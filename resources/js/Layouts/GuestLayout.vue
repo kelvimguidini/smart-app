@@ -1,5 +1,4 @@
 <script setup>
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import { Link } from '@inertiajs/inertia-vue3';
 const imageUrl = new URL('/resources/images/logo.png', import.meta.url).href;
 

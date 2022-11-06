@@ -43,7 +43,7 @@ const submit = () => {
             </div>
 
             <div class="mt-4">
-                <InputLabel for="password" value="Password" />
+                <InputLabel for="password" value="Senha" />
                 <TextInput id="password" type="password" class="mt-1 block w-full" v-model="form.password" required
                     autocomplete="current-password" />
                 <InputError class="mt-2" :message="form.errors.password" />
@@ -52,7 +52,7 @@ const submit = () => {
             <div class="block mt-4">
                 <label class="flex items-center">
                     <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ml-2 text-sm text-gray-600">Remember me</span>
+                    <span class="ml-2 text-sm text-gray-600">Lembrar de mim</span>
                 </label>
             </div>
 
