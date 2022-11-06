@@ -55,3 +55,7 @@ Executar migration para criação das tabelas do projeto
 ```sh
 php artisan migrate
 ```
+
+Usuário inicial: 
+admin@admin.com'
+Admin

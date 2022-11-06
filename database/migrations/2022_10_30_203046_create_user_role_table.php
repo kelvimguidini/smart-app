@@ -19,6 +19,14 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('role_id')->references('id')->on('roles');
         });
+
+        // Insert some stuff
+        DB::table('roles')->insert(
+            array(
+                'name' => 'Administrador',
+                'active' => true
+            )
+        );
     }
 
     /**
