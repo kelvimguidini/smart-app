@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -21,10 +22,10 @@ return new class extends Migration
         });
 
         // Insert some stuff
-        DB::table('roles')->insert(
+        DB::table('user_role')->insert(
             array(
-                'name' => 'Administrador',
-                'active' => true
+                'user_id' => DB::table('users')->select('id')->where('email', 'admin@admin.com')->first()->id,
+                'role_id' => DB::table('roles')->select('id')->where('name', 'Administrador')->first()->id
             )
         );
     }

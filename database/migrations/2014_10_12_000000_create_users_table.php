@@ -28,8 +28,8 @@ return new class extends Migration
         // Insert some stuff
         DB::table('users')->insert(
             array(
+                'name' => 'Admin',
                 'email' => 'admin@admin.com',
-                'verified' => true,
                 'password' => Hash::make('Admin')
             )
         );
