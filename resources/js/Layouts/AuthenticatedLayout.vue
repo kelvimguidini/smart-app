@@ -1,18 +1,96 @@
 <script setup>
-import { ref } from 'vue';
+import { computed, onMounted, ref, } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
+import Menu from '@/Components/Menu.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link } from '@inertiajs/inertia-vue3';
 
+/* import the fontawesome core */
+import { library } from '@fortawesome/fontawesome-svg-core'
+/* import font awesome icon component */
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+/* import specific icons */
+import { faUserSecret, faBars, faTimes, faTv, faDashboard } from '@fortawesome/free-solid-svg-icons'
+
+/* add icons to the library */
+library.add(faUserSecret, faBars, faTimes, faTv, faDashboard)
+
+
+
 const showingNavigationDropdown = ref(false);
+
+const menuItem = [
+    {
+        link: route().current('dashboard') || route().current('/') ? '' : route('dashboard'),
+        name: 'Inicio',
+        tooltip: 'Inicio',
+        icon: 'fa-solid fa-house',
+        active: route().current('dashboard') || route().current('/'),
+        isItem: true
+    },
+    {
+        isItem: true,
+        name: 'Usuários',
+        tooltip: 'Administrar Usuário',
+        subMenu: [
+            {
+                link: route().current('dashboard') || route().current('/') ? '#' : route('dashboard'),
+                name: 'Perfil',
+                tooltip: 'perfil',
+                icon: 'fa-solid fa-house',
+                active: route().current('dashboard') || route().current('/'),
+            },
+            {
+                link: route().current('dashboard') || route().current('/') ? '#' : route('dashboard'),
+                name: 'Usuário',
+                tooltip: 'Usuário',
+                icon: 'fa-solid fa-house',
+                active: false,
+            }
+        ],
+        icon: 'fa-solid fa-users',
+        active: true,
+        isItem: false
+    },
+
+    {
+        isItem: true,
+        name: 'Administração',
+        tooltip: 'Administrar Usuário',
+        subMenu: [
+            {
+                link: route().current('dashboard') || route().current('/') ? '#' : route('dashboard'),
+                name: 'Perfil',
+                tooltip: 'perfil',
+                icon: 'fa-solid fa-house',
+                active: false,
+            },
+            {
+                link: route().current('dashboard') || route().current('/') ? '#' : route('dashboard'),
+                name: 'Usuário',
+                tooltip: 'Usuário',
+                icon: 'fa-solid fa-house',
+                active: false,
+            }
+        ],
+        icon: 'fa-solid fa-users',
+        active: false,
+        isItem: false
+    },
+];
+
 </script>
 
 <template>
     <div>
         <div class="min-h-screen bg-gray-100">
+
+
+            <Menu :is-menu-open="true" :is-logged-in="false" :menu-items="menuItem" menu-title="Opções"></Menu>
+
             <nav class="bg-white border-b border-gray-100">
                 <!-- Primary Navigation Menu -->
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -21,20 +99,19 @@ const showingNavigationDropdown = ref(false);
                             <!-- Logo -->
                             <div class="shrink-0 flex items-center">
                                 <Link :href="route('dashboard')">
-                                <ApplicationLogo class="block h-9 w-auto" />
+                                <ApplicationLogo style="height: 6.25rem;" class="block h-9 w-auto" />
                                 </Link>
                             </div>
 
-                            <!-- Navigation Links -->
-                            <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                                <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
-                                    Dashboard
-                                </NavLink>
+                            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                                <slot name="header" />
                             </div>
+
                         </div>
 
                         <div class="hidden sm:flex sm:items-center sm:ml-6">
                             <!-- Settings Dropdown -->
+
                             <div class="ml-3 relative">
                                 <Dropdown align="right" width="48">
                                     <template #trigger>
@@ -108,9 +185,7 @@ const showingNavigationDropdown = ref(false);
 
             <!-- Page Heading -->
             <header class="bg-white shadow" v-if="$slots.header">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    <slot name="header" />
-                </div>
+
             </header>
 
             <!-- Page Content -->

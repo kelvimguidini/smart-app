@@ -5,6 +5,16 @@ import createServer from '@inertiajs/server';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy/dist/vue.m';
 
+/* import the fontawesome core */
+import { library } from '@fortawesome/fontawesome-svg-core'
+/* import font awesome icon component */
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+/* import specific icons */
+import { faUserSecret } from '@fortawesome/free-solid-svg-icons'
+
+/* add icons to the library */
+library.add(faUserSecret)
+
 const appName = 'Laravel';
 
 createServer((page) =>
@@ -16,6 +26,7 @@ createServer((page) =>
         setup({ app, props, plugin }) {
             return createSSRApp({ render: () => h(app, props) })
                 .use(plugin)
+                .component('font-awesome-icon', FontAwesomeIcon)
                 .use(ZiggyVue, {
                     ...page.props.ziggy,
                     location: new URL(page.props.ziggy.location),
