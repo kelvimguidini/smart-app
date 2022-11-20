@@ -1,4 +1,5 @@
 <script setup>
+import '../../css/app.css';
 import { Link } from '@inertiajs/inertia-vue3';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 </script>
