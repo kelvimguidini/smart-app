@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tightenco\Ziggy\Ziggy;
+use App\Http\Middleware\Constants;
+use App\Models\Permission;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -46,6 +48,7 @@ class HandleInertiaRequests extends Middleware
                 ]);
             },
             'appName' => env('APP_NAME'),
+            'permissionList' => Constants::PERMISSIONS
         ]);
     }
 }

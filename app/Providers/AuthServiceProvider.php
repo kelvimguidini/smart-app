@@ -31,13 +31,9 @@ class AuthServiceProvider extends ServiceProvider
 
         foreach ($permissions as $permission) {
 
-
             Gate::define($permission->name, function ($user) use ($permission) {
-
-                return $user->whereHas('role', function ($query) use ($permission) {
-
+                return $user->whereHas('roles', function ($query) use ($permission) {
                     return $query->whereHas('permissions', function ($query) use ($permission) {
-
                         return $query->whereName($permission->name);
                     });
                 });

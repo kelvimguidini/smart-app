@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\Constants;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -22,30 +23,15 @@ return new class extends Migration
         });
 
         // Insert some stuff
-        DB::table('role_permission')->insert(
-            array(
-                'permission_id' => DB::table('permission')->select('id')->where('name', 'user_create')->first()->id,
-                'role_id' => DB::table('roles')->select('id')->where('name', 'Administrador')->first()->id
-            )
-        );
-        DB::table('role_permission')->insert(
-            array(
-                'permission_id' => DB::table('permission')->select('id')->where('name', 'user_update')->first()->id,
-                'role_id' => DB::table('roles')->select('id')->where('name', 'Administrador')->first()->id
-            )
-        );
-        DB::table('role_permission')->insert(
-            array(
-                'permission_id' => DB::table('permission')->select('id')->where('name', 'user_delete')->first()->id,
-                'role_id' => DB::table('roles')->select('id')->where('name', 'Administrador')->first()->id
-            )
-        );
-        DB::table('role_permission')->insert(
-            array(
-                'permission_id' => DB::table('permission')->select('id')->where('name', 'role_admin')->first()->id,
-                'role_id' => DB::table('roles')->select('id')->where('name', 'Administrador')->first()->id
-            )
-        );
+        foreach (Constants::PERMISSIONS as $permission) {
+
+            DB::table('role_permission')->insert(
+                array(
+                    'permission_id' => DB::table('permission')->select('id')->where('name', $permission->name)->first()->id,
+                    'role_id' => DB::table('roles')->select('id')->where('name', 'Administrador')->first()->id
+                )
+            );
+        }
     }
 
     /**

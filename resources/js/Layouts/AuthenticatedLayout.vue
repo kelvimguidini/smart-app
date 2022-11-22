@@ -44,6 +44,7 @@ const menuItem = [
                 link: route().current('register') ? '' : route('register'),
                 name: 'Usuário',
                 active: route().current('register'),
+                role: 'user_admin'
             }
         ],
     },

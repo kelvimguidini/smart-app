@@ -6,18 +6,15 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/inertia-vue3';
 
+const props = defineProps({
+    roles: Array,
+});
+
 const form = useForm({
     id: 0,
     name: '',
     permissions: []
 });
-
-const permission = [
-    { name: "user_create", "title": "Criar Usuário" },
-    { name: "user_update", "title": "Editar Usuário" },
-    { name: "user_delete", "title": "Remover Usuário" },
-    { name: "role_admin", "title": "Administrar Perfil" }
-];
 
 const submit = () => {
     form.post(route('role-save'));
@@ -33,7 +30,6 @@ const submit = () => {
                 <h1 class="h3 mb-0 text-gray-800">Perfil</h1>
             </div>
         </template>
-
         <div class="row">
             <div class="col-lg-9">
 
@@ -53,7 +49,7 @@ const submit = () => {
                                     <div class="form-group">
                                         <InputLabel for="permissions" value="Permissão para:" />
                                         <select multiple class="form-control" v-model="form.permissions">
-                                            <option v-for="(option, index) in permission" :key="index"
+                                            <option v-for="(option, index) in  $page.props.permissionList" :key="index"
                                                 :value="option.name">{{ option.title }}</option>
                                         </select>
                                         <InputError class="mt-2" :message="form.errors.permissions" />
@@ -74,21 +70,39 @@ const submit = () => {
                     <div class="col-lg-12">
                         <div class="card mb-4 py-3 border-left-secondary">
                             <div class="card-body">
+
                                 <table class="table table-striped">
                                     <thead>
                                         <tr>
                                             <th scope="col">#</th>
                                             <th scope="col">Nome</th>
                                             <th scope="col">Permissões</th>
-                                            <th scope="col">Usuários</th>
+                                            <th scope="col">Ações</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <th scope="row">1</th>
-                                            <td>Mark</td>
-                                            <td>Otto</td>
-                                            <td>@mdo</td>
+                                        <tr v-for="(role, index) in roles">
+                                            <th scope="row">{{ role.id }}</th>
+                                            <td>{{ role.name }}</td>
+                                            <td>
+                                                <ul class="list-group">
+                                                    <li v-for="(permission, key) in role.permissions"
+                                                        class="list-group-item d-flex justify-content-between align-items-center">
+                                                        {{ permission.title }}
+                                                        <a href="#" class="btn btn-danger btn-icon-split">
+                                                            <span class="icon text-white-50">
+                                                                <i class="fas fa-trash"></i>
+                                                            </span>
+                                                            <span class="text">Remover</span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </td>
+                                            <td>
+                                                <a href="#" class="btn btn-danger btn-circle btn-sm">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -107,11 +121,8 @@ const submit = () => {
                     </div>
                     <div class="card-body">
                         <ul class="list-group">
-                            <li class="list-group-item list-group-item-primary">Administração Usuários</li>
-                            <li class="list-group-item">Administrar Perfil</li>
-                            <li class="list-group-item">Criar Usuário</li>
-                            <li class="list-group-item">Editar Usuário</li>
-                            <li class="list-group-item">Remover Usuário</li>
+                            <li class="list-group-item" v-for="(p, index) in $page.props.permissionList">{{ p.title }}
+                            </li>
                         </ul>
                     </div>
                 </div>

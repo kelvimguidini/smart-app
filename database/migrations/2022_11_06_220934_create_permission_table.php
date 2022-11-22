@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\Constants;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -21,18 +22,11 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::table('permission')->insert(
-            array('name' => "user_create", "title" => "Criar Usuário")
-        );
-        DB::table('permission')->insert(
-            array('name' => "user_update", "title" => "Editar Usuário")
-        );
-        DB::table('permission')->insert(
-            array('name' => "user_delete", "title" => "Remover Usuário")
-        );
-        DB::table('permission')->insert(
-            array('name' => "role_admin", "title" => "Administrar Perfil"),
-        );
+        foreach (Constants::PERMISSIONS as $permission) {
+            DB::table('permission')->insert(
+                array('name' => $permission->name, "title" => $permission->table)
+            );
+        }
     }
 
     /**

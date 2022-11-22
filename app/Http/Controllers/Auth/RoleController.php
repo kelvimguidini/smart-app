@@ -24,7 +24,11 @@ class RoleController extends Controller
         if (!Gate::allows('role_admin')) {
             abort(403);
         }
-        return Inertia::render('Auth/Role');
+
+        $r = Role::with('permissions')->get();
+        return Inertia::render('Auth/Role', [
+            'roles' => $r,
+        ]);
     }
 
     /**
@@ -50,10 +54,6 @@ class RoleController extends Controller
         //     'name' => $request->name,
         //     'actve' => true
         // ]);
-
-
-
-        $request->user()->sendEmailVerificationNotification();
 
         return back()->with('status', 'verification-link-sent');
 
