@@ -1,6 +1,6 @@
 <script setup>
-import { ref } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
+import { Link } from '@inertiajs/inertia-vue3';
 
 const imgProfile = new URL('/resources/images/undraw_profile.svg', import.meta.url).href
 
@@ -101,10 +101,10 @@ const props = defineProps({
                         Activity Log
                     </a>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" :href="route('logout')" data-toggle="modal" data-target="#logoutModal">
-                        <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                        Sair
-                    </a>
+                    <Link class="dropdown-item" :href="route('logout')">
+                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                    Sair
+                    </Link>
                 </div>
             </li>
 

@@ -1,5 +1,6 @@
 <script setup>
-
+import { Link } from '@inertiajs/inertia-vue3';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 const props = defineProps({
     //! Menu settings
     menuTitle: {
@@ -15,9 +16,7 @@ const props = defineProps({
                 name: 'Inicio',
                 icon: 'fa-solid fa-house',
                 active: true,
-                isItem: true,
-                isDividerBefore: true,
-                heading: ''
+                isItem: true
             },
 
         ],
@@ -33,45 +32,49 @@ const props = defineProps({
     <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
         <!-- Sidebar - Brand -->
-        <a class="sidebar-brand d-flex align-items-center justify-content-center">
-            <div class="sidebar-brand-text mx-3">{{ menuTitle }}</div>
-        </a>
+        <Link class="sidebar-brand d-flex align-items-center justify-content-center">
+        <div class="sidebar-brand-icon rotate-n-15">
+            <i class="fas fa-laugh-wink"></i>
+        </div>
+        <div class="sidebar-brand-text mx-3">{{ menuTitle }}</div>
+        </Link>
 
-        <span v-for="(menuItem, index) in menuItems" :key="index">
-
-
-            <!-- Divider -->
-            <hr v-if="menuItem.isDividerBefore" class="sidebar-divider my-0">
-
-            <!-- Heading -->
-            <div v-if="menuItem.heading != null" class="sidebar-heading">
-                {{ menuItem.heading }}
-            </div>
+        <li v-for="(menuItem, index) in menuItems" :key="index" :class="{ 'active': menuItem.active }" class="nav-item">
 
             <!-- Nav Item -->
-            <li :class="{ 'active': menuItem.active }" v-if="menuItem.isItem" class="nav-item">
-                <a class="nav-link" :href="menuItem.link">
-                    <i :class="menuItem.icon || 'fa-solid fa-check'"></i>
-                    <span>{{ menuItem.name }}</span></a>
-            </li>
+            <Link v-if="menuItem.isItem" class="nav-link" :href="menuItem.link">
+            <i :class="menuItem.icon || 'fa-solid fa-check'"></i>
+            <span>{{ menuItem.name }}</span>
+            </Link>
 
             <!-- Nav Item - Collapse Menu -->
-            <li class="nav-item" v-if="!menuItem.isItem" :class="{ 'active': menuItem.active }">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
-                    aria-expanded="true" aria-controls="collapseTwo">
-                    <i :class="menuItem.icon || 'fa-solid fa-check'"></i>
-                    <span>{{ menuItem.name }}</span>
-                </a>
-                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">{{ menuItem.collapseHeader }}:</h6>
-                        <a v-for="(subMenuItem, index) in menuItem.subMenu" :key="index" class="collapse-item"
-                            :href="subMenuItem.link" :class="{ 'active': subMenuItem.active }">
-                            {{ subMenuItem.name }}</a>
-                    </div>
+            <a v-if="!menuItem.isItem && menuItem.subMenu.some((s) => $page.props.auth.permissions.some((p) => p.name == s.role))"
+                class="nav-link collapsed" href="#" data-toggle="collapse" :data-target="'#collapse1' + index"
+                aria-expanded="true" :aria-controls="'collapse1' + index">
+                <i :class="menuItem.icon || 'fa-solid fa-check'"></i>
+                <span>{{ menuItem.name }}</span>
+            </a>
+            <div v-if="!menuItem.isItem" :id="'collapse1' + index" class="collapse" :class="{ 'show': menuItem.active }"
+                aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <h6 class="collapse-header">{{ menuItem.collapseHeader }}:</h6>
+                    <Link
+                        v-for="(subMenuItem, subIndex) in menuItem.subMenu.filter((s) => $page.props.auth.permissions.some((p) => p.name == s.role))"
+                        :key="subIndex" class="collapse-item" :href="subMenuItem.link"
+                        :class="{ 'active': subMenuItem.active }">
+                    {{ subMenuItem.name }}</Link>
                 </div>
-            </li>
-        </span>
+            </div>
+        </li>
+
+
+        <!-- Divider -->
+        <hr class="sidebar-divider d-none d-md-block">
+
+        <!-- Sidebar Toggler (Sidebar) -->
+        <div class="text-center d-none d-md-inline">
+            <button class="rounded-circle border-0" id="sidebarToggle"></button>
+        </div>
 
     </ul>
     <!-- End of Sidebar -->
