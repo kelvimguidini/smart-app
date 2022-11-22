@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Providers\RouteServiceProvider;
+use Exception;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 
 class RoleController extends Controller
 {
@@ -50,19 +53,30 @@ class RoleController extends Controller
             'permissions' => 'required',
         ]);
 
-        // $user = Role::create([
-        //     'name' => $request->name,
-        //     'actve' => true
-        // ]);
+        try {
+            $role = Role::create([
+                'name' => $request->name,
+                'active' => true
+            ]);
 
-        return back()->with('status', 'verification-link-sent');
+            // Insert some stuff
+            foreach ($request->permissions as $permission) {
 
-        // if ($status == Password::RESET_LINK_SENT) {
-        //     return back()->with('status', __($status));
-        // }
+                DB::table('role_permission')->insert(
+                    array(
+                        'permission_id' => DB::table('permission')->select('id')->where('name', $permission)->first()->id,
+                        'role_id' => $role->id
+                    )
+                );
+            }
+        } catch (Exception $e) {
 
-        // throw ValidationException::withMessages([
-        //     'email' => [trans($status)],
-        // ]);
+            // throw ValidationException::withMessages([
+            //     'error' => $e->message,
+            // ]);
+            return back()->with('status', __($e->message));
+        }
+
+        return back()->with('status', __('success'));
     }
 }

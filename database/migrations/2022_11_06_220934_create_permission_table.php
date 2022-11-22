@@ -21,12 +21,6 @@ return new class extends Migration
             $table->string('name');
             $table->timestamps();
         });
-
-        foreach (Constants::PERMISSIONS as $permission) {
-            DB::table('permission')->insert(
-                array('name' => $permission->name, "title" => $permission->table)
-            );
-        }
     }
 
     /**

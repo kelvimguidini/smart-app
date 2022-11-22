@@ -18,15 +18,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->boolean('active');
+            $table->timestamps();
         });
-
-        // Insert some stuff
-        DB::table('roles')->insert(
-            array(
-                'name' => 'Administrador',
-                'active' => true
-            )
-        );
     }
 
     /**
@@ -36,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('role');
+        Schema::dropIfExists('roles');
     }
 };

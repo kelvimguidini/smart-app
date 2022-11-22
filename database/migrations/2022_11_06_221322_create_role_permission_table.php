@@ -21,17 +21,6 @@ return new class extends Migration
             $table->foreign('permission_id')->references('id')->on('permission');
             $table->foreign('role_id')->references('id')->on('roles');
         });
-
-        // Insert some stuff
-        foreach (Constants::PERMISSIONS as $permission) {
-
-            DB::table('role_permission')->insert(
-                array(
-                    'permission_id' => DB::table('permission')->select('id')->where('name', $permission->name)->first()->id,
-                    'role_id' => DB::table('roles')->select('id')->where('name', 'Administrador')->first()->id
-                )
-            );
-        }
     }
 
     /**

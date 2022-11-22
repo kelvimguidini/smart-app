@@ -20,14 +20,6 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('role_id')->references('id')->on('roles');
         });
-
-        // Insert some stuff
-        DB::table('user_role')->insert(
-            array(
-                'user_id' => DB::table('users')->select('id')->where('email', 'admin@admin.com')->first()->id,
-                'role_id' => DB::table('roles')->select('id')->where('name', 'Administrador')->first()->id
-            )
-        );
     }
 
     /**

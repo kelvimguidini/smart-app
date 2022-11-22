@@ -89,19 +89,20 @@ const submit = () => {
                                                     <li v-for="(permission, key) in role.permissions"
                                                         class="list-group-item d-flex justify-content-between align-items-center">
                                                         {{ permission.title }}
-                                                        <a href="#" class="btn btn-danger btn-icon-split">
-                                                            <span class="icon text-white-50">
-                                                                <i class="fas fa-trash"></i>
-                                                            </span>
-                                                            <span class="text">Remover</span>
+                                                        <a href="#" class="btn btn-danger btn-circle btn-sm">
+                                                            <i class="fas fa-trash"></i>
                                                         </a>
                                                     </li>
                                                 </ul>
                                             </td>
                                             <td>
-                                                <a href="#" class="btn btn-danger btn-circle btn-sm">
-                                                    <i class="fas fa-trash"></i>
+                                                <a href="#" class="btn btn-danger btn-icon-split">
+                                                    <span class="icon text-white-50">
+                                                        <i class="fas fa-trash"></i>
+                                                    </span>
+                                                    <span class="text">Remover</span>
                                                 </a>
+
                                             </td>
                                         </tr>
                                     </tbody>
