@@ -6,6 +6,8 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/inertia-vue3';
 
+
+
 const props = defineProps({
     roles: Array,
 });
@@ -17,7 +19,11 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route('role-save'));
+    form.post(route('role-save'), {
+        onSuccess: () => {
+            form.reset();
+        },
+    });
 };
 </script>
 
@@ -70,43 +76,44 @@ const submit = () => {
                     <div class="col-lg-12">
                         <div class="card mb-4 py-3 border-left-secondary">
                             <div class="card-body">
-
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">#</th>
-                                            <th scope="col">Nome</th>
-                                            <th scope="col">Permissões</th>
-                                            <th scope="col">Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr v-for="(role, index) in roles">
-                                            <th scope="row">{{ role.id }}</th>
-                                            <td>{{ role.name }}</td>
-                                            <td>
-                                                <ul class="list-group">
-                                                    <li v-for="(permission, key) in role.permissions"
-                                                        class="list-group-item d-flex justify-content-between align-items-center">
-                                                        {{ permission.title }}
-                                                        <a href="#" class="btn btn-danger btn-circle btn-sm">
+                                <div class="table-responsive">
+                                    <table class="table table-striped" id="dataTable" width="100%" cellspacing="0">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">#</th>
+                                                <th scope="col">Nome</th>
+                                                <th scope="col">Permissões</th>
+                                                <th scope="col">Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="(role, index) in roles">
+                                                <th scope="row">{{ role.id }}</th>
+                                                <td>{{ role.name }}</td>
+                                                <td>
+                                                    <ul class="list-group">
+                                                        <li v-for="(permission, key) in role.permissions"
+                                                            class="list-group-item d-flex justify-content-between align-items-center">
+                                                            {{ permission.title }}
+                                                            <a href="#" class="btn btn-danger btn-circle btn-sm">
+                                                                <i class="fas fa-trash"></i>
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </td>
+                                                <td>
+                                                    <a href="#" class="btn btn-danger btn-icon-split">
+                                                        <span class="icon text-white-50">
                                                             <i class="fas fa-trash"></i>
-                                                        </a>
-                                                    </li>
-                                                </ul>
-                                            </td>
-                                            <td>
-                                                <a href="#" class="btn btn-danger btn-icon-split">
-                                                    <span class="icon text-white-50">
-                                                        <i class="fas fa-trash"></i>
-                                                    </span>
-                                                    <span class="text">Remover</span>
-                                                </a>
+                                                        </span>
+                                                        <span class="text">Remover</span>
+                                                    </a>
 
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>

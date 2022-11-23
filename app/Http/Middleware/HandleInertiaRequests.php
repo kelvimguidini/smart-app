@@ -48,7 +48,8 @@ class HandleInertiaRequests extends Middleware
                 ]);
             },
             'appName' => env('APP_NAME'),
-            'permissionList' => Constants::PERMISSIONS
+            'permissionList' => Constants::PERMISSIONS,
+            'flash' => $request->session()->get('flash'),
         ]);
     }
 }

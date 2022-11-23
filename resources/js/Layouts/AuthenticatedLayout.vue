@@ -1,22 +1,30 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 // Bootstrap core JavaScript
-import '../vendor/jquery/jquery.min.js';
-import '../vendor/bootstrap/js/bootstrap.bundle.min.js';
+import '@/vendor/jquery/jquery.min.js';
+import '@/vendor/bootstrap/js/bootstrap.bundle.min.js';
 
 // Core plugin JavaScript
-import '../vendor/jquery-easing/jquery.easing.min.js';
+import '@/vendor/jquery-easing/jquery.easing.min.js';
 
 // Custom scripts for all pages
-import '../vendor/sb-admin-2.js';
+import '@/vendor/sb-admin-2.js';
 
 import '../../css/sb-admin-2.css';
 import '../vendor/fontawesome-free/css/all.min.css';
 
+import '@/vendor/datatables/jquery.dataTables.min.js';
+import '@/vendor/datatables/dataTables.bootstrap4.min.js';
+import '@/vendor/demo/datatables-demo.js';
+
+import '../vendor/datatables/dataTables.bootstrap4.min.css';
+
 
 import Menu from '@/Components/Menu.vue';
 import NavBar from '@/Components/NavBar.vue';
+import FlashMessage from '@/Components/FlashMessage.vue';
 import { Link } from '@inertiajs/inertia-vue3';
+import { usePage } from '@inertiajs/inertia-vue3'
 
 
 const menuItem = [
@@ -93,7 +101,8 @@ onMounted(() => {
 
         <Menu :menu-items="menuItem" :togle="toggleMenu" :menu-title="$page.props.appName"></Menu>
 
-
+        <FlashMessage v-if="$page.props.flash != null" :message="$page.props.flash.message"
+            :type="$page.props.flash.type"></FlashMessage>
 
         <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
@@ -117,7 +126,6 @@ onMounted(() => {
                     <!-- Page Heading -->
                     <header class="bg-white shadow" v-if="$slots.header">
                     </header>
-
                     <!-- Page Content -->
                     <main>
                         <slot />
@@ -147,7 +155,8 @@ onMounted(() => {
 
     <!-- Scroll to Top Button-->
     <Link class="scroll-to-top rounded" href="#page-top">
-    <FontAwesomeIcon icon="fa fa-angle-up" />
+    <i class="fa fa-angle-up"></i>
+
     </Link>
 
     <!-- Logout Modal-->

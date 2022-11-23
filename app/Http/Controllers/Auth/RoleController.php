@@ -29,6 +29,7 @@ class RoleController extends Controller
         }
 
         $r = Role::with('permissions')->get();
+
         return Inertia::render('Auth/Role', [
             'roles' => $r,
         ]);
@@ -52,7 +53,7 @@ class RoleController extends Controller
             'name' => 'required|string|max:255',
             'permissions' => 'required',
         ]);
-
+        $r = Role::with('permissions')->get();
         try {
             $role = Role::create([
                 'name' => $request->name,
@@ -70,13 +71,9 @@ class RoleController extends Controller
                 );
             }
         } catch (Exception $e) {
-
-            // throw ValidationException::withMessages([
-            //     'error' => $e->message,
-            // ]);
-            return back()->with('status', __($e->message));
+            redirect()->back()->with('flash', ['message' => trans($e->message), 'type' => 'danger']);
         }
 
-        return back()->with('status', __('success'));
+        return redirect()->route('role')->with('flash', ['message' => trans('Register saved Successful'), 'type' => 'success']);
     }
 }
