@@ -24,6 +24,11 @@ const formDelete = useForm({
     id: 0
 });
 
+const formRemovePermission = useForm({
+    role_id: 0,
+    permission_id: 0
+});
+
 onMounted(() => {
 
     $('table').DataTable({
@@ -45,6 +50,20 @@ const deleteRole = (id) => {
         },
     });
 };
+
+
+const removePermission = (role_permisson) => {
+    isLoader.value = true;
+    formRemovePermission.role_id = role_permisson[0];
+    formRemovePermission.permission_id = role_permisson[1];
+    formRemovePermission.delete(route('permission-remove'), {
+        onFinish: () => {
+            isLoader.value = false;
+            formRemovePermission.reset();
+        },
+    });
+};
+
 
 
 const submit = () => {
@@ -152,10 +171,24 @@ const submit = () => {
                                                                 <li v-for="(permission, key) in role.permissions"
                                                                     class="list-group-item d-flex justify-content-between align-items-center">
                                                                     {{ permission.title }}
-                                                                    <a href="#"
-                                                                        class="btn btn-danger btn-circle btn-sm">
-                                                                        <i class="fas fa-trash"></i>
-                                                                    </a>
+
+                                                                    <Modal :key="'permission_' + index"
+                                                                        :modal-title="'Confirmar remoção de permissão'"
+                                                                        :ok-botton-callback="removePermission"
+                                                                        :ok-botton-callback-param="[role.id, permission.id]"
+                                                                        btn-class="btn btn-danger btn-circle btn-sm">
+                                                                        <template v-slot:button>
+                                                                            <span v-if="formRemovePermission.processing"
+                                                                                class="spinner-border spinner-border-sm"
+                                                                                role="status" aria-hidden="true"></span>
+                                                                            <i class="fas fa-trash"></i>
+                                                                        </template>
+                                                                        <template v-slot:content>
+                                                                            Tem certeza que deseja remover a permissão
+                                                                            <b>{{ permission.title }}</b> do perfil
+                                                                            <b>{{ role.name }}</b>?
+                                                                        </template>
+                                                                    </Modal>
                                                                 </li>
                                                             </ul>
                                                         </template>
