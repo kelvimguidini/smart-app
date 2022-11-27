@@ -6,11 +6,15 @@ import { Head, Link, useForm } from '@inertiajs/inertia-vue3';
 
 const props = defineProps({
     status: String,
+    email: String
 });
 
-const form = useForm();
+const form = useForm({
+    email: '',
+});
 
 const submit = () => {
+    form.email = props.email;
     form.post(route('verification.send'));
 };
 
@@ -19,23 +23,23 @@ const verificationLinkSent = computed(() => props.status === 'verification-link-
 
 <template>
     <GuestLayout>
+
         <Head title="Email Verification" />
 
         <div class="mb-4 text-sm text-gray-600">
-            Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn't receive the email, we will gladly send you another.
+            Sua conta já foi criada! Antes de começar, confirme o seu endereço de cadastro clicando no link presente no
+            e-mail que te enviamos. Caso não tenha recebido o email, teremos o maior prazer em te enviar outro.
         </div>
 
-        <div class="mb-4 font-medium text-sm text-green-600" v-if="verificationLinkSent" >
-            A new verification link has been sent to the email address you provided during registration.
+        <div class="mb-4 font-medium text-sm text-green-600" v-if="verificationLinkSent">
+            Um novo link de verificação foi enviado para o endereço de e-mail de cadastro..
         </div>
 
         <form @submit.prevent="submit">
             <div class="mt-4 flex items-center justify-between">
                 <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                    Resend Verification Email
+                    Enviar novamente o e-mail de verificação
                 </PrimaryButton>
-
-                <Link :href="route('logout')" method="post" as="button" class="underline text-sm text-gray-600 hover:text-gray-900">Log Out</Link>
             </div>
         </form>
     </GuestLayout>

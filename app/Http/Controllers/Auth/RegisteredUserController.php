@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
+use Exception;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,7 +23,15 @@ class RegisteredUserController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Auth/Register');
+        if (!Gate::allows('role_admin')) {
+            abort(403);
+        }
+
+        $users = User::all();
+
+        return Inertia::render('Auth/Register', [
+            'users' => $users,
+        ]);
     }
 
     /**
@@ -34,22 +44,21 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request)
     {
+        if (!Gate::allows('role_admin')) {
+            abort(403);
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'email' => 'required|string|email|max:255|unique:users'
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => Hash::make('qwerty'),
         ]);
 
-        event(new Registered($user));
-
-        Auth::login($user);
-
-        return redirect(RouteServiceProvider::HOME);
+        return redirect()->route('register')->with('flash', ['message' => trans('Register saved Successful'), 'type' => 'success']);
     }
 }

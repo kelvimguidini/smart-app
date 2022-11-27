@@ -6,6 +6,11 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/inertia-vue3';
 
+
+const props = defineProps({
+    users: Array,
+});
+
 const form = useForm({
     name: '',
     email: '',
@@ -28,7 +33,7 @@ const submit = () => {
 
         <template #header>
             <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Vadastro de usuários</h1>
+                <h1 class="h3 mb-0 text-gray-800">Cadastro de usuários</h1>
             </div>
         </template>
 
@@ -37,20 +42,27 @@ const submit = () => {
                 <div class="card mb-4 py-3 border-left-primary">
                     <div class="card-body">
                         <form @submit.prevent="submit">
-                            <div>
-                                <InputLabel for="name" value="Name" />
-                                <TextInput id="name" type="text" class="mt-1 block w-full" v-model="form.name" required
-                                    autofocus autocomplete="name" />
-                                <InputError class="mt-2" :message="form.errors.name" />
-                            </div>
 
-                            <div class="mt-4">
-                                <InputLabel for="email" value="Email" />
-                                <TextInput id="email" type="email" class="mt-1 block w-full" v-model="form.email"
-                                    required autocomplete="username" />
-                                <InputError class="mt-2" :message="form.errors.email" />
-                            </div>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
 
+                                        <InputLabel for="name" value="Name" />
+                                        <TextInput id="name" type="text" class="form-control" v-model="form.name"
+                                            required autofocus autocomplete="name" />
+                                        <InputError class="mt-2 text-danger" :message="form.errors.name" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+
+                                        <InputLabel for="email" value="Email" />
+                                        <TextInput id="email" type="email" class="form-control" v-model="form.email"
+                                            required autocomplete="username" />
+                                        <InputError class="mt-2 text-danger" :message="form.errors.email" />
+                                    </div>
+                                </div>
+                            </div>
                             <div class="flex items-center justify-end mt-4">
 
                                 <div class="flex items-center justify-end mt-4 rigth">
@@ -83,48 +95,22 @@ const submit = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="(role, index) in roles">
-                                        <th scope="row">{{ role.id }}</th>
-                                        <td>{{ role.name }}</td>
+                                    <tr v-for="(user, index) in users">
+                                        <th>{{ user.id }}</th>
+                                        <td>{{ user.name }}</td>
+                                        <td>{{ user.email }}</td>
                                         <td>
-                                            <Modal :modal-title="'Permissões para ' + role.name"
-                                                btn-class="btn btn-info btn-icon-split mr-2">
-                                                <template v-slot:button>
-                                                    <span class="icon text-white-50">
-                                                        <i class="fas fa-list"></i>
-                                                    </span>
-                                                    <span class="text">Permissões</span>
-                                                </template>
-                                                <template v-slot:content>
-                                                    <ul class="list-group">
-                                                        <li v-for="(permission, key) in role.permissions"
-                                                            class="list-group-item d-flex justify-content-between align-items-center">
-                                                            {{ permission.title }}
-
-                                                            <Modal :key="'permission_' + index"
-                                                                :modal-title="'Confirmar remoção de permissão'"
-                                                                :ok-botton-callback="removePermission"
-                                                                :ok-botton-callback-param="[role.id, permission.id]"
-                                                                btn-class="btn btn-danger btn-circle btn-sm">
-                                                                <template v-slot:button>
-                                                                    <span v-if="formRemovePermission.processing"
-                                                                        class="spinner-border spinner-border-sm"
-                                                                        role="status" aria-hidden="true"></span>
-                                                                    <i class="fas fa-trash"></i>
-                                                                </template>
-                                                                <template v-slot:content>
-                                                                    Tem certeza que deseja remover a permissão
-                                                                    <b>{{ permission.title }}</b> do perfil
-                                                                    <b>{{ role.name }}</b>?
-                                                                </template>
-                                                            </Modal>
-                                                        </li>
-                                                    </ul>
-                                                </template>
-                                            </Modal>
-
-
-                                            <Modal :key="index" :modal-title="'Confirmar Exclusão de ' + role.name"
+                                            <span v-if="user.email_verified_at != null"
+                                                class="btn-success btn-circle btn-sm">
+                                                <i class="fas fa-check"></i>
+                                            </span>
+                                            <span v-if="user.email_verified_at == null"
+                                                class="btn btn-warning btn-circle btn-sm" title="Não ativo">
+                                                <i class="fas fa-times"></i>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <!-- <Modal :key="index" :modal-title="'Confirmar Exclusão de ' + user.name"
                                                 :ok-botton-callback="deleteRole" :ok-botton-callback-param="role.id"
                                                 btn-class="btn btn-danger btn-icon-split">
                                                 <template v-slot:button>
@@ -136,7 +122,7 @@ const submit = () => {
                                                 <template v-slot:content>
                                                     Tem certeza que deseja apagar esse registro?
                                                 </template>
-                                            </Modal>
+                                            </Modal> -->
 
                                         </td>
                                     </tr>

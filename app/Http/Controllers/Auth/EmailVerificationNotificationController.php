@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Providers\RouteServiceProvider;
+use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class EmailVerificationNotificationController extends Controller
 {
@@ -16,12 +19,14 @@ class EmailVerificationNotificationController extends Controller
      */
     public function store(Request $request)
     {
-        if ($request->user()->hasVerifiedEmail()) {
+        $user = User::where('email', $request->email)->first();
+
+        if ($user->email_verified_at != null) {
             return redirect()->intended(RouteServiceProvider::HOME);
         }
 
-        $request->user()->sendEmailVerificationNotification();
+        $user->sendEmailVerificationNotification();
 
-        return back()->with('status', 'verification-link-sent');
+        return Inertia::render('Auth/VerifyEmail', ['status' => session('status'), 'email' => $request->email]);
     }
 }
