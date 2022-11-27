@@ -71,7 +71,7 @@ class RoleController extends Controller
                 );
             }
         } catch (Exception $e) {
-            return redirect()->route('role')->with('flash', ['message' => trans($e->getMessage()), 'type' => 'danger']);
+            throw $e;
         }
 
         return redirect()->route('role')->with('flash', ['message' => trans('Register saved Successful'), 'type' => 'success']);
@@ -93,7 +93,32 @@ class RoleController extends Controller
 
             $r->delete();
         } catch (Exception $e) {
-            return redirect()->route('role')->with('flash', ['message' => trans($e->getMessage()), 'type' => 'danger']);
+
+            throw $e;
+        }
+
+        return redirect()->route('role')->with('flash', ['message' => trans('Registro apagado com sucesso!'), 'type' => 'success']);
+    }
+
+
+
+    /**
+     * Display the registration view.
+     *
+     * @return \Inertia\Response
+     */
+    public function permissionRemove(Request $request)
+    {
+        if (!Gate::allows('role_admin')) {
+            abort(403);
+        }
+        try {
+            DB::table('role_permission')->where([
+                ['role_id', '=', $request->role_id],
+                ['permission_id', '=', $request->permission_id],
+            ])->delete();
+        } catch (Exception $e) {
+            throw $e;
         }
 
         return redirect()->route('role')->with('flash', ['message' => trans('Registro apagado com sucesso!'), 'type' => 'success']);

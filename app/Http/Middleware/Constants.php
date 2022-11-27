@@ -12,9 +12,7 @@ class Constants extends Middleware
      * @var Array
      */
     const PERMISSIONS = [
-        ['name' => "user_create", "title" => "Criar Usuário"],
-        ['name' => "user_update", "title" => "Editar Usuário"],
-        ['name' => "user_delete", "title" => "Remover Usuário"],
+        ['name' => "user_admin", "title" => "Administrar Usuários"],
         ['name' => "role_admin", "title" => "Administrar Perfil"]
     ];
 }

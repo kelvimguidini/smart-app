@@ -65,4 +65,8 @@ Route::middleware('auth')->group(function () {
 
     Route::delete('role-delete', [RoleController::class, 'delete'])
         ->name('role-delete');
+
+
+    Route::delete('permission-remove', [RoleController::class, 'permissionRemove'])
+        ->name('permission-remove');
 });
