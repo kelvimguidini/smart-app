@@ -4,9 +4,6 @@ import { Link } from '@inertiajs/inertia-vue3';
 
 const imgProfile = new URL('/resources/images/undraw_profile.svg', import.meta.url).href
 
-const props = defineProps({
-});
-
 </script>
 
 

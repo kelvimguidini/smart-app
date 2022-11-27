@@ -51,9 +51,10 @@ class User extends Authenticatable
     {
         $permissionModel = new Permission();
         return $permissionModel->whereHas('roles', function ($query1) {
-            return $query1->whereHas('users', function ($query) {
+            $roles = $query1->whereHas('users', function ($query) {
                 return $query->where('id', $this->id);
             });
+            return $roles;
         })->get();
     }
 }

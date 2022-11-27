@@ -1,8 +1,13 @@
 <script setup>
-import '../../css/app.css';
+import '../../css/extern.css';
 import { Link } from '@inertiajs/inertia-vue3';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 </script>
+<style>
+@tailwind base;
+@tailwind component;
+@tailwind utilities;
+</style>
 
 <template>
     <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">

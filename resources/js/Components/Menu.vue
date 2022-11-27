@@ -54,15 +54,17 @@ const props = defineProps({
                 <i :class="menuItem.icon || 'fa-solid fa-check'"></i>
                 <span>{{ menuItem.name }}</span>
             </a>
-            <div v-if="!menuItem.isItem" :id="'collapse1' + index" class="collapse" :class="{ 'show': menuItem.active }"
-                aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+            <div v-if="!menuItem.isItem" :id="'collapse1' + index" class="collapse"
+                :class="{ 'show': menuItem.subMenu.some((s) => s.active) }" aria-labelledby="headingTwo"
+                style="visibility: inherit" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">{{ menuItem.collapseHeader }}:</h6>
                     <Link
                         v-for="(subMenuItem, subIndex) in menuItem.subMenu.filter((s) => $page.props.auth.permissions.some((p) => p.name == s.role))"
                         :key="subIndex" class="collapse-item" :href="subMenuItem.link"
                         :class="{ 'active': subMenuItem.active }">
-                    {{ subMenuItem.name }}</Link>
+                    {{ subMenuItem.name }}
+                    </Link>
                 </div>
             </div>
         </li>

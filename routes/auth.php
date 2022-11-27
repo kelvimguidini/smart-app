@@ -62,4 +62,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('role-save', [RoleController::class, 'store'])
         ->name('role-save');
+
+    Route::delete('role-delete', [RoleController::class, 'delete'])
+        ->name('role-delete');
 });

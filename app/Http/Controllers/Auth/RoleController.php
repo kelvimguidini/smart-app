@@ -71,9 +71,31 @@ class RoleController extends Controller
                 );
             }
         } catch (Exception $e) {
-            redirect()->back()->with('flash', ['message' => trans($e->message), 'type' => 'danger']);
+            return redirect()->route('role')->with('flash', ['message' => trans($e->getMessage()), 'type' => 'danger']);
         }
 
         return redirect()->route('role')->with('flash', ['message' => trans('Register saved Successful'), 'type' => 'success']);
+    }
+
+    /**
+     * Display the registration view.
+     *
+     * @return \Inertia\Response
+     */
+    public function delete(Request $request)
+    {
+        if (!Gate::allows('role_admin')) {
+            abort(403);
+        }
+        try {
+
+            $r = Role::where('id', $request->id)->first();
+
+            $r->delete();
+        } catch (Exception $e) {
+            return redirect()->route('role')->with('flash', ['message' => trans($e->getMessage()), 'type' => 'danger']);
+        }
+
+        return redirect()->route('role')->with('flash', ['message' => trans('Registro apagado com sucesso!'), 'type' => 'success']);
     }
 }

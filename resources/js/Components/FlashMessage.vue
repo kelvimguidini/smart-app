@@ -1,6 +1,5 @@
 <script setup>
-import { Link } from '@inertiajs/inertia-vue3';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { onMounted } from 'vue';
 const props = defineProps({
 
     message: {
@@ -21,7 +20,7 @@ onMounted(() => {
         $('#message').fadeOut(300, function () {
             $(this).remove();
         });
-    }, 15000); // milliseconds
+    }, 7000); // milliseconds
 });
 
 var cssMessage = "display: block; position: fixed; top: 0; left: 20%; right: 20%; width: 60%; padding-top: 10px; z-index: 9999";

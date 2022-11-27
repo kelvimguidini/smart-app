@@ -4,8 +4,10 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
-import { Head, Link, useForm } from '@inertiajs/inertia-vue3';
-
+import Modal from '@/Components/Modal.vue';
+import Loader from '@/Components/Loader.vue';
+import { Head, useForm } from '@inertiajs/inertia-vue3';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 
 const props = defineProps({
@@ -18,6 +20,33 @@ const form = useForm({
     permissions: []
 });
 
+const formDelete = useForm({
+    id: 0
+});
+
+onMounted(() => {
+
+    $('table').DataTable({
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/pt-BR.json',
+        },
+    });
+});
+
+const isLoader = ref(false);
+
+const deleteRole = (id) => {
+    isLoader.value = true;
+    formDelete.id = id;
+    formDelete.delete(route('role-delete'), {
+        onFinish: () => {
+            isLoader.value = false;
+            formDelete.reset();
+        },
+    });
+};
+
+
 const submit = () => {
     form.post(route('role-save'), {
         onSuccess: () => {
@@ -29,11 +58,12 @@ const submit = () => {
 
 <template>
     <AuthenticatedLayout>
+        <Loader v-bind:show="isLoader"></Loader>
 
         <Head title="Perfil" />
         <template #header>
             <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Perfil</h1>
+                <h1 class="h3 mb-0 text-gray-800">Perfil de acesso</h1>
             </div>
         </template>
         <div class="row">
@@ -46,27 +76,46 @@ const submit = () => {
 
                                 <form @submit.prevent="submit">
 
-                                    <div class="form-group">
-                                        <InputLabel for="name" value="Nome:" />
-                                        <TextInput type="text" class="form-control" v-model="form.name" required
-                                            autofocus autocomplete="name" />
-                                        <InputError class="mt-2" :message="form.errors.name" />
-                                    </div>
-                                    <div class="form-group">
-                                        <InputLabel for="permissions" value="Permissão para:" />
-                                        <select multiple class="form-control" v-model="form.permissions">
-                                            <option v-for="(option, index) in  $page.props.permissionList" :key="index"
-                                                :value="option.name">{{ option.title }}</option>
-                                        </select>
-                                        <InputError class="mt-2" :message="form.errors.permissions" />
-                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <InputLabel for="name" value="Nome:" />
+                                                <TextInput type="text" class="form-control" v-model="form.name" required
+                                                    autofocus autocomplete="name" />
+                                                <InputError class="mt-2 text-danger" :message="form.errors.name" />
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
 
+                                            <div class="form-group">
+                                                <InputLabel for="permissions" value="Permissão para:" />
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <div class="form-check"
+                                                            v-for="(option, index) in  $page.props.permissionList">
+                                                            <input v-model="form.permissions" class="form-check-input"
+                                                                type="checkbox" :value="option.name" :id="option.name">
+                                                            <label class="form-check-label" :for="option.name">
+                                                                {{ option.title }}
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <InputError class="mt-2 text-danger"
+                                                    :message="form.errors.permissions" />
+                                            </div>
+
+                                        </div>
+                                    </div>
                                     <div class="flex items-center justify-end mt-4 rigth">
                                         <PrimaryButton css-class="btn btn-primary float-right"
                                             :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                                            <span v-if="form.processing" class="spinner-border spinner-border-sm"
+                                                role="status" aria-hidden="true"></span>
                                             Salvar
                                         </PrimaryButton>
                                     </div>
+
                                 </form>
                             </div>
                         </div>
@@ -82,7 +131,6 @@ const submit = () => {
                                             <tr>
                                                 <th scope="col">#</th>
                                                 <th scope="col">Nome</th>
-                                                <th scope="col">Permissões</th>
                                                 <th scope="col">Ações</th>
                                             </tr>
                                         </thead>
@@ -91,23 +139,44 @@ const submit = () => {
                                                 <th scope="row">{{ role.id }}</th>
                                                 <td>{{ role.name }}</td>
                                                 <td>
-                                                    <ul class="list-group">
-                                                        <li v-for="(permission, key) in role.permissions"
-                                                            class="list-group-item d-flex justify-content-between align-items-center">
-                                                            {{ permission.title }}
-                                                            <a href="#" class="btn btn-danger btn-circle btn-sm">
+                                                    <Modal :modal-title="'Permissões para ' + role.name"
+                                                        btn-class="btn btn-info btn-icon-split mr-2">
+                                                        <template v-slot:button>
+                                                            <span class="icon text-white-50">
+                                                                <i class="fas fa-list"></i>
+                                                            </span>
+                                                            <span class="text">Permissões</span>
+                                                        </template>
+                                                        <template v-slot:content>
+                                                            <ul class="list-group">
+                                                                <li v-for="(permission, key) in role.permissions"
+                                                                    class="list-group-item d-flex justify-content-between align-items-center">
+                                                                    {{ permission.title }}
+                                                                    <a href="#"
+                                                                        class="btn btn-danger btn-circle btn-sm">
+                                                                        <i class="fas fa-trash"></i>
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </template>
+                                                    </Modal>
+
+
+                                                    <Modal :key="index"
+                                                        :modal-title="'Confirmar Exclusão de ' + role.name"
+                                                        :ok-botton-callback="deleteRole"
+                                                        :ok-botton-callback-param="role.id"
+                                                        btn-class="btn btn-danger btn-icon-split">
+                                                        <template v-slot:button>
+                                                            <span class="icon text-white-50">
                                                                 <i class="fas fa-trash"></i>
-                                                            </a>
-                                                        </li>
-                                                    </ul>
-                                                </td>
-                                                <td>
-                                                    <a href="#" class="btn btn-danger btn-icon-split">
-                                                        <span class="icon text-white-50">
-                                                            <i class="fas fa-trash"></i>
-                                                        </span>
-                                                        <span class="text">Remover</span>
-                                                    </a>
+                                                            </span>
+                                                            <span class="text">Excluir</span>
+                                                        </template>
+                                                        <template v-slot:content>
+                                                            Tem certeza que deseja apagar esse registro?
+                                                        </template>
+                                                    </Modal>
 
                                                 </td>
                                             </tr>

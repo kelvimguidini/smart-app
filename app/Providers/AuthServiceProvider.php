@@ -36,7 +36,7 @@ class AuthServiceProvider extends ServiceProvider
                     return $query->whereHas('permissions', function ($query) use ($permission) {
                         return $query->whereName($permission->name);
                     });
-                });
+                })->count() > 0;
             });
         }
 

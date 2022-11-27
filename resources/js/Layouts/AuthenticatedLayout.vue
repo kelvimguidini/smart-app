@@ -10,12 +10,11 @@ import '@/vendor/jquery-easing/jquery.easing.min.js';
 // Custom scripts for all pages
 import '@/vendor/sb-admin-2.js';
 
-import '../../css/sb-admin-2.css';
+import '../../css/app.css';
 import '../vendor/fontawesome-free/css/all.min.css';
 
 import '@/vendor/datatables/jquery.dataTables.min.js';
 import '@/vendor/datatables/dataTables.bootstrap4.min.js';
-import '@/vendor/demo/datatables-demo.js';
 
 import '../vendor/datatables/dataTables.bootstrap4.min.css';
 
@@ -38,13 +37,12 @@ const menuItem = [
     {
         name: 'Usuários',
         icon: 'fas fw fa-users',
-        active: route().current('register') || route().current('role'),
         isItem: false,
         collapseHeader: 'Administrar acessos',
         subMenu: [
             {
                 link: route().current('role') ? '' : route('role'),
-                name: 'Perfil',
+                name: 'Perfil de Acesso',
                 active: route().current('role'),
                 role: 'role_admin'
             },
@@ -99,7 +97,7 @@ onMounted(() => {
     <!-- Page Wrapper -->
     <div id="wrapper">
 
-        <Menu :menu-items="menuItem" :togle="toggleMenu" :menu-title="$page.props.appName"></Menu>
+        <Menu :menu-items="menuItem" :menu-title="$page.props.appName"></Menu>
 
         <FlashMessage v-if="$page.props.flash != null" :message="$page.props.flash.message"
             :type="$page.props.flash.type"></FlashMessage>
