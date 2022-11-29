@@ -24,7 +24,7 @@ const verificationLinkSent = computed(() => props.status === 'verification-link-
 <template>
     <GuestLayout>
 
-        <Head title="Email Verification" />
+        <Head title="Ativar Conta" />
 
         <div class="mb-4 text-sm text-gray-600">
             Sua conta já foi criada! Antes de começar, confirme o seu endereço de cadastro clicando no link presente no

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 use App\Http\Middleware\Constants;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -31,7 +32,8 @@ class DatabaseSeeder extends Seeder
         DB::table('roles')->insert(
             array(
                 'name' => 'Administrador',
-                'active' => true
+                'active' => true,
+                'email_verified_at' => Carbon::now()
             )
         );
 

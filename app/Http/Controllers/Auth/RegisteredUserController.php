@@ -59,6 +59,8 @@ class RegisteredUserController extends Controller
             'password' => Hash::make('qwerty'),
         ]);
 
+        $user->sendEmailVerificationNotification();
+
         return redirect()->route('register')->with('flash', ['message' => trans('Register saved Successful'), 'type' => 'success']);
     }
 }
