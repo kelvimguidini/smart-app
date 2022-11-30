@@ -88,7 +88,7 @@ class RoleController extends Controller
         }
         try {
 
-            $r = Role::where('id', $request->id)->first();
+            $r = Role::find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

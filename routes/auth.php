@@ -56,6 +56,12 @@ Route::middleware('auth')->group(function () {
 
     Route::post('register', [RegisteredUserController::class, 'store']);
 
+    // Route::get('register/{id}', [RegisteredUserController::class, 'create'])
+    //     ->name('registerEdit');
+
+    // Route::delete('user-delete', [RegisteredUserController::class, 'delete'])->name('permission-remove');
+
+    // Route::delete('role-remove', [RegisteredUserController::class, 'permissionRemove'])->name('role-remove');
 
     Route::get('role', [RoleController::class, 'create'])
         ->name('role');

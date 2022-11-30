@@ -5,31 +5,93 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/inertia-vue3';
+import { onMounted, ref } from 'vue';
 
 
 const props = defineProps({
     users: Array,
+    roles: Array,
+    // userEdit: Array
 });
 
 const form = useForm({
+    id: 0,
     name: '',
     email: '',
     password: '',
     password_confirmation: '',
     terms: false,
+    roles: []
 });
+
+const formDelete = useForm({
+    id: 0
+});
+
+const formRemoveRole = useForm({
+    role_id: 0,
+    user_id: 0
+});
+
+const userInEdition = ref(0);
 
 const submit = () => {
     form.post(route('register'), {
         onFinish: () => form.reset('password', 'password_confirmation'),
     });
 };
+
+const edit = (user) => {
+    userInEdition.value = user.id;
+    form.name = user.name;
+    form.email = user.email;
+    form.id = user.id;
+    form.roles = [];
+    user.roles.map(function (value, key) {
+        form.roles.push(value.id);
+    });
+};
+
+const isLoader = ref(false);
+
+const deleteUser = (id) => {
+    isLoader.value = true;
+    formDelete.id = id;
+    formDelete.delete(route('user-delete'), {
+        onFinish: () => {
+            isLoader.value = false;
+            formDelete.reset();
+        },
+    });
+};
+
+
+const removeRole = (role_user) => {
+    isLoader.value = true;
+    formRemoveRole.role_id = role_user[0];
+    formRemoveRole.user_id = role_user[1];
+    formRemoveRole.delete(route('role-remove'), {
+        onFinish: () => {
+            isLoader.value = false;
+            formRemoveRole.reset();
+        },
+    });
+};
+
+onMounted(() => {
+    // if (userEdit != null) {
+    //     edit(userEdit);
+    // }
+});
+
 </script>
 
 <template>
     <AuthenticatedLayout>
 
         <Head title="Usuários" />
+        <Loader v-bind:show="isLoader"></Loader>
+
 
         <template #header>
             <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -44,7 +106,7 @@ const submit = () => {
                         <form @submit.prevent="submit">
 
                             <div class="row">
-                                <div class="col-lg-6">
+                                <div class="col-lg-4">
                                     <div class="form-group">
 
                                         <InputLabel for="name" value="Name" />
@@ -53,7 +115,7 @@ const submit = () => {
                                         <InputError class="mt-2 text-danger" :message="form.errors.name" />
                                     </div>
                                 </div>
-                                <div class="col-lg-6">
+                                <div class="col-lg-4">
                                     <div class="form-group">
 
                                         <InputLabel for="email" value="Email" />
@@ -62,17 +124,41 @@ const submit = () => {
                                         <InputError class="mt-2 text-danger" :message="form.errors.email" />
                                     </div>
                                 </div>
+
+                                <div class="col-lg-4">
+                                    <div class="form-group">
+                                        <InputLabel for="role" value="Perfil de acesso:" />
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="form-check" v-for="(role, index) in  roles">
+                                                    <input v-model="form.roles" class="form-check-input" type="checkbox"
+                                                        :value="role.id" :id="role.name">
+                                                    <label class="form-check-label" :for="role.name">
+                                                        {{ role.name }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <InputError class="mt-2 text-danger" :message="form.errors.roles" />
+                                    </div>
+
+                                </div>
                             </div>
                             <div class="flex items-center justify-end mt-4">
 
-                                <div class="flex items-center justify-end mt-4 rigth">
-                                    <PrimaryButton css-class="btn btn-primary float-right"
-                                        :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                                        <span v-if="form.processing" class="spinner-border spinner-border-sm"
-                                            role="status" aria-hidden="true"></span>
-                                        Salvar
-                                    </PrimaryButton>
-                                </div>
+                                <PrimaryButton css-class="btn btn-primary float-right m-1"
+                                    :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                                    <span v-if="form.processing" class="spinner-border spinner-border-sm" role="status"
+                                        aria-hidden="true"></span>
+                                    Salvar
+                                </PrimaryButton>
+
+                                <PrimaryButton v-if="userInEdition > 0" css-class="btn btn-info float-right m-1"
+                                    v-on:click="form.reset(); userInEdition = 0"
+                                    :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                                    Novo
+                                </PrimaryButton>
+
                             </div>
                         </form>
                     </div>
@@ -95,8 +181,9 @@ const submit = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="(user, index) in users">
-                                        <th>{{ user.id }}</th>
+                                    <tr v-for="(user, index) in users"
+                                        :class="{ 'table-info': userInEdition == user.id }">
+                                        <th>{{ user.id }}}</th>
                                         <td>{{ user.name }}</td>
                                         <td>{{ user.email }}</td>
                                         <td>
@@ -110,8 +197,51 @@ const submit = () => {
                                             </span>
                                         </td>
                                         <td>
-                                            <!-- <Modal :key="index" :modal-title="'Confirmar Exclusão de ' + user.name"
-                                                :ok-botton-callback="deleteRole" :ok-botton-callback-param="role.id"
+                                            <Modal :modal-title="'Permissões para ' + user.name"
+                                                btn-class="btn btn-info btn-icon-split mr-2">
+                                                <template v-slot:button>
+                                                    <span class="icon text-white-50">
+                                                        <i class="fas fa-list"></i>
+                                                    </span>
+                                                    <span class="text">Permissões</span>
+                                                </template>
+                                                <template v-slot:content>
+                                                    <ul class="list-group">
+                                                        <li v-for="(role, key) in user.roles"
+                                                            class="list-group-item d-flex justify-content-between align-items-center">
+                                                            {{ role.name }}
+
+                                                            <Modal :key="'role_' + index"
+                                                                :modal-title="'Confirmar remoção de perfil'"
+                                                                :ok-botton-callback="removeRole"
+                                                                :ok-botton-callback-param="[role.id, user.id]"
+                                                                btn-class="btn btn-danger btn-circle btn-sm">
+                                                                <template v-slot:button>
+                                                                    <span v-if="formRemoveRole.processing"
+                                                                        class="spinner-border spinner-border-sm"
+                                                                        role="status" aria-hidden="true"></span>
+                                                                    <i class="fas fa-trash"></i>
+                                                                </template>
+                                                                <template v-slot:content>
+                                                                    Tem certeza que deseja remover o perfil
+                                                                    <b>{{ role.name }}</b> de
+                                                                    <b>{{ user.name }}</b>?
+                                                                </template>
+                                                            </Modal>
+                                                        </li>
+                                                    </ul>
+                                                </template>
+                                            </Modal>
+
+                                            <button class="btn btn-info btn-icon-split mr-2" v-on:click="edit(user)">
+                                                <span class="icon text-white-50">
+                                                    <i class="fas fa-edit"></i>
+                                                </span>
+                                                <span class="text">Editar</span>
+                                            </button>
+
+                                            <Modal :key="index" :modal-title="'Confirmar Exclusão de ' + user.name"
+                                                :ok-botton-callback="deleteUser" :ok-botton-callback-param="user.id"
                                                 btn-class="btn btn-danger btn-icon-split">
                                                 <template v-slot:button>
                                                     <span class="icon text-white-50">
@@ -122,7 +252,7 @@ const submit = () => {
                                                 <template v-slot:content>
                                                     Tem certeza que deseja apagar esse registro?
                                                 </template>
-                                            </Modal> -->
+                                            </Modal>
 
                                         </td>
                                     </tr>

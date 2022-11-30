@@ -23,7 +23,7 @@ import Menu from '@/Components/Menu.vue';
 import NavBar from '@/Components/NavBar.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
 import { Link } from '@inertiajs/inertia-vue3';
-import { usePage } from '@inertiajs/inertia-vue3'
+
 
 
 const menuItem = [
@@ -99,8 +99,8 @@ onMounted(() => {
 
         <Menu :menu-items="menuItem" :menu-title="$page.props.appName"></Menu>
 
-        <FlashMessage v-if="$page.props.flash != null" :message="$page.props.flash.message"
-            :type="$page.props.flash.type"></FlashMessage>
+        <FlashMessage v-if="$page.props.flash != null" :show="$page.props.flash != null"
+            :message="$page.props.flash.message" :type="$page.props.flash.type"></FlashMessage>
 
         <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">

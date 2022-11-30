@@ -29,7 +29,7 @@ class VerifyEmailController extends Controller
     {
         $hash = $request->hash;
 
-        $user = User::where('id', $request->id)->first();
+        $user = User::find($request->id);
 
 
 
