@@ -79,10 +79,10 @@ const submit = () => {
     <AuthenticatedLayout>
         <Loader v-bind:show="isLoader"></Loader>
 
-        <Head title="Perfil" />
+        <Head title="Grupo" />
         <template #header>
             <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Perfil de acesso</h1>
+                <h1 class="h3 mb-0 text-gray-800">Grupo de acesso</h1>
             </div>
         </template>
         <div class="row">
@@ -185,7 +185,7 @@ const submit = () => {
                                                                         </template>
                                                                         <template v-slot:content>
                                                                             Tem certeza que deseja remover a permissão
-                                                                            <b>{{ permission.title }}</b> do perfil
+                                                                            <b>{{ permission.title }}</b> do grupo
                                                                             <b>{{ role.name }}</b>?
                                                                         </template>
                                                                     </Modal>

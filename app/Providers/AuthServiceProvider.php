@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Permission;
+use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\DB;
@@ -40,6 +41,8 @@ class AuthServiceProvider extends ServiceProvider
             });
         }
 
-        //
+        Gate::define('profile_edit', function (User $user, $id) {
+            return $user->id === $id;
+        });
     }
 }

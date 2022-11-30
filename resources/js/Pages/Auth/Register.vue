@@ -4,6 +4,8 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
+import Modal from '@/Components/Modal.vue';
+import Loader from '@/Components/Loader.vue';
 import { Head, Link, useForm } from '@inertiajs/inertia-vue3';
 import { onMounted, ref } from 'vue';
 
@@ -78,12 +80,6 @@ const removeRole = (role_user) => {
     });
 };
 
-onMounted(() => {
-    // if (userEdit != null) {
-    //     edit(userEdit);
-    // }
-});
-
 </script>
 
 <template>
@@ -127,7 +123,7 @@ onMounted(() => {
 
                                 <div class="col-lg-4">
                                     <div class="form-group">
-                                        <InputLabel for="role" value="Perfil de acesso:" />
+                                        <InputLabel for="role" value="Grupo de acesso:" />
                                         <div class="card">
                                             <div class="card-body">
                                                 <div class="form-check" v-for="(role, index) in  roles">
@@ -183,7 +179,7 @@ onMounted(() => {
                                 <tbody>
                                     <tr v-for="(user, index) in users"
                                         :class="{ 'table-info': userInEdition == user.id }">
-                                        <th>{{ user.id }}}</th>
+                                        <th>{{ user.id }}</th>
                                         <td>{{ user.name }}</td>
                                         <td>{{ user.email }}</td>
                                         <td>
@@ -203,7 +199,7 @@ onMounted(() => {
                                                     <span class="icon text-white-50">
                                                         <i class="fas fa-list"></i>
                                                     </span>
-                                                    <span class="text">Permissões</span>
+                                                    <span class="text">Grupos de acesso</span>
                                                 </template>
                                                 <template v-slot:content>
                                                     <ul class="list-group">
@@ -212,7 +208,7 @@ onMounted(() => {
                                                             {{ role.name }}
 
                                                             <Modal :key="'role_' + index"
-                                                                :modal-title="'Confirmar remoção de perfil'"
+                                                                :modal-title="'Confirmar remoção de grupo'"
                                                                 :ok-botton-callback="removeRole"
                                                                 :ok-botton-callback-param="[role.id, user.id]"
                                                                 btn-class="btn btn-danger btn-circle btn-sm">
@@ -223,7 +219,7 @@ onMounted(() => {
                                                                     <i class="fas fa-trash"></i>
                                                                 </template>
                                                                 <template v-slot:content>
-                                                                    Tem certeza que deseja remover o perfil
+                                                                    Tem certeza que deseja remover o grupo
                                                                     <b>{{ role.name }}</b> de
                                                                     <b>{{ user.name }}</b>?
                                                                 </template>
@@ -233,7 +229,7 @@ onMounted(() => {
                                                 </template>
                                             </Modal>
 
-                                            <button class="btn btn-info btn-icon-split mr-2" v-on:click="edit(user)">
+                                            <button class="btn btn-primary btn-icon-split mr-2" v-on:click="edit(user)">
                                                 <span class="icon text-white-50">
                                                     <i class="fas fa-edit"></i>
                                                 </span>

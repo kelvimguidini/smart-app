@@ -25,7 +25,7 @@ class RegisteredUserController extends Controller
      */
     public function create()
     {
-        if (!Gate::allows('role_admin')) {
+        if (!Gate::allows('user_admin')) {
             abort(403);
         }
 
@@ -50,7 +50,7 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request)
     {
-        if (!Gate::allows('role_admin')) {
+        if (!Gate::allows('user_admin')) {
             abort(403);
         }
 
@@ -122,12 +122,12 @@ class RegisteredUserController extends Controller
      */
     public function delete(Request $request)
     {
-        if (!Gate::allows('role_admin')) {
+        if (!Gate::allows('user_admin')) {
             abort(403);
         }
         try {
 
-            $r = Role::find($request->id);
+            $r = User::find($request->id);
 
             $r->delete();
         } catch (Exception $e) {
@@ -135,7 +135,7 @@ class RegisteredUserController extends Controller
             throw $e;
         }
 
-        return redirect()->route('role')->with('flash', ['message' => trans('Registro apagado com sucesso!'), 'type' => 'success']);
+        return redirect()->back()->with('flash', ['message' => trans('Registro apagado com sucesso!'), 'type' => 'success']);
     }
 
 
@@ -145,20 +145,20 @@ class RegisteredUserController extends Controller
      *
      * @return \Inertia\Response
      */
-    public function permissionRemove(Request $request)
+    public function roleRemove(Request $request)
     {
-        if (!Gate::allows('role_admin')) {
+        if (!Gate::allows('user_admin')) {
             abort(403);
         }
         try {
-            DB::table('role_permission')->where([
+            DB::table('user_role')->where([
                 ['role_id', '=', $request->role_id],
-                ['permission_id', '=', $request->permission_id],
+                ['user_id', '=', $request->user_id],
             ])->delete();
         } catch (Exception $e) {
             throw $e;
         }
 
-        return redirect()->route('role')->with('flash', ['message' => trans('Registro apagado com sucesso!'), 'type' => 'success']);
+        return redirect()->back()->with('flash', ['message' => trans('Registro apagado com sucesso!'), 'type' => 'success']);
     }
 }

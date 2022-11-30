@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\ProfileUserController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\Auth\VerifyEmailController;
@@ -56,12 +57,15 @@ Route::middleware('auth')->group(function () {
 
     Route::post('register', [RegisteredUserController::class, 'store']);
 
-    // Route::get('register/{id}', [RegisteredUserController::class, 'create'])
-    //     ->name('registerEdit');
+    Route::get('profile', [ProfileUserController::class, 'create'])
+        ->name('profile');
 
-    // Route::delete('user-delete', [RegisteredUserController::class, 'delete'])->name('permission-remove');
+    Route::post('profile', [ProfileUserController::class, 'store'])
+        ->name('profile');
 
-    // Route::delete('role-remove', [RegisteredUserController::class, 'permissionRemove'])->name('role-remove');
+    Route::delete('user-delete', [RegisteredUserController::class, 'delete'])->name('user-delete');
+
+    Route::delete('role-remove', [RegisteredUserController::class, 'roleRemove'])->name('role-remove');
 
     Route::get('role', [RoleController::class, 'create'])
         ->name('role');
