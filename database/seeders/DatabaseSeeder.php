@@ -24,7 +24,8 @@ class DatabaseSeeder extends Seeder
             array(
                 'name' => 'Admin',
                 'email' => 'admin@admin.com',
-                'password' => Hash::make('Admin')
+                'password' => Hash::make('Admin'),
+                'email_verified_at' => Carbon::now()
             )
         );
 
@@ -33,7 +34,6 @@ class DatabaseSeeder extends Seeder
             array(
                 'name' => 'Administrador',
                 'active' => true,
-                'email_verified_at' => Carbon::now()
             )
         );
 

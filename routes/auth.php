@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
+use App\Http\Controllers\Auth\CustomerController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
@@ -52,6 +53,7 @@ Route::middleware('auth')->group(function () {
     Route::get('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 
+    //USER
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');
 
@@ -65,6 +67,7 @@ Route::middleware('auth')->group(function () {
 
     Route::delete('user-delete', [RegisteredUserController::class, 'delete'])->name('user-delete');
 
+    //ROLE
     Route::delete('role-remove', [RegisteredUserController::class, 'roleRemove'])->name('role-remove');
 
     Route::get('role', [RoleController::class, 'create'])
@@ -79,4 +82,14 @@ Route::middleware('auth')->group(function () {
 
     Route::delete('permission-remove', [RoleController::class, 'permissionRemove'])
         ->name('permission-remove');
+
+    //TABELS AUXILIARES
+    Route::get('customer', [CustomerController::class, 'create'])
+        ->name('customer');
+
+    Route::post('customer-save', [CustomerController::class, 'store'])
+        ->name('customer-save');
+
+    Route::delete('customer-delete', [CustomerController::class, 'delete'])
+        ->name('customer-delete');
 });

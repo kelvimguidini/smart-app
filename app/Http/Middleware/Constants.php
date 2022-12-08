@@ -13,6 +13,7 @@ class Constants extends Middleware
      */
     const PERMISSIONS = [
         ['name' => "user_admin", "title" => "Administrar Usuários"],
-        ['name' => "role_admin", "title" => "Administrar Grupos de Acesso"]
+        ['name' => "role_admin", "title" => "Administrar Grupos de Acesso"],
+        ['name' => "customer_admin", "title" => "Administrar Clientes"]
     ];
 }

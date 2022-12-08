@@ -54,6 +54,20 @@ const menuItem = [
             }
         ],
     },
+    {
+        name: 'Cadastro',
+        icon: 'fa fa-table',
+        isItem: false,
+        collapseHeader: 'Tabelas auxiliares',
+        subMenu: [
+            {
+                link: route().current('customer') ? '' : route('customer'),
+                name: 'Clientes',
+                active: route().current('customer'),
+                role: 'customer_admin'
+            }
+        ],
+    },
 ];
 
 onMounted(() => {

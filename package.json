@@ -29,6 +29,7 @@
         "@fortawesome/free-solid-svg-icons": "^6.2.0",
         "@fortawesome/vue-fontawesome": "^3.0.2",
         "@smartweb/vue-flash-message": "^0.6.10",
-        "jquery": "^3.6.1"
+        "jquery": "^3.6.1",
+        "vue-avatar-cropper": "^6.0.9"
     }
 }
