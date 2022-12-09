@@ -8,44 +8,20 @@ import Modal from '@/Components/Modal.vue';
 import Loader from '@/Components/Loader.vue';
 import { Head, useForm } from '@inertiajs/inertia-vue3';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
+// import VueMask from 'v-mask';
+import { mask } from 'vue-the-mask'
 
 
 const props = defineProps({
-    customers: Array
+    crds: Array
 });
 
-const file = ref(null);
-const previewImage = ref(null);
-
-const previewImageHandled = ref(false);
-
-const handleFileUpload = async () => {
-    previewImageHandled.value = true;
-    form.logo = file.value.files[0];
-    const reader = new FileReader();
-    reader.readAsDataURL(form.logo);
-    reader.onload = e => {
-        previewImage.value = e.target.result;
-    };
-}
-
-const customerInEdition = ref(0);
-
-
-const handleEditForm = (customer) => {
-
-    customerInEdition.value = customer.id;
-    form.id = customer.id;
-    form.name = customer.name;
-    form.logo = customer.logo;
-    previewImage.value = '.' + customer.logo;
-
-}
+const crdInEdition = ref(0);
 
 const form = useForm({
     id: 0,
     name: '',
-    logo: null
+    cnpj: ''
 });
 
 const formDelete = useForm({
@@ -60,14 +36,16 @@ onMounted(() => {
             url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/pt-BR.json',
         },
     });
+
+    $('.cnpj').mask('00.000.000/0000-00', { reverse: true });
 });
 
 const isLoader = ref(false);
 
-const deleteCustomer = (id) => {
+const deleteCRD = (id) => {
     isLoader.value = true;
     formDelete.id = id;
-    formDelete.delete(route('customer-delete'), {
+    formDelete.delete(route('crd-delete'), {
         onFinish: () => {
             isLoader.value = false;
             formDelete.reset();
@@ -75,8 +53,15 @@ const deleteCustomer = (id) => {
     });
 };
 
+const edit = (crd) => {
+    crdInEdition.value = crd.id;
+    form.name = crd.name;
+    form.cnpj = crd.cnpj;
+    form.id = crd.id;
+};
+
 const submit = () => {
-    form.post(route('customer-save'), {
+    form.post(route('crd-save'), {
         onSuccess: () => {
             form.reset();
         },
@@ -88,14 +73,14 @@ const submit = () => {
     <AuthenticatedLayout>
         <Loader v-bind:show="isLoader"></Loader>
 
-        <Head title="Clientes" />
+        <Head title="CRD's" />
         <template #header>
             <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Clientes</h1>
+                <h1 class="h3 mb-0 text-gray-800">CRD's</h1>
             </div>
         </template>
         <div class="row">
-            <div class="col-lg-9">
+            <div class="col-lg-12">
 
                 <div class="row">
                     <div class="col-lg-12">
@@ -116,24 +101,10 @@ const submit = () => {
                                         <div class="col-lg-6">
 
                                             <div class="form-group">
-                                                <InputLabel for="logo" value="Logo:" />
-                                                <div class="card">
-                                                    <div class="card-body">
-                                                        <input ref="file" @input="form.logo"
-                                                            v-on:change="handleFileUpload()" type="file" />
-
-                                                    </div>
-                                                </div>
-                                                <InputError class="mt-2 text-danger" :message="form.errors.logo" />
-                                            </div>
-
-                                            <div v-if="customerInEdition > 0" class="alert alert-warning " role="alert">
-                                                <h4
-                                                    class="alert-heading text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                    Alteração da logo!
-                                                </h4>
-                                                <p>Ao clicar em salvar SEM carregar imagem a alteração dos dados do
-                                                    cliente NÃO apagará a imagem</p>
+                                                <InputLabel for="cnpj" value="CNPJ:" />
+                                                <TextInput type="text" class="form-control cnpj" v-model="form.cnpj"
+                                                    required autofocus autocomplete="cnpj" />
+                                                <InputError class="mt-2 text-danger" :message="form.errors.cnpj" />
                                             </div>
 
                                         </div>
@@ -145,9 +116,8 @@ const submit = () => {
                                                 role="status" aria-hidden="true"></span>
                                             Salvar
                                         </PrimaryButton>
-                                        <PrimaryButton v-if="customerInEdition > 0"
-                                            css-class="btn btn-info float-right m-1"
-                                            v-on:click="form.reset(); customerInEdition = 0; previewImage = null"
+                                        <PrimaryButton v-if="crdInEdition > 0" css-class="btn btn-info float-right m-1"
+                                            v-on:click="form.reset(); crdInEdition = 0;"
                                             :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                                             Novo
                                         </PrimaryButton>
@@ -168,17 +138,19 @@ const submit = () => {
                                             <tr>
                                                 <th scope="col">#</th>
                                                 <th scope="col">Nome</th>
+                                                <th scope="col">CNPJ</th>
                                                 <th scope="col">Ações</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr v-for="(customer, index) in customers"
-                                                :class="{ 'table-info': customerInEdition == customer.id }">
-                                                <th scope="row">{{ customer.id }}</th>
-                                                <td>{{ customer.name }}</td>
+                                            <tr v-for="(crd, index) in crds"
+                                                :class="{ 'table-info': crdInEdition == crd.id }">
+                                                <th scope="row">{{ crd.id }}</th>
+                                                <td>{{ crd.name }}</td>
+                                                <td>{{ crd.cnpj }}</td>
                                                 <td>
                                                     <button class="btn btn-info btn-icon-split mr-2"
-                                                        v-on:click="handleEditForm(customer)">
+                                                        v-on:click="edit(crd)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-edit"></i>
                                                         </span>
@@ -186,9 +158,9 @@ const submit = () => {
                                                     </button>
 
                                                     <Modal :key="index"
-                                                        :modal-title="'Confirmar Exclusão de ' + customer.name"
-                                                        :ok-botton-callback="deleteCustomer"
-                                                        :ok-botton-callback-param="customer.id"
+                                                        :modal-title="'Confirmar Exclusão de ' + crd.name"
+                                                        :ok-botton-callback="deleteCRD"
+                                                        :ok-botton-callback-param="crd.id"
                                                         btn-class="btn btn-danger btn-icon-split">
                                                         <template v-slot:button>
                                                             <span class="icon text-white-50">
@@ -211,25 +183,7 @@ const submit = () => {
                     </div>
                 </div>
             </div>
-
-
-            <div class="col-lg-3">
-                <!-- Basic Card Example -->
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Logo</h6>
-                    </div>
-                    <div class="card-body">
-                        <img :src="previewImage" style="padding-right: 0;padding-left: 0;" class="rounded col-12"
-                            :class="{ 'border border-danger': previewImageHandled }" />
-                    </div>
-                </div>
-
-            </div>
-
         </div>
-
-
 
     </AuthenticatedLayout>
 </template>

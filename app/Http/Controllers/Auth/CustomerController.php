@@ -4,10 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
-use App\Models\Role;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -48,28 +46,31 @@ class CustomerController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
         ]);
+        try {
+            $url = false;
+            if ($request->file('logo')) {
+                $path = Storage::putFile('public/logos', $request->file('logo'));
+                $url = Storage::url($path);
+            }
 
-        $url = false;
-        if ($request->file('logo')) {
-            $path = Storage::putFile('public/logos', $request->file('logo'));
-            $url = Storage::url($path);
+            if ($request->id > 0) {
+
+                $customer = Customer::find($request->id);
+
+                $customer->name = $request->name;
+                $customer->logo = $url ?  $url : $request->logo;
+                $customer->save();
+            } else {
+
+                $customer = Customer::create([
+                    'name' => $request->name,
+                    'logo' => $url,
+                ]);
+            }
+        } catch (Exception $e) {
+            Storage::delete($path);
+            throw $e;
         }
-
-        if ($request->id > 0) {
-
-            $customer = Customer::find($request->id);
-
-            $customer->name = $request->name;
-            $customer->logo = $url ?  $url : $request->logo;
-            $customer->save();
-        } else {
-
-            $customer = Customer::create([
-                'name' => $request->name,
-                'logo' => $url,
-            ]);
-        }
-
         return redirect()->route('customer')->with('flash', ['message' => trans('Register saved Successful'), 'type' => 'success']);
     }
 
@@ -88,6 +89,8 @@ class CustomerController extends Controller
             $r = Customer::find($request->id);
 
             $r->delete();
+
+            Storage::delete($r->logo);
         } catch (Exception $e) {
 
             throw $e;

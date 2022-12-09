@@ -7,6 +7,9 @@ import '@/vendor/bootstrap/js/bootstrap.bundle.min.js';
 // Core plugin JavaScript
 import '@/vendor/jquery-easing/jquery.easing.min.js';
 
+// Mask
+import '@/vendor/mask/jquery.mask.js';
+
 // Custom scripts for all pages
 import '@/vendor/sb-admin-2.js';
 
@@ -65,6 +68,12 @@ const menuItem = [
                 name: 'Clientes',
                 active: route().current('customer'),
                 role: 'customer_admin'
+            },
+            {
+                link: route().current('crd') ? '' : route('crd'),
+                name: 'CRD\'s',
+                active: route().current('crd'),
+                role: 'crd_admin'
             }
         ],
     },

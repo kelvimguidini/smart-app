@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\CustomerController;
+use App\Http\Controllers\Auth\CrdController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
@@ -92,4 +93,13 @@ Route::middleware('auth')->group(function () {
 
     Route::delete('customer-delete', [CustomerController::class, 'delete'])
         ->name('customer-delete');
+
+    Route::get('crd', [CrdController::class, 'create'])
+        ->name('crd');
+
+    Route::post('crd-save', [CrdController::class, 'store'])
+        ->name('crd-save');
+
+    Route::delete('crd-delete', [CrdController::class, 'delete'])
+        ->name('crd-delete');
 });
