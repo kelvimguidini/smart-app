@@ -1,7 +1,6 @@
 <?php
-
 return [
-
+    
     /*
     |--------------------------------------------------------------------------
     | Server Side Rendering
@@ -15,15 +14,11 @@ return [
     | please visit https://inertiajs.com/server-side-rendering
     |
     */
-
     'ssr' => [
-
         'enabled' => true,
-
         'url' => 'http://127.0.0.1:13714/render',
-
     ],
-
+    
     /*
     |--------------------------------------------------------------------------
     | Testing
@@ -35,28 +30,18 @@ return [
     | paths AND with any of the extensions specified here.
     |
     */
-
     'testing' => [
-
         'ensure_pages_exist' => true,
-
         'page_paths' => [
-
-            resource_path('js/Pages'),
-
+            resource_path('views/pages'),
         ],
-
         'page_extensions' => [
-
             'js',
             'jsx',
             'svelte',
             'ts',
             'tsx',
             'vue',
-
         ],
-
     ],
-
 ];

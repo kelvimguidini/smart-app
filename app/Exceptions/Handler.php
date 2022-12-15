@@ -44,7 +44,7 @@ class Handler extends ExceptionHandler
     public function register()
     {
         $this->reportable(function (Throwable $e) {
-            return redirect()->back()->with('flash', ['message' => trans($e->getMessage()), 'type' => 'danger']);
+            return redirect()->back()->with('flash', ['message' => $e->getMessage(), 'type' => 'danger']);
         });
     }
 }
