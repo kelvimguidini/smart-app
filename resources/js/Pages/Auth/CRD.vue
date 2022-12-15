@@ -7,9 +7,7 @@ import TextInput from '@/Components/TextInput.vue';
 import Modal from '@/Components/Modal.vue';
 import Loader from '@/Components/Loader.vue';
 import { Head, useForm } from '@inertiajs/inertia-vue3';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
-// import VueMask from 'v-mask';
-import { mask } from 'vue-the-mask'
+import { onMounted, ref } from 'vue';
 
 
 const props = defineProps({
