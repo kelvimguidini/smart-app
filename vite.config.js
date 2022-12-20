@@ -21,4 +21,7 @@ export default defineConfig({
     ssr: {
         noExternal: ['@inertiajs/server'],
     },
+    devServer: {
+        proxy: 'https://dev.eventos.com.br'
+    }
 });

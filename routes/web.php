@@ -18,6 +18,6 @@ use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified', 'cors'])->name('dashboard');
 
 require __DIR__ . '/auth.php';

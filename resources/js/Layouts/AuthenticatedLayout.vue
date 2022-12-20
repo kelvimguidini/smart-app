@@ -122,7 +122,7 @@ onMounted(() => {
                     </div>
 
                     <!-- Page Heading -->
-                    <header class="bg-white shadow" v-if="$slots.header">
+                    <header class=" shadow" v-if="$slots.header">
                     </header>
                     <!-- Page Content -->
                     <main>
