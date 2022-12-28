@@ -41,6 +41,16 @@ class AuthServiceProvider extends ServiceProvider
                         });
                     })->count() > 0;
                 });
+
+                if ($permission->verifyId) {
+                    Gate::define($permission->name . "_user", function ($user, $id) use ($permission) {
+                        return $user->whereHas('roles', function ($query) use ($permission) {
+                            return $query->whereHas('permissions', function ($query) use ($permission) {
+                                return $query->whereName($permission->name);
+                            });
+                        })->count() > 0 && ((is_array($id) && in_array($user->id, $id)) || $user->id === $id);
+                    });
+                }
             }
 
             Gate::define('profile_edit', function (User $user, $id) {

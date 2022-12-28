@@ -9,6 +9,7 @@ use App\Models\Event;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
 
@@ -21,16 +22,30 @@ class EventController extends Controller
      */
     public function list()
     {
-        if (!Gate::allows('event_admin')) {
+        $userId =  Auth::user()->id;
+        if (Gate::allows('event_admin')) {
+            $e = Event::with("crd")
+                ->with('customer')
+                ->with('hotel_operator')
+                ->with('air_operator')
+                ->with('land_operator')
+                ->get();
+        } else if (Gate::allows('event_operator')) {
+            $e = Event::with("crd")
+                ->with('customer')
+                ->with(['hotel_operator' => function ($query) use ($userId) {
+                    $query->where('hotel_operator', '=', $userId);
+                }])
+                ->with(['air_operator' => function ($query) use ($userId) {
+                    $query->where('air_operator', '=', $userId);
+                }])
+                ->with(['land_operator' => function ($query) use ($userId) {
+                    $query->where('land_operator', '=', $userId);
+                }])
+                ->get();
+        } else {
             abort(403);
         }
-
-        $e = Event::with("crd")
-            ->with('customer')
-            ->with('hotel_operator')
-            ->with('air_operator')
-            ->with('land_operator')
-            ->get();
 
         return Inertia::render('Auth/EventList', [
             'events' => $e

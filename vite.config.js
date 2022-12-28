@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
+import basicSsl from '@vitejs/plugin-basic-ssl'
 
 export default defineConfig({
     plugins: [
@@ -9,6 +10,7 @@ export default defineConfig({
             ssr: 'resources/js/ssr.js',
             refresh: true,
         }),
+        basicSsl(),
         vue({
             template: {
                 transformAssetUrls: {
@@ -16,12 +18,17 @@ export default defineConfig({
                     includeAbsolute: false,
                 },
             },
-        }),
+        })
     ],
     ssr: {
         noExternal: ['@inertiajs/server'],
     },
-    devServer: {
-        proxy: 'https://dev.eventos.com.br'
-    }
+    server: {
+        host: '0.0.0.0',
+        hmr: {
+            host: 'localhost',
+        }, watch: {
+            usePolling: true,
+        },
+    },
 });

@@ -77,6 +77,26 @@ const menuItem = [
             }
         ],
     },
+    {
+        name: 'Eventos',
+        icon: 'fa fa-table',
+        isItem: false,
+        collapseHeader: 'Cotações',
+        subMenu: [
+            {
+                link: route().current('customer') ? '' : route('customer'),
+                name: 'Cadastro Inicial',
+                active: route().current('customer'),
+                role: 'customer_admin'
+            },
+            {
+                link: route().current('event-list') ? '' : route('event-list'),
+                name: 'Listar',
+                active: route().current('event-list'),
+                role: ['event_admin', 'event_operator']
+            }
+        ],
+    },
 ];
 
 onMounted(() => {

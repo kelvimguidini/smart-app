@@ -120,7 +120,6 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::get('event/{id}', [EventController::class, 'create'])
         ->name('event-edit');
 
-
     Route::delete('event-delete', [EventController::class, 'delete'])
         ->name('event-delete');
 });

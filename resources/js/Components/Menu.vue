@@ -48,7 +48,7 @@ const props = defineProps({
             </Link>
 
             <!-- Nav Item - Collapse Menu -->
-            <a v-if="!menuItem.isItem && menuItem.subMenu.some((s) => $page.props.auth.permissions.some((p) => p.name == s.role))"
+            <a v-if="!menuItem.isItem && menuItem.subMenu.some((s) => $page.props.auth.permissions.some((p) => p.name === s.role || (Array.isArray(s.role) && s.role.some((r) => r == p.name))))"
                 class="nav-link collapsed" href="#" data-toggle="collapse" :data-target="'#collapse1' + index"
                 aria-expanded="true" :aria-controls="'collapse1' + index">
                 <i :class="menuItem.icon || 'fa-solid fa-check'"></i>
@@ -60,7 +60,7 @@ const props = defineProps({
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">{{ menuItem.collapseHeader }}:</h6>
                     <Link
-                        v-for="(subMenuItem, subIndex) in menuItem.subMenu.filter((s) => $page.props.auth.permissions.some((p) => p.name == s.role))"
+                        v-for="(subMenuItem, subIndex) in menuItem.subMenu.filter((s) => $page.props.auth.permissions.some((p) => p.name === s.role || (Array.isArray(s.role) && s.role.some((r) => r == p.name))))"
                         :key="subIndex" class="collapse-item" :href="subMenuItem.link"
                         :class="{ 'active': subMenuItem.active }">
                     {{ subMenuItem.name }}

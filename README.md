@@ -53,7 +53,7 @@ DB_PASSWORD=casanova
 Executar migration para criação das tabelas do projeto
 
 ```sh
-php artisan migrate
+php artisan migrate:fresh --seed
 ```
 
 Usuário inicial: 

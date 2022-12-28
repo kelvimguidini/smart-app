@@ -9,11 +9,11 @@ window._ = _;
 
 import axios from 'axios';
 window.axios = axios;
-
+// window.axios.defaults.baseURL = "smart-app"
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-window.axios.defaults.headers.common['crossDomain'] = true;
-window.axios.defaults.headers.common['Access-Control-Allow-Origin'] = 'https://dev.eventos.com.br';
-
+// window.axios.defaults.headers.common['crossDomain'] = true;
+// window.axios.defaults.headers.common['Access-Control-Allow-Origin'] = 'https://dev.eventos.com.br';
+// window.axios.defaults.withCredentials = true;
 /**
  * Echo exposes an expressive API for subscribing to channels and listening
  * for events that are broadcast by Laravel. Echo and event broadcasting

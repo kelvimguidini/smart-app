@@ -16,6 +16,7 @@ class Constants extends Middleware
         ['name' => "role_admin", "title" => "Administrar Grupos de Acesso"],
         ['name' => "customer_admin", "title" => "Administrar Clientes"],
         ['name' => "crd_admin", "title" => "Administrar CRD's"],
-        ['name' => "event_admin", "title" => "Administrar Eventos"]
+        ['name' => "event_admin", "title" => "Administrar Eventos"],
+        ['name' => "event_operator", "title" => "Operador do Evento", "verifyId" => true]
     ];
 }
