@@ -69,7 +69,7 @@ class RoleController extends Controller
             throw $e;
         }
 
-        return redirect()->route('role')->with('flash', ['message' => trans('Register saved Successful'), 'type' => 'success']);
+        return redirect()->route('role')->with('flash', ['message' => trans('Registro salvo com sucesso'), 'type' => 'success']);
     }
 
     /**

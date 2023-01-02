@@ -47,7 +47,7 @@ class EventController extends Controller
             abort(403);
         }
 
-        return Inertia::render('Auth/EventList', [
+        return Inertia::render('Auth/Event/EventList', [
             'events' => $e
         ]);
     }
@@ -70,7 +70,7 @@ class EventController extends Controller
         $customers = Customer::all();
         $users = User::all();
 
-        return Inertia::render('Auth/EventCreate', [
+        return Inertia::render('Auth/Event/EventCreate', [
             'crds' => $crds,
             'customers' => $customers,
             'users' => $users,
@@ -95,28 +95,60 @@ class EventController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'cnpj' => 'required|string|max:18',
+            'customer' => 'required|string|max:255',
+            'code' => 'required|string|max:255',
+            'requester' => 'required|string|max:255',
+            'sector' => 'required|string|max:255',
+            'paxBase' => 'required|string|max:255',
+            'cc' => 'required|string|max:255',
+            'date' => 'required|string|max:30',
+            'crd_id' => 'required|string',
+            'hotel_operator' => 'required|string',
+            'air_operator' => 'required|string',
+            'land_operator' => 'required|string'
         ]);
+
         try {
 
             if ($request->id > 0) {
 
-                $crd = CRD::find($request->id);
+                $event = Event::find($request->id);
 
-                $crd->name = $request->name;
-                $crd->cnpj = $request->cnpj;
-                $crd->save();
+                $event->name = $request->name;
+                $event->customer_id = $request->customer;
+                $event->code = $request->code;
+                $event->requester = $request->requester;
+                $event->sector = $request->sector;
+                $event->pax_base = $request->paxBase;
+                $event->cost_center = $request->cc;
+                $event->date = $request->date;
+                $event->crd_id = $request->crd_id;
+                $event->hotel_operator = $request->hotel_operator;
+                $event->air_operator = $request->air_operator;
+                $event->land_operator = $request->land_operator;
+
+                $event->save();
             } else {
 
                 $crd = CRD::create([
                     'name' => $request->name,
-                    'cnpj' => $request->cnpj,
+                    'customer_id' => $request->customer,
+                    'code' => $request->code,
+                    'requester' => $request->requester,
+                    'sector' => $request->sector,
+                    'pax_base' => $request->paxBase,
+                    'cost_center' => $request->cc,
+                    'date' => $request->date,
+                    'crd_id' => $request->crd_id,
+                    'hotel_operator' => $request->hotel_operator,
+                    'air_operator' => $request->air_operator,
+                    'land_operator' => $request->land_operator
                 ]);
             }
         } catch (Exception $e) {
             throw $e;
         }
-        return redirect()->route('crd')->with('flash', ['message' => 'Register saved Successful', 'type' => 'success']);
+        return redirect()->route('crd')->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
     }
 
     /**

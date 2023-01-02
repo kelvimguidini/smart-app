@@ -79,7 +79,7 @@ class RegisteredUserController extends Controller
                 );
             }
 
-            return redirect()->route('register')->with('flash', ['message' => trans('Register saved Successful'), 'type' => 'success']);
+            return redirect()->route('register')->with('flash', ['message' => trans('Registro salvo com sucesso'), 'type' => 'success']);
         }
 
         $request->validate([
@@ -106,7 +106,7 @@ class RegisteredUserController extends Controller
 
         $user->sendEmailVerificationNotification();
 
-        return redirect()->route('register')->with('flash', ['message' => trans('Register saved Successful'), 'type' => 'success']);
+        return redirect()->route('register')->with('flash', ['message' => trans('Registro salvo com sucesso'), 'type' => 'success']);
     }
 
 

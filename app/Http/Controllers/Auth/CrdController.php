@@ -65,7 +65,7 @@ class CrdController extends Controller
         } catch (Exception $e) {
             throw $e;
         }
-        return redirect()->route('crd')->with('flash', ['message' => trans('Register saved Successful'), 'type' => 'success']);
+        return redirect()->route('crd')->with('flash', ['message' => trans('Registro salvo com sucesso'), 'type' => 'success']);
     }
 
     /**

@@ -28,7 +28,6 @@ import FlashMessage from '@/Components/FlashMessage.vue';
 import { Link } from '@inertiajs/inertia-vue3';
 
 
-
 const menuItem = [
     {
         link: route().current('dashboard') || route().current('/') ? '' : route('dashboard'),
@@ -84,10 +83,10 @@ const menuItem = [
         collapseHeader: 'Cotações',
         subMenu: [
             {
-                link: route().current('customer') ? '' : route('customer'),
+                link: route().current('event-create') ? '' : route('event-create'),
                 name: 'Cadastro Inicial',
-                active: route().current('customer'),
-                role: 'customer_admin'
+                active: route().current('event-create'),
+                role: 'event_admin'
             },
             {
                 link: route().current('event-list') ? '' : route('event-list'),

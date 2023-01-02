@@ -71,7 +71,7 @@ class CustomerController extends Controller
             Storage::delete($path);
             throw $e;
         }
-        return redirect()->route('customer')->with('flash', ['message' => trans('Register saved Successful'), 'type' => 'success']);
+        return redirect()->route('customer')->with('flash', ['message' => trans('Registro salvo com sucesso'), 'type' => 'success']);
     }
 
     /**

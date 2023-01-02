@@ -52,7 +52,7 @@ class ProfileUserController extends Controller
         $userEdit->email = $request->email;
         $userEdit->save();
 
-        return redirect()->back()->with('flash', ['message' => trans('Register saved Successful'), 'type' => 'success']);
+        return redirect()->back()->with('flash', ['message' => trans('Registro salvo com sucesso'), 'type' => 'success']);
     }
 
 
