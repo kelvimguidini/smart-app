@@ -16,7 +16,7 @@ const formDelete = useForm({
 
 
 onMounted(() => {
-
+    console.log(props.events);
     $('table').DataTable({
         language: {
             url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/pt-BR.json',
@@ -72,12 +72,13 @@ const deleteEvent = (id) => {
                                         <tbody>
                                             <tr v-for="(event, index) in events">
                                                 <th scope="row">{{ event.id }}</th>
-                                                <td>{{ event.custumer.name }}</td>
+                                                <td>{{ event.customer.name }}</td>
                                                 <td>{{ event.name }}</td>
                                                 <td>{{ event.code }}</td>
-                                                <td>{{ event.date }}</td>
+                                                <td>{{ new Date(event.date).toLocaleDateString() }}</td>
                                                 <td>
-                                                    <a class="btn btn-info btn-icon-split mr-2"
+                                                    <a v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin')"
+                                                        class="btn btn-info btn-icon-split mr-2"
                                                         :href="route('event-edit', { id: event.id })">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-edit"></i>
@@ -85,7 +86,9 @@ const deleteEvent = (id) => {
                                                         <span class="text">Editar</span>
                                                     </a>
 
-                                                    <Modal :key="index"
+                                                    <Modal
+                                                        v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin')"
+                                                        :key="index"
                                                         :modal-title="'Confirmar Exclusão de ' + event.name"
                                                         :ok-botton-callback="deleteEvent"
                                                         :ok-botton-callback-param="event.id"

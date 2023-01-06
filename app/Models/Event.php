@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use DateTime;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -73,7 +74,7 @@ class Event extends Model
     /**
      * The primary key associated with the table.
      *
-     * @var string
+     * @var DateTime
      */
     protected $date = 'date';
 
@@ -109,13 +110,12 @@ class Event extends Model
 
     public function crd()
     {
-        return $this->hasOne(CRD::class);
+        return $this->hasOne(CRD::class, 'id', 'crd_id');
     }
-
 
     public function customer()
     {
-        return $this->hasOne(Customer::class);
+        return $this->hasOne(Customer::class, 'id', 'customer_id');
     }
 
     public function hotel_operator()

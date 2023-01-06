@@ -34,13 +34,13 @@ class EventController extends Controller
             $e = Event::with("crd")
                 ->with('customer')
                 ->with(['hotel_operator' => function ($query) use ($userId) {
-                    $query->where('hotel_operator', '=', $userId);
+                    $query->where('id', '=', $userId);
                 }])
                 ->with(['air_operator' => function ($query) use ($userId) {
-                    $query->where('air_operator', '=', $userId);
+                    $query->where('id', '=', $userId);
                 }])
                 ->with(['land_operator' => function ($query) use ($userId) {
-                    $query->where('land_operator', '=', $userId);
+                    $query->where('id', '=', $userId);
                 }])
                 ->get();
         } else {
@@ -130,7 +130,7 @@ class EventController extends Controller
                 $event->save();
             } else {
 
-                $crd = CRD::create([
+                $crd = Event::create([
                     'name' => $request->name,
                     'customer_id' => $request->customer,
                     'code' => $request->code,
@@ -148,7 +148,7 @@ class EventController extends Controller
         } catch (Exception $e) {
             throw $e;
         }
-        return redirect()->route('crd')->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
+        return redirect()->back()->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
     }
 
     /**

@@ -39,16 +39,25 @@ const form = useForm({
 
 const isLoader = ref(false);
 
-const crdInEdition = ref(0);
-
-// const edit = (crd) => {
-//     crdInEdition.value = crd.id;
-//     form.name = crd.name;
-//     form.cnpj = crd.cnpj;
-//     form.id = crd.id;
-// };
+const edit = (event) => {
+    form.id = event.id;
+    form.name = event.name;
+    form.customer = event.customer_id;
+    form.code = event.code;
+    form.requester = event.requester;
+    form.sector = event.sector;
+    form.paxBase = event.pax_base;
+    form.cc = event.cost_center;
+    form.date = new Date(event.date);
+    form.crd_id = event.crd_id;
+    form.hotel_operator = event.hotel_operator;
+    form.air_operator = event.air_operator;
+    form.land_operator = event.land_operator;
+};
 
 onMounted(() => {
+
+    edit(props.event);
     $('#customer').select2({
         theme: "bootstrap4"
     }).on('select2:select', (e) => {
@@ -78,6 +87,7 @@ onMounted(() => {
     }).on('select2:select', (e) => {
         form.land_operator = e.params.data.id;
     });
+
 });
 
 const submit = () => {

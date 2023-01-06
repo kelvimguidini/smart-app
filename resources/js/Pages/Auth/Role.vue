@@ -10,6 +10,8 @@ import { Head, useForm } from '@inertiajs/inertia-vue3';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 
+const inEdition = ref(0);
+
 const props = defineProps({
     roles: Array,
 });
@@ -19,6 +21,16 @@ const form = useForm({
     name: '',
     permissions: []
 });
+
+const edit = (role) => {
+    inEdition.value = role.id;
+    form.name = role.name;
+    form.permissions = [];
+    form.id = role.id;
+    role.permissions.map(function (value, key) {
+        form.permissions.push(value.name);
+    });
+};
 
 const formDelete = useForm({
     id: 0
@@ -154,10 +166,18 @@ const submit = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr v-for="(role, index) in roles">
+                                            <tr v-for="(role, index) in roles"
+                                                :class="{ 'table-info': inEdition == role.id }">
                                                 <th scope="row">{{ role.id }}</th>
                                                 <td>{{ role.name }}</td>
                                                 <td>
+                                                    <button class="btn btn-info btn-icon-split mr-2"
+                                                        v-on:click="edit(role)">
+                                                        <span class="icon text-white-50">
+                                                            <i class="fas fa-edit"></i>
+                                                        </span>
+                                                        <span class="text">Editar</span>
+                                                    </button>
                                                     <Modal :modal-title="'Permissões para ' + role.name"
                                                         btn-class="btn btn-info btn-icon-split mr-2">
                                                         <template v-slot:button>

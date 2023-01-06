@@ -34,4 +34,9 @@ class CRD extends Model
      * @var string
      */
     protected $cnpj = 'cnpj';
+
+    public function events()
+    {
+        return $this->belongsTo(Event::class);
+    }
 }
