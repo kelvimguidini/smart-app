@@ -50,23 +50,39 @@ class RoleController extends Controller
         ]);
         $r = Role::with('permissions')->get();
         try {
-            $role = Role::create([
-                'name' => $request->name,
-                'active' => true
-            ]);
 
-            // Insert some stuff
-            foreach ($request->permissions as $permission) {
+            if ($request->id > 0) {
 
-                DB::table('role_permission')->insert(
-                    array(
-                        'permission_id' => DB::table('permission')->select('id')->where('name', $permission)->first()->id,
-                        'role_id' => $role->id
-                    )
-                );
+                $role = Role::find($request->id);
+
+                $role->name = $request->name;
+                $role->active = $request->active;
+
+                $role->save();
+
+                DB::table('role_permission')->where([
+                    ['role_id', '=', $request->id]
+                ])->delete();
+            } else {
+
+                $role = Role::create([
+                    'name' => $request->name,
+                    'active' => true
+                ]);
             }
         } catch (Exception $e) {
             throw $e;
+        }
+
+        // Insert some stuff
+        foreach ($request->permissions as $permission) {
+
+            DB::table('role_permission')->insert(
+                array(
+                    'permission_id' => DB::table('permission')->select('id')->where('name', $permission)->first()->id,
+                    'role_id' => $role->id
+                )
+            );
         }
 
         return redirect()->route('role')->with('flash', ['message' => trans('Registro salvo com sucesso'), 'type' => 'success']);

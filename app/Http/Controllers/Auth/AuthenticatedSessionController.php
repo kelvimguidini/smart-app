@@ -38,6 +38,9 @@ class AuthenticatedSessionController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
+        if ($user == null) {
+            return Inertia::render('Auth/VerifyEmail', ['status' => 'E-mail não encontrado!', 'email' => $request->email]);
+        }
         if ($user->email_verified_at == null) {
             return Inertia::render('Auth/VerifyEmail', ['status' => session('status'), 'email' => $request->email]);
         }

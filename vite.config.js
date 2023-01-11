@@ -30,5 +30,10 @@ export default defineConfig({
         }, watch: {
             usePolling: true,
         },
+        // proxy: {
+        //     "/smart-app/public/": {
+        //         target: "https://dev.eventos.com.br",
+        //     }
+        // }
     },
 });
