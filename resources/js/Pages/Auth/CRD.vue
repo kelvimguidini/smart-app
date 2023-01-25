@@ -61,6 +61,7 @@ const edit = (crd) => {
 const submit = () => {
     form.post(route('crd-save'), {
         onSuccess: () => {
+            crdInEdition.value = 0;
             form.reset();
         },
     });
