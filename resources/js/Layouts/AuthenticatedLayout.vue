@@ -7,6 +7,17 @@ import '@/vendor/bootstrap/js/bootstrap.bundle.min.js';
 // Core plugin JavaScript
 import '@/vendor/jquery-easing/jquery.easing.min.js';
 
+
+//SELECT2
+import '@/vendor/select2/select2.min.css';
+import '@/vendor/select2/select2-bootstrap.css';
+import '@/vendor/select2/select2.min.js';
+import '@/vendor/select2/pt-BR.min.js';
+
+//JQUERY UI
+import '@/vendor/jquery-ui/jquery-ui.js';
+import '@/vendor/jquery-ui/jquery-ui.css';
+
 // Mask
 import '@/vendor/mask/jquery.mask.js';
 
@@ -73,6 +84,12 @@ const menuItem = [
                 name: 'CRD\'s',
                 active: route().current('crd'),
                 role: 'crd_admin'
+            },
+            {
+                link: route().current('hotel') ? '' : route('hotel'),
+                name: 'Hotel',
+                active: route().current('hotel'),
+                role: ['event_admin', 'hotel_operator']
             }
         ],
     },
@@ -92,7 +109,7 @@ const menuItem = [
                 link: route().current('event-list') ? '' : route('event-list'),
                 name: 'Listar',
                 active: route().current('event-list'),
-                role: ['event_admin', 'event_operator']
+                role: ['event_admin', 'hotel_operator', 'land_operator', 'air_operator']
             }
         ],
     },

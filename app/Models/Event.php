@@ -132,4 +132,9 @@ class Event extends Model
     {
         return $this->hasOne(User::class, 'id', 'land_operator');
     }
+
+    public function hotels()
+    {
+        return $this->belongsTo(Hotel::class);
+    }
 }

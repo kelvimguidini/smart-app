@@ -7,13 +7,13 @@ use App\Http\Controllers\Auth\CrdController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\EventController;
+use App\Http\Controllers\Auth\HotelController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\ProfileUserController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\Auth\VerifyEmailController;
-use App\Models\Event;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['guest', 'cors'])->group(function () {
@@ -106,20 +106,31 @@ Route::middleware(['auth', 'cors'])->group(function () {
         ->name('crd-delete');
 
 
-    //TABELS AUXILIARES
+    //Eventos
     Route::get('event-list', [EventController::class, 'list'])
         ->name('event-list');
 
     Route::get('event', [EventController::class, 'create'])
         ->name('event-create');
 
+    Route::get('event/{id}/{tab?}', [EventController::class, 'create'])
+        ->name('event-edit');
+
     Route::post('event-save', [EventController::class, 'store'])
         ->name('event-save');
 
 
-    Route::get('event/{id}', [EventController::class, 'create'])
-        ->name('event-edit');
-
     Route::delete('event-delete', [EventController::class, 'delete'])
         ->name('event-delete');
+
+
+    //HOTEL
+    Route::get('hotel', [HotelController::class, 'create'])
+        ->name('hotel');
+
+    Route::post('hotel-save', [HotelController::class, 'store'])
+        ->name('hotel-save');
+
+    Route::delete('hotel-delete', [HotelController::class, 'delete'])
+        ->name('hotel-delete');
 });

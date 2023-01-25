@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\CRD;
 use App\Models\Customer;
 use App\Models\Event;
+use App\Models\Hotel;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -30,7 +31,7 @@ class EventController extends Controller
                 ->with('air_operator')
                 ->with('land_operator')
                 ->get();
-        } else if (Gate::allows('event_operator')) {
+        } else if (Gate::allows('hotel_operator') || Gate::allows('land_operator') || Gate::allows('air_operator')) {
             $e = Event::with("crd")
                 ->with('customer')
                 ->with(['hotel_operator' => function ($query) use ($userId) {
@@ -60,7 +61,7 @@ class EventController extends Controller
      */
     public function create(Request $request)
     {
-        if (!Gate::allows('event_admin')) {
+        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator') && !Gate::allows('land_operator') && !Gate::allows('air_operator')) {
             abort(403);
         }
 
@@ -69,12 +70,15 @@ class EventController extends Controller
         $crds = CRD::all();
         $customers = Customer::all();
         $users = User::all();
+        // $hotels = Hotel::where('event_id', $event != null ? $event->id : 0)->get();
 
         return Inertia::render('Auth/Event/EventCreate', [
             'crds' => $crds,
             'customers' => $customers,
             'users' => $users,
-            'event' => $event
+            'event' => $event,
+            // 'hotels' => $hotels,
+            'tab' => $request->tab
         ]);
     }
 
@@ -130,7 +134,7 @@ class EventController extends Controller
                 $event->save();
             } else {
 
-                $crd = Event::create([
+                $event = Event::create([
                     'name' => $request->name,
                     'customer_id' => $request->customer,
                     'code' => $request->code,
@@ -148,7 +152,7 @@ class EventController extends Controller
         } catch (Exception $e) {
             throw $e;
         }
-        return redirect()->back()->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
+        return redirect()->route('event-edit',  ['id' => $event->id, 'tab' => 1])->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
     }
 
     /**
@@ -158,12 +162,12 @@ class EventController extends Controller
      */
     public function delete(Request $request)
     {
-        if (!Gate::allows('crd_admin')) {
+        if (!Gate::allows('event_admin')) {
             abort(403);
         }
         try {
 
-            $r = CRD::find($request->id);
+            $r = Event::find($request->id);
 
             $r->delete();
         } catch (Exception $e) {
@@ -171,6 +175,6 @@ class EventController extends Controller
             throw $e;
         }
 
-        return redirect()->route('crd')->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
+        return redirect()->back()->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
     }
 }

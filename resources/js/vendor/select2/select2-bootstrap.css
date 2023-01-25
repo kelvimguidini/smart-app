@@ -1,5 +1,6 @@
 .select2-container {
-    display: block
+    display: block;
+    width: auto !important;
 }
 
 .select2-container *:focus {
@@ -23,7 +24,7 @@
 }
 
 .select2-container--bootstrap4 .select2-selection {
-    width: 100%;
+    width: 100% !important;
     background-color: #fff;
     border: 1px solid #ced4da;
     border-radius: .25rem;

@@ -18,7 +18,8 @@
     },
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build",
+        "serve": "vite preview"
     },
     "devDependencies": {
         "@babel/plugin-syntax-import-meta": "^7.10.4",
