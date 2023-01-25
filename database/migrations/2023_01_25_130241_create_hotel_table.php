@@ -22,6 +22,11 @@ class CreateHotelTable extends Migration
             $table->string('email');
             $table->boolean('national');
 
+            $table->bigInteger('category_id')->unsigned()->nullable();
+            $table->bigInteger('apto_id')->unsigned()->nullable();
+
+            $table->foreign('category_id')->references('id')->on('category')->onDelete('NO ACTION');
+            $table->foreign('apto_id')->references('id')->on('apto')->onDelete('NO ACTION');
             $table->softDeletes();
             $table->timestamps();
         });

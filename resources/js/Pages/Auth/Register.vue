@@ -39,7 +39,10 @@ const userInEdition = ref(0);
 
 const submit = () => {
     form.post(route('register'), {
-        onFinish: () => form.reset('password', 'password_confirmation'),
+        onFinish: () => {
+            form.reset('password', 'password_confirmation');
+            userInEdition.value = 0;
+        },
     });
 };
 

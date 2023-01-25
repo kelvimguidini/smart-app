@@ -109,7 +109,7 @@ const mount = (() => {
             url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/pt-BR.json',
         },
     });
-})
+});
 
 onMounted(() => {
     mount();
@@ -303,6 +303,13 @@ const submit = () => {
             <div v-if="event != null && $page.props.auth.permissions.some((p) => p.name === 'hotel_operator' || p.name === 'event_admin')"
                 id="hotel">
                 <p>Conteudo da aba Hotel.</p>
+                <div class="col-lg-0.5">
+                    <div class="flex items-center justify-end mt-4 rigth">
+                        <PrimaryButton css-class="btn btn-info float-right">
+                            <i class="fas fa-plus"></i>
+                        </PrimaryButton>
+                    </div>
+                </div>
             </div>
 
             <div v-if="event != null && $page.props.auth.permissions.some((p) => p.name === 'land_operator' || p.name === 'event_admin')"

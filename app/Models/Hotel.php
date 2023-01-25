@@ -69,4 +69,14 @@ class Hotel extends Model
     {
         return $this->hasOne(Event::class, 'id', 'event_id');
     }
+
+    public function aptos()
+    {
+        return $this->belongsToMany(Apto::class, 'apto_hotel');
+    }
+
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'category_hotel');
+    }
 }

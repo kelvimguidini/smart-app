@@ -12,7 +12,9 @@ import { onMounted, ref } from 'vue';
 
 const props = defineProps({
     hotels: Array,
-    cities: Array
+    cities: Array,
+    aptos: Array,
+    categories: Array,
 });
 
 const inEdition = ref(0);
@@ -24,6 +26,8 @@ const form = useForm({
     contact: '',
     phone: '',
     email: '',
+    aptos: [],
+    categories: [],
     national: false,
 });
 
@@ -54,6 +58,7 @@ const isLoader = ref(false);
 
 const edit = (hotel) => {
     if (hotel != null) {
+        form.reset();
 
         inEdition.value = hotel.id;
         form.id = hotel.id;
@@ -64,17 +69,30 @@ const edit = (hotel) => {
         form.national = hotel.national == true || hotel.national == 1;
         form.city = hotel.city;
 
+        hotel.aptos.map(function (value, key) {
+            form.aptos.push(value.id);
+        });
+        hotel.categories.map(function (value, key) {
+            form.categories.push(value.id);
+        });
         $('#city').val(hotel.city).trigger('change');
-        $('.phone').mask('(00) 00000-0000');
+
+        $('.phone').val(form.phone).trigger('keyup');
     }
 };
+
+const newItem = (() => {
+    form.reset();
+    $('#city').val('').trigger('change');
+    inEdition.value = 0;
+});
 
 const submit = () => {
     isLoader.value = true;
     form.post(route('hotel-save'), {
         onSuccess: () => {
+            newItem();
             isLoader.value = false;
-            form.reset();
         },
     });
 };
@@ -147,8 +165,8 @@ const deleteHotel = (id) => {
                                 <div class="col">
                                     <div class="form-group">
                                         <InputLabel for="phone" value="Telefone:" />
-                                        <TextInput type="text" class="form-control phone" v-model="form.phone" required
-                                            autofocus autocomplete="phone" />
+                                        <TextInput id="phone" type="text" class="form-control phone"
+                                            v-model="form.phone" required autofocus autocomplete="phone" />
                                         <InputError class="mt-2 text-danger" :message="form.errors.phone" />
                                     </div>
 
@@ -161,23 +179,79 @@ const deleteHotel = (id) => {
                                         <InputError class="mt-2 text-danger" :message="form.errors.email" />
                                     </div>
                                 </div>
-                                <div class="col">
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" v-model="form.national" type="checkbox"
-                                            id="autoSizingCheck">
-                                        <label class="form-check-label" for="autoSizingCheck">
-                                            Hotel Nacional
-                                        </label>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <InputLabel for="categories" value="Categorias:" />
+
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="form-check" v-for="(option, index) in categories">
+                                                    <input v-model="form.categories" class="form-check-input"
+                                                        type="checkbox" :value="option.id" :id="option.name">
+                                                    <label class="form-check-label" :for="option.name">
+                                                        {{ option.name }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <InputError class="mt-2 text-danger" :message="form.errors.category" />
                                     </div>
                                 </div>
 
-                                <div class="col-lg-0.5">
-                                    <div class="flex items-center justify-end mt-4 rigth">
-                                        <PrimaryButton css-class="btn btn-info float-right">
-                                            <i class="fas fa-plus"></i>
-                                        </PrimaryButton>
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <InputLabel for="aptos" value="Apartamento:" />
+
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="form-check" v-for="(option, index) in aptos">
+                                                    <input v-model="form.aptos" class="form-check-input" type="checkbox"
+                                                        :value="option.id" :id="option.name">
+                                                    <label class="form-check-label" :for="option.name">
+                                                        {{ option.name }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <InputError class="mt-2 text-danger" :message="form.errors.aptos" />
                                     </div>
                                 </div>
+                                <div class="col">
+                                    <div class="form-group">
+                                        <InputLabel for="national" value=" " />
+
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" v-model="form.national"
+                                                        type="checkbox" id="autoSizingCheck">
+                                                    <label class="form-check-label" for="autoSizingCheck">
+                                                        Hotel Nacional
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-end mt-4 rigth">
+                                <PrimaryButton css-class="btn btn-primary float-right"
+                                    :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                                    <span v-if="form.processing" class="spinner-border spinner-border-sm" role="status"
+                                        aria-hidden="true"></span>
+                                    Salvar
+                                </PrimaryButton>
+                                <PrimaryButton v-if="inEdition > 0" css-class="btn btn-info float-right m-1"
+                                    v-on:click="newItem()" :class="{ 'opacity-25': form.processing }"
+                                    :disabled="form.processing">
+                                    Novo
+                                </PrimaryButton>
                             </div>
 
                         </form>

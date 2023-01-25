@@ -86,11 +86,23 @@ const menuItem = [
                 role: 'crd_admin'
             },
             {
+                link: route().current('apto') ? '' : route('apto'),
+                name: 'Hotel Apartamento',
+                active: route().current('Apartamento'),
+                role: ['apto_admin']
+            },
+            {
+                link: route().current('category') ? '' : route('category'),
+                name: 'Hotel Categoria',
+                active: route().current('category'),
+                role: ['category_admin']
+            },
+            {
                 link: route().current('hotel') ? '' : route('hotel'),
                 name: 'Hotel',
                 active: route().current('hotel'),
                 role: ['event_admin', 'hotel_operator']
-            }
+            },
         ],
     },
     {

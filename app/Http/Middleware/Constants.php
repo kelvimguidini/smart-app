@@ -17,9 +17,11 @@ class Constants extends Middleware
         ['name' => "customer_admin", "title" => "Administrar Clientes"],
         ['name' => "crd_admin", "title" => "Administrar CRD's"],
         ['name' => "event_admin", "title" => "Administrar Eventos"],
-        ['name' => "hotel_operator", "title" => "Operador de hotel", "verifyId" => true],
-        ['name' => "land_operator", "title" => "Operador de terrestre", "verifyId" => true],
-        ['name' => "air_operator", "title" => "Operador de aéreo", "verifyId" => true]
+        ['name' => "hotel_operator", "title" => "Operador de Hotel", "verifyId" => true],
+        ['name' => "land_operator", "title" => "Operador de Terrestre", "verifyId" => true],
+        ['name' => "air_operator", "title" => "Operador de Aéreo", "verifyId" => true],
+        ['name' => "apto_admin", "title" => "Administrar Apartamento de Hotel"],
+        ['name' => "category_admin", "title" => "Administrar Categorias de Hotel"]
     ];
 
 

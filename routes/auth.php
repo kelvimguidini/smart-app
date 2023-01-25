@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Auth\AptoController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\CategoryController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\CustomerController;
 use App\Http\Controllers\Auth\CrdController;
@@ -104,6 +106,26 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     Route::delete('crd-delete', [CrdController::class, 'delete'])
         ->name('crd-delete');
+
+
+    Route::get('apto', [AptoController::class, 'create'])
+        ->name('apto');
+
+    Route::post('apto-save', [AptoController::class, 'store'])
+        ->name('apto-save');
+
+    Route::delete('apto-delete', [AptoController::class, 'delete'])
+        ->name('apto-delete');
+
+
+    Route::get('category', [CategoryController::class, 'create'])
+        ->name('category');
+
+    Route::post('category-save', [CategoryController::class, 'store'])
+        ->name('category-save');
+
+    Route::delete('category-delete', [CategoryController::class, 'delete'])
+        ->name('category-delete');
 
 
     //Eventos

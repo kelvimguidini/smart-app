@@ -4,14 +4,13 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\Constants;
-use App\Models\CRD;
-use App\Models\Customer;
-use App\Models\Event;
+use App\Models\Apto;
+use App\Models\Category;
 use App\Models\Hotel;
-use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
 
@@ -25,12 +24,11 @@ class HotelController extends Controller
      */
     public function create(Request $request)
     {
-
         $userId =  Auth::user()->id;
         if (Gate::allows('event_admin')) {
-            $hotels = Hotel::all();
+            $hotels = Hotel::with('aptos')->with('categories')->get();
         } else if (Gate::allows('hotel_operator')) {
-            $hotels = Hotel::with(['hotel_operator' => function ($query) use ($userId) {
+            $hotels = Hotel::with('aptos')->with('categories')->with(['hotel_operator' => function ($query) use ($userId) {
                 $query->where('id', '=', $userId);
             }]);
         } else {
@@ -39,7 +37,9 @@ class HotelController extends Controller
 
         return Inertia::render('Auth/Hotel', [
             'hotels' => $hotels,
-            'cities' =>  Constants::CITIES
+            'cities' =>  Constants::CITIES,
+            'categories' => Category::all(),
+            'aptos' => Apto::all()
         ]);
     }
 
@@ -79,6 +79,14 @@ class HotelController extends Controller
                 $hotel->national = $request->national;
 
                 $hotel->save();
+
+                DB::table('apto_hotel')->where([
+                    ['hotel_id', '=', $request->id]
+                ])->delete();
+
+                DB::table('category_hotel')->where([
+                    ['hotel_id', '=', $request->id]
+                ])->delete();
             } else {
 
                 $hotel = Hotel::create([
@@ -89,6 +97,25 @@ class HotelController extends Controller
                     'email' => $request->email,
                     'national' => $request->national
                 ]);
+            }
+
+            foreach ($request->aptos as $apto) {
+                DB::table('apto_hotel')->insert(
+                    array(
+                        'apto_id' => $apto,
+                        'hotel_id' => $hotel->id
+                    )
+                );
+            }
+
+            foreach ($request->categories as $category) {
+
+                DB::table('category_hotel')->insert(
+                    array(
+                        'category_id' => $category,
+                        'hotel_id' => $hotel->id
+                    )
+                );
             }
         } catch (Exception $e) {
             throw $e;

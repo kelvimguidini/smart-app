@@ -81,6 +81,8 @@ const removePermission = (role_permisson) => {
 const submit = () => {
     form.post(route('role-save'), {
         onSuccess: () => {
+
+            inEdition.value = 0;
             form.reset();
         },
     });
