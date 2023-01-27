@@ -74,6 +74,12 @@ const menuItem = [
         collapseHeader: 'Tabelas auxiliares',
         subMenu: [
             {
+                link: route().current('currency') ? '' : route('currency'),
+                name: 'Moeda',
+                active: route().current('currency'),
+                role: ['currency_admin']
+            },
+            {
                 link: route().current('customer') ? '' : route('customer'),
                 name: 'Clientes',
                 active: route().current('customer'),

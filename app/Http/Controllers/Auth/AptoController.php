@@ -23,7 +23,7 @@ class AptoController extends Controller
         }
 
         $t = Apto::all();
-        return Inertia::render('Auth/Apto', [
+        return Inertia::render('Auth/Auxiliaries/Apto', [
             'aptos' => $t
         ]);
     }

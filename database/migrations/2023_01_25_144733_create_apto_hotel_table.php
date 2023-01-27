@@ -14,6 +14,7 @@ class CreateAptoHotelTable extends Migration
     public function up()
     {
         Schema::create('apto_hotel', function (Blueprint $table) {
+            $table->id();
             $table->bigInteger('apto_id')->unsigned()->index();
             $table->bigInteger('hotel_id')->unsigned()->index();
             $table->foreign('apto_id')->references('id')->on('apto');

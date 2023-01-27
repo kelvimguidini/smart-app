@@ -14,6 +14,7 @@ class CreateCategoryHotelTable extends Migration
     public function up()
     {
         Schema::create('category_hotel', function (Blueprint $table) {
+            $table->id();
             $table->bigInteger('category_id')->unsigned()->index();
             $table->bigInteger('hotel_id')->unsigned()->index();
             $table->foreign('category_id')->references('id')->on('category');

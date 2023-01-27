@@ -15,7 +15,28 @@ class CreateEventHotelTable extends Migration
     {
         Schema::create('event_hotel', function (Blueprint $table) {
             $table->id();
+
+            $table->bigInteger('hotel_id')->unsigned()->index();
+            $table->bigInteger('event_id')->unsigned()->index();
+
+            //impostos
+            $table->decimal('iss_percent');
+            $table->decimal('service_percent');
+            $table->decimal('iva_percent');
+
+            $table->bigInteger('currency_id')->unsigned()->index();
+
+            $table->boolean('invoice');
+            $table->string('internal_observation');
+            $table->string('customer_observation');
+
+            $table->softDeletes();
             $table->timestamps();
+
+            $table->foreign('hotel_id')->references('id')->on('hotel')->onDelete('cascade');
+            $table->foreign('event_id')->references('id')->on('event')->onDelete('cascade');
+
+            $table->foreign('currency_id')->references('id')->on('currency');
         });
     }
 

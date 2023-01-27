@@ -24,7 +24,8 @@ class Constants extends Middleware
         ['name' => "category_admin", "title" => "Administrar Categorias de Hotel"],
         ['name' => "purpose_admin", "title" => "Administrar Propósito"],
         ['name' => "regime_admin", "title" => "Administrar Regimes"],
-        ['name' => "broker_admin", "title" => "Administrar Brokers"]
+        ['name' => "broker_admin", "title" => "Administrar Brokers"],
+        ['name' => "currency_admin", "title" => "Administrar Moedas"]
     ];
 
 

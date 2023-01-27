@@ -35,7 +35,7 @@ class HotelController extends Controller
             abort(403);
         }
 
-        return Inertia::render('Auth/Hotel', [
+        return Inertia::render('Auth/Auxiliaries/Hotel', [
             'hotels' => $hotels,
             'cities' =>  Constants::CITIES,
             'categories' => Category::all(),

@@ -24,7 +24,7 @@ class BrokerController extends Controller
         }
 
         $t = Broker::all();
-        return Inertia::render('Auth/Broker', [
+        return Inertia::render('Auth/Auxiliaries/Broker', [
             'brokers' => $t
         ]);
     }

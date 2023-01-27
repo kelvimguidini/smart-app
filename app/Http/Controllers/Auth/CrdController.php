@@ -23,7 +23,7 @@ class CrdController extends Controller
         }
 
         $t = CRD::all();
-        return Inertia::render('Auth/CRD', [
+        return Inertia::render('Auth/Auxiliaries/CRD', [
             'crds' => $t
         ]);
     }

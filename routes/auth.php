@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\CategoryController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\CustomerController;
 use App\Http\Controllers\Auth\CrdController;
+use App\Http\Controllers\Auth\CurrencyController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\EventController;
@@ -152,7 +153,6 @@ Route::middleware(['auth', 'cors'])->group(function () {
         ->name('purpose-delete');
 
 
-
     Route::get('broker', [BrokerController::class, 'create'])
         ->name('broker');
 
@@ -161,6 +161,16 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     Route::delete('broker-delete', [BrokerController::class, 'delete'])
         ->name('broker-delete');
+
+
+    Route::get('currency', [CurrencyController::class, 'create'])
+        ->name('currency');
+
+    Route::post('currency-save', [CurrencyController::class, 'store'])
+        ->name('currency-save');
+
+    Route::delete('currency-delete', [CurrencyController::class, 'delete'])
+        ->name('currency-delete');
 
 
 

@@ -24,7 +24,7 @@ class RegimeController extends Controller
         }
 
         $t = Regime::all();
-        return Inertia::render('Auth/Regime', [
+        return Inertia::render('Auth/Auxiliaries/Regime', [
             'regimes' => $t
         ]);
     }

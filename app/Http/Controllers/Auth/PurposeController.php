@@ -24,7 +24,7 @@ class PurposeController extends Controller
         }
 
         $t = Purpose::all();
-        return Inertia::render('Auth/Purpose', [
+        return Inertia::render('Auth/Auxiliaries/Purpose', [
             'purposes' => $t
         ]);
     }

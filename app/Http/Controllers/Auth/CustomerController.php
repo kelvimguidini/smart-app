@@ -24,7 +24,7 @@ class CustomerController extends Controller
         }
 
         $t = Customer::all();
-        return Inertia::render('Auth/Customer', [
+        return Inertia::render('Auth/Auxiliaries/Customer', [
             'customers' => $t
         ]);
     }

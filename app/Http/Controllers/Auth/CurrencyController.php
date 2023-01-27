@@ -3,13 +3,14 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Category;
+use App\Models\Apto;
+use App\Models\Currency;
 use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
 
-class CategoryController extends Controller
+class CurrencyController extends Controller
 {
     /**
      * Display the registration view.
@@ -18,13 +19,13 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        if (!Gate::allows('category_admin')) {
+        if (!Gate::allows('currency_admin')) {
             abort(403);
         }
 
-        $t = Category::all();
-        return Inertia::render('Auth/Auxiliaries/Category', [
-            'categories' => $t
+        $t = Currency::all();
+        return Inertia::render('Auth/Auxiliaries/Currency', [
+            'currencies' => $t
         ]);
     }
 
@@ -38,7 +39,7 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        if (!Gate::allows('category_admin')) {
+        if (!Gate::allows('currency_admin')) {
             abort(403);
         }
 
@@ -49,20 +50,22 @@ class CategoryController extends Controller
 
             if ($request->id > 0) {
 
-                $Category = Category::find($request->id);
+                $currency = Currency::find($request->id);
 
-                $Category->name = $request->name;
-                $Category->save();
+                $currency->name = $request->name;
+                $currency->symbol = $request->symbol;
+                $currency->save();
             } else {
 
-                $Category = Category::create([
-                    'name' => $request->name
+                $currency = Currency::create([
+                    'name' => $request->name,
+                    'symbol' => $request->symbol
                 ]);
             }
         } catch (Exception $e) {
             throw $e;
         }
-        return redirect()->route('category')->with('flash', ['message' => trans('Registro salvo com sucesso'), 'type' => 'success']);
+        return redirect()->route('currency')->with('flash', ['message' => trans('Registro salvo com sucesso'), 'type' => 'success']);
     }
 
     /**
@@ -72,12 +75,12 @@ class CategoryController extends Controller
      */
     public function delete(Request $request)
     {
-        if (!Gate::allows('category_admin')) {
+        if (!Gate::allows('currency_admin')) {
             abort(403);
         }
         try {
 
-            $r = Category::find($request->id);
+            $r = Currency::find($request->id);
 
             $r->delete();
         } catch (Exception $e) {
@@ -85,6 +88,6 @@ class CategoryController extends Controller
             throw $e;
         }
 
-        return redirect()->route('category')->with('flash', ['message' => trans('Registro apagado com sucesso!'), 'type' => 'success']);
+        return redirect()->route('currency')->with('flash', ['message' => trans('Registro apagado com sucesso!'), 'type' => 'success']);
     }
 }
