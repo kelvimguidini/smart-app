@@ -70,14 +70,14 @@ class EventController extends Controller
         $crds = CRD::all();
         $customers = Customer::all();
         $users = User::all();
-        // $hotels = Hotel::where('event_id', $event != null ? $event->id : 0)->get();
+        $hotels = Hotel::where('event_id', $event != null ? $event->id : 0)->get();
 
         return Inertia::render('Auth/Event/EventCreate', [
             'crds' => $crds,
             'customers' => $customers,
             'users' => $users,
             'event' => $event,
-            // 'hotels' => $hotels,
+            'hotels' => $hotels,
             'tab' => $request->tab
         ]);
     }

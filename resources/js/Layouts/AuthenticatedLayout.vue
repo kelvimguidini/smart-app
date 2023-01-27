@@ -88,7 +88,7 @@ const menuItem = [
             {
                 link: route().current('apto') ? '' : route('apto'),
                 name: 'Hotel Apartamento',
-                active: route().current('Apartamento'),
+                active: route().current('apto'),
                 role: ['apto_admin']
             },
             {
@@ -96,6 +96,24 @@ const menuItem = [
                 name: 'Hotel Categoria',
                 active: route().current('category'),
                 role: ['category_admin']
+            },
+            {
+                link: route().current('regime') ? '' : route('regime'),
+                name: 'Hotel Regime',
+                active: route().current('regime'),
+                role: ['regime_admin']
+            },
+            {
+                link: route().current('broker') ? '' : route('broker'),
+                name: 'Hotel Broker',
+                active: route().current('broker'),
+                role: ['broker_admin']
+            },
+            {
+                link: route().current('purpose') ? '' : route('purpose'),
+                name: 'Hotel Propósito',
+                active: route().current('purpose'),
+                role: ['purpose_admin']
             },
             {
                 link: route().current('hotel') ? '' : route('hotel'),

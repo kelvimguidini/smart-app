@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AptoController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\BrokerController;
 use App\Http\Controllers\Auth\CategoryController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\CustomerController;
@@ -13,6 +14,8 @@ use App\Http\Controllers\Auth\HotelController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\ProfileUserController;
+use App\Http\Controllers\Auth\PurposeController;
+use App\Http\Controllers\Auth\RegimeController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\Auth\VerifyEmailController;
@@ -126,6 +129,39 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     Route::delete('category-delete', [CategoryController::class, 'delete'])
         ->name('category-delete');
+
+
+    Route::get('regime', [RegimeController::class, 'create'])
+        ->name('regime');
+
+    Route::post('regime-save', [RegimeController::class, 'store'])
+        ->name('regime-save');
+
+    Route::delete('regime-delete', [RegimeController::class, 'delete'])
+        ->name('regime-delete');
+
+
+
+    Route::get('purpose', [PurposeController::class, 'create'])
+        ->name('purpose');
+
+    Route::post('purpose-save', [PurposeController::class, 'store'])
+        ->name('purpose-save');
+
+    Route::delete('purpose-delete', [PurposeController::class, 'delete'])
+        ->name('purpose-delete');
+
+
+
+    Route::get('broker', [BrokerController::class, 'create'])
+        ->name('broker');
+
+    Route::post('broker-save', [BrokerController::class, 'store'])
+        ->name('broker-save');
+
+    Route::delete('broker-delete', [BrokerController::class, 'delete'])
+        ->name('broker-delete');
+
 
 
     //Eventos
