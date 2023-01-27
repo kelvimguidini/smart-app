@@ -42,6 +42,13 @@ const form = useForm({
 });
 
 
+const formHotel = useForm({
+    id: 0,
+    hotel: '',
+    city: '',
+});
+
+
 const isLoader = ref(false);
 
 
@@ -100,6 +107,7 @@ const mount = (() => {
     }).on('select2:select', (e) => {
         form.land_operator = e.params.data.id;
     });
+
     edit(props.event);
 
     $("#tabs").tabs({ active: props.tab });
@@ -119,7 +127,7 @@ const submit = () => {
     form.post(route('event-save'), {
         onSuccess: () => {
             form.reset();
-            $("#tabs").tabs({ active: props.tab });
+            $("#tabs").tabs("refresh");
         },
     });
 };
@@ -302,14 +310,137 @@ const submit = () => {
 
             <div v-if="event != null && $page.props.auth.permissions.some((p) => p.name === 'hotel_operator' || p.name === 'event_admin')"
                 id="hotel">
-                <p>Conteudo da aba Hotel.</p>
-                <div class="col-lg-0.5">
-                    <div class="flex items-center justify-end mt-4 rigth">
-                        <PrimaryButton css-class="btn btn-info float-right">
-                            <i class="fas fa-plus"></i>
-                        </PrimaryButton>
+
+                <div class="card mb-4 py-3 border-left-primary">
+                    <div class="card-body">
+                        <form @submit.prevent="submitHotel">
+
+                            <div class="row">
+                                <div class="col-lg-4">
+
+                                    <div class="form-group">
+                                        <InputLabel for="hotel" value="Hotel:" />
+
+                                        <select class="form-control" id="hotel" :required="required">
+                                            <option>.::Selecione::.</option>
+                                            <option v-for="(option, index) in hotels"
+                                                :selected="option.id == formHotel.hotel" :value="option.id">
+                                                {{ option.name }}
+                                            </option>
+                                        </select>
+
+                                        <InputError class="mt-2 text-danger" :message="formHotel.errors.hotel" />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <InputLabel for="city" value="Cidade:" />
+                                        <TextInput type="text" class="form-control" v-model="formHotel.city"
+                                            disabled="true" />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <InputLabel for="code" value="Código do Evento:" />
+                                        <TextInput type="text" class="form-control" v-model="form.code" required
+                                            autofocus autocomplete="code" />
+                                        <InputError class="mt-2 text-danger" :message="form.errors.code" />
+                                    </div>
+
+                                </div>
+                                <div class="col-lg-4">
+
+
+                                    <div class="form-group">
+                                        <InputLabel for="sector" value="Setor:" />
+                                        <TextInput type="text" class="form-control" v-model="form.sector" required
+                                            autofocus autocomplete="sector" />
+                                        <InputError class="mt-2 text-danger" :message="form.errors.sector" />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <InputLabel for="paxBase" value="Base de Pax:" />
+                                        <TextInput type="text" class="form-control" v-model="form.paxBase" required
+                                            autofocus autocomplete="paxBase" />
+                                        <InputError class="mt-2 text-danger" :message="form.errors.paxBase" />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <InputLabel for="cc" value="Centro de Custo:" />
+                                        <TextInput type="text" class="form-control" v-model="form.cc" required autofocus
+                                            autocomplete="cc" />
+                                        <InputError class="mt-2 text-danger" :message="form.errors.cc" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+
+                                    <div class="form-group">
+                                        <InputLabel for="date" value="Data do Evento:" />
+                                        <datepicker v-model="form.date" class="form-control" :locale="ptBR"
+                                            inputFormat="dd/MM/yyyy" weekdayFormat="EEEEEE" />
+                                        <InputError class="mt-2 text-danger" :message="form.errors.date" />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <InputLabel for="CRD" value="CRD:" />
+
+                                        <select class="form-control" id="crd_id" :required="required">
+                                            <option>.::Selecione::.</option>
+                                            <option v-for="(option, index) in crds" :selected="option.id == form.crd_id"
+                                                :value="option.id">
+                                                {{ option.name }}
+                                            </option>
+                                        </select>
+
+                                        <InputError class="mt-2 text-danger" :message="form.errors.crd_id" />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <InputLabel for="hotel_operator" value="Operador - Hotel:" />
+                                        <select class="form-control" id="hotel_operator" :required="required">
+                                            <option>.::Selecione::.</option>
+                                            <option v-for="(option, index) in users"
+                                                :selected="option.id == form.hotel_operator" :value="option.id">
+                                                {{ option.name }}
+                                            </option>
+                                        </select>
+                                        <InputError class="mt-2 text-danger" :message="form.errors.hotel_operator" />
+                                    </div>
+                                    <div class="form-group">
+                                        <InputLabel for="land_operator" value="Operador - Terrestre:" />
+                                        <select class="form-control" id="land_operator" :required="required">
+                                            <option>.::Selecione::.</option>
+                                            <option v-for="(option, index) in users"
+                                                :selected="option.id == form.land_operator" :value="option.id">
+                                                {{ option.name }}
+                                            </option>
+                                        </select>
+                                        <InputError class="mt-2 text-danger" :message="form.errors.land_operator" />
+                                    </div>
+                                    <div class="form-group">
+                                        <InputLabel for="air_operator" value="Operador - Aéreo:" />
+                                        <select class="form-control" id="air_operator" :required="required">
+                                            <option>.::Selecione::.</option>
+                                            <option v-for="(option, index) in users"
+                                                :selected="option.id == form.air_operator" :value="option.id">
+                                                {{ option.name }}
+                                            </option>
+                                        </select>
+                                        <InputError class="mt-2 text-danger" :message="form.errors.air_operator" />
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-end mt-4 rigth">
+                                <PrimaryButton css-class="btn btn-primary float-right"
+                                    :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                                    <span v-if="form.processing" class="spinner-border spinner-border-sm" role="status"
+                                        aria-hidden="true"></span>
+                                    Salvar
+                                </PrimaryButton>
+                            </div>
+                        </form>
                     </div>
                 </div>
+
             </div>
 
             <div v-if="event != null && $page.props.auth.permissions.some((p) => p.name === 'land_operator' || p.name === 'event_admin')"
