@@ -3,10 +3,15 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Broker;
 use App\Models\CRD;
+use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\Event;
+use App\Models\EventHotel;
 use App\Models\Hotel;
+use App\Models\Purpose;
+use App\Models\Regime;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -70,7 +75,17 @@ class EventController extends Controller
         $crds = CRD::all();
         $customers = Customer::all();
         $users = User::all();
-        $hotels = Hotel::where('event_id', $event != null ? $event->id : 0)->get();
+        $hotels = Hotel::with("categories")->with("aptos")->get();
+
+        $brokers = Broker::all();
+        $currencies = Currency::all();
+        $regimes = Regime::all();
+        $purposes = Purpose::all();
+
+        $users = User::all();
+
+        $eventHotel = EventHotel::with(['eventHotelsOpt', 'hotel', 'currency', 'event'])->find($request->ehotel);
+        $eventHotels = EventHotel::with(['eventHotelsOpt.broker', 'eventHotelsOpt.regime', 'eventHotelsOpt.purpose', 'eventHotelsOpt.apto_hotel.apto', 'eventHotelsOpt.category_hotel.category', 'hotel', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
 
         return Inertia::render('Auth/Event/EventCreate', [
             'crds' => $crds,
@@ -78,7 +93,13 @@ class EventController extends Controller
             'users' => $users,
             'event' => $event,
             'hotels' => $hotels,
-            'tab' => $request->tab
+            'tab' => $request->tab,
+            'brokers' => $brokers,
+            'currencies' => $currencies,
+            'regimes' => $regimes,
+            'purposes' => $purposes,
+            'eventHotels' => $eventHotels,
+            'eventHotel' => $eventHotel
         ]);
     }
 

@@ -53,12 +53,14 @@ class CurrencyController extends Controller
                 $currency = Currency::find($request->id);
 
                 $currency->name = $request->name;
+                $currency->sigla = $request->sigla;
                 $currency->symbol = $request->symbol;
                 $currency->save();
             } else {
 
                 $currency = Currency::create([
                     'name' => $request->name,
+                    'sigla' => $request->sigla,
                     'symbol' => $request->symbol
                 ]);
             }

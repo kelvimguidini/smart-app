@@ -47,6 +47,16 @@ class DatabaseSeeder extends Seeder
         );
 
 
+        // Insert some stuff
+        DB::table('currency')->insert(
+            array(
+                'name' => 'Real',
+                'sigla' => 'BRL',
+                'symbol' => 'R$'
+            )
+        );
+
+
         foreach (Constants::PERMISSIONS as $p) {
             DB::table('permission')->insert(
                 array(

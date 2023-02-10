@@ -34,4 +34,9 @@ class Currency extends Model
      * @var string
      */
     protected $symbol = 'symbol';
+
+    public function event_hotels()
+    {
+        return $this->belongsTo(EventHotel::class);
+    }
 }

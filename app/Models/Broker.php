@@ -28,9 +28,8 @@ class Broker extends Model
      */
     protected $name = 'name';
 
-
-    public function hotels()
+    public function event_hotels_opt()
     {
-        return $this->belongsToMany(Hotel::class, 'apto_hotel');
+        return $this->belongsTo(EventHotelOpt::class);
     }
 }

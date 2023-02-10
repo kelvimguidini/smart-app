@@ -27,14 +27,14 @@ class CreateEventHotelTable extends Migration
             $table->bigInteger('currency_id')->unsigned()->index();
 
             $table->boolean('invoice');
-            $table->string('internal_observation');
-            $table->string('customer_observation');
+            $table->string('internal_observation')->nullable();
+            $table->string('customer_observation')->nullable();
 
             $table->softDeletes();
             $table->timestamps();
 
-            $table->foreign('hotel_id')->references('id')->on('hotel')->onDelete('cascade');
-            $table->foreign('event_id')->references('id')->on('event')->onDelete('cascade');
+            $table->foreign('hotel_id')->references('id')->on('hotel');
+            $table->foreign('event_id')->references('id')->on('event');
 
             $table->foreign('currency_id')->references('id')->on('currency');
         });

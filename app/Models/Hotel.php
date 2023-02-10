@@ -79,4 +79,9 @@ class Hotel extends Model
     {
         return $this->belongsToMany(Category::class, 'category_hotel');
     }
+
+    public function event_hotels()
+    {
+        return $this->belongsTo(EventHotel::class);
+    }
 }

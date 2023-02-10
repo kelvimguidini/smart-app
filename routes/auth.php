@@ -181,7 +181,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::get('event', [EventController::class, 'create'])
         ->name('event-create');
 
-    Route::get('event/{id}/{tab?}', [EventController::class, 'create'])
+    Route::get('event/{id}/{tab?}/{ehotel?}', [EventController::class, 'create'])
         ->name('event-edit');
 
     Route::post('event-save', [EventController::class, 'store'])
@@ -201,4 +201,26 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     Route::delete('hotel-delete', [HotelController::class, 'delete'])
         ->name('hotel-delete');
+
+
+    Route::post('hotel-event-save', [HotelController::class, 'storeEventHotel'])
+        ->name('hotel-event-save');
+
+
+    Route::post('hotel-opt-save', [HotelController::class, 'storeHotelOpt'])
+        ->name('hotel-opt-save');
+
+
+
+    Route::post('hotel-opt-save', [HotelController::class, 'storeHotelOpt'])
+        ->name('hotel-opt-save');
+
+
+
+    Route::delete('event-hotel-delete', [HotelController::class, 'eventHotelDelete'])
+        ->name('event-hotel-delete');
+
+
+    Route::delete('opt-delete', [HotelController::class, 'optDelete'])
+        ->name('opt-delete');
 });

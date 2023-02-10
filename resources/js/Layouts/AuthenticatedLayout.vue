@@ -20,6 +20,7 @@ import '@/vendor/jquery-ui/jquery-ui.css';
 
 // Mask
 import '@/vendor/mask/jquery.mask.js';
+import '@/vendor/mask/jquery.maskMoney.js';
 
 // Custom scripts for all pages
 import '@/vendor/sb-admin-2.js';
@@ -91,33 +92,41 @@ const menuItem = [
                 active: route().current('crd'),
                 role: 'crd_admin'
             },
+        ],
+    },
+    {
+        name: 'Cadastro Hotel',
+        icon: 'fa fa-concierge-bell',
+        isItem: false,
+        collapseHeader: 'Tabelas auxiliares de hotel',
+        subMenu: [
             {
                 link: route().current('apto') ? '' : route('apto'),
-                name: 'Hotel Apartamento',
+                name: 'Apartamento',
                 active: route().current('apto'),
                 role: ['apto_admin']
             },
             {
                 link: route().current('category') ? '' : route('category'),
-                name: 'Hotel Categoria',
+                name: 'Categoria',
                 active: route().current('category'),
                 role: ['category_admin']
             },
             {
                 link: route().current('regime') ? '' : route('regime'),
-                name: 'Hotel Regime',
+                name: 'Regime',
                 active: route().current('regime'),
                 role: ['regime_admin']
             },
             {
                 link: route().current('broker') ? '' : route('broker'),
-                name: 'Hotel Broker',
+                name: 'Broker',
                 active: route().current('broker'),
                 role: ['broker_admin']
             },
             {
                 link: route().current('purpose') ? '' : route('purpose'),
-                name: 'Hotel Propósito',
+                name: 'Propósito',
                 active: route().current('purpose'),
                 role: ['purpose_admin']
             },
@@ -131,7 +140,7 @@ const menuItem = [
     },
     {
         name: 'Eventos',
-        icon: 'fa fa-table',
+        icon: 'fa fa-luggage-cart',
         isItem: false,
         collapseHeader: 'Cotações',
         subMenu: [

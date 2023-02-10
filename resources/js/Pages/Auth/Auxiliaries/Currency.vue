@@ -19,7 +19,8 @@ const inEdition = ref(0);
 const form = useForm({
     id: 0,
     name: '',
-    symbol: ''
+    symbol: '',
+    sigla: ''
 });
 
 const formDelete = useForm({
@@ -52,12 +53,13 @@ const deleteCurrency = (id) => {
 const edit = (currency) => {
     inEdition.value = currency.id;
     form.name = currency.name;
+    form.sigla = currency.sigla;
     form.symbol = currency.symbol;
     form.id = currency.id;
 };
 
 const submit = () => {
-    form.post(route('symbol-save'), {
+    form.post(route('currency-save'), {
         onSuccess: () => {
             form.reset();
             inEdition.value = 0;
@@ -87,7 +89,7 @@ const submit = () => {
                                 <form @submit.prevent="submit">
 
                                     <div class="row">
-                                        <div class="col-lg-6">
+                                        <div class="col">
                                             <div class="form-group">
                                                 <InputLabel for="name" value="Nome:" />
                                                 <TextInput type="text" class="form-control" v-model="form.name" required
@@ -95,7 +97,16 @@ const submit = () => {
                                                 <InputError class="mt-2 text-danger" :message="form.errors.name" />
                                             </div>
                                         </div>
-                                        <div class="col-lg-6">
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <InputLabel for="sigla" value="Sigla:" />
+                                                <TextInput type="text" class="form-control" v-model="form.sigla"
+                                                    required autofocus autocomplete="symsiglabol" />
+                                                <InputError class="mt-2 text-danger" :message="form.errors.sigla" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col">
                                             <div class="form-group">
                                                 <InputLabel for="symbol" value="Símbolo:" />
                                                 <TextInput type="text" class="form-control" v-model="form.symbol"
@@ -133,6 +144,8 @@ const submit = () => {
                                             <tr>
                                                 <th scope="col">#</th>
                                                 <th scope="col">Nome</th>
+                                                <th scope="col">Sigla</th>
+
                                                 <th scope="col">Símbolo</th>
                                                 <th scope="col">Ações</th>
                                             </tr>
@@ -142,6 +155,8 @@ const submit = () => {
                                                 :class="{ 'table-info': inEdition == currency.id }">
                                                 <th scope="row">{{ currency.id }}</th>
                                                 <td>{{ currency.name }}</td>
+
+                                                <td>{{ currency.sigla }}</td>
                                                 <td>{{ currency.symbol }}</td>
                                                 <td>
                                                     <button class="btn btn-info btn-icon-split mr-2"

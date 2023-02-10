@@ -17,6 +17,8 @@ class CreateCurrencyTable extends Migration
             $table->id();
 
             $table->string('name');
+
+            $table->string('sigla');
             $table->string('symbol');
 
             $table->softDeletes();

@@ -22,6 +22,10 @@ const props = defineProps({
         // type: any,
         default: null,
     },
+    btnDisabled: {
+        type: Boolean,
+        default: 'btn btn-primary'
+    },
 });
 
 const id = 'modal-' + Math.floor(Date.now() * Math.random()).toString(36)
@@ -29,11 +33,9 @@ const id = 'modal-' + Math.floor(Date.now() * Math.random()).toString(36)
 </script>
 
 <template>
-    <a href="" :class="btnClass" data-toggle="modal" :data-target="'#' + id">
+    <a href="" :class="btnClass" :disabled="btnDisabled" data-toggle="modal" :data-target="'#' + id">
         <slot name="button" />
     </a>
-    <!-- <slot name="trigger" /> -->
-
 
     <!-- Modal -->
     <div class="modal fade" :id="id" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
