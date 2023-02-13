@@ -23,7 +23,7 @@ class ProfileUserController extends Controller
     {;
 
         return Inertia::render('Auth/Profile', [
-            'user' => Auth::user()
+            'user' => User::with('roles')->find(Auth::user()->id)
         ]);
     }
 
@@ -43,13 +43,15 @@ class ProfileUserController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255'
+            'email' => 'required|string|email|max:255',
+            'phone' => 'required|string|max:255',
         ]);
 
         $userEdit = User::find($request->id);
 
         $userEdit->name = $request->name;
         $userEdit->email = $request->email;
+        $userEdit->phone = $request->phone;
         $userEdit->save();
 
         return redirect()->back()->with('flash', ['message' => trans('Registro salvo com sucesso'), 'type' => 'success']);

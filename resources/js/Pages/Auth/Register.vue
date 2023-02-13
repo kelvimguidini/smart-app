@@ -20,6 +20,7 @@ const form = useForm({
     id: 0,
     name: '',
     email: '',
+    phone: '',
     password: '',
     password_confirmation: '',
     terms: false,
@@ -50,6 +51,7 @@ const edit = (user) => {
     userInEdition.value = user.id;
     form.name = user.name;
     form.email = user.email;
+    form.phone = user.phone;
     form.id = user.id;
     form.roles = [];
     user.roles.map(function (value, key) {
@@ -90,6 +92,9 @@ onMounted(() => {
             url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/pt-BR.json',
         },
     });
+
+
+    $('#phone').mask('(00) 00000-0000');
 });
 
 </script>
@@ -114,25 +119,37 @@ onMounted(() => {
                         <form @submit.prevent="submit">
 
                             <div class="row">
-                                <div class="col-lg-4">
-                                    <div class="form-group">
+                                <div class="col-lg-8">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
 
-                                        <InputLabel for="name" value="Name" />
-                                        <TextInput id="name" type="text" class="form-control" v-model="form.name"
-                                            required autofocus autocomplete="name" />
-                                        <InputError class="mt-2 text-danger" :message="form.errors.name" />
+                                                <InputLabel for="name" value="Name" />
+                                                <TextInput id="name" type="text" class="form-control"
+                                                    v-model="form.name" required autofocus autocomplete="name" />
+                                                <InputError class="mt-2 text-danger" :message="form.errors.name" />
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+
+                                                <InputLabel for="email" value="Email" />
+                                                <TextInput id="email" type="email" class="form-control"
+                                                    v-model="form.email" required autocomplete="username" />
+                                                <InputError class="mt-2 text-danger" :message="form.errors.email" />
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <InputLabel for="Phone" value="Telefone" />
+                                                <TextInput id="phone" type="text" class="form-control"
+                                                    v-model="form.phone" required autofocus autocomplete="phone" />
+                                                <InputError class="mt-2 text-danger" :message="form.errors.phone" />
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="form-group">
 
-                                        <InputLabel for="email" value="Email" />
-                                        <TextInput id="email" type="email" class="form-control" v-model="form.email"
-                                            required autocomplete="username" />
-                                        <InputError class="mt-2 text-danger" :message="form.errors.email" />
-                                    </div>
                                 </div>
-
                                 <div class="col-lg-4">
                                     <div class="form-group">
                                         <InputLabel for="role" value="Grupo de acesso:" />
@@ -184,6 +201,7 @@ onMounted(() => {
                                         <th scope="col">#</th>
                                         <th scope="col">Nome</th>
                                         <th scope="col">Email</th>
+                                        <th scope="col">Telefone</th>
                                         <th scope="col">Ativo</th>
                                         <th scope="col">Ações</th>
                                     </tr>
@@ -193,6 +211,7 @@ onMounted(() => {
                                         :class="{ 'table-info': userInEdition == user.id }">
                                         <th>{{ user.id }}</th>
                                         <td>{{ user.name }}</td>
+                                        <td>{{ user.phone }}</td>
                                         <td>{{ user.email }}</td>
                                         <td>
                                             <span v-if="user.email_verified_at != null"

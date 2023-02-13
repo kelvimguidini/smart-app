@@ -16,6 +16,7 @@ const form = useForm({
     id: 0,
     name: '',
     email: '',
+    phone: '',
 });
 
 const submit = () => {
@@ -28,8 +29,11 @@ onMounted(() => {
     if (props.user != null) {
         form.id = props.user.id;
         form.name = props.user.name;
+        form.phone = props.user.phone;
         form.email = props.user.email;
     }
+
+    $('#phone').mask('(00) 00000-0000');
 });
 
 </script>
@@ -52,22 +56,43 @@ onMounted(() => {
                         <form @submit.prevent="submit">
 
                             <div class="row">
-                                <div class="col-lg-4">
-                                    <div class="form-group">
-                                        <InputLabel for="name" value="Name" />
-                                        <TextInput id="name" type="text" class="form-control" v-model="form.name"
-                                            required autofocus autocomplete="name" />
-                                        <InputError class="mt-2 text-danger" :message="form.errors.name" />
+                                <div class="col-lg-8">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+
+                                                <InputLabel for="name" value="Name" />
+                                                <TextInput id="name" type="text" class="form-control"
+                                                    v-model="form.name" required autofocus autocomplete="name" />
+                                                <InputError class="mt-2 text-danger" :message="form.errors.name" />
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+
+                                                <InputLabel for="email" value="Email" />
+                                                <TextInput id="email" type="email" class="form-control"
+                                                    v-model="form.email" required autocomplete="username" />
+                                                <InputError class="mt-2 text-danger" :message="form.errors.email" />
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <InputLabel for="Phone" value="Telefone" />
+                                                <TextInput id="phone" type="text" class="form-control"
+                                                    v-model="form.phone" required autofocus autocomplete="phone" />
+                                                <InputError class="mt-2 text-danger" :message="form.errors.phone" />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-lg-4">
-                                    <div class="form-group">
-
-                                        <InputLabel for="email" value="Email" />
-                                        <TextInput id="email" type="email" class="form-control" v-model="form.email"
-                                            required autocomplete="username" />
-                                        <InputError class="mt-2 text-danger" :message="form.errors.email" />
-                                    </div>
+                                    <ul class="list-group">
+                                        <li v-for="(role, key) in user.roles"
+                                            class="list-group-item d-flex justify-content-between align-items-center">
+                                            {{ role.name }}
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
                             <div class="flex items-center justify-end mt-4">

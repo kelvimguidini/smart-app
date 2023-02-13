@@ -56,13 +56,15 @@ class RegisteredUserController extends Controller
 
             $request->validate([
                 'name' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255'
+                'email' => 'required|string|email|max:255',
+                'phone' => 'required|string|max:255',
             ]);
 
             $userEdit = User::with('roles')->find($request->id);
 
             $userEdit->name = $request->name;
             $userEdit->email = $request->email;
+            $userEdit->phone = $request->phone;
             $userEdit->save();
 
             foreach ($userEdit->roles as $role) {
@@ -84,12 +86,14 @@ class RegisteredUserController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users'
+            'email' => 'required|string|email|max:255|unique:users',
+            'phone' => 'required|string|max:255'
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'phone' => $request->phone,
             'password' => Hash::make('qwerty'),
         ]);
 
