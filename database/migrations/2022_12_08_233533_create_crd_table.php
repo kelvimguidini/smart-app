@@ -16,9 +16,13 @@ return new class extends Migration
         Schema::create('crd', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('cnpj');
+            $table->string('number');
             $table->softDeletes();
             $table->timestamps();
+
+            $table->bigInteger('customer_id')->unsigned();
+
+            $table->foreign('customer_id')->references('id')->on('customer');
         });
     }
 

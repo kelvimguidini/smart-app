@@ -10,7 +10,21 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Event extends Model
 {
     use SoftDeletes;
-    protected $fillable = ['name', 'code', 'requester', 'customer_id', 'sector', 'pax_base', 'cost_center', 'date', 'crd_id', 'hotel_operator', 'air_operator', 'land_operator'];
+    protected $fillable = [
+        'name',
+        'code',
+        'requester',
+        'customer_id',
+        'sector',
+        'pax_base',
+        'cost_center',
+        'date',
+        'date_final',
+        'crd_id',
+        'hotel_operator',
+        'air_operator',
+        'land_operator'
+    ];
     protected $table = 'event';
 
     /**
@@ -77,6 +91,13 @@ class Event extends Model
      * @var DateTime
      */
     protected $date = 'date';
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var DateTime
+     */
+    protected $date_final = 'date_final';
 
     /**
      * The primary key associated with the table.

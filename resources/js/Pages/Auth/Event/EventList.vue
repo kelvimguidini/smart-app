@@ -64,17 +64,19 @@ const deleteEvent = (id) => {
                                                 <th scope="col">Nome</th>
                                                 <th scope="col">Código do Evento</th>
                                                 <th scope="col">Data</th>
+                                                <th scope="col">Data Final</th>
                                                 <th scope="col">Ações</th>
 
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr v-for="(event, index) in events">
+                                            <tr v-for="(event, index) in eventst">
                                                 <th scope="row">{{ event.id }}</th>
                                                 <td>{{ event.customer.name }}</td>
                                                 <td>{{ event.name }}</td>
                                                 <td>{{ event.code }}</td>
                                                 <td>{{ new Date(event.date).toLocaleDateString() }}</td>
+                                                <td>{{ new Date(event.date_final).toLocaleDateString() }}</td>
                                                 <td>
                                                     <a v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin')"
                                                         class="btn btn-info btn-icon-split mr-2"

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\CRD;
+use App\Models\Customer;
 use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -22,9 +23,10 @@ class CrdController extends Controller
             abort(403);
         }
 
-        $t = CRD::all();
+        $t = CRD::with('customer')->get();
         return Inertia::render('Auth/Auxiliaries/CRD', [
-            'crds' => $t
+            'crds' => $t,
+            'customers' => Customer::all()
         ]);
     }
 
@@ -44,7 +46,7 @@ class CrdController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'cnpj' => 'required|string|max:18',
+            'number' => 'required|string|max:18',
         ]);
         try {
 
@@ -53,13 +55,15 @@ class CrdController extends Controller
                 $crd = CRD::find($request->id);
 
                 $crd->name = $request->name;
-                $crd->cnpj = $request->cnpj;
+                $crd->number = $request->number;
+                $crd->customer_id = $request->customer_id;
                 $crd->save();
             } else {
 
                 $crd = CRD::create([
                     'name' => $request->name,
-                    'cnpj' => $request->cnpj,
+                    'number' => $request->number,
+                    'customer_id' => $request->customer_id,
                 ]);
             }
         } catch (Exception $e) {

@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('pax_base');
             $table->string('cost_center');
             $table->timestamp('date');
+            $table->timestamp('date_final');
             $table->bigInteger('crd_id')->unsigned()->nullable();
             $table->bigInteger('hotel_operator')->unsigned()->nullable();
             $table->bigInteger('air_operator')->unsigned()->nullable();

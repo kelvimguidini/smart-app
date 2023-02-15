@@ -81,12 +81,12 @@ const form = useForm({
     paxBase: '',
     cc: '',
     date: '',
+    date_final: '',
     crd_id: '',
     hotel_operator: '',
     air_operator: '',
     land_operator: '',
 });
-
 
 const formHotel = useForm({
     id: 0,
@@ -191,10 +191,13 @@ const edit = (event) => {
         form.paxBase = event.pax_base;
         form.cc = event.cost_center;
         form.date = new Date(event.date);
+        form.date_final = new Date(event.date_final);
         form.crd_id = event.crd_id;
         form.hotel_operator = event.hotel_operator;
         form.air_operator = event.air_operator;
         form.land_operator = event.land_operator;
+
+        props.crds = props.crds.filter((v, i) => { return v.customer.id == form.customer });
 
         $('#customer').val(event.customer_id).trigger('change');
         $('#crd_id').val(event.crd_id).trigger('change');
@@ -325,6 +328,7 @@ onMounted(() => {
         theme: "bootstrap4", language: "pt-Br"
     }).on('select2:select', (e) => {
         form.customer = e.params.data.id;
+        props.crds = props.crds.filter((v, i) => { return v.customer.id == form.customer });
     });
 
     $('#crd_id').select2({
@@ -619,13 +623,26 @@ const sumTaxes = (evho, taxType) => {
                                 </div>
                                 <div class="col-lg-4">
 
-                                    <div class="form-group">
-                                        <InputLabel for="date" value="Data do Evento:" />
-                                        <datepicker v-model="form.date" class="form-control" :locale="ptBR"
-                                            inputFormat="dd/MM/yyyy" weekdayFormat="EEEEEE" />
-                                        <InputError class="mt-2 text-danger" :message="form.errors.date" />
-                                    </div>
+                                    <div class="row">
 
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <InputLabel for="date" value="Data do Evento:" />
+                                                <datepicker v-model="form.date" class="form-control" :locale="ptBR"
+                                                    inputFormat="dd/MM/yyyy" weekdayFormat="EEEEEE" />
+                                                <InputError class="mt-2 text-danger" :message="form.errors.date" />
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <InputLabel for="date_final" value="Data do Evento Fim:" />
+                                                <datepicker v-model="form.date_final" class="form-control"
+                                                    :locale="ptBR" inputFormat="dd/MM/yyyy" weekdayFormat="EEEEEE" />
+                                                <InputError class="mt-2 text-danger"
+                                                    :message="form.errors.date_final" />
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="form-group">
                                         <InputLabel for="CRD" value="CRD:" />
 

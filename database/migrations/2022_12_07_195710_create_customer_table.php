@@ -16,6 +16,10 @@ return new class extends Migration
         Schema::create('customer', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('document');
+            $table->string('phone');
+            $table->string('email');
+            $table->string('responsibleAuthorizing');
             $table->string('logo')->nullable();
             $table->softDeletes();
             $table->timestamps();

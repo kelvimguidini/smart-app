@@ -10,7 +10,7 @@ class CRD extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['name', 'cnpj'];
+    protected $fillable = ['name', 'number', 'customer_id'];
     protected $table = 'crd';
 
     /**
@@ -33,10 +33,22 @@ class CRD extends Model
      *
      * @var string
      */
-    protected $cnpj = 'cnpj';
+    protected $number = 'number';
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var int
+     */
+    protected $customer_id = 'customer_id';
 
     public function events()
     {
         return $this->belongsTo(Event::class);
+    }
+
+    public function customer()
+    {
+        return $this->hasOne(Customer::class,  'id', 'customer_id');
     }
 }

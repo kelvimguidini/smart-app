@@ -126,7 +126,8 @@ class EventController extends Controller
             'sector' => 'required|string|max:255',
             'paxBase' => 'required|string|max:255',
             'cc' => 'required|string|max:255',
-            'date' => 'required|string|max:30',
+            'date' => 'required|date',
+            'date_final' => 'required|date|after_or_equal:in',
             'crd_id' => 'required|string',
             'hotel_operator' => 'required|string',
             'air_operator' => 'required|string',
@@ -147,6 +148,7 @@ class EventController extends Controller
                 $event->pax_base = $request->paxBase;
                 $event->cost_center = $request->cc;
                 $event->date = $request->date;
+                $event->date_final = $request->date_final;
                 $event->crd_id = $request->crd_id;
                 $event->hotel_operator = $request->hotel_operator;
                 $event->air_operator = $request->air_operator;
@@ -163,7 +165,8 @@ class EventController extends Controller
                     'sector' => $request->sector,
                     'pax_base' => $request->paxBase,
                     'cost_center' => $request->cc,
-                    'date' => $request->date,
+                    'date_final' => $request->date_final,
+                    'date_final' => $request->date_final,
                     'crd_id' => $request->crd_id,
                     'hotel_operator' => $request->hotel_operator,
                     'air_operator' => $request->air_operator,

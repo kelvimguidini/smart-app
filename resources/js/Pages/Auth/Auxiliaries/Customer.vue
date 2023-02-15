@@ -7,7 +7,7 @@ import TextInput from '@/Components/TextInput.vue';
 import Modal from '@/Components/Modal.vue';
 import Loader from '@/Components/Loader.vue';
 import { Head, useForm } from '@inertiajs/inertia-vue3';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 
 const props = defineProps({
@@ -38,13 +38,20 @@ const handleEditForm = (customer) => {
     form.id = customer.id;
     form.name = customer.name;
     form.logo = customer.logo;
+    form.document = customer.document;
+    form.phone = customer.phone;
+    form.email = customer.email;
+    form.responsibleAuthorizing = customer.responsibleAuthorizing;
     previewImage.value = '.' + customer.logo;
-
 }
 
 const form = useForm({
     id: 0,
     name: '',
+    document: '',
+    phone: '',
+    email: '',
+    responsibleAuthorizing: '',
     logo: null
 });
 
@@ -60,6 +67,18 @@ onMounted(() => {
             url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/pt-BR.json',
         },
     });
+
+    $('.phone').mask('(00) 00000-0000');
+
+    var options = {
+        onKeyPress: function (cpf_cnpj, e, field, options) {
+            var masks = ['000.000.000-000', '00.000.000/0000-00'];
+            var mask = cpf_cnpj.length > 14 ? masks[1] : masks[0];
+            field.mask(mask, options);
+        }
+    };
+    $('.document').mask('000.000.000-000', options);
+
 });
 
 const isLoader = ref(false);
@@ -105,7 +124,7 @@ const submit = () => {
                                 <form @submit.prevent="submit">
 
                                     <div class="row">
-                                        <div class="col-lg-6">
+                                        <div class="col">
                                             <div class="form-group">
                                                 <InputLabel for="name" value="Nome:" />
                                                 <TextInput type="text" class="form-control" v-model="form.name" required
@@ -113,7 +132,48 @@ const submit = () => {
                                                 <InputError class="mt-2 text-danger" :message="form.errors.name" />
                                             </div>
                                         </div>
-                                        <div class="col-lg-6">
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <InputLabel for="document" value="CPF/CNPJ:" />
+                                                <TextInput type="text" class="form-control document"
+                                                    v-model="form.document" required autofocus
+                                                    autocomplete="document" />
+                                                <InputError class="mt-2 text-danger" :message="form.errors.document" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <InputLabel for="phone" value="Telefone:" />
+                                                <TextInput type="text" class="form-control phone" v-model="form.phone"
+                                                    required autofocus autocomplete="phone" />
+                                                <InputError class="mt-2 text-danger" :message="form.errors.phone" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <InputLabel for="email" value="E-mail:" />
+                                                <TextInput type="text" class="form-control" v-model="form.email"
+                                                    required autofocus autocomplete="email" />
+                                                <InputError class="mt-2 text-danger" :message="form.errors.email" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <InputLabel for="responsibleAuthorizing"
+                                                    value="Responsável pela autorização:" />
+                                                <TextInput type="text" class="form-control"
+                                                    v-model="form.responsibleAuthorizing" required autofocus
+                                                    autocomplete="responsibleAuthorizing" />
+                                                <InputError class="mt-2 text-danger"
+                                                    :message="form.errors.responsibleAuthorizing" />
+                                            </div>
+                                        </div>
+                                        <div class="col">
 
                                             <div class="form-group">
                                                 <InputLabel for="logo" value="Logo:" />
@@ -168,6 +228,10 @@ const submit = () => {
                                             <tr>
                                                 <th scope="col">#</th>
                                                 <th scope="col">Nome</th>
+                                                <th scope="col" class="document">CPF/CNPJ</th>
+                                                <th scope="col">Telefone</th>
+                                                <th scope="col">E-mail</th>
+                                                <th scope="col">Responsável pela autorização</th>
                                                 <th scope="col">Ações</th>
                                             </tr>
                                         </thead>
@@ -176,6 +240,10 @@ const submit = () => {
                                                 :class="{ 'table-info': customerInEdition == customer.id }">
                                                 <th scope="row">{{ customer.id }}</th>
                                                 <td>{{ customer.name }}</td>
+                                                <td>{{ customer.document }}</td>
+                                                <td>{{ customer.phone }}</td>
+                                                <td>{{ customer.email }}</td>
+                                                <td>{{ customer.responsibleAuthorizing }}</td>
                                                 <td>
                                                     <button class="btn btn-info btn-icon-split mr-2"
                                                         v-on:click="handleEditForm(customer)">

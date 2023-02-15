@@ -58,12 +58,20 @@ class CustomerController extends Controller
                 $customer = Customer::find($request->id);
 
                 $customer->name = $request->name;
+                $customer->document = $request->document;
+                $customer->phone = $request->phone;
+                $customer->email = $request->email;
+                $customer->responsibleAuthorizing = $request->responsibleAuthorizing;
                 $customer->logo = $url ?  $url : $request->logo;
                 $customer->save();
             } else {
 
                 $customer = Customer::create([
                     'name' => $request->name,
+                    'document' => $request->document,
+                    'phone' => $request->phone,
+                    'email' => $request->email,
+                    'responsibleAuthorizing' => $request->responsibleAuthorizing,
                     'logo' => $url,
                 ]);
             }
