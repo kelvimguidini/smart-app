@@ -1391,7 +1391,6 @@ const sumTaxes = (evho, taxType) => {
 
                 </div>
             </div>
-
             <!-- FIM ABA HOTEL -->
 
             <!-- ABA A&B -->
