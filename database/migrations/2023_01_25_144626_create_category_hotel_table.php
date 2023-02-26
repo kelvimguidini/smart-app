@@ -18,7 +18,7 @@ class CreateCategoryHotelTable extends Migration
             $table->bigInteger('category_id')->unsigned()->index();
             $table->bigInteger('hotel_id')->unsigned()->index();
             $table->foreign('category_id')->references('id')->on('category');
-            $table->foreign('hotel_id')->references('id')->on('hotel')->onDelete('cascade');
+            $table->foreign('hotel_id')->references('id')->on('provider')->onDelete('cascade');
         });
     }
 

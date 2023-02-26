@@ -33,7 +33,7 @@ class CreateEventHotelTable extends Migration
             $table->softDeletes();
             $table->timestamps();
 
-            $table->foreign('hotel_id')->references('id')->on('hotel');
+            $table->foreign('hotel_id')->references('id')->on('provider');
             $table->foreign('event_id')->references('id')->on('event');
 
             $table->foreign('currency_id')->references('id')->on('currency');

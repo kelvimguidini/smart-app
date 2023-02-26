@@ -31,6 +31,6 @@ class Category extends Model
 
     public function hotels()
     {
-        return $this->belongsToMany(Hotel::class, 'category_hotel');
+        return $this->belongsToMany(Provider::class, 'category_hotel', 'hotel_id');
     }
 }

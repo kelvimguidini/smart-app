@@ -94,7 +94,7 @@ class EventHotel extends Model
 
     public function hotel()
     {
-        return $this->hasOne(Hotel::class,  'id', 'hotel_id');
+        return $this->hasOne(Provider::class,  'id', 'hotel_id');
     }
 
     public function currency()

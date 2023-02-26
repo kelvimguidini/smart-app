@@ -18,7 +18,7 @@ class CreateAptoHotelTable extends Migration
             $table->bigInteger('apto_id')->unsigned()->index();
             $table->bigInteger('hotel_id')->unsigned()->index();
             $table->foreign('apto_id')->references('id')->on('apto');
-            $table->foreign('hotel_id')->references('id')->on('hotel')->onDelete('cascade');
+            $table->foreign('hotel_id')->references('id')->on('provider')->onDelete('cascade');
         });
     }
 

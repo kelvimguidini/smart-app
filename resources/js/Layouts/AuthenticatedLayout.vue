@@ -95,10 +95,10 @@ const menuItem = [
         ],
     },
     {
-        name: 'Cadastro Hotel',
+        name: 'Cadastro Fornecedor',
         icon: 'fa fa-concierge-bell',
         isItem: false,
-        collapseHeader: 'Tabelas auxiliares de hotel',
+        collapseHeader: 'Auxiliares de Fornecedor',
         subMenu: [
             {
                 link: route().current('apto') ? '' : route('apto'),
@@ -132,7 +132,7 @@ const menuItem = [
             },
             {
                 link: route().current('hotel') ? '' : route('hotel'),
-                name: 'Hotel',
+                name: 'Fornecedor',
                 active: route().current('hotel'),
                 role: ['event_admin', 'hotel_operator']
             },
@@ -174,7 +174,6 @@ onMounted(() => {
 </script>
 
 <template>
-
     <!-- Page Wrapper -->
     <div id="wrapper">
 
@@ -237,5 +236,4 @@ onMounted(() => {
     <i class="fa fa-angle-up"></i>
 
     </Link>
-
 </template>

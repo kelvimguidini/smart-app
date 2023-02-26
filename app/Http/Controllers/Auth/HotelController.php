@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\EventHotel;
 use App\Models\EventHotelOpt;
 use App\Models\Hotel;
+use App\Models\Provider;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,9 +29,9 @@ class HotelController extends Controller
     {
         $userId =  Auth::user()->id;
         if (Gate::allows('event_admin')) {
-            $hotels = Hotel::with('aptos')->with('categories')->get();
+            $hotels = Provider::with('aptos')->with('categories')->get();
         } else if (Gate::allows('hotel_operator')) {
-            $hotels = Hotel::with('aptos')->with('categories')->with(['hotel_operator' => function ($query) use ($userId) {
+            $hotels = Provider::with('aptos')->with('categories')->with(['hotel_operator' => function ($query) use ($userId) {
                 $query->where('id', '=', $userId);
             }]);
         } else {
@@ -71,7 +72,7 @@ class HotelController extends Controller
         try {
 
             if ($request->id > 0) {
-                $hotel = Hotel::find($request->id);
+                $hotel = Provider::find($request->id);
 
                 $hotel->name = $request->name;
                 $hotel->city = $request->city;
@@ -79,6 +80,9 @@ class HotelController extends Controller
                 $hotel->phone = $request->phone;
                 $hotel->email = $request->email;
                 $hotel->national = $request->national;
+                $hotel->iss_percent = $request->iss_percent;
+                $hotel->service_percent = $request->service_percent;
+                $hotel->iva_percent = $request->iva_percent;
 
                 $hotel->save();
 
@@ -91,13 +95,16 @@ class HotelController extends Controller
                 ])->delete();
             } else {
 
-                $hotel = Hotel::create([
+                $hotel = Provider::create([
                     'name' => $request->name,
                     'city' => $request->city,
                     'contact' => $request->contact,
                     'phone' => $request->phone,
                     'email' => $request->email,
-                    'national' => $request->national
+                    'national' => $request->national,
+                    'iss_percent' => $request->iss_percent,
+                    'service_percent' => $request->service_percent,
+                    'iva_percent' => $request->iva_percent
                 ]);
             }
 
@@ -281,7 +288,7 @@ class HotelController extends Controller
         }
         try {
 
-            $r = Hotel::find($request->id);
+            $r = Provider::find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

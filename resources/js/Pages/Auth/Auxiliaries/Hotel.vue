@@ -29,6 +29,9 @@ const form = useForm({
     aptos: [],
     categories: [],
     national: false,
+    service_percent: null,
+    iva_percent: null,
+    iss_percent: null,
 });
 
 const formDelete = useForm({
@@ -68,6 +71,9 @@ const edit = (hotel) => {
         form.email = hotel.email;
         form.national = hotel.national == true || hotel.national == 1;
         form.city = hotel.city;
+        form.iss_percent = hotel.iss_percent;
+        form.service_percent = hotel.service_percent;
+        form.iva_percent = hotel.iva_percent;
 
         hotel.aptos.map(function (value, key) {
             form.aptos.push(value.id);
@@ -113,10 +119,10 @@ const deleteHotel = (id) => {
     <AuthenticatedLayout>
         <Loader v-bind:show="isLoader"></Loader>
 
-        <Head title="Hoteis" />
+        <Head title="Fornecedor" />
         <template #header>
             <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                <h1 class="h3 mb-0 text-gray-800">Hoteis</h1>
+                <h1 class="h3 mb-0 text-gray-800">Fornecedor</h1>
             </div>
         </template>
 
@@ -131,9 +137,9 @@ const deleteHotel = (id) => {
                                 <div class="col">
 
                                     <div class="form-group">
-                                        <InputLabel for="name" value="Hotel:" />
-                                        <TextInput type="text" class="form-control" v-model="form.name" required
-                                            autofocus autocomplete="name" />
+                                        <InputLabel for="name" value="Nome:" />
+                                        <TextInput type="text" class="form-control" v-model="form.name" required autofocus
+                                            autocomplete="name" />
                                         <InputError class="mt-2 text-danger" :message="form.errors.name" />
                                     </div>
 
@@ -144,8 +150,8 @@ const deleteHotel = (id) => {
 
                                         <select class="form-control" id="city" :required="required">
                                             <option>.::Selecione::.</option>
-                                            <option v-for="(option, index) in cities"
-                                                :selected="option.name == form.city" :value="option.name">
+                                            <option v-for="(option, index) in cities" :selected="option.name == form.city"
+                                                :value="option.name">
                                                 {{ option.name }} - {{ option.uf }}
                                             </option>
                                         </select>
@@ -165,21 +171,69 @@ const deleteHotel = (id) => {
                                 <div class="col">
                                     <div class="form-group">
                                         <InputLabel for="phone" value="Telefone:" />
-                                        <TextInput id="phone" type="text" class="form-control phone"
-                                            v-model="form.phone" required autofocus autocomplete="phone" />
+                                        <TextInput id="phone" type="text" class="form-control phone" v-model="form.phone"
+                                            required autofocus autocomplete="phone" />
                                         <InputError class="mt-2 text-danger" :message="form.errors.phone" />
                                     </div>
 
                                 </div>
-                                <div class="col">
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-3">
                                     <div class="form-group">
                                         <InputLabel for="email" value="E-mail:" />
-                                        <TextInput type="email" class="form-control" v-model="form.email" required
-                                            autofocus autocomplete="email" />
+                                        <TextInput type="email" class="form-control" v-model="form.email" required autofocus
+                                            autocomplete="email" />
                                         <InputError class="mt-2 text-danger" :message="form.errors.email" />
                                     </div>
                                 </div>
+
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <InputLabel for="iss_percent" value="ISS:" />
+                                        <TextInput type="number" class="form-control percent" v-model="form.iss_percent"
+                                            required autofocus min="0" step=".1" autocomplete="iss_percent" />
+                                    </div>
+                                </div>
+
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <InputLabel for="service_percent" value="Serviço:" />
+                                        <TextInput type="number" class="form-control percent" v-model="form.service_percent"
+                                            required autofocus min="0" step=".1" autocomplete="service_percent" />
+                                    </div>
+                                </div>
+
+                                <div class="col-2">
+                                    <div class="form-group">
+                                        <InputLabel for="iva_percent" value="IVA:" />
+                                        <TextInput type="number" class="form-control percent" v-model="form.iva_percent"
+                                            required autofocus min="0" step=".1" autocomplete="iva_percent" />
+                                    </div>
+                                </div>
+
+                                <div class="col">
+                                    <div class="form-group">
+                                        <InputLabel for="national" value=" " />
+
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" v-model="form.national" type="checkbox"
+                                                        id="autoSizingCheck">
+                                                    <label class="form-check-label" for="autoSizingCheck">
+                                                        Fornecedor Nacional
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+
+
                             <div class="row">
                                 <div class="col-4">
                                     <div class="form-group">
@@ -221,23 +275,7 @@ const deleteHotel = (id) => {
                                         <InputError class="mt-2 text-danger" :message="form.errors.aptos" />
                                     </div>
                                 </div>
-                                <div class="col">
-                                    <div class="form-group">
-                                        <InputLabel for="national" value=" " />
 
-                                        <div class="card">
-                                            <div class="card-body">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" v-model="form.national"
-                                                        type="checkbox" id="autoSizingCheck">
-                                                    <label class="form-check-label" for="autoSizingCheck">
-                                                        Hotel Nacional
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
 
                             <div class="flex items-center justify-end mt-4 rigth">
@@ -266,24 +304,29 @@ const deleteHotel = (id) => {
                                 <thead>
                                     <tr>
                                         <th scope="col">#</th>
-                                        <th scope="col">Hotel</th>
+                                        <th scope="col">Nome</th>
                                         <th scope="col">Cidade</th>
                                         <th scope="col">Contato</th>
                                         <th scope="col">Telefone</th>
                                         <th scope="col">E-mail</th>
+                                        <th scope="col">IVA</th>
+                                        <th scope="col">ISS</th>
+                                        <th scope="col">Serviço</th>
                                         <th scope="col">Tipo</th>
                                         <th scope="col">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="(hotel, index) in hotels"
-                                        :class="{ 'table-info': inEdition == hotel.id }">
+                                    <tr v-for="(hotel, index) in hotels" :class="{ 'table-info': inEdition == hotel.id }">
                                         <th scope="row">{{ hotel.id }}</th>
                                         <td>{{ hotel.name }}</td>
                                         <td>{{ hotel.city }}</td>
                                         <td>{{ hotel.contact }}</td>
                                         <td class="phone">{{ hotel.phone }}</td>
                                         <td>{{ hotel.email }}</td>
+                                        <td>{{ hotel.iva_percent }}</td>
+                                        <td>{{ hotel.iss_percent }}</td>
+                                        <td>{{ hotel.service_percent }}</td>
                                         <td>{{ hotel.national ? "Nacional" : "Internacional" }}</td>
                                         <td>
                                             <button class="btn btn-info btn-icon-split mr-2" v-on:click="edit(hotel)">

@@ -31,6 +31,6 @@ class Apto extends Model
 
     public function hotels()
     {
-        return $this->belongsToMany(Hotel::class, 'apto_hotel');
+        return $this->belongsToMany(Provider::class, 'apto_hotel', 'hotel_id');
     }
 }

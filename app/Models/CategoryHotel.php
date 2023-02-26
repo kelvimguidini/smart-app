@@ -23,7 +23,7 @@ class CategoryHotel extends Model
     public function hotel()
     {
         // return $this->belongsToMany(Hotel::class);
-        return $this->hasOne(Hotel::class, 'id', 'hotel_id');
+        return $this->hasOne(Provider::class, 'id', 'hotel_id');
     }
 
 

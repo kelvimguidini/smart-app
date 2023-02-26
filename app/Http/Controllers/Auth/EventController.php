@@ -10,6 +10,7 @@ use App\Models\Customer;
 use App\Models\Event;
 use App\Models\EventHotel;
 use App\Models\Hotel;
+use App\Models\Provider;
 use App\Models\Purpose;
 use App\Models\Regime;
 use App\Models\User;
@@ -72,10 +73,10 @@ class EventController extends Controller
 
         $event = Event::find($request->id);
 
-        $crds = CRD::all();
+        $crds = CRD::with("customer")->get();
         $customers = Customer::all();
         $users = User::all();
-        $hotels = Hotel::with("categories")->with("aptos")->get();
+        $hotels = Provider::with("categories")->with("aptos")->get();
 
         $brokers = Broker::all();
         $currencies = Currency::all();
