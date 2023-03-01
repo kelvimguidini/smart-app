@@ -70,7 +70,7 @@ const deleteEvent = (id) => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr v-for="(event, index) in eventst">
+                                            <tr v-for="(event, index) in events">
                                                 <th scope="row">{{ event.id }}</th>
                                                 <td>{{ event.customer.name }}</td>
                                                 <td>{{ event.name }}</td>
@@ -89,8 +89,7 @@ const deleteEvent = (id) => {
 
                                                     <Modal
                                                         v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin')"
-                                                        :key="index"
-                                                        :modal-title="'Confirmar Exclusão de ' + event.name"
+                                                        :key="index" :modal-title="'Confirmar Exclusão de ' + event.name"
                                                         :ok-botton-callback="deleteEvent"
                                                         :ok-botton-callback-param="event.id"
                                                         btn-class="btn btn-danger btn-icon-split">

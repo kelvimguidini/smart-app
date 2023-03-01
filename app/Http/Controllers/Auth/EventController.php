@@ -166,7 +166,7 @@ class EventController extends Controller
                     'sector' => $request->sector,
                     'pax_base' => $request->paxBase,
                     'cost_center' => $request->cc,
-                    'date_final' => $request->date_final,
+                    'date' => $request->date,
                     'date_final' => $request->date_final,
                     'crd_id' => $request->crd_id,
                     'hotel_operator' => $request->hotel_operator,
