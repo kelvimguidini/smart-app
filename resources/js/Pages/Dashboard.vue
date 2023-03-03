@@ -4,7 +4,6 @@ import { Head } from '@inertiajs/inertia-vue3';
 </script>
 
 <template>
-
     <Head title="Dashboard" />
 
     <AuthenticatedLayout>
@@ -21,7 +20,7 @@ import { Head } from '@inertiajs/inertia-vue3';
                         {{ $page.props.auth.user }}
                     </div>
                     <div class="p-6 bg-white border-b border-gray-200">
-                        {{ $page.props.auth.permissions }}
+
                     </div>
                 </div>
             </div>

@@ -126,6 +126,22 @@ const sumTaxes = (evho, taxType) => {
     return sum;
 }
 //FIM FUNÇÕES GERAIS
+const formDelete = useForm({
+    id: 0
+});
+
+const deleteEventHotel = (id) => {
+    isLoader.value = true;
+    formDelete.id = id;
+    formDelete.delete(route('event-hotel-delete'), {
+        onFinish: () => {
+            isLoader.value = false;
+            formDelete.reset()
+            props.mountCallBack();
+            newEventHotel();
+        },
+    });
+};
 
 const showDetails = ref(false);
 </script>
@@ -136,60 +152,19 @@ const showDetails = ref(false);
         <PrimaryButton type="button" css-class="btn btn-success btn-sm btn-icon-split mr-2"
             :title="showDetails ? 'Ocultar' : 'Exibir'" v-on:click="showDetails = !showDetails">
             <span class="icon text-white-50">
-                <i class="fas" v-bind:class="{ 'fa-eye-slash': showDetails, 'fa-eye': !showDetails }"></i>
+                <i class="fas" v-bind:class="{ 'fa-eye': showDetails, 'fa-eye-slash': !showDetails }"></i>
             </span>
-            <span class="text">{{ showDetails ? 'Ocultar' : 'Exibir' }} Detalhes</span>
+            <span class="text m2">{{ showDetails ? 'Ocultar' : 'Exibir' }} Detalhes</span>
         </PrimaryButton>
         <div class="table-responsive">
             <table class="table table-sm table-bordered text-center" width="100%" cellspacing="0">
-                <thead class="thead-dark">
-                    <tr>
-                        <th class="align-middle" rowspan="2" scope="col">Broker</th>
-                        <th class="align-middle" rowspan="2" scope="col">Regime</th>
-                        <th class="align-middle" rowspan="2" scope="col">Proposito</th>
-                        <th class="align-middle" rowspan="2" scope="col">CAT.</th>
-                        <th class="align-middle" rowspan="2" scope="col">APTO</th>
-                        <th class="align-middle" rowspan="2" scope="col">IN</th>
-                        <th class="align-middle" rowspan="2" scope="col">OUT</th>
-                        <th class="align-middle" rowspan="2" scope="col">QTD</th>
-                        <th class="align-middle" rowspan="2" scope="col">NTS</th>
-                        <th class="align-middle" rowspan="2" scope="col">Comissão (%)</th>
-                        <th colspan="2" class="  align-middle" scope="col">Valor de Venda</th>
-                        <th colspan="2" class="align-middle" scope="col">Valor de Custo</th>
-                        <th class="align-middle" rowspan="2" scope="col">Proposta Recebida</th>
-                        <th class="align-middle" rowspan="2" scope="col">%</th>
-                        <template v-if="showDetails">
-                            <th colspan="3" class="align-middle" scope="col">Comparativo</th>
-                            <th colspan="6" class="align-middle" scope="col">
-                                IMPOSTOS DESTACADOS POR SERVIÇOS
-                            </th>
-                        </template>
-                        <th class="align-middle" rowspan="2" scope="col"></th>
-                    </tr>
-                    <tr>
-                        <th class="align-middle">Unidade</th>
-                        <th class="align-middle">Total</th>
-                        <th class="align-middle">Unidade</th>
-                        <th class="align-middle">Custo TTL</th>
-                        <template v-if="showDetails">
-                            <th class="align-middle">Trivago</th>
-                            <th class="align-middle">Website HTL</th>
-                            <th class="align-middle">Omnibess</th>
-                            <th class="align-middle">{{ eventHotel != null ? eventHotel.percentISS : 0 }}%</th>
-                            <th class="align-middle">ISS</th>
-                            <th class="align-middle">{{ eventHotel != null ? eventHotel.percentIService : 0 }}%</th>
-                            <th class="align-middle">Servico</th>
-                            <th class="align-middle">{{ eventHotel != null ? eventHotel.percentIVA : 0 }}%</th>
-                            <th class="align-middle">IVA</th>
-                        </template>
-                    </tr>
-                </thead>
+
                 <tbody>
                     <template v-for="(evho, index) in eventHotels" :key="evho.id">
 
                         <tr class="bg-light text-dark thead-dark">
                             <th class="text-left" :colspan="showDetails ? 24 : 15">
-                                Hotel {{ index + 1 }} || {{ evho.hotel.name }} || {{ evho.hotel.national
+                                Hotel {{ index + 1 }} | {{ evho.hotel.name }} |v {{ evho.hotel.national
                                     ?
                                     "Nacional" : "Internacional" }}
                                 {{ evho.hotel.city }}
@@ -202,7 +177,65 @@ const showDetails = ref(false);
                                 </span>
                                 <span class="text">Editar</span>
                                 </Link>
+
+                                <Modal :key="index" :modal-title="'Confirmar Remoção'"
+                                    :ok-botton-callback="deleteEventHotel" :ok-botton-callback-param="evho.id"
+                                    btn-class="btn btn-danger btn-icon-split">
+                                    <template v-slot:button>
+                                        <span class="icon text-white-50">
+                                            <i class="fas fa-trash"></i>
+                                        </span>
+                                        <span class="text">Excluir</span>
+                                    </template>
+                                    <template v-slot:content>
+                                        Tem certeza que deseja remover o hotel {{
+                                            evho.hotel.name
+                                        }}
+                                        do evento {{ evho.event.name }}
+                                    </template>
+                                </Modal>
                             </th>
+                        </tr>
+
+                        <tr class="thead-dark">
+                            <th class="align-middle" rowspan="2" scope="col">Broker</th>
+                            <th class="align-middle" rowspan="2" scope="col">Regime</th>
+                            <th class="align-middle" rowspan="2" scope="col">Proposito</th>
+                            <th class="align-middle" rowspan="2" scope="col">CAT.</th>
+                            <th class="align-middle" rowspan="2" scope="col">APTO</th>
+                            <th class="align-middle" rowspan="2" scope="col">IN</th>
+                            <th class="align-middle" rowspan="2" scope="col">OUT</th>
+                            <th class="align-middle" rowspan="2" scope="col">QTD</th>
+                            <th class="align-middle" rowspan="2" scope="col">NTS</th>
+                            <th class="align-middle" rowspan="2" scope="col">Comissão (%)</th>
+                            <th colspan="2" class="  align-middle" scope="col">Valor de Venda</th>
+                            <th colspan="2" class="align-middle" scope="col">Valor de Custo</th>
+                            <th class="align-middle" rowspan="2" scope="col">Proposta Recebida</th>
+                            <th class="align-middle" rowspan="2" scope="col">%</th>
+                            <template v-if="showDetails">
+                                <th colspan="3" class="align-middle" scope="col">Comparativo</th>
+                                <th colspan="6" class="align-middle" scope="col">
+                                    IMPOSTOS DESTACADOS POR SERVIÇOS
+                                </th>
+                            </template>
+                            <th class="align-middle" rowspan="2" scope="col"></th>
+                        </tr>
+                        <tr class="thead-dark">
+                            <th class="align-middle">Unidade</th>
+                            <th class="align-middle">Total</th>
+                            <th class="align-middle">Unidade</th>
+                            <th class="align-middle">Custo TTL</th>
+                            <template v-if="showDetails">
+                                <th class="align-middle">Trivago</th>
+                                <th class="align-middle">Website HTL</th>
+                                <th class="align-middle">Omnibess</th>
+                                <th class="align-middle">{{ eventHotel != null ? eventHotel.percentISS : 0 }}%</th>
+                                <th class="align-middle">ISS</th>
+                                <th class="align-middle">{{ eventHotel != null ? eventHotel.percentIService : 0 }}%</th>
+                                <th class="align-middle">Servico</th>
+                                <th class="align-middle">{{ eventHotel != null ? eventHotel.percentIVA : 0 }}%</th>
+                                <th class="align-middle">IVA</th>
+                            </template>
                         </tr>
 
                         <!-- Opt TRs -->

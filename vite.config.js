@@ -24,16 +24,15 @@ export default defineConfig({
         noExternal: ['@inertiajs/server'],
     },
     server: {
-        host: '0.0.0.0',
-        hmr: {
-            host: 'localhost',
-        }, watch: {
-            usePolling: true,
-        },
-        proxy: {
-            "/smart-app/public/": {
-                target: "https://dev.eventos.com.br",
-            }
-        }
+        // host: '0.0.0.0',
+        hmr: true,
+        // watch: {
+        //     usePolling: true,
+        // },
+        // proxy: {
+        //     "/smart-app/public/": {
+        //         target: "https://dev.eventos.com.br",
+        //     }
+        // }
     },
 });
