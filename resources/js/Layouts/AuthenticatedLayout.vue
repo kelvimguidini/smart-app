@@ -95,10 +95,24 @@ const menuItem = [
         ],
     },
     {
-        name: 'Cadastro Fornecedor',
-        icon: 'fa fa-concierge-bell',
+        name: 'Cadastro p/ Fornecedor',
+        icon: 'fa fa-hotel',
         isItem: false,
         collapseHeader: 'Auxiliares de Fornecedor',
+        subMenu: [
+            {
+                link: route().current('broker') ? '' : route('broker'),
+                name: 'Broker',
+                active: route().current('broker'),
+                role: ['broker_admin']
+            }
+        ],
+    },
+    {
+        name: 'Cadastro p/ Hotel',
+        icon: 'fa fa-bed',
+        isItem: false,
+        collapseHeader: 'Auxiliares de Hotel',
         subMenu: [
             {
                 link: route().current('apto') ? '' : route('apto'),
@@ -119,24 +133,46 @@ const menuItem = [
                 role: ['regime_admin']
             },
             {
-                link: route().current('broker') ? '' : route('broker'),
-                name: 'Broker',
-                active: route().current('broker'),
-                role: ['broker_admin']
-            },
-            {
                 link: route().current('purpose') ? '' : route('purpose'),
                 name: 'Propósito',
                 active: route().current('purpose'),
                 role: ['purpose_admin']
             },
+        ],
+    },
+    {
+        name: 'Cadastros p/ A&B',
+        icon: 'fa fa-utensils',
+        isItem: false,
+        collapseHeader: 'Auxiliares de A&B',
+        subMenu: [
             {
-                link: route().current('hotel') ? '' : route('hotel'),
-                name: 'Fornecedor',
-                active: route().current('hotel'),
-                role: ['event_admin', 'hotel_operator']
+                link: route().current('local') ? '' : route('local'),
+                name: 'Local',
+                active: route().current('local'),
+                role: ['local_admin']
+            },
+            {
+                link: route().current('service') ? '' : route('service'),
+                name: 'Serviço',
+                active: route().current('service'),
+                role: ['service_admin']
+            },
+            {
+                link: route().current('service-type') ? '' : route('service-type'),
+                name: 'Tipo de Serviço',
+                active: route().current('service-type'),
+                role: ['service_type_admin']
             },
         ],
+    },
+    {
+        link: route().current('hotel') ? '' : route('hotel'),
+        name: 'Fornecedor',
+        icon: 'fa fa-building',
+        active: route().current('hotel'),
+        isItem: true,
+        role: ['event_admin', 'hotel_operator']
     },
     {
         name: 'Eventos',

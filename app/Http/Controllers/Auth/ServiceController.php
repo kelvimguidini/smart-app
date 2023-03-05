@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Broker;
+use App\Models\Service;
 use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
 
-class BrokerController extends Controller
+class ServiceController extends Controller
 {
     /**
      * Display the registration view.
@@ -18,13 +18,13 @@ class BrokerController extends Controller
      */
     public function create()
     {
-        if (!Gate::allows('broker_admin')) {
+        if (!Gate::allows('service_admin')) {
             abort(403);
         }
 
-        $t = Broker::all();
-        return Inertia::render('Auth/Auxiliaries/Broker', [
-            'brokers' => $t
+        $t = Service::all();
+        return Inertia::render('Auth/Auxiliaries/Service', [
+            'services' => $t
         ]);
     }
 
@@ -38,7 +38,7 @@ class BrokerController extends Controller
      */
     public function store(Request $request)
     {
-        if (!Gate::allows('broker_admin')) {
+        if (!Gate::allows('service_admin')) {
             abort(403);
         }
 
@@ -49,20 +49,20 @@ class BrokerController extends Controller
 
             if ($request->id > 0) {
 
-                $broker = Broker::find($request->id);
+                $obj = Service::find($request->id);
 
-                $broker->name = $request->name;
-                $broker->save();
+                $obj->name = $request->name;
+                $obj->save();
             } else {
 
-                $broker = Broker::create([
+                $obj = Service::create([
                     'name' => $request->name
                 ]);
             }
         } catch (Exception $e) {
             throw $e;
         }
-        return redirect()->route('broker')->with('flash', ['message' => trans('Registro salvo com sucesso'), 'type' => 'success']);
+        return redirect()->route('service')->with('flash', ['message' => trans('Registro salvo com sucesso'), 'type' => 'success']);
     }
 
     /**
@@ -72,12 +72,12 @@ class BrokerController extends Controller
      */
     public function delete(Request $request)
     {
-        if (!Gate::allows('broker_admin')) {
+        if (!Gate::allows('service_admin')) {
             abort(403);
         }
         try {
 
-            $r = Broker::find($request->id);
+            $r = Service::find($request->id);
 
             $r->delete();
         } catch (Exception $e) {
@@ -85,6 +85,6 @@ class BrokerController extends Controller
             throw $e;
         }
 
-        return redirect()->route('broker')->with('flash', ['message' => trans('Registro apagado com sucesso!'), 'type' => 'success']);
+        return redirect()->route('service')->with('flash', ['message' => trans('Registro apagado com sucesso!'), 'type' => 'success']);
     }
 }

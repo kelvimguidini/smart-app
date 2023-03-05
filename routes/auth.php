@@ -12,6 +12,7 @@ use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\EventController;
 use App\Http\Controllers\Auth\HotelController;
+use App\Http\Controllers\Auth\LocalController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\ProfileUserController;
@@ -19,6 +20,8 @@ use App\Http\Controllers\Auth\PurposeController;
 use App\Http\Controllers\Auth\RegimeController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\RoleController;
+use App\Http\Controllers\Auth\ServiceController;
+use App\Http\Controllers\Auth\ServiceTypeController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
@@ -161,6 +164,39 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     Route::delete('broker-delete', [BrokerController::class, 'delete'])
         ->name('broker-delete');
+
+
+
+    Route::get('local', [LocalController::class, 'create'])
+        ->name('local');
+
+    Route::post('local-save', [LocalController::class, 'store'])
+        ->name('local-save');
+
+    Route::delete('local-delete', [LocalController::class, 'delete'])
+        ->name('local-delete');
+
+
+    Route::get('service', [ServiceController::class, 'create'])
+        ->name('service');
+
+    Route::post('service-save', [ServiceController::class, 'store'])
+        ->name('service-save');
+
+    Route::delete('service-delete', [ServiceController::class, 'delete'])
+        ->name('service-delete');
+
+
+
+    Route::get('service-type', [ServiceTypeController::class, 'create'])
+        ->name('service-type');
+
+    Route::post('service-type-save', [ServiceTypeController::class, 'store'])
+        ->name('service-type-save');
+
+    Route::delete('service-type-delete', [ServiceTypeController::class, 'delete'])
+        ->name('service-type-delete');
+
 
 
     Route::get('currency', [CurrencyController::class, 'create'])
