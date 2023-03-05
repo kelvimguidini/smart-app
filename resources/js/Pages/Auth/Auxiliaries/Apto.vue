@@ -95,7 +95,7 @@ const submit = () => {
                                         </div>
                                     </div>
                                     <div class="flex items-center justify-end mt-4 rigth">
-                                        <PrimaryButton css-class="btn btn-primary float-right"
+                                        <PrimaryButton css-class="btn btn-primary float-right m-1"
                                             :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                                             <span v-if="form.processing" class="spinner-border spinner-border-sm"
                                                 role="status" aria-hidden="true"></span>
@@ -140,10 +140,8 @@ const submit = () => {
                                                         <span class="text">Editar</span>
                                                     </button>
 
-                                                    <Modal :key="index"
-                                                        :modal-title="'Confirmar Exclusão de ' + apto.name"
-                                                        :ok-botton-callback="deleteApto"
-                                                        :ok-botton-callback-param="apto.id"
+                                                    <Modal :key="index" :modal-title="'Confirmar Exclusão de ' + apto.name"
+                                                        :ok-botton-callback="deleteApto" :ok-botton-callback-param="apto.id"
                                                         btn-class="btn btn-danger btn-icon-split">
                                                         <template v-slot:button>
                                                             <span class="icon text-white-50">

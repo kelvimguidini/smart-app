@@ -421,7 +421,7 @@ const duplicate = (opt) => {
                                 </div>
                             </div>
                             <div class="flex items-center justify-end mt-4 rigth">
-                                <PrimaryButton css-class="btn btn-primary float-right"
+                                <PrimaryButton css-class="btn btn-primary float-right m-1"
                                     :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                                     <span v-if="form.processing" class="spinner-border spinner-border-sm" role="status"
                                         aria-hidden="true"></span>
@@ -505,12 +505,33 @@ const duplicate = (opt) => {
                         </li>
                     </ul>
                     <div id="table">
+                        <ListHotelFull :event-hotel="eventHotel" :event-hotels="eventHotels" :edit-opt="editOpt"
+                            :duplicate="duplicate" :delete-opt="deleteOpt"></ListHotelFull>
                     </div>
 
                     <div id="form-ab" class="card mb-4 py-3 border-left-primary">
+                        <div class="card-body">
+                            <FormProvider :event-hotel="eventHotel" :currencies="currencies" :hotels="hotels"
+                                :select-hotel-call-back="selectHotel" :event-id="event.id" :mount-call-back="mount">
+                            </FormProvider>
+                        </div>
                     </div>
 
                     <div v-if="eventHotel != null && eventHotel.id > 0" id="ab-opt">
+                        <div class="row">
+                            <div class="col">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <FormProviderOpt :event-hotel="eventHotel" :brokers="brokers" :regimes="regimes"
+                                            :purposes="purposes" :cats-hotel="catsHotel" :aptos-hotel="aptosHotel"
+                                            :select-hotel-call-back="selectHotel" ref="formProviderOptRef"
+                                            :hotel-selected="hotelSelected">
+                                        </FormProviderOpt>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
                     </div>
 
                 </div>

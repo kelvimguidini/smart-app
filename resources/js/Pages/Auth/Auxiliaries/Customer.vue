@@ -135,9 +135,8 @@ const submit = () => {
                                         <div class="col">
                                             <div class="form-group">
                                                 <InputLabel for="document" value="CPF/CNPJ:" />
-                                                <TextInput type="text" class="form-control document"
-                                                    v-model="form.document" required autofocus
-                                                    autocomplete="document" />
+                                                <TextInput type="text" class="form-control document" v-model="form.document"
+                                                    required autofocus autocomplete="document" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.document" />
                                             </div>
                                         </div>
@@ -156,8 +155,8 @@ const submit = () => {
                                         <div class="col">
                                             <div class="form-group">
                                                 <InputLabel for="email" value="E-mail:" />
-                                                <TextInput type="text" class="form-control" v-model="form.email"
-                                                    required autofocus autocomplete="email" />
+                                                <TextInput type="text" class="form-control" v-model="form.email" required
+                                                    autofocus autocomplete="email" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.email" />
                                             </div>
                                         </div>
@@ -199,14 +198,13 @@ const submit = () => {
                                         </div>
                                     </div>
                                     <div class="flex items-center justify-end mt-4 rigth">
-                                        <PrimaryButton css-class="btn btn-primary float-right"
+                                        <PrimaryButton css-class="btn btn-primary float-right m-1"
                                             :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                                             <span v-if="form.processing" class="spinner-border spinner-border-sm"
                                                 role="status" aria-hidden="true"></span>
                                             Salvar
                                         </PrimaryButton>
-                                        <PrimaryButton v-if="customerInEdition > 0"
-                                            css-class="btn btn-info float-right m-1"
+                                        <PrimaryButton v-if="customerInEdition > 0" css-class="btn btn-info float-right m-1"
                                             v-on:click="form.reset(); customerInEdition = 0; previewImage = null"
                                             :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                                             Novo

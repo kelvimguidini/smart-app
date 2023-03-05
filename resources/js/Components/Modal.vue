@@ -61,6 +61,4 @@ const id = 'modal-' + Math.floor(Date.now() * Math.random()).toString(36)
             </div>
         </div>
     </div>
-
-
 </template>

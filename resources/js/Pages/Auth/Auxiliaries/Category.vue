@@ -97,7 +97,7 @@ const submit = () => {
 
                                     </div>
                                     <div class="flex items-center justify-end mt-4 rigth">
-                                        <PrimaryButton css-class="btn btn-primary float-right"
+                                        <PrimaryButton css-class="btn btn-primary float-right m-1"
                                             :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                                             <span v-if="form.processing" class="spinner-border spinner-border-sm"
                                                 role="status" aria-hidden="true"></span>

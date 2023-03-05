@@ -134,14 +134,13 @@ const submit = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <InputError class="mt-2 text-danger"
-                                                    :message="form.errors.permissions" />
+                                                <InputError class="mt-2 text-danger" :message="form.errors.permissions" />
                                             </div>
 
                                         </div>
                                     </div>
                                     <div class="flex items-center justify-end mt-4 rigth">
-                                        <PrimaryButton css-class="btn btn-primary float-right"
+                                        <PrimaryButton css-class="btn btn-primary float-right m-1"
                                             :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                                             <span v-if="form.processing" class="spinner-border spinner-border-sm"
                                                 role="status" aria-hidden="true"></span>
@@ -217,10 +216,8 @@ const submit = () => {
                                                     </Modal>
 
 
-                                                    <Modal :key="index"
-                                                        :modal-title="'Confirmar Exclusão de ' + role.name"
-                                                        :ok-botton-callback="deleteRole"
-                                                        :ok-botton-callback-param="role.id"
+                                                    <Modal :key="index" :modal-title="'Confirmar Exclusão de ' + role.name"
+                                                        :ok-botton-callback="deleteRole" :ok-botton-callback-param="role.id"
                                                         btn-class="btn btn-danger btn-icon-split">
                                                         <template v-slot:button>
                                                             <span class="icon text-white-50">

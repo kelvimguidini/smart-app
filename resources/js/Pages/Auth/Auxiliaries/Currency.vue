@@ -100,8 +100,8 @@ const submit = () => {
                                         <div class="col">
                                             <div class="form-group">
                                                 <InputLabel for="sigla" value="Sigla:" />
-                                                <TextInput type="text" class="form-control" v-model="form.sigla"
-                                                    required autofocus autocomplete="symsiglabol" />
+                                                <TextInput type="text" class="form-control" v-model="form.sigla" required
+                                                    autofocus autocomplete="symsiglabol" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.sigla" />
                                             </div>
                                         </div>
@@ -109,14 +109,14 @@ const submit = () => {
                                         <div class="col">
                                             <div class="form-group">
                                                 <InputLabel for="symbol" value="Símbolo:" />
-                                                <TextInput type="text" class="form-control" v-model="form.symbol"
-                                                    required autofocus autocomplete="symbol" />
+                                                <TextInput type="text" class="form-control" v-model="form.symbol" required
+                                                    autofocus autocomplete="symbol" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.symbol" />
                                             </div>
                                         </div>
                                     </div>
                                     <div class="flex items-center justify-end mt-4 rigth">
-                                        <PrimaryButton css-class="btn btn-primary float-right"
+                                        <PrimaryButton css-class="btn btn-primary float-right m-1"
                                             :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                                             <span v-if="form.processing" class="spinner-border spinner-border-sm"
                                                 role="status" aria-hidden="true"></span>

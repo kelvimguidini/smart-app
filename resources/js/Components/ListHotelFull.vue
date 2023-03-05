@@ -3,6 +3,11 @@ import { Link } from '@inertiajs/inertia-vue3';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import Modal from '@/Components/Modal.vue';
 import { ref } from 'vue';
+import { useForm } from '@inertiajs/inertia-vue3';
+import Loader from '@/Components/Loader.vue';
+
+const isLoader = ref(false);
+
 const props = defineProps({
     eventHotels: {
         type: Array,
@@ -148,8 +153,10 @@ const showDetails = ref(false);
 
 
 <template>
+    <Loader v-bind:show="isLoader"></Loader>
+
     <div class="row">
-        <PrimaryButton type="button" css-class="btn btn-success btn-sm btn-icon-split mr-2"
+        <PrimaryButton type="button" css-class="btn btn-success btn-sm btn-icon-split m-1"
             :title="showDetails ? 'Ocultar' : 'Exibir'" v-on:click="showDetails = !showDetails">
             <span class="icon text-white-50">
                 <i class="fas" v-bind:class="{ 'fa-eye': showDetails, 'fa-eye-slash': !showDetails }"></i>
@@ -163,14 +170,14 @@ const showDetails = ref(false);
                     <template v-for="(evho, index) in eventHotels" :key="evho.id">
 
                         <tr class="bg-light text-dark thead-dark">
-                            <th class="text-left" :colspan="showDetails ? 24 : 15">
-                                Hotel {{ index + 1 }} | {{ evho.hotel.name }} |v {{ evho.hotel.national
+                            <th class="text-left" :colspan="showDetails ? 23 : 14">
+                                Hotel {{ index + 1 }} | {{ evho.hotel.name }} | {{ evho.hotel.national
                                     ?
                                     "Nacional" : "Internacional" }}
                                 {{ evho.hotel.city }}
                             </th>
-                            <th class="align-middle text-right" colspan="2">
-                                <Link class="btn btn-info btn-sm btn-icon-split mr-2"
+                            <th class="align-middle text-right" colspan="3">
+                                <Link class="btn btn-info btn-sm btn-icon-split"
                                     :href="route('event-edit', { 'id': evho.event_id, 'tab': 1, 'ehotel': evho.id })">
                                 <span class="icon text-white-50">
                                     <i class="fas fa-edit"></i>
@@ -178,9 +185,9 @@ const showDetails = ref(false);
                                 <span class="text">Editar</span>
                                 </Link>
 
-                                <Modal :key="index" :modal-title="'Confirmar Remoção'"
-                                    :ok-botton-callback="deleteEventHotel" :ok-botton-callback-param="evho.id"
-                                    btn-class="btn btn-danger btn-icon-split">
+                                <Modal modal-title="Confirmar Remoção" :ok-botton-callback="deleteEventHotel"
+                                    :ok-botton-callback-param="evho.id"
+                                    btn-class="btn btn-sm btn-danger btn-icon-split m-1">
                                     <template v-slot:button>
                                         <span class="icon text-white-50">
                                             <i class="fas fa-trash"></i>
@@ -190,8 +197,7 @@ const showDetails = ref(false);
                                     <template v-slot:content>
                                         Tem certeza que deseja remover o hotel {{
                                             evho.hotel.name
-                                        }}
-                                        do evento {{ evho.event.name }}
+                                        }} do evento {{ evho.event.name }}
                                     </template>
                                 </Modal>
                             </th>
@@ -404,7 +410,7 @@ const showDetails = ref(false);
                         </tr>
 
                         <tr>
-                            <td class="align-middle text-dark" colspan="3">
+                            <td class="align-middle text-dark text-left" colspan="3">
                                 OBSERVAÇÃO INTERNA:
                             </td>
                             <td class="align-middle text-dark text-left" colspan="13">
@@ -435,7 +441,7 @@ const showDetails = ref(false);
                         </tr>
 
                         <tr>
-                            <td class="align-middle text-dark" colspan="3">
+                            <td class="align-middle text-dark text-left" colspan="3">
                                 OBSERVAÇÃO CLIENTE:
                             </td>
                             <td class="align-middle text-dark text-left" colspan="13">

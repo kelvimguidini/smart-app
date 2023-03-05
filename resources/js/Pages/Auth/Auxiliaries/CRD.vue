@@ -142,7 +142,7 @@ const submit = () => {
                                         </div>
                                     </div>
                                     <div class="flex items-center justify-end mt-4 rigth">
-                                        <PrimaryButton css-class="btn btn-primary float-right"
+                                        <PrimaryButton css-class="btn btn-primary float-right m-1"
                                             :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                                             <span v-if="form.processing" class="spinner-border spinner-border-sm"
                                                 role="status" aria-hidden="true"></span>
@@ -183,18 +183,15 @@ const submit = () => {
                                                 <td>{{ crd.number }}</td>
                                                 <td>{{ crd.customer.name }}</td>
                                                 <td>
-                                                    <button class="btn btn-info btn-icon-split mr-2"
-                                                        v-on:click="edit(crd)">
+                                                    <button class="btn btn-info btn-icon-split mr-2" v-on:click="edit(crd)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-edit"></i>
                                                         </span>
                                                         <span class="text">Editar</span>
                                                     </button>
 
-                                                    <Modal :key="index"
-                                                        :modal-title="'Confirmar Exclusão de ' + crd.name"
-                                                        :ok-botton-callback="deleteCRD"
-                                                        :ok-botton-callback-param="crd.id"
+                                                    <Modal :key="index" :modal-title="'Confirmar Exclusão de ' + crd.name"
+                                                        :ok-botton-callback="deleteCRD" :ok-botton-callback-param="crd.id"
                                                         btn-class="btn btn-danger btn-icon-split">
                                                         <template v-slot:button>
                                                             <span class="icon text-white-50">
