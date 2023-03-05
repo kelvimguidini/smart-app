@@ -10,8 +10,8 @@ import { ref, onMounted } from 'vue';
 import Datepicker from 'vue3-datepicker';
 import { ptBR } from 'date-fns/locale';
 import ListHotelFull from '@/Components/ListHotelFull.vue';
-import FormProvider from '@/Components/FormProvider.vue';
-import FormProviderOpt from '@/Components/FormProviderOpt.vue';
+import FormProviderHotel from '@/Components/FormProviderHotel.vue';
+import FormProviderHotelOpt from '@/Components/FormProviderHotelOpt.vue';
 
 
 const props = defineProps({
@@ -460,9 +460,9 @@ const duplicate = (opt) => {
 
                     <div id="form-hotel" class="card mb-4 py-3 border-left-primary">
                         <div class="card-body">
-                            <FormProvider :event-hotel="eventHotel" :currencies="currencies" :hotels="hotels"
+                            <FormProviderHotel :event-hotel="eventHotel" :currencies="currencies" :hotels="hotels"
                                 :select-hotel-call-back="selectHotel" :event-id="event.id" :mount-call-back="mount">
-                            </FormProvider>
+                            </FormProviderHotel>
                         </div>
                     </div>
 
@@ -471,11 +471,11 @@ const duplicate = (opt) => {
                             <div class="col">
                                 <div class="card">
                                     <div class="card-body">
-                                        <FormProviderOpt :event-hotel="eventHotel" :brokers="brokers" :regimes="regimes"
-                                            :purposes="purposes" :cats-hotel="catsHotel" :aptos-hotel="aptosHotel"
-                                            :select-hotel-call-back="selectHotel" ref="formProviderOptRef"
-                                            :hotel-selected="hotelSelected">
-                                        </FormProviderOpt>
+                                        <FormProviderHotelOpt :event-hotel="eventHotel" :brokers="brokers"
+                                            :regimes="regimes" :purposes="purposes" :cats-hotel="catsHotel"
+                                            :aptos-hotel="aptosHotel" :select-hotel-call-back="selectHotel"
+                                            ref="formProviderOptRef" :hotel-selected="hotelSelected">
+                                        </FormProviderHotelOpt>
                                     </div>
                                 </div>
 
