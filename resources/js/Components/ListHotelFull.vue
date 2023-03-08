@@ -2,7 +2,7 @@
 import { Link } from '@inertiajs/inertia-vue3';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import Modal from '@/Components/Modal.vue';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useForm } from '@inertiajs/inertia-vue3';
 import Loader from '@/Components/Loader.vue';
 
@@ -29,7 +29,17 @@ const props = defineProps({
         type: Function,
         default: null,
     },
+    mountCallBack: {
+        type: Function,
+        default: null,
+    },
+    newEventHotel: {
+        type: Function,
+        default: null,
+    },
 });
+
+
 
 //FUNÇÕES GERAIS
 const daysBetween = (date1, date2) => {
@@ -132,18 +142,20 @@ const sumTaxes = (evho, taxType) => {
 }
 //FIM FUNÇÕES GERAIS
 const formDelete = useForm({
-    id: 0
+    id: 0,
+    event_id: 0
 });
 
-const deleteEventHotel = (id) => {
+const deleteEventHotel = (data) => {
     isLoader.value = true;
-    formDelete.id = id;
+    formDelete.id = data.id;
+    formDelete.event_id = data.event_id;
     formDelete.delete(route('event-hotel-delete'), {
         onFinish: () => {
             isLoader.value = false;
             formDelete.reset()
             props.mountCallBack();
-            newEventHotel();
+            props.newEventHotel('hotel');
         },
     });
 };
@@ -156,7 +168,7 @@ const showDetails = ref(false);
     <Loader v-bind:show="isLoader"></Loader>
 
     <div class="row">
-        <PrimaryButton type="button" css-class="btn btn-success btn-sm btn-icon-split m-1"
+        <PrimaryButton v-if="eventHotels.length > 0" type="button" css-class="btn btn-success btn-sm btn-icon-split m-1"
             :title="showDetails ? 'Ocultar' : 'Exibir'" v-on:click="showDetails = !showDetails">
             <span class="icon text-white-50">
                 <i class="fas" v-bind:class="{ 'fa-eye': showDetails, 'fa-eye-slash': !showDetails }"></i>
@@ -186,7 +198,7 @@ const showDetails = ref(false);
                                 </Link>
 
                                 <Modal modal-title="Confirmar Remoção" :ok-botton-callback="deleteEventHotel"
-                                    :ok-botton-callback-param="evho.id"
+                                    :ok-botton-callback-param="{ 'id': evho.id, 'event_id': evho.event_id }"
                                     btn-class="btn btn-sm btn-danger btn-icon-split m-1">
                                     <template v-slot:button>
                                         <span class="icon text-white-50">
@@ -195,9 +207,9 @@ const showDetails = ref(false);
                                         <span class="text">Excluir</span>
                                     </template>
                                     <template v-slot:content>
-                                        Tem certeza que deseja remover o hotel {{
+                                        <span class="text-dark text-left">Tem certeza que deseja remover o hotel {{
                                             evho.hotel.name
-                                        }} do evento {{ evho.event.name }}
+                                        }} do evento {{ evho.event.name }}</span>
                                     </template>
                                 </Modal>
                             </th>
@@ -350,18 +362,18 @@ const showDetails = ref(false);
                         </tr>
                         <!-- FIM Opt TRs -->
                         <tr>
-                            <td class="align-middle bg-warning text-dark">
+                            <td class="align-middle bg-warning text-dark text-rigth">
                                 Diária Média:
                             </td>
                             <td class="align-middle bg-warning text-dark">
                                 {{ formatCurrency(average(evho)) }}
                             </td>
                             <td class="align-middle"></td>
-                            <td class="align-middle bg-warning text-dark" colspan="2">
+                            <td class="align-middle bg-warning text-dark text-rigth" colspan="2">
                                 Room Nights:
                             </td>
                             <td class="align-middle">{{ roomNights(evho) }}</td>
-                            <td class="align-middle"># Aptos:</td>
+                            <td class="align-middle text-rigth"># Aptos:</td>
                             <td class="align-middle">{{ sumCount(evho) }}</td>
                             <td class="align-middle bg-warning text-dark">
                                 {{ sumNts(evho) }}
@@ -372,13 +384,13 @@ const showDetails = ref(false);
                             <td class="align-middle bg-success text-white">
                                 {{ formatCurrency(sumSale(evho)) }}
                             </td>
-                            <td class="align-middle bg-warning text-dark">
+                            <td class="align-middle bg-warning text-dark text-rigth">
                                 Total Custo
                             </td>
                             <td class="align-middle bg-warning text-dark">
                                 {{ formatCurrency(sumCost(evho)) }}
                             </td>
-                            <td class="align-middle bg-warning text-dark">
+                            <td class="align-middle bg-warning text-dark text-rigth">
                                 Média %
                             </td>
                             <td class="align-middle bg-warning text-dark">

@@ -10,7 +10,7 @@ class EventAB extends Model
     use SoftDeletes;
 
     protected $fillable = ['event_id', 'ab_id', 'currency_id', 'iss_percent', 'service_percent', 'iva_percent', 'invoice', 'internal_observation', 'customer_observation'];
-    protected $table = 'ab';
+    protected $table = 'event_ab';
 
 
     /**
@@ -102,8 +102,8 @@ class EventAB extends Model
         return $this->hasOne(Currency::class,  'id', 'currency_id');
     }
 
-    public function eventAbsOpt()
+    public function eventAbOpts()
     {
-        return $this->hasMany(EventAbOpt::class);
+        return $this->hasMany(EventAbOpt::class, 'event_ab_id', 'id');
     }
 }

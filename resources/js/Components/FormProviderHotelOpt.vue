@@ -183,6 +183,13 @@ onMounted(() => {
         formOpt.event_hotel_id = props.eventHotel.id;
     }
     formOpt.hotel_id = props.hotelSelected;
+
+    let symbol = 'R$ ';
+    if (props.eventHotel != null) {
+        symbol = props.eventHotel.currency.symbol + ' ';
+    }
+    $('.money').maskMoney({ prefix: symbol, allowNegative: false, thousands: '.', decimal: ',', affixesStay: true });
+
 });
 
 const catsHotel = ref(props.catsHotel);
@@ -195,7 +202,6 @@ watch(
         aptosHotel: props.aptosHotel
     }),
     (newValues, oldValues) => {
-        console.log(newValues);
         if (newValues.hotelSelected != oldValues.hotelSelected) {
             formOpt.hotel_id = newValues.hotelSelected;
         }

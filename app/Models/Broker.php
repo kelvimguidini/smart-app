@@ -32,4 +32,9 @@ class Broker extends Model
     {
         return $this->belongsTo(EventHotelOpt::class);
     }
+
+    public function event_abs_opt()
+    {
+        return $this->belongsTo(EventABOpt::class);
+    }
 }

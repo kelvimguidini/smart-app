@@ -8,11 +8,15 @@ use App\Models\CRD;
 use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\Event;
+use App\Models\EventAB;
 use App\Models\EventHotel;
 use App\Models\Hotel;
+use App\Models\Local;
 use App\Models\Provider;
 use App\Models\Purpose;
 use App\Models\Regime;
+use App\Models\Service;
+use App\Models\ServiceType;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -76,31 +80,43 @@ class EventController extends Controller
         $crds = CRD::with("customer")->get();
         $customers = Customer::all();
         $users = User::all();
-        $hotels = Provider::with("categories")->with("aptos")->get();
+        $providers = Provider::with("categories")->with("aptos")->get();
 
         $brokers = Broker::all();
         $currencies = Currency::all();
         $regimes = Regime::all();
         $purposes = Purpose::all();
 
+        $services = Service::all();
+        $servicesType = ServiceType::all();
+        $locals = Local::all();
+
         $users = User::all();
 
-        $eventHotel = EventHotel::with(['eventHotelsOpt', 'hotel', 'currency', 'event'])->find($request->ehotel);
+        $eventHotel = $request->tab == 1 ? EventHotel::with(['eventHotelsOpt', 'hotel', 'currency', 'event'])->find($request->ehotel) : null;
         $eventHotels = EventHotel::with(['eventHotelsOpt.broker', 'eventHotelsOpt.regime', 'eventHotelsOpt.purpose', 'eventHotelsOpt.apto_hotel.apto', 'eventHotelsOpt.category_hotel.category', 'hotel', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
+
+        $eventAB = $request->tab == 2 ? EventAB::with(['eventAbOpts.service', 'eventAbOpts.service_type', 'ab', 'currency', 'event'])->find($request->ehotel) : null;
+        $eventABs = EventAB::with(['eventAbOpts.broker', 'eventAbOpts.service', 'eventAbOpts.service_type', 'eventAbOpts.local', 'ab', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
 
         return Inertia::render('Auth/Event/EventCreate', [
             'crds' => $crds,
             'customers' => $customers,
             'users' => $users,
             'event' => $event,
-            'hotels' => $hotels,
+            'providers' => $providers,
             'tab' => $request->tab,
             'brokers' => $brokers,
             'currencies' => $currencies,
             'regimes' => $regimes,
             'purposes' => $purposes,
             'eventHotels' => $eventHotels,
-            'eventHotel' => $eventHotel
+            'eventHotel' => $eventHotel,
+            'eventAB' => $eventAB,
+            'eventABs' => $eventABs,
+            'services' => $services,
+            'servicesType' => $servicesType,
+            'locals' => $locals,
         ]);
     }
 

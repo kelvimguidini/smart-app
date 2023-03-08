@@ -11,9 +11,8 @@ import Datepicker from 'vue3-datepicker';
 import { ptBR } from 'date-fns/locale';
 import ListHotelFull from '@/Components/ListHotelFull.vue';
 import ListABFull from '@/Components/ListABFull.vue';
-import FormProviderHotel from '@/Components/FormProviderHotel.vue';
+import FormProvider from '@/Components/FormProvider.vue';
 import FormProviderHotelOpt from '@/Components/FormProviderHotelOpt.vue';
-import FormProviderAB from '@/Components/FormProviderAB.vue';
 import FormProviderABOpt from '@/Components/FormProviderABOpt.vue';
 
 
@@ -34,7 +33,7 @@ const props = defineProps({
         type: Object,
         default: {},
     },
-    hotels: {
+    providers: {
         type: Array,
         default: [],
     },
@@ -43,6 +42,14 @@ const props = defineProps({
         default: [],
     },
     eventHotel: {
+        type: Object,
+        default: {},
+    },
+    eventABs: {
+        type: Array,
+        default: [],
+    },
+    eventAB: {
         type: Object,
         default: {},
     },
@@ -72,12 +79,20 @@ const props = defineProps({
     aptosHotel: {
         type: Array,
         default: [],
-    }
+    },
+    services: {
+        type: Array,
+        default: [],
+    },
+    servicesType: {
+        type: Array,
+        default: [],
+    },
+    locals: {
+        type: Array,
+        default: [],
+    },
 });
-
-const formProviderOptRef = ref(null);
-
-const hotelSelected = ref(0);
 
 const edit = (event) => {
     if (event != null) {
@@ -103,12 +118,6 @@ const edit = (event) => {
         $('#hotel_operator').val(event.hotel_operator).trigger('change');
         $('#air_operator').val(event.air_operator).trigger('change');
         $('#land_operator').val(event.land_operator).trigger('change');
-    }
-};
-
-const editOpt = (opt) => {
-    if (formProviderOptRef.value) {
-        formProviderOptRef.value.editOpt(opt);
     }
 };
 
@@ -165,14 +174,6 @@ onMounted(() => {
     });
     //Basico - Fim
     mount();
-
-    let symbol = 'R$ ';
-    if (props.eventHotel != null) {
-        symbol = props.eventHotel.currency.symbol + ' ';
-    }
-    $('.money').maskMoney({ prefix: symbol, allowNegative: false, thousands: '.', decimal: ',', affixesStay: true });
-
-
 });
 
 
@@ -214,8 +215,13 @@ const isLoader = ref(false);
 //FIM VARIAVEIS
 
 //FUNÇÕES HOTEL
+
+const formProviderOptRef = ref(null);
+
+const hotelSelected = ref(0);
+
 const selectHotel = (id) => {
-    var hotel = props.hotels.filter((item) => { return item.id == id })[0] || null;
+    var hotel = props.providers.filter((item) => { return item.id == id })[0] || null;
 
     props.catsHotel = hotel.categories;
     props.aptosHotel = hotel.aptos;
@@ -241,7 +247,61 @@ const duplicate = (opt) => {
     }
 }
 
+const editOpt = (opt) => {
+    if (formProviderOptRef.value) {
+        formProviderOptRef.value.editOpt(opt);
+    }
+};
 //FIM FUNÇÕES HOTEL
+
+//FUNÇÕES ALIMENTAÇÃO E BEBIDAS
+
+const formProviderOptRefAB = ref(null);
+
+
+const deleteOptAB = (id) => {
+    isLoader.value = true;
+    formDelete.id = id;
+    formDelete.delete(route('opt-ab-delete'), {
+        onFinish: () => {
+            isLoader.value = false;
+            formDelete.reset();
+            mount();
+        },
+    });
+};
+
+const duplicateAB = (opt) => {
+    if (formProviderOptRefAB.value) {
+        formProviderOptRefAB.value.duplicate(opt);
+    }
+}
+
+const editOptAB = (opt) => {
+    if (formProviderOptRefAB.value) {
+        formProviderOptRefAB.value.editOpt(opt);
+    }
+
+};
+
+//FIM FUNÇÕES ALIMENTAÇÃO E BEBIDAS
+
+const formProviderHotelRef = ref(null);
+const formProviderAbRef = ref(null);
+const newEventProv = (type) => {
+    switch (props.type) {
+        case 'hotel':
+            if (formProviderHotelRef.value) {
+                formProviderHotelRef.value.newEventProvider();
+            }
+            break;
+        case 'ab':
+            if (formProviderAbRef.value) {
+                formProviderAbRef.value.newEventProvider();
+            }
+            break;
+    }
+};
 
 </script>
 
@@ -458,14 +518,16 @@ const duplicate = (opt) => {
                     </ul>
                     <div id="table">
                         <ListHotelFull :event-hotel="eventHotel" :event-hotels="eventHotels" :edit-opt="editOpt"
-                            :duplicate="duplicate" :delete-opt="deleteOpt"></ListHotelFull>
+                            :duplicate="duplicate" :delete-opt="deleteOpt" :mount-call-back="mount"
+                            :new-event-hotel="newEventProv"></ListHotelFull>
                     </div>
 
                     <div id="form-hotel" class="card mb-4 py-3 border-left-primary">
                         <div class="card-body">
-                            <FormProviderHotel :event-hotel="eventHotel" :currencies="currencies" :hotels="hotels"
-                                :select-hotel-call-back="selectHotel" :event-id="event.id" :mount-call-back="mount">
-                            </FormProviderHotel>
+                            <FormProvider :event-provider="eventHotel" :currencies="currencies" :providers="providers"
+                                type="hotel" :select-call-back="selectHotel" :event-id="event.id" :mount-call-back="mount"
+                                ref="formProviderHotelRef">
+                            </FormProvider>
                         </div>
                     </div>
 
@@ -503,32 +565,32 @@ const duplicate = (opt) => {
                             <a class="nav-link" href="#form-ab">Cadastro A&B</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" v-bind:class="{ 'disabled': !(eventHotel != null && eventHotel.id > 0) }"
+                            <a class="nav-link" v-bind:class="{ 'disabled': !(eventAB != null && eventAB.id > 0) }"
                                 href="#ab-opt">Cadastro Detalhe</a>
                         </li>
                     </ul>
                     <div id="table">
-                        <ListABFull :event-hotel="eventHotel" :event-hotels="eventHotels" :edit-opt="editOpt"
-                            :duplicate="duplicate" :delete-opt="deleteOpt"></ListABFull>
+                        <ListABFull :event-a-b="eventAB" :event-a-bs="eventABs" :edit-opt="editOptAB"
+                            :duplicate="duplicateAB" :delete-opt="deleteOptAB" :mount-call-back="mount"
+                            :new-event-hotel="newEventProv"></ListABFull>
                     </div>
 
                     <div id="form-ab" class="card mb-4 py-3 border-left-primary">
                         <div class="card-body">
-                            <FormProviderAB :event-hotel="eventHotel" :currencies="currencies" :hotels="hotels"
-                                :select-hotel-call-back="selectHotel" :event-id="event.id" :mount-call-back="mount">
-                            </FormProviderAB>
+                            <FormProvider key="ab" :event-provider="eventAB" :currencies="currencies" :providers="providers"
+                                type="ab" :select-call-back="selectHotel" :event-id="event.id" :mount-call-back="mount"
+                                ref="formProviderAbRef">
+                            </FormProvider>
                         </div>
                     </div>
 
-                    <div v-if="eventHotel != null && eventHotel.id > 0" id="ab-opt">
+                    <div v-if="eventAB != null && eventAB.id > 0" id="ab-opt">
                         <div class="row">
                             <div class="col">
                                 <div class="card">
                                     <div class="card-body">
-                                        <FormProviderABOpt :event-hotel="eventHotel" :brokers="brokers" :regimes="regimes"
-                                            :purposes="purposes" :cats-hotel="catsHotel" :aptos-hotel="aptosHotel"
-                                            :select-hotel-call-back="selectHotel" ref="formProviderOptRef"
-                                            :hotel-selected="hotelSelected">
+                                        <FormProviderABOpt :event-ab="eventAB" :brokers="brokers" :services="services"
+                                            :services-type="servicesType" :locals="locals" ref="formProviderOptRefAB">
                                         </FormProviderABOpt>
                                     </div>
                                 </div>

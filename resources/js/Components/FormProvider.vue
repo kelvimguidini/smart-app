@@ -1,13 +1,13 @@
 <script setup>
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, defineExpose } from 'vue';
 import { useForm } from '@inertiajs/inertia-vue3';
 import Loader from '@/Components/Loader.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
 
 const props = defineProps({
-    eventHotel: {
+    eventProvider: {
         type: Object,
         default: null
     },
@@ -15,11 +15,11 @@ const props = defineProps({
         type: Array,
         default: [],
     },
-    hotels: {
+    providers: {
         type: Array,
         default: [],
     },
-    selectHotelCallBack: {
+    selectCallBack: {
         type: Function,
         default: null,
     },
@@ -31,12 +31,17 @@ const props = defineProps({
         type: Function,
         default: null,
     },
+    type: {
+        type: String,
+        default: null,
+    },
+
 });
 
-const formHotel = useForm({
+const form = useForm({
     id: 0,
     event_id: 0,
-    hotel_id: 0,
+    provider_id: 0,
     city: '',
     currency: '',
     invoice: false,
@@ -45,84 +50,103 @@ const formHotel = useForm({
     iva_percent: null,
 
     internal_observation: '',
-    customer_observation: ''
+    customer_observation: '',
+    type: ''
 });
 
-const formDelete = useForm({
-    id: 0
-});
-
-const submitHotel = () => {
-
-    formHotel.post(route('hotel-event-save'), {
+const submit = () => {
+    form.type = props.type;
+    form.post(route('hotel-event-save'), {
         onSuccess: (id) => {
+            selectProvider(form.provider_id);
             props.mountCallBack();
-            $('#tabs-hotel').tabs({ active: 2 });
+            switch (props.type) {
+                case 'hotel':
+                    $('#tabs-hotel').tabs({ active: 2 });
+                    break;
+                case 'ab':
+                    $('#tabs-aandb').tabs({ active: 2 });
+                    break;
+            }
         },
     });
 };
 
-const selectHotel = (id) => {
+const selectProvider = (id) => {
+    var prov = props.providers.filter((item) => { return item.id == id })[0] || null;
 
-    var hotel = props.hotels.filter((item) => { return item.id == id })[0] || null;
+    if (prov) {
+        form.provider_id = parseInt(id);
+        form.city = prov.city;
 
-    if (hotel) {
-        formHotel.hotel_id = parseInt(id);
-        formHotel.city = hotel.city;
+        form.iss_percent = prov.iss_percent;
+        form.iva_percent = prov.iva_percent;
+        form.service_percent = prov.service_percent;
 
-        formHotel.iss_percent = hotel.iss_percent;
-        formHotel.iva_percent = hotel.iva_percent;
-        formHotel.service_percent = hotel.service_percent;
-
-        props.selectHotelCallBack(id);
+        props.selectCallBack(id);
     }
 }
 
-const newEventHotel = () => {
-    formHotel.reset();
-    formHotel.event_id = props.eventId;
+const newEventProvider = () => {
+    form.reset();
+    form.event_id = props.eventId;
 
-    $('#hotel-select').val('').trigger('change');
-    $('#currency').val('').trigger('change');
+    $('#hotel-select' + props.type).val('').trigger('change');
+    $('#currency' + props.type).val('').trigger('change');
 }
+
+defineExpose({
+    newEventProvider
+});
+
 
 
 const edit = () => {
 
-    if (props.eventHotel != null) {
-        selectHotel(props.eventHotel.hotel_id);
+    if (props.eventProvider != null) {
 
-        formHotel.id = props.eventHotel.id;
-        formHotel.event_id = props.eventHotel.event_id;
-        formHotel.hotel_id = props.eventHotel.hotel_id;
-        formHotel.currency = props.eventHotel.currency_id;
-        formHotel.invoice = props.eventHotel.invoice == true;
-        formHotel.iss_percent = props.eventHotel.iss_percent;
-        formHotel.service_percent = props.eventHotel.service_percent;
-        formHotel.iva_percent = props.eventHotel.iva_percent;
+        form.id = props.eventProvider.id;
+        form.event_id = props.eventProvider.event_id;
+        form.provider_id = props.eventProvider.provider_id;
+        form.currency = props.eventProvider.currency_id;
+        form.invoice = props.eventProvider.invoice == true;
+        form.iss_percent = props.eventProvider.iss_percent;
+        form.service_percent = props.eventProvider.service_percent;
+        form.iva_percent = props.eventProvider.iva_percent;
 
-        formHotel.internal_observation = props.eventHotel.internal_observation;
-        formHotel.customer_observation = props.eventHotel.customer_observation;
+        form.internal_observation = props.eventProvider.internal_observation;
+        form.customer_observation = props.eventProvider.customer_observation;
 
-        $('#hotel-select').val(props.eventHotel.hotel_id).trigger('change');
-        $('#currency').val(props.eventHotel.currency_id).trigger('change');
+        switch (props.type) {
+            case 'hotel':
+                selectProvider(props.eventProvider.hotel_id);
+
+                $('#hotel-select' + props.type).val(props.eventProvider.hotel_id).trigger('change');
+                break;
+            case 'ab':
+                selectProvider(props.eventProvider.ab_id);
+                $('#hotel-select' + props.type).val(props.eventProvider.ab_id).trigger('change');
+                break;
+        }
+
+        $('#currency' + props.type).val(props.eventProvider.currency_id).trigger('change');
     }
 };
 
 onMounted(() => {
 
-    formHotel.event_id = props.eventId;
-    $('#hotel-select').select2({
+    form.event_id = props.eventId;
+    $('#hotel-select' + props.type).select2({
         theme: "bootstrap4", language: "pt-Br"
     }).on('select2:select', (e) => {
-        formHotel.hotel = e.params.data.id;
-        selectHotel(e.params.data.id);
+        form.hotel = e.params.data.id;
+        selectProvider(e.params.data.id);
     });
 
-    $('#currency').select2({
+    $('#currency' + props.type).select2({
         theme: "bootstrap4", language: "pt-Br"
     }).on('select2:select', (e) => {
-        formHotel.currency = e.params.data.id;
+        form.currency = e.params.data.id;
     });
 
     edit();
@@ -136,27 +160,27 @@ const isLoader = ref(false);
 <template>
     <Loader v-bind:show="isLoader"></Loader>
 
-    <form @submit.prevent="submitHotel">
+    <form @submit.prevent="submit">
         <div class="row">
             <div class="col">
                 <div class="form-group">
                     <InputLabel for="hotel" value="Hotel:" />
 
-                    <select class="form-control" id="hotel-select" :required="required">
+                    <select class="form-control" :id="'hotel-select' + type" :required="required">
                         <option>.::Selecione::.</option>
-                        <option v-for="(option, index) in hotels" :selected="option.id == formHotel.hotel_id"
+                        <option v-for="(option, index) in providers" :selected="option.id == form.provider_id"
                             :value="option.id">
                             {{ option.name }}
                         </option>
                     </select>
 
-                    <InputError class="mt-2 text-danger" :message="formHotel.errors.hotel" />
+                    <InputError class="mt-2 text-danger" :message="form.errors.hotel" />
                 </div>
             </div>
             <div class="col">
                 <div class="form-group">
                     <InputLabel for="city" value="Cidade:" />
-                    <TextInput type="text" class="form-control" v-model="formHotel.city" disabled="true" />
+                    <TextInput type="text" class="form-control" v-model="form.city" disabled="true" />
                 </div>
             </div>
             <div class="col">
@@ -164,7 +188,7 @@ const isLoader = ref(false);
                     <div class="col">
                         <div class="form-group">
                             <InputLabel for="iss_percent" value="ISS:" />
-                            <TextInput type="number" class="form-control percent" v-model="formHotel.iss_percent" required
+                            <TextInput type="number" class="form-control percent" v-model="form.iss_percent" required
                                 autofocus min="0" step=".1" autocomplete="iss_percent" />
                         </div>
                     </div>
@@ -172,15 +196,15 @@ const isLoader = ref(false);
                     <div class="col">
                         <div class="form-group">
                             <InputLabel for="service_percent" value="Serviço:" />
-                            <TextInput type="number" class="form-control percent" v-model="formHotel.service_percent"
-                                required autofocus min="0" step=".1" autocomplete="service_percent" />
+                            <TextInput type="number" class="form-control percent" v-model="form.service_percent" required
+                                autofocus min="0" step=".1" autocomplete="service_percent" />
                         </div>
                     </div>
 
                     <div class="col">
                         <div class="form-group">
                             <InputLabel for="iva_percent" value="IVA:" />
-                            <TextInput type="number" class="form-control percent" v-model="formHotel.iva_percent" required
+                            <TextInput type="number" class="form-control percent" v-model="form.iva_percent" required
                                 autofocus min="0" step=".1" autocomplete="iva_percent" />
                         </div>
                     </div>
@@ -193,15 +217,15 @@ const isLoader = ref(false);
                         <div class="form-group">
                             <InputLabel for="currencies" value="Moeda:" />
 
-                            <select class="form-control" id="currency" :required="required">
+                            <select class="form-control" :id="'currency' + type" :required="required">
                                 <option>.::Selecione::.</option>
-                                <option v-for="(option, index) in currencies" :selected="option.id == formHotel.currency"
+                                <option v-for="(option, index) in currencies" :selected="option.id == form.currency"
                                     :value="option.id">
                                     {{ option.name }}
                                 </option>
                             </select>
 
-                            <InputError class="mt-2 text-danger" :message="formHotel.errors.currency" />
+                            <InputError class="mt-2 text-danger" :message="form.errors.currency" />
                         </div>
                     </div>
 
@@ -209,7 +233,7 @@ const isLoader = ref(false);
 
                         <div class="form-group">
                             <InputLabel for="invoice" value="Nota Fiscal" />
-                            <select class="form-control" v-model="formHotel.invoice">
+                            <select class="form-control" v-model="form.invoice">
                                 <option :value="false">Não</option>
                                 <option :value="true">Sim</option>
                             </select>
@@ -228,7 +252,7 @@ const isLoader = ref(false);
 
                 <div class="form-group">
                     <InputLabel for="internal_observation" value="Observação Interna:" />
-                    <textarea class="form-control" v-model="formHotel.internal_observation"></textarea>
+                    <textarea class="form-control" v-model="form.internal_observation"></textarea>
                 </div>
 
             </div>
@@ -236,22 +260,22 @@ const isLoader = ref(false);
             <div class="col-lg-3">
                 <div class="form-group">
                     <InputLabel for="customer_observation" value="Observação Cliente:" />
-                    <textarea class="form-control" v-model="formHotel.customer_observation"></textarea>
+                    <textarea class="form-control" v-model="form.customer_observation"></textarea>
                 </div>
             </div>
 
             <div class="col">
                 <div class="items-center justify-end mt-4 rigth">
-                    <PrimaryButton css-class="btn btn-primary float-right m-1"
-                        :class="{ 'opacity-25': formHotel.processing }" :disabled="formHotel.processing">
-                        <span v-if="formHotel.processing" class="spinner-border spinner-border-sm" role="status"
+                    <PrimaryButton css-class="btn btn-primary float-right m-1" :class="{ 'opacity-25': form.processing }"
+                        :disabled="form.processing">
+                        <span v-if="form.processing" class="spinner-border spinner-border-sm" role="status"
                             aria-hidden="true"></span>
                         Salvar
                     </PrimaryButton>
 
 
-                    <PrimaryButton type="button" v-if="eventHotel != null && eventHotel.id > 0"
-                        css-class="btn btn-info float-right m-1" v-on:click="newEventHotel();">
+                    <PrimaryButton type="button" v-if="eventProvider != null && eventProvider.id > 0"
+                        css-class="btn btn-info float-right m-1" v-on:click="newEventProvider();">
                         Novo
                     </PrimaryButton>
 

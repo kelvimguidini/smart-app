@@ -8,50 +8,35 @@ import TextInput from '@/Components/TextInput.vue';
 import Datepicker from 'vue3-datepicker';
 
 const props = defineProps({
-    eventHotel: {
+    eventAb: {
         type: Object,
         default: null
     },
-
     brokers: {
         type: Array,
         default: [],
     },
-    regimes: {
+    services: {
         type: Array,
         default: [],
     },
-    purposes: {
+    servicesType: {
         type: Array,
         default: [],
     },
-    catsHotel: {
+    locals: {
         type: Array,
         default: [],
     },
-    aptosHotel: {
-        type: Array,
-        default: [],
-    },
-    selectHotelCallBack: {
-        type: Function,
-        default: null,
-    },
-    hotelSelected: {
-        type: Number,
-        default: 0,
-    }
 });
 
 const formOpt = useForm({
-    event_hotel_id: 0,
+    event_ab_id: 0,
     id: 0,
     broker: 0,
-    regime: 0,
-    purpose: 0,
-    category_id: 0,
-    apto_id: 0,
-    hotel_id: 0,
+    service_id: 0,
+    service_type_id: 0,
+    local_id: 0,
     in: '',
     out: '',
     received_proposal: null,
@@ -61,7 +46,6 @@ const formOpt = useForm({
     compare_trivago: null,
     compare_website_htl: null,
     compare_omnibess: null,
-
 });
 
 const editOpt = (opt) => {
@@ -71,14 +55,12 @@ const editOpt = (opt) => {
 }
 
 const duplicate = (opt) => {
-    formOpt.event_hotel_id = props.eventHotel.id;
+    formOpt.event_ab_id = props.eventAb.id;
 
     formOpt.broker = opt.broker_id;
-    formOpt.regime = opt.regime_id;
-    formOpt.purpose = opt.purpose_id;
-    formOpt.category_id = opt.category_hotel.category_id;
-    formOpt.apto_id = opt.apto_hotel.apto_id;
-    formOpt.hotel_id = props.eventHotel.hotel_id;
+    formOpt.local_id = opt.local_id;
+    formOpt.service_id = opt.service_id;
+    formOpt.service_type_id = opt.service_type_id;
     formOpt.in = new Date(opt.in);
     formOpt.out = new Date(opt.out);
     formOpt.received_proposal = opt.received_proposal;
@@ -89,10 +71,10 @@ const duplicate = (opt) => {
     formOpt.compare_omnibess = opt.compare_omnibess;
 
     $('#broker').val(opt.broker_id).trigger('change');
-    $('#regime').val(opt.regime_id).trigger('change');
-    $('#purpose').val(opt.purpose_id).trigger('change');
-    $('#cat').val(opt.category_hotel.category_id).trigger('change');
-    $('#apto').val(opt.apto_hotel.apto_id).trigger('change');
+    $('#local').val(opt.local_id).trigger('change');
+    $('#service').val(opt.service_id).trigger('change');
+    $('#servece-type').val(opt.service_type_id).trigger('change');
+
 
     $("#received_proposal").maskMoney('mask', opt.received_proposal);
     $('#compare_trivago').maskMoney('mask', opt.compare_trivago);
@@ -100,7 +82,7 @@ const duplicate = (opt) => {
     $('#compare_omnibess').maskMoney('mask', opt.compare_omnibess);
 
 
-    $('#tabs-hotel').tabs({ active: 2 });
+    $('#tabs-aandb').tabs({ active: 2 });
 }
 
 defineExpose({
@@ -117,29 +99,27 @@ const submitOpt = () => {
     formOpt.compare_website_htl = $('#compare_website_htl').maskMoney('unmasked')[0];
     formOpt.compare_omnibess = $('#compare_omnibess').maskMoney('unmasked')[0];
 
-    if (formOpt.event_hotel_id == 0) {
-        formOpt.event_hotel_id = props.eventHotel.id;
+    if (formOpt.event_ab_id == 0) {
+        formOpt.event_ab_id = props.eventAb.id;
     }
 
-    formOpt.post(route('hotel-opt-save'), {
+    formOpt.post(route('ab-opt-save'), {
         onFinish: () => {
             formOpt.reset();
-            formOpt.hotel_id = props.eventHotel.hotel_id;
+            formOpt.ab_id = props.eventAb.ab_id;
             $('#broker').val('').trigger('change');
-            $('#regime').val('').trigger('change');
-            $('#purpose').val('').trigger('change');
-            $('#cat').val('').trigger('change');
-            $('#apto').val('').trigger('change');
+            $('#local').val('').trigger('change');
+            $('#service').val('').trigger('change');
+            $('#service-type').val('').trigger('change');
 
             $('#received_proposal').val('');
             $('#compare_trivago').val('');
             $('#compare_website_htl').val('');
             $('#compare_omnibess').val('');
 
-            props.selectHotelCallBack(props.eventHotel.hotel_id);
             isLoader.value = false;
 
-            $('#tabs-hotel').tabs({ active: 0 });
+            $('#tabs-aandb').tabs({ active: 0 });
         },
     });
 };
@@ -152,55 +132,39 @@ onMounted(() => {
         formOpt.broker = e.params.data.id;
     });
 
-    $('#regime').select2({
+    $('#local').select2({
         theme: "bootstrap4", language: "pt-Br"
     }).on('select2:select', (e) => {
-        formOpt.regime = e.params.data.id;
+        formOpt.local_id = e.params.data.id;
     });
 
-    $('#purpose').select2({
+    $('#service').select2({
         theme: "bootstrap4", language: "pt-Br"
     }).on('select2:select', (e) => {
-        formOpt.purpose = e.params.data.id;
+        formOpt.service_id = e.params.data.id;
     });
 
-    $('#cat').select2({
+    $('#service-type').select2({
         theme: "bootstrap4", language: "pt-Br"
     }).on('select2:select', (e) => {
-        formOpt.category_id = e.params.data.id;
+        formOpt.service_type_id = e.params.data.id;
     });
 
-    $('#apto').select2({
-        theme: "bootstrap4", language: "pt-Br"
-    }).on('select2:select', (e) => {
-        formOpt.apto_id = e.params.data.id;
-    });
     //Hotel - Fim
-    if (props.eventHotel != null) {
-        formOpt.event_hotel_id = props.eventHotel.id;
+    if (props.eventAb != null) {
+        formOpt.event_ab_id = props.eventAb.id;
     }
-    if (props.eventHotel != null) {
-        formOpt.event_hotel_id = props.eventHotel.id;
+    if (props.eventAb != null) {
+        formOpt.event_ab_id = props.eventAb.id;
     }
-    formOpt.hotel_id = props.hotelSelected;
+
+    let symbol = 'R$ ';
+    if (props.eventAB != null) {
+        symbol = props.eventAB.currency.symbol + ' ';
+        formOpt.ab_id = props.eventAB.ab_id;
+    }
+    $('.money').maskMoney({ prefix: symbol, allowNegative: false, thousands: '.', decimal: ',', affixesStay: true });
 });
-
-const catsHotel = ref(props.catsHotel);
-const aptosHotel = ref(props.aptosHotel);
-
-watch(
-    () => ({
-        p1: props.hotelSelected,
-        p2: props.catsHotel,
-        p3: props.aptosHotel
-    }),
-    (newValues, oldValues) => {
-        console.log(newValues);
-        formOpt.hotel_id = newValues.p1;
-        catsHotel.value = newValues.p2;
-        aptosHotel.value = newValues.p3;
-    }
-);
 
 
 const isLoader = ref(false);
@@ -214,6 +178,17 @@ const isLoader = ref(false);
     <form @submit.prevent="submitOpt">
         <div class="row">
             <div class="col-lg-4">
+
+                <div class="form-group">
+                    <InputLabel for="service" value="Serviços:" />
+                    <select class="form-control" id="service" :required="required">
+                        <option>.::Selecione::.</option>
+                        <option v-for="(option, index) in services" :value="option.id">
+                            {{ option.name }}
+                        </option>
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <InputLabel for="broker" value="Broker:" />
                     <select class="form-control" id="broker" :required="required">
@@ -225,48 +200,27 @@ const isLoader = ref(false);
                 </div>
 
                 <div class="form-group">
-                    <InputLabel for="regime" value="Regime:" />
-                    <select class="form-control" id="regime" :required="required">
+                    <InputLabel for="service-type" value="Tipo de Serviços:" />
+                    <select class="form-control" id="service-type" :required="required">
                         <option>.::Selecione::.</option>
-                        <option v-for="(option, index) in regimes" :value="option.id">
+                        <option v-for="(option, index) in servicesType" :value="option.id">
                             {{ option.name }}
                         </option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <InputLabel for="purpose" value="Proposito:" />
-                    <select class="form-control" id="purpose" :required="required">
+                    <InputLabel for="local" value="Local:" />
+                    <select class="form-control" id="local" :required="required">
                         <option>.::Selecione::.</option>
-                        <option v-for="(option, index) in purposes" :value="option.id">
+                        <option v-for="(option, index) in locals" :value="option.id">
                             {{ option.name }}
                         </option>
                     </select>
                 </div>
-
-                <div class="form-group">
-                    <InputLabel for="cat" value="CAT.:" />
-                    <select class="form-control" id="cat" :required="required">
-                        <option>.::Selecione::.</option>
-                        <option v-for="(option, index) in catsHotel" :value="option.pivot.category_id">
-                            {{ option.name }}
-                        </option>
-                    </select>
-                </div>
-
             </div>
 
             <div class="col-lg-4">
-
-                <div class="form-group">
-                    <InputLabel for="apto" value="APTO:" />
-                    <select class="form-control" id="apto" :required="required">
-                        <option>.::Selecione::.</option>
-                        <option v-for="(option, index) in aptosHotel" :value="option.pivot.apto_id">
-                            {{ option.name }}
-                        </option>
-                    </select>
-                </div>
 
                 <div class="row">
                     <div class="col">
@@ -344,7 +298,7 @@ const isLoader = ref(false);
 
                 <div class="flex items-center justify-end mt-4 rigth">
                     <PrimaryButton css-class="btn btn-primary float-right m-1" :class="{ 'opacity-25': formOpt.processing }"
-                        :disabled="formOpt.processing || eventHotel == null || eventHotel.id == 0">
+                        :disabled="formOpt.processing || eventAb == null || eventAb.id == 0">
                         <i class="fa fa-save" v-if="formOpt.id > 0"></i>
                         <i class="fa fa-plus" v-else></i>
                     </PrimaryButton>

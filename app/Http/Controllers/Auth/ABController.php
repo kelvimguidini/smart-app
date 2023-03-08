@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\EventAB;
+use App\Models\EventABOpt;
 use App\Models\EventHotel;
 use App\Models\EventHotelOpt;
 use App\Models\Provider;
@@ -12,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
 
-class HotelController extends Controller
+class ABController extends Controller
 {
 
     /**
@@ -23,16 +25,17 @@ class HotelController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function storeHotelOpt(Request $request)
+    public function storeOpt(Request $request)
     {
-        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator')) {
+        if (!Gate::allows('event_admin') && !Gate::allows('land_operator')) {
             abort(403);
         }
 
         $request->validate([
             'broker' => 'required|integer',
-            'regime' => 'required|integer',
-            'purpose' => 'required|integer',
+            'local_id' => 'required|integer',
+            'service_id' => 'required|integer',
+            'service_type_id' => 'required|integer',
             'in' => 'required|date',
             'out' => 'required|date|after_or_equal:in',
             'received_proposal' => 'required|numeric',
@@ -46,26 +49,14 @@ class HotelController extends Controller
 
         try {
 
-            $apto_hotel_id = DB::table('apto_hotel')->where([
-                ['hotel_id', '=', $request->hotel_id],
-                ['apto_id', '=', $request->apto_id]
-            ])->select('id')->first()->id;
-
-            $cat_hotel_id = DB::table('category_hotel')->where([
-                ['category_id', '=', $request->category_id],
-                ['hotel_id', '=', $request->hotel_id]
-            ])->select('id')->first()->id;
-
-
             if ($request->id > 0) {
-                $opt = EventHotelOpt::find($request->id);
+                $opt = EventABOpt::find($request->id);
 
-                $opt->event_hotel_id = $request->event_hotel_id;
+                $opt->event_ab_id = $request->event_ab_id;
                 $opt->broker_id = $request->broker;
-                $opt->regime_id = $request->regime;
-                $opt->purpose_id = $request->purpose;
-                $opt->category_hotel_id = $cat_hotel_id;
-                $opt->apto_hotel_id = $apto_hotel_id;
+                $opt->local_id = $request->local_id;
+                $opt->service_id = $request->service_id;
+                $opt->service_type_id = $request->service_type_id;
                 $opt->in = $request->in;
                 $opt->out = $request->out;
                 $opt->received_proposal_percent = $request->received_proposal_percent;
@@ -79,13 +70,12 @@ class HotelController extends Controller
                 $opt->save();
             } else {
 
-                $opt = EventHotelOpt::create([
-                    'event_hotel_id' => $request->event_hotel_id,
+                $opt = EventABOpt::create([
+                    'event_ab_id' => $request->event_ab_id,
                     'broker_id' => $request->broker,
-                    'regime_id' => $request->regime,
-                    'purpose_id' => $request->purpose,
-                    'category_hotel_id' => $cat_hotel_id,
-                    'apto_hotel_id' => $apto_hotel_id,
+                    'local_id' => $request->local_id,
+                    'service_id' => $request->service_id,
+                    'service_type_id' => $request->service_type_id,
                     'in' => $request->in,
                     'out' => $request->out,
                     'received_proposal_percent' => $request->received_proposal_percent,
@@ -103,19 +93,20 @@ class HotelController extends Controller
         return redirect()->back()->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
     }
 
+
     /**
      * Display the registration view.
      *
      * @return \Inertia\Response
      */
-    public function delete(Request $request)
+    public function eventABDelete(Request $request)
     {
-        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator')) {
+        if (!Gate::allows('event_admin') && !Gate::allows('land_operator')) {
             abort(403);
         }
         try {
 
-            $r = Provider::find($request->id);
+            $r = EventAB::find($request->id);
 
             $r->delete();
         } catch (Exception $e) {
@@ -123,31 +114,7 @@ class HotelController extends Controller
             throw $e;
         }
 
-        return redirect()->back()->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
-    }
-
-
-    /**
-     * Display the registration view.
-     *
-     * @return \Inertia\Response
-     */
-    public function eventHotelDelete(Request $request)
-    {
-        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator')) {
-            abort(403);
-        }
-        try {
-
-            $r = EventHotel::find($request->id);
-
-            $r->delete();
-        } catch (Exception $e) {
-
-            throw $e;
-        }
-
-        return redirect()->route('event-edit',  ['id' => $request->event_id, 'tab' => 1])->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
+        return redirect()->route('event-edit',  ['id' => $request->event_id, 'tab' => 2])->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
     }
 
 
@@ -158,12 +125,12 @@ class HotelController extends Controller
      */
     public function optDelete(Request $request)
     {
-        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator')) {
+        if (!Gate::allows('event_admin') && !Gate::allows('land_operator')) {
             abort(403);
         }
         try {
 
-            $r = EventHotelOpt::find($request->id);
+            $r = EventABOpt::find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

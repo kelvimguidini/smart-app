@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\ABController;
 use App\Http\Controllers\Auth\AptoController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\BrokerController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Auth\LocalController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\ProfileUserController;
+use App\Http\Controllers\Auth\ProviderController;
 use App\Http\Controllers\Auth\PurposeController;
 use App\Http\Controllers\Auth\RegimeController;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -229,34 +231,34 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
 
     //HOTEL
-    Route::get('hotel', [HotelController::class, 'create'])
+    Route::get('hotel', [ProviderController::class, 'create'])
         ->name('hotel');
 
-    Route::post('hotel-save', [HotelController::class, 'store'])
+    Route::post('hotel-save', [ProviderController::class, 'store'])
         ->name('hotel-save');
 
-    Route::delete('hotel-delete', [HotelController::class, 'delete'])
+    Route::delete('hotel-delete', [ProviderController::class, 'delete'])
         ->name('hotel-delete');
 
-
-    Route::post('hotel-event-save', [HotelController::class, 'storeEventHotel'])
+    Route::post('hotel-event-save', [ProviderController::class, 'storeEventProvider'])
         ->name('hotel-event-save');
 
-
     Route::post('hotel-opt-save', [HotelController::class, 'storeHotelOpt'])
         ->name('hotel-opt-save');
-
-
-
-    Route::post('hotel-opt-save', [HotelController::class, 'storeHotelOpt'])
-        ->name('hotel-opt-save');
-
-
 
     Route::delete('event-hotel-delete', [HotelController::class, 'eventHotelDelete'])
         ->name('event-hotel-delete');
 
-
     Route::delete('opt-delete', [HotelController::class, 'optDelete'])
         ->name('opt-delete');
+
+    //AB
+    Route::post('ab-opt-save', [ABController::class, 'storeOpt'])
+        ->name('ab-opt-save');
+
+    Route::delete('opt-ab-delete', [ABController::class, 'optDelete'])
+        ->name('opt-ab-delete');
+
+    Route::delete('event-ab-delete', [ABController::class, 'eventABDelete'])
+        ->name('event-ab-delete');
 });
