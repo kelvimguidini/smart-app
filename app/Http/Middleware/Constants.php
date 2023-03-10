@@ -31,6 +31,9 @@ class Constants extends Middleware
         ['name' => "service_type_admin", "title" => "Administrar Tipos de Serviços"],
         ['name' => "service_hall_admin", "title" => "Administrar Serviços Salão"],
         ['name' => "purpose_hall_admin", "title" => "Administrar Propósito Salão"],
+        ['name' => "frequency_admin", "title" => "Administrar Frequência"],
+        ['name' => "service_add_admin", "title" => "Administrar Serviços Adicionais"],
+        ['name' => "measure_admin", "title" => "Administrar Medidas"],
     ];
 
 

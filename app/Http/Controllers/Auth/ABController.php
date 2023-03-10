@@ -5,12 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\EventAB;
 use App\Models\EventABOpt;
-use App\Models\EventHotel;
-use App\Models\EventHotelOpt;
-use App\Models\Provider;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
 

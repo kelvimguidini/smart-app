@@ -188,6 +188,32 @@ const menuItem = [
         ]
     },
     {
+        name: 'Cadastros p/ Adicional',
+        icon: 'fa fa-vest',
+        isItem: false,
+        collapseHeader: 'Auxiliares de Adicional',
+        subMenu: [
+            {
+                link: route().current('service-add') ? '' : route('service-add'),
+                name: 'Serviço',
+                active: route().current('service-add'),
+                role: ['service_add_admin']
+            },
+            {
+                link: route().current('measure') ? '' : route('measure'),
+                name: 'Medida',
+                active: route().current('measure'),
+                role: ['measure_admin']
+            },
+            {
+                link: route().current('frequency') ? '' : route('frequency'),
+                name: 'Frequência',
+                active: route().current('frequency'),
+                role: ['frequency_admin']
+            },
+        ]
+    },
+    {
         link: route().current('hotel') ? '' : route('hotel'),
         name: 'Fornecedor',
         icon: 'fa fa-building',

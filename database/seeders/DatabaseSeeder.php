@@ -172,6 +172,34 @@ class DatabaseSeeder extends Seeder
         ]);
 
 
+        DB::table('service_add')->insert([
+            ['name' => 'Lavanderia'],
+            ['name' => 'Gelo'],
+            ['name' => 'Frigobar'],
+            ['name' => 'Internet'],
+            ['name' => 'Massagem'],
+            ['name' => 'Segurança'],
+            ['name' => 'Outros'],
+        ]);
+
+        DB::table('measure')->insert([
+            ['name' => 'Kilo'],
+            ['name' => 'Unidade'],
+            ['name' => 'Exclusiva'],
+            ['name' => 'MHZ'],
+        ]);
+
+        DB::table('frequency')->insert([
+            ['name' => 'Diário'],
+            ['name' => 'Por Hora'],
+            ['name' => 'Semanal'],
+            ['name' => 'Up Load'],
+            ['name' => 'Down Load'],
+            ['name' => 'Regular'],
+            ['name' => 'Só Agua'],
+            ['name' => 'Patrocinador'],
+        ]);
+
 
         DB::table('crd')->insert([
             ['name' => 'CORPORATIVO CBF', 'number' => '69.215.0001', 'customer_id' =>  DB::table('customer')->select('id')->where('name', '4BTS')->first()->id],

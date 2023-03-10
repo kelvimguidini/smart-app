@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\ABController;
+use App\Http\Controllers\Auth\AddController;
 use App\Http\Controllers\Auth\AptoController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\BrokerController;
@@ -12,9 +13,11 @@ use App\Http\Controllers\Auth\CurrencyController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\EventController;
+use App\Http\Controllers\Auth\FrequencyController;
 use App\Http\Controllers\Auth\HallController;
 use App\Http\Controllers\Auth\HotelController;
 use App\Http\Controllers\Auth\LocalController;
+use App\Http\Controllers\Auth\MeasureController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\ProfileUserController;
@@ -24,6 +27,7 @@ use App\Http\Controllers\Auth\PurposeHallController;
 use App\Http\Controllers\Auth\RegimeController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\RoleController;
+use App\Http\Controllers\Auth\ServiceAddController;
 use App\Http\Controllers\Auth\ServiceController;
 use App\Http\Controllers\Auth\ServiceHallController;
 use App\Http\Controllers\Auth\ServiceTypeController;
@@ -205,6 +209,16 @@ Route::middleware(['auth', 'cors'])->group(function () {
         ->name('service-hall-delete');
 
 
+    Route::get('service-add', [ServiceAddController::class, 'create'])
+        ->name('service-add');
+
+    Route::post('service-add-save', [ServiceAddController::class, 'store'])
+        ->name('service-add-save');
+
+    Route::delete('service-add-delete', [ServiceAddController::class, 'delete'])
+        ->name('service-add-delete');
+
+
 
 
     Route::get('purpose-hall', [PurposeHallController::class, 'create'])
@@ -239,6 +253,25 @@ Route::middleware(['auth', 'cors'])->group(function () {
         ->name('currency-delete');
 
 
+    Route::get('measure', [MeasureController::class, 'create'])
+        ->name('measure');
+
+    Route::post('measure-save', [MeasureController::class, 'store'])
+        ->name('measure-save');
+
+    Route::delete('measure-delete', [MeasureController::class, 'delete'])
+        ->name('measure-delete');
+
+
+    Route::get('frequency', [FrequencyController::class, 'create'])
+        ->name('frequency');
+
+    Route::post('frequency-save', [FrequencyController::class, 'store'])
+        ->name('frequency-save');
+
+    Route::delete('frequency-delete', [FrequencyController::class, 'delete'])
+        ->name('frequency-delete');
+
 
     //Eventos
     Route::get('event-list', [EventController::class, 'list'])
@@ -271,6 +304,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::post('hotel-event-save', [ProviderController::class, 'storeEventProvider'])
         ->name('hotel-event-save');
 
+
     Route::post('hotel-opt-save', [HotelController::class, 'storeHotelOpt'])
         ->name('hotel-opt-save');
 
@@ -300,4 +334,15 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     Route::delete('event-hall-delete', [HallController::class, 'eventHallDelete'])
         ->name('event-hall-delete');
+
+
+    //ADICIONAL
+    Route::post('add-opt-save', [AddController::class, 'storeOpt'])
+        ->name('add-opt-save');
+
+    Route::delete('opt-add-delete', [AddController::class, 'optDelete'])
+        ->name('opt-add-delete');
+
+    Route::delete('event-add-delete', [AddController::class, 'eventAddDelete'])
+        ->name('event-add-delete');
 });

@@ -70,6 +70,9 @@ const submit = () => {
                 case 'hall':
                     $('#tabs-hall').tabs({ active: 2 });
                     break;
+                case 'add':
+                    $('#tabs-add').tabs({ active: 2 });
+                    break;
             }
         },
     });
@@ -125,7 +128,6 @@ const edit = () => {
         switch (props.type) {
             case 'hotel':
                 selectProvider(props.eventProvider.hotel_id);
-
                 $('#hotel-select' + props.type).val(props.eventProvider.hotel_id).trigger('change');
                 break;
             case 'ab':
@@ -135,6 +137,10 @@ const edit = () => {
             case 'hall':
                 selectProvider(props.eventProvider.hall_id);
                 $('#hotel-select' + props.type).val(props.eventProvider.hall_id).trigger('change');
+                break;
+            case 'add':
+                selectProvider(props.eventProvider.add_id);
+                $('#hotel-select' + props.type).val(props.eventProvider.add_id).trigger('change');
                 break;
         }
 

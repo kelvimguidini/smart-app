@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\EventHall;
-use App\Models\EventHallOpt;
+use App\Models\EventAdd;
+use App\Models\EventAddOpt;
 use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
 
-class HallController extends Controller
+class AddController extends Controller
 {
 
     /**
@@ -28,8 +28,8 @@ class HallController extends Controller
         }
 
         $request->validate([
-            'broker' => 'required|integer',
-            'purpose' => 'required|integer',
+            'frequency' => 'required|integer',
+            'measure' => 'required|integer',
             'service' => 'required|integer',
             'in' => 'required|date',
             'out' => 'required|date|after_or_equal:in',
@@ -42,14 +42,13 @@ class HallController extends Controller
         try {
 
             if ($request->id > 0) {
-                $opt = EventHallOpt::find($request->id);
+                $opt = EventAddOpt::find($request->id);
 
-                $opt->event_hall_id = $request->event_hall_id;
-                $opt->broker_id = $request->broker;
-                $opt->purpose_id = $request->purpose;
+                $opt->event_add_id = $request->event_add_id;
+                $opt->frequency_id = $request->frequency;
+                $opt->measure_id = $request->measure;
                 $opt->service_id = $request->service;
-                $opt->name = $request->name;
-                $opt->m2 = $request->m2;
+                $opt->unit = $request->unit;
                 $opt->pax = $request->pax;
                 $opt->in = $request->in;
                 $opt->out = $request->out;
@@ -61,13 +60,12 @@ class HallController extends Controller
                 $opt->save();
             } else {
 
-                $opt = EventHallOpt::create([
-                    'event_hall_id' => $request->event_hall_id,
-                    'broker_id' => $request->broker,
-                    'purpose_id' => $request->purpose,
+                $opt = EventAddOpt::create([
+                    'event_add_id' => $request->event_add_id,
+                    'frequency_id' => $request->frequency,
+                    'measure_id' => $request->measure,
                     'service_id' => $request->service,
-                    'name' => $request->name,
-                    'm2' => $request->m2,
+                    'unit' => $request->unit,
                     'pax' => $request->pax,
                     'in' => $request->in,
                     'out' => $request->out,
@@ -89,14 +87,14 @@ class HallController extends Controller
      *
      * @return \Inertia\Response
      */
-    public function eventHallDelete(Request $request)
+    public function eventAddDelete(Request $request)
     {
         if (!Gate::allows('event_admin') && !Gate::allows('land_operator')) {
             abort(403);
         }
         try {
 
-            $r = EventHall::find($request->id);
+            $r = EventAdd::find($request->id);
 
             $r->delete();
         } catch (Exception $e) {
@@ -104,7 +102,7 @@ class HallController extends Controller
             throw $e;
         }
 
-        return redirect()->route('event-edit',  ['id' => $request->event_id, 'tab' => 3])->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
+        return redirect()->route('event-edit',  ['id' => $request->event_id, 'tab' => 4])->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
     }
 
 
@@ -120,7 +118,7 @@ class HallController extends Controller
         }
         try {
 
-            $r = EventHallOpt::find($request->id);
+            $r = EventAddOpt::find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

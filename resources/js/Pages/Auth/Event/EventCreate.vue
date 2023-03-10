@@ -12,10 +12,12 @@ import { ptBR } from 'date-fns/locale';
 import ListHotelFull from '@/Components/ListHotelFull.vue';
 import ListABFull from '@/Components/ListABFull.vue';
 import ListHallFull from '@/Components/ListHallFull.vue';
+import ListAddFull from '@/Components/ListAddFull.vue';
 import FormProvider from '@/Components/FormProvider.vue';
 import FormProviderHotelOpt from '@/Components/FormProviderHotelOpt.vue';
 import FormProviderABOpt from '@/Components/FormProviderABOpt.vue';
 import FormProviderHallOpt from '@/Components/FormProviderHallOpt.vue';
+import FormProviderAddOpt from '@/Components/FormProviderAddOpt.vue';
 
 const props = defineProps({
     crds: {
@@ -62,6 +64,14 @@ const props = defineProps({
         type: Object,
         default: {},
     },
+    eventAdds: {
+        type: Array,
+        default: [],
+    },
+    eventAdd: {
+        type: Object,
+        default: {},
+    },
     tab: {
         default: 0
     },
@@ -105,7 +115,15 @@ const props = defineProps({
         type: Array,
         default: [],
     },
-    purposesHall: {
+    servicesAdd: {
+        type: Array,
+        default: [],
+    },
+    frequencies: {
+        type: Array,
+        default: [],
+    },
+    measures: {
         type: Array,
         default: [],
     },
@@ -156,11 +174,15 @@ const mount = () => {
     }
     $("#tabs-aandb").tabs();
 
-
     if ($('#tabs-hall').hasClass('ui-tabs')) {
         $("#tabs-hall").tabs("destroy");
     }
     $("#tabs-hall").tabs();
+
+    if ($('#tabs-add').hasClass('ui-tabs')) {
+        $("#tabs-add").tabs("destroy");
+    }
+    $("#tabs-add").tabs();
 }
 
 onMounted(() => {
@@ -341,10 +363,43 @@ const editOptHall = (opt) => {
 
 //FIM FUNÇÕES SALÕES
 
+//FUNÇÕES ADD
+
+const formProviderOptRefAdd = ref(null);
+
+
+const deleteOptAdd = (id) => {
+    isLoader.value = true;
+    formDelete.id = id;
+    formDelete.delete(route('opt-add-delete'), {
+        onFinish: () => {
+            isLoader.value = false;
+            formDelete.reset();
+            mount();
+        },
+    });
+};
+
+const duplicateAdd = (opt) => {
+    if (formProviderOptRefAdd.value) {
+        formProviderOptRefAdd.value.duplicate(opt);
+    }
+}
+
+const editOptAdd = (opt) => {
+    if (formProviderOptRefAdd.value) {
+        formProviderOptRefAdd.value.editOpt(opt);
+    }
+
+};
+
+//FIM FUNÇÕES ADD
+
 
 const formProviderHotelRef = ref(null);
 const formProviderAbRef = ref(null);
 const formProviderHallRef = ref(null);
+const formProviderAddRef = ref(null);
 const newEventProv = (type) => {
     switch (props.type) {
         case 'hotel':
@@ -360,6 +415,11 @@ const newEventProv = (type) => {
         case 'hall':
             if (formProviderHallRef.value) {
                 formProviderHallRef.value.newEventProvider();
+            }
+            break;
+        case 'add':
+            if (formProviderAddRef.value) {
+                formProviderAddRef.value.newEventProvider();
             }
             break;
     }
@@ -718,7 +778,52 @@ const newEventProv = (type) => {
 
             <div v-if="event != null && $page.props.auth.permissions.some((p) => p.name === 'land_operator' || p.name === 'event_admin')"
                 id="additional">
-                <p>Conteudo da aba follow Up.</p>
+
+                <div id="tabs-add">
+
+                    <ul class="nav nav-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#table">Lista</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#form-add">Cadastro</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" v-bind:class="{ 'disabled': !(eventAdd != null && eventAdd.id > 0) }"
+                                href="#add-opt">Cadastro Detalhe</a>
+                        </li>
+                    </ul>
+                    <div id="table">
+                        <ListAddFull :event-add="eventAdd" :event-adds="eventAdds" :edit-opt="editOptAdd"
+                            :duplicate="duplicateAdd" :delete-opt="deleteOptAdd" :mount-call-back="mount"
+                            :new-event-add="newEventProv"></ListAddFull>
+                    </div>
+
+                    <div id="form-add" class="card mb-4 py-3 border-left-primary">
+                        <div class="card-body">
+                            <FormProvider key="add" :event-provider="eventAdd" :currencies="currencies"
+                                :providers="providers" type="add" :event-id="event.id" :mount-call-back="mount"
+                                ref="formProviderAddRef">
+                            </FormProvider>
+                        </div>
+                    </div>
+
+                    <div v-if="eventAdd != null && eventAdd.id > 0" id="add-opt">
+                        <div class="row">
+                            <div class="col">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <FormProviderAddOpt :event-add="eventAdd" :frequencies="frequencies"
+                                            :measures="measures" :services="servicesAdd" ref="formProviderOptRefAdd">
+                                        </FormProviderAddOpt>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
 
         </div>

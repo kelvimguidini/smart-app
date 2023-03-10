@@ -5,27 +5,26 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class EventHallOpt extends Model
+class EventAddOpt extends Model
 {
     use SoftDeletes;
 
     protected $fillable = [
-        'event_hall_id',
+        'event_add_id',
         'service_id',
-        'purpose_id',
-        'broker_id',
+        'measure_id',
+        'frequency_id',
+        'unit',
+        'pax',
         'in',
         'out',
         'count',
         'kickback',
         'received_proposal',
         'received_proposal_percent',
-        'name',
-        'm2',
-        'pax'
     ];
 
-    protected $table = 'event_hall_opt';
+    protected $table = 'event_add_opt';
 
     /**
      * The primary key associated with the table.
@@ -39,7 +38,7 @@ class EventHallOpt extends Model
      *
      * @var int
      */
-    protected $event_hall_id = 'event_hall_id';
+    protected $event_add_id = 'event_add_id';
 
     /**
      * The primary key associated with the table.
@@ -53,7 +52,7 @@ class EventHallOpt extends Model
      *
      * @var int
      */
-    protected $name = 'name';
+    protected $service = 'service';
 
 
     /**
@@ -61,7 +60,24 @@ class EventHallOpt extends Model
      *
      * @var int
      */
-    protected $m2 = 'm2';
+    protected $measure = 'measure';
+
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var int
+     */
+    protected $frequency = 'frequency';
+
+
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var int
+     */
+    protected $unit = 'unit';
 
 
     /**
@@ -70,20 +86,6 @@ class EventHallOpt extends Model
      * @var int
      */
     protected $pax = 'pax';
-
-
-    /**
-     * The primary key associated with the table.
-     *
-     * @var int
-     */
-    protected $purpose_id = 'purpose_id';
-    /**
-     * The primary key associated with the table.
-     *
-     * @var int
-     */
-    protected $broker_id = 'broker_id';
 
     /**
      * The primary key associated with the table.
@@ -129,23 +131,23 @@ class EventHallOpt extends Model
     protected $received_proposal_percent = 'received_proposal_percent';
 
 
-    public function event_hall()
+    public function event_add()
     {
-        return $this->hasOne(EventHall::class, 'id', 'event_hall_id');
+        return $this->hasOne(EventAdd::class, 'id', 'event_add_id');
     }
 
     public function service()
     {
-        return $this->hasOne(ServiceHall::class, 'id', 'service_id');
+        return $this->hasOne(ServiceAdd::class, 'id', 'service_id');
     }
 
-    public function purpose()
+    public function measure()
     {
-        return $this->hasOne(PurposeHall::class, 'id', 'purpose_id');
+        return $this->hasOne(Measure::class, 'id', 'measure_id');
     }
 
-    public function broker()
+    public function frequency()
     {
-        return $this->hasOne(Broker::class, 'id', 'broker_id');
+        return $this->hasOne(Frequency::class, 'id', 'frequency_id');
     }
 }

@@ -9,15 +9,19 @@ use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\Event;
 use App\Models\EventAB;
+use App\Models\EventAdd;
 use App\Models\EventHall;
 use App\Models\EventHotel;
+use App\Models\Frequency;
 use App\Models\Hotel;
 use App\Models\Local;
+use App\Models\Measure;
 use App\Models\Provider;
 use App\Models\Purpose;
 use App\Models\PurposeHall;
 use App\Models\Regime;
 use App\Models\Service;
+use App\Models\ServiceAdd;
 use App\Models\ServiceHall;
 use App\Models\ServiceType;
 use App\Models\User;
@@ -98,6 +102,10 @@ class EventController extends Controller
         $servicesHall = ServiceHall::all();
         $purposesHall = PurposeHall::all();
 
+        $servicesAdd = ServiceAdd::all();
+        $frequencies = Frequency::all();
+        $measures = Measure::all();
+
         $users = User::all();
 
         $eventHotel = $request->tab == 1 ? EventHotel::with(['eventHotelsOpt', 'hotel', 'currency', 'event'])->find($request->ehotel) : null;
@@ -108,6 +116,9 @@ class EventController extends Controller
 
         $eventHall = $request->tab == 3 ? EventHall::with(['eventHallOpts', 'hall', 'currency', 'event'])->find($request->ehotel) : null;
         $eventHalls = EventHall::with(['eventHallOpts.broker', 'eventHallOpts.service', 'eventHallOpts.purpose', 'hall', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
+
+        $eventAdd = $request->tab == 4 ? EventAdd::with(['eventAddOpts', 'add', 'currency', 'event'])->find($request->ehotel) : null;
+        $eventAdds = EventAdd::with(['eventAddOpts', 'eventAddOpts.frequency', 'eventAddOpts.measure', 'eventAddOpts.service', 'add', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
 
         return Inertia::render('Auth/Event/EventCreate', [
             'crds' => $crds,
@@ -131,6 +142,11 @@ class EventController extends Controller
             'purposesHall' => $purposesHall,
             'eventHall' => $eventHall,
             'eventHalls' => $eventHalls,
+            'servicesAdd' => $servicesAdd,
+            'frequencies' => $frequencies,
+            'measures' => $measures,
+            'eventAdd' => $eventAdd,
+            'eventAdds' => $eventAdds,
         ]);
     }
 

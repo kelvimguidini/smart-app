@@ -7,6 +7,7 @@ use App\Http\Middleware\Constants;
 use App\Models\Apto;
 use App\Models\Category;
 use App\Models\EventAB;
+use App\Models\EventAdd;
 use App\Models\EventHall;
 use App\Models\EventHotel;
 use App\Models\Provider;
@@ -169,6 +170,10 @@ class ProviderController extends Controller
                         $provider = EventHall::find($request->id);
                         $provider->hall_id = $request->provider_id;
                         break;
+                    case 'add':
+                        $provider = EventAdd::find($request->id);
+                        $provider->add_id = $request->provider_id;
+                        break;
                 }
 
 
@@ -224,6 +229,19 @@ class ProviderController extends Controller
                             'customer_observation' => $request->customer_observation
                         ]);
                         break;
+                    case 'add':
+                        $provider = EventAdd::create([
+                            'add_id' => $request->provider_id,
+                            'event_id' => $request->event_id,
+                            'iss_percent' => $request->iss_percent,
+                            'service_percent' => $request->service_percent,
+                            'iva_percent' => $request->iva_percent,
+                            'currency_id' => $request->currency,
+                            'invoice' => $request->invoice,
+                            'internal_observation' => $request->internal_observation,
+                            'customer_observation' => $request->customer_observation
+                        ]);
+                        break;
                 }
             }
         } catch (Exception $e) {
@@ -238,6 +256,9 @@ class ProviderController extends Controller
                 break;
             case 'hall':
                 $tab = 3;
+                break;
+            case 'add':
+                $tab = 4;
                 break;
         }
 
