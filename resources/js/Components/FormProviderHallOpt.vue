@@ -8,7 +8,7 @@ import TextInput from '@/Components/TextInput.vue';
 import Datepicker from 'vue3-datepicker';
 
 const props = defineProps({
-    eventAb: {
+    eventHall: {
         type: Object,
         default: null
     },
@@ -20,23 +20,21 @@ const props = defineProps({
         type: Array,
         default: [],
     },
-    servicesType: {
+    purposes: {
         type: Array,
         default: [],
-    },
-    locals: {
-        type: Array,
-        default: [],
-    },
+    }
 });
 
 const formOpt = useForm({
-    event_ab_id: 0,
+    event_hall_id: 0,
     id: 0,
     broker: 0,
-    service_id: 0,
-    service_type_id: 0,
-    local_id: 0,
+    service: 0,
+    purpose: 0,
+    name: '',
+    m2: '',
+    pax: '',
     in: '',
     out: '',
     received_proposal: null,
@@ -48,16 +46,22 @@ const formOpt = useForm({
 const editOpt = (opt) => {
     formOpt.id = opt.id;
 
-    duplicate(opt);
+    duplicate(opt, true);
 }
 
-const duplicate = (opt) => {
-    formOpt.event_ab_id = props.eventAb.id;
+const duplicate = (opt, isEdit = false) => {
+    formOpt.event_hall_id = props.eventHall.id;
+
+    if (!isEdit) {
+        formOpt.id = 0;
+    }
 
     formOpt.broker = opt.broker_id;
-    formOpt.local_id = opt.local_id;
-    formOpt.service_id = opt.service_id;
-    formOpt.service_type_id = opt.service_type_id;
+    formOpt.service = opt.service_id;
+    formOpt.purpose = opt.purpose_id;
+    formOpt.name = opt.name;
+    formOpt.m2 = opt.m2;
+    formOpt.pax = opt.pax;
     formOpt.in = new Date(opt.in);
     formOpt.out = new Date(opt.out);
     formOpt.received_proposal = opt.received_proposal;
@@ -65,14 +69,13 @@ const duplicate = (opt) => {
     formOpt.count = opt.count;
 
     $('#broker').val(opt.broker_id).trigger('change');
-    $('#local').val(opt.local_id).trigger('change');
     $('#service').val(opt.service_id).trigger('change');
-    $('#servece-type').val(opt.service_type_id).trigger('change');
+    $('#purpose').val(opt.purpose_id).trigger('change');
+
 
     $("#received_proposal").maskMoney('mask', opt.received_proposal);
 
-
-    $('#tabs-aandb').tabs({ active: 2 });
+    $('#tabs-hall').tabs({ active: 2 });
 }
 
 defineExpose({
@@ -86,25 +89,25 @@ const submitOpt = () => {
 
     formOpt.received_proposal = $('#received_proposal').maskMoney('unmasked')[0];
 
-
-    if (formOpt.event_ab_id == 0) {
-        formOpt.event_ab_id = props.eventAb.id;
+    if (formOpt.event_hall == 0) {
+        formOpt.event_hall = props.eventHall.id;
     }
 
-    formOpt.post(route('ab-opt-save'), {
+    formOpt.post(route('hall-opt-save'), {
         onFinish: () => {
             formOpt.reset();
-            formOpt.ab_id = props.eventAb.ab_id;
+            formOpt.hall_id = props.eventHall.hall_id;
             $('#broker').val('').trigger('change');
-            $('#local').val('').trigger('change');
             $('#service').val('').trigger('change');
-            $('#service-type').val('').trigger('change');
+            $('#purpose').val('').trigger('change');
 
             $('#received_proposal').val('');
 
             isLoader.value = false;
 
-            $('#tabs-aandb').tabs({ active: 0 });
+            formOpt.id = 0;
+
+            $('#tabs-hall').tabs({ active: 0 });
         },
     });
 };
@@ -117,36 +120,30 @@ onMounted(() => {
         formOpt.broker = e.params.data.id;
     });
 
-    $('#local').select2({
-        theme: "bootstrap4", language: "pt-Br"
-    }).on('select2:select', (e) => {
-        formOpt.local_id = e.params.data.id;
-    });
-
     $('#service').select2({
         theme: "bootstrap4", language: "pt-Br"
     }).on('select2:select', (e) => {
-        formOpt.service_id = e.params.data.id;
+        formOpt.service = e.params.data.id;
     });
 
-    $('#service-type').select2({
+    $('#purpose').select2({
         theme: "bootstrap4", language: "pt-Br"
     }).on('select2:select', (e) => {
-        formOpt.service_type_id = e.params.data.id;
+        formOpt.purpose = e.params.data.id;
     });
 
     //Hotel - Fim
-    if (props.eventAb != null) {
-        formOpt.event_ab_id = props.eventAb.id;
+    if (props.eventHall != null) {
+        formOpt.event_hall_id = props.eventHall.id;
     }
-    if (props.eventAb != null) {
-        formOpt.event_ab_id = props.eventAb.id;
+    if (props.eventHall != null) {
+        formOpt.event_hall_id = props.eventHall.id;
     }
 
     let symbol = 'R$ ';
-    if (props.eventAB != null) {
-        symbol = props.eventAB.currency.symbol + ' ';
-        formOpt.ab_id = props.eventAB.ab_id;
+    if (props.eventHall != null) {
+        symbol = props.eventHall.currency.symbol + ' ';
+        formOpt.hall_id = props.eventHall.hall_id;
     }
     $('.money').maskMoney({ prefix: symbol, allowNegative: false, thousands: '.', decimal: ',', affixesStay: true });
 });
@@ -185,34 +182,41 @@ const isLoader = ref(false);
                 </div>
 
                 <div class="form-group">
-                    <InputLabel for="service-type" value="Tipo de Serviços:" />
-                    <select class="form-control" id="service-type" :required="required">
-                        <option>.::Selecione::.</option>
-                        <option v-for="(option, index) in servicesType" :value="option.id">
-                            {{ option.name }}
-                        </option>
-                    </select>
+                    <InputLabel for="name" value="Nome do Salão:" />
+                    <TextInput type="text" class="form-control" v-model="formOpt.name" required autofocus
+                        autocomplete="name" />
+                </div>
+
+                <div class="form-group">
+                    <InputLabel for="m2" value="M2:" />
+                    <TextInput type="text" class="form-control" v-model="formOpt.m2" required autofocus autocomplete="m2" />
                 </div>
 
             </div>
 
             <div class="col-lg-4">
 
+
                 <div class="form-group">
-                    <InputLabel for="local" value="Local:" />
-                    <select class="form-control" id="local" :required="required">
+                    <InputLabel for="purpose" value="Propósito:" />
+                    <select class="form-control" id="purpose" :required="required">
                         <option>.::Selecione::.</option>
-                        <option v-for="(option, index) in locals" :value="option.id">
+                        <option v-for="(option, index) in purposes" :value="option.id">
                             {{ option.name }}
                         </option>
                     </select>
+                </div>
+
+                <div class="form-group">
+                    <InputLabel for="pax" value="#Pax:" />
+                    <TextInput type="text" class="form-control" v-model="formOpt.pax" required autofocus
+                        autocomplete="pax" />
                 </div>
 
                 <div class="row">
                     <div class="col">
                         <div class="form-group">
                             <InputLabel for="in" value="IN:" />
-
                             <datepicker v-model="formOpt.in" class="form-control" :locale="ptBR" inputFormat="dd/MM/yyyy"
                                 weekdayFormat="EEEEEE" />
                         </div>
@@ -221,7 +225,6 @@ const isLoader = ref(false);
                     <div class="col">
                         <div class="form-group">
                             <InputLabel for="out" value="OUT:" />
-
                             <datepicker v-model="formOpt.out" class="form-control" :locale="ptBR" inputFormat="dd/MM/yyyy"
                                 weekdayFormat="EEEEEE" />
                         </div>
@@ -276,7 +279,7 @@ const isLoader = ref(false);
                 </div>
                 <div class="flex items-center justify-end mt-4 rigth">
                     <PrimaryButton css-class="btn btn-primary float-right m-1" :class="{ 'opacity-25': formOpt.processing }"
-                        :disabled="formOpt.processing || eventAb == null || eventAb.id == 0">
+                        :disabled="formOpt.processing || eventHall == null || eventHall.id == 0">
                         <i class="fa fa-save" v-if="formOpt.id > 0"></i>
                         <i class="fa fa-plus" v-else></i>
                     </PrimaryButton>

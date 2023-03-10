@@ -22,13 +22,15 @@ class Constants extends Middleware
         ['name' => "air_operator", "title" => "Operador de Aéreo", "verifyId" => true],
         ['name' => "apto_admin", "title" => "Administrar Apartamento de Hotel"],
         ['name' => "category_admin", "title" => "Administrar Categorias de Hotel"],
-        ['name' => "purpose_admin", "title" => "Administrar Propósito"],
+        ['name' => "purpose_admin", "title" => "Administrar Propósito Hotel"],
         ['name' => "regime_admin", "title" => "Administrar Regimes"],
         ['name' => "broker_admin", "title" => "Administrar Brokers"],
         ['name' => "currency_admin", "title" => "Administrar Moedas"],
         ['name' => "local_admin", "title" => "Administrar Locais"],
-        ['name' => "service_admin", "title" => "Administrar Serviços"],
+        ['name' => "service_admin", "title" => "Administrar Serviços de A&B"],
         ['name' => "service_type_admin", "title" => "Administrar Tipos de Serviços"],
+        ['name' => "service_hall_admin", "title" => "Administrar Serviços Salão"],
+        ['name' => "purpose_hall_admin", "title" => "Administrar Propósito Salão"],
     ];
 
 

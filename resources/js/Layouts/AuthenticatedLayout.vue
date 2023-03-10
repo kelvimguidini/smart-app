@@ -93,6 +93,7 @@ const menuItem = [
                 role: 'crd_admin'
             },
         ],
+        divider: true
     },
     {
         name: 'Cadastro p/ Fornecedor',
@@ -167,12 +168,33 @@ const menuItem = [
         ],
     },
     {
+        name: 'Cadastros p/ Salão',
+        icon: 'fa fa-warehouse',
+        isItem: false,
+        collapseHeader: 'Auxiliares de Salão',
+        subMenu: [
+            {
+                link: route().current('service-hall') ? '' : route('service-hall'),
+                name: 'Serviço',
+                active: route().current('service-hall'),
+                role: ['service_hall_admin']
+            },
+            {
+                link: route().current('purpose-hall') ? '' : route('purpose-hall'),
+                name: 'Propósito',
+                active: route().current('purpose-hall'),
+                role: ['purpose_hall_admin']
+            },
+        ]
+    },
+    {
         link: route().current('hotel') ? '' : route('hotel'),
         name: 'Fornecedor',
         icon: 'fa fa-building',
         active: route().current('hotel'),
         isItem: true,
-        role: ['event_admin', 'hotel_operator']
+        role: ['event_admin', 'hotel_operator'],
+        divider: true
     },
     {
         name: 'Eventos',

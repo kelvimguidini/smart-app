@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 
-class Service extends Model
+class PurposeHall extends Model
 {
     use SoftDeletes;
 
     protected $fillable = ['name'];
-    protected $table = 'service';
+    protected $table = 'purpose_hall';
 
     /**
      * The primary key associated with the table.
@@ -28,8 +28,8 @@ class Service extends Model
      */
     protected $name = 'name';
 
-    public function event_abs_opt()
+    public function event_hall_opt()
     {
-        return $this->belongsTo(EventABOpt::class);
+        return $this->belongsTo(EventHallOpt::class);
     }
 }

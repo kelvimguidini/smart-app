@@ -128,6 +128,26 @@ class DatabaseSeeder extends Seeder
         ]);
 
 
+        DB::table('service_hall')->insert([
+            ['name' => 'Salões de Eventos'],
+            ['name' => 'Aluguel de Equipamentos'],
+            ['name' => 'Coffe Break'],
+            ['name' => 'Outros'],
+            ['name' => 'Shows'],
+            ['name' => 'Big Screen TV'],
+            ['name' => 'Projector TV'],
+            ['name' => 'Led TV'],
+        ]);
+
+        DB::table('purpose_hall')->insert([
+            ['name' => 'Reuniões'],
+            ['name' => 'Conferência Imprensa'],
+            ['name' => 'Refeições'],
+            ['name' => 'Equipamentos'],
+            ['name' => 'Evento'],
+            ['name' => 'Preleção'],
+        ]);
+
         DB::table('service_type')->insert([
             ['name' => 'Cafe Manhã'],
             ['name' => 'Almoço'],

@@ -67,6 +67,9 @@ const submit = () => {
                 case 'ab':
                     $('#tabs-aandb').tabs({ active: 2 });
                     break;
+                case 'hall':
+                    $('#tabs-hall').tabs({ active: 2 });
+                    break;
             }
         },
     });
@@ -83,7 +86,9 @@ const selectProvider = (id) => {
         form.iva_percent = prov.iva_percent;
         form.service_percent = prov.service_percent;
 
-        props.selectCallBack(id);
+        if (props.selectCallBack && typeof props.selectCallBack === 'function') {
+            props.selectCallBack(id);
+        }
     }
 }
 
@@ -126,6 +131,10 @@ const edit = () => {
             case 'ab':
                 selectProvider(props.eventProvider.ab_id);
                 $('#hotel-select' + props.type).val(props.eventProvider.ab_id).trigger('change');
+                break;
+            case 'hall':
+                selectProvider(props.eventProvider.hall_id);
+                $('#hotel-select' + props.type).val(props.eventProvider.hall_id).trigger('change');
                 break;
         }
 

@@ -9,11 +9,11 @@ import Loader from '@/Components/Loader.vue';
 const isLoader = ref(false);
 
 const props = defineProps({
-    eventABs: {
+    eventHalls: {
         type: Array,
         default: []
     },
-    eventAB: {
+    eventHall: {
         type: Object,
         default: []
     },
@@ -33,7 +33,7 @@ const props = defineProps({
         type: Function,
         default: null,
     },
-    newEventAb: {
+    newEventHall: {
         type: Function,
         default: null,
     },
@@ -54,8 +54,8 @@ const daysBetween = (date1, date2) => {
 const formatCurrency = (value) => {
     value = Math.round(value * 100) / 100;
     let sigla = 'BRL';
-    if (props.eventAb != null) {
-        sigla = props.eventAb.currency.sigla;
+    if (props.eventHall != null) {
+        sigla = props.eventHall.currency.sigla;
     }
     return new Intl.NumberFormat('pt-BR', {
         style: 'currency',
@@ -73,66 +73,66 @@ const unitSale = (opt) => {
     return Math.ceil(unitCost(opt) / opt.received_proposal_percent)
 }
 
-const roomNights = (evab) => {
+const roomNights = (evHall) => {
     let sum = 0;
-    for (const opt of evab.event_ab_opts) {
+    for (const opt of evHall.event_hall_opts) {
         sum += (opt.count * daysBetween(opt.in, opt.out));
     }
     return sum;
 }
 
-const average = (evab) => {
+const average = (evHall) => {
     let sum = 0;
-    for (const opt of evab.event_ab_opts) {
+    for (const opt of evHall.event_hall_opts) {
         sum += unitSale(opt);
     }
-    return sum / evab.event_ab_opts.length;
+    return sum / evHall.event_hall_opts.length;
 }
 
-const sumCount = (evab) => {
+const sumCount = (evHall) => {
     let sum = 0;
-    for (const opt of evab.event_ab_opts) {
+    for (const opt of evHall.event_hall_opts) {
         sum += opt.count;
     }
     return sum;
 }
 
-const sumNts = (evab) => {
+const sumNts = (evHall) => {
     let sum = 0;
-    for (const opt of evab.event_ab_opts) {
+    for (const opt of evHall.event_hall_opts) {
         sum += daysBetween(opt.in, opt.out);
     }
     return sum;
 }
 
-const sumSale = (evab) => {
+const sumSale = (evHall) => {
     let sum = 0;
-    for (const opt of evab.event_ab_opts) {
+    for (const opt of evHall.event_hall_opts) {
         sum += unitSale(opt) * daysBetween(opt.in, opt.out) * opt.count;
     }
     return sum;
 }
 
-const sumCost = (evab) => {
+const sumCost = (evHall) => {
     let sum = 0;
-    for (const opt of evab.event_ab_opts) {
+    for (const opt of evHall.event_hall_opts) {
         sum += unitCost(opt) * daysBetween(opt.in, opt.out) * opt.count;
     }
     return sum;
 }
 
-const sumTaxes = (evab, taxType) => {
+const sumTaxes = (evHall, taxType) => {
     let sum = 0;
-    for (const opt of evab.event_ab_opts) {
+    for (const opt of evHall.event_hall_opts) {
         switch (taxType) {
             case 'iss':
-                sum += ((unitSale(opt) * evab.iss_percent) / 100) * daysBetween(opt.in, opt.out) * opt.count;
+                sum += ((unitSale(opt) * evHall.iss_percent) / 100) * daysBetween(opt.in, opt.out) * opt.count;
                 break;
             case 'serv':
-                sum += ((unitSale(opt) * evab.service_percent) / 100) * daysBetween(opt.in, opt.out) * opt.count;
+                sum += ((unitSale(opt) * evHall.service_percent) / 100) * daysBetween(opt.in, opt.out) * opt.count;
                 break;
             case 'iva':
-                sum += ((unitSale(opt) * evab.iva_percent) / 100) * daysBetween(opt.in, opt.out) * opt.count;
+                sum += ((unitSale(opt) * evHall.iva_percent) / 100) * daysBetween(opt.in, opt.out) * opt.count;
                 break;
         }
 
@@ -149,12 +149,12 @@ const deleteEventHotel = (data) => {
     isLoader.value = true;
     formDelete.id = data.id;
     formDelete.event_id = data.event_id;
-    formDelete.delete(route('event-ab-delete'), {
+    formDelete.delete(route('event-hall-delete'), {
         onFinish: () => {
             isLoader.value = false;
             formDelete.reset()
             props.mountCallBack();
-            props.newEventAb('ab');
+            props.newEventHall('hall');
         },
     });
 };
@@ -167,7 +167,7 @@ const showDetails = ref(false);
     <Loader v-bind:show="isLoader"></Loader>
 
     <div class="row">
-        <PrimaryButton v-if="eventABs.length > 0" type="button" css-class="btn btn-success btn-sm btn-icon-split m-1"
+        <PrimaryButton v-if="eventHalls.length > 0" type="button" css-class="btn btn-success btn-sm btn-icon-split m-1"
             :title="showDetails ? 'Ocultar' : 'Exibir'" v-on:click="showDetails = !showDetails">
             <span class="icon text-white-50">
                 <i class="fas" v-bind:class="{ 'fa-eye': showDetails, 'fa-eye-slash': !showDetails }"></i>
@@ -178,18 +178,18 @@ const showDetails = ref(false);
             <table class="table table-sm table-bordered text-center" width="100%" cellspacing="0">
 
                 <tbody>
-                    <template v-for="(evab, index) in eventABs" :key="evab.id">
+                    <template v-for="(evHall, index) in eventHalls" :key="evHall.id">
 
                         <tr class="bg-light text-dark thead-dark">
-                            <th class="text-left" :colspan="showDetails ? 19 : 13">
-                                Hotel {{ index + 1 }} | {{ evab.ab.name }} | {{ evab.ab.national
+                            <th class="text-left" :colspan="showDetails ? 21 : 15">
+                                Hotel {{ index + 1 }} | {{ evHall.hall.name }} | {{ evHall.hall.national
                                     ?
                                     "Nacional" : "Internacional" }}
-                                {{ evab.ab.city }}
+                                {{ evHall.hall.city }}
                             </th>
                             <th class="align-middle text-right" colspan="3">
                                 <Link class="btn btn-info btn-sm btn-icon-split"
-                                    :href="route('event-edit', { 'id': evab.event_id, 'tab': 2, 'ehotel': evab.id })">
+                                    :href="route('event-edit', { 'id': evHall.event_id, 'tab': 3, 'ehotel': evHall.id })">
                                 <span class="icon text-white-50">
                                     <i class="fas fa-edit"></i>
                                 </span>
@@ -197,7 +197,7 @@ const showDetails = ref(false);
                                 </Link>
 
                                 <Modal modal-title="Confirmar Remoção" :ok-botton-callback="deleteEventHotel"
-                                    :ok-botton-callback-param="{ 'id': evab.id, 'event_id': evab.event_id }"
+                                    :ok-botton-callback-param="{ 'id': evHall.id, 'event_id': evHall.event_id }"
                                     btn-class="btn btn-sm btn-danger btn-icon-split m-1">
                                     <template v-slot:button>
                                         <span class="icon text-white-50">
@@ -207,8 +207,8 @@ const showDetails = ref(false);
                                     </template>
                                     <template v-slot:content>
                                         <span class="text-dark">Tem certeza que deseja remover o hotel {{
-                                            evab.ab.name
-                                        }} do evento {{ evab.ab.name }}</span>
+                                            evHall.hall.name
+                                        }} do evento {{ evHall.hall.name }}</span>
                                     </template>
                                 </Modal>
                             </th>
@@ -217,8 +217,10 @@ const showDetails = ref(false);
                         <tr class="thead-dark">
                             <th class="align-middle" rowspan="2" scope="col">Serviço</th>
                             <th class="align-middle" rowspan="2" scope="col">Broker</th>
-                            <th class="align-middle" rowspan="2" scope="col">Tipo Serviço</th>
-                            <th class="align-middle" rowspan="2" scope="col">Local</th>
+                            <th class="align-middle" rowspan="2" scope="col">Nome Salão</th>
+                            <th class="align-middle" rowspan="2" scope="col">M2</th>
+                            <th class="align-middle" rowspan="2" scope="col">Proposito</th>
+                            <th class="align-middle" rowspan="2" scope="col">#PAX</th>
                             <th class="align-middle" rowspan="2" scope="col">IN</th>
                             <th class="align-middle" rowspan="2" scope="col">OUT</th>
                             <th class="align-middle" rowspan="2" scope="col">QTD</th>
@@ -251,11 +253,13 @@ const showDetails = ref(false);
                         </tr>
 
                         <!-- Opt TRs -->
-                        <tr v-for="opt in evab.event_ab_opts">
+                        <tr v-for="opt in evHall.event_hall_opts">
                             <td class="align-middle">{{ opt.service.name }}</td>
                             <td class="align-middle">{{ opt.broker.name }}</td>
-                            <td class="align-middle">{{ opt.service_type.name }}</td>
-                            <td class="align-middle">{{ opt.local.name }}</td>
+                            <td class="align-middle">{{ opt.name }}</td>
+                            <td class="align-middle">{{ opt.m2 }}</td>
+                            <td class="align-middle">{{ opt.purpose.name }}</td>
+                            <td class="align-middle">{{ opt.pax }}</td>
                             <td class="align-middle">{{ new Date(opt.in).toLocaleDateString() }}</td>
                             <td class="align-middle">{{ new Date(opt.out).toLocaleDateString() }}</td>
                             <td class="align-middle">{{ opt.count }}</td>
@@ -288,35 +292,35 @@ const showDetails = ref(false);
                             </td>
                             <template v-if="showDetails">
                                 <td class="align-middle bg-secondary text-white">
-                                    {{ evab.iss_percent }}</td>
+                                    {{ evHall.iss_percent }}</td>
                                 <td class=" align-middle bg-secondary text-white">
-                                    {{ formatCurrency((unitSale(opt) * evab.iss_percent) / 100) }}
+                                    {{ formatCurrency((unitSale(opt) * evHall.iss_percent) / 100) }}
                                 </td>
                                 <td class="align-middle bg-secondary text-white">
-                                    {{ evab.service_percent }}
+                                    {{ evHall.service_percent }}
                                 </td>
                                 <td class=" align-middle bg-secondary text-white">
-                                    {{ formatCurrency(((unitSale(opt)) * evab.service_percent) /
+                                    {{ formatCurrency(((unitSale(opt)) * evHall.service_percent) /
                                         100) }}
                                 </td>
                                 <td class="align-middle bg-secondary text-white">{{
-                                    evab.iva_percent
+                                    evHall.iva_percent
                                 }}</td>
                                 <td class=" align-middle bg-secondary text-white">
-                                    {{ formatCurrency(((unitSale(opt)) * evab.iva_percent) / 100) }}
+                                    {{ formatCurrency(((unitSale(opt)) * evHall.iva_percent) / 100) }}
                                 </td>
                             </template>
                             <td class="align-middle">
                                 <div class="d-flex">
                                     <PrimaryButton
-                                        :disabled="!(eventAB != null && eventAB.id > 0 && eventAB.id == opt.event_ab_id)"
+                                        :disabled="!(eventHall != null && eventHall.id > 0 && eventHall.id == opt.event_hall_id)"
                                         type="button" css-class="btn btn-info btn-circle btn-sm text-white" title="Editar"
                                         v-on:click="editOpt(opt)">
                                         <i class="fas fa-edit"></i>
                                     </PrimaryButton>
 
                                     <PrimaryButton
-                                        :disabled="!(eventAB != null && eventAB.id > 0 && eventAB.id == opt.event_ab_id)"
+                                        :disabled="!(eventHall != null && eventHall.id > 0 && eventHall.id == opt.event_hall_id)"
                                         type="button" css-class="btn btn-info btn-circle btn-sm text-white" title="Duplicar"
                                         v-on:click="duplicate(opt)">
                                         <i class="fas fa-clone"></i>
@@ -341,29 +345,29 @@ const showDetails = ref(false);
                                 Diária Média:
                             </td>
                             <td class="align-middle bg-warning text-dark">
-                                {{ formatCurrency(average(evab)) }}
+                                {{ formatCurrency(average(evHall)) }}
                             </td>
                             <td class="align-middle"></td>
                             <td class="align-middle bg-warning text-dark text-rigth">
                                 Room Nights:
                             </td>
-                            <td class="align-middle">{{ roomNights(evab) }}</td>
+                            <td class="align-middle">{{ roomNights(evHall) }}</td>
                             <td class="align-middle text-rigth"># Aptos:</td>
-                            <td class="align-middle">{{ sumCount(evab) }}</td>
+                            <td class="align-middle">{{ sumCount(evHall) }}</td>
                             <td class="align-middle bg-warning text-dark">
-                                {{ sumNts(evab) }}
+                                {{ sumNts(evHall) }}
                             </td>
                             <td class="align-middle bg-success text-white" colspan="2">
                                 Total venda:
                             </td>
                             <td class="align-middle bg-success text-white">
-                                {{ formatCurrency(sumSale(evab)) }}
+                                {{ formatCurrency(sumSale(evHall)) }}
                             </td>
                             <td class="align-middle bg-warning text-dark text-rigth">
                                 Total Custo
                             </td>
                             <td class="align-middle bg-warning text-dark">
-                                {{ formatCurrency(sumCost(evab)) }}
+                                {{ formatCurrency(sumCost(evHall)) }}
                             </td>
                             <td class="align-middle bg-warning text-dark text-rigth">
                                 Média %
@@ -373,7 +377,7 @@ const showDetails = ref(false);
                                     new Intl.NumberFormat({
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2
-                                    }).format((1 - (sumCost(evab) / sumSale(evab))) * 100)
+                                    }).format((1 - (sumCost(evHall) / sumSale(evHall))) * 100)
                                 }}
                             </td>
                             <template v-if="showDetails">
@@ -400,27 +404,27 @@ const showDetails = ref(false);
                                 OBSERVAÇÃO INTERNA:
                             </td>
                             <td class="align-middle text-dark text-left" colspan="9">
-                                {{ evab.internal_observation }}
+                                {{ evHall.internal_observation }}
                             </td>
                             <template v-if="showDetails">
                                 <td class="align-middle" colspan="3"></td>
                                 <td class="align-middle bg-success text-white">
-                                    {{ formatCurrency(sumTaxes(evab, 'iss')) }}
+                                    {{ formatCurrency(sumTaxes(evHall, 'iss')) }}
                                 </td>
                                 <td class="align-middle">
-                                    {{ formatCurrency((sumCost(evab) * evab.iss_percent) / 100) }}
+                                    {{ formatCurrency((sumCost(evHall) * evHall.iss_percent) / 100) }}
                                 </td>
                                 <td class="align-middle bg-success text-white">
-                                    {{ formatCurrency(sumTaxes(evab, 'serv')) }}
+                                    {{ formatCurrency(sumTaxes(evHall, 'serv')) }}
                                 </td>
                                 <td class="align-middle">
-                                    {{ formatCurrency((sumCost(evab) * evab.service_percent) / 100) }}
+                                    {{ formatCurrency((sumCost(evHall) * evHall.service_percent) / 100) }}
                                 </td>
                                 <td class="align-middle bg-success text-white">
-                                    {{ formatCurrency(sumTaxes(evab, 'iva')) }}
+                                    {{ formatCurrency(sumTaxes(evHall, 'iva')) }}
                                 </td>
                                 <td class="align-middle">
-                                    {{ formatCurrency((sumCost(evab) * evab.iva_percent) / 100) }}
+                                    {{ formatCurrency((sumCost(evHall) * evHall.iva_percent) / 100) }}
                                 </td>
                             </template>
                             <td class="align-middle"></td>
@@ -431,7 +435,7 @@ const showDetails = ref(false);
                                 OBSERVAÇÃO CLIENTE:
                             </td>
                             <td class="align-middle text-dark text-left" colspan="9">
-                                {{ evab.customer_observation }}
+                                {{ evHall.customer_observation }}
                             </td>
 
                             <template v-if="showDetails">
@@ -440,16 +444,16 @@ const showDetails = ref(false);
                                     Venda
                                 </td>
                                 <td class="align-middle bg-success text-white" colspan="2">
-                                    {{ formatCurrency(sumSale(evab) + sumTaxes(evab, 'iss') +
-                                        sumTaxes(evab, 'serv') + sumTaxes(evab, 'iva')) }}
+                                    {{ formatCurrency(sumSale(evHall) + sumTaxes(evHall, 'iss') +
+                                        sumTaxes(evHall, 'serv') + sumTaxes(evHall, 'iva')) }}
                                 </td>
                                 <td class="align-middle bg-warning text-white">
                                     Custo
                                 </td>
                                 <td class="align-middle bg-warning text-white" colspan="2">
-                                    {{ formatCurrency(((sumCost(evab) * evab.iss_percent) / 100) +
-                                        ((sumCost(evab) * evab.service_percent) / 100) + ((sumCost(evab) *
-                                            evab.iva_percent) / 100) + sumCost(evab)) }}
+                                    {{ formatCurrency(((sumCost(evHall) * evHall.iss_percent) / 100) +
+                                        ((sumCost(evHall) * evHall.service_percent) / 100) + ((sumCost(evHall) *
+                                            evHall.iva_percent) / 100) + sumCost(evHall)) }}
                                 </td>
                             </template>
                             <td></td>

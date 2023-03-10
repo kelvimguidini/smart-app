@@ -27,7 +27,6 @@ const props = defineProps({
 
 
 <template>
-
     <!-- Sidebar -->
     <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
@@ -41,6 +40,7 @@ const props = defineProps({
 
         <li v-for="(menuItem, index) in menuItems" :key="index" :class="{ 'active': menuItem.active }" class="nav-item">
 
+            <hr v-if="menuItem.divider" class="sidebar-divider d-none d-md-block">
             <!-- Nav Item -->
             <Link v-if="menuItem.isItem" class="nav-link" :href="menuItem.link">
             <i :class="menuItem.icon || 'fa-solid fa-check'"></i>

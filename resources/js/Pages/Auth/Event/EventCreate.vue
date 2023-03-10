@@ -11,10 +11,11 @@ import Datepicker from 'vue3-datepicker';
 import { ptBR } from 'date-fns/locale';
 import ListHotelFull from '@/Components/ListHotelFull.vue';
 import ListABFull from '@/Components/ListABFull.vue';
+import ListHallFull from '@/Components/ListHallFull.vue';
 import FormProvider from '@/Components/FormProvider.vue';
 import FormProviderHotelOpt from '@/Components/FormProviderHotelOpt.vue';
 import FormProviderABOpt from '@/Components/FormProviderABOpt.vue';
-
+import FormProviderHallOpt from '@/Components/FormProviderHallOpt.vue';
 
 const props = defineProps({
     crds: {
@@ -50,6 +51,14 @@ const props = defineProps({
         default: [],
     },
     eventAB: {
+        type: Object,
+        default: {},
+    },
+    eventHalls: {
+        type: Array,
+        default: [],
+    },
+    eventHall: {
         type: Object,
         default: {},
     },
@@ -89,6 +98,14 @@ const props = defineProps({
         default: [],
     },
     locals: {
+        type: Array,
+        default: [],
+    },
+    servicesHall: {
+        type: Array,
+        default: [],
+    },
+    purposesHall: {
         type: Array,
         default: [],
     },
@@ -138,6 +155,12 @@ const mount = () => {
         $("#tabs-aandb").tabs("destroy");
     }
     $("#tabs-aandb").tabs();
+
+
+    if ($('#tabs-hall').hasClass('ui-tabs')) {
+        $("#tabs-hall").tabs("destroy");
+    }
+    $("#tabs-hall").tabs();
 }
 
 onMounted(() => {
@@ -286,8 +309,42 @@ const editOptAB = (opt) => {
 
 //FIM FUNÇÕES ALIMENTAÇÃO E BEBIDAS
 
+//FUNÇÕES SALÕES
+
+const formProviderOptRefHall = ref(null);
+
+
+const deleteOptHall = (id) => {
+    isLoader.value = true;
+    formDelete.id = id;
+    formDelete.delete(route('opt-hall-delete'), {
+        onFinish: () => {
+            isLoader.value = false;
+            formDelete.reset();
+            mount();
+        },
+    });
+};
+
+const duplicateHall = (opt) => {
+    if (formProviderOptRefHall.value) {
+        formProviderOptRefHall.value.duplicate(opt);
+    }
+}
+
+const editOptHall = (opt) => {
+    if (formProviderOptRefHall.value) {
+        formProviderOptRefHall.value.editOpt(opt);
+    }
+
+};
+
+//FIM FUNÇÕES SALÕES
+
+
 const formProviderHotelRef = ref(null);
 const formProviderAbRef = ref(null);
+const formProviderHallRef = ref(null);
 const newEventProv = (type) => {
     switch (props.type) {
         case 'hotel':
@@ -298,6 +355,11 @@ const newEventProv = (type) => {
         case 'ab':
             if (formProviderAbRef.value) {
                 formProviderAbRef.value.newEventProvider();
+            }
+            break;
+        case 'hall':
+            if (formProviderHallRef.value) {
+                formProviderHallRef.value.newEventProvider();
             }
             break;
     }
@@ -578,8 +640,7 @@ const newEventProv = (type) => {
                     <div id="form-ab" class="card mb-4 py-3 border-left-primary">
                         <div class="card-body">
                             <FormProvider key="ab" :event-provider="eventAB" :currencies="currencies" :providers="providers"
-                                type="ab" :select-call-back="selectHotel" :event-id="event.id" :mount-call-back="mount"
-                                ref="formProviderAbRef">
+                                type="ab" :event-id="event.id" :mount-call-back="mount" ref="formProviderAbRef">
                             </FormProvider>
                         </div>
                     </div>
@@ -603,11 +664,57 @@ const newEventProv = (type) => {
             </div>
             <!-- FIM ABA A&B -->
 
-
+            <!-- ABA HALL -->
             <div v-if="event != null && $page.props.auth.permissions.some((p) => p.name === 'land_operator' || p.name === 'event_admin')"
                 id="hall">
-                <p>Conteudo da aba follow Up.</p>
+
+                <div id="tabs-hall">
+
+                    <ul class="nav nav-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#table">Lista</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#form-hall">Cadastro</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" v-bind:class="{ 'disabled': !(eventHall != null && eventHall.id > 0) }"
+                                href="#hall-opt">Cadastro Detalhe</a>
+                        </li>
+                    </ul>
+                    <div id="table">
+                        <ListHallFull :event-hall="eventHall" :event-halls="eventHalls" :edit-opt="editOptHall"
+                            :duplicate="duplicateHall" :delete-opt="deleteOptHall" :mount-call-back="mount"
+                            :new-event-hall="newEventProv"></ListHallFull>
+                    </div>
+
+                    <div id="form-hall" class="card mb-4 py-3 border-left-primary">
+                        <div class="card-body">
+                            <FormProvider key="ab" :event-provider="eventHall" :currencies="currencies"
+                                :providers="providers" type="hall" :event-id="event.id" :mount-call-back="mount"
+                                ref="formProviderHallRef">
+                            </FormProvider>
+                        </div>
+                    </div>
+
+                    <div v-if="eventHall != null && eventHall.id > 0" id="hall-opt">
+                        <div class="row">
+                            <div class="col">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <FormProviderHallOpt :event-hall="eventHall" :brokers="brokers"
+                                            :purposes="purposesHall" :services="servicesHall" ref="formProviderOptRefHall">
+                                        </FormProviderHallOpt>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
+            <!-- FIM ABA HALL -->
 
             <div v-if="event != null && $page.props.auth.permissions.some((p) => p.name === 'land_operator' || p.name === 'event_admin')"
                 id="additional">

@@ -5,16 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class EventABOpt extends Model
+class EventHallOpt extends Model
 {
     use SoftDeletes;
 
     protected $fillable = [
-        'event_ab_id',
+        'event_hall_id',
         'service_id',
-        'service_type_id',
+        'purpose_id',
         'broker_id',
-        'local_id',
         'in',
         'out',
         'count',
@@ -23,7 +22,7 @@ class EventABOpt extends Model
         'received_proposal_percent',
     ];
 
-    protected $table = 'event_ab_opt';
+    protected $table = 'event_hall_opt';
 
     /**
      * The primary key associated with the table.
@@ -37,7 +36,7 @@ class EventABOpt extends Model
      *
      * @var int
      */
-    protected $event_ab_id = 'event_ab_id';
+    protected $event_hall_id = 'event_hall_id';
 
     /**
      * The primary key associated with the table.
@@ -51,19 +50,13 @@ class EventABOpt extends Model
      *
      * @var int
      */
-    protected $service_type_id = 'service_type_id';
+    protected $purpose_id = 'purpose_id';
     /**
      * The primary key associated with the table.
      *
      * @var int
      */
     protected $broker_id = 'broker_id';
-    /**
-     * The primary key associated with the table.
-     *
-     * @var int
-     */
-    protected $local_id = 'local_id';
 
     /**
      * The primary key associated with the table.
@@ -109,28 +102,23 @@ class EventABOpt extends Model
     protected $received_proposal_percent = 'received_proposal_percent';
 
 
-    public function event_ab()
+    public function event_hall()
     {
-        return $this->hasOne(EventAB::class, 'id', 'event_ab_id');
+        return $this->hasOne(EventHall::class, 'id', 'event_hall_id');
     }
 
     public function service()
     {
-        return $this->hasOne(Service::class, 'id', 'service_id');
+        return $this->hasOne(ServiceHall::class, 'id', 'service_id');
     }
 
-    public function service_type()
+    public function purpose()
     {
-        return $this->hasOne(ServiceType::class, 'id', 'service_type_id');
+        return $this->hasOne(PurposeHall::class, 'id', 'purpose_id');
     }
 
     public function broker()
     {
         return $this->hasOne(Broker::class, 'id', 'broker_id');
-    }
-
-    public function Local()
-    {
-        return $this->hasOne(Local::class, 'id', 'local_id');
     }
 }

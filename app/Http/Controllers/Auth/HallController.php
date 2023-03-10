@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\EventAB;
 use App\Models\EventABOpt;
+use App\Models\EventHall;
+use App\Models\EventHallOpt;
 use App\Models\EventHotel;
 use App\Models\EventHotelOpt;
 use App\Models\Provider;
@@ -14,7 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
 
-class ABController extends Controller
+class HallController extends Controller
 {
 
     /**
@@ -33,9 +35,8 @@ class ABController extends Controller
 
         $request->validate([
             'broker' => 'required|integer',
-            'local_id' => 'required|integer',
-            'service_id' => 'required|integer',
-            'service_type_id' => 'required|integer',
+            'purpose' => 'required|integer',
+            'service' => 'required|integer',
             'in' => 'required|date',
             'out' => 'required|date|after_or_equal:in',
             'received_proposal' => 'required|numeric',
@@ -47,13 +48,15 @@ class ABController extends Controller
         try {
 
             if ($request->id > 0) {
-                $opt = EventABOpt::find($request->id);
+                $opt = EventHallOpt::find($request->id);
 
-                $opt->event_ab_id = $request->event_ab_id;
+                $opt->event_hall_id = $request->event_hall_id;
                 $opt->broker_id = $request->broker;
-                $opt->local_id = $request->local_id;
-                $opt->service_id = $request->service_id;
-                $opt->service_type_id = $request->service_type_id;
+                $opt->purpose_id = $request->purpose;
+                $opt->service_id = $request->service;
+                $opt->name = $request->name;
+                $opt->m2 = $request->m2;
+                $opt->pax = $request->pax;
                 $opt->in = $request->in;
                 $opt->out = $request->out;
                 $opt->received_proposal_percent = $request->received_proposal_percent;
@@ -64,12 +67,14 @@ class ABController extends Controller
                 $opt->save();
             } else {
 
-                $opt = EventABOpt::create([
-                    'event_ab_id' => $request->event_ab_id,
+                $opt = EventHallOpt::create([
+                    'event_hall_id' => $request->event_hall_id,
                     'broker_id' => $request->broker,
-                    'local_id' => $request->local_id,
-                    'service_id' => $request->service_id,
-                    'service_type_id' => $request->service_type_id,
+                    'purpose_id' => $request->purpose,
+                    'service_id' => $request->service,
+                    'name' => $request->name,
+                    'm2' => $request->m2,
+                    'pax' => $request->pax,
                     'in' => $request->in,
                     'out' => $request->out,
                     'received_proposal_percent' => $request->received_proposal_percent,
@@ -90,14 +95,14 @@ class ABController extends Controller
      *
      * @return \Inertia\Response
      */
-    public function eventABDelete(Request $request)
+    public function eventHallDelete(Request $request)
     {
         if (!Gate::allows('event_admin') && !Gate::allows('land_operator')) {
             abort(403);
         }
         try {
 
-            $r = EventAB::find($request->id);
+            $r = EventHall::find($request->id);
 
             $r->delete();
         } catch (Exception $e) {
@@ -105,7 +110,7 @@ class ABController extends Controller
             throw $e;
         }
 
-        return redirect()->route('event-edit',  ['id' => $request->event_id, 'tab' => 2])->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
+        return redirect()->route('event-edit',  ['id' => $request->event_id, 'tab' => 3])->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
     }
 
 
@@ -121,7 +126,7 @@ class ABController extends Controller
         }
         try {
 
-            $r = EventABOpt::find($request->id);
+            $r = EventHallOpt::find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

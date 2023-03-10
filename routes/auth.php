@@ -12,6 +12,7 @@ use App\Http\Controllers\Auth\CurrencyController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\EventController;
+use App\Http\Controllers\Auth\HallController;
 use App\Http\Controllers\Auth\HotelController;
 use App\Http\Controllers\Auth\LocalController;
 use App\Http\Controllers\Auth\NewPasswordController;
@@ -19,12 +20,16 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\ProfileUserController;
 use App\Http\Controllers\Auth\ProviderController;
 use App\Http\Controllers\Auth\PurposeController;
+use App\Http\Controllers\Auth\PurposeHallController;
 use App\Http\Controllers\Auth\RegimeController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\Auth\ServiceController;
+use App\Http\Controllers\Auth\ServiceHallController;
 use App\Http\Controllers\Auth\ServiceTypeController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Models\Purpose;
+use App\Models\ServiceHall;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['guest', 'cors'])->group(function () {
@@ -190,6 +195,29 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
 
 
+    Route::get('service-hall', [ServiceHallController::class, 'create'])
+        ->name('service-hall');
+
+    Route::post('service-hall-save', [ServiceHallController::class, 'store'])
+        ->name('service-hall-save');
+
+    Route::delete('service-hall-delete', [ServiceHallController::class, 'delete'])
+        ->name('service-hall-delete');
+
+
+
+
+    Route::get('purpose-hall', [PurposeHallController::class, 'create'])
+        ->name('purpose-hall');
+
+    Route::post('purpose-hall-save', [PurposeHallController::class, 'store'])
+        ->name('purpose-hall-save');
+
+    Route::delete('purpose-hall-delete', [PurposeHallController::class, 'delete'])
+        ->name('purpose-hall-delete');
+
+
+
     Route::get('service-type', [ServiceTypeController::class, 'create'])
         ->name('service-type');
 
@@ -261,4 +289,15 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     Route::delete('event-ab-delete', [ABController::class, 'eventABDelete'])
         ->name('event-ab-delete');
+
+
+    //HALL
+    Route::post('hall-opt-save', [HallController::class, 'storeOpt'])
+        ->name('hall-opt-save');
+
+    Route::delete('opt-hall-delete', [HallController::class, 'optDelete'])
+        ->name('opt-hall-delete');
+
+    Route::delete('event-hall-delete', [HallController::class, 'eventHallDelete'])
+        ->name('event-hall-delete');
 });

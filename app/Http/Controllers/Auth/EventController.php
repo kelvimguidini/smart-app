@@ -9,13 +9,16 @@ use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\Event;
 use App\Models\EventAB;
+use App\Models\EventHall;
 use App\Models\EventHotel;
 use App\Models\Hotel;
 use App\Models\Local;
 use App\Models\Provider;
 use App\Models\Purpose;
+use App\Models\PurposeHall;
 use App\Models\Regime;
 use App\Models\Service;
+use App\Models\ServiceHall;
 use App\Models\ServiceType;
 use App\Models\User;
 use Exception;
@@ -91,13 +94,20 @@ class EventController extends Controller
         $servicesType = ServiceType::all();
         $locals = Local::all();
 
+
+        $servicesHall = ServiceHall::all();
+        $purposesHall = PurposeHall::all();
+
         $users = User::all();
 
         $eventHotel = $request->tab == 1 ? EventHotel::with(['eventHotelsOpt', 'hotel', 'currency', 'event'])->find($request->ehotel) : null;
         $eventHotels = EventHotel::with(['eventHotelsOpt.broker', 'eventHotelsOpt.regime', 'eventHotelsOpt.purpose', 'eventHotelsOpt.apto_hotel.apto', 'eventHotelsOpt.category_hotel.category', 'hotel', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
 
-        $eventAB = $request->tab == 2 ? EventAB::with(['eventAbOpts.service', 'eventAbOpts.service_type', 'ab', 'currency', 'event'])->find($request->ehotel) : null;
+        $eventAB = $request->tab == 2 ? EventAB::with(['eventAbOpts', 'ab', 'currency', 'event'])->find($request->ehotel) : null;
         $eventABs = EventAB::with(['eventAbOpts.broker', 'eventAbOpts.service', 'eventAbOpts.service_type', 'eventAbOpts.local', 'ab', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
+
+        $eventHall = $request->tab == 3 ? EventHall::with(['eventHallOpts', 'hall', 'currency', 'event'])->find($request->ehotel) : null;
+        $eventHalls = EventHall::with(['eventHallOpts.broker', 'eventHallOpts.service', 'eventHallOpts.purpose', 'hall', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
 
         return Inertia::render('Auth/Event/EventCreate', [
             'crds' => $crds,
@@ -117,6 +127,10 @@ class EventController extends Controller
             'services' => $services,
             'servicesType' => $servicesType,
             'locals' => $locals,
+            'servicesHall' => $servicesHall,
+            'purposesHall' => $purposesHall,
+            'eventHall' => $eventHall,
+            'eventHalls' => $eventHalls,
         ]);
     }
 
