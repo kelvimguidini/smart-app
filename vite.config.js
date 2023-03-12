@@ -23,16 +23,16 @@ export default defineConfig({
     ssr: {
         noExternal: ['@inertiajs/server'],
     },
-    server: {
-        // host: '0.0.0.0',
-        hmr: true,
-        // watch: {
-        //     usePolling: true,
-        // },
-        // proxy: {
-        //     "/smart-app/public/": {
-        //         target: "https://dev.eventos.com.br",
-        //     }
-        // }
-    },
+    // server: {
+    //     // host: '0.0.0.0',
+    //     hmr: true,
+    //     watch: {
+    //         usePolling: true,
+    //     },
+    //     proxy: {
+    //         "/smart-app/public/": {
+    //             target: "https://dev.eventos.com.br",
+    //         }
+    //     }
+    // },
 });
