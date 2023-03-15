@@ -167,6 +167,9 @@ const showDetails = ref(false);
     <Loader v-bind:show="isLoader"></Loader>
 
     <div class="row">
+        <div v-if="eventABs.length == 0" class="alert alert-primary" role="alert">
+            Nenhum fornecedor cadastrado!
+        </div>
         <PrimaryButton v-if="eventABs.length > 0" type="button" css-class="btn btn-success btn-sm btn-icon-split m-1"
             :title="showDetails ? 'Ocultar' : 'Exibir'" v-on:click="showDetails = !showDetails">
             <span class="icon text-white-50">
@@ -248,6 +251,14 @@ const showDetails = ref(false);
                                 <th class="align-middle">{{ eventAb != null ? eventAb.percentIVA : 0 }}%</th>
                                 <th class="align-middle">IVA</th>
                             </template>
+                        </tr>
+
+                        <tr v-if="evab.event_ab_opts.length == 0">
+                            <td :colspan="showDetails ? 19 : 13">
+                                <div class="alert alert-primary" role="alert">
+                                    Nenhum fornecedor cadastrado!
+                                </div>
+                            </td>
                         </tr>
 
                         <!-- Opt TRs -->

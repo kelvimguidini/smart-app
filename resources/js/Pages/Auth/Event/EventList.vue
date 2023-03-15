@@ -2,7 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Modal from '@/Components/Modal.vue';
 import Loader from '@/Components/Loader.vue';
-import { Head, useForm } from '@inertiajs/inertia-vue3';
+import { Head, Link, useForm } from '@inertiajs/inertia-vue3';
 import { onMounted, ref } from 'vue';
 
 
@@ -16,11 +16,11 @@ const formDelete = useForm({
 
 
 onMounted(() => {
-    $('table').DataTable({
-        language: {
-            url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/pt-BR.json',
-        },
-    });
+    // $('table').DataTable({
+    //     language: {
+    //         url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/pt-BR.json',
+    //     },
+    // });
 });
 
 const isLoader = ref(false);
@@ -35,6 +35,53 @@ const deleteEvent = (id) => {
         },
     });
 };
+
+const providersByEvent = (event) => {
+
+    var groups = [];
+
+    event.event_hotels && event.event_hotels.map((current) => {
+        if (!groups.some(g => g.id == current.hotel.id)) {
+            groups.push({
+                id: current.hotel.id,
+                name: current.hotel.name,
+                city: current.hotel.city,
+            });
+        }
+    }, {});
+
+    event.event_abs && event.event_abs.map((current) => {
+        if (!groups.some(g => g.id == current.ab.id)) {
+            groups.push({
+                id: current.ab.id,
+                name: current.ab.name,
+                city: current.ab.city,
+            });
+        }
+    }, {});
+
+    event.event_halls && event.event_halls.map((current) => {
+        if (!groups.some(g => g.id == current.hall.id)) {
+            groups.push({
+                id: current.hall.id,
+                name: current.hall.name,
+                city: current.hall.city,
+            });
+        }
+    }, {});
+
+    event.event_adds && event.event_adds.map((current) => {
+        if (!groups.some(g => g.id == current.add.id)) {
+            groups.push({
+                id: current.add.id,
+                name: current.add.name,
+                city: current.add.city,
+            });
+        }
+    }, {});
+
+    return groups;
+}
 </script>
 
 <template>
@@ -70,42 +117,64 @@ const deleteEvent = (id) => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr v-for="(event, index) in events">
-                                                <th scope="row">{{ event.id }}</th>
-                                                <td>{{ event.customer.name }}</td>
-                                                <td>{{ event.name }}</td>
-                                                <td>{{ event.code }}</td>
-                                                <td>{{ new Date(event.date).toLocaleDateString() }}</td>
-                                                <td>{{ new Date(event.date_final).toLocaleDateString() }}</td>
-                                                <td>
-                                                    <a v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin')"
-                                                        class="btn btn-info btn-icon-split mr-2"
-                                                        :href="route('event-edit', { id: event.id })">
+                                            <template v-for="(event, index) in events">
+                                                <tr>
+                                                    <th scope="row">{{ event.id }}</th>
+                                                    <td>{{ event.customer.name }}</td>
+                                                    <td>{{ event.name }}</td>
+                                                    <td>{{ event.code }}</td>
+                                                    <td>{{ new Date(event.date).toLocaleDateString() }}</td>
+                                                    <td>{{ new Date(event.date_final).toLocaleDateString() }}</td>
+                                                    <td>
+
+                                                        <Link
+                                                            v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin')"
+                                                            class="btn btn-info btn-icon-split mr-2"
+                                                            :href="route('event-edit', { id: event.id })">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-edit"></i>
                                                         </span>
                                                         <span class="text">Editar</span>
-                                                    </a>
+                                                        </Link>
 
-                                                    <Modal
-                                                        v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin')"
-                                                        :key="index" :modal-title="'Confirmar Exclusão de ' + event.name"
-                                                        :ok-botton-callback="deleteEvent"
-                                                        :ok-botton-callback-param="event.id"
-                                                        btn-class="btn btn-danger btn-icon-split">
-                                                        <template v-slot:button>
-                                                            <span class="icon text-white-50">
-                                                                <i class="fas fa-trash"></i>
-                                                            </span>
-                                                            <span class="text">Excluir</span>
-                                                        </template>
-                                                        <template v-slot:content>
-                                                            Tem certeza que deseja apagar esse registro?
-                                                        </template>
-                                                    </Modal>
+                                                        <Modal
+                                                            v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin')"
+                                                            :key="index"
+                                                            :modal-title="'Confirmar Exclusão de ' + event.name"
+                                                            :ok-botton-callback="deleteEvent"
+                                                            :ok-botton-callback-param="event.id"
+                                                            btn-class="btn btn-danger btn-icon-split">
+                                                            <template v-slot:button>
+                                                                <span class="icon text-white-50">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </span>
+                                                                <span class="text">Excluir</span>
+                                                            </template>
+                                                            <template v-slot:content>
+                                                                Tem certeza que deseja apagar esse registro?
+                                                            </template>
+                                                        </Modal>
 
-                                                </td>
-                                            </tr>
+                                                    </td>
+                                                </tr>
+                                                <tr v-for="(prov, index) in providersByEvent(event)">
+                                                    <th scope="row"></th>
+                                                    <td colspan="5">Hotel: {{ prov.name }} | {{ prov.city }}</td>
+
+                                                    <td>
+                                                        <Link
+                                                            v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin')"
+                                                            class="btn btn-secondary btn-icon-split mr-2" :disabled="true"
+                                                            :href="route('budget', { provider_id: prov.id, event_id: event.id })">
+                                                        <span class="icon text-white-50">
+                                                            <i class="fas fa-badge-dollar"></i>
+                                                        </span>
+                                                        <span class="text">Orçamento</span>
+                                                        </Link>
+
+                                                    </td>
+                                                </tr>
+                                            </template>
                                         </tbody>
                                     </table>
                                 </div>

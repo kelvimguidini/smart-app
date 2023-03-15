@@ -156,6 +156,22 @@ class Event extends Model
 
     public function event_hotels()
     {
-        return $this->belongsTo(EventHotel::class);
+        return $this->hasMany(EventHotel::class, 'event_id', 'id');
+    }
+
+
+    public function event_abs()
+    {
+        return $this->hasMany(EventAB::class, 'event_id', 'id');
+    }
+
+    public function event_halls()
+    {
+        return $this->hasMany(EventHall::class, 'event_id', 'id');
+    }
+
+    public function event_adds()
+    {
+        return $this->hasMany(EventAdd::class, 'event_id', 'id');
     }
 }

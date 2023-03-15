@@ -54,7 +54,7 @@ const duplicate = (opt, isEdit = false) => {
     if (!isEdit) {
         formOpt.id = 0;
     }
-    console.log(opt);
+
     formOpt.measure = opt.measure_id;
     formOpt.service = opt.service_id;
     formOpt.frequency = opt.frequency_id;

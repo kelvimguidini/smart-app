@@ -42,15 +42,13 @@ class EventController extends Controller
     {
         $userId =  Auth::user()->id;
         if (Gate::allows('event_admin')) {
-            $e = Event::with("crd")
-                ->with('customer')
+            $e = Event::with(['crd', 'customer', 'event_hotels.hotel', 'event_abs.ab', 'event_halls.hall', 'event_adds.add'])
                 ->with('hotel_operator')
                 ->with('air_operator')
                 ->with('land_operator')
                 ->get();
         } else if (Gate::allows('hotel_operator') || Gate::allows('land_operator') || Gate::allows('air_operator')) {
-            $e = Event::with("crd")
-                ->with('customer')
+            $e = Event::with(['crd', 'customer', 'event_hotels.hotel', 'event_abs.ab', 'event_halls.hall', 'event_adds.add'])
                 ->with(['hotel_operator' => function ($query) use ($userId) {
                     $query->where('id', '=', $userId);
                 }])

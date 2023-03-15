@@ -2,10 +2,6 @@
 ob_start();
 session_start();
 
-header('Access-Control-Allow-Origin: *');
-header("Access-Control-Allow-Headers: *");
-header('Content-type: text/html; charset=utf-8');
-
 setlocale(LC_ALL, 'pt_BR.utf-8', 'pt_BR', 'Portuguese_Brazil');
 error_reporting(0);
 
@@ -63,8 +59,8 @@ $router->post("/aereo/emissao/{idAuth}/{idvoo}", "Booking:toIssue", "booking.toI
 $router->dispatch();
 
 /*** ERRORS PROCESS */
-if($router->error()){
-    $router->redirect("web.error",["errcode" => $router->error()]);
+if ($router->error()) {
+    $router->redirect("web.error", ["errcode" => $router->error()]);
 }
 
 ob_end_flush();

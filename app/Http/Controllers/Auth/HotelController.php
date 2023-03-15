@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Event;
+use App\Models\EventAB;
+use App\Models\EventAdd;
+use App\Models\EventHall;
 use App\Models\EventHotel;
 use App\Models\EventHotelOpt;
 use App\Models\Provider;
@@ -172,5 +176,24 @@ class HotelController extends Controller
         }
 
         return redirect()->back()->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
+    }
+
+
+    /**
+     * Display the registration view.
+     *
+     * @return \Inertia\Response
+     */
+    public function budget(Request $request)
+    {
+        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator')) {
+            abort(403);
+        }
+
+        $event = Event::with(['event_hotels', 'event_abs', 'event_halls', 'event_adds'])->find($request->id);
+
+        return Inertia::render('Auth/Event/EventCreate', [
+            'event' => $event,
+        ]);
     }
 }

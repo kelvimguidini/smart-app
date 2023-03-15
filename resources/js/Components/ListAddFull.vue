@@ -167,6 +167,9 @@ const showDetails = ref(false);
     <Loader v-bind:show="isLoader"></Loader>
 
     <div class="row">
+        <div v-if="eventAdds.length == 0" class="alert alert-primary" role="alert">
+            Nenhum fornecedor cadastrado!
+        </div>
         <PrimaryButton v-if="eventAdds.length > 0" type="button" css-class="btn btn-success btn-sm btn-icon-split m-1"
             :title="showDetails ? 'Ocultar' : 'Exibir'" v-on:click="showDetails = !showDetails">
             <span class="icon text-white-50">
@@ -252,6 +255,13 @@ const showDetails = ref(false);
                         </tr>
 
                         <!-- Opt TRs -->
+                        <tr v-if="evAdd.event_add_opts.length == 0">
+                            <td :colspan="showDetails ? 20 : 14">
+                                <div class="alert alert-primary" role="alert">
+                                    Nenhum fornecedor cadastrado!
+                                </div>
+                            </td>
+                        </tr>
                         <tr v-for="opt in evAdd.event_add_opts">
                             <td class="align-middle">{{ opt.service.name }}</td>
                             <td class="align-middle">{{ opt.unit }}</td>

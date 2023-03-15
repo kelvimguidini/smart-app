@@ -7,10 +7,10 @@ Options +FollowSymLinks -MultiViews
 RewriteEngine On
 
 ## Adding a trailing slash
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{THE_REQUEST} \s/+(.+?[^/])[?\s] [NC]
-RewriteRule ^ /%1/ [L,R=301]
+#RewriteCond %{REQUEST_FILENAME} !-f
+#RewriteCond %{REQUEST_FILENAME} !-d
+#RewriteCond %{THE_REQUEST} \s/+(.+?[^/])[?\s] [NC]
+#RewriteRule ^ /%1/ [L,R=301]
 
 # remove /public/ from URL
 RewriteCond %{REQUEST_URI} !/public/ [NC]

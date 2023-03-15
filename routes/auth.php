@@ -345,4 +345,9 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     Route::delete('event-add-delete', [AddController::class, 'eventAddDelete'])
         ->name('event-add-delete');
+
+
+    //ORÇAMENTO
+    Route::get('budget/{provider_id}/{event_id}', [HotelController::class, 'budget'])
+        ->name('budget');
 });
