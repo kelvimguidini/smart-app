@@ -41,6 +41,7 @@ const handleEditForm = (customer) => {
     form.document = customer.document;
     form.phone = customer.phone;
     form.email = customer.email;
+    form.color = customer.color
     form.responsibleAuthorizing = customer.responsibleAuthorizing;
     previewImage.value = '.' + customer.logo;
 }
@@ -52,7 +53,8 @@ const form = useForm({
     phone: '',
     email: '',
     responsibleAuthorizing: '',
-    logo: null
+    logo: null,
+    color: '#000000'
 });
 
 const formDelete = useForm({
@@ -95,12 +97,15 @@ const deleteCustomer = (id) => {
 };
 
 const submit = () => {
+
     form.post(route('customer-save'), {
         onSuccess: () => {
             form.reset();
         },
     });
 };
+
+
 </script>
 
 <template>
@@ -196,6 +201,30 @@ const submit = () => {
                                             </div>
 
                                         </div>
+                                        <!-- </div>
+                                                                                                                                                                                                                                    <div class="row"> -->
+                                        <div class="col">
+
+                                            <div class="form-group">
+                                                <InputLabel for="color" value="Cor:" />
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <input type="color" id="color" v-model="form.color">
+                                                    </div>
+                                                </div>
+                                                <InputError class="mt-2 text-danger" :message="form.errors.logo" />
+                                            </div>
+
+                                            <div class="alert alert-warning " role="alert">
+                                                <h4
+                                                    class="alert-heading text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                    Seleção da cor!
+                                                </h4>
+                                                <p>Selecione a cor predominante na marca desse cliente, essa cor será usada
+                                                    na impressão da proposta!</p>
+                                            </div>
+
+                                        </div>
                                     </div>
                                     <div class="flex items-center justify-end mt-4 rigth">
                                         <PrimaryButton css-class="btn btn-primary float-right m-1"
@@ -230,6 +259,7 @@ const submit = () => {
                                                 <th scope="col">Telefone</th>
                                                 <th scope="col">E-mail</th>
                                                 <th scope="col">Responsável pela autorização</th>
+                                                <th scope="col">Cor</th>
                                                 <th scope="col">Ações</th>
                                             </tr>
                                         </thead>
@@ -242,6 +272,8 @@ const submit = () => {
                                                 <td>{{ customer.phone }}</td>
                                                 <td>{{ customer.email }}</td>
                                                 <td>{{ customer.responsibleAuthorizing }}</td>
+                                                <td><span class="border p-1" :style="'background-color:' +
+                                                    customer.color">&nbsp;</span></td>
                                                 <td>
                                                     <button class="btn btn-info btn-icon-split mr-2"
                                                         v-on:click="handleEditForm(customer)">

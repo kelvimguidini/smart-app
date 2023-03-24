@@ -233,51 +233,6 @@ const deleteHotel = (id) => {
                                 </div>
                             </div>
 
-
-                            <div class="row">
-                                <div class="col-4">
-                                    <div class="form-group">
-                                        <InputLabel for="categories" value="Categorias:" />
-
-                                        <div class="card">
-                                            <div class="card-body">
-                                                <div class="form-check" v-for="(option, index) in categories">
-                                                    <input v-model="form.categories" class="form-check-input"
-                                                        type="checkbox" :value="option.id" :id="option.name">
-                                                    <label class="form-check-label" :for="option.name">
-                                                        {{ option.name }}
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-
-
-                                        <InputError class="mt-2 text-danger" :message="form.errors.category" />
-                                    </div>
-                                </div>
-
-                                <div class="col-4">
-                                    <div class="form-group">
-                                        <InputLabel for="aptos" value="Apartamento:" />
-
-                                        <div class="card">
-                                            <div class="card-body">
-                                                <div class="form-check" v-for="(option, index) in aptos">
-                                                    <input v-model="form.aptos" class="form-check-input" type="checkbox"
-                                                        :value="option.id" :id="option.name">
-                                                    <label class="form-check-label" :for="option.name">
-                                                        {{ option.name }}
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <InputError class="mt-2 text-danger" :message="form.errors.aptos" />
-                                    </div>
-                                </div>
-
-                            </div>
-
                             <div class="flex items-center justify-end mt-4 rigth">
                                 <PrimaryButton css-class="btn btn-primary float-right m-1"
                                     :class="{ 'opacity-25': form.processing }" :disabled="form.processing">

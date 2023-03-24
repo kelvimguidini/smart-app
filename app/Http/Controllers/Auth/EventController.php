@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Apto;
 use App\Models\Broker;
+use App\Models\Category;
 use App\Models\CRD;
 use App\Models\Currency;
 use App\Models\Customer;
@@ -13,7 +15,6 @@ use App\Models\EventAdd;
 use App\Models\EventHall;
 use App\Models\EventHotel;
 use App\Models\Frequency;
-use App\Models\Hotel;
 use App\Models\Local;
 use App\Models\Measure;
 use App\Models\Provider;
@@ -85,7 +86,7 @@ class EventController extends Controller
         $crds = CRD::with("customer")->get();
         $customers = Customer::all();
         $users = User::all();
-        $providers = Provider::with("categories")->with("aptos")->get();
+        $providers = Provider::get();
 
         $brokers = Broker::all();
         $currencies = Currency::all();
@@ -107,7 +108,7 @@ class EventController extends Controller
         $users = User::all();
 
         $eventHotel = $request->tab == 1 ? EventHotel::with(['eventHotelsOpt', 'hotel', 'currency', 'event'])->find($request->ehotel) : null;
-        $eventHotels = EventHotel::with(['eventHotelsOpt.broker', 'eventHotelsOpt.regime', 'eventHotelsOpt.purpose', 'eventHotelsOpt.apto_hotel.apto', 'eventHotelsOpt.category_hotel.category', 'hotel', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
+        $eventHotels = EventHotel::with(['eventHotelsOpt.broker', 'eventHotelsOpt.regime', 'eventHotelsOpt.purpose', 'eventHotelsOpt.apto_hotel', 'eventHotelsOpt.category_hotel', 'hotel', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
 
         $eventAB = $request->tab == 2 ? EventAB::with(['eventAbOpts', 'ab', 'currency', 'event'])->find($request->ehotel) : null;
         $eventABs = EventAB::with(['eventAbOpts.broker', 'eventAbOpts.service', 'eventAbOpts.service_type', 'eventAbOpts.local', 'ab', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
@@ -145,6 +146,8 @@ class EventController extends Controller
             'measures' => $measures,
             'eventAdd' => $eventAdd,
             'eventAdds' => $eventAdds,
+            'catsHotel' => Category::all(),
+            'aptosHotel' => Apto::all(),
         ]);
     }
 

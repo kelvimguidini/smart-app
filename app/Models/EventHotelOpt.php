@@ -133,17 +133,13 @@ class EventHotelOpt extends Model
 
     public function apto_hotel()
     {
-        return $this->hasOne(AptoHotel::class, 'id', 'apto_hotel_id');
+        return $this->hasOne(Apto::class, 'id', 'apto_hotel_id');
     }
-
-
 
     public function category_hotel()
     {
-        return $this->hasOne(CategoryHotel::class, 'id', 'category_hotel_id');
+        return $this->hasOne(Category::class, 'id', 'category_hotel_id');
     }
-
-
 
     public function broker()
     {

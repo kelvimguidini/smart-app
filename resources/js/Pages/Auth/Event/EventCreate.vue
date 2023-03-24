@@ -91,6 +91,10 @@ const props = defineProps({
         type: Array,
         default: [],
     },
+    purposesHall: {
+        type: Array,
+        default: [],
+    },
     catsHotel: {
         type: Array,
         default: [],
@@ -267,9 +271,6 @@ const hotelSelected = ref(0);
 
 const selectHotel = (id) => {
     var hotel = props.providers.filter((item) => { return item.id == id })[0] || null;
-
-    props.catsHotel = hotel.categories;
-    props.aptosHotel = hotel.aptos;
 
     hotelSelected.value = hotel.id;
 }

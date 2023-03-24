@@ -27,17 +27,6 @@ class CreateProviderTable extends Migration
             $table->decimal('service_percent');
             $table->decimal('iva_percent');
 
-            // $table->boolean('has_hotel');
-            // $table->boolean('has_ab');
-            // $table->boolean('has_hall');
-            // $table->boolean('has_additional');
-
-
-            $table->bigInteger('category_id')->unsigned()->nullable();
-            $table->bigInteger('apto_id')->unsigned()->nullable();
-
-            $table->foreign('category_id')->references('id')->on('category')->onDelete('NO ACTION');
-            $table->foreign('apto_id')->references('id')->on('apto')->onDelete('NO ACTION');
             $table->softDeletes();
             $table->timestamps();
         });

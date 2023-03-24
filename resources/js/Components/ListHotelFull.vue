@@ -272,9 +272,9 @@ const showDetails = ref(false);
                             <td class="align-middle">{{ opt.broker.name }}</td>
                             <td class="align-middle">{{ opt.regime.name }}</td>
                             <td class="align-middle">{{ opt.purpose.name }}</td>
-                            <td class="align-middle">{{ opt.category_hotel.category.name }}
+                            <td class="align-middle">{{ opt.category_hotel.name }}
                             </td>
-                            <td class="align-middle">{{ opt.apto_hotel.apto.name }}</td>
+                            <td class="align-middle">{{ opt.apto_hotel.name }}</td>
                             <td class="align-middle">{{
                                 new Date(opt.in).toLocaleDateString()
                             }}

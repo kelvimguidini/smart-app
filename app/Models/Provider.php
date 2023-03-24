@@ -47,17 +47,6 @@ class Provider extends Model
     protected $has_hall = 'has_hall';
     protected $has_additional = 'has_additional';
 
-
-    public function aptos()
-    {
-        return $this->belongsToMany(Apto::class, 'apto_hotel', 'hotel_id');
-    }
-
-    public function categories()
-    {
-        return $this->belongsToMany(Category::class, 'category_hotel', 'hotel_id');
-    }
-
     public function event_hotels()
     {
         return $this->belongsTo(EventHotel::class);

@@ -16,6 +16,7 @@ class Customer extends Model
         'document',
         'phone',
         'email',
+        'color',
         'responsibleAuthorizing',
     ];
     protected $table = 'customer';
@@ -35,6 +36,13 @@ class Customer extends Model
      */
     protected $name = 'name';
 
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $color = 'color';
 
     /**
      * The primary key associated with the table.

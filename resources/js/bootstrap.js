@@ -12,7 +12,7 @@ import axios from 'axios';
 
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 axios.defaults.headers.common['crossDomain'] = true;
-axios.defaults.headers.common['Access-Control-Allow-Origin'] = 'https://smart4bts.com.br';
+// axios.defaults.headers.common['Access-Control-Allow-Origin'] = 'https://smart4bts.com.br';
 // axios.defaults.headers.common['Referrer-Policy'] = 'strict-origin-when-cross-origin';
 axios.defaults.withCredentials = true;
 window.axios = axios;

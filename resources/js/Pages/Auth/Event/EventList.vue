@@ -14,15 +14,6 @@ const formDelete = useForm({
     id: 0
 });
 
-
-onMounted(() => {
-    // $('table').DataTable({
-    //     language: {
-    //         url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/pt-BR.json',
-    //     },
-    // });
-});
-
 const isLoader = ref(false);
 
 const deleteEvent = (id) => {
@@ -162,15 +153,76 @@ const providersByEvent = (event) => {
                                                     <td colspan="5">Hotel: {{ prov.name }} | {{ prov.city }}</td>
 
                                                     <td>
-                                                        <Link
+
+                                                        <Modal :key="index" v-if="false"
+                                                            :modal-title="'Link para ser enviado ao contato do hotel para preencher o orçamento.'"
+                                                            :ok-botton-callback="createLink"
+                                                            :ok-botton-callback-param="{ event: event.id, provider: prov.id }"
+                                                            ok-botton-label="Enviar link por email"
+                                                            btn-class="btn btn-secondary btn-icon-split mr-2">
+                                                            <template v-slot:button>
+                                                                <span class="icon text-white-50">
+                                                                    <i class="fas fa-link"></i>
+                                                                </span>
+                                                                <span class="text">Criar link Orçamento</span>
+                                                            </template>
+                                                            <template v-slot:content>
+
+                                                                <!-- Earnings (Monthly) Card Example -->
+                                                                <div class="col-xl-3 col-md-6 mb-4">
+                                                                    <div class="card border-left-info shadow h-100 py-2">
+                                                                        <div class="card-body">
+                                                                            <div class="row no-gutters align-items-center">
+                                                                                <div class="col mr-2">
+                                                                                    <div
+                                                                                        class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                                                                        {{ link }}</div>
+                                                                                    <div
+                                                                                        class="row no-gutters align-items-center">
+                                                                                        <div class="col-auto">
+                                                                                            <div
+                                                                                                class="h5 mb-0 mr-3 font-weight-bold text-gray-800">
+                                                                                                50%</div>
+                                                                                        </div>
+                                                                                        <div class="col">
+                                                                                            <div
+                                                                                                class="progress progress-sm mr-2">
+                                                                                                <div class="progress-bar bg-info"
+                                                                                                    role="progressbar"
+                                                                                                    style="width: 50%"
+                                                                                                    aria-valuenow="50"
+                                                                                                    aria-valuemin="0"
+                                                                                                    aria-valuemax="100">
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-auto">
+                                                                                    <i
+                                                                                        class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                Esse link para ser enviado ao contato no hotel () para
+                                                                preenchimento da proposta do
+                                                                orçamento. Você também pode pedir para enviar para "" no
+                                                                template padrão do sistema clicando no
+                                                                botão abaixo.
+                                                            </template>
+                                                        </Modal>
+                                                        <a target="blank"
                                                             v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin')"
-                                                            class="btn btn-secondary btn-icon-split mr-2" :disabled="true"
-                                                            :href="route('budget', { provider_id: prov.id, event_id: event.id })">
-                                                        <span class="icon text-white-50">
-                                                            <i class="fas fa-badge-dollar"></i>
-                                                        </span>
-                                                        <span class="text">Orçamento</span>
-                                                        </Link>
+                                                            class="btn btn-secondary btn-icon-split mr-2"
+                                                            :href="route('proposal-hotel', { event_id: event.id, provider_id: prov.id })">
+                                                            <span class="icon text-white-50">
+                                                                <i class="fas fa-file-pdf"></i>
+                                                            </span>
+                                                            <span class="text">Proposta Hotel</span>
+                                                        </a>
 
                                                     </td>
                                                 </tr>

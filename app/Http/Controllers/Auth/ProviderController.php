@@ -30,7 +30,7 @@ class ProviderController extends Controller
     {
         $userId =  Auth::user()->id;
         if (Gate::allows('event_admin')) {
-            $hotels = Provider::with('aptos')->with('categories')->get();
+            $hotels = Provider::get();
         } else if (Gate::allows('hotel_operator')) {
             $hotels = Provider::with('aptos')->with('categories')->with(['hotel_operator' => function ($query) use ($userId) {
                 $query->where('id', '=', $userId);
@@ -42,8 +42,6 @@ class ProviderController extends Controller
         return Inertia::render('Auth/Auxiliaries/Hotel', [
             'hotels' => $hotels,
             'cities' =>  Constants::CITIES,
-            'categories' => Category::all(),
-            'aptos' => Apto::all(),
         ]);
     }
 
@@ -86,14 +84,6 @@ class ProviderController extends Controller
                 $hotel->iva_percent = $request->iva_percent;
 
                 $hotel->save();
-
-                DB::table('apto_hotel')->where([
-                    ['hotel_id', '=', $request->id]
-                ])->delete();
-
-                DB::table('category_hotel')->where([
-                    ['hotel_id', '=', $request->id]
-                ])->delete();
             } else {
 
                 $hotel = Provider::create([
@@ -107,25 +97,6 @@ class ProviderController extends Controller
                     'service_percent' => $request->service_percent,
                     'iva_percent' => $request->iva_percent
                 ]);
-            }
-
-            foreach ($request->aptos as $apto) {
-                DB::table('apto_hotel')->insert(
-                    array(
-                        'apto_id' => $apto,
-                        'hotel_id' => $hotel->id
-                    )
-                );
-            }
-
-            foreach ($request->categories as $category) {
-
-                DB::table('category_hotel')->insert(
-                    array(
-                        'category_id' => $category,
-                        'hotel_id' => $hotel->id
-                    )
-                );
             }
         } catch (Exception $e) {
             throw $e;

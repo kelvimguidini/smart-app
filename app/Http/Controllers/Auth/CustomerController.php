@@ -58,6 +58,7 @@ class CustomerController extends Controller
                 $customer = Customer::find($request->id);
 
                 $customer->name = $request->name;
+                $customer->color = $request->color;
                 $customer->document = $request->document;
                 $customer->phone = $request->phone;
                 $customer->email = $request->email;
@@ -69,6 +70,7 @@ class CustomerController extends Controller
                 $customer = Customer::create([
                     'name' => $request->name,
                     'document' => $request->document,
+                    'color' => $request->color,
                     'phone' => $request->phone,
                     'email' => $request->email,
                     'responsibleAuthorizing' => $request->responsibleAuthorizing,
@@ -76,7 +78,9 @@ class CustomerController extends Controller
                 ]);
             }
         } catch (Exception $e) {
-            Storage::delete($path);
+            if (isset($path)) {
+                Storage::delete($path);
+            }
             throw $e;
         }
         return redirect()->route('customer')->with('flash', ['message' => trans('Registro salvo com sucesso'), 'type' => 'success']);

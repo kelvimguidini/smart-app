@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('document');
+            $table->string('color');
             $table->string('phone');
             $table->string('email');
             $table->string('responsibleAuthorizing');

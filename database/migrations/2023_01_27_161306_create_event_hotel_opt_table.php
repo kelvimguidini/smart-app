@@ -41,8 +41,8 @@ class CreateEventHotelOptTable extends Migration
             $table->timestamps();
 
             $table->foreign('event_hotel_id')->references('id')->on('event_hotel')->onDelete('cascade');
-            $table->foreign('apto_hotel_id')->references('id')->on('apto_hotel')->onDelete('cascade');
-            $table->foreign('category_hotel_id')->references('id')->on('category_hotel')->onDelete('cascade');
+            $table->foreign('apto_hotel_id')->references('id')->on('apto')->onDelete('cascade');
+            $table->foreign('category_hotel_id')->references('id')->on('category')->onDelete('cascade');
 
             $table->foreign('broker_id')->references('id')->on('broker')->onDelete('cascade');
             $table->foreign('regime_id')->references('id')->on('regime')->onDelete('cascade');

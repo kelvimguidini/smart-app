@@ -73,6 +73,7 @@ class DatabaseSeeder extends Seeder
             'name' => '4BTS',
             'document' => '77.777.777/7777-77',
             'phone' => '61981925127',
+            'color' => '#e9540d',
             'email' => 'teste@teste.com',
             'responsibleAuthorizing' => 'Responsável pela altorização 4bts',
             'logo' => '/storage/logos/V69xCbFL9xW752FGKz0hu1erWbaxqNKab97EkuV3.png'

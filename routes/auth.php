@@ -32,8 +32,7 @@ use App\Http\Controllers\Auth\ServiceController;
 use App\Http\Controllers\Auth\ServiceHallController;
 use App\Http\Controllers\Auth\ServiceTypeController;
 use App\Http\Controllers\Auth\VerifyEmailController;
-use App\Models\Purpose;
-use App\Models\ServiceHall;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['guest', 'cors'])->group(function () {
@@ -64,6 +63,13 @@ Route::middleware(['guest', 'cors'])->group(function () {
     Route::get('verify-email/{id}/{hash}', [VerifyEmailController::class, '__invoke'])
         ->middleware(['throttle:6,1'])
         ->name('verification.verify');
+
+    Route::get('new-event/{params}', function ($params) {
+        $paramsCript = Crypt::decryptString($params);
+        $parameters = json_decode($paramsCript, true);
+
+        return app()->make('App\Http\Controllers\HotelController')->mostrarPagina($parameters['event'], $parameters['provider']);
+    });
 });
 
 Route::middleware(['auth', 'cors'])->group(function () {
@@ -350,4 +356,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
     //ORÇAMENTO
     Route::get('budget/{provider_id}/{event_id}', [HotelController::class, 'budget'])
         ->name('budget');
+
+    Route::get('proposal-hotel/{provider_id}/{event_id}', [HotelController::class, 'proposalPdf'])
+        ->name('proposal-hotel');
 });

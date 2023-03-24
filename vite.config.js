@@ -36,7 +36,7 @@ export default defineConfig({
             },
         },
         //cors: true,
-        hmr: true,
+        // hmr: true,
         // proxy: {
         //     "/": {
         //         target: "https://smart4bts.com.br",

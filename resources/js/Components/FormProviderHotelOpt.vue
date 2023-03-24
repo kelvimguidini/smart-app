@@ -192,24 +192,14 @@ onMounted(() => {
 
 });
 
-const catsHotel = ref(props.catsHotel);
-const aptosHotel = ref(props.aptosHotel);
 
 watch(
     () => ({
         hotelSelected: props.hotelSelected,
-        catsHotel: props.catsHotel,
-        aptosHotel: props.aptosHotel
     }),
     (newValues, oldValues) => {
         if (newValues.hotelSelected != oldValues.hotelSelected) {
             formOpt.hotel_id = newValues.hotelSelected;
-        }
-        if (newValues.catsHotel != oldValues.catsHotel) {
-            catsHotel.value = newValues.catsHotel;
-        }
-        if (newValues.aptosHotel != oldValues.aptosHotel) {
-            aptosHotel.value = newValues.aptosHotel;
         }
     }
 );
@@ -221,7 +211,6 @@ const isLoader = ref(false);
 
 <template>
     <Loader v-bind:show="isLoader"></Loader>
-
 
     <form @submit.prevent="submitOpt">
         <div class="row">
@@ -260,7 +249,7 @@ const isLoader = ref(false);
                     <InputLabel for="cat" value="CAT.:" />
                     <select class="form-control" id="cat" :required="required">
                         <option>.::Selecione::.</option>
-                        <option v-for="(option, index) in catsHotel" :value="option.pivot.category_id">
+                        <option v-for="(option, index) in catsHotel" :value="option.id">
                             {{ option.name }}
                         </option>
                     </select>
@@ -274,7 +263,7 @@ const isLoader = ref(false);
                     <InputLabel for="apto" value="APTO:" />
                     <select class="form-control" id="apto" :required="required">
                         <option>.::Selecione::.</option>
-                        <option v-for="(option, index) in aptosHotel" :value="option.pivot.apto_id">
+                        <option v-for="(option, index) in aptosHotel" :value="option.id">
                             {{ option.name }}
                         </option>
                     </select>
