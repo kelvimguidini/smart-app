@@ -189,7 +189,8 @@ const isLoader = ref(false);
 
                 <div class="form-group">
                     <InputLabel for="m2" value="M2:" />
-                    <TextInput type="text" class="form-control" v-model="formOpt.m2" required autofocus autocomplete="m2" />
+                    <TextInput type="number" class="form-control" v-model="formOpt.m2" required autofocus
+                        autocomplete="m2" />
                 </div>
 
             </div>

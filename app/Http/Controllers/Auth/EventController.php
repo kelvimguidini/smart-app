@@ -168,7 +168,7 @@ class EventController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'customer' => 'required|string|max:255',
+            'customer' => 'required|numeric',
             'code' => 'required|string|max:255',
             'requester' => 'required|string|max:255',
             'sector' => 'required|string|max:255',
@@ -176,10 +176,10 @@ class EventController extends Controller
             'cc' => 'required|string|max:255',
             'date' => 'required|date',
             'date_final' => 'required|date|after_or_equal:in',
-            'crd_id' => 'required|string',
-            'hotel_operator' => 'required|string',
-            'air_operator' => 'required|string',
-            'land_operator' => 'required|string'
+            'crd_id' => 'required|numeric',
+            'hotel_operator' => 'required|numeric',
+            'air_operator' => 'required|numeric',
+            'land_operator' => 'required|numeric'
         ]);
 
         try {
@@ -201,6 +201,8 @@ class EventController extends Controller
                 $event->hotel_operator = $request->hotel_operator;
                 $event->air_operator = $request->air_operator;
                 $event->land_operator = $request->land_operator;
+                $event->iof = $request->iof;
+                $event->service_charge = $request->service_charge;
 
                 $event->save();
             } else {
@@ -218,7 +220,9 @@ class EventController extends Controller
                     'crd_id' => $request->crd_id,
                     'hotel_operator' => $request->hotel_operator,
                     'air_operator' => $request->air_operator,
-                    'land_operator' => $request->land_operator
+                    'land_operator' => $request->land_operator,
+                    'iof' => $request->iof,
+                    'service_charge' => $request->service_charge
                 ]);
             }
         } catch (Exception $e) {

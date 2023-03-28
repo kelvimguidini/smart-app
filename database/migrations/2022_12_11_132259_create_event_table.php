@@ -22,6 +22,8 @@ return new class extends Migration
             $table->string('sector');
             $table->string('pax_base');
             $table->string('cost_center');
+            $table->integer('iof');
+            $table->integer('service_charge');
             $table->timestamp('date');
             $table->timestamp('date_final');
             $table->bigInteger('crd_id')->unsigned()->nullable();

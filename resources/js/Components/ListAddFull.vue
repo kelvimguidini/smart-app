@@ -256,7 +256,7 @@ const showDetails = ref(false);
 
                         <!-- Opt TRs -->
                         <tr v-if="evAdd.event_add_opts.length == 0">
-                            <td :colspan="showDetails ? 20 : 14">
+                            <td :colspan="showDetails ? 23 : 17">
                                 <div class="alert alert-primary" role="alert">
                                     Nenhum fornecedor cadastrado!
                                 </div>
@@ -411,7 +411,7 @@ const showDetails = ref(false);
                             <td class="align-middle text-dark text-left" colspan="3">
                                 OBSERVAÇÃO INTERNA:
                             </td>
-                            <td class="align-middle text-dark text-left" colspan="8">
+                            <td class="align-middle text-dark text-left" :colspan="showDetails ? 10 : 8">
                                 {{ evAdd.internal_observation }}
                             </td>
                             <template v-if="showDetails">
@@ -442,7 +442,7 @@ const showDetails = ref(false);
                             <td class="align-middle text-dark text-left" colspan="3">
                                 OBSERVAÇÃO CLIENTE:
                             </td>
-                            <td class="align-middle text-dark text-left" colspan="8">
+                            <td class="align-middle text-dark text-left" :colspan="showDetails ? 10 : 8">
                                 {{ evAdd.customer_observation }}
                             </td>
 

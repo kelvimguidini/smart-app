@@ -278,22 +278,22 @@ class HotelController extends Controller
                 $query->whereHas('event_hotel', function ($query) use ($provider) {
                     $query->where('hotel_id', '=', $provider);
                 });
-            }, 'event_hotels.eventHotelsOpt.regime', 'event_hotels.eventHotelsOpt.apto_hotel', 'event_hotels.eventHotelsOpt.category_hotel',
+            }, 'event_hotels.eventHotelsOpt.regime', 'event_hotels.eventHotelsOpt.apto_hotel', 'event_hotels.eventHotelsOpt.category_hotel', 'event_hotels.currency',
             'event_abs.eventAbOpts' => function ($query) use ($provider) {
                 $query->whereHas('event_ab', function ($query) use ($provider) {
                     $query->where('ab_id', '=', $provider);
                 });
-            },
+            }, 'event_abs.eventAbOpts.Local', 'event_abs.eventAbOpts.service_type', 'event_abs.currency',
             'event_halls.eventHallOpts' => function ($query) use ($provider) {
                 $query->whereHas('event_hall', function ($query) use ($provider) {
                     $query->where('hall_id', '=', $provider);
                 });
-            },
+            }, 'event_halls.eventHallOpts.purpose', 'event_halls.currency',
             'event_adds.eventAddOpts' => function ($query) use ($provider) {
                 $query->whereHas('event_add', function ($query) use ($provider) {
                     $query->where('add_id', '=', $provider);
                 });
-            },
+            }, 'event_adds.eventAddOpts.service', 'event_adds.eventAddOpts.measure', 'event_adds.eventAddOpts.frequency', 'event_adds.currency',
         ])->find($event);
 
         $providers = collect();

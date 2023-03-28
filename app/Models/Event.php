@@ -23,7 +23,9 @@ class Event extends Model
         'crd_id',
         'hotel_operator',
         'air_operator',
-        'land_operator'
+        'land_operator',
+        'iof',
+        'service_charge'
     ];
     protected $table = 'event';
 
@@ -41,6 +43,20 @@ class Event extends Model
      * @var string
      */
     protected $name = 'name';
+    /**
+     * The primary key associated with the table.
+     *
+     * @var int
+     */
+    protected $iof = 'iof';
+
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $service_charge = 'service_charge';
 
     /**
      * The primary key associated with the table.

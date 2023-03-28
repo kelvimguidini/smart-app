@@ -10,7 +10,7 @@ class Currency extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['name', 'symbol'];
+    protected $fillable = ['name', 'symbol', 'sigla'];
     protected $table = 'currency';
 
     /**
@@ -19,6 +19,13 @@ class Currency extends Model
      * @var int
      */
     protected $id = 'id';
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var int
+     */
+    protected $sigla = 'sigla';
 
 
     /**

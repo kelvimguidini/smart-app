@@ -22,7 +22,7 @@ class CreateEventHallOptTable extends Migration
             $table->bigInteger('service_id')->unsigned()->index();
             $table->bigInteger('purpose_id')->unsigned()->index();
             $table->string('name');
-            $table->string('m2');
+            $table->integer('m2');
             $table->string('pax');
 
             $table->timestamp('in');

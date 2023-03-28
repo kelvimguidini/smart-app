@@ -415,7 +415,7 @@ const showDetails = ref(false);
                             <td class="align-middle text-dark text-left" colspan="3">
                                 OBSERVAÇÃO INTERNA:
                             </td>
-                            <td class="align-middle text-dark text-left" colspan="9">
+                            <td class="align-middle text-dark text-left" :colspan="showDetails ? 11 : 9">
                                 {{ evHall.internal_observation }}
                             </td>
                             <template v-if="showDetails">
@@ -446,7 +446,7 @@ const showDetails = ref(false);
                             <td class="align-middle text-dark text-left" colspan="3">
                                 OBSERVAÇÃO CLIENTE:
                             </td>
-                            <td class="align-middle text-dark text-left" colspan="9">
+                            <td class="align-middle text-dark text-left" :colspan="showDetails ? 11 : 9">
                                 {{ evHall.customer_observation }}
                             </td>
 

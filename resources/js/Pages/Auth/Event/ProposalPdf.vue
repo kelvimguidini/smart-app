@@ -60,6 +60,32 @@ const sumTaxesProvider = (eventP, opt) => {
     return ((unitSale(opt) * eventP.iss_percent) / 100) + ((unitSale(opt) * eventP.service_percent) / 100) + ((unitSale(opt) * eventP.iva_percent) / 100);
 }
 
+
+const sumTotal = (rate, taxes, qtdDayle) => {
+    return ((rate + taxes) * qtdDayle);
+}
+
+//HOTEL
+const sumTotalHotelValue = ref(0);
+const sumQtdDayles = ref(0);
+const sumValueRate = ref(0);
+
+
+//AB
+const sumTotalABValue = ref(0);
+const sumABQtdDayles = ref(0);
+const sumABValueRate = ref(0);
+
+//SALÃO
+const sumTotalHallValue = ref(0);
+const sumHallQtdDayles = ref(0);
+const sumHallValueRate = ref(0);
+
+//Adicional
+const sumTotalAddValue = ref(0);
+const sumAddQtdDayles = ref(0);
+const sumAddValueRate = ref(0);
+
 const hexToRgb = (hex, a) => {
     // remover o sinal de jogo da frente, se existir
     hex = hex.replace('#', '');
@@ -79,6 +105,57 @@ const salvarPDF = () => {
     window.print();
 
 }
+
+const hotelEvent = ref(null);
+const abEvent = ref(null);
+const hallEvent = ref(null);
+const addEvent = ref(null);
+
+onMounted(() => {
+    hotelEvent.value = props.event.event_hotels.find((s) => s.hotel_id == props.provider.id);
+    abEvent.value = props.event.event_abs.find((s) => s.ab_id == props.provider.id);
+    hallEvent.value = props.event.event_halls.find((s) => s.hall_id == props.provider.id);
+    addEvent.value = props.event.event_adds.find((s) => s.add_id == props.provider.id);
+
+    hotelEvent.value.event_hotels_opt.forEach(item => {
+        var rate = parseFloat(item.received_proposal);
+        var taxes = parseFloat(sumTaxesProvider(hotelEvent.value, item));
+        var qtdDayle = item.count * daysBetween(item.in, item.out)
+
+        sumValueRate.value += rate;
+        sumQtdDayles.value += qtdDayle;
+        sumTotalHotelValue.value += ((rate + taxes) * qtdDayle);
+    });
+
+    abEvent.value.event_ab_opts.forEach(item => {
+        var rate = parseFloat(item.received_proposal);
+        var taxes = parseFloat(sumTaxesProvider(abEvent.value, item));
+        var qtdDayle = item.count * daysBetween(item.in, item.out)
+
+        sumABValueRate.value += rate;
+        sumABQtdDayles.value += qtdDayle;
+        sumTotalABValue.value += ((rate + taxes) * qtdDayle);
+    });
+
+    hallEvent.value.event_hall_opts.forEach(item => {
+        var rate = parseFloat(item.received_proposal);
+        var taxes = parseFloat(sumTaxesProvider(hallEvent.value, item));
+
+        sumHallValueRate.value += rate;
+        sumHallQtdDayles.value += daysBetween(item.in, item.out);
+        sumTotalHallValue.value += ((rate + taxes) * daysBetween(item.in, item.out));
+    });
+
+    addEvent.value.event_add_opts.forEach(item => {
+        var rate = parseFloat(item.received_proposal);
+        var taxes = parseFloat(sumTaxesProvider(hallEvent.value, item));
+        var qtdDayle = item.count * daysBetween(item.in, item.out)
+
+        sumAddValueRate.value += rate;
+        sumAddQtdDayles.value += qtdDayle;
+        sumTotalAddValue.value += ((rate + taxes) * daysBetween(item.in, item.out));
+    });
+});
 
 </script>
 
@@ -146,7 +223,7 @@ tr {
         </header>
         <div class="overflow-x-auto">
             <table class="w-full border-collapse border border-gray-400"
-                v-if="event.event_hotels.find((s) => s.hotel_id == provider.id) != null && event.event_hotels.find((s) => s.hotel_id == provider.id).event_hotels_opt != null && event.event_hotels.find((s) => s.hotel_id == provider.id).event_hotels_opt.length > 0">
+                v-if="hotelEvent != null && hotelEvent.event_hotels_opt != null && hotelEvent.event_hotels_opt.length > 0">
                 <thead>
                     <tr class="table-header"
                         :style="'background-image: linear-gradient(to right, ' + hexToRgb(event.customer.color, 0.7) + ', ' + hexToRgb(event.customer.color, 0.3) + ');'">
@@ -169,54 +246,60 @@ tr {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(item, index) in event.event_hotels.find((s) => s.hotel_id == provider.id).event_hotels_opt"
-                        :key="index" class="table-row {{ index % 2 === 0 ? 'bg-gray-100' : '' }}">
-                        <th class="border border-gray-400 px-4 py-2">{{ item.category_hotel.name }}</th>
-                        <th class="border border-gray-400 px-4 py-2">{{ item.regime.name }}</th>
-                        <th class="border border-gray-400 px-4 py-2">{{ item.apto_hotel.name }}</th>
+                    <tr v-for="(item, index) in hotelEvent.event_hotels_opt" :key="index"
+                        class="table-row {{ index % 2 === 0 ? 'bg-gray-100' : '' }}">
+                        <td class="border border-gray-400 px-4 py-2">{{ item.category_hotel.name }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ item.regime.name }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ item.apto_hotel.name }}</td>
                         <td class="border border-gray-400 px-4 py-2">{{ new Date(item.in).toLocaleDateString() }}</td>
                         <td class="border border-gray-400 px-4 py-2">{{ new Date(item.out).toLocaleDateString() }}</td>
                         <td class="border border-gray-400 px-4 py-2">{{ item.count }}</td>
                         <td class="border border-gray-400 px-4 py-2">{{ daysBetween(item.in, item.out) }}</td>
                         <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(item.received_proposal) }}</td>
                         <td class="border border-gray-400 px-4 py-2">{{
-                            formatCurrency(sumTaxesProvider(event.event_hotels.find((s) =>
-                                s.hotel_id == provider.id), item)) }}
+                            formatCurrency(sumTaxesProvider(hotelEvent, item)) }}
                         </td>
                         <td class="border border-gray-400 px-4 py-2">
-                            {{ (item.received_proposal + sumTaxesProvider(event.event_hotels.find((s) =>
-                                s.hotel_id == provider.id), item)) }}
+                            {{ formatCurrency((parseFloat(item.received_proposal)) + parseFloat(
+                                sumTaxesProvider(hotelEvent, item))) }}
                         </td>
                         <td class="border border-gray-400 px-4 py-2">{{
-                            formatCurrency(sumTaxesProvider(event.event_hotels.find((s) =>
-                                s.hotel_id == provider.id), item) + unitSale(item)) }}
+                            formatCurrency(sumTotal(parseFloat(item.received_proposal), parseFloat(
+                                sumTaxesProvider(hotelEvent, item)), item.count * daysBetween(item.in, item.out))) }}
                         </td>
                     </tr>
                 </tbody>
                 <tfoot class="table-footer">
                     <tr>
-                        <td colspan="10" class="border border-gray-400 px-4 py-2">Diária Média dos Salões</td>
-                        <td class="border border-gray-400 px-4 py-2">R$ 0,00</td>
+                        <td colspan="4" class="border border-gray-400 px-4 py-2">Diária Média: {{
+                            formatCurrency(sumValueRate /
+                                hotelEvent.event_hotels_opt.length) }} Sem Taxas</td>
+                        <td></td>
+                        <td colspan="2" class="border border-gray-400 px-4 py-2">{{ sumQtdDayles }} Room Nights</td>
+                        <td colspan="3"></td>
+                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(sumTotalHotelValue) }}</td>
                     </tr>
                     <tr>
-                        <td colspan="10" class="border border-gray-400 px-4 py-2">Diárias de Salões</td>
-                        <td class="border border-gray-400 px-4 py-2" colspan="2">0</td>
+                        <td class="border border-gray-400 px-4 py-2">Comentários</td>
+                        <td colspan="10" class="border border-gray-400 px-4 py-2">{{ hotelEvent.customer_observation }}</td>
                     </tr>
                 </tfoot>
             </table>
 
             <table class="w-full border-collapse border border-gray-400 mt-4"
-                v-if="event.event_halls.find((s) => s.hall_id == provider.id) != null && event.event_halls.find((s) => s.hall_id == provider.id).event_hall_opts != null && event.event_halls.find((s) => s.hall_id == provider.id).event_hall_opts.length > 0">
+                v-if="abEvent != null && abEvent.event_ab_opts != null && abEvent.event_ab_opts.length > 0">
                 <thead>
                     <tr class="table-header"
                         :style="'background-image: linear-gradient(to right, ' + hexToRgb(event.customer.color, 0.7) + ', ' + hexToRgb(event.customer.color, 0.3) + ');'">
-                        <th colspan="8" class="py-2 text-center">
-                            Salões
+                        <th colspan="10" class="py-2 text-center">
+                            Alimentos & Bebidas
                         </th>
                     </tr>
                     <tr class="bg-gray-100">
-                        <th class="border border-gray-400 px-4 py-2">IN</th>
-                        <th class="border border-gray-400 px-4 py-2">Out</th>
+                        <th class="border border-gray-400 px-4 py-2">Refeição</th>
+                        <th class="border border-gray-400 px-4 py-2">Local</th>
+                        <th class="border border-gray-400 px-4 py-2">De</th>
+                        <th class="border border-gray-400 px-4 py-2">Até</th>
                         <th class="border border-gray-400 px-4 py-2">Qtd</th>
                         <th class="border border-gray-400 px-4 py-2">Diárias</th>
                         <th class="border border-gray-400 px-4 py-2">Valor</th>
@@ -226,45 +309,60 @@ tr {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(item, index) in event.event_halls.find((s) => s.hall_id == provider.id).event_hall_opts"
-                        :key="index" class="table-row {{ index % 2 === 0 ? 'bg-gray-100' : '' }}">
+                    <tr v-for="(item, index) in abEvent.event_ab_opts" :key="index"
+                        class="table-row {{ index % 2 === 0 ? 'bg-gray-100' : '' }}">
+                        <td class="border border-gray-400 px-4 py-2">{{ item.service_type.name }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ item.local.name }}</td>
                         <td class="border border-gray-400 px-4 py-2">{{ new Date(item.in).toLocaleDateString() }}</td>
-                        <td class="border border-gray-400 px-4 py-2">{{ new Date(item.in).toLocaleDateString() }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ new Date(item.out).toLocaleDateString() }}</td>
                         <td class="border border-gray-400 px-4 py-2">{{ item.count }}</td>
                         <td class="border border-gray-400 px-4 py-2">{{ daysBetween(item.in, item.out) }}</td>
                         <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(item.received_proposal) }}</td>
-                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(event.event_halls.find((s) =>
-                            s.hall_id == provider.id)).iss_percent }}</td>
-                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(item.received_proposal) }}</td>
-                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(item.received_proposal) }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{
+                            formatCurrency(sumTaxesProvider(abEvent, item)) }}
+                        </td>
+                        <td class="border border-gray-400 px-4 py-2">
+                            {{ formatCurrency((parseFloat(item.received_proposal)) + parseFloat(
+                                sumTaxesProvider(abEvent, item))) }}
+                        </td>
+                        <td class="border border-gray-400 px-4 py-2">{{
+                            formatCurrency(sumTotal(parseFloat(item.received_proposal), parseFloat(
+                                sumTaxesProvider(abEvent, item)), item.count * daysBetween(item.in, item.out))) }}
+                        </td>
                     </tr>
                 </tbody>
                 <tfoot class="table-footer">
                     <tr>
-                        <td colspan="7" class="border border-gray-400 px-4 py-2">Diária Média dos Salões</td>
-                        <td class="border border-gray-400 px-4 py-2">R$ 0,00</td>
+                        <td colspan="3" class="border border-gray-400 px-4 py-2">Preço Medio por Refeição</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(sumABValueRate /
+                            abEvent.event_ab_opts.length) }}</td>
+                        <td></td>
+                        <td colspan="2" class="border border-gray-400 px-4 py-2">{{ sumABQtdDayles }} Refeições</td>
+                        <td colspan="2"></td>
+                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(sumTotalABValue) }}</td>
                     </tr>
                     <tr>
-                        <td colspan="7" class="border border-gray-400 px-4 py-2">Diárias de Salões</td>
-                        <td class="border border-gray-400 px-4 py-2" colspan="2">0</td>
+                        <td class="border border-gray-400 px-4 py-2">Comentários</td>
+                        <td colspan="9" class="border border-gray-400 px-4 py-2">{{ abEvent.customer_observation }}</td>
                     </tr>
                 </tfoot>
             </table>
 
-
             <table class="w-full border-collapse border border-gray-400 mt-4"
-                v-if="event.event_halls.find((s) => s.hall_id == provider.id) != null && event.event_halls.find((s) => s.hall_id == provider.id).event_hall_opts != null && event.event_halls.find((s) => s.hall_id == provider.id).event_hall_opts.length > 0">
-
+                v-if="hallEvent != null && hallEvent.event_hall_opts != null && hallEvent.event_hall_opts.length > 0">
                 <thead>
                     <tr class="table-header"
                         :style="'background-image: linear-gradient(to right, ' + hexToRgb(event.customer.color, 0.7) + ', ' + hexToRgb(event.customer.color, 0.3) + ');'">
-                        <th colspan="8" class="py-2 text-center">
-                            Salões
+                        <th colspan="11" class="py-2 text-center">
+                            Salões & Eventos
                         </th>
                     </tr>
                     <tr class="bg-gray-100">
-                        <th class="border border-gray-400 px-4 py-2">IN</th>
-                        <th class="border border-gray-400 px-4 py-2">Out</th>
+                        <th class="border border-gray-400 px-4 py-2">Nome</th>
+                        <th class="border border-gray-400 px-4 py-2">Metragem</th>
+                        <th class="border border-gray-400 px-4 py-2">Finalidade</th>
+                        <th class="border border-gray-400 px-4 py-2">De</th>
+                        <th class="border border-gray-400 px-4 py-2">Até</th>
                         <th class="border border-gray-400 px-4 py-2">Qtd</th>
                         <th class="border border-gray-400 px-4 py-2">Diárias</th>
                         <th class="border border-gray-400 px-4 py-2">Valor</th>
@@ -274,45 +372,62 @@ tr {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(item, index) in event.event_halls.find((s) => s.hall_id == provider.id).event_hall_opts"
-                        :key="index" class="table-row {{ index % 2 === 0 ? 'bg-gray-100' : '' }}">
+                    <tr v-for="(item, index) in hallEvent.event_hall_opts" :key="index"
+                        class="table-row {{ index % 2 === 0 ? 'bg-gray-100' : '' }}">
+                        <td class="border border-gray-400 px-4 py-2">{{ item.name }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ item.m2 }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ item.purpose.name }}</td>
                         <td class="border border-gray-400 px-4 py-2">{{ new Date(item.in).toLocaleDateString() }}</td>
-                        <td class="border border-gray-400 px-4 py-2">{{ new Date(item.in).toLocaleDateString() }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ new Date(item.out).toLocaleDateString() }}</td>
                         <td class="border border-gray-400 px-4 py-2">{{ item.count }}</td>
                         <td class="border border-gray-400 px-4 py-2">{{ daysBetween(item.in, item.out) }}</td>
                         <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(item.received_proposal) }}</td>
-                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(event.event_halls.find((s) =>
-                            s.hall_id == provider.id)).iss_percent }}</td>
-                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(item.received_proposal) }}</td>
-                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(item.received_proposal) }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{
+                            formatCurrency(sumTaxesProvider(hallEvent, item)) }}
+                        </td>
+                        <td class="border border-gray-400 px-4 py-2">
+                            {{ formatCurrency((parseFloat(item.received_proposal)) + parseFloat(
+                                sumTaxesProvider(hallEvent, item))) }}
+                        </td>
+                        <td class="border border-gray-400 px-4 py-2">{{
+                            formatCurrency(sumTotal(parseFloat(item.received_proposal), parseFloat(
+                                sumTaxesProvider(hallEvent, item)), daysBetween(item.in, item.out))) }}
+                        </td>
                     </tr>
                 </tbody>
                 <tfoot class="table-footer">
                     <tr>
-                        <td colspan="7" class="border border-gray-400 px-4 py-2">Diária Média dos Salões</td>
-                        <td class="border border-gray-400 px-4 py-2">R$ 0,00</td>
+                        <td colspan="3" class="border border-gray-400 px-4 py-2">Diária Média dos Salões</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(sumHallValueRate /
+                            hallEvent.event_hall_opts.length) }}</td>
+                        <td colspan="2"></td>
+                        <td colspan="2" class="border border-gray-400 px-4 py-2">{{ sumHallQtdDayles }} Diárias de Salões
+                        </td>
+                        <td colspan="2"></td>
+                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(sumTotalHallValue) }}</td>
                     </tr>
                     <tr>
-                        <td colspan="7" class="border border-gray-400 px-4 py-2">Diárias de Salões</td>
-                        <td class="border border-gray-400 px-4 py-2" colspan="2">0</td>
+                        <td class="border border-gray-400 px-4 py-2">Comentários</td>
+                        <td colspan="10" class="border border-gray-400 px-4 py-2">{{ hallEvent.customer_observation }}</td>
                     </tr>
                 </tfoot>
             </table>
 
-
             <table class="w-full border-collapse border border-gray-400 mt-4"
-                v-if="event.event_halls.find((s) => s.hall_id == provider.id) != null && event.event_halls.find((s) => s.hall_id == provider.id).event_hall_opts != null && event.event_halls.find((s) => s.hall_id == provider.id).event_hall_opts.length > 0">
-
+                v-if="addEvent != null && addEvent.event_add_opts != null && addEvent.event_add_opts.length > 0">
                 <thead>
                     <tr class="table-header"
                         :style="'background-image: linear-gradient(to right, ' + hexToRgb(event.customer.color, 0.7) + ', ' + hexToRgb(event.customer.color, 0.3) + ');'">
-                        <th colspan="8" class="py-2 text-center">
-                            Salões
+                        <th colspan="11" class="py-2 text-center">
+                            Adicionais
                         </th>
                     </tr>
                     <tr class="bg-gray-100">
-                        <th class="border border-gray-400 px-4 py-2">IN</th>
-                        <th class="border border-gray-400 px-4 py-2">Out</th>
+                        <th class="border border-gray-400 px-4 py-2">Serviço</th>
+                        <th class="border border-gray-400 px-4 py-2">Frequência</th>
+                        <th class="border border-gray-400 px-4 py-2">Measure</th>
+                        <th class="border border-gray-400 px-4 py-2">De</th>
+                        <th class="border border-gray-400 px-4 py-2">Até</th>
                         <th class="border border-gray-400 px-4 py-2">Qtd</th>
                         <th class="border border-gray-400 px-4 py-2">Diárias</th>
                         <th class="border border-gray-400 px-4 py-2">Valor</th>
@@ -322,38 +437,51 @@ tr {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(item, index) in event.event_halls.find((s) => s.hall_id == provider.id).event_hall_opts"
-                        :key="index" class="table-row {{ index % 2 === 0 ? 'bg-gray-100' : '' }}">
+                    <tr v-for="(item, index) in addEvent.event_add_opts" :key="index"
+                        class="table-row {{ index % 2 === 0 ? 'bg-gray-100' : '' }}">
+                        <td class="border border-gray-400 px-4 py-2">{{ item.service.name }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ item.frequency.name }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ item.measure.name }}</td>
                         <td class="border border-gray-400 px-4 py-2">{{ new Date(item.in).toLocaleDateString() }}</td>
-                        <td class="border border-gray-400 px-4 py-2">{{ new Date(item.in).toLocaleDateString() }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ new Date(item.out).toLocaleDateString() }}</td>
                         <td class="border border-gray-400 px-4 py-2">{{ item.count }}</td>
                         <td class="border border-gray-400 px-4 py-2">{{ daysBetween(item.in, item.out) }}</td>
                         <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(item.received_proposal) }}</td>
-                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(event.event_halls.find((s) =>
-                            s.hall_id == provider.id)).iss_percent }}</td>
-                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(unitSale(item)) }}</td>
-                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(item.received_proposal) }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{
+                            formatCurrency(sumTaxesProvider(hallEvent, item)) }}
+                        </td>
+                        <td class="border border-gray-400 px-4 py-2">
+                            {{ formatCurrency((parseFloat(item.received_proposal)) + parseFloat(
+                                sumTaxesProvider(hallEvent, item))) }}
+                        </td>
+                        <td class="border border-gray-400 px-4 py-2">{{
+                            formatCurrency(sumTotal(parseFloat(item.received_proposal), parseFloat(
+                                sumTaxesProvider(hallEvent, item)), daysBetween(item.in, item.out))) }}
+                        </td>
                     </tr>
                 </tbody>
                 <tfoot class="table-footer">
                     <tr>
-                        <td colspan="7" class="border border-gray-400 px-4 py-2">Diária Média dos Salões</td>
-                        <td class="border border-gray-400 px-4 py-2">R$ 0,00</td>
+                        <td colspan="3" class="border border-gray-400 px-4 py-2">Valor médio</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(sumAddValueRate /
+                            addEvent.event_add_opts.length) }}</td>
+                        <td colspan="2"></td>
+                        <td colspan="2" class="border border-gray-400 px-4 py-2">{{ sumAddQtdDayles }}</td>
+                        <td colspan="2"></td>
+                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(sumTotalAddValue) }}</td>
                     </tr>
                     <tr>
-                        <td colspan="7" class="border border-gray-400 px-4 py-2">Diárias de Salões</td>
-                        <td class="border border-gray-400 px-4 py-2" colspan="2">0</td>
+                        <td class="border border-gray-400 px-4 py-2">Comentários</td>
+                        <td colspan="10" class="border border-gray-400 px-4 py-2">{{ addEvent.customer_observation }}</td>
                     </tr>
                 </tfoot>
             </table>
 
-
-            <table class="w-full border-collapse border border-gray-400 mt-4"
-                v-if="event.event_halls.find((s) => s.hall_id == provider.id) != null && event.event_halls.find((s) => s.hall_id == provider.id).event_hall_opts != null && event.event_halls.find((s) => s.hall_id == provider.id).event_hall_opts.length > 0">
+            <table class="w-full border-collapse border border-gray-400 mt-4">
 
                 <thead>
                     <tr>
-                        <th colspan="8">
+                        <th colspan="8" class="table-header">
                             Resumo da Poposta
                         </th>
                     </tr>
@@ -366,46 +494,70 @@ tr {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
+                    <tr
+                        v-if="hotelEvent != null && hotelEvent.event_hotels_opt != null && hotelEvent.event_hotels_opt.length > 0">
                         <td class="border border-gray-400 px-4 py-2">Hospedagem</td>
                         <td class="border border-gray-400 px-4 py-2">Rooms Night</td>
-                        <td class="border border-gray-400 px-4 py-2">{{ 656 }}</td>
-                        <td class="border border-gray-400 px-4 py-2">BRL</td>
-                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(98) }}</td>
-                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(654, 46) }}</td>
-                    </tr>
-                    <tr>
-                        <td class="border border-gray-400 px-4 py-2">Alimentos & Bebidas</td>
-                        <td class="border border-gray-400 px-4 py-2">Refeições</td>
-                        <td class="border border-gray-400 px-4 py-2">{{ 656 }}</td>
-                        <td class="border border-gray-400 px-4 py-2">BRL</td>
-                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(98) }}</td>
-                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(654, 46) }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ sumQtdDayles }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ hotelEvent.currency.sigla }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(sumValueRate /
+                            hotelEvent.event_hotels_opt.length) }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(sumTotalHotelValue) }}</td>
                     </tr>
 
-                    <tr>
+                    <tr v-if="abEvent != null && abEvent.event_ab_opts != null && abEvent.event_ab_opts.length > 0">
+                        <td class="border border-gray-400 px-4 py-2">Alimentos & Bebidas</td>
+                        <td class="border border-gray-400 px-4 py-2">Refeições</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ sumABQtdDayles }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ abEvent != null ? abEvent.currency.sigla : "" }}
+                        </td>
+                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(sumABValueRate /
+                            abEvent.event_ab_opts.length) }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(sumTotalABValue) }}</td>
+                    </tr>
+
+                    <tr
+                        v-if="hallEvent != null && hallEvent.event_hall_opts != null && hallEvent.event_hall_opts.length > 0">
                         <td class="border border-gray-400 px-4 py-2">Salões e Eventos</td>
                         <td class="border border-gray-400 px-4 py-2">Serviços e Areas</td>
-                        <td class="border border-gray-400 px-4 py-2">{{ 656 }}</td>
-                        <td class="border border-gray-400 px-4 py-2">BRL</td>
-                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(98) }}</td>
-                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(654, 46) }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ sumHallQtdDayles }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ hallEvent.currency.sigla }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(sumHallValueRate /
+                            hallEvent.event_hall_opts.length) }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(sumTotalHallValue) }}</td>
                     </tr>
+
+                    <tr v-if="addEvent != null && addEvent.event_add_opts != null && addEvent.event_add_opts.length > 0">
+                        <td class="border border-gray-400 px-4 py-2">Adicionais</td>
+                        <td class="border border-gray-400 px-4 py-2">Serviços Adicionais</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ sumAddQtdDayles }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ addEvent.currency.sigla }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(sumAddValueRate /
+                            addEvent.event_add_opts.length) }}</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(sumTotalAddValue) }}</td>
+                    </tr>
+
                 </tbody>
                 <tfoot class="table-footer">
                     <tr class="bg-blue-100">
                         <td class="border border-gray-400 px-4 py-2">IOF</td>
-                        <td class="border border-gray-400 px-4 py-2">7%</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ event.iof }}</td>
                         <td class="border border-gray-400 px-4 py-2">Taxa de Serviço</td>
-                        <td class="border border-gray-400 px-4 py-2">7%</td>
-                        <td class="border border-gray-400 px-4 py-2">Cambio</td>
+                        <td class="border border-gray-400 px-4 py-2">{{ event.service_charge }}</td>
+                        <td></td>
                         <td class="border border-gray-400 px-4 py-2">Valor Total</td>
                     </tr>
                     <tr class="bg-gray-100">
-                        <td class="border border-gray-400 px-4 py-2" colspan="2">IOF</td>
-                        <td class="border border-gray-400 px-4 py-2" colspan="2">Taxa de Serviço</td>
-                        <td class="border border-gray-400 px-4 py-2">Cambio</td>
-                        <td class="border border-gray-400 px-4 py-2">Valor Total</td>
+                        <td class="border border-gray-400 px-4 py-2" colspan="2">{{ formatCurrency(((sumTotalHotelValue +
+                            sumTotalABValue + sumTotalHallValue + sumTotalAddValue) * event.iof) / 100) }}</td>
+                        <td class="border border-gray-400 px-4 py-2" colspan="2">{{ formatCurrency(((sumTotalHotelValue +
+                            sumTotalABValue + sumTotalHallValue + sumTotalAddValue) * event.service_charge) / 100) }}</td>
+                        <td></td>
+                        <td class="border border-gray-400 px-4 py-2">{{ formatCurrency(sumTotalHotelValue +
+                            sumTotalABValue + sumTotalHallValue + sumTotalAddValue + (((sumTotalHotelValue +
+                                sumTotalABValue + sumTotalHallValue + sumTotalAddValue) * event.iof) / 100) +
+                            (((sumTotalHotelValue +
+                                sumTotalABValue + sumTotalHallValue + sumTotalAddValue) * event.service_charge) / 100)) }}</td>
                     </tr>
                 </tfoot>
             </table>

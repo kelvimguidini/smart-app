@@ -22,7 +22,7 @@ class CreateEventAddOptTable extends Migration
             $table->bigInteger('measure_id')->unsigned()->index();
             $table->bigInteger('frequency_id')->unsigned()->index();
 
-            $table->string('unit');
+            $table->integer('unit');
             $table->string('pax');
 
             $table->timestamp('in');

@@ -252,6 +252,8 @@ const form = useForm({
     hotel_operator: '',
     air_operator: '',
     land_operator: '',
+    iof: '',
+    service_charge: ''
 });
 
 const formDelete = useForm({
@@ -489,6 +491,26 @@ const newEventProv = (type) => {
                                         <TextInput type="text" class="form-control" v-model="form.code" required autofocus
                                             autocomplete="code" />
                                         <InputError class="mt-2 text-danger" :message="form.errors.code" />
+                                    </div>
+                                    <div class="row">
+
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <InputLabel for="iof" value="IOF:" />
+                                                <TextInput type="number" class="form-control" v-model="form.iof" required
+                                                    autofocus autocomplete="iof" />
+                                                <InputError class="mt-2 text-danger" :message="form.errors.iof" />
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <InputLabel for="service_charge" value="Taxa De Serviço:" />
+                                                <TextInput type="number" class="form-control" v-model="form.service_charge"
+                                                    required autofocus autocomplete="service_charge" />
+                                                <InputError class="mt-2 text-danger"
+                                                    :message="form.errors.service_charge" />
+                                            </div>
+                                        </div>
                                     </div>
 
                                 </div>

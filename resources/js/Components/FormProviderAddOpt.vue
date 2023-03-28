@@ -171,7 +171,7 @@ const isLoader = ref(false);
 
                 <div class="form-group">
                     <InputLabel for="unit" value="Unidade utilizada:" />
-                    <TextInput type="text" class="form-control" v-model="formOpt.unit" required autofocus
+                    <TextInput type="number" class="form-control" v-model="formOpt.unit" required autofocus
                         autocomplete="name" />
                 </div>
 
