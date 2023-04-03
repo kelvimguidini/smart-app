@@ -3,20 +3,23 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\PdfEmail;
 use App\Models\Event;
 use App\Models\EventHotel;
 use App\Models\EventHotelOpt;
 use App\Models\Provider;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-use Inertia\ResponseFactory;
 use Illuminate\Support\Facades\Gate;
-use Barryvdh\DomPDF\Facade as PDF;
-use Illuminate\Contracts\View\View;
-use Illuminate\Http\Response;
+use Dompdf\Dompdf;
+use Dompdf\Options;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Mail\Mailable;
+use Illuminate\Support\Facades\DB;
 
 class HotelController extends Controller
 {
@@ -256,6 +259,7 @@ class HotelController extends Controller
         if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator') && !Gate::allows('land_operator')) {
             abort(403);
         }
+
         $provider = $request->provider_id;
         $event = $request->event_id;
 
@@ -316,16 +320,77 @@ class HotelController extends Controller
 
         $providerBank = $providers->filter()->unique()->values()->first();
 
+        $arr = array(
+            "providerBank" => $providerBank,
+            "eventBank" => $eventBank
+        );
 
-        // $html = (new Response($response->content()))->getContent();
-        return Inertia::render('Auth/Event/ProposalPdf', [
-            'event' => $eventBank,
-            'provider' => $providerBank
-        ]);
+        $pdf = $this->createPDF($arr, 1);
+
+        // Renderize o HTML como PDF
+        $pdf->render();
+        // Retorna o PDF como um arquivo de download
+        if ($request->download) {
+            return $pdf->stream('Orçamento-hotel.pdf');
+        } else {
+
+            $user = User::find(Auth::user()->id);
+            $data = [
+                'body' => $request->message != null ? $request->message : "",
+                'hasAttachment' => true,
+                'signature' => $request->signature != null ? $request->signature : "",
+                'subject' => "Orçamento de hotel"
+            ];
+            $send = Mail::to($request->emails);
+
+            if ($request->copyMe) {
+                $send->cc($user->email);
+            }
+
+            $send->send(new PdfEmail($pdf->output(), 'Orçamento-hotel.pdf', $data, "Orçamento de hotel"));
+
+            DB::table('email_log')->insert(
+                array(
+                    'event_id' => $event,
+                    'provider_id' => $provider,
+                    'sender_id' => $user->id,
+                    'body' => $request->message,
+                    'attachment' => $pdf->output()
+                )
+            );
 
 
-        // $pdf = PDF::loadView('hotel-budget', null);
+            return redirect()->back()->with('flash', ['message' => 'E-mail enviado com sucesso!', 'type' => 'success']);
+        }
+    }
 
-        // return $pdf->download('orcamento-hotel.pdf');
+    private function createPDF(array $paramters, int $type)
+    {
+        $pdf = new Dompdf();
+
+        $html = "";
+        switch ($type) {
+            case 1:
+                $html = view('proposalPdf', [
+                    'event' => $paramters['eventBank'],
+                    'provider' => $paramters['providerBank']
+                ])->render();
+
+                break;
+            default:
+                $html = "<div class=\"text-truncate\">Sem Conteudo a ser apresentado</div>";
+                break;
+        }
+
+        $pdf->setPaper('A4', 'portrait');
+
+        // Crie uma instância do Dompdf
+        $options = new Options();
+        // Carregue o HTML no Dompdf
+        $pdf->loadHtml($html);
+
+        $pdf->setOptions($options);
+
+        return $pdf;
     }
 }

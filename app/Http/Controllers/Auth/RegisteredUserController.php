@@ -65,6 +65,7 @@ class RegisteredUserController extends Controller
             $userEdit->name = $request->name;
             $userEdit->email = $request->email;
             $userEdit->phone = $request->phone;
+            $userEdit->signature = $request->signature;
             $userEdit->save();
 
             foreach ($userEdit->roles as $role) {
@@ -94,6 +95,7 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
+            'signature' => $request->signature,
             'password' => Hash::make('qwerty'),
         ]);
 

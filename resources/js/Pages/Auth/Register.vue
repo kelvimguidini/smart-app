@@ -8,7 +8,7 @@ import Modal from '@/Components/Modal.vue';
 import Loader from '@/Components/Loader.vue';
 import { Head, Link, useForm } from '@inertiajs/inertia-vue3';
 import { onMounted, ref } from 'vue';
-
+import CKEditor from '@/Components/CKEditor.vue';
 
 const props = defineProps({
     users: Array,
@@ -24,7 +24,8 @@ const form = useForm({
     password: '',
     password_confirmation: '',
     terms: false,
-    roles: []
+    roles: [],
+    signature: ''
 });
 
 const formDelete = useForm({
@@ -125,8 +126,8 @@ onMounted(() => {
                                             <div class="form-group">
 
                                                 <InputLabel for="name" value="Name" />
-                                                <TextInput id="name" type="text" class="form-control"
-                                                    v-model="form.name" required autofocus autocomplete="name" />
+                                                <TextInput id="name" type="text" class="form-control" v-model="form.name"
+                                                    required autofocus autocomplete="name" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.name" />
                                             </div>
                                         </div>
@@ -134,16 +135,22 @@ onMounted(() => {
                                             <div class="form-group">
 
                                                 <InputLabel for="email" value="Email" />
-                                                <TextInput id="email" type="email" class="form-control"
-                                                    v-model="form.email" required autocomplete="username" />
+                                                <TextInput id="email" type="email" class="form-control" v-model="form.email"
+                                                    required autocomplete="username" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.email" />
+                                            </div>
+
+                                            <div class="form-group">
+                                                <InputLabel for="signature" value="Assinatura" />
+                                                <CKEditor v-model:content="form.signature" :height="150" />
+                                                <InputError class="mt-2 text-danger" :message="form.errors.signature" />
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <InputLabel for="Phone" value="Telefone" />
-                                                <TextInput id="phone" type="text" class="form-control"
-                                                    v-model="form.phone" required autofocus autocomplete="phone" />
+                                                <TextInput id="phone" type="text" class="form-control" v-model="form.phone"
+                                                    required autofocus autocomplete="phone" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.phone" />
                                             </div>
                                         </div>
@@ -179,8 +186,8 @@ onMounted(() => {
                                 </PrimaryButton>
 
                                 <PrimaryButton v-if="userInEdition > 0" css-class="btn btn-info float-right m-1"
-                                    v-on:click="form.reset(); userInEdition = 0"
-                                    :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                                    v-on:click="form.reset(); userInEdition = 0" :class="{ 'opacity-25': form.processing }"
+                                    :disabled="form.processing">
                                     Novo
                                 </PrimaryButton>
 
@@ -207,8 +214,7 @@ onMounted(() => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="(user, index) in users"
-                                        :class="{ 'table-info': userInEdition == user.id }">
+                                    <tr v-for="(user, index) in users" :class="{ 'table-info': userInEdition == user.id }">
                                         <th>{{ user.id }}</th>
                                         <td>{{ user.name }}</td>
                                         <td>{{ user.phone }}</td>

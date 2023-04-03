@@ -6,6 +6,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, useForm } from '@inertiajs/inertia-vue3';
 import { onMounted } from 'vue';
+import CKEditor from '@/Components/CKEditor.vue';
 
 
 const props = defineProps({
@@ -60,28 +61,31 @@ onMounted(() => {
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-
                                                 <InputLabel for="name" value="Name" />
-                                                <TextInput id="name" type="text" class="form-control"
-                                                    v-model="form.name" required autofocus autocomplete="name" />
+                                                <TextInput id="name" type="text" class="form-control" v-model="form.name"
+                                                    required autofocus autocomplete="name" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.name" />
+                                            </div>
+                                            <div class="form-group">
+                                                <InputLabel for="Phone" value="Telefone" />
+                                                <TextInput id="phone" type="text" class="form-control" v-model="form.phone"
+                                                    required autofocus autocomplete="phone" />
+                                                <InputError class="mt-2 text-danger" :message="form.errors.phone" />
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
 
                                                 <InputLabel for="email" value="Email" />
-                                                <TextInput id="email" type="email" class="form-control"
-                                                    v-model="form.email" required autocomplete="username" />
+                                                <TextInput id="email" type="email" class="form-control" v-model="form.email"
+                                                    required autocomplete="username" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.email" />
                                             </div>
-                                        </div>
-                                        <div class="col-lg-6">
+
                                             <div class="form-group">
-                                                <InputLabel for="Phone" value="Telefone" />
-                                                <TextInput id="phone" type="text" class="form-control"
-                                                    v-model="form.phone" required autofocus autocomplete="phone" />
-                                                <InputError class="mt-2 text-danger" :message="form.errors.phone" />
+                                                <InputLabel for="signature" value="Assinatura" />
+                                                <CKEditor v-model:content="form.signature" :height="150" />
+                                                <InputError class="mt-2 text-danger" :message="form.errors.signature" />
                                             </div>
                                         </div>
                                     </div>

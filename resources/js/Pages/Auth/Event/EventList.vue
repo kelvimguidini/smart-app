@@ -4,7 +4,8 @@ import Modal from '@/Components/Modal.vue';
 import Loader from '@/Components/Loader.vue';
 import { Head, Link, useForm } from '@inertiajs/inertia-vue3';
 import { onMounted, ref } from 'vue';
-
+import TextInput from '@/Components/TextInput.vue';
+import CKEditor from '@/Components/CKEditor.vue';
 
 const props = defineProps({
     events: Array
@@ -16,6 +17,14 @@ const formDelete = useForm({
 
 const isLoader = ref(false);
 
+
+const emails = ref('');
+const sendEmail = ref(true);
+const message = ref('teste');
+const provider_id = ref(0);
+const event_id = ref(0);
+const copyMe = ref(false);
+
 const deleteEvent = (id) => {
     isLoader.value = true;
     formDelete.id = id;
@@ -23,6 +32,24 @@ const deleteEvent = (id) => {
         onFinish: () => {
             isLoader.value = false;
             formDelete.reset();
+        },
+    });
+};
+
+const sendProposal = (array) => {
+    isLoader.value = true;
+    const formProposal = useForm({
+        download: !array['sendEmail'],
+        message: array['message'],
+        provider_id: array['provider_id'],
+        event_id: array['event_id'],
+        emails: array['emails'],
+        copyMe: array['copyMe']
+    });
+
+    formProposal.post(route('proposal-hotel'), {
+        onFinish: () => {
+            isLoader.value = false;
         },
     });
 };
@@ -37,6 +64,7 @@ const providersByEvent = (event) => {
                 id: current.hotel.id,
                 name: current.hotel.name,
                 city: current.hotel.city,
+                email: current.hotel.email,
             });
         }
     }, {});
@@ -47,6 +75,7 @@ const providersByEvent = (event) => {
                 id: current.ab.id,
                 name: current.ab.name,
                 city: current.ab.city,
+                email: current.ab.email,
             });
         }
     }, {});
@@ -57,6 +86,7 @@ const providersByEvent = (event) => {
                 id: current.hall.id,
                 name: current.hall.name,
                 city: current.hall.city,
+                email: current.add.email,
             });
         }
     }, {});
@@ -67,6 +97,7 @@ const providersByEvent = (event) => {
                 id: current.add.id,
                 name: current.add.name,
                 city: current.add.city,
+                email: current.add.email,
             });
         }
     }, {});
@@ -214,15 +245,85 @@ const providersByEvent = (event) => {
                                                                 botão abaixo.
                                                             </template>
                                                         </Modal>
-                                                        <a target="blank"
+
+
+                                                        <Modal modal-title="Envio de Proposta"
                                                             v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin')"
-                                                            class="btn btn-secondary btn-icon-split mr-2"
-                                                            :href="route('proposal-hotel', { event_id: event.id, provider_id: prov.id })">
-                                                            <span class="icon text-white-50">
-                                                                <i class="fas fa-file-pdf"></i>
-                                                            </span>
-                                                            <span class="text">Proposta Hotel</span>
-                                                        </a>
+                                                            :ok-botton-callback="sendProposal"
+                                                            :ok-botton-callback-param="{ event_id: event.id, provider_id: prov.id, emails: prov.email, download: !sendEmail, message: message, copyMe: copyMe }"
+                                                            :ok-botton-label="isDownload ? 'Baixar PDF' : 'Enviar Proposta'"
+                                                            btn-class="btn btn-secondary btn-icon-split mr-2">
+                                                            <template v-slot:button>
+                                                                <span class="icon text-white-50">
+                                                                    <i class="fas fa-file-pdf"></i>
+                                                                </span>
+                                                                <span class="text">Proposta Hotel</span>
+                                                            </template>
+                                                            <template v-slot:content>
+
+                                                                <div class="row">
+                                                                    <div class="col">
+                                                                        <div class="form-group">
+                                                                            <div class="form-check">
+                                                                                <input class="form-check-input"
+                                                                                    v-model="sendEmail" type="checkbox"
+                                                                                    id="autoSizingCheck">
+                                                                                <label class="form-check-label"
+                                                                                    for="autoSizingCheck">
+                                                                                    Enviar E-mail
+                                                                                </label>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                </div>
+
+                                                                <div class="row" v-if="sendEmail">
+                                                                    <div class="col-12">
+
+                                                                        <div class="form-group">
+                                                                            <InputLabel value="Enviar para:" />
+                                                                            <TextInput type="text" class="form-control"
+                                                                                v-model="prov.email" />
+                                                                        </div>
+
+                                                                        <div class="alert alert-warning " role="alert">
+                                                                            <h4
+                                                                                class="alert-heading text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                                                Separe os e-mails com ; (ponto e vírgula)
+                                                                                caso tenha mais de 1
+                                                                            </h4>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="col-12">
+                                                                        <div class="form-group">
+                                                                            <div class="form-check">
+                                                                                {{ message }}
+                                                                                <InputLabel value=" " />
+                                                                                <CKEditor v-model:content="message"
+                                                                                    :height="150" />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="col-12">
+                                                                        <div class="form-group">
+                                                                            <div class="form-check">
+                                                                                <input class="form-check-input"
+                                                                                    v-model="copyMe" type="checkbox"
+                                                                                    id="autoSizingCheck">
+                                                                                <label class="form-check-label"
+                                                                                    for="autoSizingCheck">
+                                                                                    Enviar cópia para mim
+                                                                                </label>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                            </template>
+                                                        </Modal>
 
                                                     </td>
                                                 </tr>

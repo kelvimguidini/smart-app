@@ -357,6 +357,6 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::get('budget/{provider_id}/{event_id}', [HotelController::class, 'budget'])
         ->name('budget');
 
-    Route::get('proposal-hotel/{provider_id}/{event_id}', [HotelController::class, 'proposalPdf'])
+    Route::post('proposal-hotel', [HotelController::class, 'proposalPdf'])
         ->name('proposal-hotel');
 });

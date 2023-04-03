@@ -52,6 +52,7 @@ class ProfileUserController extends Controller
         $userEdit->name = $request->name;
         $userEdit->email = $request->email;
         $userEdit->phone = $request->phone;
+        $userEdit->signature = $request->signature;
         $userEdit->save();
 
         return redirect()->back()->with('flash', ['message' => trans('Registro salvo com sucesso'), 'type' => 'success']);
