@@ -181,7 +181,7 @@ const submit = () => {
                                                 <th scope="row">{{ crd.id }}</th>
                                                 <td>{{ crd.name }}</td>
                                                 <td>{{ crd.number }}</td>
-                                                <td>{{ crd.customer.name }}</td>
+                                                <td>{{ crd.customer != null ? crd.customer.name : ' - ' }}</td>
                                                 <td>
                                                     <button class="btn btn-info btn-icon-split mr-2" v-on:click="edit(crd)">
                                                         <span class="icon text-white-50">

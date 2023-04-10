@@ -54,6 +54,7 @@ const edit = (user) => {
     form.email = user.email;
     form.phone = user.phone;
     form.id = user.id;
+    form.signature = user.signature;
     form.roles = [];
     user.roles.map(function (value, key) {
         form.roles.push(value.id);
@@ -130,6 +131,12 @@ onMounted(() => {
                                                     required autofocus autocomplete="name" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.name" />
                                             </div>
+                                            <div class="form-group">
+                                                <InputLabel for="Phone" value="Telefone" />
+                                                <TextInput id="phone" type="text" class="form-control" v-model="form.phone"
+                                                    required autofocus autocomplete="phone" />
+                                                <InputError class="mt-2 text-danger" :message="form.errors.phone" />
+                                            </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
@@ -144,14 +151,6 @@ onMounted(() => {
                                                 <InputLabel for="signature" value="Assinatura" />
                                                 <CKEditor v-model:content="form.signature" :height="150" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.signature" />
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-6">
-                                            <div class="form-group">
-                                                <InputLabel for="Phone" value="Telefone" />
-                                                <TextInput id="phone" type="text" class="form-control" v-model="form.phone"
-                                                    required autofocus autocomplete="phone" />
-                                                <InputError class="mt-2 text-danger" :message="form.errors.phone" />
                                             </div>
                                         </div>
                                     </div>
@@ -217,8 +216,8 @@ onMounted(() => {
                                     <tr v-for="(user, index) in users" :class="{ 'table-info': userInEdition == user.id }">
                                         <th>{{ user.id }}</th>
                                         <td>{{ user.name }}</td>
-                                        <td>{{ user.phone }}</td>
                                         <td>{{ user.email }}</td>
+                                        <td>{{ user.phone }}</td>
                                         <td>
                                             <span v-if="user.email_verified_at != null"
                                                 class="btn-success btn-circle btn-sm">

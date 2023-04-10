@@ -149,8 +149,11 @@ const edit = (event) => {
         form.hotel_operator = event.hotel_operator;
         form.air_operator = event.air_operator;
         form.land_operator = event.land_operator;
+        form.iof = event.iof;
+        form.service_charge = event.service_charge;
 
-        props.crds = props.crds.filter((v, i) => { return v.customer.id == form.customer });
+
+        props.crds = props.crds.filter((v, i) => { return v.customer == null || v.customer.id == form.customer });
 
         $('#customer').val(event.customer_id).trigger('change');
         $('#crd_id').val(event.crd_id).trigger('change');

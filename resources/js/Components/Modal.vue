@@ -1,5 +1,6 @@
 <script setup>
 
+import { Link } from '@inertiajs/inertia-vue3';
 
 const props = defineProps({
     modalTitle: {
@@ -24,8 +25,16 @@ const props = defineProps({
     },
     btnDisabled: {
         type: Boolean,
-        default: 'btn btn-primary'
+        default: false
     },
+    btnIsLink: {
+        type: Boolean,
+        default: false
+    },
+    url: {
+        type: String,
+        default: ''
+    }
 });
 
 const id = 'modal-' + Math.floor(Date.now() * Math.random()).toString(36)
@@ -53,10 +62,14 @@ const id = 'modal-' + Math.floor(Date.now() * Math.random()).toString(36)
                 <div class="modal-footer">
 
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-                    <button v-if="okBottonCallback != null" type="button" class="btn btn-primary"
+                    <button v-if="okBottonCallback != null && !btnIsLink" type="button" class="btn btn-primary"
                         v-on:click="okBottonCallback(okBottonCallbackParam)" data-dismiss="modal">
                         {{ okBottonLabel }}
                     </button>
+                    <Link v-on:click="okBottonCallback(okBottonCallbackParam)" data-dismiss="modal" v-if="btnIsLink"
+                        class="btn btn-primary" :href="url">{{
+                            okBottonLabel }}
+                    </Link>
                 </div>
             </div>
         </div>

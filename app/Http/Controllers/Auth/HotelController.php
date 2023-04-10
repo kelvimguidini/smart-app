@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Mail\PdfEmail;
 use App\Models\Event;
+use App\Models\EventAB;
+use App\Models\EventAdd;
+use App\Models\EventHall;
 use App\Models\EventHotel;
 use App\Models\EventHotelOpt;
 use App\Models\Provider;
@@ -20,6 +23,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\DB;
+use PDF;
 
 class HotelController extends Controller
 {
@@ -326,24 +330,24 @@ class HotelController extends Controller
         );
 
         $pdf = $this->createPDF($arr, 1);
-
+        // return $pdf;
         // Renderize o HTML como PDF
         $pdf->render();
         // Retorna o PDF como um arquivo de download
-        if ($request->download) {
+        if ($request->download == "true") {
             return $pdf->stream('Orçamento-hotel.pdf');
         } else {
 
             $user = User::find(Auth::user()->id);
             $data = [
-                'body' => $request->message != null ? $request->message : "",
+                'body' => $request->message != null ? urldecode($request->message) : "",
                 'hasAttachment' => true,
                 'signature' => $request->signature != null ? $request->signature : "",
                 'subject' => "Orçamento de hotel"
             ];
-            $send = Mail::to($request->emails);
+            $send = Mail::to(explode(";", $request->emails));
 
-            if ($request->copyMe) {
+            if ($request->copyMe == "true") {
                 $send->cc($user->email);
             }
 
@@ -354,11 +358,43 @@ class HotelController extends Controller
                     'event_id' => $event,
                     'provider_id' => $provider,
                     'sender_id' => $user->id,
-                    'body' => $request->message,
+                    'body' => urldecode($request->message),
                     'attachment' => $pdf->output()
                 )
             );
 
+            // Encontre o registro existente com base no event_id e provider_id
+            $eventHotel = EventHotel::where('event_id', $event)->where('hotel_id', $provider)->first();
+
+            if ($eventHotel) {
+                // Atualize o valor sended_email para true
+                $eventHotel->sended_mail = true;
+                $eventHotel->update();
+            }
+            // Encontre o registro existente com base no event_id e provider_id
+            $eventAb = EventAB::where('event_id', $event)->where('ab_id', $provider)->first();
+
+            if ($eventAb) {
+                // Atualize o valor sended_email para true
+                $eventAb->sended_mail = true;
+                $eventAb->update();
+            }
+            // Encontre o registro existente com base no event_id e provider_id
+            $eventHall = EventHall::where('event_id', $event)->where('hall_id', $provider)->first();
+
+            if ($eventHall) {
+                // Atualize o valor sended_email para true
+                $eventHall->sended_mail = true;
+                $eventHall->update();
+            }
+            // Encontre o registro existente com base no event_id e provider_id
+            $eventAdd = EventAdd::where('event_id', $event)->where('add_id', $provider)->first();
+
+            if ($eventAdd) {
+                // Atualize o valor sended_email para true
+                $eventAdd->sended_mail = true;
+                $eventAdd->update();
+            }
 
             return redirect()->back()->with('flash', ['message' => 'E-mail enviado com sucesso!', 'type' => 'success']);
         }
@@ -366,7 +402,12 @@ class HotelController extends Controller
 
     private function createPDF(array $paramters, int $type)
     {
-        $pdf = new Dompdf();
+        $options = new Options();
+        $options->set('isRemoteEnabled', true);
+        $options->set('acceptedMediaTypes',  ['image/jpeg', 'image/png']);
+        $options->set('chroot', realpath($_SERVER['DOCUMENT_ROOT']));
+
+        $pdf = new Dompdf($options);
 
         $html = "";
         switch ($type) {
@@ -381,15 +422,11 @@ class HotelController extends Controller
                 $html = "<div class=\"text-truncate\">Sem Conteudo a ser apresentado</div>";
                 break;
         }
-
-        $pdf->setPaper('A4', 'portrait');
-
-        // Crie uma instância do Dompdf
-        $options = new Options();
+        // return $html;
         // Carregue o HTML no Dompdf
         $pdf->loadHtml($html);
 
-        $pdf->setOptions($options);
+        $pdf->setPaper('A4', 'portrait');
 
         return $pdf;
     }

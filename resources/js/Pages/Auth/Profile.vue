@@ -32,6 +32,7 @@ onMounted(() => {
         form.name = props.user.name;
         form.phone = props.user.phone;
         form.email = props.user.email;
+        form.signature = props.user.signature;
     }
 
     $('#phone').mask('(00) 00000-0000');

@@ -90,44 +90,49 @@ $sumAddValueRate = 0;
 $sumAddQtdDayles = 0;
 $sumTotalAddValue = 0;
 
-foreach ($hotelEvent->eventHotelsOpt as $item) {
+if ($hotelEvent != null) {
+    foreach ($hotelEvent->eventHotelsOpt as $item) {
 
-    $rate = floatval($item->received_proposal);
-    $taxes = floatval(sumTaxesProvider($hotelEvent, $item));
-    $qtdDayle = $item->count * daysBetween($item->in, $item->out);
+        $rate = floatval($item->received_proposal);
+        $taxes = floatval(sumTaxesProvider($hotelEvent, $item));
+        $qtdDayle = $item->count * daysBetween($item->in, $item->out);
 
-    $sumValueRate += $rate;
-    $sumQtdDayles += $qtdDayle;
-    $sumTotalHotelValue += ($rate + $taxes) * $qtdDayle;
+        $sumValueRate += $rate;
+        $sumQtdDayles += $qtdDayle;
+        $sumTotalHotelValue += ($rate + $taxes) * $qtdDayle;
+    }
 }
+if ($abEvent != null) {
+    foreach ($abEvent->eventAbOpts as $item) {
+        $rate = floatval($item->received_proposal);
+        $taxes = floatval(sumTaxesProvider($abEvent, $item));
+        $qtdDayle = $item->count * daysBetween($item->in, $item->out);
 
-foreach ($abEvent->eventAbOpts as $item) {
-    $rate = floatval($item->received_proposal);
-    $taxes = floatval(sumTaxesProvider($abEvent, $item));
-    $qtdDayle = $item->count * daysBetween($item->in, $item->out);
-
-    $sumABValueRate += $rate;
-    $sumABQtdDayles += $qtdDayle;
-    $sumTotalABValue += ($rate + $taxes) * $qtdDayle;
+        $sumABValueRate += $rate;
+        $sumABQtdDayles += $qtdDayle;
+        $sumTotalABValue += ($rate + $taxes) * $qtdDayle;
+    }
 }
+if ($hallEvent != null) {
+    foreach ($hallEvent->eventHallOpts as $item) {
+        $rate = floatval($item->received_proposal);
+        $taxes = floatval(sumTaxesProvider($hallEvent, $item));
 
-foreach ($hallEvent->eventHallOpts as $item) {
-    $rate = floatval($item->received_proposal);
-    $taxes = floatval(sumTaxesProvider($hallEvent, $item));
-
-    $sumHallValueRate += $rate;
-    $sumHallQtdDayles += daysBetween($item->in, $item->out);
-    $sumTotalHallValue += ($rate + $taxes) * daysBetween($item->in, $item->out);
+        $sumHallValueRate += $rate;
+        $sumHallQtdDayles += daysBetween($item->in, $item->out);
+        $sumTotalHallValue += ($rate + $taxes) * daysBetween($item->in, $item->out);
+    }
 }
+if ($addEvent != null) {
+    foreach ($addEvent->eventAddOpts as $item) {
+        $rate = floatval($item->received_proposal);
+        $taxes = floatval(sumTaxesProvider($hallEvent, $item));
+        $qtdDayle = $item->count * daysBetween($item->in, $item->out);
 
-foreach ($addEvent->eventAddOpts as $item) {
-    $rate = floatval($item->received_proposal);
-    $taxes = floatval(sumTaxesProvider($hallEvent, $item));
-    $qtdDayle = $item->count * daysBetween($item->in, $item->out);
-
-    $sumAddValueRate += $rate;
-    $sumAddQtdDayles += $qtdDayle;
-    $sumTotalAddValue += ($rate + $taxes) * daysBetween($item->in, $item->out);
+        $sumAddValueRate += $rate;
+        $sumAddQtdDayles += $qtdDayle;
+        $sumTotalAddValue += ($rate + $taxes) * daysBetween($item->in, $item->out);
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -156,30 +161,39 @@ foreach ($addEvent->eventAddOpts as $item) {
         .resumo {
             page-break-before: always;
         }
+
+        table {
+            width: 15cm;
+            max-width: 19cm !important;
+        }
     </style>
 </head>
 
 <body>
     <div id="app">
 
-        <div style="margin: 0 auto 2.5rem; max-width: 90%; padding: 0 1rem;margin-top: 27px;">
-            <header class="header" style="display: flex; align-items: center; justify-content: space-between;">
-                <div style="display: flex; align-items: center;">
-                    <img style="width: 4rem; height: 4rem; margin-right: 0.5rem;" src="{{ $event['customer']['logo'] }}" alt="{{ $event['customer']['name'] }}">
-                    <div>
-                        <h1 style="font-weight: bold; font-size: 1.25rem; margin-bottom: 0.25rem;">Evento: {{ $event['name'] }}</h1>
-                        <p style="color: #6B7280; font-size: 1rem;">Hotel: {{ $provider['name'] }}</p>
+        <div style="margin: 0 auto 2.5rem;">
+            <header class="header">
+                <div style="display: inline-block;vertical-align: middle;">
+                    <img style="width: 4rem;height: 4rem;margin-right: 25px;vertical-align: middle;left: 1;" src="{{ asset('storage/logos/logo.png') }}" alt="4BTS">
+
+                    <div style="display: inline-block;vertical-align: middle;">
+                        <h1 style="font-weight: bold; font-size: 1.25rem; margin-bottom: 0.25rem;">Evento: teste</h1>
+                        <p style="color: #6B7280; font-size: 1rem; margin-bottom: 0;">Hotel: windsor</p>
                     </div>
                 </div>
-                <img style="width: 5rem; height: 5rem; fill: #6B7280;" src="/storage/logos/logo.png" alt="Logo">
+                <div style="display: inline-block;vertical-align: middle;right: 16px;position: absolute;">
+                    <img style="width: 5rem; height: 5rem; fill: #6B7280;" src="{{ asset($event->customer->logo)  }}" alt="4BTS">
+                </div>
             </header>
         </div>
 
-        <div style="overflow-x:auto;">
+
+        <div>
             @if($hotelEvent != null && $hotelEvent->eventHotelsOpt != null && count($hotelEvent->eventHotelsOpt) > 0)
-            <table style="width: 100%; border-collapse: collapse; border: 1px solid gray;">
-                <thead>
-                    <tr style="background-image: linear-gradient(to right, <?php echo hexToRgb($event->customer->color, 0.7) ?>, <?php echo hexToRgb($event->customer->color, 0.3) ?>); color: white;">
+            <table style="font-size: 10pt; max-width: 19cm; width: 100%; border-collapse: collapse; border: 1px solid gray; page-break-inside: avoid;">
+                <thead style="display: table-header-group;">
+                    <tr style="background-color: <?php echo hexToRgb($event->customer->color, 0.5) ?>">
                         <th colspan="11" style="padding: 0.5rem; text-align: center;">Hospedagem</th>
                     </tr>
                     <tr style="background-color: #f7fafc;">
@@ -196,7 +210,7 @@ foreach ($addEvent->eventAddOpts as $item) {
                         <th style="border: 1px solid gray; padding: 0.5rem;">Total Geral</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody style="page-break-inside: avoid;">
                     @foreach($hotelEvent->eventHotelsOpt as $key => $item)
                     <tr>
                         <td style="border: 1px solid gray; padding: 0.5rem;">{{ $item->category_hotel->name }}</td>
@@ -240,8 +254,8 @@ foreach ($addEvent->eventAddOpts as $item) {
 
 
             @if($abEvent != null && $abEvent->eventAbOpts != null && count($abEvent->eventAbOpts) > 0)
-            <table style="width: 100%; border-collapse: collapse; border: 1px solid gray;margin-top: 27px;">
-                <thead>
+            <table style="font-size: 10pt; max-width: 19cm; width: 100%; border-collapse: collapse; border: 1px solid gray;margin-top: 27px; page-break-inside: avoid;">
+                <thead style="display: table-header-group;">
                     <tr style="background-image: linear-gradient(to right, <?php echo hexToRgb($event->customer->color, 0.7) ?>, <?php echo hexToRgb($event->customer->color, 0.3) ?>); color: white;">
                         <th colspan="10" style="padding: 0.5rem; text-align: center;">Alimentos & Bebidas</th>
                     </tr>
@@ -258,7 +272,7 @@ foreach ($addEvent->eventAddOpts as $item) {
                         <th style="border: 1px solid gray; padding: 0.5rem;">Total Geral</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody style="page-break-inside: avoid;">
                     @foreach($abEvent->eventAbOpts as $key => $item)
                     <tr>
                         <td style="border: 1px solid gray; padding: 0.5rem;">{{ $item->service_type->name }}</td>
@@ -301,8 +315,8 @@ foreach ($addEvent->eventAddOpts as $item) {
 
 
             @if($hallEvent != null && $hallEvent->eventHallOpts != null && count($hallEvent->eventHallOpts) > 0)
-            <table style="width: 100%; border-collapse: collapse; border: 1px solid gray;margin-top: 27px;">
-                <thead>
+            <table style="font-size: 10pt; max-width: 19cm; width: 100%; border-collapse: collapse; border: 1px solid gray;margin-top: 27px; page-break-inside: avoid;">
+                <thead style="display: table-header-group;">
                     <tr style="background-image: linear-gradient(to right, <?php echo hexToRgb($event->customer->color, 0.7) ?>, <?php echo hexToRgb($event->customer->color, 0.3) ?>); color: white;">
                         <th colspan="11" style="padding: 0.5rem; text-align: center;">Salões & Eventos</th>
                     </tr>
@@ -320,7 +334,7 @@ foreach ($addEvent->eventAddOpts as $item) {
                         <th style="border: 1px solid gray; padding: 0.5rem;">Total Geral</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody style="page-break-inside: avoid;">
                     @foreach($hallEvent->eventHallOpts as $key => $item)
                     <tr>
                         <td style="border: 1px solid gray; padding: 0.5rem;">{{ $item->name }}</td>
@@ -365,8 +379,8 @@ foreach ($addEvent->eventAddOpts as $item) {
 
 
             @if($addEvent != null && $addEvent->eventAddOpts != null && count($addEvent->eventAddOpts) > 0)
-            <table style="width: 100%; border-collapse: collapse; border: 1px solid gray;margin-top: 27px;">
-                <thead>
+            <table style="font-size: 10pt; max-width: 19cm; width: 100%; border-collapse: collapse; border: 1px solid gray;margin-top: 27px; page-break-inside: avoid;">
+                <thead style="display: table-header-group;">
                     <tr style="background-image: linear-gradient(to right, <?php echo hexToRgb($event->customer->color, 0.7) ?>, <?php echo hexToRgb($event->customer->color, 0.3) ?>); color: white;">
                         <th colspan="11" style="padding: 0.5rem; text-align: center;">Adicionais</th>
                     </tr>
@@ -384,7 +398,7 @@ foreach ($addEvent->eventAddOpts as $item) {
                         <th style="border: 1px solid gray; padding: 0.5rem;">Total Geral</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody style="page-break-inside: avoid;">
                     @foreach($addEvent->eventAddOpts as $key => $item)
                     <tr>
                         <td style="border: 1px solid gray; padding: 0.5rem;">{{ $item->service->name }}</td>
@@ -427,125 +441,130 @@ foreach ($addEvent->eventAddOpts as $item) {
             @endif
 
 
-            <table style="width:100%; border-collapse: collapse; border: 1px solid #ccc; margin-top: 4rem;">
-                <thead>
-                    <tr>
-                        <th colspan="8" style="text-align:center; font-weight:bold;">
-                            Resumo da Proposta
-                        </th>
-                    </tr>
-                    <tr style="background-color: #ebf8ff;">
-                        <th style="border: 1px solid #ccc; padding: 0.5rem;">Serviços</th>
-                        <th style="border: 1px solid #ccc; padding: 0.5rem;" colspan="2">Totais de</th>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">Moeda</td>
-                        <th style="border: 1px solid #ccc; padding: 0.5rem;">Preço médio</th>
-                        <th style="border: 1px solid #ccc; padding: 0.5rem;">Total do Pedido</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if($hotelEvent != null && $hotelEvent->eventHotelsOpt != null && count($hotelEvent->eventHotelsOpt) > 0)
-                    <tr style="border: 1px solid #ccc;">
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">Hospedagem</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">Rooms Night</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ $sumQtdDayles}}</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ $hotelEvent->currency->sigla}}</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ formatCurrency($sumValueRate / count($hotelEvent->eventHotelsOpt))}}</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ formatCurrency($sumTotalHotelValue)}}</td>
-                    </tr>
-                    @endif
+        </div>
 
-                    @if($abEvent != null && $abEvent->eventAbOpts != null && count($abEvent->eventAbOpts) > 0)
-                    <tr style="border: 1px solid #ccc;">
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">Alimentos & Bebidas</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">Refeições</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ $sumABQtdDayles }}</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ $abEvent != null ? $abEvent->currency->sigla : ""}}</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ formatCurrency($sumABValueRate / count($abEvent->eventAbOpts))}}</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">{{formatCurrency($sumTotalABValue) }} </td>
-                    </tr>
-                    @endif
+        <table style="width:100%; border-collapse: collapse; border: 1px solid #ccc; page-break-before: always;">
+            <thead>
+                <tr>
+                    <th colspan="6" style="padding: 0.5rem; text-align:center; font-weight:bold;">
+                        Resumo da Proposta
+                    </th>
+                </tr>
+                <tr style="background-color: #ebf8ff;">
+                    <th style="border: 1px solid #ccc; padding: 0.5rem;">Serviços</th>
+                    <th style="border: 1px solid #ccc; padding: 0.5rem;" colspan="2">Totais de</th>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">Moeda</td>
+                    <th style="border: 1px solid #ccc; padding: 0.5rem;">Preço médio</th>
+                    <th style="border: 1px solid #ccc; padding: 0.5rem;">Total do Pedido</th>
+                </tr>
+            </thead>
+            <tbody style="page-break-inside: avoid;">
+                @if($hotelEvent != null && $hotelEvent->eventHotelsOpt != null && count($hotelEvent->eventHotelsOpt) > 0)
+                <tr style="border: 1px solid #ccc;">
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">Hospedagem</td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">Rooms Night</td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ $sumQtdDayles}}</td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ $hotelEvent->currency->sigla}}</td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ formatCurrency($sumValueRate / count($hotelEvent->eventHotelsOpt))}}</td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ formatCurrency($sumTotalHotelValue)}}</td>
+                </tr>
+                @endif
 
-
-                    @if($hallEvent != null && $hallEvent->eventHallOpts != null && count($hallEvent->eventHallOpts) > 0)
-                    <tr style="border: 1px solid #ccc;">
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">Alimentos & Bebidas</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">Refeições</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ $sumHallQtdDayles }}</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ $hallEvent != null ? $hallEvent->currency->sigla : ""}}</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ formatCurrency($sumHallValueRate / count($hallEvent->eventHallOpts))}}</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ formatCurrency($sumTotalHallValue) }} </td>
-                    </tr>
-                    @endif
+                @if($abEvent != null && $abEvent->eventAbOpts != null && count($abEvent->eventAbOpts) > 0)
+                <tr style="border: 1px solid #ccc;">
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">Alimentos & Bebidas</td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">Refeições</td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ $sumABQtdDayles }}</td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ $abEvent != null ? $abEvent->currency->sigla : ""}}</td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ formatCurrency($sumABValueRate / count($abEvent->eventAbOpts))}}</td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">{{formatCurrency($sumTotalABValue) }} </td>
+                </tr>
+                @endif
 
 
-                    @if($addEvent != null && $addEvent->eventAddOpts != null && count($addEvent->eventAddOpts) > 0)
-                    <tr style="border: 1px solid #ccc;">
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">Alimentos & Bebidas</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">Refeições</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ $sumAddQtdDayles }}</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ $addEvent != null ? $addEvent->currency->sigla : ""}}</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ formatCurrency($sumAddValueRate / count($addEvent->eventAddOpts))}}</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ formatCurrency($sumTotalAddValue) }} </td>
-                    </tr>
-                    @endif
-                </tbody>
-                <tfoot class="table-footer">
-                    <tr style="background-color: #ebf8ff;">
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">IOF</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ $event->iof }}</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">Taxa de Serviço</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ $event->service_charge }}</td>
-                        <td></td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">Valor Total</td>
-                    </tr>
-                    <tr style="background-color: #f7fafc;">
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;" colspan="2">{{ formatCurrency((($sumTotalHotelValue +
+                @if($hallEvent != null && $hallEvent->eventHallOpts != null && count($hallEvent->eventHallOpts) > 0)
+                <tr style="border: 1px solid #ccc;">
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">Alimentos & Bebidas</td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">Refeições</td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ $sumHallQtdDayles }}</td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ $hallEvent != null ? $hallEvent->currency->sigla : ""}}</td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ formatCurrency($sumHallValueRate / count($hallEvent->eventHallOpts))}}</td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ formatCurrency($sumTotalHallValue) }} </td>
+                </tr>
+                @endif
+
+
+                @if($addEvent != null && $addEvent->eventAddOpts != null && count($addEvent->eventAddOpts) > 0)
+                <tr style="border: 1px solid #ccc;">
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">Alimentos & Bebidas</td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">Refeições</td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ $sumAddQtdDayles }}</td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ $addEvent != null ? $addEvent->currency->sigla : ""}}</td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ formatCurrency($sumAddValueRate / count($addEvent->eventAddOpts))}}</td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ formatCurrency($sumTotalAddValue) }} </td>
+                </tr>
+                @endif
+            </tbody>
+            <tfoot class="table-footer">
+                <tr style="background-color: #ebf8ff;">
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">IOF</td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ $event->iof }}</td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">Taxa de Serviço</td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ $event->service_charge }}</td>
+                    <td></td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">Valor Total</td>
+                </tr>
+                <tr style="background-color: #f7fafc;">
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;" colspan="2">{{ formatCurrency((($sumTotalHotelValue +
                             $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue) * $event->iof) / 100) }}</td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;" colspan="2">{{ formatCurrency((($sumTotalHotelValue +
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;" colspan="2">{{ formatCurrency((($sumTotalHotelValue +
                             $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue) * $event->service_charge) / 100) }}</td>
-                        <td></td>
-                        <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ formatCurrency($sumTotalHotelValue +
+                    <td></td>
+                    <td style="border: 1px solid #ccc; padding: 0.5rem;">{{ formatCurrency($sumTotalHotelValue +
                             $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue + ((($sumTotalHotelValue +
                             $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue) * $event->iof) / 100) +
                             ((($sumTotalHotelValue +
                             $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue) * $event->service_charge) / 100)) }}</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
+                </tr>
+            </tfoot>
+        </table>
+        <hr style="border-top: 1px solid black;">
 
-        <footer id="footer" style="bottom: 0; width: 100%;">
-            <div style="padding-top: 400px !important; display: flex; justify-content: flex-end; align-items: center; border-top: 1px solid black; margin-top: 4rem;">
-                <div style="font-size: small; font-weight: 500; color: #4b5563;">
-                    <div style="display: flex; align-items: center;">
-                        <p style="margin-right: 0.5rem;">PRAZO:</p>
-                        <hr style="border-top: 1px solid black; width: 8rem; height: 0; flex-grow: 1;">
+        <footer id="footer" style="position: absolute; bottom: 0; width: 100%;">
+            <div style="margin-top: 70px; text-align: right;">
+                <div style="width: 5.5cm; float:right">
+                    <hr style="border-top: 1px solid black; margin-top:32px;">
+                </div>
+                <p style="margin-right: 5cm;">PRAZO:</p>
+            </div>
+
+            <div style="margin-top: 70px; display: table; width: 100%;">
+                <div style="display: table-cell; text-align: center;">
+                    <div style="width: 7cm; margin: 0 auto;">
+                        <hr style="border-top: 1px solid black;">
                     </div>
+                    <p>Autorizado por</p>
+                </div>
+                <div style="display: table-cell; text-align: center;">
+                    <div style="width: 7cm; margin: 0 auto;">
+                        <hr style="border-top: 1px solid black;">
+                    </div>
+                    <p>Data da autorização</p>
                 </div>
             </div>
-            <div style="padding-top: 100px; display: flex; justify-content: center; align-items: center; gap: 2rem; padding: 2rem 0; margin-top: 6rem;">
-                <div style="width: 33.33%;">
-                    <hr style="border-top: 1px solid black;">
-                    <p style="text-align: center;">Autorizado por</p>
+
+            <div style="background-color: #1f2937; color: #fff;">
+                <div style="display: inline-block; padding: 10px; ">
+                    <p>Avenida das Americas, 3434 - Bloco 5 - Grupo 520</p>
+                    <p>Barra da Tijuca - Rio de Janeiro - 22.640-102</p>
                 </div>
-                <div style="width: 33.33%;">
-                    <hr style="border-top: 1px solid black;">
-                    <p style="text-align: center;">Data da autorização</p>
-                </div>
-            </div>
-            <div style="background-color: #1f2937; color: #d1d5db; padding: 1rem 2rem; padding-top: 1.5rem; margin-top: 6rem;">
-                <div style="max-width: 64rem; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <p>Avenida das Americas, 3434 - Bloco 5 - Grupo 520</p>
-                        <p>Barra da Tijuca - Rio de Janeiro - 22.640-102</p>
-                    </div>
-                    <div>
-                        <p>Tel.: (+55 21) 2025-7900</p>
-                        <p>www.4BTS.com.br</p>
-                    </div>
+                <div style="display: inline-block; padding: 10px; text-align: right; float: right;">
+                    <p>Tel.: (+55 21) 2025-7900</p>
+                    <p>www.4BTS.com.br</p>
                 </div>
             </div>
         </footer>
+
     </div>
 
 </body>

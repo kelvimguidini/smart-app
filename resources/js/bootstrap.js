@@ -13,7 +13,7 @@ import axios from 'axios';
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 axios.defaults.headers.common['crossDomain'] = true;
 // axios.defaults.headers.common['Access-Control-Allow-Origin'] = 'https://smart4bts.com.br';
-// axios.defaults.headers.common['Referrer-Policy'] = 'strict-origin-when-cross-origin';
+
 axios.defaults.withCredentials = true;
 window.axios = axios;
 /**
@@ -22,17 +22,17 @@ window.axios = axios;
  * allows your team to easily build robust real-time web applications.
  */
 
-import Echo from 'laravel-echo';
+// import Echo from 'laravel-echo';
 
-import Pusher from 'pusher-js';
-window.Pusher = Pusher;
+// import Pusher from 'pusher-js';
+// window.Pusher = Pusher;
 
-window.Echo = new Echo({
-    broadcaster: 'pusher',
-    key: import.meta.env.VITE_PUSHER_APP_KEY,
-    wsHost: import.meta.env.VITE_PUSHER_HOST ?? `ws-${import.meta.env.VITE_PUSHER_APP_CLUSTER}.pusher.com`,
-    wsPort: import.meta.env.VITE_PUSHER_PORT ?? 80,
-    wssPort: import.meta.env.VITE_PUSHER_PORT ?? 443,
-    forceTLS: (import.meta.env.VITE_PUSHER_SCHEME ?? 'https') === 'https',
-    enabledTransports: ['ws', 'wss'],
-});
+// window.Echo = new Echo({
+//     broadcaster: 'pusher',
+//     key: import.meta.env.VITE_PUSHER_APP_KEY,
+//     wsHost: import.meta.env.VITE_PUSHER_HOST ?? `ws-${import.meta.env.VITE_PUSHER_APP_CLUSTER}.pusher.com`,
+//     wsPort: import.meta.env.VITE_PUSHER_PORT ?? 80,
+//     wssPort: import.meta.env.VITE_PUSHER_PORT ?? 443,
+//     forceTLS: (import.meta.env.VITE_PUSHER_SCHEME ?? 'https') === 'https',
+//     enabledTransports: ['ws', 'wss'],
+// });

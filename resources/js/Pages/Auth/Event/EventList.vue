@@ -20,10 +20,9 @@ const isLoader = ref(false);
 
 const emails = ref('');
 const sendEmail = ref(true);
-const message = ref('teste');
-const provider_id = ref(0);
-const event_id = ref(0);
+const message = ref('');
 const copyMe = ref(false);
+const disabledBtn = ref(false);
 
 const deleteEvent = (id) => {
     isLoader.value = true;
@@ -38,21 +37,48 @@ const deleteEvent = (id) => {
 
 const sendProposal = (array) => {
     isLoader.value = true;
-    const formProposal = useForm({
-        download: !array['sendEmail'],
-        message: array['message'],
-        provider_id: array['provider_id'],
-        event_id: array['event_id'],
-        emails: array['emails'],
-        copyMe: array['copyMe']
-    });
 
-    formProposal.post(route('proposal-hotel'), {
-        onFinish: () => {
-            isLoader.value = false;
-        },
-    });
+    if (array['download']) {
+        // Abrir uma nova guia com a URL de download
+        const downloadUrl = route('proposal-hotel', {
+            download: array['download'],
+            provider_id: array['provider_id'],
+            event_id: array['event_id'],
+        });
+
+        const downloadWindow = window.open(downloadUrl, '_blank');
+
+        // Verificar periodicamente se a guia foi fechada
+        const checkDownloadWindow = setInterval(() => {
+            if (downloadWindow.closed) {
+                // Quando a guia for fechada, parar o loader e limpar o temporizador
+                isLoader.value = false;
+                clearInterval(checkDownloadWindow);
+            }
+        }, 1000);
+    } else {
+        const formProposal = useForm({
+
+        });
+
+        formProposal.get(route('proposal-hotel', {
+            download: array['download'],
+            provider_id: array['provider_id'],
+            event_id: array['event_id'],
+            message: array['message'],
+            emails: array['emails'],
+            copyMe: array['copyMe']
+        }), {
+            onFinish: () => {
+                isLoader.value = false;
+            },
+        });
+    }
+
+
 };
+
+
 
 const providersByEvent = (event) => {
 
@@ -65,6 +91,7 @@ const providersByEvent = (event) => {
                 name: current.hotel.name,
                 city: current.hotel.city,
                 email: current.hotel.email,
+                sended_mail: current.sended_mail,
             });
         }
     }, {});
@@ -76,6 +103,7 @@ const providersByEvent = (event) => {
                 name: current.ab.name,
                 city: current.ab.city,
                 email: current.ab.email,
+                sended_mail: current.sended_mail,
             });
         }
     }, {});
@@ -87,6 +115,7 @@ const providersByEvent = (event) => {
                 name: current.hall.name,
                 city: current.hall.city,
                 email: current.add.email,
+                sended_mail: current.sended_mail,
             });
         }
     }, {});
@@ -98,6 +127,7 @@ const providersByEvent = (event) => {
                 name: current.add.name,
                 city: current.add.city,
                 email: current.add.email,
+                sended_mail: current.sended_mail,
             });
         }
     }, {});
@@ -142,7 +172,7 @@ const providersByEvent = (event) => {
                                             <template v-for="(event, index) in events">
                                                 <tr>
                                                     <th scope="row">{{ event.id }}</th>
-                                                    <td>{{ event.customer.name }}</td>
+                                                    <td>{{ event.customer != null ? event.customer.name : ' - ' }}</td>
                                                     <td>{{ event.name }}</td>
                                                     <td>{{ event.code }}</td>
                                                     <td>{{ new Date(event.date).toLocaleDateString() }}</td>
@@ -246,21 +276,29 @@ const providersByEvent = (event) => {
                                                             </template>
                                                         </Modal>
 
-
                                                         <Modal modal-title="Envio de Proposta"
                                                             v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin')"
                                                             :ok-botton-callback="sendProposal"
-                                                            :ok-botton-callback-param="{ event_id: event.id, provider_id: prov.id, emails: prov.email, download: !sendEmail, message: message, copyMe: copyMe }"
-                                                            :ok-botton-label="isDownload ? 'Baixar PDF' : 'Enviar Proposta'"
-                                                            btn-class="btn btn-secondary btn-icon-split mr-2">
+                                                            :ok-botton-callback-param="{ event_id: event.id, provider_id: prov.id, emails: emails, download: !sendEmail, message: message, copyMe: copyMe }"
+                                                            :ok-botton-label="!sendEmail ? 'Baixar PDF' : 'Enviar Proposta'"
+                                                            :btn-class="prov.sended_mail ? 'btn btn-danger btn-icon-split mr-2' : 'btn btn-secondary btn-icon-split mr-2'">
                                                             <template v-slot:button>
-                                                                <span class="icon text-white-50">
-                                                                    <i class="fas fa-file-pdf"></i>
-                                                                </span>
-                                                                <span class="text">Proposta Hotel</span>
+                                                                <div @click="{
+                                                                    emails = event.customer != null ? event.customer.email : '';
+                                                                    sendEmail = true;
+                                                                    message = '';
+                                                                    copyMe = false;
+                                                                }">
+                                                                    <span class="icon text-white-50">
+                                                                        <i v-if="!prov.sended_mail"
+                                                                            class="fas fa-file-pdf"></i>
+                                                                        <i v-if="prov.sended_mail"
+                                                                            class="fas fa-exclamation-triangle"></i>
+                                                                    </span>
+                                                                    <span class="text">Proposta Hotel</span>
+                                                                </div>
                                                             </template>
                                                             <template v-slot:content>
-
                                                                 <div class="row">
                                                                     <div class="col">
                                                                         <div class="form-group">
@@ -284,7 +322,7 @@ const providersByEvent = (event) => {
                                                                         <div class="form-group">
                                                                             <InputLabel value="Enviar para:" />
                                                                             <TextInput type="text" class="form-control"
-                                                                                v-model="prov.email" />
+                                                                                v-model="emails" />
                                                                         </div>
 
                                                                         <div class="alert alert-warning " role="alert">
@@ -299,9 +337,8 @@ const providersByEvent = (event) => {
                                                                     <div class="col-12">
                                                                         <div class="form-group">
                                                                             <div class="form-check">
-                                                                                {{ message }}
                                                                                 <InputLabel value=" " />
-                                                                                <CKEditor v-model:content="message"
+                                                                                <CKEditor v-model:contentCode="message"
                                                                                     :height="150" />
                                                                             </div>
                                                                         </div>
@@ -312,14 +349,22 @@ const providersByEvent = (event) => {
                                                                             <div class="form-check">
                                                                                 <input class="form-check-input"
                                                                                     v-model="copyMe" type="checkbox"
-                                                                                    id="autoSizingCheck">
+                                                                                    id="check-copyme">
                                                                                 <label class="form-check-label"
-                                                                                    for="autoSizingCheck">
+                                                                                    for="check-copyme">
                                                                                     Enviar cópia para mim
                                                                                 </label>
                                                                             </div>
                                                                         </div>
                                                                     </div>
+                                                                </div>
+
+                                                                <div class="alert alert-danger " role="alert"
+                                                                    v-if="prov.sended_mail">
+                                                                    <h4
+                                                                        class="alert-heading text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                                        Já foi enviado um e-mail com essa proposta!
+                                                                    </h4>
                                                                 </div>
 
                                                             </template>
