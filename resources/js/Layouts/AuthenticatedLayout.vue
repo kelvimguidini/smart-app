@@ -33,8 +33,10 @@ import '@/vendor/datatables/dataTables.bootstrap4.min.js';
 
 import '../vendor/datatables/dataTables.bootstrap4.min.css';
 
+import '@/vendor/crypto-js.min.js';
 
 import Menu from '@/Components/Menu.vue';
+import NavBarFake from '@/Components/NavBarFake.vue';
 import NavBar from '@/Components/NavBar.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
 import { Link } from '@inertiajs/inertia-vue3';
@@ -92,61 +94,12 @@ const menuItem = [
                 active: route().current('crd'),
                 role: 'crd_admin'
             },
-        ],
-        divider: true
-    },
-    {
-        name: 'Cadastro p/ Fornecedor',
-        icon: 'fa fa-hotel',
-        isItem: false,
-        collapseHeader: 'Auxiliares de Fornecedor',
-        subMenu: [
             {
                 link: route().current('broker') ? '' : route('broker'),
                 name: 'Broker',
                 active: route().current('broker'),
                 role: ['broker_admin']
-            }
-        ],
-    },
-    {
-        name: 'Cadastro p/ Hotel',
-        icon: 'fa fa-bed',
-        isItem: false,
-        collapseHeader: 'Auxiliares de Hotel',
-        subMenu: [
-            {
-                link: route().current('apto') ? '' : route('apto'),
-                name: 'Apartamento',
-                active: route().current('apto'),
-                role: ['apto_admin']
             },
-            {
-                link: route().current('category') ? '' : route('category'),
-                name: 'Categoria',
-                active: route().current('category'),
-                role: ['category_admin']
-            },
-            {
-                link: route().current('regime') ? '' : route('regime'),
-                name: 'Regime',
-                active: route().current('regime'),
-                role: ['regime_admin']
-            },
-            {
-                link: route().current('purpose') ? '' : route('purpose'),
-                name: 'Propósito',
-                active: route().current('purpose'),
-                role: ['purpose_admin']
-            },
-        ],
-    },
-    {
-        name: 'Cadastros p/ A&B',
-        icon: 'fa fa-utensils',
-        isItem: false,
-        collapseHeader: 'Auxiliares de A&B',
-        subMenu: [
             {
                 link: route().current('local') ? '' : route('local'),
                 name: 'Local',
@@ -165,14 +118,6 @@ const menuItem = [
                 active: route().current('service-type'),
                 role: ['service_type_admin']
             },
-        ],
-    },
-    {
-        name: 'Cadastros p/ Salão',
-        icon: 'fa fa-warehouse',
-        isItem: false,
-        collapseHeader: 'Auxiliares de Salão',
-        subMenu: [
             {
                 link: route().current('service-hall') ? '' : route('service-hall'),
                 name: 'Serviço',
@@ -185,14 +130,6 @@ const menuItem = [
                 active: route().current('purpose-hall'),
                 role: ['purpose_hall_admin']
             },
-        ]
-    },
-    {
-        name: 'Cadastros p/ Adicional',
-        icon: 'fa fa-vest',
-        isItem: false,
-        collapseHeader: 'Auxiliares de Adicional',
-        subMenu: [
             {
                 link: route().current('service-add') ? '' : route('service-add'),
                 name: 'Serviço',
@@ -214,13 +151,24 @@ const menuItem = [
         ]
     },
     {
-        link: route().current('hotel') ? '' : route('hotel'),
         name: 'Fornecedor',
         icon: 'fa fa-building',
-        active: route().current('hotel'),
-        isItem: true,
-        role: ['event_admin', 'hotel_operator'],
-        divider: true
+        isItem: false,
+        collapseHeader: 'Fornecedores',
+        subMenu: [
+            {
+                link: route().current('hotel') ? '' : route('hotel'),
+                name: 'Hotel',
+                active: route().current('hotel'),
+                role: ['event_admin', 'hotel_operator'],
+            },
+            {
+                link: route().current('transport') ? '' : route('transport'),
+                name: 'Transporte',
+                active: route().current('transport'),
+                role: ['event_admin', 'land_operator']
+            }
+        ],
     },
     {
         name: 'Eventos',
@@ -271,8 +219,9 @@ onMounted(() => {
 
             <!-- Main Content -->
             <div id="content">
-
                 <NavBar></NavBar>
+                <NavBarFake>
+                </NavBarFake>
 
                 <!-- Begin Page Content -->
                 <div class="container-fluid">

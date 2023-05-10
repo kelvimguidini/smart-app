@@ -87,13 +87,7 @@
         </div>
 
         <div class="body">
-            <p>Prezado(a),</p>
-
             <p>{!! $body !!}</p>
-
-
-
-
 
 
             {{ __('Regards') }},<br>

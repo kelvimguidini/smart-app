@@ -5,13 +5,13 @@ use App\Http\Controllers\Auth\AddController;
 use App\Http\Controllers\Auth\AptoController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\BrokerController;
+use App\Http\Controllers\Auth\BudgetController;
 use App\Http\Controllers\Auth\CategoryController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\CustomerController;
 use App\Http\Controllers\Auth\CrdController;
 use App\Http\Controllers\Auth\CurrencyController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
-use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\EventController;
 use App\Http\Controllers\Auth\FrequencyController;
 use App\Http\Controllers\Auth\HallController;
@@ -70,6 +70,15 @@ Route::middleware(['guest', 'cors'])->group(function () {
 
         return app()->make('App\Http\Controllers\HotelController')->mostrarPagina($parameters['event'], $parameters['provider']);
     });
+});
+
+Route::middleware(['cors'])->group(function () {
+
+    Route::get('budget/{token}/{prove?}/{user?}', [BudgetController::class, 'budget'])
+        ->name('budget');
+
+    Route::post('budget-save', [BudgetController::class, 'store'])
+        ->name('budget-save');
 });
 
 Route::middleware(['auth', 'cors'])->group(function () {
@@ -354,9 +363,18 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
 
     //ORÇAMENTO
-    Route::get('budget/{provider_id}/{event_id}', [HotelController::class, 'budget'])
-        ->name('budget');
+    Route::post('budget-prove', [BudgetController::class, 'prove'])
+        ->name('budget-prove');
+
+    Route::get('create-link/{download}/{provider_id}/{event_id}/{link}/{emails?}/{copyMe?}/{message?}/{attachment?}/{linkEmail?}', [BudgetController::class, 'createLink'])
+        ->name('create-link');
 
     Route::get('proposal-hotel/{download}/{provider_id}/{event_id}/{emails?}/{copyMe?}/{message?}', [HotelController::class, 'proposalPdf'])
         ->name('proposal-hotel');
+    //FIM HOTEL
+
+    //TRANSPORTE
+    Route::get('transport', [ProviderTransportController::class, 'create'])
+        ->name('transport');
+    //FIM TRANSPORTE
 });

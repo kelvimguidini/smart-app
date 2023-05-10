@@ -9,7 +9,7 @@ class EventHall extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['event_id', 'hall_id', 'currency_id', 'iss_percent', 'service_percent', 'iva_percent', 'invoice', 'internal_observation', 'customer_observation'];
+    protected $fillable = ['event_id', 'hall_id', 'currency_id', 'iss_percent', 'service_percent', 'iva_percent', 'invoice', 'internal_observation', 'customer_observation', 'sended_mail_link', 'token_budget'];
     protected $table = 'event_hall';
 
 
@@ -112,6 +112,20 @@ class EventHall extends Model
      */
     protected $customer_observation = 'customer_observation';
 
+    /**
+     * The primary key associated with the table.
+     *
+     * @var int
+     */
+    protected $sended_mail_link = 'sended_mail_link';
+
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var int
+     */
+    protected $token_budget = 'token_budget';
 
     public function event()
     {
@@ -131,5 +145,10 @@ class EventHall extends Model
     public function eventHallOpts()
     {
         return $this->hasMany(EventHallOpt::class, 'event_hall_id', 'id');
+    }
+
+    public function providerBudget()
+    {
+        return $this->hasMany(ProviderBudget::class, 'event_hall_id', 'id');
     }
 }

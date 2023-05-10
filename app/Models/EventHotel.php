@@ -9,7 +9,7 @@ class EventHotel extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['event_id', 'hotel_id', 'currency_id', 'iss_percent', 'service_percent', 'iva_percent', 'invoice', 'internal_observation', 'customer_observation'];
+    protected $fillable = ['event_id', 'hotel_id', 'currency_id', 'iss_percent', 'service_percent', 'iva_percent', 'invoice', 'internal_observation', 'customer_observation', 'sended_mail_link', 'token_budget'];
     protected $table = 'event_hotel';
 
 
@@ -87,6 +87,21 @@ class EventHotel extends Model
     protected $customer_observation = 'customer_observation';
 
 
+    /**
+     * The primary key associated with the table.
+     *
+     * @var int
+     */
+    protected $sended_mail_link = 'sended_mail_link';
+
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var int
+     */
+    protected $token_budget = 'token_budget';
+
     public function event()
     {
         return $this->hasOne(Event::class, 'id', 'event_id');
@@ -105,5 +120,10 @@ class EventHotel extends Model
     public function eventHotelsOpt()
     {
         return $this->hasMany(EventHotelOpt::class);
+    }
+
+    public function providerBudget()
+    {
+        return $this->hasMany(ProviderBudget::class, 'event_hotel_id', 'id');
     }
 }

@@ -175,11 +175,11 @@ if ($addEvent != null) {
         <div style="margin: 0 auto 2.5rem;">
             <header class="header">
                 <div style="display: inline-block;vertical-align: middle;">
-                    <img style="width: 4rem;height: 4rem;margin-right: 25px;vertical-align: middle;left: 1;" src="{{ asset('storage/logos/logo.png') }}" alt="4BTS">
+                    <img style="width: 4rem;height: 4rem;margin-right: 25px;vertical-align: middle;left: 1;" src="/storage/logos/logo.png" alt="4BTS">
 
                     <div style="display: inline-block;vertical-align: middle;">
-                        <h1 style="font-weight: bold; font-size: 1.25rem; margin-bottom: 0.25rem;">Evento: teste</h1>
-                        <p style="color: #6B7280; font-size: 1rem; margin-bottom: 0;">Hotel: windsor</p>
+                        <h1 style="font-weight: bold; font-size: 1.25rem; margin-bottom: 0.25rem;">Evento: {{ $event->name }}</h1>
+                        <p style="color: #6B7280; font-size: 1rem; margin-bottom: 0;">Hotel: {{ $provider->name }}</p>
                     </div>
                 </div>
                 <div style="display: inline-block;vertical-align: middle;right: 16px;position: absolute;">
@@ -256,7 +256,7 @@ if ($addEvent != null) {
             @if($abEvent != null && $abEvent->eventAbOpts != null && count($abEvent->eventAbOpts) > 0)
             <table style="font-size: 10pt; max-width: 19cm; width: 100%; border-collapse: collapse; border: 1px solid gray;margin-top: 27px; page-break-inside: avoid;">
                 <thead style="display: table-header-group;">
-                    <tr style="background-image: linear-gradient(to right, <?php echo hexToRgb($event->customer->color, 0.7) ?>, <?php echo hexToRgb($event->customer->color, 0.3) ?>); color: white;">
+                    <tr style="background-color: <?php echo hexToRgb($event->customer->color, 0.5) ?>">
                         <th colspan="10" style="padding: 0.5rem; text-align: center;">Alimentos & Bebidas</th>
                     </tr>
                     <tr style="background-color: #f7fafc;">
@@ -317,7 +317,7 @@ if ($addEvent != null) {
             @if($hallEvent != null && $hallEvent->eventHallOpts != null && count($hallEvent->eventHallOpts) > 0)
             <table style="font-size: 10pt; max-width: 19cm; width: 100%; border-collapse: collapse; border: 1px solid gray;margin-top: 27px; page-break-inside: avoid;">
                 <thead style="display: table-header-group;">
-                    <tr style="background-image: linear-gradient(to right, <?php echo hexToRgb($event->customer->color, 0.7) ?>, <?php echo hexToRgb($event->customer->color, 0.3) ?>); color: white;">
+                    <tr style="background-color: <?php echo hexToRgb($event->customer->color, 0.5) ?>">
                         <th colspan="11" style="padding: 0.5rem; text-align: center;">Salões & Eventos</th>
                     </tr>
                     <tr style="background-color: #f7fafc;">
@@ -381,7 +381,7 @@ if ($addEvent != null) {
             @if($addEvent != null && $addEvent->eventAddOpts != null && count($addEvent->eventAddOpts) > 0)
             <table style="font-size: 10pt; max-width: 19cm; width: 100%; border-collapse: collapse; border: 1px solid gray;margin-top: 27px; page-break-inside: avoid;">
                 <thead style="display: table-header-group;">
-                    <tr style="background-image: linear-gradient(to right, <?php echo hexToRgb($event->customer->color, 0.7) ?>, <?php echo hexToRgb($event->customer->color, 0.3) ?>); color: white;">
+                    <tr style="background-color: <?php echo hexToRgb($event->customer->color, 0.5) ?>">
                         <th colspan="11" style="padding: 0.5rem; text-align: center;">Adicionais</th>
                     </tr>
                     <tr style="background-color: #f7fafc;">

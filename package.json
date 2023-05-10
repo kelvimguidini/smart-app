@@ -19,7 +19,10 @@
         "laravel-echo": "^1.14.2",
         "lodash": "^4.17.21",
         "pusher-js": "^7.6.0",
+        "uuid": "^9.0.0",
+        "v-money": "^0.8.1",
         "vue-avatar-cropper": "^6.0.9",
+        "vue-the-mask": "^0.11.1",
         "vue3-datepicker": "^0.3.4"
     },
     "scripts": {

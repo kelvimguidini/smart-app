@@ -31,6 +31,10 @@ const props = defineProps({
         type: Boolean,
         default: false
     },
+    btnBlank: {
+        type: String,
+        default: ''
+    },
     url: {
         type: String,
         default: ''
@@ -66,9 +70,8 @@ const id = 'modal-' + Math.floor(Date.now() * Math.random()).toString(36)
                         v-on:click="okBottonCallback(okBottonCallbackParam)" data-dismiss="modal">
                         {{ okBottonLabel }}
                     </button>
-                    <Link v-on:click="okBottonCallback(okBottonCallbackParam)" data-dismiss="modal" v-if="btnIsLink"
-                        class="btn btn-primary" :href="url">{{
-                            okBottonLabel }}
+                    <Link data-dismiss="modal" v-if="btnIsLink" class="btn btn-primary" :target="btnBlank ? '_blank' : ''"
+                        :href="url">{{ okBottonLabel }}
                     </Link>
                 </div>
             </div>

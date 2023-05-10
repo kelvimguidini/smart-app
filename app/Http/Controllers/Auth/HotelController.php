@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use PDF;
 
 class HotelController extends Controller
@@ -176,88 +177,6 @@ class HotelController extends Controller
         return redirect()->back()->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
     }
 
-
-    /**
-     * Display the registration view.
-     *
-     * @return \Inertia\Response
-     */
-    public function budget(Request $request)
-    {
-        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator') && !Gate::allows('land_operator')) {
-            abort(403);
-        }
-        $provider = $request->provider_id;
-        $event = $request->event_id;
-
-        $eventBank = Event::with('customer')->with([
-            'event_hotels.hotel' => function ($query) use ($provider) {
-                $query->where('id', '=', $provider);
-            },
-            'event_abs.ab' => function ($query) use ($provider) {
-                $query->where('id', '=', $provider);
-            },
-            'event_halls.hall' => function ($query) use ($provider) {
-                $query->where('id', '=', $provider);
-            },
-            'event_adds.add' => function ($query) use ($provider) {
-                $query->where('id', '=', $provider);
-            },
-
-            'event_hotels.eventHotelsOpt' => function ($query) use ($provider) {
-                $query->whereHas('event_hotel', function ($query) use ($provider) {
-                    $query->where('hotel_id', '=', $provider);
-                });
-            },
-            'event_abs.eventAbOpts' => function ($query) use ($provider) {
-                $query->whereHas('event_ab', function ($query) use ($provider) {
-                    $query->where('ab_id', '=', $provider);
-                });
-            },
-            'event_halls.eventHallOpts' => function ($query) use ($provider) {
-                $query->whereHas('event_hall', function ($query) use ($provider) {
-                    $query->where('hall_id', '=', $provider);
-                });
-            },
-            'event_adds.eventAddOpts' => function ($query) use ($provider) {
-                $query->whereHas('event_add', function ($query) use ($provider) {
-                    $query->where('add_id', '=', $provider);
-                });
-            },
-        ])->find($event);
-
-        $providers = collect();
-
-        if ($event->event_hotels->isNotEmpty()) {
-            $providers = $providers->concat($event->event_hotels->pluck('hotel'));
-        }
-
-        if ($event->event_abs->isNotEmpty()) {
-            $providers = $providers->concat($event->event_abs->pluck('ab'));
-        }
-
-        if ($event->event_halls->isNotEmpty()) {
-            $providers = $providers->concat($event->event_halls->pluck('hall'));
-        }
-
-        if ($event->event_adds->isNotEmpty()) {
-            $providers = $providers->concat($event->event_adds->pluck('add'));
-        }
-
-        $providerBank = $providers->filter()->unique()->values()->first();
-
-        $parameters = compact('event', 'provider');
-        $parametersCripts = Crypt::encryptString(json_encode($parameters));
-        $url = route('new-event', ['params' => $parametersCripts]);
-
-
-        return Inertia::render('Auth/Event/Budget', [
-            'event' => $eventBank,
-            'provider' => $providerBank,
-            'link' => $url
-        ]);
-    }
-
     public function proposalPdf(Request $request)
     {
         if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator') && !Gate::allows('land_operator')) {
@@ -335,15 +254,15 @@ class HotelController extends Controller
         $pdf->render();
         // Retorna o PDF como um arquivo de download
         if ($request->download == "true") {
-            return $pdf->stream('Orçamento-hotel.pdf');
+            return $pdf->stream('Proposta-hotel.pdf');
         } else {
 
             $user = User::find(Auth::user()->id);
             $data = [
                 'body' => $request->message != null ? urldecode($request->message) : "",
                 'hasAttachment' => true,
-                'signature' => $request->signature != null ? $request->signature : "",
-                'subject' => "Orçamento de hotel"
+                'signature' => $user->signature != null ? $user->signature : "",
+                'subject' => "Proposta de hotel"
             ];
             $send = Mail::to(explode(";", $request->emails));
 
@@ -351,7 +270,7 @@ class HotelController extends Controller
                 $send->cc($user->email);
             }
 
-            $send->send(new PdfEmail($pdf->output(), 'Orçamento-hotel.pdf', $data, "Orçamento de hotel"));
+            $send->send(new PdfEmail($pdf->output(), 'Proposta-hotel.pdf', $data, "Proposta de hotel"));
 
             DB::table('email_log')->insert(
                 array(
@@ -359,7 +278,9 @@ class HotelController extends Controller
                     'provider_id' => $provider,
                     'sender_id' => $user->id,
                     'body' => urldecode($request->message),
-                    'attachment' => $pdf->output()
+                    'attachment' => $pdf->output(),
+                    'to' => explode(";", $request->emails),
+                    'type' => 'proposal'
                 )
             );
 
@@ -404,8 +325,10 @@ class HotelController extends Controller
     {
         $options = new Options();
         $options->set('isRemoteEnabled', true);
-        $options->set('acceptedMediaTypes',  ['image/jpeg', 'image/png']);
-        $options->set('chroot', realpath($_SERVER['DOCUMENT_ROOT']));
+
+        $path = base_path('public');
+
+        $options->set('chroot', $path);
 
         $pdf = new Dompdf($options);
 

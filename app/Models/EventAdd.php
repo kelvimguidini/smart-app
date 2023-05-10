@@ -9,7 +9,7 @@ class EventAdd extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['event_id', 'add_id', 'currency_id', 'iss_percent', 'service_percent', 'iva_percent', 'invoice', 'internal_observation', 'customer_observation'];
+    protected $fillable = ['event_id', 'add_id', 'currency_id', 'iss_percent', 'service_percent', 'iva_percent', 'invoice', 'internal_observation', 'customer_observation', 'sended_mail_link', 'token_budget'];
     protected $table = 'event_add';
 
 
@@ -27,6 +27,21 @@ class EventAdd extends Model
      * @var int
      */
     protected $event_id = 'event_id';
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var int
+     */
+    protected $sended_mail_link = 'sended_mail_link';
+
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var int
+     */
+    protected $token_budget = 'token_budget';
 
 
     /**
@@ -109,5 +124,10 @@ class EventAdd extends Model
     public function eventAddOpts()
     {
         return $this->hasMany(EventAddOpt::class, 'event_add_id', 'id');
+    }
+
+    public function providerBudget()
+    {
+        return $this->hasMany(ProviderBudget::class, 'event_add_id', 'id');
     }
 }

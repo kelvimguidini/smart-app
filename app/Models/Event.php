@@ -155,17 +155,17 @@ class Event extends Model
         return $this->hasOne(Customer::class, 'id', 'customer_id');
     }
 
-    public function hotel_operator()
+    public function hotelOperator()
     {
         return $this->hasOne(User::class, 'id', 'hotel_operator');
     }
 
-    public function air_operator()
+    public function airOperator()
     {
         return $this->hasOne(User::class, 'id', 'air_operator');
     }
 
-    public function land_operator()
+    public function landOperator()
     {
         return $this->hasOne(User::class, 'id', 'land_operator');
     }
@@ -174,7 +174,6 @@ class Event extends Model
     {
         return $this->hasMany(EventHotel::class, 'event_id', 'id');
     }
-
 
     public function event_abs()
     {

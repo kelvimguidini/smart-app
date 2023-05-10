@@ -24,14 +24,13 @@ export default defineConfig({
         noExternal: ['@inertiajs/server'],
     },
     server: {
-        host: 'https://smart4bts.com.br',
+        // host: 'https://smart4bts.com.br',
+        host: 'local.api-smart.com',
         watch: {
             // Recarrega a página sempre que um arquivo for alterado
             usePolling: true,
             interval: 100,
-            // Função de callback que será executada sempre que um arquivo for alterado
-            // Essa função pode ser usada para realizar uma ação específica
-            // Neste caso, estamos recarregando a página
+
             onWatched: (event, path) => {
                 server.ws.send({ type: 'full-reload' })
             },
@@ -40,9 +39,10 @@ export default defineConfig({
         hmr: true,
         proxy: {
             "/": {
-                target: "https://smart4bts.com.br",
+                target: "local.api-smart.com",
+                // target: "https://smart4bts.com.br",
             }
         },
-        // https: true,
+        https: true,
     },
 });

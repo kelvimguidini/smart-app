@@ -53,6 +53,11 @@ class AuthServiceProvider extends ServiceProvider
                 }
             }
 
+
+            Gate::define('save_budget', function (User $user, $id) {
+                return $user->id == $id;
+            });
+
             Gate::define('profile_edit', function (User $user, $id) {
                 return $user->id === $id;
             });

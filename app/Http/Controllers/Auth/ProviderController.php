@@ -236,8 +236,6 @@ class ProviderController extends Controller
         return redirect()->route('event-edit',  ['id' => $request->event_id, 'tab' => $tab, 'ehotel' => $provider->id])->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
     }
 
-
-
     /**
      * Display the registration view.
      *
