@@ -62,20 +62,9 @@ Admin
 
 
 
-
 ####### Executar ao commitar
-php artisan migrate --path=database/migrations/2023_04_13_011959_add_columns_to_provider_event_table.php
-
-php artisan migrate --path=database/migrations/2023_04_13_012038_add_columns_to_email_log_table.php
-
-php artisan migrate --path=database/migrations/2023_04_15_235223_create_provider_budget_table.php
-
-php artisan migrate --path=database/migrations/2023_04_19_005915_create_provider_budget_item_table.php
-
-php artisan migrate --path=database/migrations/2023_04_23_113450_add_columns_acepted.php
-
-php artisan migrate --path=database/migrations/2023_05_01_182535_add_evaluated_and_approved_to_provider_budget_table.php
 
 php artisan db:seed --class=IncrementalPermissionsSeeder
+php artisan db:seed --class=TransportSeeder
 
 enviar node_module

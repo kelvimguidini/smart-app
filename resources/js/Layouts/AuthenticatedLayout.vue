@@ -96,7 +96,7 @@ const menuItem = [
             },
             {
                 link: route().current('broker') ? '' : route('broker'),
-                name: 'Broker',
+                name: 'Broker Hotel',
                 active: route().current('broker'),
                 role: ['broker_admin']
             },
@@ -148,27 +148,43 @@ const menuItem = [
                 active: route().current('frequency'),
                 role: ['frequency_admin']
             },
-        ]
-    },
-    {
-        name: 'Fornecedor',
-        icon: 'fa fa-building',
-        isItem: false,
-        collapseHeader: 'Fornecedores',
-        subMenu: [
             {
-                link: route().current('hotel') ? '' : route('hotel'),
-                name: 'Hotel',
-                active: route().current('hotel'),
-                role: ['event_admin', 'hotel_operator'],
+                link: route().current('broker-trans') ? '' : route('broker-trans'),
+                name: 'Broker Transporte',
+                active: route().current('broker-trans'),
+                role: ['broker_trans_admin']
             },
             {
-                link: route().current('transport') ? '' : route('transport'),
-                name: 'Transporte',
-                active: route().current('transport'),
-                role: ['event_admin', 'land_operator']
+                link: route().current('brand') ? '' : route('brand'),
+                name: 'Marca',
+                active: route().current('brand'),
+                role: ['brand_admin']
+            },
+            {
+                link: route().current('vehicle') ? '' : route('vehicle'),
+                name: 'Veículo',
+                active: route().current('vehicle'),
+                role: ['vehicle_admin']
+            },
+            {
+                link: route().current('car-model') ? '' : route('car-model'),
+                name: 'Modelo de Carro',
+                active: route().current('car-model'),
+                role: ['car_model_admin']
+            },
+            {
+                link: route().current('transport-service') ? '' : route('transport-service'),
+                name: 'Serviço de Transporte',
+                active: route().current('transport-service'),
+                role: ['transport_service_admin']
+            },
+            {
+                link: route().current('hotel') ? '' : route('hotel'),
+                name: 'Fornecedor',
+                active: route().current('hotel'),
+                role: ['admin_provider'],
             }
-        ],
+        ]
     },
     {
         name: 'Eventos',

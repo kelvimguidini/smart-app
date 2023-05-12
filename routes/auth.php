@@ -4,8 +4,11 @@ use App\Http\Controllers\Auth\ABController;
 use App\Http\Controllers\Auth\AddController;
 use App\Http\Controllers\Auth\AptoController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\BrandController;
 use App\Http\Controllers\Auth\BrokerController;
+use App\Http\Controllers\Auth\BrokerTransportController;
 use App\Http\Controllers\Auth\BudgetController;
+use App\Http\Controllers\Auth\CarModelController;
 use App\Http\Controllers\Auth\CategoryController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\CustomerController;
@@ -31,6 +34,8 @@ use App\Http\Controllers\Auth\ServiceAddController;
 use App\Http\Controllers\Auth\ServiceController;
 use App\Http\Controllers\Auth\ServiceHallController;
 use App\Http\Controllers\Auth\ServiceTypeController;
+use App\Http\Controllers\Auth\TransportServiceController;
+use App\Http\Controllers\Auth\VehicleController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Route;
@@ -190,6 +195,56 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     Route::delete('broker-delete', [BrokerController::class, 'delete'])
         ->name('broker-delete');
+
+
+    Route::get('broker-trans', [BrokerTransportController::class, 'create'])
+        ->name('broker-trans');
+
+    Route::post('broker-trans-save', [BrokerTransportController::class, 'store'])
+        ->name('broker-trans-save');
+
+    Route::delete('broker-trans-delete', [BrokerTransportController::class, 'delete'])
+        ->name('broker-trans-delete');
+
+
+    Route::get('vehicle', [VehicleController::class, 'create'])
+        ->name('vehicle');
+
+    Route::post('vehicle-save', [VehicleController::class, 'store'])
+        ->name('vehicle-save');
+
+    Route::delete('vehicle-delete', [VehicleController::class, 'delete'])
+        ->name('vehicle-delete');
+
+
+    Route::get('brand', [BrandController::class, 'create'])
+        ->name('brand');
+
+    Route::post('brand-save', [BrandController::class, 'store'])
+        ->name('brand-save');
+
+    Route::delete('brand-delete', [BrandController::class, 'delete'])
+        ->name('brand-delete');
+
+
+    Route::get('car-model', [CarModelController::class, 'create'])
+        ->name('car-model');
+
+    Route::post('car-model-save', [CarModelController::class, 'store'])
+        ->name('car-model-save');
+
+    Route::delete('car-model-delete', [CarModelController::class, 'delete'])
+        ->name('car-model-delete');
+
+
+    Route::get('transport-service', [TransportServiceController::class, 'create'])
+        ->name('transport-service');
+
+    Route::post('transport-service-save', [TransportServiceController::class, 'store'])
+        ->name('transport-service-save');
+
+    Route::delete('transport-service-delete', [TransportServiceController::class, 'delete'])
+        ->name('transport-service-delete');
 
 
 
@@ -372,9 +427,4 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::get('proposal-hotel/{download}/{provider_id}/{event_id}/{emails?}/{copyMe?}/{message?}', [HotelController::class, 'proposalPdf'])
         ->name('proposal-hotel');
     //FIM HOTEL
-
-    //TRANSPORTE
-    Route::get('transport', [ProviderTransportController::class, 'create'])
-        ->name('transport');
-    //FIM TRANSPORTE
 });

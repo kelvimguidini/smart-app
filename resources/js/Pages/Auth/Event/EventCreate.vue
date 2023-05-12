@@ -13,11 +13,13 @@ import ListHotelFull from '@/Components/ListHotelFull.vue';
 import ListABFull from '@/Components/ListABFull.vue';
 import ListHallFull from '@/Components/ListHallFull.vue';
 import ListAddFull from '@/Components/ListAddFull.vue';
+import ListTransportFull from '@/Components/ListTransportFull.vue';
 import FormProvider from '@/Components/FormProvider.vue';
 import FormProviderHotelOpt from '@/Components/FormProviderHotelOpt.vue';
 import FormProviderABOpt from '@/Components/FormProviderABOpt.vue';
 import FormProviderHallOpt from '@/Components/FormProviderHallOpt.vue';
 import FormProviderAddOpt from '@/Components/FormProviderAddOpt.vue';
+import FormProviderTransportOpt from '@/Components/FormProviderTransportOpt.vue';
 
 const props = defineProps({
     crds: {
@@ -47,6 +49,14 @@ const props = defineProps({
     eventHotel: {
         type: Object,
         default: {},
+    },
+    eventTransport: {
+        type: Object,
+        default: {},
+    },
+    eventTransports: {
+        type: Array,
+        default: [],
     },
     eventABs: {
         type: Array,
@@ -190,6 +200,11 @@ const mount = () => {
         $("#tabs-add").tabs("destroy");
     }
     $("#tabs-add").tabs();
+
+    if ($('#tabs-transport').hasClass('ui-transport')) {
+        $("#tabs-transport").tabs("destroy");
+    }
+    $("#tabs-transport").tabs();
 }
 
 onMounted(() => {
@@ -406,6 +421,7 @@ const formProviderHotelRef = ref(null);
 const formProviderAbRef = ref(null);
 const formProviderHallRef = ref(null);
 const formProviderAddRef = ref(null);
+const formProviderTransportRef = ref(null);
 const newEventProv = (type) => {
     switch (props.type) {
         case 'hotel':
@@ -426,6 +442,11 @@ const newEventProv = (type) => {
         case 'add':
             if (formProviderAddRef.value) {
                 formProviderAddRef.value.newEventProvider();
+            }
+            break;
+        case 'add':
+            if (formProviderTransportRef.value) {
+                formProviderTransportRef.value.newEventProvider();
             }
             break;
     }
@@ -458,18 +479,23 @@ const newEventProv = (type) => {
 
                 <li class="nav-item">
                     <a class="nav-link"
-                        v-bind:class="{ 'disabled': event == null || !$page.props.auth.permissions.some((p) => p.name === 'land_operator' || p.name === 'event_admin') }"
+                        v-bind:class="{ 'disabled': event == null || !$page.props.auth.permissions.some((p) => p.name === 'hotel_operator' || p.name === 'event_admin') }"
                         href="#aandb">A&B</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link"
-                        v-bind:class="{ 'disabled': event == null || !$page.props.auth.permissions.some((p) => p.name === 'land_operator' || p.name === 'event_admin') }"
+                        v-bind:class="{ 'disabled': event == null || !$page.props.auth.permissions.some((p) => p.name === 'hotel_operator' || p.name === 'event_admin') }"
                         href="#hall">Salões</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link"
-                        v-bind:class="{ 'disabled': event == null || !$page.props.auth.permissions.some((p) => p.name === 'land_operator' || p.name === 'event_admin') }"
+                        v-bind:class="{ 'disabled': event == null || !$page.props.auth.permissions.some((p) => p.name === 'hotel_operator' || p.name === 'event_admin') }"
                         href="#additional">Adicionais</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link"
+                        v-bind:class="{ 'disabled': event == null || !$page.props.auth.permissions.some((p) => p.name === 'land_operator' || p.name === 'event_admin') }"
+                        href="#transport">Transporte</a>
                 </li>
             </ul>
 
@@ -701,7 +727,7 @@ const newEventProv = (type) => {
             <!-- FIM ABA HOTEL -->
 
             <!-- ABA A&B -->
-            <div v-if="event != null && $page.props.auth.permissions.some((p) => p.name === 'land_operator' || p.name === 'event_admin')"
+            <div v-if="event != null && $page.props.auth.permissions.some((p) => p.name === 'hotel_operator' || p.name === 'event_admin')"
                 id="aandb">
                 <div id="tabs-aandb">
 
@@ -751,7 +777,7 @@ const newEventProv = (type) => {
             <!-- FIM ABA A&B -->
 
             <!-- ABA HALL -->
-            <div v-if="event != null && $page.props.auth.permissions.some((p) => p.name === 'land_operator' || p.name === 'event_admin')"
+            <div v-if="event != null && $page.props.auth.permissions.some((p) => p.name === 'hotel_operator' || p.name === 'event_admin')"
                 id="hall">
 
                 <div id="tabs-hall">
@@ -802,7 +828,7 @@ const newEventProv = (type) => {
             </div>
             <!-- FIM ABA HALL -->
 
-            <div v-if="event != null && $page.props.auth.permissions.some((p) => p.name === 'land_operator' || p.name === 'event_admin')"
+            <div v-if="event != null && $page.props.auth.permissions.some((p) => p.name === 'hotel_operator' || p.name === 'event_admin')"
                 id="additional">
 
                 <div id="tabs-add">
@@ -851,6 +877,61 @@ const newEventProv = (type) => {
 
                 </div>
             </div>
+
+
+            <!-- ABA TRANSPORTE -->
+            <div v-if="event != null && $page.props.auth.permissions.some((p) => p.name === 'land_operator' || p.name === 'event_admin')"
+                id="transport">
+                <div id="tabs-transport">
+
+                    <ul class="nav nav-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#table-trans">Lista</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#form-trans">Cadastro Transporte</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" v-bind:class="{ 'disabled': !(eventHotel != null && eventHotel.id > 0) }"
+                                href="#trans-opt">Cadastro Detalhe</a>
+                        </li>
+                    </ul>
+                    <div id="table-trans">
+                        <ListTransportFull :event-hotel="eventHotel" :event-hotels="eventHotels" :edit-opt="editOpt"
+                            :duplicate="duplicate" :delete-opt="deleteOpt" :mount-call-back="mount"
+                            :new-event-hotel="newEventProv"></ListTransportFull>
+                    </div>
+
+                    <div id="form-hotel" class="card mb-4 py-3 border-left-primary">
+                        <div class="card-body">
+                            <FormProvider :event-provider="eventTransport" :currencies="currencies"
+                                :providers="providers.filter(obj => obj.is_transport)" type="transport"
+                                :select-call-back="selectHotel" :event-id="event.id" :mount-call-back="mount"
+                                ref="formProviderTransportRef">
+                            </FormProvider>
+                        </div>
+                    </div>
+
+                    <div v-if="eventHotel != null && eventHotel.id > 0" id="hotel-opt">
+                        <div class="row">
+                            <div class="col">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <FormProviderTransportOpt :event-hotel="eventHotel" :brokers="brokers"
+                                            :regimes="regimes" :purposes="purposes" :cats-hotel="catsHotel"
+                                            :aptos-hotel="aptosHotel" :select-hotel-call-back="selectHotel"
+                                            ref="formProviderOptRef" :hotel-selected="hotelSelected">
+                                        </FormProviderTransportOpt>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <!-- FIM ABA TRANSPORTE -->
 
         </div>
     </AuthenticatedLayout>

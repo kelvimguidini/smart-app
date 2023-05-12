@@ -56,6 +56,7 @@ const form = useForm({
 
 const submit = () => {
     form.type = props.type;
+    form.event_id = props.eventId;
     form.post(route('hotel-event-save'), {
         onSuccess: (id) => {
             selectProvider(form.provider_id);
@@ -72,6 +73,9 @@ const submit = () => {
                     break;
                 case 'add':
                     $('#tabs-add').tabs({ active: 2 });
+                    break;
+                case 'transport':
+                    $('#tabs-transport').tabs({ active: 2 });
                     break;
             }
         },
@@ -142,6 +146,10 @@ const edit = () => {
                 selectProvider(props.eventProvider.add_id);
                 $('#hotel-select' + props.type).val(props.eventProvider.add_id).trigger('change');
                 break;
+            case 'transport':
+                selectProvider(props.eventProvider.transport_id);
+                $('#hotel-select' + props.type).val(props.eventProvider.transport_id).trigger('change');
+                break;
         }
 
         $('#currency' + props.type).val(props.eventProvider.currency_id).trigger('change');
@@ -149,7 +157,6 @@ const edit = () => {
 };
 
 onMounted(() => {
-
     form.event_id = props.eventId;
     $('#hotel-select' + props.type).select2({
         theme: "bootstrap4", language: "pt-Br"

@@ -10,6 +10,7 @@ use App\Models\EventAB;
 use App\Models\EventAdd;
 use App\Models\EventHall;
 use App\Models\EventHotel;
+use App\Models\EventTransport;
 use App\Models\Provider;
 use Exception;
 use Illuminate\Http\Request;
@@ -82,6 +83,7 @@ class ProviderController extends Controller
                 $hotel->iss_percent = $request->iss_percent;
                 $hotel->service_percent = $request->service_percent;
                 $hotel->iva_percent = $request->iva_percent;
+                $hotel->is_transport = $request->is_transport;
 
                 $hotel->save();
             } else {
@@ -95,7 +97,8 @@ class ProviderController extends Controller
                     'national' => $request->national,
                     'iss_percent' => $request->iss_percent,
                     'service_percent' => $request->service_percent,
-                    'iva_percent' => $request->iva_percent
+                    'iva_percent' => $request->iva_percent,
+                    'is_transport' => $request->is_transport
                 ]);
             }
         } catch (Exception $e) {
@@ -144,6 +147,10 @@ class ProviderController extends Controller
                     case 'add':
                         $provider = EventAdd::find($request->id);
                         $provider->add_id = $request->provider_id;
+                        break;
+                    case 'transport':
+                        $provider = EventTransport::find($request->id);
+                        $provider->transport_id = $request->provider_id;
                         break;
                 }
 
@@ -213,6 +220,19 @@ class ProviderController extends Controller
                             'customer_observation' => $request->customer_observation
                         ]);
                         break;
+                    case 'transport':
+                        $provider = EventTransport::create([
+                            'transport_id' => $request->provider_id,
+                            'event_id' => $request->event_id,
+                            'iss_percent' => $request->iss_percent,
+                            'service_percent' => $request->service_percent,
+                            'iva_percent' => $request->iva_percent,
+                            'currency_id' => $request->currency,
+                            'invoice' => $request->invoice,
+                            'internal_observation' => $request->internal_observation,
+                            'customer_observation' => $request->customer_observation
+                        ]);
+                        break;
                 }
             }
         } catch (Exception $e) {
@@ -230,6 +250,9 @@ class ProviderController extends Controller
                 break;
             case 'add':
                 $tab = 4;
+                break;
+            case 'transport':
+                $tab = 5;
                 break;
         }
 

@@ -20,7 +20,6 @@ class IncrementalPermissionsSeeder extends Seeder
     public function run()
     {
 
-
         foreach (Constants::PERMISSIONS as $p) {
             if (!DB::table('permission')->where('name', $p['name'])->exists()) {
                 DB::table('permission')->insert(

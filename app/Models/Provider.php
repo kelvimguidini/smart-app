@@ -22,7 +22,8 @@ class Provider extends Model
         'has_hotel',
         'has_ab',
         'has_hall',
-        'has_additional'
+        'has_additional',
+        'is_transport'
     ];
 
     protected $table = 'provider';
@@ -46,6 +47,7 @@ class Provider extends Model
     protected $has_ab = 'has_ab';
     protected $has_hall = 'has_hall';
     protected $has_additional = 'has_additional';
+    protected $is_transport = 'is_transport';
 
     public function event_hotels()
     {
