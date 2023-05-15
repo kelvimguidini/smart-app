@@ -436,11 +436,10 @@ const showDetails = ref(false);
                             <td class="align-middle text-dark text-left" colspan="3">
                                 OBSERVAÇÃO INTERNA:
                             </td>
-                            <td class="align-middle text-dark text-left" :colspan="showDetails ? 15 : 13">
+                            <td class="align-middle text-dark text-left" :colspan="showDetails ? 16 : 13">
                                 {{ evho.internal_observation }}
                             </td>
                             <template v-if="showDetails">
-                                <td class="align-middle" colspan="3"></td>
                                 <td class="align-middle bg-success text-white">
                                     {{ formatCurrency(sumTaxes(evho, 'iss')) }}
                                 </td>
@@ -467,12 +466,11 @@ const showDetails = ref(false);
                             <td class="align-middle text-dark text-left" colspan="3">
                                 OBSERVAÇÃO CLIENTE:
                             </td>
-                            <td class="align-middle text-dark text-left" :colspan="showDetails ? 15 : 13">
+                            <td class="align-middle text-dark text-left" :colspan="showDetails ? 16 : 13">
                                 {{ evho.customer_observation }}
                             </td>
 
                             <template v-if="showDetails">
-                                <td class="align-middle" colspan="3"></td>
                                 <td class="align-middle bg-success text-white">
                                     Venda
                                 </td>

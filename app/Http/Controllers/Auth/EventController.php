@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Apto;
+use App\Models\Brand;
 use App\Models\Broker;
+use App\Models\BrokerTransport;
+use App\Models\CarModel;
 use App\Models\Category;
 use App\Models\CRD;
 use App\Models\Currency;
@@ -14,6 +17,7 @@ use App\Models\EventAB;
 use App\Models\EventAdd;
 use App\Models\EventHall;
 use App\Models\EventHotel;
+use App\Models\EventTransport;
 use App\Models\Frequency;
 use App\Models\Local;
 use App\Models\Measure;
@@ -25,8 +29,11 @@ use App\Models\Service;
 use App\Models\ServiceAdd;
 use App\Models\ServiceHall;
 use App\Models\ServiceType;
+use App\Models\TransportService;
 use App\Models\User;
+use App\Models\Vehicle;
 use Exception;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -105,6 +112,12 @@ class EventController extends Controller
         $frequencies = Frequency::all();
         $measures = Measure::all();
 
+        $brokersT = BrokerTransport::all();
+        $vehicles = Vehicle::all();
+        $models = CarModel::all();
+        $servicesT = TransportService::all();
+        $brands = Brand::all();
+
         $users = User::all();
 
         $eventHotel = $request->tab == 1 ? EventHotel::with(['eventHotelsOpt', 'hotel', 'currency', 'event'])->find($request->ehotel) : null;
@@ -118,6 +131,9 @@ class EventController extends Controller
 
         $eventAdd = $request->tab == 4 ? EventAdd::with(['eventAddOpts', 'add', 'currency', 'event'])->find($request->ehotel) : null;
         $eventAdds = EventAdd::with(['eventAddOpts', 'eventAddOpts.frequency', 'eventAddOpts.measure', 'eventAddOpts.service', 'add', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
+
+        $eventTransport = $request->tab == 5 ? EventTransport::with(['eventTransportOpts', 'transport', 'currency', 'event'])->find($request->ehotel) : null;
+        $eventTransports = EventTransport::with(['eventTransportOpts', 'eventTransportOpts.broker', 'eventTransportOpts.vehicle', 'eventTransportOpts.model', 'eventTransportOpts.service', 'eventTransportOpts.brand', 'transport', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
 
         return Inertia::render('Auth/Event/EventCreate', [
             'crds' => $crds,
@@ -148,6 +164,13 @@ class EventController extends Controller
             'eventAdds' => $eventAdds,
             'catsHotel' => Category::all(),
             'aptosHotel' => Apto::all(),
+            'brokersT' => $brokersT,
+            'vehicles' => $vehicles,
+            'models' => $models,
+            'servicesT' => $servicesT,
+            'brands' => $brands,
+            'eventTransport' => $eventTransport,
+            'eventTransports' => $eventTransports
         ]);
     }
 

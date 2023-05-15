@@ -34,6 +34,7 @@ use App\Http\Controllers\Auth\ServiceAddController;
 use App\Http\Controllers\Auth\ServiceController;
 use App\Http\Controllers\Auth\ServiceHallController;
 use App\Http\Controllers\Auth\ServiceTypeController;
+use App\Http\Controllers\Auth\TransportController;
 use App\Http\Controllers\Auth\TransportServiceController;
 use App\Http\Controllers\Auth\VehicleController;
 use App\Http\Controllers\Auth\VerifyEmailController;
@@ -416,6 +417,15 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::delete('event-add-delete', [AddController::class, 'eventAddDelete'])
         ->name('event-add-delete');
 
+    //TRANSPORTE
+    Route::post('transport-opt-save', [TransportController::class, 'storeOpt'])
+        ->name('transport-opt-save');
+
+    Route::delete('opt-transport-delete', [TransportController::class, 'optDelete'])
+        ->name('opt-transport-delete');
+
+    Route::delete('event-transport-delete', [TransportController::class, 'eventTransportDelete'])
+        ->name('event-transport-delete');
 
     //ORÇAMENTO
     Route::post('budget-prove', [BudgetController::class, 'prove'])

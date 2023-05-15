@@ -254,7 +254,7 @@ const showDetails = ref(false);
                         </tr>
 
                         <tr v-if="evab.event_ab_opts.length == 0">
-                            <td :colspan="showDetails ? 19 : 13">
+                            <td :colspan="showDetails ? 17 : 13">
                                 <div class="alert alert-primary" role="alert">
                                     Nenhum fornecedor cadastrado!
                                 </div>
@@ -410,11 +410,10 @@ const showDetails = ref(false);
                             <td class="align-middle text-dark text-left" colspan="3">
                                 OBSERVAÇÃO INTERNA:
                             </td>
-                            <td class="align-middle text-dark text-left" colspan="9">
+                            <td class="align-middle text-dark text-left" colspan="12">
                                 {{ evab.internal_observation }}
                             </td>
                             <template v-if="showDetails">
-                                <td class="align-middle" colspan="3"></td>
                                 <td class="align-middle bg-success text-white">
                                     {{ formatCurrency(sumTaxes(evab, 'iss')) }}
                                 </td>
@@ -441,12 +440,11 @@ const showDetails = ref(false);
                             <td class="align-middle text-dark text-left" colspan="3">
                                 OBSERVAÇÃO CLIENTE:
                             </td>
-                            <td class="align-middle text-dark text-left" colspan="9">
+                            <td class="align-middle text-dark text-left" colspan="12">
                                 {{ evab.customer_observation }}
                             </td>
 
                             <template v-if="showDetails">
-                                <td class="align-middle" colspan="3"></td>
                                 <td class="align-middle bg-success text-white">
                                     Venda
                                 </td>

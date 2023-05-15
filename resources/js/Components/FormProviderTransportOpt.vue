@@ -8,99 +8,89 @@ import TextInput from '@/Components/TextInput.vue';
 import Datepicker from 'vue3-datepicker';
 
 const props = defineProps({
-    eventHotel: {
+    eventTransport: {
         type: Object,
         default: null
     },
-
     brokers: {
         type: Array,
         default: [],
     },
-    regimes: {
+    vehicles: {
         type: Array,
         default: [],
     },
-    purposes: {
+    models: {
         type: Array,
         default: [],
     },
-    catsHotel: {
+    services: {
         type: Array,
         default: [],
     },
-    aptosHotel: {
+    brands: {
         type: Array,
         default: [],
     },
-    selectHotelCallBack: {
+    selectTransportCallBack: {
         type: Function,
         default: null,
     },
-    hotelSelected: {
+    transportSelected: {
         type: Number,
         default: 0,
     }
 });
 
 const formOpt = useForm({
-    event_hotel_id: 0,
+    event_transport_id: 0,
     id: 0,
     broker: 0,
-    regime: 0,
-    purpose: 0,
-    category_id: 0,
-    apto_id: 0,
-    hotel_id: 0,
+    vehicle: 0,
+    model: 0,
+    service: 0,
+    brand: 0,
+    observation: '',
     in: '',
     out: '',
     received_proposal: null,
     received_proposal_percent: 0.8,
     kickback: null,
-    count: null,
-    compare_trivago: null,
-    compare_website_htl: null,
-    compare_omnibess: null,
-
+    count: null
 });
 
 const editOpt = (opt) => {
     formOpt.id = opt.id;
 
-    duplicate(opt);
+    duplicate(opt, true);
 }
 
-const duplicate = (opt) => {
-    formOpt.event_hotel_id = props.eventHotel.id;
-
+const duplicate = (opt, edit = false) => {
+    if (edit) {
+        formOpt.id = 0;
+    }
+    formOpt.event_transport_id = props.eventTransport.id;
     formOpt.broker = opt.broker_id;
-    formOpt.regime = opt.regime_id;
-    formOpt.purpose = opt.purpose_id;
-    formOpt.category_id = opt.category_hotel.category_id;
-    formOpt.apto_id = opt.apto_hotel.apto_id;
-    formOpt.hotel_id = props.eventHotel.hotel_id;
+    formOpt.vehicle = opt.vehicle_id;
+    formOpt.model = opt.model_id;
+    formOpt.service = opt.service_id;
+    formOpt.brand = opt.brand_id;
+    formOpt.observation = opt.observation;
     formOpt.in = new Date(opt.in);
     formOpt.out = new Date(opt.out);
     formOpt.received_proposal = opt.received_proposal;
     formOpt.kickback = opt.kickback;
     formOpt.count = opt.count;
-    formOpt.compare_trivago = opt.compare_trivago;
-    formOpt.compare_website_htl = opt.compare_website_htl;
-    formOpt.compare_omnibess = opt.compare_omnibess;
 
     $('#broker').val(opt.broker_id).trigger('change');
-    $('#regime').val(opt.regime_id).trigger('change');
-    $('#purpose').val(opt.purpose_id).trigger('change');
-    $('#cat').val(opt.category_hotel.category_id).trigger('change');
-    $('#apto').val(opt.apto_hotel.apto_id).trigger('change');
+    $('#vehicle').val(opt.vehicle_id).trigger('change');
+    $('#model').val(opt.model_id).trigger('change');
+    $('#service').val(opt.service_id).trigger('change');
+    $('#brand').val(opt.brand_id).trigger('change');
 
     $("#received_proposal").maskMoney('mask', opt.received_proposal);
-    $('#compare_trivago').maskMoney('mask', opt.compare_trivago);
-    $('#compare_website_htl').maskMoney('mask', opt.compare_website_htl);
-    $('#compare_omnibess').maskMoney('mask', opt.compare_omnibess);
 
-
-    $('#tabs-hotel').tabs({ active: 2 });
+    $('#tabs-transport').tabs({ active: 2 });
 }
 
 defineExpose({
@@ -113,33 +103,27 @@ const submitOpt = () => {
     isLoader.value = true;
 
     formOpt.received_proposal = $('#received_proposal').maskMoney('unmasked')[0];
-    formOpt.compare_trivago = $('#compare_trivago').maskMoney('unmasked')[0];
-    formOpt.compare_website_htl = $('#compare_website_htl').maskMoney('unmasked')[0];
-    formOpt.compare_omnibess = $('#compare_omnibess').maskMoney('unmasked')[0];
 
-    if (formOpt.event_hotel_id == 0) {
-        formOpt.event_hotel_id = props.eventHotel.id;
+    if (formOpt.event_transport_id == 0) {
+        formOpt.event_transport_id = props.eventTransport.id;
     }
 
-    formOpt.post(route('hotel-opt-save'), {
+    formOpt.post(route('transport-opt-save'), {
         onFinish: () => {
             formOpt.reset();
-            formOpt.hotel_id = props.eventHotel.hotel_id;
+            formOpt.transport_id = props.eventTransport.transport_id;
             $('#broker').val('').trigger('change');
-            $('#regime').val('').trigger('change');
-            $('#purpose').val('').trigger('change');
-            $('#cat').val('').trigger('change');
-            $('#apto').val('').trigger('change');
+            $('#vehicle').val('').trigger('change');
+            $('#model').val('').trigger('change');
+            $('#service').val('').trigger('change');
+            $('#brand').val('').trigger('change');
 
             $('#received_proposal').val('');
-            $('#compare_trivago').val('');
-            $('#compare_website_htl').val('');
-            $('#compare_omnibess').val('');
 
-            props.selectHotelCallBack(props.eventHotel.hotel_id);
+            props.selectTransportCallBack(props.eventTransport.transport_id);
             isLoader.value = false;
 
-            $('#tabs-hotel').tabs({ active: 0 });
+            $('#tabs-transport').tabs({ active: 0 });
         },
     });
 };
@@ -152,41 +136,41 @@ onMounted(() => {
         formOpt.broker = e.params.data.id;
     });
 
-    $('#regime').select2({
+    $('#vehicle').select2({
         theme: "bootstrap4", language: "pt-Br"
     }).on('select2:select', (e) => {
-        formOpt.regime = e.params.data.id;
+        formOpt.vehicle = e.params.data.id;
     });
 
-    $('#purpose').select2({
+    $('#model').select2({
         theme: "bootstrap4", language: "pt-Br"
     }).on('select2:select', (e) => {
-        formOpt.purpose = e.params.data.id;
+        formOpt.model = e.params.data.id;
     });
 
-    $('#cat').select2({
+    $('#service').select2({
         theme: "bootstrap4", language: "pt-Br"
     }).on('select2:select', (e) => {
-        formOpt.category_id = e.params.data.id;
+        formOpt.service = e.params.data.id;
     });
 
-    $('#apto').select2({
+    $('#brand').select2({
         theme: "bootstrap4", language: "pt-Br"
     }).on('select2:select', (e) => {
-        formOpt.apto_id = e.params.data.id;
+        formOpt.brand = e.params.data.id;
     });
     //Hotel - Fim
-    if (props.eventHotel != null) {
-        formOpt.event_hotel_id = props.eventHotel.id;
+    if (props.eventTransport != null) {
+        formOpt.event_transport_id = props.eventTransport.id;
     }
-    if (props.eventHotel != null) {
-        formOpt.event_hotel_id = props.eventHotel.id;
+    if (props.eventTransport != null) {
+        formOpt.event_transport_id = props.eventTransport.id;
     }
-    formOpt.hotel_id = props.hotelSelected;
+    formOpt.transport_id = props.transportSelected;
 
     let symbol = 'R$ ';
-    if (props.eventHotel != null) {
-        symbol = props.eventHotel.currency.symbol + ' ';
+    if (props.eventTransport != null) {
+        symbol = props.eventTransport.currency.symbol + ' ';
     }
     $('.money').maskMoney({ prefix: symbol, allowNegative: false, thousands: '.', decimal: ',', affixesStay: true });
 
@@ -195,11 +179,11 @@ onMounted(() => {
 
 watch(
     () => ({
-        hotelSelected: props.hotelSelected,
+        transportSelected: props.transportSelected,
     }),
     (newValues, oldValues) => {
-        if (newValues.hotelSelected != oldValues.hotelSelected) {
-            formOpt.hotel_id = newValues.hotelSelected;
+        if (newValues.transportSelected != oldValues.transportSelected) {
+            formOpt.transport_id = newValues.transportSelected;
         }
     }
 );
@@ -226,30 +210,49 @@ const isLoader = ref(false);
                 </div>
 
                 <div class="form-group">
-                    <InputLabel for="regime" value="Regime:" />
-                    <select class="form-control" id="regime" :required="required">
+                    <InputLabel for="vehicle" value="Veículo:" />
+                    <select class="form-control" id="vehicle" :required="required">
                         <option>.::Selecione::.</option>
-                        <option v-for="(option, index) in regimes" :value="option.id">
+                        <option v-for="(option, index) in vehicles" :value="option.id">
                             {{ option.name }}
                         </option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <InputLabel for="purpose" value="Proposito:" />
-                    <select class="form-control" id="purpose" :required="required">
+                    <InputLabel for="model" value="Modelo:" />
+                    <select class="form-control" id="model" :required="required">
                         <option>.::Selecione::.</option>
-                        <option v-for="(option, index) in purposes" :value="option.id">
+                        <option v-for="(option, index) in models" :value="option.id">
+                            {{ option.name }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+
+                <div class="form-group">
+                    <InputLabel for="service" value="Serviço:" />
+                    <select class="form-control" id="service" :required="required">
+                        <option>.::Selecione::.</option>
+                        <option v-for="(option, index) in services" :value="option.id">
                             {{ option.name }}
                         </option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <InputLabel for="cat" value="CAT.:" />
-                    <select class="form-control" id="cat" :required="required">
+                    <InputLabel for="observation" value="OBS.:" />
+                    <TextInput type="text" class="form-control" v-model="formOpt.observation" autofocus
+                        autocomplete="observation" />
+                </div>
+
+                <div class="form-group">
+                    <InputLabel for="brand" value="Marca:" />
+                    <select class="form-control" id="brand" :required="required">
                         <option>.::Selecione::.</option>
-                        <option v-for="(option, index) in catsHotel" :value="option.id">
+                        <option v-for="(option, index) in brands" :value="option.id">
                             {{ option.name }}
                         </option>
                     </select>
@@ -258,16 +261,6 @@ const isLoader = ref(false);
             </div>
 
             <div class="col-lg-4">
-
-                <div class="form-group">
-                    <InputLabel for="apto" value="APTO:" />
-                    <select class="form-control" id="apto" :required="required">
-                        <option>.::Selecione::.</option>
-                        <option v-for="(option, index) in aptosHotel" :value="option.id">
-                            {{ option.name }}
-                        </option>
-                    </select>
-                </div>
 
                 <div class="row">
                     <div class="col">
@@ -321,31 +314,10 @@ const isLoader = ref(false);
 
                     </div>
                 </div>
-            </div>
-
-            <div class="col-lg-4">
-
-                <div class="form-group">
-                    <InputLabel for="compare_trivago" value="Comparação Trivago:" />
-                    <TextInput id="compare_trivago" type="text" class="form-control money" v-model="formOpt.compare_trivago"
-                        required autofocus autocomplete="compare_trivago" />
-                </div>
-
-                <div class="form-group">
-                    <InputLabel for="compare_website_htl" value="comparação Website Htl" />
-                    <TextInput id="compare_website_htl" type="text" class="form-control money"
-                        v-model="formOpt.compare_website_htl" required autofocus autocomplete="compare_website_htl" />
-                </div>
-
-                <div class="form-group">
-                    <InputLabel for="compare_omnibess" value="comparação Omnibess:" />
-                    <TextInput id="compare_omnibess" type="text" class="form-control money"
-                        v-model="formOpt.compare_omnibess" required autofocus autocomplete="compare_omnibess" />
-                </div>
 
                 <div class="flex items-center justify-end mt-4 rigth">
                     <PrimaryButton css-class="btn btn-primary float-right m-1" :class="{ 'opacity-25': formOpt.processing }"
-                        :disabled="formOpt.processing || eventHotel == null || eventHotel.id == 0">
+                        :disabled="formOpt.processing || eventTransport == null || eventTransport.id == 0">
                         <i class="fa fa-save" v-if="formOpt.id > 0"></i>
                         <i class="fa fa-plus" v-else></i>
                     </PrimaryButton>

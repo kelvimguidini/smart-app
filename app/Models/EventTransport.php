@@ -86,14 +86,12 @@ class EventTransport extends Model
      */
     protected $customer_observation = 'customer_observation';
 
-
     /**
      * The primary key associated with the table.
      *
      * @var int
      */
     protected $sended_mail_link = 'sended_mail_link';
-
 
     /**
      * The primary key associated with the table.
@@ -107,7 +105,7 @@ class EventTransport extends Model
         return $this->hasOne(Event::class, 'id', 'event_id');
     }
 
-    public function hotel()
+    public function transport()
     {
         return $this->hasOne(Provider::class,  'id', 'transport_id');
     }
@@ -117,9 +115,9 @@ class EventTransport extends Model
         return $this->hasOne(Currency::class,  'id', 'currency_id');
     }
 
-    public function eventHotelsOpt()
+    public function eventTransportOpts()
     {
-        return $this->hasMany(EventHotelOpt::class);
+        return $this->hasMany(EventTransportOpt::class);
     }
 
     public function providerBudget()

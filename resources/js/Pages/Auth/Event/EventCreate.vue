@@ -141,6 +141,26 @@ const props = defineProps({
         type: Array,
         default: [],
     },
+    brokersT: {
+        type: Array,
+        default: [],
+    },
+    vehicles: {
+        type: Array,
+        default: [],
+    },
+    models: {
+        type: Array,
+        default: [],
+    },
+    servicesT: {
+        type: Array,
+        default: [],
+    },
+    brands: {
+        type: Array,
+        default: [],
+    },
 });
 
 const edit = (event) => {
@@ -417,6 +437,38 @@ const editOptAdd = (opt) => {
 //FIM FUNÇÕES ADD
 
 
+//FUNÇÕES TRANSPORTE
+
+const formProviderOptRefTransport = ref(null);
+
+
+const deleteOptTransport = (id) => {
+    isLoader.value = true;
+    formDelete.id = id;
+    formDelete.delete(route('opt-transport-delete'), {
+        onFinish: () => {
+            isLoader.value = false;
+            formDelete.reset();
+            mount();
+        },
+    });
+};
+
+const duplicateTransport = (opt) => {
+    if (formProviderOptRefTransport.value) {
+        formProviderOptRefTransport.value.duplicate(opt);
+    }
+}
+
+const editOptTransport = (opt) => {
+    if (formProviderOptRefTransport.value) {
+        formProviderOptRefTransport.value.editOpt(opt);
+    }
+
+};
+
+//FIM FUNÇÕES ALIMENTAÇÃO E BEBIDAS
+
 const formProviderHotelRef = ref(null);
 const formProviderAbRef = ref(null);
 const formProviderHallRef = ref(null);
@@ -444,7 +496,7 @@ const newEventProv = (type) => {
                 formProviderAddRef.value.newEventProvider();
             }
             break;
-        case 'add':
+        case 'transport':
             if (formProviderTransportRef.value) {
                 formProviderTransportRef.value.newEventProvider();
             }
@@ -892,35 +944,36 @@ const newEventProv = (type) => {
                             <a class="nav-link" href="#form-trans">Cadastro Transporte</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" v-bind:class="{ 'disabled': !(eventHotel != null && eventHotel.id > 0) }"
+                            <a class="nav-link"
+                                v-bind:class="{ 'disabled': !(eventTransport != null && eventTransport.id > 0) }"
                                 href="#trans-opt">Cadastro Detalhe</a>
                         </li>
                     </ul>
                     <div id="table-trans">
-                        <ListTransportFull :event-hotel="eventHotel" :event-hotels="eventHotels" :edit-opt="editOpt"
-                            :duplicate="duplicate" :delete-opt="deleteOpt" :mount-call-back="mount"
-                            :new-event-hotel="newEventProv"></ListTransportFull>
+                        <ListTransportFull :event-transport="eventTransport" :event-transports="eventTransports"
+                            :edit-opt="editOptTransport" :duplicate="duplicateTransport" :delete-opt="deleteOptTransport"
+                            :mount-call-back="mount" :new-event-transport="newEventProv"></ListTransportFull>
                     </div>
 
-                    <div id="form-hotel" class="card mb-4 py-3 border-left-primary">
+                    <div id="form-trans" class="card mb-4 py-3 border-left-primary">
                         <div class="card-body">
                             <FormProvider :event-provider="eventTransport" :currencies="currencies"
                                 :providers="providers.filter(obj => obj.is_transport)" type="transport"
-                                :select-call-back="selectHotel" :event-id="event.id" :mount-call-back="mount"
+                                :select-call-back="selectTransport" :event-id="event.id" :mount-call-back="mount"
                                 ref="formProviderTransportRef">
                             </FormProvider>
                         </div>
                     </div>
 
-                    <div v-if="eventHotel != null && eventHotel.id > 0" id="hotel-opt">
+                    <div v-if="eventTransport != null && eventTransport.id > 0" id="trans-opt">
                         <div class="row">
                             <div class="col">
                                 <div class="card">
                                     <div class="card-body">
-                                        <FormProviderTransportOpt :event-hotel="eventHotel" :brokers="brokers"
-                                            :regimes="regimes" :purposes="purposes" :cats-hotel="catsHotel"
-                                            :aptos-hotel="aptosHotel" :select-hotel-call-back="selectHotel"
-                                            ref="formProviderOptRef" :hotel-selected="hotelSelected">
+                                        <FormProviderTransportOpt :event-transport="eventTransport" :brokers="brokersT"
+                                            :vehicles="vehicles" :models="models" :services="servicesT" :brands="brands"
+                                            :select-transport-call-back="selectHotel" ref="formProviderOptRefTransport"
+                                            :transport-selected="hotelSelected">
                                         </FormProviderTransportOpt>
                                     </div>
                                 </div>

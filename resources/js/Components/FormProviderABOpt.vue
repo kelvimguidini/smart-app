@@ -48,10 +48,13 @@ const formOpt = useForm({
 const editOpt = (opt) => {
     formOpt.id = opt.id;
 
-    duplicate(opt);
+    duplicate(opt, true);
 }
 
-const duplicate = (opt) => {
+const duplicate = (opt, edit = false) => {
+    if (!edit) {
+        formOpt.id = 0;
+    }
     formOpt.event_ab_id = props.eventAb.id;
 
     formOpt.broker = opt.broker_id;
