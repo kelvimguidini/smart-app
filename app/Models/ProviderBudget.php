@@ -37,6 +37,13 @@ class ProviderBudget extends Model
         'comment_hall',
         'event_hall_id',
 
+
+        'hosting_fee_transport',
+        'iss_fee_transport',
+        'iva_fee_transport',
+        'comment_transport',
+        'event_transport_id',
+
         'evaluated',
         'approved'
     ];
@@ -59,6 +66,11 @@ class ProviderBudget extends Model
     public function eventHall()
     {
         return $this->belongsTo(EventHall::class);
+    }
+
+    public function eventTransport()
+    {
+        return $this->belongsTo(EventTransport::class);
     }
 
     public function providerBudgetItems()

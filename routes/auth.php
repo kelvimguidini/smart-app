@@ -434,7 +434,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::get('create-link/{download}/{provider_id}/{event_id}/{link}/{emails?}/{copyMe?}/{message?}/{attachment?}/{linkEmail?}', [BudgetController::class, 'createLink'])
         ->name('create-link');
 
-    Route::get('proposal-hotel/{download}/{provider_id}/{event_id}/{emails?}/{copyMe?}/{message?}', [HotelController::class, 'proposalPdf'])
+    Route::get('proposal-hotel/{download}/{provider_id}/{event_id}/{emails?}/{copyMe?}/{message?}', [ProviderController::class, 'proposalPdf'])
         ->name('proposal-hotel');
     //FIM HOTEL
 });

@@ -18,6 +18,7 @@ class ProviderBudgetItem extends Model
         'event_ab_opt_id',
         'event_add_opt_id',
         'event_hall_opt_id',
+        'event_transport_opt_id',
         'comission',
         'value',
         'comment',
@@ -45,6 +46,11 @@ class ProviderBudgetItem extends Model
 
     public function eventHallOption()
     {
-        return $this->belongsTo(EventHallOption::class, 'event_hall_opt_id');
+        return $this->belongsTo(eventHallOption::class, 'event_hall_opt_id');
+    }
+
+    public function eventTransportOption()
+    {
+        return $this->belongsTo(EventTransportOpt::class, 'event_transport_opt_id');
     }
 }

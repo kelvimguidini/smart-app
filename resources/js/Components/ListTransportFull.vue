@@ -262,7 +262,6 @@ const showDetails = ref(false);
                         <tr v-if="evtr.event_transport_opts.length == 0">
                             <td :colspan="showDetails ? 24 : 18">
                                 <div class="alert alert-primary" role="alert">
-                                    {{ evtr }}
                                     Nenhum fornecedor cadastrado!
                                 </div>
                             </td>

@@ -93,7 +93,7 @@
             {{ __('Regards') }},<br>
             {{ config('app.name') }},<br><br>
             @if($signature != null)
-            {{!!$signature !!}}
+            {!!$signature !!}
             @endif
             @if($hasAttachment)
             <hr>

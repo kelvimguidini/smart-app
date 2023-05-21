@@ -169,7 +169,8 @@ const providersByEvent = (event) => {
                 name: current.hotel.name,
                 city: current.hotel.city,
                 email: current.hotel.email,
-                sended_mail: current.sended_mail_link,
+                sended_mail: current.sended_mail,
+                sended_mail_link: current.sended_mail_link,
                 token_budget: current.token_budget,
                 providerBudget: current.provider_budget
             });
@@ -183,7 +184,8 @@ const providersByEvent = (event) => {
                 name: current.ab.name,
                 city: current.ab.city,
                 email: current.ab.email,
-                sended_mail: current.sended_mail_link,
+                sended_mail: current.sended_mail,
+                sended_mail_link: current.sended_mail_link,
                 token_budget: current.token_budget,
                 providerBudget: current.provider_budget
             });
@@ -197,7 +199,8 @@ const providersByEvent = (event) => {
                 name: current.hall.name,
                 city: current.hall.city,
                 email: current.add.email,
-                sended_mail: current.sended_mail_link,
+                sended_mail: current.sended_mail,
+                sended_mail_link: current.sended_mail_link,
                 token_budget: current.token_budget,
                 providerBudget: current.provider_budget
             });
@@ -211,7 +214,23 @@ const providersByEvent = (event) => {
                 name: current.add.name,
                 city: current.add.city,
                 email: current.add.email,
-                sended_mail: current.sended_mail_link,
+                sended_mail: current.sended_mail,
+                sended_mail_link: current.sended_mail_link,
+                token_budget: current.token_budget,
+                providerBudget: current.provider_budget
+            });
+        }
+    }, {});
+
+    event.event_transports && event.event_transports.map((current) => {
+        if (!groups.some(g => g.id == current.transport.id)) {
+            groups.push({
+                id: current.transport.id,
+                name: current.transport.name,
+                city: current.transport.city,
+                email: current.transport.email,
+                isTransport: true,
+                sended_mail: current.sended_mail,
                 token_budget: current.token_budget,
                 providerBudget: current.provider_budget
             });
@@ -257,7 +276,7 @@ const providersByEvent = (event) => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <template v-for="(event, index) in events">
+                                            <template v-for="(event, index) in  events ">
                                                 <tr>
                                                     <th scope="row">{{ event.id }}</th>
                                                     <td>{{ event.customer != null ? event.customer.name : ' - ' }}</td>
@@ -297,17 +316,19 @@ const providersByEvent = (event) => {
 
                                                     </td>
                                                 </tr>
-                                                <tr v-for="(prov, index) in providersByEvent(event)">
+                                                <tr v-for="(prov, index) in  providersByEvent(event) ">
                                                     <th scope="row"></th>
-                                                    <td colspan="5">Hotel: {{ prov.name }} | {{ prov.city }}</td>
+                                                    <td colspan="5">{{ prov.isTransport ? 'Transporte Terrestre' : 'Hotel'
+                                                    }}:
+                                                        {{ prov.name }} | {{ prov.city }}</td>
 
                                                     <td>
 
                                                         <Modal :key="index" modal-title="Link para orçamento"
-                                                            :ok-botton-callback="createLink"
+                                                            v-if="!prov.isTransport" :ok-botton-callback="createLink"
                                                             :ok-botton-callback-param="{ event_id: event.id, provider_id: prov.id, emails: emailsLink, download: !sendEmailLink, message: messageLink, copyMe: copyMeLink, attachment: attachmentLink, link: token, linkEmail: linkEmail }"
                                                             :ok-botton-label="sendEmailLink ? 'Enviar link por e-mail' : 'Baixar PDF'"
-                                                            :btn-class="prov.sended_mail ? 'btn btn-danger btn-icon-split mr-2' : 'btn btn-secondary btn-icon-split mr-2'">
+                                                            :btn-class="prov.sended_mail_link ? 'btn btn-danger btn-icon-split mr-2' : 'btn btn-secondary btn-icon-split mr-2'">
 
                                                             <template v-slot:button>
                                                                 <div v-on:click="newObjcts(prov.token_budget, prov.email)">
@@ -426,7 +447,7 @@ const providersByEvent = (event) => {
                                                         </Modal>
 
                                                         <Modal :key="index"
-                                                            v-if="prov.providerBudget[0] && !prov.providerBudget[0].evaluated && $page.props.auth.permissions.some((p) => p.name === 'prove_budget_hotel')"
+                                                            v-if="prov && !prov.isTransport && prov.providerBudget && prov.providerBudget[0] && !prov.providerBudget[0].evaluated && $page.props.auth.permissions.some((p) => p.name === 'prove_budget_hotel')"
                                                             modal-title="Aprovar ou recusar orçamento do fornecedor"
                                                             :btn-blank="true" :btn-is-link="true" ok-botton-label="Avaliar"
                                                             :url="route('budget', { token: prov.token_budget, prove: true, user: $page.props.auth.user.id })"
@@ -453,9 +474,8 @@ const providersByEvent = (event) => {
                                                             </template>
                                                         </Modal>
 
-
                                                         <Modal :key="index"
-                                                            v-if="prov.providerBudget[0] && prov.providerBudget[0].evaluated"
+                                                            v-if="prov && !prov.isTransport && prov.providerBudget && prov.providerBudget[0] && prov.providerBudget[0].evaluated"
                                                             modal-title="Aprovação do orçamento do fornecedor"
                                                             :btn-blank="true" :btn-is-link="true" ok-botton-label="Avaliar"
                                                             :url="route('budget', { token: prov.token_budget, prove: true })"
@@ -478,7 +498,8 @@ const providersByEvent = (event) => {
                                                                         <p><strong>Aprovado: </strong>
                                                                             <span :class="{
                                                                                 'text-info': prov.providerBudget[0].approved, 'text- danger': prov.providerBudget.approved
-                                                                            }">
+                                                                            }
+                                                                                ">
                                                                                 {{ prov.providerBudget[0].approved ? 'Sim' :
                                                                                     'Não' }}
                                                                             </span>
@@ -494,9 +515,8 @@ const providersByEvent = (event) => {
                                                             </template>
                                                         </Modal>
 
-
                                                         <Modal modal-title="Envio de Proposta"
-                                                            v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin')"
+                                                            v-if="prov && prov.providerBudget && $page.props.auth.permissions.some((p) => p.name === 'event_admin')"
                                                             :ok-botton-callback="sendProposal"
                                                             :ok-botton-callback-param="{ event_id: event.id, provider_id: prov.id, emails: emails, download: !sendEmail, message: message, copyMe: copyMe }"
                                                             :ok-botton-label="!sendEmail ? 'Baixar PDF' : 'Enviar Proposta'"

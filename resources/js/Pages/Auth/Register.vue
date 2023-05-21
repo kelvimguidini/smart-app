@@ -147,6 +147,7 @@ onMounted(() => {
                                                 <InputError class="mt-2 text-danger" :message="form.errors.email" />
                                             </div>
 
+
                                             <div class="form-group">
                                                 <InputLabel for="signature" value="Assinatura" />
                                                 <CKEditor v-model:content="form.signature" :height="150" />

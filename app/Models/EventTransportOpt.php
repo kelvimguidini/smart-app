@@ -120,4 +120,9 @@ class EventTransportOpt extends Model
     {
         return $this->hasOne(Brand::class, 'id', 'brand_id');
     }
+
+    public function providerBudget()
+    {
+        return $this->hasMany(ProviderBudget::class, 'event_transport_id', 'id');
+    }
 }

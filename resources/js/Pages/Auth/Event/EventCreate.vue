@@ -750,8 +750,9 @@ const newEventProv = (type) => {
 
                     <div id="form-hotel" class="card mb-4 py-3 border-left-primary">
                         <div class="card-body">
-                            <FormProvider :event-provider="eventHotel" :currencies="currencies" :providers="providers"
-                                type="hotel" :select-call-back="selectHotel" :event-id="event.id" :mount-call-back="mount"
+                            <FormProvider :event-provider="eventHotel" :currencies="currencies"
+                                :providers="providers.filter(obj => !obj.is_transport)" type="hotel"
+                                :select-call-back="selectHotel" :event-id="event.id" :mount-call-back="mount"
                                 ref="formProviderHotelRef">
                             </FormProvider>
                         </div>
@@ -803,8 +804,9 @@ const newEventProv = (type) => {
 
                     <div id="form-ab" class="card mb-4 py-3 border-left-primary">
                         <div class="card-body">
-                            <FormProvider key="ab" :event-provider="eventAB" :currencies="currencies" :providers="providers"
-                                type="ab" :event-id="event.id" :mount-call-back="mount" ref="formProviderAbRef">
+                            <FormProvider key="ab" :event-provider="eventAB" :currencies="currencies"
+                                :providers="providers.filter(obj => !obj.is_transport)" type="ab" :event-id="event.id"
+                                :mount-call-back="mount" ref="formProviderAbRef">
                             </FormProvider>
                         </div>
                     </div>
@@ -855,8 +857,8 @@ const newEventProv = (type) => {
                     <div id="form-hall" class="card mb-4 py-3 border-left-primary">
                         <div class="card-body">
                             <FormProvider key="ab" :event-provider="eventHall" :currencies="currencies"
-                                :providers="providers" type="hall" :event-id="event.id" :mount-call-back="mount"
-                                ref="formProviderHallRef">
+                                :providers="providers.filter(obj => !obj.is_transport)" type="hall" :event-id="event.id"
+                                :mount-call-back="mount" ref="formProviderHallRef">
                             </FormProvider>
                         </div>
                     </div>
@@ -906,8 +908,8 @@ const newEventProv = (type) => {
                     <div id="form-add" class="card mb-4 py-3 border-left-primary">
                         <div class="card-body">
                             <FormProvider key="add" :event-provider="eventAdd" :currencies="currencies"
-                                :providers="providers" type="add" :event-id="event.id" :mount-call-back="mount"
-                                ref="formProviderAddRef">
+                                :providers="providers.filter(obj => !obj.is_transport)" type="add" :event-id="event.id"
+                                :mount-call-back="mount" ref="formProviderAddRef">
                             </FormProvider>
                         </div>
                     </div>

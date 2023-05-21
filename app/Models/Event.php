@@ -189,4 +189,9 @@ class Event extends Model
     {
         return $this->hasMany(EventAdd::class, 'event_id', 'id');
     }
+
+    public function event_transports()
+    {
+        return $this->hasMany(EventTransport::class, 'event_id', 'id');
+    }
 }

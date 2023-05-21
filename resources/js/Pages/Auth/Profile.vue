@@ -18,6 +18,7 @@ const form = useForm({
     name: '',
     email: '',
     phone: '',
+    signature: '',
 });
 
 const submit = () => {
