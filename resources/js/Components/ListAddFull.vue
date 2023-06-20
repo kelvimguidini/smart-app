@@ -168,7 +168,7 @@ const showDetails = ref(false);
 
     <div class="row">
         <div v-if="eventAdds.length == 0" class="alert alert-primary" role="alert">
-            Nenhum fornecedor cadastrado!
+            Nenhum cadastro de adicional!
         </div>
         <PrimaryButton v-if="eventAdds.length > 0" type="button" css-class="btn btn-success btn-sm btn-icon-split m-1"
             :title="showDetails ? 'Ocultar' : 'Exibir'" v-on:click="showDetails = !showDetails">
@@ -258,7 +258,7 @@ const showDetails = ref(false);
                         <tr v-if="evAdd.event_add_opts.length == 0">
                             <td :colspan="showDetails ? 23 : 17">
                                 <div class="alert alert-primary" role="alert">
-                                    Nenhum fornecedor cadastrado!
+                                    Nenhuma opção para adicional cadastrada!
                                 </div>
                             </td>
                         </tr>

@@ -9,7 +9,11 @@ class EventHotel extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['event_id', 'hotel_id', 'currency_id', 'iss_percent', 'service_percent', 'iva_percent', 'invoice', 'internal_observation', 'customer_observation', 'sended_mail_link', 'token_budget'];
+    protected $fillable = [
+        'event_id', 'hotel_id', 'currency_id', 'iss_percent', 'service_percent', 'iva_percent', 'invoice', 'internal_observation', 'customer_observation', 'sended_mail_link', 'token_budget',
+        'iof',
+        'service_charge'
+    ];
     protected $table = 'event_hotel';
 
 

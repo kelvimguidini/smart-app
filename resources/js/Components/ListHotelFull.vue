@@ -169,7 +169,7 @@ const showDetails = ref(false);
 
     <div class="row">
         <div v-if="eventHotels.length == 0" class="alert alert-primary" role="alert">
-            Nenhum fornecedor cadastrado!
+            Nenhum cadastro de hotel!
         </div>
         <PrimaryButton v-if="eventHotels.length > 0" type="button" css-class="btn btn-success btn-sm btn-icon-split m-1"
             :title="showDetails ? 'Ocultar' : 'Exibir'" v-on:click="showDetails = !showDetails">
@@ -263,7 +263,7 @@ const showDetails = ref(false);
                         <tr v-if="evho.event_hotels_opt.length == 0">
                             <td :colspan="showDetails ? 23 : 14">
                                 <div class="alert alert-primary" role="alert">
-                                    Nenhum fornecedor cadastrado!
+                                    Nenhuma opção para hotel cadastrada!
                                 </div>
                             </td>
                         </tr>

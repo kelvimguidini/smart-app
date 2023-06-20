@@ -25,6 +25,8 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\ProfileUserController;
 use App\Http\Controllers\Auth\ProviderController;
+use App\Http\Controllers\Auth\ProviderServicesController;
+use App\Http\Controllers\Auth\ProviderTransportController;
 use App\Http\Controllers\Auth\PurposeController;
 use App\Http\Controllers\Auth\PurposeHallController;
 use App\Http\Controllers\Auth\RegimeController;
@@ -38,6 +40,7 @@ use App\Http\Controllers\Auth\TransportController;
 use App\Http\Controllers\Auth\TransportServiceController;
 use App\Http\Controllers\Auth\VehicleController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Models\ProviderTransport;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Route;
 
@@ -345,7 +348,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
 
     //Eventos
-    Route::get('event-list', [EventController::class, 'list'])
+    Route::get('event-list/{page?}', [EventController::class, 'list'])
         ->name('event-list');
 
     Route::get('event', [EventController::class, 'create'])
@@ -362,6 +365,9 @@ Route::middleware(['auth', 'cors'])->group(function () {
         ->name('event-delete');
 
 
+    Route::post('event-status-save', [EventController::class, 'statusStore'])
+        ->name('event-status-save');
+
     //HOTEL
     Route::get('hotel', [ProviderController::class, 'create'])
         ->name('hotel');
@@ -375,12 +381,11 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::post('hotel-event-save', [ProviderController::class, 'storeEventProvider'])
         ->name('hotel-event-save');
 
+    Route::delete('event-hotel-delete', [HotelController::class, 'eventHotelDelete'])
+        ->name('event-hotel-delete');
 
     Route::post('hotel-opt-save', [HotelController::class, 'storeHotelOpt'])
         ->name('hotel-opt-save');
-
-    Route::delete('event-hotel-delete', [HotelController::class, 'eventHotelDelete'])
-        ->name('event-hotel-delete');
 
     Route::delete('opt-delete', [HotelController::class, 'optDelete'])
         ->name('opt-delete');
@@ -417,6 +422,18 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::delete('event-add-delete', [AddController::class, 'eventAddDelete'])
         ->name('event-add-delete');
 
+    Route::get('provider-service', [ProviderServicesController::class, 'create'])
+        ->name('provider-service');
+
+    Route::post('provider-service-save', [ProviderServicesController::class, 'store'])
+        ->name('provider-service-save');
+
+    Route::delete('provider-service-delete', [ProviderServicesController::class, 'delete'])
+        ->name('provider-service-delete');
+
+    Route::post('provider-service-event-save', [ProviderServicesController::class, 'storeEventProvider'])
+        ->name('provider-service-event-save');
+
     //TRANSPORTE
     Route::post('transport-opt-save', [TransportController::class, 'storeOpt'])
         ->name('transport-opt-save');
@@ -426,6 +443,19 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     Route::delete('event-transport-delete', [TransportController::class, 'eventTransportDelete'])
         ->name('event-transport-delete');
+
+
+    Route::get('provider-transport', [ProviderTransportController::class, 'create'])
+        ->name('provider-transport');
+
+    Route::post('provider-transport-save', [ProviderTransportController::class, 'store'])
+        ->name('provider-transport-save');
+
+    Route::delete('provider-transport-delete', [ProviderTransportController::class, 'delete'])
+        ->name('provider-transport-delete');
+
+    Route::post('provider-transport-event-save', [ProviderTransportController::class, 'storeEventProvider'])
+        ->name('provider-transport-event-save');
 
     //ORÇAMENTO
     Route::post('budget-prove', [BudgetController::class, 'prove'])

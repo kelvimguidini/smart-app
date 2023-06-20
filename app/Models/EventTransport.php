@@ -9,7 +9,11 @@ class EventTransport extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['event_id', 'transport_id', 'currency_id', 'iss_percent', 'service_percent', 'iva_percent', 'invoice', 'internal_observation', 'customer_observation', 'sended_mail_link', 'token_budget', 'sended_mail'];
+    protected $fillable = [
+        'event_id', 'transport_id', 'currency_id', 'iss_percent', 'service_percent', 'iva_percent', 'invoice', 'internal_observation', 'customer_observation', 'sended_mail_link', 'token_budget', 'sended_mail',
+        'iof',
+        'service_charge'
+    ];
     protected $table = 'event_transport';
 
 

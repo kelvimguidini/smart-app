@@ -24,8 +24,6 @@ class Event extends Model
         'hotel_operator',
         'air_operator',
         'land_operator',
-        'iof',
-        'service_charge'
     ];
     protected $table = 'event';
 
@@ -193,5 +191,10 @@ class Event extends Model
     public function event_transports()
     {
         return $this->hasMany(EventTransport::class, 'event_id', 'id');
+    }
+
+    public function eventStatus()
+    {
+        return $this->hasOne(EventStatus::class, 'event_id', 'id');
     }
 }

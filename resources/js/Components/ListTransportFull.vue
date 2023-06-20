@@ -169,7 +169,7 @@ const showDetails = ref(false);
     <div class="row">
 
         <div v-if="eventTransports.length == 0" class="alert alert-primary" role="alert">
-            Nenhum fornecedor cadastrado!
+            Nenhum cadastro para transporte!
         </div>
         <PrimaryButton v-if="eventTransports.length > 0" type="button" css-class="btn btn-success btn-sm btn-icon-split m-1"
             :title="showDetails ? 'Ocultar' : 'Exibir'" v-on:click="showDetails = !showDetails">
@@ -262,7 +262,7 @@ const showDetails = ref(false);
                         <tr v-if="evtr.event_transport_opts.length == 0">
                             <td :colspan="showDetails ? 24 : 18">
                                 <div class="alert alert-primary" role="alert">
-                                    Nenhum fornecedor cadastrado!
+                                    Nenhuma opção para transporte cadastrada!
                                 </div>
                             </td>
                         </tr>

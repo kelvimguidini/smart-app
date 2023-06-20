@@ -32,7 +32,6 @@ const form = useForm({
     service_percent: null,
     iva_percent: null,
     iss_percent: null,
-    is_transport: null,
 });
 
 const formDelete = useForm({
@@ -61,6 +60,7 @@ const isLoader = ref(false);
 
 
 const edit = (hotel) => {
+
     if (hotel != null) {
         form.reset();
 
@@ -75,14 +75,7 @@ const edit = (hotel) => {
         form.iss_percent = hotel.iss_percent;
         form.service_percent = hotel.service_percent;
         form.iva_percent = hotel.iva_percent;
-        form.is_transport = hotel.is_transport == true || hotel.is_transport == 1;
 
-        hotel.aptos.map(function (value, key) {
-            form.aptos.push(value.id);
-        });
-        hotel.categories.map(function (value, key) {
-            form.categories.push(value.id);
-        });
         $('#city').val(hotel.city).trigger('change');
         $('.phone').val(form.phone).trigger('keyup');
     }
@@ -96,7 +89,7 @@ const newItem = (() => {
 
 const submit = () => {
     isLoader.value = true;
-    form.post(route('hotel-save'), {
+    form.post(route('provider-transport-save'), {
         onSuccess: () => {
             newItem();
             isLoader.value = false;
@@ -107,7 +100,7 @@ const submit = () => {
 const deleteHotel = (id) => {
     isLoader.value = true;
     formDelete.id = id;
-    formDelete.delete(route('hotel-delete'), {
+    formDelete.delete(route('provider-transport-delete'), {
         onFinish: () => {
             isLoader.value = false;
             formDelete.reset();
@@ -226,22 +219,6 @@ const deleteHotel = (id) => {
                                                         id="autoSizingCheck">
                                                     <label class="form-check-label" for="autoSizingCheck">
                                                         Fornecedor Nacional
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <InputLabel for="is_transport" value=" " />
-
-                                        <div class="card">
-                                            <div class="card-body">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" v-model="form.is_transport"
-                                                        type="checkbox" id="transport">
-                                                    <label class="form-check-label" for="transport">
-                                                        Transporte
                                                     </label>
                                                 </div>
                                             </div>

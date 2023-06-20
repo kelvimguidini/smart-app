@@ -126,7 +126,7 @@ onMounted(() => {
                                         <div class="col-lg-6">
                                             <div class="form-group">
 
-                                                <InputLabel for="name" value="Name" />
+                                                <InputLabel for="name" value="Nome" />
                                                 <TextInput id="name" type="text" class="form-control" v-model="form.name"
                                                     required autofocus autocomplete="name" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.name" />

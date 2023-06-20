@@ -67,4 +67,5 @@ Admin
 php artisan db:seed --class=IncrementalPermissionsSeeder
 php artisan db:seed --class=TransportSeeder
 
+
 enviar node_module

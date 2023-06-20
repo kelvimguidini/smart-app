@@ -7,6 +7,7 @@ import { ref } from 'vue';
 import TextInput from '@/Components/TextInput.vue';
 import CKEditor from '@/Components/CKEditor.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
+import Datepicker from 'vue3-datepicker';
 import { v4 as uuidv4 } from 'uuid';
 
 const props = defineProps({
@@ -17,8 +18,82 @@ const formDelete = useForm({
     id: 0
 });
 
-const isLoader = ref(false);
+const formStatus = useForm({
+    id: 0,
+    event_id: 0,
 
+    observation_hotel: '',
+    observation_transport: '',
+
+    request_hotel: '',
+    provider_order_hotel: '',
+    briefing_hotel: '',
+    response_hotel: '',
+    pricing_hotel: '',
+    custumer_send_hotel: '',
+    change_hotel: '',
+    done_hotel: '',
+
+    status_hotel: '',
+
+    request_transport: '',
+    provider_order_transport: '',
+    briefing_transport: '',
+    response_transport: '',
+    pricing_transport: '',
+    custumer_send_transport: '',
+    change_transport: '',
+    done_transport: '',
+
+    status_transport: '',
+});
+
+
+const editStatus = (status, event_id) => {
+    formStatus.event_id = event_id;
+
+    if (status != null) {
+        formStatus.id = status.id;
+
+        formStatus.observation_hotel = status.observation_hotel;
+        formStatus.observation_transport = status.observation_transport;
+
+        formStatus.request_hotel = status.request_hotel;
+        formStatus.provider_order_hotel = status.provider_order_hotel;
+        formStatus.briefing_hotel = status.briefing_hotel;
+        formStatus.response_hotel = status.response_hotel;
+        formStatus.pricing_hotel = status.pricing_hotel;
+        formStatus.custumer_send_hotel = status.custumer_send_hotel;
+        formStatus.change_hotel = status.change_hotel;
+        formStatus.done_hotel = status.done_hotel;
+
+        formStatus.status_hotel = status.status_hotel;
+
+        formStatus.request_transport = status.request_transport;
+        formStatus.provider_order_transport = status.provider_order_transport;
+        formStatus.briefing_transport = status.briefing_transport;
+        formStatus.response_transport = status.response_transport;
+        formStatus.pricing_transport = status.pricing_transport;
+        formStatus.custumer_send_transport = status.custumer_send_transport;
+        formStatus.change_transport = status.change_transport;
+        formStatus.done_transport = status.done_transport;
+
+        formStatus.status_transport = status.status_transport;
+
+    }
+};
+
+const saveStatus = () => {
+    isLoader.value = true;
+    formStatus.post(route('event-status-save'), {
+        onFinish: () => {
+            isLoader.value = false;
+            formStatus.reset();
+        },
+    });
+}
+
+const isLoader = ref(false);
 
 const emails = ref('');
 const sendEmail = ref(true);
@@ -245,11 +320,12 @@ const providersByEvent = (event) => {
     <AuthenticatedLayout>
         <Loader v-bind:show="isLoader"></Loader>
 
-        <FlashMessage v-if="flash != null" :show="flash != null" :message="flash.message" :type="flash.type"></FlashMessage>
+
+        0j0j00000y 00
 
         <Head title="Eventos" />
         <template #header>
-            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div class="d-sm-flex                               align-items-center justify-content-between mb-4">
                 <h1 class="h3 mb-0 text-gray-800">Eventos</h1>
             </div>
         </template>
@@ -259,6 +335,8 @@ const providersByEvent = (event) => {
                 <div class="row">
 
                     <div class="col-lg-12">
+
+
                         <div class="card mb-4 py-3 border-left-secondary">
                             <div class="card-body">
                                 <div class="table-responsive">
@@ -272,11 +350,10 @@ const providersByEvent = (event) => {
                                                 <th scope="col">Data</th>
                                                 <th scope="col">Data Final</th>
                                                 <th scope="col">Ações</th>
-
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <template v-for="(event, index) in  events ">
+                                            <template v-for="(event, index) in  events.data">
                                                 <tr>
                                                     <th scope="row">{{ event.id }}</th>
                                                     <td>{{ event.customer != null ? event.customer.name : ' - ' }}</td>
@@ -285,6 +362,296 @@ const providersByEvent = (event) => {
                                                     <td>{{ new Date(event.date).toLocaleDateString() }}</td>
                                                     <td>{{ new Date(event.date_final).toLocaleDateString() }}</td>
                                                     <td>
+                                                        <Modal
+                                                            v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin')"
+                                                            :key="index" modal-title="Follow UP"
+                                                            :ok-botton-callback="saveStatus" :content-big="true"
+                                                            btn-class="btn btn-success btn-icon-split mr-2">
+                                                            <template v-slot:button>
+                                                                <div v-on:click="editStatus(event.event_status, event.id)">
+                                                                    <span class="icon text-white-50">
+                                                                        <i class="fas fa-arrows-alt-v"></i>
+                                                                    </span>
+                                                                    <span class="text">Follow UP</span>
+                                                                </div>
+                                                            </template>
+                                                            <template v-slot:content>
+
+                                                                <div class="container">
+                                                                    <div class="row">
+
+                                                                        <div class="col-6">
+                                                                            <h2>Tabela de Hospedagem</h2>
+                                                                            <table class="table">
+                                                                                <tbody>
+                                                                                    <tr>
+                                                                                        <th>Data da Solicitação
+                                                                                        </th>
+                                                                                        <td>
+                                                                                            {{ formStatus.request_hotel }}
+                                                                                            <datepicker
+                                                                                                v-model="formStatus.request_hotel"
+                                                                                                class="form-control"
+                                                                                                :locale="ptBR"
+                                                                                                inputFormat="dd/MM/yyyy"
+                                                                                                weekdayFormat="EEEEEE" />
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <th>Reunião de Briefing</th>
+                                                                                        <td>
+                                                                                            <datepicker
+                                                                                                v-model="formStatus.briefing_hotel"
+                                                                                                class="form-control"
+                                                                                                :locale="ptBR"
+                                                                                                inputFormat="dd/MM/yyyy"
+                                                                                                weekdayFormat="EEEEEE" />
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <th>Pedido ao Fornecedor</th>
+                                                                                        <td>
+                                                                                            <datepicker
+                                                                                                v-model="formStatus.provider_order_hotel"
+                                                                                                class="form-control"
+                                                                                                :locale="ptBR"
+                                                                                                inputFormat="dd/MM/yyyy"
+                                                                                                weekdayFormat="EEEEEE" />
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <th>Chegada Resposta</th>
+                                                                                        <td>
+                                                                                            <datepicker
+                                                                                                v-model="formStatus.response_hotel"
+                                                                                                class="form-control"
+                                                                                                :locale="ptBR"
+                                                                                                inputFormat="dd/MM/yyyy"
+                                                                                                weekdayFormat="EEEEEE" />
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <th>Precificação pelo Gestor</th>
+                                                                                        <td>
+                                                                                            <datepicker
+                                                                                                v-model="formStatus.pricing_hotel"
+                                                                                                class="form-control"
+                                                                                                :locale="ptBR"
+                                                                                                inputFormat="dd/MM/yyyy"
+                                                                                                weekdayFormat="EEEEEE" />
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <th>Enviado ao Cliente</th>
+                                                                                        <td>
+                                                                                            <datepicker
+                                                                                                v-model="formStatus.custumer_send_hotel"
+                                                                                                class="form-control"
+                                                                                                :locale="ptBR"
+                                                                                                inputFormat="dd/MM/yyyy"
+                                                                                                weekdayFormat="EEEEEE" />
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <th>Pedido de Alteração</th>
+                                                                                        <td>
+                                                                                            <datepicker
+                                                                                                v-model="formStatus.change_hotel"
+                                                                                                class="form-control"
+                                                                                                :locale="ptBR"
+                                                                                                inputFormat="dd/MM/yyyy"
+                                                                                                weekdayFormat="EEEEEE" />
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <th>Fechado com Cliente</th>
+                                                                                        <td>
+                                                                                            <datepicker
+                                                                                                v-model="formStatus.done_hotel"
+                                                                                                class="form-control"
+                                                                                                :locale="ptBR"
+                                                                                                inputFormat="dd/MM/yyyy"
+                                                                                                weekdayFormat="EEEEEE" />
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <th>Status</th>
+                                                                                        <td>
+                                                                                            <select class="form-control"
+                                                                                                id="customer"
+                                                                                                :required="required">
+                                                                                                <option>.::Selecione::.
+                                                                                                </option>
+                                                                                                <option
+                                                                                                    :selected="formStatus.status_hotel == 'Aguardando Aprovação'"
+                                                                                                    value="Aguardando Aprovação">
+                                                                                                    Aguardando Aprovação
+                                                                                                </option>
+                                                                                                <option
+                                                                                                    :selected="formStatus.status_hotel != 'Aguardando Aprovação' && formStatus.status_hotel != ''"
+                                                                                                    value="Aprovado">
+                                                                                                    {{
+                                                                                                        formStatus.status_hotel
+                                                                                                        != '' ?
+                                                                                                        formStatus.status_hotel
+                                                                                                        : 'Aprovado' }}
+                                                                                                </option>
+                                                                                            </select>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td colspan="2">
+                                                                                            <div class="form-group">
+                                                                                                <InputLabel
+                                                                                                    for="observation_hotel"
+                                                                                                    value="Obs:" />
+                                                                                                <textarea
+                                                                                                    class="form-control"
+                                                                                                    v-model="formStatus.observation_hotel"></textarea>
+                                                                                            </div>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+
+                                                                        <div class="col-6">
+                                                                            <h2>Tabela de Transporte</h2>
+                                                                            <table class="table">
+                                                                                <tbody>
+                                                                                    <tr>
+                                                                                        <th>Data da Solicitação</th>
+                                                                                        <td>
+                                                                                            <datepicker
+                                                                                                v-model="formStatus.request_transport"
+                                                                                                class="form-control"
+                                                                                                :locale="ptBR"
+                                                                                                inputFormat="dd/MM/yyyy"
+                                                                                                weekdayFormat="EEEEEE" />
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <th>Reunião de Briefing</th>
+                                                                                        <td>
+                                                                                            <datepicker
+                                                                                                v-model="formStatus.briefing_transport"
+                                                                                                class="form-control"
+                                                                                                :locale="ptBR"
+                                                                                                inputFormat="dd/MM/yyyy"
+                                                                                                weekdayFormat="EEEEEE" />
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <th>Pedido ao Fornecedor</th>
+                                                                                        <td>
+                                                                                            <datepicker
+                                                                                                v-model="formStatus.provider_order_transport"
+                                                                                                class="form-control"
+                                                                                                :locale="ptBR"
+                                                                                                inputFormat="dd/MM/yyyy"
+                                                                                                weekdayFormat="EEEEEE" />
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <th>Chegada Resposta</th>
+                                                                                        <td>
+                                                                                            <datepicker
+                                                                                                v-model="formStatus.response_transport"
+                                                                                                class="form-control"
+                                                                                                :locale="ptBR"
+                                                                                                inputFormat="dd/MM/yyyy"
+                                                                                                weekdayFormat="EEEEEE" />
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <th>Precificação pelo Gestor</th>
+                                                                                        <td>
+                                                                                            <datepicker
+                                                                                                v-model="formStatus.pricing_transport"
+                                                                                                class="form-control"
+                                                                                                :locale="ptBR"
+                                                                                                inputFormat="dd/MM/yyyy"
+                                                                                                weekdayFormat="EEEEEE" />
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <th>Enviado ao Cliente</th>
+                                                                                        <td>
+                                                                                            <datepicker
+                                                                                                v-model="formStatus.custumer_send_transport"
+                                                                                                class="form-control"
+                                                                                                :locale="ptBR"
+                                                                                                inputFormat="dd/MM/yyyy"
+                                                                                                weekdayFormat="EEEEEE" />
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <th>Pedido de Alteração</th>
+                                                                                        <td>
+                                                                                            <datepicker
+                                                                                                v-model="formStatus.change_transport"
+                                                                                                class="form-control"
+                                                                                                :locale="ptBR"
+                                                                                                inputFormat="dd/MM/yyyy"
+                                                                                                weekdayFormat="EEEEEE" />
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <th>Fechado com Cliente</th>
+                                                                                        <td>
+                                                                                            <datepicker
+                                                                                                v-model="formStatus.done_transport"
+                                                                                                class="form-control"
+                                                                                                :locale="ptBR"
+                                                                                                inputFormat="dd/MM/yyyy"
+                                                                                                weekdayFormat="EEEEEE" />
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <th>Status</th>
+                                                                                        <td>
+                                                                                            <select class="form-control"
+                                                                                                id="customer"
+                                                                                                :required="required">
+                                                                                                <option>.::Selecione::.
+                                                                                                </option>
+                                                                                                <option
+                                                                                                    :selected="formStatus.status_transport == 'Aguardando Aprovação'"
+                                                                                                    value="Aguardando Aprovação">
+                                                                                                    Aguardando Aprovação
+                                                                                                </option>
+                                                                                                <option
+                                                                                                    :selected="formStatus.status_transport != 'Aguardando Aprovação' && formStatus.status_transport != ''"
+                                                                                                    value="Aprovado">
+                                                                                                    {{
+                                                                                                        formStatus.status_transport
+                                                                                                        != '' ?
+                                                                                                        formStatus.status_transport
+                                                                                                        : 'Aprovado' }}
+                                                                                                </option>
+                                                                                            </select>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td colspan="2">
+                                                                                            <div class="form-group">
+                                                                                                <InputLabel
+                                                                                                    for="observation_transport"
+                                                                                                    value="Obs:" />
+                                                                                                <textarea
+                                                                                                    class="form-control"
+                                                                                                    v-model="formStatus.observation_transport"></textarea>
+                                                                                            </div>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </template>
+                                                        </Modal>
+
 
                                                         <Link
                                                             v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin')"
@@ -615,6 +982,32 @@ const providersByEvent = (event) => {
                                         </tbody>
                                     </table>
                                 </div>
+
+                                <!-- Navegação da página -->
+                                <nav aria-label="Page navigation example">
+                                    <ul class="pagination">
+                                        <li class="page-item" :class="{ 'disabled': !events.prev_page_url }">
+                                            <a class="page-link"
+                                                :href="route('event-list', { page: events.current_page - 1 })">
+                                                Anterior
+                                            </a>
+                                        </li>
+
+                                        <li class="page-item" v-for="page in events.last_page" :key="page"
+                                            :class="{ 'active': page === events.current_page }">
+                                            <a class="page-link" :href="route('event-list', { page: page })"
+                                                v-if="page !== events.current_page">{{ page }}</a>
+                                            <a class="page-link" v-if="page === events.current_page">{{ page }}</a>
+                                        </li>
+
+                                        <li class="page-item" :class="{ 'disabled': !events.next_page_url }">
+                                            <a class="page-link"
+                                                :href="route('event-list', { page: events.current_page + 1 })">
+                                                Proxima
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
                             </div>
                         </div>
                     </div>

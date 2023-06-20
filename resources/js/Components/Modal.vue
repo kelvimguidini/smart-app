@@ -31,6 +31,10 @@ const props = defineProps({
         type: Boolean,
         default: false
     },
+    contentBig: {
+        type: Boolean,
+        default: false
+    },
     btnBlank: {
         type: String,
         default: ''
@@ -45,6 +49,13 @@ const id = 'modal-' + Math.floor(Date.now() * Math.random()).toString(36)
 
 </script>
 
+<style>
+.modal-content-big {
+    width: fit-content !important;
+    max-width: 1100px !important;
+}
+</style>
+
 <template>
     <a href="" :class="btnClass" :disabled="btnDisabled" data-toggle="modal" :data-target="'#' + id">
         <slot name="button" />
@@ -52,7 +63,7 @@ const id = 'modal-' + Math.floor(Date.now() * Math.random()).toString(36)
 
     <!-- Modal -->
     <div class="modal fade" :id="id" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog" v-bind:class="{ 'modal-content-big': contentBig }" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title text-dark" id="exampleModalLabel">{{ modalTitle }}</h5>

@@ -20,6 +20,7 @@ import FormProviderABOpt from '@/Components/FormProviderABOpt.vue';
 import FormProviderHallOpt from '@/Components/FormProviderHallOpt.vue';
 import FormProviderAddOpt from '@/Components/FormProviderAddOpt.vue';
 import FormProviderTransportOpt from '@/Components/FormProviderTransportOpt.vue';
+import { CountrySelect, RegionSelect } from 'vue-country-region-select';
 
 const props = defineProps({
     crds: {
@@ -179,8 +180,6 @@ const edit = (event) => {
         form.hotel_operator = event.hotel_operator;
         form.air_operator = event.air_operator;
         form.land_operator = event.land_operator;
-        form.iof = event.iof;
-        form.service_charge = event.service_charge;
 
 
         props.crds = props.crds.filter((v, i) => { return v.customer == null || v.customer.id == form.customer });
@@ -289,9 +288,7 @@ const form = useForm({
     crd_id: '',
     hotel_operator: '',
     air_operator: '',
-    land_operator: '',
-    iof: '',
-    service_charge: ''
+    land_operator: ''
 });
 
 const formDelete = useForm({
@@ -344,6 +341,18 @@ const editOpt = (opt) => {
 
 const formProviderOptRefAB = ref(null);
 
+const selectedCountry = ref(null);
+const selectedRegion = ref(null);
+
+const onCountrySelect = (country) => {
+    alert(country);
+    selectedCountry.value = country;
+    selectedRegion.value = null;
+}
+const onRegionSelect = (region) => {
+    selectedRegion.value = region;
+    alert(region);
+}
 
 const deleteOptAB = (id) => {
     isLoader.value = true;
@@ -573,26 +582,11 @@ const newEventProv = (type) => {
                                             autocomplete="code" />
                                         <InputError class="mt-2 text-danger" :message="form.errors.code" />
                                     </div>
-                                    <div class="row">
 
-                                        <div class="col">
-                                            <div class="form-group">
-                                                <InputLabel for="iof" value="IOF:" />
-                                                <TextInput type="number" class="form-control" v-model="form.iof" required
-                                                    autofocus autocomplete="iof" />
-                                                <InputError class="mt-2 text-danger" :message="form.errors.iof" />
-                                            </div>
-                                        </div>
-                                        <div class="col">
-                                            <div class="form-group">
-                                                <InputLabel for="service_charge" value="Taxa De Serviço:" />
-                                                <TextInput type="number" class="form-control" v-model="form.service_charge"
-                                                    required autofocus autocomplete="service_charge" />
-                                                <InputError class="mt-2 text-danger"
-                                                    :message="form.errors.service_charge" />
-                                            </div>
-                                        </div>
+                                    <div class="form-group">
+                                        <CountrySelect @input="onCountrySelect" />
                                     </div>
+
 
                                 </div>
                                 <div class="col-lg-4">

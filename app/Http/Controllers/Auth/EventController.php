@@ -17,6 +17,7 @@ use App\Models\EventAB;
 use App\Models\EventAdd;
 use App\Models\EventHall;
 use App\Models\EventHotel;
+use App\Models\EventStatus;
 use App\Models\EventTransport;
 use App\Models\Frequency;
 use App\Models\Local;
@@ -46,17 +47,22 @@ class EventController extends Controller
      *
      * @return \Inertia\Response
      */
-    public function list()
+    public function list(Request $request)
     {
+        $perPage = 10;
+        $page = $request->page ? $request->page : 1;
+
         $userId =  Auth::user()->id;
         if (Gate::allows('event_admin')) {
             $e = Event::with(['crd', 'customer', 'event_hotels.hotel', 'event_abs.ab', 'event_halls.hall', 'event_adds.add', 'event_transports.transport', 'event_transports.providerBudget.user',  'event_hotels.providerBudget.user', 'event_abs.providerBudget.user', 'event_halls.providerBudget.user', 'event_adds.providerBudget.user'])
                 ->with('hotelOperator')
                 ->with('airOperator')
                 ->with('landOperator')
-                ->get();
+
+                ->with('eventStatus')
+                ->paginate($perPage, ['*'], 'page', $page);
         } else if (Gate::allows('hotel_operator') || Gate::allows('land_operator') || Gate::allows('air_operator')) {
-            $e = Event::with(['crd', 'customer', 'event_hotels.hotel', 'event_abs.ab', 'event_halls.hall', 'event_adds.add', 'event_transports.transport', 'event_transports.providerBudget.user', 'event_hotels.providerBudget.user', 'event_abs.providerBudget.user', 'event_halls.providerBudget.user', 'event_adds.providerBudget.user'])
+            $e = Event::with(['event_status', 'crd', 'customer', 'event_hotels.hotel', 'event_abs.ab', 'event_halls.hall', 'event_adds.add', 'event_transports.transport', 'event_transports.providerBudget.user', 'event_hotels.providerBudget.user', 'event_abs.providerBudget.user', 'event_halls.providerBudget.user', 'event_adds.providerBudget.user'])
                 ->with(['hotelOperator' => function ($query) use ($userId) {
                     $query->where('id', '=', $userId);
                 }])
@@ -66,7 +72,7 @@ class EventController extends Controller
                 ->with(['landOperator' => function ($query) use ($userId) {
                     $query->where('id', '=', $userId);
                 }])
-                ->get();
+                ->paginate($perPage, ['*'], 'page', $page);
         } else {
             abort(403);
         }
@@ -224,8 +230,6 @@ class EventController extends Controller
                 $event->hotel_operator = $request->hotel_operator;
                 $event->air_operator = $request->air_operator;
                 $event->land_operator = $request->land_operator;
-                $event->iof = $request->iof;
-                $event->service_charge = $request->service_charge;
 
                 $event->save();
             } else {
@@ -244,8 +248,6 @@ class EventController extends Controller
                     'hotel_operator' => $request->hotel_operator,
                     'air_operator' => $request->air_operator,
                     'land_operator' => $request->land_operator,
-                    'iof' => $request->iof,
-                    'service_charge' => $request->service_charge
                 ]);
             }
         } catch (Exception $e) {
@@ -253,6 +255,80 @@ class EventController extends Controller
         }
         return redirect()->route('event-edit',  ['id' => $event->id, 'tab' => 1])->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
     }
+
+
+    /**
+     * Handle an incoming registration request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function statusStore(Request $request)
+    {
+        if (!Gate::allows('change_status_admin')) {
+            abort(403);
+        }
+
+        try {
+
+            if ($request->id > 0) {
+
+                $status = EventStatus::find($request->id);
+
+                $status->observation_hotel = $request->observation_hotel;
+                $status->observation_transport = $request->observation_transport;
+                $status->request_hotel = $request->request_hotel;
+                $status->provider_order_hotel = $request->provider_order_hotel;
+                $status->briefing_hotel = $request->briefing_hotel;
+                $status->response_hotel = $request->response_hotel;
+                $status->pricing_hotel = $request->pricing_hotel;
+                $status->custumer_send_hotel = $request->custumer_send_hotel;
+                $status->change_hotel = $request->change_hotel;
+                $status->done_hotel = $request->done_hotel;
+                $status->status_hotel = $request->status_hotel == "Aprovado" ? "Aprovado por " . User::find(Auth::user()->id)->name : $request->status_hotel;
+                $status->request_transport = $request->request_transport;
+                $status->provider_order_transport = $request->provider_order_transport;
+                $status->response_transport = $request->response_transport;
+                $status->pricing_transport = $request->pricing_transport;
+                $status->custumer_send_transport = $request->custumer_send_transport;
+                $status->done_transport = $request->done_transport;
+                $status->change_transport = $request->change_transport;
+                $status->status_transport = $request->status_transport == "Aprovado" ? "Aprovado por " . User::find(Auth::user()->id)->name : $request->status_transport;
+
+                $status->save();
+            } else {
+
+                $status = EventStatus::create([
+                    'event_id' => $request->event_id,
+                    'observation_hotel' => $request->observation_hotel,
+                    'observation_transport' => $request->observation_transport,
+                    'request_hotel' => $request->request_hotel,
+                    'provider_order_hotel' => $request->provider_order_hotel,
+                    'briefing_hotel' => $request->briefing_hotel,
+                    'response_hotel' => $request->response_hotel,
+                    'pricing_hotel' => $request->pricing_hotel,
+                    'custumer_send_hotel' => $request->custumer_send_hotel,
+                    'change_hotel' => $request->change_hotel,
+                    'done_hotel' => $request->done_hotel,
+                    'status_hotel' => $request->status_hotel == "Aprovado" ? "Aprovado por " . User::find(Auth::user()->id)->name : $request->status_hotel,
+                    'request_transport' => $request->request_transport,
+                    'provider_order_transport' => $request->provider_order_transport,
+                    'response_transport' => $request->response_transport,
+                    'pricing_transport' => $request->pricing_transport,
+                    'custumer_send_transport' => $request->custumer_send_transport,
+                    'change_transport' => $request->change_transport,
+                    'response_transport' => $request->response_transport,
+                    'status_transport' => $request->status_transport == "Aprovado" ? "Aprovado por " . User::find(Auth::user()->id)->name : $request->status_transport,
+                ]);
+            }
+        } catch (Exception $e) {
+            throw $e;
+        }
+        return redirect()->back()->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
+    }
+
 
     /**
      * Display the registration view.

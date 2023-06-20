@@ -13,9 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('provider', function (Blueprint $table) {
+        Schema::table('event_hotel', function (Blueprint $table) {
 
-            $table->boolean('is_transport')->default(false);
+            $table->decimal('iof')->default(0);
+            $table->decimal('service_charge')->default(0);
         });
     }
 
@@ -26,8 +27,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('provider', function (Blueprint $table) {
-            $table->dropColumn('is_transport');
+        Schema::table('event_hotel', function (Blueprint $table) {
+            //
         });
     }
 };

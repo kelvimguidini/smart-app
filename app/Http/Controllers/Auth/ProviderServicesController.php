@@ -6,10 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\Constants;
 use App\Mail\PdfEmail;
 use App\Models\Event;
-use App\Models\EventAB;
-use App\Models\EventHall;
-use App\Models\EventHotel;
-use App\Models\Provider;
+use App\Models\EventAdd;
+use App\Models\ProviderServices;
 use App\Models\User;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -21,7 +19,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Mail;
 
-class ProviderController extends Controller
+class ProviderServicesController extends Controller
 {
 
     /**
@@ -32,13 +30,13 @@ class ProviderController extends Controller
     public function create(Request $request)
     {
         $userId =  Auth::user()->id;
-        if (Gate::allows('admin_provider')) {
-            $hotels = Provider::get();
+        if (Gate::allows('event_admin')) {
+            $hotels = ProviderServices::get();
         } else {
             abort(403);
         }
 
-        return Inertia::render('Auth/Auxiliaries/Provider', [
+        return Inertia::render('Auth/Auxiliaries/ProviderServices', [
             'hotels' => $hotels,
             'cities' =>  Constants::CITIES,
         ]);
@@ -55,7 +53,7 @@ class ProviderController extends Controller
      */
     public function store(Request $request)
     {
-        if (!Gate::allows('admin_provider')) {
+        if (!Gate::allows('admin_provider_service')) {
             abort(403);
         }
 
@@ -70,7 +68,7 @@ class ProviderController extends Controller
         try {
 
             if ($request->id > 0) {
-                $hotel = Provider::find($request->id);
+                $hotel = ProviderServices::find($request->id);
 
                 $hotel->name = $request->name;
                 $hotel->city = $request->city;
@@ -85,7 +83,7 @@ class ProviderController extends Controller
                 $hotel->save();
             } else {
 
-                $hotel = Provider::create([
+                $hotel = ProviderServices::create([
                     'name' => $request->name,
                     'city' => $request->city,
                     'contact' => $request->contact,
@@ -127,20 +125,12 @@ class ProviderController extends Controller
         try {
 
             if ($request->id > 0) {
-                switch ($request->type) {
-                    case 'hotel':
-                        $provider = EventHotel::find($request->id);
-                        $provider->hotel_id = $request->provider_id;
-                        break;
-                    case 'ab':
-                        $provider = EventAB::find($request->id);
-                        $provider->ab_id = $request->provider_id;
-                        break;
-                    case 'hall':
-                        $provider = EventHall::find($request->id);
-                        $provider->hall_id = $request->provider_id;
-                        break;
-                }
+
+                $provider = EventAdd::find($request->id);
+                $provider->add_id = $request->provider_id;
+
+
+
 
                 $provider->event_id = $request->event_id;
                 $provider->iss_percent = $request->iss_percent;
@@ -156,71 +146,25 @@ class ProviderController extends Controller
 
                 $provider->save();
             } else {
-
-                switch ($request->type) {
-                    case 'hotel':
-                        $provider = EventHotel::create([
-                            'hotel_id' => $request->provider_id,
-                            'event_id' => $request->event_id,
-                            'iss_percent' => $request->iss_percent,
-                            'service_percent' => $request->service_percent,
-                            'iva_percent' => $request->iva_percent,
-                            'currency_id' => $request->currency,
-                            'invoice' => $request->invoice,
-                            'internal_observation' => $request->internal_observation,
-                            'customer_observation' => $request->customer_observation,
-                            'iof' => $request->iof,
-                            'service_charge' => $request->service_charge
-                        ]);
-                        break;
-                    case 'ab':
-                        $provider = EventAB::create([
-                            'ab_id' => $request->provider_id,
-                            'event_id' => $request->event_id,
-                            'iss_percent' => $request->iss_percent,
-                            'service_percent' => $request->service_percent,
-                            'iva_percent' => $request->iva_percent,
-                            'currency_id' => $request->currency,
-                            'invoice' => $request->invoice,
-                            'internal_observation' => $request->internal_observation,
-                            'customer_observation' => $request->customer_observation,
-                            'iof' => $request->iof,
-                            'service_charge' => $request->service_charge
-                        ]);
-                        break;
-                    case 'hall':
-                        $provider = EventHall::create([
-                            'hall_id' => $request->provider_id,
-                            'event_id' => $request->event_id,
-                            'iss_percent' => $request->iss_percent,
-                            'service_percent' => $request->service_percent,
-                            'iva_percent' => $request->iva_percent,
-                            'currency_id' => $request->currency,
-                            'invoice' => $request->invoice,
-                            'internal_observation' => $request->internal_observation,
-                            'customer_observation' => $request->customer_observation,
-                            'iof' => $request->iof,
-                            'service_charge' => $request->service_charge
-                        ]);
-                        break;
-                }
+                $provider = EventAdd::create([
+                    'add_id' => $request->provider_id,
+                    'event_id' => $request->event_id,
+                    'iss_percent' => $request->iss_percent,
+                    'service_percent' => $request->service_percent,
+                    'iva_percent' => $request->iva_percent,
+                    'currency_id' => $request->currency,
+                    'invoice' => $request->invoice,
+                    'internal_observation' => $request->internal_observation,
+                    'customer_observation' => $request->customer_observation,
+                    'iof' => $request->iof,
+                    'service_charge' => $request->service_charge
+                ]);
             }
         } catch (Exception $e) {
             throw $e;
         }
-        switch ($request->type) {
-            case 'hotel':
-                $tab = 1;
-                break;
-            case 'ab':
-                $tab = 2;
-                break;
-            case 'hall':
-                $tab = 3;
-                break;
-        }
 
-        return redirect()->route('event-edit',  ['id' => $request->event_id, 'tab' => $tab, 'ehotel' => $provider->id])->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
+        return redirect()->route('event-edit',  ['id' => $request->event_id, 'tab' => 4, 'ehotel' => $provider->id])->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
     }
 
     /**
@@ -230,12 +174,12 @@ class ProviderController extends Controller
      */
     public function delete(Request $request)
     {
-        if (!Gate::allows('admin_provider')) {
+        if (!Gate::allows('admin_provider_service')) {
             abort(403);
         }
         try {
 
-            $r = Provider::find($request->id);
+            $r = ProviderServices::find($request->id);
 
             $r->delete();
         } catch (Exception $e) {
@@ -257,47 +201,23 @@ class ProviderController extends Controller
 
         $eventBank = Event::with([
             'customer',
-            'event_hotels.hotel' => function ($query) use ($provider) {
+            'event_adds.add' => function ($query) use ($provider) {
                 $query->where('id', '=', $provider);
             },
-            'event_abs.ab' => function ($query) use ($provider) {
-                $query->where('id', '=', $provider);
-            },
-            'event_halls.hall' => function ($query) use ($provider) {
-                $query->where('id', '=', $provider);
-            },
-
-            'event_hotels.eventHotelsOpt' => function ($query) use ($provider) {
-                $query->whereHas('event_hotel', function ($query) use ($provider) {
-                    $query->where('hotel_id', '=', $provider);
+            'event_adds.eventAddOpts' => function ($query) use ($provider) {
+                $query->whereHas('event_add', function ($query) use ($provider) {
+                    $query->where('add_id', '=', $provider);
                 });
-            }, 'event_hotels.eventHotelsOpt.regime', 'event_hotels.eventHotelsOpt.apto_hotel', 'event_hotels.eventHotelsOpt.category_hotel', 'event_hotels.currency',
-            'event_abs.eventAbOpts' => function ($query) use ($provider) {
-                $query->whereHas('event_ab', function ($query) use ($provider) {
-                    $query->where('ab_id', '=', $provider);
-                });
-            }, 'event_abs.eventAbOpts.Local', 'event_abs.eventAbOpts.service_type', 'event_abs.currency',
-            'event_halls.eventHallOpts' => function ($query) use ($provider) {
-                $query->whereHas('event_hall', function ($query) use ($provider) {
-                    $query->where('hall_id', '=', $provider);
-                });
-            }, 'event_halls.eventHallOpts.purpose', 'event_halls.currency',
+            }, 'event_adds.eventAddOpts.service', 'event_adds.eventAddOpts.measure', 'event_adds.eventAddOpts.frequency', 'event_adds.currency',
 
         ])->find($event);
 
         $providers = collect();
 
-        if ($eventBank->event_hotels->isNotEmpty()) {
-            $providers = $providers->concat($eventBank->event_hotels->pluck('hotel'));
+        if ($eventBank->event_adds->isNotEmpty()) {
+            $providers = $providers->concat($eventBank->event_adds->pluck('add'));
         }
 
-        if ($eventBank->event_abs->isNotEmpty()) {
-            $providers = $providers->concat($eventBank->event_abs->pluck('ab'));
-        }
-
-        if ($eventBank->event_halls->isNotEmpty()) {
-            $providers = $providers->concat($eventBank->event_halls->pluck('hall'));
-        }
 
         $providerBank = $providers->filter()->unique()->values()->first();
 
@@ -315,7 +235,7 @@ class ProviderController extends Controller
             return $pdf->stream('Proposta.pdf');
         } else {
 
-            $sub = "Proposta para hotel";
+            $sub = "Proposta para serviços";
             $user = User::find(Auth::user()->id);
             $data = [
                 'body' => $request->message != null ? urldecode($request->message) : "",
@@ -344,28 +264,12 @@ class ProviderController extends Controller
             );
 
             // Encontre o registro existente com base no event_id e provider_id
-            $eventHotel = EventHotel::where('event_id', $event)->where('hotel_id', $provider)->first();
+            $eventAdd = EventAdd::where('event_id', $event)->where('add_id', $provider)->first();
 
-            if ($eventHotel) {
+            if ($eventAdd) {
                 // Atualize o valor sended_email para true
-                $eventHotel->sended_mail = true;
-                $eventHotel->update();
-            }
-            // Encontre o registro existente com base no event_id e provider_id
-            $eventAb = EventAB::where('event_id', $event)->where('ab_id', $provider)->first();
-
-            if ($eventAb) {
-                // Atualize o valor sended_email para true
-                $eventAb->sended_mail = true;
-                $eventAb->update();
-            }
-            // Encontre o registro existente com base no event_id e provider_id
-            $eventHall = EventHall::where('event_id', $event)->where('hall_id', $provider)->first();
-
-            if ($eventHall) {
-                // Atualize o valor sended_email para true
-                $eventHall->sended_mail = true;
-                $eventHall->update();
+                $eventAdd->sended_mail = true;
+                $eventAdd->update();
             }
 
             return redirect()->back()->with('flash', ['message' => 'E-mail enviado com sucesso!', 'type' => 'success']);

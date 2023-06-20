@@ -41,6 +41,9 @@ class Constants extends Middleware
         ['name' => "vehicle_admin", "title" => "Administrar Veículo"],
         ['name' => "car_model_admin", "title" => "Administrar Modelo Carro"],
         ['name' => "transport_service_admin", "title" => "Administrar Serviço Transporte"],
+        ['name' => "change_status_admin", "title" => "Administrar Status"],
+        ['name' => "admin_provider_service", "title" => "Administrar Fornecedor Serviço"],
+        ['name' => "admin_provider_transport", "title" => "Administrar Fornecedor Transporte"],
     ];
 
 

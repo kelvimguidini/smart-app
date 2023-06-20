@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Provider extends Model
+class ProviderServices extends Model
 {
     use SoftDeletes;
 
@@ -19,12 +19,10 @@ class Provider extends Model
         'iss_percent',
         'service_percent',
         'iva_percent',
-        'has_hotel',
-        'has_ab',
-        'has_hall'
+        'has_additional',
     ];
 
-    protected $table = 'provider';
+    protected $table = 'provider_services';
 
     /**
      * The primary key associated with the table.
@@ -41,9 +39,6 @@ class Provider extends Model
     protected $iss_percent = 'iss_percent';
     protected $service_percent = 'service_percent';
     protected $iva_percent = 'iva_percent';
-    protected $has_hotel = 'has_hotel';
-    protected $has_ab = 'has_ab';
-    protected $has_hall = 'has_hall';
 
     public function event_hotels()
     {
