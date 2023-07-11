@@ -48,6 +48,8 @@ const form = useForm({
     iss_percent: null,
     service_percent: null,
     iva_percent: null,
+    service_charge: null,
+    iof: null,
 
     internal_observation: '',
     customer_observation: '',
@@ -57,7 +59,22 @@ const form = useForm({
 const submit = () => {
     form.type = props.type;
     form.event_id = props.eventId;
-    form.post(route('hotel-event-save'), {
+
+    switch (props.type) {
+
+        case 'add':
+            var url = route('provider-service-event-save');
+            break;
+        case 'transport':
+            var url = route('provider-transport-event-save');
+            break;
+        default:
+            var url = route('hotel-event-save');
+            break;
+    }
+
+
+    form.post(url, {
         onSuccess: (id) => {
             selectProvider(form.provider_id);
             props.mountCallBack();
@@ -92,6 +109,9 @@ const selectProvider = (id) => {
         form.iss_percent = prov.iss_percent;
         form.iva_percent = prov.iva_percent;
         form.service_percent = prov.service_percent;
+        form.iof = prov.iof;
+        form.service_charge = prov.service_charge;
+
 
         if (props.selectCallBack && typeof props.selectCallBack === 'function') {
             props.selectCallBack(id);
@@ -125,6 +145,8 @@ const edit = () => {
         form.iss_percent = props.eventProvider.iss_percent;
         form.service_percent = props.eventProvider.service_percent;
         form.iva_percent = props.eventProvider.iva_percent;
+        form.iof = props.eventProvider.iof;
+        form.service_charge = props.eventProvider.service_charge;
 
         form.internal_observation = props.eventProvider.internal_observation;
         form.customer_observation = props.eventProvider.customer_observation;
@@ -186,7 +208,7 @@ const isLoader = ref(false);
         <div class="row">
             <div class="col">
                 <div class="form-group">
-                    <InputLabel for="hotel" value="Hotel:" />
+                    <InputLabel for="hotel" value="Fornecedor:" />
 
                     <select class="form-control" :id="'hotel-select' + type" :required="required">
                         <option>.::Selecione::.</option>
@@ -283,6 +305,27 @@ const isLoader = ref(false);
                 <div class="form-group">
                     <InputLabel for="customer_observation" value="Observação Cliente:" />
                     <textarea class="form-control" v-model="form.customer_observation"></textarea>
+                </div>
+            </div>
+
+
+            <div class="col-lg-3">
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <InputLabel for="iof" value="IOF:" />
+                            <TextInput type="number" class="form-control percent" v-model="form.iof" required autofocus
+                                min="0" step=".1" autocomplete="iof" />
+                        </div>
+                    </div>
+
+                    <div class="col">
+                        <div class="form-group">
+                            <InputLabel for="service_charge" value="Taxa Serviço:" />
+                            <TextInput type="number" class="form-control percent" v-model="form.service_charge" required
+                                autofocus min="0" step=".1" autocomplete="service_charge" />
+                        </div>
+                    </div>
                 </div>
             </div>
 

@@ -183,8 +183,7 @@ const isLoader = ref(false);
 
                 <div class="form-group">
                     <InputLabel for="name" value="Nome do Salão:" />
-                    <TextInput type="text" class="form-control" v-model="formOpt.name" required autofocus
-                        autocomplete="name" />
+                    <TextInput type="text" class="form-control" v-model="formOpt.name" autofocus autocomplete="name" />
                 </div>
 
                 <div class="form-group">

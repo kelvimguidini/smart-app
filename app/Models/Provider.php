@@ -19,6 +19,8 @@ class Provider extends Model
         'iss_percent',
         'service_percent',
         'iva_percent',
+        'iof',
+        'service_charge',
         'has_hotel',
         'has_ab',
         'has_hall'

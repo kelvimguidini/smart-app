@@ -41,20 +41,6 @@ class Event extends Model
      * @var string
      */
     protected $name = 'name';
-    /**
-     * The primary key associated with the table.
-     *
-     * @var int
-     */
-    protected $iof = 'iof';
-
-
-    /**
-     * The primary key associated with the table.
-     *
-     * @var string
-     */
-    protected $service_charge = 'service_charge';
 
     /**
      * The primary key associated with the table.
@@ -196,5 +182,10 @@ class Event extends Model
     public function eventStatus()
     {
         return $this->hasOne(EventStatus::class, 'event_id', 'id');
+    }
+
+    public function eventLocals()
+    {
+        return $this->hasMany(EventLocal::class, 'event_id', 'id');
     }
 }

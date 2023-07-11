@@ -20,7 +20,6 @@ import FormProviderABOpt from '@/Components/FormProviderABOpt.vue';
 import FormProviderHallOpt from '@/Components/FormProviderHallOpt.vue';
 import FormProviderAddOpt from '@/Components/FormProviderAddOpt.vue';
 import FormProviderTransportOpt from '@/Components/FormProviderTransportOpt.vue';
-import { CountrySelect, RegionSelect } from 'vue-country-region-select';
 
 const props = defineProps({
     crds: {
@@ -40,6 +39,14 @@ const props = defineProps({
         default: {},
     },
     providers: {
+        type: Array,
+        default: [],
+    },
+    providersService: {
+        type: Array,
+        default: [],
+    },
+    providersTranport: {
         type: Array,
         default: [],
     },
@@ -180,7 +187,7 @@ const edit = (event) => {
         form.hotel_operator = event.hotel_operator;
         form.air_operator = event.air_operator;
         form.land_operator = event.land_operator;
-
+        form.countries = event.event_locals.length > 0 ? event.event_locals : form.countries;
 
         props.crds = props.crds.filter((v, i) => { return v.customer == null || v.customer.id == form.customer });
 
@@ -258,13 +265,27 @@ onMounted(() => {
     }).on('select2:select', (e) => {
         form.land_operator = e.params.data.id;
     });
+
     //Basico - Fim
     mount();
 });
 
+const addCountry = () => {
+    form.countries.push({
+        id: 0,
+        pais: '',
+        cidade: '',
+        errors: '',
+    });
+};
+
+const removeCountry = (index) => {
+    if (form.countries.length > 1) {
+        form.countries.splice(index, 1);
+    }
+};
 
 const submit = () => {
-
     form.post(route('event-save'), {
         onSuccess: () => {
             mount();
@@ -288,7 +309,13 @@ const form = useForm({
     crd_id: '',
     hotel_operator: '',
     air_operator: '',
-    land_operator: ''
+    land_operator: '',
+    countries: [{
+        id: 0,
+        pais: '',
+        cidade: '',
+        errors: '',
+    }]
 });
 
 const formDelete = useForm({
@@ -341,19 +368,6 @@ const editOpt = (opt) => {
 
 const formProviderOptRefAB = ref(null);
 
-const selectedCountry = ref(null);
-const selectedRegion = ref(null);
-
-const onCountrySelect = (country) => {
-    alert(country);
-    selectedCountry.value = country;
-    selectedRegion.value = null;
-}
-const onRegionSelect = (region) => {
-    selectedRegion.value = region;
-    alert(region);
-}
-
 const deleteOptAB = (id) => {
     isLoader.value = true;
     formDelete.id = id;
@@ -376,7 +390,6 @@ const editOptAB = (opt) => {
     if (formProviderOptRefAB.value) {
         formProviderOptRefAB.value.editOpt(opt);
     }
-
 };
 
 //FIM FUNÇÕES ALIMENTAÇÃO E BEBIDAS
@@ -408,7 +421,6 @@ const editOptHall = (opt) => {
     if (formProviderOptRefHall.value) {
         formProviderOptRefHall.value.editOpt(opt);
     }
-
 };
 
 //FIM FUNÇÕES SALÕES
@@ -440,7 +452,6 @@ const editOptAdd = (opt) => {
     if (formProviderOptRefAdd.value) {
         formProviderOptRefAdd.value.editOpt(opt);
     }
-
 };
 
 //FIM FUNÇÕES ADD
@@ -525,7 +536,6 @@ const newEventProv = (type) => {
                 <h1 class="h3 mb-0 text-gray-800">Cadastro inicial</h1>
             </div>
         </template>
-
         <div id="tabs">
 
             <ul class="nav nav-tabs">
@@ -583,12 +593,46 @@ const newEventProv = (type) => {
                                         <InputError class="mt-2 text-danger" :message="form.errors.code" />
                                     </div>
 
-                                    <div class="form-group">
-                                        <CountrySelect @input="onCountrySelect" />
+                                    <div class="border rounded p-3">
+                                        <template v-for="(country, index) in form.countries" :key="index">
+                                            <div class="form-group">
+                                                <InputLabel :for="'country-' + index" value="País:" />
+                                                <TextInput :id="'country-' + index" type="text" class="form-control"
+                                                    v-model="country.pais" required autofocus
+                                                    :autocomplete="'country-' + index" />
+                                                <InputError class="mt-2 text-danger" :message="country.errors" />
+                                            </div>
+
+                                            <div class="form-group">
+                                                <InputLabel :for="'event_city-' + index" value="Cidade:" />
+                                                <TextInput :id="'event_city-' + index" type="text" class="form-control"
+                                                    v-model="country.cidade" required
+                                                    :autocomplete="'event_city-' + index" />
+                                                <InputError class="mt-2 text-danger" :message="country.errors" />
+                                            </div>
+
+                                            <div class="form-group">
+                                                <button v-if="form.countries.length > 1"
+                                                    @click.prevent="removeCountry(index)"
+                                                    class="btn btn-danger btn-icon-split">
+                                                    <span class="icon text-white-50">
+                                                        <i class="fas fa-trash"></i>
+                                                    </span>
+                                                </button>
+                                            </div>
+
+                                            <hr />
+                                        </template>
+                                        <button @click.prevent="addCountry"
+                                            class="btn btn-info btn-icon-split float-right m-1">
+                                            <span class="icon text-white-50">
+                                                <i class="fas fa-plus"></i>
+                                            </span>
+                                            <span class="text">Adicionar Local</span>
+                                        </button>
                                     </div>
-
-
                                 </div>
+
                                 <div class="col-lg-4">
                                     <div class="form-group">
                                         <InputLabel for="requester" value="Solicitante:" />
@@ -744,9 +788,8 @@ const newEventProv = (type) => {
 
                     <div id="form-hotel" class="card mb-4 py-3 border-left-primary">
                         <div class="card-body">
-                            <FormProvider :event-provider="eventHotel" :currencies="currencies"
-                                :providers="providers.filter(obj => !obj.is_transport)" type="hotel"
-                                :select-call-back="selectHotel" :event-id="event.id" :mount-call-back="mount"
+                            <FormProvider :event-provider="eventHotel" :currencies="currencies" :providers="providers"
+                                type="hotel" :select-call-back="selectHotel" :event-id="event.id" :mount-call-back="mount"
                                 ref="formProviderHotelRef">
                             </FormProvider>
                         </div>
@@ -850,9 +893,9 @@ const newEventProv = (type) => {
 
                     <div id="form-hall" class="card mb-4 py-3 border-left-primary">
                         <div class="card-body">
-                            <FormProvider key="ab" :event-provider="eventHall" :currencies="currencies"
-                                :providers="providers.filter(obj => !obj.is_transport)" type="hall" :event-id="event.id"
-                                :mount-call-back="mount" ref="formProviderHallRef">
+                            <FormProvider key="hall" :event-provider="eventHall" :currencies="currencies"
+                                :providers="providers" type="hall" :event-id="event.id" :mount-call-back="mount"
+                                ref="formProviderHallRef">
                             </FormProvider>
                         </div>
                     </div>
@@ -902,12 +945,11 @@ const newEventProv = (type) => {
                     <div id="form-add" class="card mb-4 py-3 border-left-primary">
                         <div class="card-body">
                             <FormProvider key="add" :event-provider="eventAdd" :currencies="currencies"
-                                :providers="providers.filter(obj => !obj.is_transport)" type="add" :event-id="event.id"
-                                :mount-call-back="mount" ref="formProviderAddRef">
+                                :providers="providersService" type="add" :event-id="event.id" :mount-call-back="mount"
+                                ref="formProviderAddRef">
                             </FormProvider>
                         </div>
                     </div>
-
                     <div v-if="eventAdd != null && eventAdd.id > 0" id="add-opt">
                         <div class="row">
                             <div class="col">
@@ -954,9 +996,8 @@ const newEventProv = (type) => {
                     <div id="form-trans" class="card mb-4 py-3 border-left-primary">
                         <div class="card-body">
                             <FormProvider :event-provider="eventTransport" :currencies="currencies"
-                                :providers="providers.filter(obj => obj.is_transport)" type="transport"
-                                :select-call-back="selectTransport" :event-id="event.id" :mount-call-back="mount"
-                                ref="formProviderTransportRef">
+                                :providers="providersTranport" type="transport" :select-call-back="selectTransport"
+                                :event-id="event.id" :mount-call-back="mount" ref="formProviderTransportRef">
                             </FormProvider>
                         </div>
                     </div>

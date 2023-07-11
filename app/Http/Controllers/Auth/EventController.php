@@ -17,12 +17,15 @@ use App\Models\EventAB;
 use App\Models\EventAdd;
 use App\Models\EventHall;
 use App\Models\EventHotel;
+use App\Models\EventLocal;
 use App\Models\EventStatus;
 use App\Models\EventTransport;
 use App\Models\Frequency;
 use App\Models\Local;
 use App\Models\Measure;
 use App\Models\Provider;
+use App\Models\ProviderServices;
+use App\Models\ProviderTransport;
 use App\Models\Purpose;
 use App\Models\PurposeHall;
 use App\Models\Regime;
@@ -52,17 +55,22 @@ class EventController extends Controller
         $perPage = 10;
         $page = $request->page ? $request->page : 1;
 
-        $userId =  Auth::user()->id;
+        $userId = Auth::user()->id;
+
+        // Obter os filtros do request
+        $startDate = $request->startDate;
+        $endDate = $request->endDate;
+        $city = $request->city;
+        $consultant = $request->consultant;
+        $client = $request->client;
+
         if (Gate::allows('event_admin')) {
-            $e = Event::with(['crd', 'customer', 'event_hotels.hotel', 'event_abs.ab', 'event_halls.hall', 'event_adds.add', 'event_transports.transport', 'event_transports.providerBudget.user',  'event_hotels.providerBudget.user', 'event_abs.providerBudget.user', 'event_halls.providerBudget.user', 'event_adds.providerBudget.user'])
+            $query = Event::with(['crd', 'customer', 'event_hotels.hotel', 'event_abs.ab', 'event_halls.hall', 'event_adds.add', 'event_transports.transport', 'event_transports.providerBudget.user', 'event_hotels.providerBudget.user', 'event_abs.providerBudget.user', 'event_halls.providerBudget.user', 'event_adds.providerBudget.user'])
                 ->with('hotelOperator')
                 ->with('airOperator')
-                ->with('landOperator')
-
-                ->with('eventStatus')
-                ->paginate($perPage, ['*'], 'page', $page);
+                ->with('landOperator');
         } else if (Gate::allows('hotel_operator') || Gate::allows('land_operator') || Gate::allows('air_operator')) {
-            $e = Event::with(['event_status', 'crd', 'customer', 'event_hotels.hotel', 'event_abs.ab', 'event_halls.hall', 'event_adds.add', 'event_transports.transport', 'event_transports.providerBudget.user', 'event_hotels.providerBudget.user', 'event_abs.providerBudget.user', 'event_halls.providerBudget.user', 'event_adds.providerBudget.user'])
+            $query = Event::with(['event_status', 'crd', 'customer', 'event_hotels.hotel', 'event_abs.ab', 'event_halls.hall', 'event_adds.add', 'event_transports.transport', 'event_transports.providerBudget.user', 'event_hotels.providerBudget.user', 'event_abs.providerBudget.user', 'event_halls.providerBudget.user', 'event_adds.providerBudget.user'])
                 ->with(['hotelOperator' => function ($query) use ($userId) {
                     $query->where('id', '=', $userId);
                 }])
@@ -71,17 +79,62 @@ class EventController extends Controller
                 }])
                 ->with(['landOperator' => function ($query) use ($userId) {
                     $query->where('id', '=', $userId);
-                }])
-                ->paginate($perPage, ['*'], 'page', $page);
+                }]);
         } else {
             abort(403);
         }
 
+        // Aplicar filtros se estiverem presentes
+        if ($startDate && $endDate) {
+            $query->where(function ($query) use ($startDate, $endDate) {
+                $query->whereDate('date', '>=', $startDate)
+                    ->whereDate('date', '<=', $endDate)
+                    ->orWhere(function ($query) use ($startDate, $endDate) {
+                        $query->whereDate('date_final', '>=', $startDate)
+                            ->whereDate('date_final', '<=', $endDate);
+                    })
+                    ->orWhere(function ($query) use ($startDate, $endDate) {
+                        $query->whereDate('date', '<=', $startDate)
+                            ->whereDate('date_final', '>=', $endDate);
+                    });
+            });
+        }
+
+        // Aplicar filtro de cidade, se estiver presente
+        if ($city) {
+            $query->whereHas('eventLocals', function ($query) use ($city) {
+                $query->where('cidade', $city);
+            });
+        }
+
+
+        if ($consultant && $consultant != ".::Selecione::.") {
+            $query->where(function ($query) use ($consultant) {
+                $query->where('hotel_operator', $consultant)
+                    ->orWhere('air_operator', $consultant)
+                    ->orWhere('land_operator', $consultant);
+            });
+        }
+
+        if ($client && $client != ".::Selecione::.") {
+            $query->where('customer_id', $client);
+        }
+
+        $events = $query->paginate($perPage, ['*'], 'page', $page);
+
         return Inertia::render('Auth/Event/EventList', [
-            'events' => $e
+            'events' => $events,
+            'filters' => (object)[
+                'startDate' => $startDate,
+                'endDate' => $endDate,
+                'city' => $city,
+                'consultant' => $consultant,
+                'client' => $client,
+            ],
+            'customers' => Customer::all(),
+            'users' => User::all()
         ]);
     }
-
 
     /**
      * Display the registration view.
@@ -94,12 +147,14 @@ class EventController extends Controller
             abort(403);
         }
 
-        $event = Event::find($request->id);
+        $event = Event::with("eventLocals")->find($request->id);
 
         $crds = CRD::with("customer")->get();
         $customers = Customer::all();
         $users = User::all();
         $providers = Provider::get();
+        $providersService = ProviderServices::get();
+        $providersTranport = ProviderTransport::get();
 
         $brokers = Broker::all();
         $currencies = Currency::all();
@@ -176,7 +231,9 @@ class EventController extends Controller
             'servicesT' => $servicesT,
             'brands' => $brands,
             'eventTransport' => $eventTransport,
-            'eventTransports' => $eventTransports
+            'eventTransports' => $eventTransports,
+            'providersService' => $providersService,
+            'providersTranport' => $providersTranport
         ]);
     }
 
@@ -232,6 +289,36 @@ class EventController extends Controller
                 $event->land_operator = $request->land_operator;
 
                 $event->save();
+
+                $savedCountries = $event->eventLocals()->pluck('id')->toArray();
+                $submittedCountries = $request->countries;
+
+                // Verificar quais países já estão no banco e tomar ações apropriadas
+                foreach ($submittedCountries as $submittedCountry) {
+                    // Verificar se o país já está no banco
+                    if (in_array($submittedCountry['id'], $savedCountries)) {
+                        // Atualizar o país existente no banco
+                        $country = EventLocal::find($submittedCountry['id']);
+
+                        $country->pais = $submittedCountry['pais'];
+                        $country->cidade = $submittedCountry['cidade'];
+                        // Outros campos do país...
+
+                        $country->save();
+                    } else {
+                        // Criar um novo país no banco
+                        $country = new EventLocal();
+                        $country->event_id = $event->id;
+                        $country->pais = $submittedCountry['pais'];
+                        $country->cidade = $submittedCountry['cidade'];
+
+                        $country->save();
+                    }
+                }
+
+                // Remover os países do banco que não estão mais presentes no formulário
+                $removedCountries = array_diff($savedCountries, array_column($submittedCountries, 'id'));
+                EventLocal::whereIn('id', $removedCountries)->delete();
             } else {
 
                 $event = Event::create([
@@ -249,6 +336,13 @@ class EventController extends Controller
                     'air_operator' => $request->air_operator,
                     'land_operator' => $request->land_operator,
                 ]);
+                foreach ($request->countries as $country) {
+                    EventLocal::create([
+                        'pais' => $country->pais,
+                        'cidade' => $country->cidade,
+                        'event_id' => $country->event_id,
+                    ]);
+                }
             }
         } catch (Exception $e) {
             throw $e;

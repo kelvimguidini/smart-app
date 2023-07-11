@@ -18,6 +18,7 @@ use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EventController;
 use App\Http\Controllers\Auth\FrequencyController;
 use App\Http\Controllers\Auth\HallController;
+use App\Http\Controllers\Auth\HomeController;
 use App\Http\Controllers\Auth\HotelController;
 use App\Http\Controllers\Auth\LocalController;
 use App\Http\Controllers\Auth\MeasureController;
@@ -351,6 +352,9 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::get('event-list/{page?}', [EventController::class, 'list'])
         ->name('event-list');
 
+    Route::post('event-list/{page?}', [EventController::class, 'list'])
+        ->name('event-list.filter');
+
     Route::get('event', [EventController::class, 'create'])
         ->name('event-create');
 
@@ -467,4 +471,25 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::get('proposal-hotel/{download}/{provider_id}/{event_id}/{emails?}/{copyMe?}/{message?}', [ProviderController::class, 'proposalPdf'])
         ->name('proposal-hotel');
     //FIM HOTEL
+
+    //dashboard
+    Route::get('dash-pending-validate', [HomeController::class, 'pendingValidate'])
+        ->name('dash-pending-validate');
+
+    Route::get('dash-event-status', [HomeController::class, 'eventStatus'])
+        ->name('dash-event-status');
+
+    Route::get('dash-wait-approval', [HomeController::class, 'waitApproval'])
+        ->name('dash-wait-approval');
+
+    Route::get('dash-by-months', [HomeController::class, 'byMonths'])
+        ->name('dash-by-months');
+
+    Route::get('dash-links-approved', [HomeController::class, 'linksApproved'])
+        ->name('dash-links-approved');
+
+    Route::get('dash-users-groups', [HomeController::class, 'userGroups'])
+        ->name('dash-users-groups');
+
+    //FIM dashboard
 });

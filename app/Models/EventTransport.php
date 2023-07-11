@@ -111,7 +111,7 @@ class EventTransport extends Model
 
     public function transport()
     {
-        return $this->hasOne(Provider::class,  'id', 'transport_id');
+        return $this->hasOne(ProviderTransport::class,  'id', 'transport_id');
     }
 
     public function currency()

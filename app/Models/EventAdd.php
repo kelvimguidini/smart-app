@@ -117,7 +117,7 @@ class EventAdd extends Model
 
     public function add()
     {
-        return $this->hasOne(Provider::class,  'id', 'add_id');
+        return $this->hasOne(ProviderServices::class,  'id', 'add_id');
     }
 
     public function currency()

@@ -208,6 +208,7 @@ class ProviderController extends Controller
         } catch (Exception $e) {
             throw $e;
         }
+        $tab = 0;
         switch ($request->type) {
             case 'hotel':
                 $tab = 1;
