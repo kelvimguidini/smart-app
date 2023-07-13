@@ -257,7 +257,6 @@ class EventController extends Controller
             'customer' => 'required|numeric',
             'code' => 'required|string|max:255',
             'requester' => 'required|string|max:255',
-            'sector' => 'required|string|max:255',
             'paxBase' => 'required|string|max:255',
             'cc' => 'required|string|max:255',
             'date' => 'required|date',
@@ -338,9 +337,9 @@ class EventController extends Controller
                 ]);
                 foreach ($request->countries as $country) {
                     EventLocal::create([
-                        'pais' => $country->pais,
-                        'cidade' => $country->cidade,
-                        'event_id' => $country->event_id,
+                        'pais' => $country['pais'],
+                        'cidade' => $country['cidade'],
+                        'event_id' => $event->id,
                     ]);
                 }
             }

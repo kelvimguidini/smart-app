@@ -215,10 +215,17 @@ const deleteHotel = (id) => {
                                         <div class="card">
                                             <div class="card-body">
                                                 <div class="form-check">
-                                                    <input class="form-check-input" v-model="form.national" type="checkbox"
-                                                        id="autoSizingCheck">
-                                                    <label class="form-check-label" for="autoSizingCheck">
+                                                    <input class="form-check-input" v-model="form.national" :value="true"
+                                                        type="radio" id="autoSizingCheck1">
+                                                    <label class="form-check-label" for="autoSizingCheck1">
                                                         Fornecedor Nacional
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" v-model="form.national" :value="false"
+                                                        type="radio" id="autoSizingCheck">
+                                                    <label class="form-check-label" for="autoSizingCheck">
+                                                        Fornecedor Interacional
                                                     </label>
                                                 </div>
                                             </div>

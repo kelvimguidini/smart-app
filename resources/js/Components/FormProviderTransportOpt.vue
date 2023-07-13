@@ -308,8 +308,8 @@ const isLoader = ref(false);
                         <div class="form-group">
                             <InputLabel for="received_proposal_percent" value="(%):" />
                             <TextInput type="number" class="form-control percent"
-                                v-model="formOpt.received_proposal_percent" :disabled="true" required autofocus min="0"
-                                step=".1" autocomplete="received_proposal_percent" />
+                                v-model="formOpt.received_proposal_percent" required autofocus min="0" step=".1"
+                                autocomplete="received_proposal_percent" />
                         </div>
 
                     </div>

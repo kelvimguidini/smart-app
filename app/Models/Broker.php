@@ -10,7 +10,14 @@ class Broker extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['name'];
+    protected $fillable = [
+        'name',
+        'city',
+        'contact',
+        'phone',
+        'email',
+        'national'
+    ];
     protected $table = 'broker';
 
     /**

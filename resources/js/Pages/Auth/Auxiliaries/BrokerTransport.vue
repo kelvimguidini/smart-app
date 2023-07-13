@@ -11,7 +11,8 @@ import { onMounted, ref } from 'vue';
 
 
 const props = defineProps({
-    brokers: Array
+    brokers: Array,
+    cities: Array
 });
 
 const inEdition = ref(0);
@@ -19,6 +20,11 @@ const inEdition = ref(0);
 const form = useForm({
     id: 0,
     name: '',
+    city: '',
+    contact: '',
+    phone: '',
+    email: '',
+    national: false,
 });
 
 const formDelete = useForm({
@@ -27,6 +33,14 @@ const formDelete = useForm({
 
 
 onMounted(() => {
+    $('#city').select2({
+        theme: "bootstrap4",
+        language: "pt-Br"
+    }).on('select2:select', (e) => {
+        form.city = e.params.data.id;
+    });
+
+    $('.phone').mask('(00) 00000-0000');
 
     $('table').DataTable({
         language: {
@@ -52,13 +66,28 @@ const edit = (broker) => {
     inEdition.value = broker.id;
     form.name = broker.name;
     form.id = broker.id;
+    form.contact = broker.contact;
+    form.phone = broker.phone;
+    form.email = broker.email;
+    form.national = broker.national == true || broker.national == 1;
+    form.city = broker.city;
+
+    $('#city').val(broker.city).trigger('change');
+    $('.phone').val(form.phone).trigger('keyup');
 };
+
+const newItem = (() => {
+    form.reset();
+    $('#city').val('').trigger('change');
+    inEdition.value = 0;
+});
 
 const submit = () => {
     form.post(route('broker-save'), {
         onSuccess: () => {
-            form.reset();
-            inEdition.value = 0;
+            newItem();
+
+            isLoader.value = false;
         },
     });
 };
@@ -85,12 +114,83 @@ const submit = () => {
                                 <form @submit.prevent="submit">
 
                                     <div class="row">
-                                        <div class="col-lg-6">
+                                        <div class="col">
                                             <div class="form-group">
                                                 <InputLabel for="name" value="Nome:" />
                                                 <TextInput type="text" class="form-control" v-model="form.name" required
                                                     autofocus autocomplete="name" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.name" />
+                                            </div>
+
+                                        </div>
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <InputLabel for="city" value="Cidade:" />
+
+                                                <select class="form-control" id="city" :required="required">
+                                                    <option>.::Selecione::.</option>
+                                                    <option v-for="(option, index) in cities"
+                                                        :selected="option.name == form.city" :value="option.name">
+                                                        {{ option.name }} - {{ option.uf }}
+                                                    </option>
+                                                </select>
+
+                                                <InputError class="mt-2 text-danger" :message="form.errors.city" />
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <InputLabel for="contact" value="Contato:" />
+                                                <TextInput type="text" class="form-control" v-model="form.contact" required
+                                                    autofocus autocomplete="contact" />
+                                                <InputError class="mt-2 text-danger" :message="form.errors.contact" />
+                                            </div>
+
+                                        </div>
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <InputLabel for="phone" value="Telefone:" />
+                                                <TextInput id="phone" type="text" class="form-control phone"
+                                                    v-model="form.phone" required autofocus autocomplete="phone" />
+                                                <InputError class="mt-2 text-danger" :message="form.errors.phone" />
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                <InputLabel for="email" value="E-mail:" />
+                                                <TextInput type="email" class="form-control" v-model="form.email" required
+                                                    autofocus autocomplete="email" />
+                                                <InputError class="mt-2 text-danger" :message="form.errors.email" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <InputLabel for="national" value=" " />
+
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" v-model="form.national"
+                                                                :value="true" type="radio" id="autoSizingCheck1">
+                                                            <label class="form-check-label" for="autoSizingCheck1">
+                                                                Broker Nacional
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" v-model="form.national"
+                                                                :value="false" type="radio" id="autoSizingCheck">
+                                                            <label class="form-check-label" for="autoSizingCheck">
+                                                                Broker Interacional
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -123,6 +223,11 @@ const submit = () => {
                                             <tr>
                                                 <th scope="col">#</th>
                                                 <th scope="col">Nome</th>
+                                                <th scope="col">Cidade</th>
+                                                <th scope="col">Contato</th>
+                                                <th scope="col">Telefone</th>
+                                                <th scope="col">E-mail</th>
+                                                <th scope="col">Tipo</th>
                                                 <th scope="col">Ações</th>
                                             </tr>
                                         </thead>
@@ -131,6 +236,11 @@ const submit = () => {
                                                 :class="{ 'table-info': inEdition == broker.id }">
                                                 <th scope="row">{{ broker.id }}</th>
                                                 <td>{{ broker.name }}</td>
+                                                <td>{{ broker.city }}</td>
+                                                <td>{{ broker.contact }}</td>
+                                                <td class="phone">{{ broker.phone }}</td>
+                                                <td>{{ broker.email }}</td>
+                                                <td>{{ broker.national ? "Nacional" : "Internacional" }}</td>
                                                 <td>
                                                     <button class="btn btn-info btn-icon-split mr-2"
                                                         v-on:click="edit(broker)">

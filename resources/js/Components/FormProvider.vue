@@ -321,7 +321,7 @@ const isLoader = ref(false);
 
                     <div class="col">
                         <div class="form-group">
-                            <InputLabel for="service_charge" value="Taxa Serviço:" />
+                            <InputLabel for="service_charge" value="Taxa de Turismo:" />
                             <TextInput type="number" class="form-control percent" v-model="form.service_charge" required
                                 autofocus min="0" step=".1" autocomplete="service_charge" />
                         </div>

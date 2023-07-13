@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\Constants;
 use App\Models\Broker;
 use Exception;
 use Illuminate\Http\Request;
@@ -24,7 +25,8 @@ class BrokerController extends Controller
 
         $t = Broker::all();
         return Inertia::render('Auth/Auxiliaries/Broker', [
-            'brokers' => $t
+            'brokers' => $t,
+            'cities' =>  Constants::CITIES,
         ]);
     }
 
@@ -43,7 +45,11 @@ class BrokerController extends Controller
         }
 
         $request->validate([
-            'name' => 'required|string|max:255'
+            'name' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'contact' => 'required|string|max:255',
+            'phone' => 'required|string|max:255',
+            'email' => 'required|string|max:255|email',
         ]);
         try {
 
@@ -52,11 +58,21 @@ class BrokerController extends Controller
                 $broker = Broker::find($request->id);
 
                 $broker->name = $request->name;
+                $broker->city = $request->city;
+                $broker->contact = $request->contact;
+                $broker->phone = $request->phone;
+                $broker->email = $request->email;
+                $broker->national = $request->national;
                 $broker->save();
             } else {
 
                 $broker = Broker::create([
-                    'name' => $request->name
+                    'name' => $request->name,
+                    'city' => $request->city,
+                    'contact' => $request->contact,
+                    'phone' => $request->phone,
+                    'email' => $request->email,
+                    'national' => $request->national,
                 ]);
             }
         } catch (Exception $e) {

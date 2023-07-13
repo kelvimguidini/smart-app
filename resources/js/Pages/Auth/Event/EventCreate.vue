@@ -266,6 +266,7 @@ onMounted(() => {
         form.land_operator = e.params.data.id;
     });
 
+
     //Basico - Fim
     mount();
 });
@@ -525,7 +526,12 @@ const newEventProv = (type) => {
 };
 
 </script>
-
+<style>
+.v3dp__popout[data-v-2e128338] {
+    left: auto;
+    right: 0px;
+}
+</style>
 <template>
     <AuthenticatedLayout>
         <Loader v-bind:show="isLoader"></Loader>
@@ -691,8 +697,8 @@ const newEventProv = (type) => {
                                         <div class="col">
                                             <div class="form-group">
                                                 <InputLabel for="date_final" value="Data do Evento Fim:" />
-                                                <datepicker v-model="form.date_final" class="form-control" :locale="ptBR"
-                                                    inputFormat="dd/MM/yyyy" weekdayFormat="EEEEEE" />
+                                                <datepicker v-model="form.date_final" class="form-control custom-datepicker"
+                                                    :locale="ptBR" inputFormat="dd/MM/yyyy" weekdayFormat="EEEEEE" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.date_final" />
                                             </div>
                                         </div>

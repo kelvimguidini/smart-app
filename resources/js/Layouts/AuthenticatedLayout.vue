@@ -108,7 +108,7 @@ const menuItem = [
             },
             {
                 link: route().current('hotel') ? '' : route('hotel'),
-                name: 'Fornecedor',
+                name: 'Hotel',
                 active: route().current('hotel'),
                 role: ['admin_provider'],
             },
@@ -194,7 +194,7 @@ const menuItem = [
         ]
     },
     {
-        name: 'Terrestre',
+        name: 'Transporte',
         icon: 'fa fa-car-alt',
         isItem: false,
         collapseHeader: 'Tabelas auxiliares',

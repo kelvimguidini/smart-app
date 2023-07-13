@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\Constants;
 use App\Models\Broker;
 use App\Models\BrokerTransport;
 use Exception;
@@ -25,7 +26,8 @@ class BrokerTransportController extends Controller
 
         $t = BrokerTransport::all();
         return Inertia::render('Auth/Auxiliaries/BrokerTransport', [
-            'brokers' => $t
+            'brokers' => $t,
+            'cities' =>  Constants::CITIES,
         ]);
     }
 
@@ -44,7 +46,11 @@ class BrokerTransportController extends Controller
         }
 
         $request->validate([
-            'name' => 'required|string|max:255'
+            'name' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'contact' => 'required|string|max:255',
+            'phone' => 'required|string|max:255',
+            'email' => 'required|string|max:255|email',
         ]);
         try {
 
@@ -53,11 +59,21 @@ class BrokerTransportController extends Controller
                 $broker = BrokerTransport::find($request->id);
 
                 $broker->name = $request->name;
+                $broker->city = $request->city;
+                $broker->contact = $request->contact;
+                $broker->phone = $request->phone;
+                $broker->email = $request->email;
+                $broker->national = $request->national;
                 $broker->save();
             } else {
 
                 $broker = BrokerTransport::create([
-                    'name' => $request->name
+                    'name' => $request->name,
+                    'city' => $request->city,
+                    'contact' => $request->contact,
+                    'phone' => $request->phone,
+                    'email' => $request->email,
+                    'national' => $request->national,
                 ]);
             }
         } catch (Exception $e) {
