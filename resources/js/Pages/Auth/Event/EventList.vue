@@ -7,6 +7,7 @@ import { ref, onMounted } from 'vue';
 import TextInput from '@/Components/TextInput.vue';
 import CKEditor from '@/Components/CKEditor.vue';
 import Datepicker from 'vue3-datepicker';
+import { ptBR } from 'date-fns/locale'
 import { v4 as uuidv4 } from 'uuid';
 
 const props = defineProps({
@@ -35,6 +36,7 @@ const formStatus = useForm({
     custumer_send_hotel: '',
     change_hotel: '',
     done_hotel: '',
+    cancelment_hotel: '',
 
     status_hotel: '',
 
@@ -46,6 +48,7 @@ const formStatus = useForm({
     custumer_send_transport: '',
     change_transport: '',
     done_transport: '',
+    cancelment_transport: '',
 
     status_transport: '',
 });
@@ -56,12 +59,13 @@ const formFilters = useForm({
     city: '',
     consultant: '',
     client: '',
+    status_hotel: '',
+    status_transport: '',
 });
 
 const submitForm = () => {
     // Obter os valores dos filtros
     isLoader.value = true;
-    console.log(formFilters);
     // Fazer uma chamada Axios para enviar os dados dos filtros para o backend
     formFilters.post(route('event-list.filter'), {
         onFinish: () => {
@@ -84,10 +88,41 @@ onMounted(() => {
     }).on('select2:select', (e) => {
         formFilters.consultant = e.params.data.id;
     });
+
+    $('#status_hotel').select2({
+        theme: "bootstrap4", language: "pt-Br"
+    }).on('select2:select', (e) => {
+        formFilters.status_hotel = e.params.data.id;
+    });
+
+
+    $('#status_transport').select2({
+        theme: "bootstrap4", language: "pt-Br"
+    }).on('selec2:select', (e) => {
+        formFilters.status_transport = e.params.data.id;
+    });
+
+
+    $('.s_hotel').select2({
+        theme: "bootstrap4", language: "pt-Br"
+    }).on('select2:select', (e) => {
+        formStatus.status_hotel = e.params.data.id;
+    });
+
+
+    $('.s_transport').select2({
+        theme: "bootstrap4", language: "pt-Br"
+    }).on('selec2:select', (e) => {
+        formStatus.status_transport = e.params.data.id;
+    });
 });
 
 const editStatus = (status, event_id) => {
     formStatus.event_id = event_id;
+
+    if (Array.isArray(status) && status.length > 0) {
+        status = status[0];
+    }
 
     if (status != null) {
         formStatus.id = status.id;
@@ -97,27 +132,32 @@ const editStatus = (status, event_id) => {
 
         formStatus.request_hotel = status.request_hotel && new Date(status.request_hotel);
         formStatus.provider_order_hotel = status.provider_order_hotel && new Date(status.provider_order_hotel);
-        formStatus.briefing_hotel = status.provider_order_hotel && new Date(status.briefing_hotel);
-        formStatus.response_hotel = status.provider_order_hotel && new Date(status.response_hotel);
-        formStatus.pricing_hotel = status.provider_order_hotel && new Date(status.pricing_hotel);
-        formStatus.custumer_send_hotel = status.provider_order_hotel && new Date(status.custumer_send_hotel);
-        formStatus.change_hotel = status.provider_order_hotel && new Date(status.change_hotel);
-        formStatus.done_hotel = status.provider_order_hotel && new Date(status.done_hotel);
+        formStatus.briefing_hotel = status.briefing_hotel && new Date(status.briefing_hotel);
+        formStatus.response_hotel = status.response_hotel && new Date(status.response_hotel);
+        formStatus.pricing_hotel = status.pricing_hotel && new Date(status.pricing_hotel);
+        formStatus.custumer_send_hotel = status.custumer_send_hotel && new Date(status.custumer_send_hotel);
+        formStatus.change_hotel = status.change_hotel && new Date(status.change_hotel);
+        formStatus.done_hotel = status.done_hotel && new Date(status.done_hotel);
+        formStatus.cancelment_hotel = status.cancelment_hotel && new Date(status.cancelment_hotel);
 
         formStatus.status_hotel = status.status_hotel;
 
-        formStatus.request_transport = status.provider_order_hotel && new Date(status.request_transport);
-        formStatus.provider_order_transport = status.provider_order_hotel && new Date(status.provider_order_transport);
-        formStatus.briefing_transport = status.provider_order_hotel && new Date(status.briefing_transport);
-        formStatus.response_transport = status.provider_order_hotel && new Date(status.response_transport);
-        formStatus.pricing_transport = status.provider_order_hotel && new Date(status.pricing_transport);
-        formStatus.custumer_send_transport = status.provider_order_hotel && new Date(status.custumer_send_transport);
-        formStatus.change_transport = status.provider_order_hotel && new Date(status.change_transport);
-        formStatus.done_transport = status.provider_order_hotel && new Date(status.done_transport);
+        formStatus.request_transport = status.request_transport && new Date(status.request_transport);
+        formStatus.provider_order_transport = status.provider_order_transport && new Date(status.provider_order_transport);
+        formStatus.briefing_transport = status.briefing_transport && new Date(status.briefing_transport);
+        formStatus.response_transport = status.response_transport && new Date(status.response_transport);
+        formStatus.pricing_transport = status.pricing_transport && new Date(status.pricing_transport);
+        formStatus.custumer_send_transport = status.custumer_send_transport && new Date(status.custumer_send_transport);
+        formStatus.change_transport = status.change_transport && new Date(status.change_transport);
+        formStatus.done_transport = status.done_transport && new Date(status.done_transport);
+        formStatus.cancelment_transport = status.cancelment_transport && new Date(status.cancelment_transport);
 
         formStatus.status_transport = status.status_transport;
 
+    } else {
+        formStatus.reset();
     }
+    console.log(formStatus);
 };
 
 const saveStatus = () => {
@@ -152,6 +192,7 @@ const flash = ref(null);
 const showEventDetails = ref(0);
 
 const showHideEventDetails = (id) => {
+
     if (showEventDetails.value == id) {
         showEventDetails.value = 0;
     } else {
@@ -437,6 +478,63 @@ const providersByEvent = (event) => {
                                     </div>
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label for="start-date">Status hotel:</label>
+                                        <select class="form-control" id="status_hotel">
+                                            <option>.::Selecione::.</option>
+                                            <option value="N" :selected="'N' == formFilters.status_hotel">Novo</option>
+                                            <option value="S" :selected="'S' == formFilters.status_hotel">Solicitação
+                                            </option>
+                                            <option value="PF" :selected="'PF' == formFilters.status_hotel">Pedido de
+                                                Fornecedor
+                                            </option>
+                                            <option value="B" :selected="'B' == formFilters.status_hotel">Briefing</option>
+                                            <option value="R" :selected="'R' == formFilters.status_hotel">Resposta</option>
+                                            <option value="P" :selected="'P' == formFilters.status_hotel">Preço</option>
+                                            <option value="EC" :selected="'EC' == formFilters.status_hotel">Envio ao Cliente
+                                            </option>
+                                            <option value="AL" :selected="'AL' == formFilters.status_hotel">Alteração
+                                            </option>
+                                            <option value="CA" :selected="'CA' == formFilters.status_hotel">Cancelado
+                                            </option>
+                                            <option value="A" :selected="'A' == formFilters.status_hotel">Aprovado</option>
+                                            <option value="C" :selected="'C' == formFilters.status_hotel">Concluído</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label for="start-date">Status transporte:</label>
+                                        <select class="form-control" id="status_transport">
+                                            <option>.::Selecione::.</option>
+                                            <option value="N" :selected="'N' == formFilters.status_transport">Novo</option>
+                                            <option value="S" :selected="'S' == formFilters.status_transport">Solicitação
+                                            </option>
+                                            <option value="PF" :selected="'PF' == formFilters.status_transport">Pedido de
+                                                Fornecedor
+                                            </option>
+                                            <option value="B" :selected="'B' == formFilters.status_transport">Briefing
+                                            </option>
+                                            <option value="R" :selected="'R' == formFilters.status_transport">Resposta
+                                            </option>
+                                            <option value="P" :selected="'P' == formFilters.status_transport">Preço</option>
+                                            <option value="EC" :selected="'EC' == formFilters.status_transport">Envio ao
+                                                Cliente
+                                            </option>
+                                            <option value="AL" :selected="'AL' == formFilters.status_transport">Alteração
+                                            </option>
+                                            <option value="CA" :selected="'CA' == formFilters.status_transport">Cancelado
+                                            </option>
+                                            <option value="A" :selected="'A' == formFilters.status_transport">Aprovado
+                                            </option>
+                                            <option value="C" :selected="'C' == formFilters.status_transport">Concluído
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
                             <button type="submit" class="btn btn-primary">Filtrar</button>
                         </form>
 
@@ -582,25 +680,34 @@ const providersByEvent = (event) => {
                                                                                 </td>
                                                                             </tr>
                                                                             <tr>
+                                                                                <th>Cancelamento</th>
+                                                                                <td>
+                                                                                    <datepicker
+                                                                                        v-model="formStatus.cancelment_hotel"
+                                                                                        class="form-control" :locale="ptBR"
+                                                                                        inputFormat="dd/MM/yyyy"
+                                                                                        weekdayFormat="EEEEEE" />
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
                                                                                 <th>Status</th>
                                                                                 <td>
-                                                                                    <select class="form-control"
-                                                                                        id="customer" :required="required">
+                                                                                    <select class="form-control s_hotel"
+                                                                                        :required="required">
                                                                                         <option>.::Selecione::.
                                                                                         </option>
                                                                                         <option
-                                                                                            :selected="formStatus.status_hotel == 'Aguardando Aprovação'"
-                                                                                            value="Aguardando Aprovação">
+                                                                                            :selected="formStatus.status_hotel == 'AA'"
+                                                                                            value="AA">
                                                                                             Aguardando Aprovação
                                                                                         </option>
                                                                                         <option
-                                                                                            :selected="formStatus.status_hotel != 'Aguardando Aprovação' && formStatus.status_hotel != ''"
-                                                                                            value="Aprovado">
-                                                                                            {{
-                                                                                                formStatus.status_hotel
-                                                                                                != '' ?
-                                                                                                formStatus.status_hotel
-                                                                                                : 'Aprovado' }}
+                                                                                            :selected="formStatus.status_hotel == 'A'"
+                                                                                            value="A">
+                                                                                            Aprovado <span
+                                                                                                v-if="formStatus.aproved_hotel && formStatus.status_hotel == 'A'">por
+                                                                                                {{ formStatus.aproved_hotel
+                                                                                                }}</span>
                                                                                         </option>
                                                                                     </select>
                                                                                 </td>
@@ -704,25 +811,35 @@ const providersByEvent = (event) => {
                                                                                 </td>
                                                                             </tr>
                                                                             <tr>
+                                                                                <th>Cancelamento</th>
+                                                                                <td>
+                                                                                    <datepicker
+                                                                                        v-model="formStatus.cancelment_transport"
+                                                                                        class="form-control" :locale="ptBR"
+                                                                                        inputFormat="dd/MM/yyyy"
+                                                                                        weekdayFormat="EEEEEE" />
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
                                                                                 <th>Status</th>
                                                                                 <td>
-                                                                                    <select class="form-control"
-                                                                                        id="customer" :required="required">
+                                                                                    <select
+                                                                                        class="form-control s_transport">
                                                                                         <option>.::Selecione::.
                                                                                         </option>
                                                                                         <option
-                                                                                            :selected="formStatus.status_transport == 'Aguardando Aprovação'"
-                                                                                            value="Aguardando Aprovação">
+                                                                                            :selected="formStatus.status_transport == 'AA'"
+                                                                                            value="AA">
                                                                                             Aguardando Aprovação
                                                                                         </option>
                                                                                         <option
-                                                                                            :selected="formStatus.status_transport != 'Aguardando Aprovação' && formStatus.status_transport != ''"
-                                                                                            value="Aprovado">
-                                                                                            {{
-                                                                                                formStatus.status_transport
-                                                                                                != '' ?
-                                                                                                formStatus.status_transport
-                                                                                                : 'Aprovado' }}
+                                                                                            :selected="formStatus.status_transport == 'A'"
+                                                                                            value="A">
+                                                                                            Aprovado <span
+                                                                                                v-if="formStatus.aproved_transport && formStatus.status_transport == 'A'">por
+                                                                                                {{
+                                                                                                    formStatus.aproved_transport
+                                                                                                }}</span>
                                                                                         </option>
                                                                                     </select>
                                                                                 </td>
@@ -1064,6 +1181,10 @@ const providersByEvent = (event) => {
                                                     </Modal>
 
                                                 </td>
+                                            </tr>
+                                            <tr v-if="providersByEvent(event).length === 0">
+                                                <th scope="row"></th>
+                                                <td colspan="6">Sem registro</td>
                                             </tr>
                                         </template>
                                     </template>

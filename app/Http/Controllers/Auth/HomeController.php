@@ -79,102 +79,64 @@ class HomeController extends Controller
     {
         $query = $this->getQueryEventBase();
 
-        $statusFieldsHotel = [
-            'request_hotel' => '`Solicitação`',
-            'provider_order_hotel' => '`Pedido de Fornecedor`',
-            'briefing_hotel' => '`Briefing`',
-            'response_hotel' => '`Resposta`',
-            'pricing_hotel' => '`Preço de Hotel`',
-            'custumer_send_hotel' => '`Envio ao Cliente`',
-            'change_hotel' => '`Alteração`',
-            'done_hotel' => '`Concluído`',
+        $statusFields = [
+            'N' => 'Novo',
+            'S' => 'Solicitação',
+            'PF' => 'Pedido de Fornecedor',
+            'B' => 'Briefing',
+            'R' => 'Resposta',
+            'P' => 'Preço',
+            'EC' => 'Envio ao Cliente',
+            'AL' => 'Alteração',
+            'CA' => 'Cancelado',
+            'A' => 'Aprovado',
+            'C' => 'Concluído'
         ];
 
-        $statusFieldsTransport = [
-            'request_transport' => '`Solicitação`',
-            'provider_order_transport' => '`Pedido de Fornecedor`',
-            'briefing_transport' => '`Briefing`',
-            'response_transport' => '`Resposta`',
-            'pricing_transport' => '`Preço`',
-            'custumer_send_transport' => '`Envio ao Cliente`',
-            'change_transport' => '`Alteração`',
-            'done_transport' => '`Concluído`',
-        ];
 
-        $query->with(['eventStatus' => function ($query) use ($statusFieldsHotel, $statusFieldsTransport) {
-            $selectClause = 'event_id';
-
-            foreach ($statusFieldsHotel as $field => $translation) {
-                $selectClause .= ', ' . $field . ' AS ' . $translation;
-            }
-
-            foreach ($statusFieldsTransport as $field => $translation) {
-                $selectClause .= ', ' . $field . ' AS ' . $translation;
-            }
-
-            // Adicione a coluna has_transport usando subconsulta
-            $selectClause .= ', (SELECT COUNT(*) FROM event_transport WHERE event_transport.event_id = `event_status`.`event_id`) AS has_transport';
-
-            $selectClause .= ', (SELECT COUNT(*) FROM event_hotel WHERE event_hotel.event_id = `event_status`.`event_id`) +
-                       (SELECT COUNT(*) FROM event_ab WHERE event_ab.event_id = `event_status`.`event_id`) +
-                       (SELECT COUNT(*) FROM event_hall WHERE event_hall.event_id = `event_status`.`event_id`) AS has_hotel';
-
-
-            $query->selectRaw($selectClause);
-        }]);
-
-
-        $events = $query->get();
+        $events = $query->with('eventStatus')->get();
 
         $statusCountsHotel = [];
         $statusCountsTransport = [];
 
+        // Loop through the events and count the occurrences of each status
         foreach ($events as $event) {
-            if ($event->eventStatus && $event->eventStatus->has_transport > 0) {
-                $statusCountsTransport[$event->id] = "Novo";
-            }
 
-            if ($event->eventStatus && $event->eventStatus->has_hotel > 0) {
-                $statusCountsHotel[$event->id] = "Novo";
-            }
+            $statusHotel = $event->eventStatus[0]->status_u_hotel ?? 'N';
+            $statusTransport = $event->eventStatus[0]->status_u_transport ?? 'N';
 
-            foreach ($statusFieldsHotel as $field) {
-                $field = str_replace('`', '', $field);
-                if ($event->eventStatus && $event->eventStatus->$field) {
-                    $statusCountsHotel[$event->id] = $field;
+
+            // For Hotel status
+            if (isset($statusFields[$statusHotel])) {
+                $statusLabelHotel = $statusFields[$statusHotel];
+
+                if (!isset($statusCountsHotel[$statusLabelHotel])) {
+                    $statusCountsHotel[$statusLabelHotel] = 1;
+                } else {
+                    $statusCountsHotel[$statusLabelHotel]++;
                 }
             }
 
-            foreach ($statusFieldsTransport as $field) {
+            // For Transport status
+            if (isset($statusFields[$statusTransport])) {
+                $statusLabelTransport = $statusFields[$statusTransport];
 
-                $field = str_replace('`', '', $field);
-                if ($event->eventStatus && $event->eventStatus->$field) {
-                    $statusCountsTransport[$event->id] = $field;
+                if (!isset($statusCountsTransport[$statusLabelTransport])) {
+                    $statusCountsTransport[$statusLabelTransport] = 1;
+                } else {
+                    $statusCountsTransport[$statusLabelTransport]++;
                 }
             }
         }
 
-        $percentagesHotel = [];
-        $percentagesTransport = [];
+        // Remove any statuses that don't have any events (null or not found in the result)
+        $statusCountsHotel = array_filter($statusCountsHotel);
+        $statusCountsTransport = array_filter($statusCountsTransport);
 
-        // Agrupar os valores
-        $groupedCountsHotel = array_count_values($statusCountsHotel);
-        $groupedCountsTransport = array_count_values($statusCountsTransport);
-
-        // Calcular o percentual de cada valor
-        $percentagesHotel = array();
-
-        foreach ($groupedCountsHotel as $status => $count) {
-            $percentagesHotel[$status] = $count;
-        }
-
-        foreach ($groupedCountsTransport as $status => $count) {
-            $percentagesTransport[$status] =  $count;
-        }
 
         $response = [
-            'hotel' => $percentagesHotel,
-            'transport' => $percentagesTransport,
+            'hotel' => $statusCountsHotel,
+            'transport' => $statusCountsTransport,
         ];
 
         return response()->json($response);
@@ -187,17 +149,17 @@ class HomeController extends Controller
      */
     public function waitApproval(Request $request)
     {
-        $query = $this->getQueryEventBase();
+        $query = $this->getQueryEventBase()->with('eventStatus');
 
         $queryHotels = $query->where(function ($query) {
             $query->whereHas('eventStatus', function ($query) {
-                $query->where('status_hotel', "Aguardando Aprovação");
+                $query->where('status_hotel', "AA");
             });
         });
 
         $queryTransports = $query->where(function ($query) {
             $query->whereHas('eventStatus', function ($query) {
-                $query->where('status_transport', "Aguardando Aprovação");
+                $query->where('status_transport', "AA");
             });
         });
 
@@ -257,7 +219,18 @@ class HomeController extends Controller
 
         // Consulta para recuperar a quantidade de eventos por mês
         $eventCounts = $query->selectRaw('formatar_data_ptbr(date) AS month, COUNT(*) AS event_count')
-            ->whereBetween('date', [$firstDayOfMonth, $lastDayOfMonth])
+            ->where(function ($query) use ($firstDayOfMonth, $lastDayOfMonth) {
+                $query->whereDate('date', '>=', $firstDayOfMonth)
+                    ->whereDate('date', '<=', $lastDayOfMonth)
+                    ->orWhere(function ($query) use ($firstDayOfMonth, $lastDayOfMonth) {
+                        $query->whereDate('date_final', '>=', $firstDayOfMonth)
+                            ->whereDate('date_final', '<=', $lastDayOfMonth);
+                    })
+                    ->orWhere(function ($query) use ($firstDayOfMonth, $lastDayOfMonth) {
+                        $query->whereDate('date', '<=', $firstDayOfMonth)
+                            ->whereDate('date_final', '>=', $lastDayOfMonth);
+                    });
+            })
             ->groupBy('month')
             ->orderBy('month')
             ->get()

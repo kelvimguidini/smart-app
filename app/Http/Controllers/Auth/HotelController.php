@@ -67,7 +67,7 @@ class HotelController extends Controller
                 $opt->broker_id = $request->broker;
                 $opt->regime_id = $request->regime;
                 $opt->purpose_id = $request->purpose;
-                $opt->category_hotel_id = $request->hotel_id;
+                $opt->category_hotel_id = $request->category_id;
                 $opt->apto_hotel_id = $request->apto_id;
                 $opt->in = $request->in;
                 $opt->out = $request->out;
@@ -87,7 +87,7 @@ class HotelController extends Controller
                     'broker_id' => $request->broker,
                     'regime_id' => $request->regime,
                     'purpose_id' => $request->purpose,
-                    'category_hotel_id' => $request->hotel_id,
+                    'category_hotel_id' => $request->category_id,
                     'apto_hotel_id' => $request->apto_id,
                     'in' => $request->in,
                     'out' => $request->out,

@@ -24,6 +24,9 @@ class EventStatus extends Model
         'custumer_send_hotel',
         'change_hotel',
         'done_hotel',
+        'cancelment_hotel',
+        'aproved_hotel',
+        'status_u_hotel',
 
         'status_hotel',
 
@@ -35,8 +38,11 @@ class EventStatus extends Model
         'custumer_send_transport',
         'change_transport',
         'done_transport',
+        'cancelment_transport',
 
         'status_transport',
+        'aproved_transport',
+        'status_u_transport'
     ];
     protected $table = 'event_status';
 

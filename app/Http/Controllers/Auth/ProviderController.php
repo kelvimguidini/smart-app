@@ -381,6 +381,7 @@ class ProviderController extends Controller
         $path = base_path('public');
 
         $options->set('chroot', $path);
+        //$options->set('debugCss', true);
 
         $pdf = new Dompdf($options);
 

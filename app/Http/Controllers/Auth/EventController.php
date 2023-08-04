@@ -37,7 +37,6 @@ use App\Models\TransportService;
 use App\Models\User;
 use App\Models\Vehicle;
 use Exception;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -63,14 +62,16 @@ class EventController extends Controller
         $city = $request->city;
         $consultant = $request->consultant;
         $client = $request->client;
+        $status_hotel = $request->status_hotel;
+        $status_transport = $request->status_transport;
 
         if (Gate::allows('event_admin')) {
-            $query = Event::with(['crd', 'customer', 'event_hotels.hotel', 'event_abs.ab', 'event_halls.hall', 'event_adds.add', 'event_transports.transport', 'event_transports.providerBudget.user', 'event_hotels.providerBudget.user', 'event_abs.providerBudget.user', 'event_halls.providerBudget.user', 'event_adds.providerBudget.user'])
+            $query = Event::with(['eventStatus', 'crd', 'customer', 'event_hotels.hotel', 'event_abs.ab', 'event_halls.hall', 'event_adds.add', 'event_transports.transport', 'event_transports.providerBudget.user', 'event_hotels.providerBudget.user', 'event_abs.providerBudget.user', 'event_halls.providerBudget.user', 'event_adds.providerBudget.user'])
                 ->with('hotelOperator')
                 ->with('airOperator')
                 ->with('landOperator');
         } else if (Gate::allows('hotel_operator') || Gate::allows('land_operator') || Gate::allows('air_operator')) {
-            $query = Event::with(['event_status', 'crd', 'customer', 'event_hotels.hotel', 'event_abs.ab', 'event_halls.hall', 'event_adds.add', 'event_transports.transport', 'event_transports.providerBudget.user', 'event_hotels.providerBudget.user', 'event_abs.providerBudget.user', 'event_halls.providerBudget.user', 'event_adds.providerBudget.user'])
+            $query = Event::with(['eventStatus', 'crd', 'customer', 'event_hotels.hotel', 'event_abs.ab', 'event_halls.hall', 'event_adds.add', 'event_transports.transport', 'event_transports.providerBudget.user', 'event_hotels.providerBudget.user', 'event_abs.providerBudget.user', 'event_halls.providerBudget.user', 'event_adds.providerBudget.user'])
                 ->with(['hotelOperator' => function ($query) use ($userId) {
                     $query->where('id', '=', $userId);
                 }])
@@ -118,6 +119,28 @@ class EventController extends Controller
 
         if ($client && $client != ".::Selecione::.") {
             $query->where('customer_id', $client);
+        }
+
+        if ($status_hotel && $status_hotel != ".::Selecione::.") {
+            $query->where(function ($query) use ($status_hotel) {
+                $query->whereHas('eventStatus', function ($query) use ($status_hotel) {
+                    $query->where('status_u_hotel', $status_hotel);
+                });
+                if ($status_hotel == 'N') {
+                    $query->orWhereDoesntHave('eventStatus');
+                }
+            });
+        }
+
+        if ($status_transport && $status_transport != ".::Selecione::.") {
+            $query->where(function ($query) use ($status_transport) {
+                $query->whereHas('eventStatus', function ($query) use ($status_transport) {
+                    $query->where('status_u_transport', $status_transport);
+                });
+                if ($status_transport == 'N') {
+                    $query->orWhereDoesntHave('eventStatus');
+                }
+            });
         }
 
         $events = $query->paginate($perPage, ['*'], 'page', $page);
@@ -366,12 +389,85 @@ class EventController extends Controller
 
         try {
 
-            if ($request->id > 0) {
+            $statusByEv = EventStatus::where('event_id', $request->event_id);
 
+            //STATUS HOTEL
+            $status_u_hotel = 'N';
+            if ($request->request_hotel) {
+                $status_u_hotel = 'S';
+            }
+            if ($request->briefing_hotel) {
+                $status_u_hotel = 'B';
+            }
+            if ($request->provider_order_hotel) {
+                $status_u_hotel = 'PF';
+            }
+            if ($request->response_hotel) {
+                $status_u_hotel = 'R';
+            }
+            if ($request->pricing_hotel) {
+                $status_u_hotel = 'P';
+            }
+            if ($request->custumer_send_hotel) {
+                $status_u_hotel = 'EC';
+            }
+            if ($request->change_hotel) {
+                $status_u_hotel = 'AL';
+            }
+            if ($request->done_hotel) {
+                $status_u_hotel = 'C';
+            }
+            if ($request->status_hotel == "A") {
+                $status_u_hotel = 'C';
+            }
+            if ($request->cancelment_hotel) {
+                $status_u_hotel = 'C';
+            }
+
+            //STATUS TRANSPORT
+            $status_u_transport = 'N';
+            if ($request->request_transport) {
+                $status_u_transport = 'S';
+            }
+            if ($request->briefing_transport) {
+                $status_u_transport = 'B';
+            }
+            if ($request->provider_order_transport) {
+                $status_u_transport = 'PF';
+            }
+            if ($request->response_transport) {
+                $status_u_transport = 'R';
+            }
+            if ($request->pricing_transport) {
+                $status_u_transport = 'P';
+            }
+            if ($request->custumer_send_transport) {
+                $status_u_transport = 'EC';
+            }
+            if ($request->change_transport) {
+                $status_u_transport = 'AL';
+            }
+            if ($request->done_transport) {
+                $status_u_transport = 'C';
+            }
+            if ($request->status_transport == "A") {
+                $status_u_transport = 'C';
+            }
+            if ($request->cancelment_transport) {
+                $status_u_transport = 'C';
+            }
+
+            if ($statusByEv->exists() || $request->id > 0) {
                 $status = EventStatus::find($request->id);
+
+                // Se não houver registro para o ID específico, atribui o primeiro registro encontrado
+                if (!$status) {
+                    $status = $statusByEv->first();
+                }
 
                 $status->observation_hotel = $request->observation_hotel;
                 $status->observation_transport = $request->observation_transport;
+
                 $status->request_hotel = $request->request_hotel;
                 $status->provider_order_hotel = $request->provider_order_hotel;
                 $status->briefing_hotel = $request->briefing_hotel;
@@ -380,7 +476,14 @@ class EventController extends Controller
                 $status->custumer_send_hotel = $request->custumer_send_hotel;
                 $status->change_hotel = $request->change_hotel;
                 $status->done_hotel = $request->done_hotel;
-                $status->status_hotel = $request->status_hotel == "Aprovado" ? "Aprovado por " . User::find(Auth::user()->id)->name : $request->status_hotel;
+                $status->cancelment_hotel = $request->cancelment_hotel;
+
+                $status->aproved_hotel = $request->status_hotel == "A" && $status->status_hotel = $request->status_hotel ? User::find(Auth::user()->id)->name : '';
+                $status->status_hotel = $request->status_hotel;
+                $status->status_u_hotel = $status_u_hotel;
+
+
+                $status->briefing_transport = $request->briefing_transport;
                 $status->request_transport = $request->request_transport;
                 $status->provider_order_transport = $request->provider_order_transport;
                 $status->response_transport = $request->response_transport;
@@ -388,7 +491,12 @@ class EventController extends Controller
                 $status->custumer_send_transport = $request->custumer_send_transport;
                 $status->done_transport = $request->done_transport;
                 $status->change_transport = $request->change_transport;
-                $status->status_transport = $request->status_transport == "Aprovado" ? "Aprovado por " . User::find(Auth::user()->id)->name : $request->status_transport;
+                $status->cancelment_transport = $request->cancelment_transport;
+
+                $status->aproved_transport = $request->status_transport == "A" && $status->status_transport = $request->status_transport ? User::find(Auth::user()->id)->name : '';
+                $status->status_transport = $request->status_transport;
+
+                $status->status_u_transport = $status_u_transport;
 
                 $status->save();
             } else {
@@ -405,15 +513,23 @@ class EventController extends Controller
                     'custumer_send_hotel' => $request->custumer_send_hotel,
                     'change_hotel' => $request->change_hotel,
                     'done_hotel' => $request->done_hotel,
-                    'status_hotel' => $request->status_hotel == "Aprovado" ? "Aprovado por " . User::find(Auth::user()->id)->name : $request->status_hotel,
+                    'cancelment_hotel' => $request->cancelment_hotel,
+                    'status_hotel' => $request->status_hotel,
+                    'aproved_hotel' => $request->status_hotel == "A" ? User::find(Auth::user()->id)->name : '',
+                    'status_u_hotel' => $status_u_hotel,
+
                     'request_transport' => $request->request_transport,
                     'provider_order_transport' => $request->provider_order_transport,
+                    'briefing_transport' => $request->briefing_transport,
                     'response_transport' => $request->response_transport,
                     'pricing_transport' => $request->pricing_transport,
                     'custumer_send_transport' => $request->custumer_send_transport,
                     'change_transport' => $request->change_transport,
                     'response_transport' => $request->response_transport,
-                    'status_transport' => $request->status_transport == "Aprovado" ? "Aprovado por " . User::find(Auth::user()->id)->name : $request->status_transport,
+                    'cancelment_transport' => $request->cancelment_transport,
+                    'status_transport' => $request->status_transport,
+                    'aproved_transport' => $request->status_transport == "A" ? User::find(Auth::user()->id)->name : '',
+                    'status_u_transport' => $status_u_transport,
                 ]);
             }
         } catch (Exception $e) {

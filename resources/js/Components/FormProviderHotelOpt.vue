@@ -78,8 +78,8 @@ const duplicate = (opt, edit = false) => {
     formOpt.broker = opt.broker_id;
     formOpt.regime = opt.regime_id;
     formOpt.purpose = opt.purpose_id;
-    formOpt.category_id = opt.category_hotel.category_id;
-    formOpt.apto_id = opt.apto_hotel.apto_id;
+    formOpt.category_id = opt.category_hotel_id;
+    formOpt.apto_id = opt.apto_hotel_id;
     formOpt.hotel_id = props.eventHotel.hotel_id;
     formOpt.in = new Date(opt.in);
     formOpt.out = new Date(opt.out);
@@ -93,8 +93,8 @@ const duplicate = (opt, edit = false) => {
     $('#broker').val(opt.broker_id).trigger('change');
     $('#regime').val(opt.regime_id).trigger('change');
     $('#purpose').val(opt.purpose_id).trigger('change');
-    $('#cat').val(opt.category_hotel.category_id).trigger('change');
-    $('#apto').val(opt.apto_hotel.apto_id).trigger('change');
+    $('#cat').val(opt.category_hotel_id).trigger('change');
+    $('#apto').val(opt.apto_hotel_id).trigger('change');
 
     $("#received_proposal").maskMoney('mask', opt.received_proposal);
     $('#compare_trivago').maskMoney('mask', opt.compare_trivago);
