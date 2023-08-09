@@ -183,14 +183,13 @@ const showDetails = ref(false);
                 <tbody>
                     <template v-for="(evAdd, index) in eventAdds" :key="evAdd.id">
 
-                        <tr class="bg-light text-dark thead-dark">
-                            <th class="text-left" :colspan="showDetails ? 20 : 14">
-                                Hotel {{ index + 1 }} | {{ evAdd.add.name }} | {{ evAdd.add.national
-                                    ?
-                                    "Nacional" : "Internacional" }}
-                                {{ evAdd.add.city }}
+                        <tr>
+                            <th class="table-header table-header-c1" colspan="2">Hotel {{ index + 1 }}</th>
+                            <th class="text-left table-header table-header-c2" :colspan="showDetails ? 18 : 12">
+                                {{ evAdd.add.name }}
                             </th>
-                            <th class="align-middle text-right" colspan="3">
+
+                            <th class="align-middle text-right table-header-c1 table-header" colspan="3">
                                 <Link class="btn btn-info btn-sm btn-icon-split"
                                     :href="route('event-edit', { 'id': evAdd.event_id, 'tab': 4, 'ehotel': evAdd.id })">
                                 <span class="icon text-white-50">
@@ -215,43 +214,53 @@ const showDetails = ref(false);
                                     </template>
                                 </Modal>
                             </th>
+
                         </tr>
 
-                        <tr class="thead-dark">
-                            <th class="align-middle" rowspan="2" scope="col">Serviço</th>
-                            <th class="align-middle" rowspan="2" scope="col">Unidade utilizada</th>
-                            <th class="align-middle" rowspan="2" scope="col">Medida</th>
-                            <th class="align-middle" rowspan="2" scope="col">#PAX</th>
-                            <th class="align-middle" rowspan="2" scope="col">Frequência</th>
-                            <th class="align-middle" rowspan="2" scope="col">IN</th>
-                            <th class="align-middle" rowspan="2" scope="col">OUT</th>
-                            <th class="align-middle" rowspan="2" scope="col">QTD</th>
-                            <th class="align-middle" rowspan="2" scope="col">Dias</th>
-                            <th class="align-middle" rowspan="2" scope="col">Comissão (%)</th>
-                            <th colspan="2" class="  align-middle" scope="col">Valor de Venda</th>
+                        <tr class="table-subheader">
+                            <th class="text-left" colspan="10">
+                                {{ evAdd.add.national ? "Nacional" : "Internacional" }}
+                                {{ evAdd.add.city }}
+                            </th>
+
+                            <th colspan="2" class="align-middle" scope="col">Valor de Venda</th>
                             <th colspan="2" class="align-middle" scope="col">Valor de Custo</th>
-                            <th class="align-middle" rowspan="2" scope="col">Proposta Recebida</th>
-                            <th class="align-middle" rowspan="2" scope="col">%</th>
+                            <th colspan="2"></th>
                             <template v-if="showDetails">
-                                <th colspan="6" class="align-middle" scope="col">
-                                    IMPOSTOS DESTACADOS POR SERVIÇOS
-                                </th>
+                                <th class="align-middle" colspan="2">ISS</th>
+                                <th class="align-middle" colspan="2">Servico</th>
+                                <th class="align-middle" colspan="2">IVA</th>
                             </template>
-                            <th class="align-middle" rowspan="2" scope="col"></th>
+                            <th class="align-middle"></th>
                         </tr>
-                        <tr class="thead-dark">
+                        <tr class="table-header-c1">
+                            <th class="align-middle">Serviço</th>
+                            <th class="align-middle">Unidade utilizada</th>
+                            <th class="align-middle">Medida</th>
+                            <th class="align-middle">#PAX</th>
+                            <th class="align-middle">Frequência</th>
+                            <th class="align-middle">IN</th>
+                            <th class="align-middle">OUT</th>
+                            <th class="align-middle">QTD</th>
+                            <th class="align-middle">Dias</th>
+                            <th class="align-middle">Comissão (%)</th>
+
                             <th class="align-middle">Unidade</th>
                             <th class="align-middle">Total</th>
                             <th class="align-middle">Unidade</th>
                             <th class="align-middle">Custo TTL</th>
+
+                            <th class="align-middle">Proposta Recebida</th>
+                            <th class="align-middle">%</th>
                             <template v-if="showDetails">
-                                <th class="align-middle">{{ eventAb != null ? eventAb.percentISS : 0 }}%</th>
-                                <th class="align-middle">ISS</th>
-                                <th class="align-middle">{{ eventAb != null ? eventAb.percentIService : 0 }}%</th>
-                                <th class="align-middle">Servico</th>
-                                <th class="align-middle">{{ eventAb != null ? eventAb.percentIVA : 0 }}%</th>
-                                <th class="align-middle">IVA</th>
+                                <th class="align-middle">Cliente</th>
+                                <th class="align-middle">Custo</th>
+                                <th class="align-middle">Cliente</th>
+                                <th class="align-middle">Custo</th>
+                                <th class="align-middle">Cliente</th>
+                                <th class="align-middle">Custo</th>
                             </template>
+                            <th class="align-middle"></th>
                         </tr>
 
                         <!-- Opt TRs -->
@@ -299,22 +308,22 @@ const showDetails = ref(false);
                             }}
                             </td>
                             <template v-if="showDetails">
-                                <td class="align-middle bg-secondary text-white">
+                                <td class="align-middle bg-success text-white">
                                     {{ evAdd.iss_percent }}</td>
-                                <td class=" align-middle bg-secondary text-white">
+                                <td class=" align-middle">
                                     {{ formatCurrency((unitSale(opt) * evAdd.iss_percent) / 100) }}
                                 </td>
-                                <td class="align-middle bg-secondary text-white">
+                                <td class="align-middle bg-success text-white">
                                     {{ evAdd.service_percent }}
                                 </td>
-                                <td class=" align-middle bg-secondary text-white">
+                                <td class=" align-middle">
                                     {{ formatCurrency(((unitSale(opt)) * evAdd.service_percent) /
                                         100) }}
                                 </td>
-                                <td class="align-middle bg-secondary text-white">{{
+                                <td class="align-middle bg-success text-white">{{
                                     evAdd.iva_percent
                                 }}</td>
-                                <td class=" align-middle bg-secondary text-white">
+                                <td class=" align-middle">
                                     {{ formatCurrency(((unitSale(opt)) * evAdd.iva_percent) / 100) }}
                                 </td>
                             </template>
@@ -348,7 +357,7 @@ const showDetails = ref(false);
                             </td>
                         </tr>
                         <!-- FIM Opt TRs -->
-                        <tr>
+                        <tr class="table-subheader">
                             <td class="align-middle bg-warning text-dark text-rigth">
                                 Diária Média:
                             </td>
@@ -388,23 +397,7 @@ const showDetails = ref(false);
                                     }).format((1 - (sumCost(evAdd) / sumSale(evAdd))) * 100)
                                 }}
                             </td>
-                            <template v-if="showDetails">
-                                <td class="align-middle bg-secondary text-white">
-                                    ISS CLIENTE
-                                </td>
-                                <td class=" align-middle bg-secondary text-white">
-                                    ISS CUSTO
-                                </td>
-                                <td class="align-middle bg-secondary text-white">
-                                    SERV CLIENTE
-                                </td>
-                                <td class=" align-middle bg-secondary text-white">
-                                    SERV CUSTO
-                                </td>
-                                <td class="align-middle bg-secondary text-white">IVA CLIENTE</td>
-                                <td class=" align-middle bg-secondary text-white">IVA CUSTO</td>
-                            </template>
-                            <td class="align-middle"></td>
+                            <td class="align-middle" :colspan="showDetails ? 7 : 1"></td>
                         </tr>
 
                         <tr>

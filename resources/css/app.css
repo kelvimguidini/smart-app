@@ -12726,3 +12726,34 @@ body.sidebar-toggled footer.sticky-footer {
 }
 
 /***** FIM LOADER ******/
+
+
+
+/* Estilos para a tabela */
+.table-header {
+    color: #000;
+    text-align: left;
+    vertical-align: middle !important;
+    border: none !important;
+    border: none !important;
+    font-size: 25px;
+    font-weight: 100;
+}
+
+.table-header-c1 {
+    background-color: #e37724;
+    color: #000;
+}
+
+.table-header-c2 {
+    background-color: #d85d10;
+    color: #000;
+}
+
+.table-subheader {
+    background-color: #ffe0b1;
+    vertical-align: middle !important;
+    font-size: 15px;
+    font-weight: 100;
+    color: #000;
+}

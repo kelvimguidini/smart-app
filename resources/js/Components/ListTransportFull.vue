@@ -73,22 +73,6 @@ const unitSale = (opt) => {
     return Math.ceil(unitCost(opt) / opt.received_proposal_percent)
 }
 
-const roomNights = (evtr) => {
-    let sum = 0;
-    for (const opt of evtr.event_transport_opts) {
-        sum += (opt.count * daysBetween(opt.in, opt.out));
-    }
-    return sum;
-}
-
-const average = (evtr) => {
-    let sum = 0;
-    for (const opt of evtr.event_transport_opts) {
-        sum += unitSale(opt);
-    }
-    return sum / evtr.event_transport_opts.length;
-}
-
 const sumCount = (evtr) => {
     let sum = 0;
     for (const opt of evtr.event_transport_opts) {
@@ -184,14 +168,13 @@ const showDetails = ref(false);
                 <tbody>
                     <template v-for="(evtr, index) in eventTransports" :key="evtr.id">
 
-                        <tr class="bg-light text-dark thead-dark">
-                            <th class="text-left" :colspan="showDetails ? 22 : 15">
-                                {{ index + 1 }} | {{ evtr.transport.name }} | {{ evtr.transport.national
-                                    ?
-                                    "Nacional" : "Internacional" }}
-                                {{ evtr.transport.city }}
+                        <tr>
+                            <th class="table-header table-header-c1" colspan="2">Transporte {{ index + 1 }}</th>
+                            <th class="text-left table-header table-header-c2" :colspan="showDetails ? 19 : 13">
+                                {{ evtr.transport.name }}
                             </th>
-                            <th class="align-middle text-right" colspan="3">
+                            <th class="align-middle text-right table-header-c1 table-header" colspan="3">
+
                                 <Link class="btn btn-info btn-sm btn-icon-split"
                                     :href="route('event-edit', { 'id': evtr.event_id, 'tab': 5, 'ehotel': evtr.id })">
                                 <span class="icon text-white-50">
@@ -219,43 +202,52 @@ const showDetails = ref(false);
                             </th>
                         </tr>
 
-                        <tr class="thead-dark">
-                            <th class="align-middle" rowspan="2" scope="col">Broker</th>
-                            <th class="align-middle" rowspan="2" scope="col">Veículo</th>
-                            <th class="align-middle" rowspan="2" scope="col">Modelo Uso</th>
-                            <th class="align-middle" rowspan="2" scope="col">Serviços</th>
-                            <th class="align-middle" rowspan="2" scope="col">Marcas</th>
-                            <th class="align-middle" rowspan="2" scope="col">OBS</th>
-                            <th class="align-middle" rowspan="2" scope="col">IN</th>
-                            <th class="align-middle" rowspan="2" scope="col">OUT</th>
-                            <th class="align-middle" rowspan="2" scope="col">QTD</th>
-                            <th class="align-middle" rowspan="2" scope="col">Dias</th>
-                            <th class="align-middle" rowspan="2" scope="col">Comissão (%)</th>
-                            <th colspan="2" class="  align-middle" scope="col">Valor de Venda</th>
-                            <th colspan="2" class="align-middle" scope="col">Valor de Custo</th>
-                            <th class="align-middle" rowspan="2" scope="col">Proposta Recebida</th>
-                            <th class="align-middle" rowspan="2" scope="col">%</th>
+                        <tr class="table-subheader">
+
+                            <th class="text-left" colspan="11">
+                                {{ evtr.transport.national ? "Nacional" : "Internacional" }}
+                                {{ evtr.transport.city }}
+                            </th>
+
+                            <th colspan="2" class="align-middle">Valor de Venda</th>
+                            <th colspan="2" class="align-middle">Valor de Custo</th>
+                            <th colspan="2"></th>
                             <template v-if="showDetails">
-                                <th colspan="6" class="align-middle" scope="col">
-                                    IMPOSTOS DESTACADOS POR SERVIÇOS
-                                </th>
+                                <th class="align-middle" colspan="2">ISS</th>
+                                <th class="align-middle" colspan="2">Servico</th>
+                                <th class="align-middle" colspan="2">IVA</th>
                             </template>
-                            <th class="align-middle" rowspan="2" scope="col"></th>
+                            <th class="align-middle"></th>
                         </tr>
-                        <tr class="thead-dark">
+                        <tr class="table-header-c1">
+                            <th class="align-middle">Broker</th>
+                            <th class="align-middle">Veículo</th>
+                            <th class="align-middle">Modelo Uso</th>
+                            <th class="align-middle">Serviços</th>
+                            <th class="align-middle">Marcas</th>
+                            <th class="align-middle">OBS</th>
+                            <th class="align-middle">IN</th>
+                            <th class="align-middle">OUT</th>
+                            <th class="align-middle">QTD</th>
+                            <th class="align-middle">Dias</th>
+                            <th class="align-middle">Comissão (%)</th>
+
                             <th class="align-middle">Unidade</th>
                             <th class="align-middle">Total</th>
                             <th class="align-middle">Unidade</th>
                             <th class="align-middle">Custo TTL</th>
+
+                            <th class="align-middle">Proposta Recebida</th>
+                            <th class="align-middle">%</th>
                             <template v-if="showDetails">
-                                <th class="align-middle">{{ eventTransport != null ? eventTransport.percentISS : 0 }}%</th>
-                                <th class="align-middle">ISS</th>
-                                <th class="align-middle">{{ eventTransport != null ? eventTransport.percentIService : 0 }}%
-                                </th>
-                                <th class="align-middle">Servico</th>
-                                <th class="align-middle">{{ eventTransport != null ? eventTransport.percentIVA : 0 }}%</th>
-                                <th class="align-middle">IVA</th>
+                                <th class="align-middle">Cliente</th>
+                                <th class="align-middle">Custo</th>
+                                <th class="align-middle">Cliente</th>
+                                <th class="align-middle">Custo</th>
+                                <th class="align-middle">Cliente</th>
+                                <th class="align-middle">Custo</th>
                             </template>
+                            <th class="align-middle"></th>
                         </tr>
 
                         <!-- Opt TRs -->
@@ -311,22 +303,22 @@ const showDetails = ref(false);
                             }}
                             </td>
                             <template v-if="showDetails">
-                                <td class="align-middle bg-secondary text-white">
+                                <td class="align-middle bg-success text-white">
                                     {{ evtr.iss_percent }}</td>
-                                <td class=" align-middle bg-secondary text-white">
+                                <td class=" align-middle">
                                     {{ formatCurrency((unitSale(opt) * evtr.iss_percent) / 100) }}
                                 </td>
-                                <td class="align-middle bg-secondary text-white">
+                                <td class="align-middle bg-success text-white">
                                     {{ evtr.service_percent }}
                                 </td>
-                                <td class=" align-middle bg-secondary text-white">
+                                <td class=" align-middle">
                                     {{ formatCurrency(((unitSale(opt)) * evtr.service_percent) /
                                         100) }}
                                 </td>
-                                <td class="align-middle bg-secondary text-white">{{
+                                <td class="align-middle bg-success text-white">{{
                                     evtr.iva_percent
                                 }}</td>
-                                <td class=" align-middle bg-secondary text-white">
+                                <td class=" align-middle">
                                     {{ formatCurrency(((unitSale(opt)) * evtr.iva_percent) / 100) }}
                                 </td>
                             </template>
@@ -360,7 +352,7 @@ const showDetails = ref(false);
                             </td>
                         </tr>
                         <!-- FIM Opt TRs -->
-                        <tr>
+                        <tr class="table-subheader">
                             <td colspan="7"></td>
                             <td class="align-middle text-rigth">Veículos:</td>
                             <td class="align-middle">{{ sumCount(evtr) }}</td>
@@ -390,23 +382,7 @@ const showDetails = ref(false);
                                     }).format((1 - (sumCost(evtr) / sumSale(evtr))) * 100)
                                 }}
                             </td>
-                            <template v-if="showDetails">
-                                <td class="align-middle bg-secondary text-white">
-                                    ISS CLIENTE
-                                </td>
-                                <td class=" align-middle bg-secondary text-white">
-                                    ISS CUSTO
-                                </td>
-                                <td class="align-middle bg-secondary text-white">
-                                    SERV CLIENTE
-                                </td>
-                                <td class=" align-middle bg-secondary text-white">
-                                    SERV CUSTO
-                                </td>
-                                <td class="align-middle bg-secondary text-white">IVA CLIENTE</td>
-                                <td class=" align-middle bg-secondary text-white">IVA CUSTO</td>
-                            </template>
-                            <td class="align-middle"></td>
+                            <td class="align-middle" :colspan="showDetails ? 7 : 1"></td>
                         </tr>
 
                         <tr>

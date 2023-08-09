@@ -113,6 +113,7 @@ onMounted(() => {
     $('.s_transport').select2({
         theme: "bootstrap4", language: "pt-Br"
     }).on('selec2:select', (e) => {
+        alert(e.params.data.id);
         formStatus.status_transport = e.params.data.id;
     });
 });
@@ -157,7 +158,6 @@ const editStatus = (status, event_id) => {
     } else {
         formStatus.reset();
     }
-    console.log(formStatus);
 };
 
 const saveStatus = () => {

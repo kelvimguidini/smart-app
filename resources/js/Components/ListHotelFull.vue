@@ -184,14 +184,12 @@ const showDetails = ref(false);
                 <tbody>
                     <template v-for="(evho, index) in eventHotels" :key="evho.id">
 
-                        <tr class="bg-light text-dark thead-dark">
-                            <th class="text-left" :colspan="showDetails ? 23 : 14">
-                                Hotel {{ index + 1 }} | {{ evho.hotel.name }} | {{ evho.hotel.national
-                                    ?
-                                    "Nacional" : "Internacional" }}
-                                {{ evho.hotel.city }}
+                        <tr>
+                            <th class="table-header table-header-c1" colspan="2">Hotel {{ index + 1 }}</th>
+                            <th class="text-left table-header table-header-c2" :colspan="showDetails ? 21 : 12">
+                                {{ evho.hotel.name }}
                             </th>
-                            <th class="align-middle text-right" colspan="3">
+                            <th class="align-middle text-right table-header-c1 table-header" colspan="3">
                                 <Link class="btn btn-info btn-sm btn-icon-split"
                                     :href="route('event-edit', { 'id': evho.event_id, 'tab': 1, 'ehotel': evho.id })">
                                 <span class="icon text-white-50">
@@ -218,45 +216,52 @@ const showDetails = ref(false);
                             </th>
                         </tr>
 
-                        <tr class="thead-dark">
-                            <th class="align-middle" rowspan="2" scope="col">Broker</th>
-                            <th class="align-middle" rowspan="2" scope="col">Regime</th>
-                            <th class="align-middle" rowspan="2" scope="col">Proposito</th>
-                            <th class="align-middle" rowspan="2" scope="col">CAT.</th>
-                            <th class="align-middle" rowspan="2" scope="col">APTO</th>
-                            <th class="align-middle" rowspan="2" scope="col">IN</th>
-                            <th class="align-middle" rowspan="2" scope="col">OUT</th>
-                            <th class="align-middle" rowspan="2" scope="col">QTD</th>
-                            <th class="align-middle" rowspan="2" scope="col">NTS</th>
-                            <th class="align-middle" rowspan="2" scope="col">Comissão (%)</th>
-                            <th colspan="2" class="  align-middle" scope="col">Valor de Venda</th>
-                            <th colspan="2" class="align-middle" scope="col">Valor de Custo</th>
-                            <th class="align-middle" rowspan="2" scope="col">Proposta Recebida</th>
-                            <th class="align-middle" rowspan="2" scope="col">%</th>
+                        <tr class="table-subheader">
+                            <th colspan="10" class="text-left">{{ evho.hotel.national
+                                ? "Nacional" : "Internacional" }}
+                                {{ evho.hotel.city }}</th>
+                            <th colspan="2" class="align-middle">Valor de Venda</th>
+                            <th colspan="2" class="align-middle">Valor de Custo</th>
+                            <th colspan="2"></th>
                             <template v-if="showDetails">
-                                <th colspan="3" class="align-middle" scope="col">Comparativo</th>
-                                <th colspan="6" class="align-middle" scope="col">
-                                    IMPOSTOS DESTACADOS POR SERVIÇOS
-                                </th>
+                                <th class="align-middle" colspan="2">ISS</th>
+                                <th class="align-middle" colspan="2">Servico</th>
+                                <th class="align-middle" colspan="2">IVA</th>
+                                <th colspan="3" class="align-middle">Comparativo</th>
                             </template>
-                            <th class="align-middle" rowspan="2" scope="col"></th>
+                            <th class="align-middle"></th>
                         </tr>
-                        <tr class="thead-dark">
+                        <tr class="table-header-c1">
+                            <th class="align-middle">Broker</th>
+                            <th class="align-middle">Regime</th>
+                            <th class="align-middle">Proposito</th>
+                            <th class="align-middle">CAT.</th>
+                            <th class="align-middle">APTO</th>
+                            <th class="align-middle">IN</th>
+                            <th class="align-middle">OUT</th>
+                            <th class="align-middle">QTD</th>
+                            <th class="align-middle">NTS</th>
+                            <th class="align-middle">Comissão (%)</th>
+
                             <th class="align-middle">Unidade</th>
                             <th class="align-middle">Total</th>
                             <th class="align-middle">Unidade</th>
                             <th class="align-middle">Custo TTL</th>
+                            <th class="align-middle">Proposta Recebida</th>
+                            <th class="align-middle">%</th>
                             <template v-if="showDetails">
+                                <th class="align-middle">Cliente</th>
+                                <th class="align-middle">Custo</th>
+                                <th class="align-middle">Cliente</th>
+                                <th class="align-middle">Custo</th>
+                                <th class="align-middle">Cliente</th>
+                                <th class="align-middle">Custo</th>
+
                                 <th class="align-middle">Trivago</th>
                                 <th class="align-middle">Website HTL</th>
                                 <th class="align-middle">Omnibess</th>
-                                <th class="align-middle">{{ eventHotel != null ? eventHotel.percentISS : 0 }}%</th>
-                                <th class="align-middle">ISS</th>
-                                <th class="align-middle">{{ eventHotel != null ? eventHotel.percentIService : 0 }}%</th>
-                                <th class="align-middle">Servico</th>
-                                <th class="align-middle">{{ eventHotel != null ? eventHotel.percentIVA : 0 }}%</th>
-                                <th class="align-middle">IVA</th>
                             </template>
+                            <th class="align-middle"></th>
                         </tr>
 
                         <!-- Opt TRs -->
@@ -312,6 +317,25 @@ const showDetails = ref(false);
                             }}
                             </td>
                             <template v-if="showDetails">
+                                <td class="align-middle bg-success text-white">
+                                    {{ evho.iss_percent }}</td>
+                                <td class=" align-middle">
+                                    {{ formatCurrency((unitSale(opt) * evho.iss_percent) / 100) }}
+                                </td>
+                                <td class="align-middle bg-success text-white">
+                                    {{ evho.service_percent }}
+                                </td>
+                                <td class=" align-middle ">
+                                    {{ formatCurrency(((unitSale(opt)) * evho.service_percent) /
+                                        100) }}
+                                </td>
+                                <td class="align-middle bg-success text-white">{{
+                                    evho.iva_percent
+                                }}</td>
+                                <td class=" align-middle ">
+                                    {{ formatCurrency(((unitSale(opt)) * evho.iva_percent) / 100) }}
+                                </td>
+
                                 <td class=" align-middle bg-secondary text-white">{{
                                     formatCurrency(opt.compare_trivago)
                                 }}
@@ -322,24 +346,6 @@ const showDetails = ref(false);
                                 </td>
                                 <td class=" align-middle bg-secondary text-white">
                                     {{ formatCurrency(opt.compare_omnibess) }}
-                                </td>
-                                <td class="align-middle bg-secondary text-white">
-                                    {{ evho.iss_percent }}</td>
-                                <td class=" align-middle bg-secondary text-white">
-                                    {{ formatCurrency((unitSale(opt) * evho.iss_percent) / 100) }}
-                                </td>
-                                <td class="align-middle bg-secondary text-white">
-                                    {{ evho.service_percent }}
-                                </td>
-                                <td class=" align-middle bg-secondary text-white">
-                                    {{ formatCurrency(((unitSale(opt)) * evho.service_percent) /
-                                        100) }}
-                                </td>
-                                <td class="align-middle bg-secondary text-white">{{
-                                    evho.iva_percent
-                                }}</td>
-                                <td class=" align-middle bg-secondary text-white">
-                                    {{ formatCurrency(((unitSale(opt)) * evho.iva_percent) / 100) }}
                                 </td>
                             </template>
                             <td class="align-middle">
@@ -372,7 +378,7 @@ const showDetails = ref(false);
                             </td>
                         </tr>
                         <!-- FIM Opt TRs -->
-                        <tr>
+                        <tr class="table-subheader">
                             <td class="align-middle bg-warning text-dark text-rigth">
                                 Diária Média:
                             </td>
@@ -413,21 +419,7 @@ const showDetails = ref(false);
                                 }}
                             </td>
                             <template v-if="showDetails">
-                                <td class="align-middle" colspan="3"></td>
-                                <td class="align-middle bg-secondary text-white">
-                                    ISS CLIENTE
-                                </td>
-                                <td class=" align-middle bg-secondary text-white">
-                                    ISS CUSTO
-                                </td>
-                                <td class="align-middle bg-secondary text-white">
-                                    SERV CLIENTE
-                                </td>
-                                <td class=" align-middle bg-secondary text-white">
-                                    SERV CUSTO
-                                </td>
-                                <td class="align-middle bg-secondary text-white">IVA CLIENTE</td>
-                                <td class=" align-middle bg-secondary text-white">IVA CUSTO</td>
+                                <td class="align-middle" colspan="9"></td>
                             </template>
                             <td class="align-middle"></td>
                         </tr>
@@ -436,7 +428,7 @@ const showDetails = ref(false);
                             <td class="align-middle text-dark text-left" colspan="3">
                                 OBSERVAÇÃO INTERNA:
                             </td>
-                            <td class="align-middle text-dark text-left" :colspan="showDetails ? 16 : 13">
+                            <td class="align-middle text-dark text-left" :colspan="showDetails ? 13 : 13">
                                 {{ evho.internal_observation }}
                             </td>
                             <template v-if="showDetails">
@@ -458,6 +450,7 @@ const showDetails = ref(false);
                                 <td class="align-middle">
                                     {{ formatCurrency((sumCost(evho) * evho.iva_percent) / 100) }}
                                 </td>
+                                <td colspan="3"></td>
                             </template>
                             <td class="align-middle"></td>
                         </tr>
@@ -466,7 +459,7 @@ const showDetails = ref(false);
                             <td class="align-middle text-dark text-left" colspan="3">
                                 OBSERVAÇÃO CLIENTE:
                             </td>
-                            <td class="align-middle text-dark text-left" :colspan="showDetails ? 16 : 13">
+                            <td class="align-middle text-dark text-left" :colspan="showDetails ? 13 : 13">
                                 {{ evho.customer_observation }}
                             </td>
 
@@ -486,6 +479,7 @@ const showDetails = ref(false);
                                         ((sumCost(evho) * evho.service_percent) / 100) + ((sumCost(evho) *
                                             evho.iva_percent) / 100) + sumCost(evho)) }}
                                 </td>
+                                <td colspan="3"></td>
                             </template>
                             <td></td>
                         </tr>
