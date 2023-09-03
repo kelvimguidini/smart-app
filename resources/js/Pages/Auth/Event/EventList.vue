@@ -118,6 +118,13 @@ onMounted(() => {
     });
 });
 
+const showInvoicement = (status) => {
+    if (Array.isArray(status) && status.length > 0) {
+        status = status[0];
+    }
+    return status.status_u_hotel == 'A' || status.status_u_transport == 'A';
+};
+
 const editStatus = (status, event_id) => {
     formStatus.event_id = event_id;
 
@@ -142,6 +149,7 @@ const editStatus = (status, event_id) => {
         formStatus.cancelment_hotel = status.cancelment_hotel && new Date(status.cancelment_hotel);
 
         formStatus.status_hotel = status.status_hotel;
+        $('.s_hotel').val(status.status_hotel).trigger('change');
 
         formStatus.request_transport = status.request_transport && new Date(status.request_transport);
         formStatus.provider_order_transport = status.provider_order_transport && new Date(status.provider_order_transport);
@@ -154,7 +162,7 @@ const editStatus = (status, event_id) => {
         formStatus.cancelment_transport = status.cancelment_transport && new Date(status.cancelment_transport);
 
         formStatus.status_transport = status.status_transport;
-
+        $('.s_transport').val(status.status_transport).trigger('change');
     } else {
         formStatus.reset();
     }
@@ -186,6 +194,13 @@ const attachmentLink = ref(false);
 const linkEmail = ref(true);
 const token = ref(uuidv4());
 const link = ref('');
+
+
+const emailsInvoice = ref('');
+const sendEmailInvoice = ref(true);
+const messageInvoice = ref('');
+const copyMeInvoice = ref(false);
+
 
 const flash = ref(null);
 
@@ -319,6 +334,45 @@ const sendProposal = (array) => {
     }
 
 
+};
+
+const sendInvoice = (array) => {
+    isLoader.value = true;
+
+    if (array['download']) {
+        // Abrir uma nova guia com a URL de download
+        const downloadUrl = route('invoice', {
+            download: array['download'],
+            provider_id: array['provider_id'],
+            event_id: array['event_id'],
+        });
+
+        const downloadWindow = window.open(downloadUrl, '_blank');
+
+        // Verificar periodicamente se a guia foi fechada
+        const checkDownloadWindow = setInterval(() => {
+            if (downloadWindow.closed) {
+                // Quando a guia for fechada, parar o loader e limpar o temporizador
+                isLoader.value = false;
+                clearInterval(checkDownloadWindow);
+            }
+        }, 1000);
+    } else {
+        const formInvoice = useForm({});
+
+        formInvoice.get(route('invoice', {
+            download: array['download'],
+            provider_id: array['provider_id'],
+            event_id: array['event_id'],
+            message: array['message'],
+            emails: array['emails'],
+            copyMe: array['copyMe']
+        }), {
+            onFinish: () => {
+                isLoader.value = false;
+            },
+        });
+    }
 };
 
 const providersByEvent = (event) => {
@@ -500,6 +554,8 @@ const providersByEvent = (event) => {
                                             <option value="CA" :selected="'CA' == formFilters.status_hotel">Cancelado
                                             </option>
                                             <option value="A" :selected="'A' == formFilters.status_hotel">Aprovado</option>
+                                            <option value="AA" :selected="'AA' == formFilters.status_hotel">Aguardando
+                                                Aprovação</option>
                                             <option value="C" :selected="'C' == formFilters.status_hotel">Concluído</option>
                                         </select>
                                     </div>
@@ -529,6 +585,9 @@ const providersByEvent = (event) => {
                                             </option>
                                             <option value="A" :selected="'A' == formFilters.status_transport">Aprovado
                                             </option>
+                                            <option value="AA" :selected="'AA' == formFilters.status_hotel">Aguardando
+                                                Aprovação
+                                            </option>
                                             <option value="C" :selected="'C' == formFilters.status_transport">Concluído
                                             </option>
                                         </select>
@@ -537,7 +596,6 @@ const providersByEvent = (event) => {
                             </div>
                             <button type="submit" class="btn btn-primary">Filtrar</button>
                         </form>
-
                     </div>
                 </div>
             </div>
@@ -692,18 +750,12 @@ const providersByEvent = (event) => {
                                                                             <tr>
                                                                                 <th>Status</th>
                                                                                 <td>
-                                                                                    <select class="form-control s_hotel"
-                                                                                        :required="required">
-                                                                                        <option>.::Selecione::.
-                                                                                        </option>
-                                                                                        <option
-                                                                                            :selected="formStatus.status_hotel == 'AA'"
-                                                                                            value="AA">
+                                                                                    <select class="form-control s_hotel">
+                                                                                        <option>.::Selecione::.</option>
+                                                                                        <option value="AA">
                                                                                             Aguardando Aprovação
                                                                                         </option>
-                                                                                        <option
-                                                                                            :selected="formStatus.status_hotel == 'A'"
-                                                                                            value="A">
+                                                                                        <option value="A">
                                                                                             Aprovado <span
                                                                                                 v-if="formStatus.aproved_hotel && formStatus.status_hotel == 'A'">por
                                                                                                 {{ formStatus.aproved_hotel
@@ -825,16 +877,10 @@ const providersByEvent = (event) => {
                                                                                 <td>
                                                                                     <select
                                                                                         class="form-control s_transport">
-                                                                                        <option>.::Selecione::.
-                                                                                        </option>
-                                                                                        <option
-                                                                                            :selected="formStatus.status_transport == 'AA'"
-                                                                                            value="AA">
-                                                                                            Aguardando Aprovação
-                                                                                        </option>
-                                                                                        <option
-                                                                                            :selected="formStatus.status_transport == 'A'"
-                                                                                            value="A">
+                                                                                        <option>.::Selecione::.</option>
+                                                                                        <option value="AA">Aguardando
+                                                                                            Aprovação</option>
+                                                                                        <option value="A">
                                                                                             Aprovado <span
                                                                                                 v-if="formStatus.aproved_transport && formStatus.status_transport == 'A'">por
                                                                                                 {{
@@ -877,7 +923,7 @@ const providersByEvent = (event) => {
                                                     v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin')"
                                                     :key="index" :modal-title="'Confirmar Exclusão de ' + event.name"
                                                     :ok-botton-callback="deleteEvent" :ok-botton-callback-param="event.id"
-                                                    btn-class="btn btn-danger btn-icon-split">
+                                                    btn-class="btn btn-danger btn-icon-split mr-2">
                                                     <template v-slot:button>
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-trash"></i>
@@ -888,6 +934,7 @@ const providersByEvent = (event) => {
                                                         Tem certeza que deseja apagar esse registro?
                                                     </template>
                                                 </Modal>
+
                                             </td>
                                         </tr>
                                         <template v-if="showEventDetails == event.id">
@@ -1175,6 +1222,88 @@ const providersByEvent = (event) => {
                                                                     class="alert-heading text-xs font-weight-bold text-primary text-uppercase mb-1">
                                                                     Já foi enviado um e-mail com essa proposta!
                                                                 </h4>
+                                                            </div>
+
+                                                        </template>
+                                                    </Modal>
+
+                                                    <Modal modal-title="Faturamento"
+                                                        v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin') && showInvoicement(event.event_status)"
+                                                        :ok-botton-callback="sendInvoice"
+                                                        :ok-botton-callback-param="{ event_id: event.id, emails: emailsInvoice, download: !sendEmailInvoice, provider_id: prov.id, message: messageInvoice, copyMe: copyMeInvoice }"
+                                                        :ok-botton-label="!sendEmailInvoice ? 'Baixar PDF' : 'Enviar Faturamento'"
+                                                        btn-class="btn btn-secondary btn-icon-split ">
+                                                        <template v-slot:button>
+                                                            <div @click="{
+                                                                emailsInvoice = '';
+                                                                sendEmailInvoice = false;
+                                                                messageInvoice = '';
+                                                                copyMeInvoice = false;
+                                                            }">
+                                                                <span class="icon text-white-50">
+                                                                    <i class="fas fa-file-pdf"></i>
+                                                                </span>
+                                                                <span class="text">Faturamento</span>
+                                                            </div>
+                                                        </template>
+                                                        <template v-slot:content>
+                                                            <div class="row">
+                                                                <div class="col">
+                                                                    <div class="form-group">
+                                                                        <div class="form-check">
+                                                                            <input class="form-check-input"
+                                                                                v-model="sendEmailInvoice" type="checkbox"
+                                                                                id="autoSizingCheck">
+                                                                            <label class="form-check-label"
+                                                                                for="autoSizingCheck">
+                                                                                Enviar E-mail
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="row" v-if="sendEmailInvoice">
+                                                                <div class="col-12">
+
+                                                                    <div class="form-group">
+                                                                        <InputLabel value="Enviar para:" />
+                                                                        <TextInput type="text" class="form-control"
+                                                                            v-model="emailsInvoice" />
+                                                                    </div>
+
+                                                                    <div class="alert alert-warning " role="alert">
+                                                                        <h4
+                                                                            class="alert-heading text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                                            Separe os e-mails com ; (ponto e vírgula)
+                                                                            caso tenha mais de 1
+                                                                        </h4>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-12">
+                                                                    <div class="form-group">
+                                                                        <div class="form-check">
+                                                                            <InputLabel value=" " />
+                                                                            <CKEditor v-model:contentCode="messageInvoice"
+                                                                                :height="150" />
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-12">
+                                                                    <div class="form-group">
+                                                                        <div class="form-check">
+                                                                            <input class="form-check-input"
+                                                                                v-model="copyMeInvoice" type="checkbox"
+                                                                                id="check-copyme">
+                                                                            <label class="form-check-label"
+                                                                                for="check-copyme">
+                                                                                Enviar cópia para mim
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
                                                             </div>
 
                                                         </template>

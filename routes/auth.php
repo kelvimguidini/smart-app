@@ -372,6 +372,11 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::post('event-status-save', [EventController::class, 'statusStore'])
         ->name('event-status-save');
 
+
+    Route::get('invoice/{download}/{provider_id}/{event_id}/{emails?}/{copyMe?}/{message?}', [ProviderController::class, 'invoicingPdf'])
+        ->name('invoice');
+
+
     //HOTEL
     Route::get('hotel', [ProviderController::class, 'create'])
         ->name('hotel');

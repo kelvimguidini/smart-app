@@ -373,6 +373,90 @@ class ProviderController extends Controller
         }
     }
 
+
+    public function invoicingPdf(Request $request)
+    {
+        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator') && !Gate::allows('land_operator')) {
+            abort(403);
+        }
+
+        $provider = $request->provider_id;
+        $event = $request->event_id;
+
+        $eventBank = Event::with([
+            'customer',
+            'event_hotels.hotel',
+            'event_abs.ab',
+            'event_halls.hall',
+            'eventStatus',
+
+            'event_hotels.eventHotelsOpt', 'event_hotels.eventHotelsOpt.regime', 'event_hotels.eventHotelsOpt.apto_hotel', 'event_hotels.eventHotelsOpt.category_hotel', 'event_hotels.currency',
+            'event_abs.eventAbOpts', 'event_abs.eventAbOpts.Local', 'event_abs.eventAbOpts.service_type', 'event_abs.currency',
+            'event_halls.eventHallOpts', 'event_halls.eventHallOpts.purpose', 'event_halls.currency',
+
+        ])->find($event);
+
+        $providers = collect();
+
+        if ($eventBank->event_hotels->isNotEmpty()) {
+            $providers = $providers->concat($eventBank->event_hotels->pluck('hotel'));
+        }
+
+        if ($eventBank->event_abs->isNotEmpty()) {
+            $providers = $providers->concat($eventBank->event_abs->pluck('ab'));
+        }
+
+        if ($eventBank->event_halls->isNotEmpty()) {
+            $providers = $providers->concat($eventBank->event_halls->pluck('hall'));
+        }
+
+        $providerBank = $providers->filter()->unique()->values()->first();
+
+        $arr = array(
+            "providerBank" => $providerBank,
+            "eventBank" => $eventBank
+        );
+
+        $pdf = $this->createPDF($arr, 2);
+        //return $pdf;
+        // Renderize o HTML como PDF
+        $pdf->render();
+        // Retorna o PDF como um arquivo de download
+        if ($request->download == "true") {
+            return $pdf->stream('Faturamento.pdf');
+        } else {
+
+            $sub = "Faturamento evento";
+            $user = User::find(Auth::user()->id);
+            $data = [
+                'body' => $request->message != null ? urldecode($request->message) : "",
+                'hasAttachment' => true,
+                'signature' => $user->signature != null ? $user->signature : "",
+                'subject' => $sub
+            ];
+            $send = Mail::to(explode(";", $request->emails));
+
+            if ($request->copyMe == "true") {
+                $send->cc($user->email);
+            }
+
+            $send->send(new PdfEmail($pdf->output(), 'Faturamento.pdf', $data, $sub));
+
+            DB::table('email_log')->insert(
+                array(
+                    'event_id' => $event,
+                    'sender_id' => $user->id,
+                    'body' => urldecode($request->message),
+                    'attachment' => $pdf->output(),
+                    'to' => $request->emails,
+                    'type' => 'proposal'
+                )
+            );
+
+            return redirect()->back()->with('flash', ['message' => 'E-mail enviado com sucesso!', 'type' => 'success']);
+        }
+    }
+
     private function createPDF(array $paramters, int $type)
     {
         $options = new Options();
@@ -389,6 +473,13 @@ class ProviderController extends Controller
         switch ($type) {
             case 1:
                 $html = view('proposalPdf', [
+                    'event' => $paramters['eventBank'],
+                    'provider' => $paramters['providerBank']
+                ])->render();
+
+                break;
+            case 2:
+                $html = view('invoicePDF', [
                     'event' => $paramters['eventBank'],
                     'provider' => $paramters['providerBank']
                 ])->render();

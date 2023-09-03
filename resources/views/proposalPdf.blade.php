@@ -194,6 +194,7 @@ if ($transportEvent != null) {
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
+            page-break-inside: avoid;
         }
 
         th,
@@ -373,7 +374,7 @@ if ($transportEvent != null) {
                     </thead>
                     <tbody>
                         @foreach($hotelEvent->eventHotelsOpt as $key => $item)
-                        <tr style="background-color: {{ $key % 2 == 0 ? '#ffffff' : '#f7fafc' }}">
+                        <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
                             <td style="padding: 0.5rem;">{{ $item->category_hotel->name }}</td>
                             <td style="padding: 0.5rem;">{{ $item->regime->name }}</td>
                             <td style="padding: 0.5rem;">{{ $item->apto_hotel->name }}</td>
@@ -396,8 +397,8 @@ if ($transportEvent != null) {
                     </tbody>
                     <tfoot class="table-footer">
                         <tr style="background-color: #ffe0b1">
-                            <td style="padding: 0.5rem;"><b>Comentários:</b></td>
-                            <td colspan="10" style="padding: 0.5rem;">{{ $hotelEvent->customer_observation }}</td>
+                            <td colspan="2" style="padding: 0.5rem;"><b>Comentários:</b></td>
+                            <td colspan="9" style="padding: 0.5rem;">{{ $hotelEvent->customer_observation }}</td>
                         </tr>
                     </tfoot>
 
@@ -426,7 +427,7 @@ if ($transportEvent != null) {
                     </thead>
                     <tbody>
                         @foreach($abEvent->eventAbOpts as $key => $item)
-                        <tr style="background-color: {{ $key % 2 == 0 ? '#ffffff' : '#f7fafc' }}">
+                        <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
                             <td style="padding: 0.5rem;">{{ $item->service_type->name }}</td>
                             <td style="padding: 0.5rem;">{{ $item->local->name }}</td>
                             <td style="padding: 0.5rem;">{{ date("d/m/Y", strtotime($item->in)) }}</td>
@@ -448,8 +449,8 @@ if ($transportEvent != null) {
                     </tbody>
                     <tfoot class="table-footer">
                         <tr style="background-color: #ffe0b1">
-                            <td style="padding: 0.5rem;"><b>Comentários:</b></td>
-                            <td colspan="10" style="padding: 0.5rem;">{{ $abEvent->customer_observation }}</td>
+                            <td colspan="2" style="padding: 0.5rem;"><b>Comentários:</b></td>
+                            <td colspan="9" style="padding: 0.5rem;">{{ $abEvent->customer_observation }}</td>
                         </tr>
                     </tfoot>
 
@@ -479,7 +480,7 @@ if ($transportEvent != null) {
                     </thead>
                     <tbody>
                         @foreach($hallEvent->eventHallOpts as $key => $item)
-                        <tr style="background-color: {{ $key % 2 == 0 ? '#ffffff' : '#f7fafc' }}">
+                        <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
                             <td style="padding: 0.5rem;">{{ $item->name }}</td>
                             <td style="padding: 0.5rem;">{{ $item->m2 }}</td>
                             <td style="padding: 0.5rem;">{{ $item->purpose->name }}</td>
@@ -502,8 +503,8 @@ if ($transportEvent != null) {
                     </tbody>
                     <tfoot class="table-footer">
                         <tr style="background-color: #ffe0b1">
-                            <td style="padding: 0.5rem;"><b>Comentários:</b></td>
-                            <td colspan="10" style="padding: 0.5rem;">{{ $hallEvent->customer_observation }}</td>
+                            <td colspan="2" style="padding: 0.5rem;"><b>Comentários:</b></td>
+                            <td colspan="9" style="padding: 0.5rem;">{{ $hallEvent->customer_observation }}</td>
                         </tr>
                     </tfoot>
 
@@ -533,7 +534,7 @@ if ($transportEvent != null) {
                     </thead>
                     <tbody>
                         @foreach($addEvent->eventAddOpts as $key => $item)
-                        <tr style="background-color: {{ $key % 2 == 0 ? '#ffffff' : '#f7fafc' }}">
+                        <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
                             <td style="padding: 0.5rem;">{{ $item->service->name }}</td>
                             <td style="padding: 0.5rem;">{{ $item->frequency->name }}</td>
                             <td style="padding: 0.5rem;">{{ $item->measure->name }}</td>
@@ -556,8 +557,8 @@ if ($transportEvent != null) {
                     </tbody>
                     <tfoot class="table-footer">
                         <tr style="background-color: #ffe0b1">
-                            <td style="padding: 0.5rem;"><b>Comentários:</b></td>
-                            <td colspan="10" style="padding: 0.5rem;">{{ $addEvent->customer_observation }}</td>
+                            <td colspan="2" style="padding: 0.5rem;"><b>Comentários:</b></td>
+                            <td colspan="9" style="padding: 0.5rem;">{{ $addEvent->customer_observation }}</td>
                         </tr>
                     </tfoot>
 
@@ -589,7 +590,7 @@ if ($transportEvent != null) {
                     </thead>
                     <tbody>
                         @foreach($transportEvent->eventTransportOpts as $key => $item)
-                        <tr style="background-color: {{ $key % 2 == 0 ? '#ffffff' : '#f7fafc' }}">
+                        <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
                             <td style="padding: 0.5rem;">{{ $item->brand->name }}</td>
                             <td style="padding: 0.5rem;">{{ $item->vehicle->name }}</td>
                             <td style="padding: 0.5rem;">{{ $item->model->name }}</td>
@@ -613,8 +614,8 @@ if ($transportEvent != null) {
                     </tbody>
                     <tfoot class="table-footer">
                         <tr style="background-color: #ffe0b1">
-                            <td style="padding: 0.5rem;"><b>Comentários:</b></td>
-                            <td colspan="11" style="padding: 0.5rem;">{{ $transportEvent->customer_observation }}</td>
+                            <td colspan="2" style="padding: 0.5rem;"><b>Comentários:</b></td>
+                            <td colspan="10" style="padding: 0.5rem;">{{ $transportEvent->customer_observation }}</td>
                         </tr>
                     </tfoot>
 
@@ -637,7 +638,7 @@ if ($transportEvent != null) {
                     </thead>
                     <tbody>
                         @if($hotelEvent != null && $hotelEvent->eventHotelsOpt != null && count($hotelEvent->eventHotelsOpt) > 0)
-                        <tr style="background-color: {{ !$strip ? '#ffffff' : '#f7fafc' }}">
+                        <tr style="background-color: <? !$strip ? '#ffffff' : '#f7fafc' ?>">
                             <td style="padding: 0.5rem;">Hospedagem</td>
                             <td style="padding: 0.5rem;">Rooms Night</td>
                             <td style="padding: 0.5rem;">{{ $sumQtdDayles}}</td>
@@ -648,7 +649,7 @@ if ($transportEvent != null) {
                         @endif
 
                         @if($abEvent != null && $abEvent->eventAbOpts != null && count($abEvent->eventAbOpts) > 0)
-                        <tr style="background-color: {{ !$strip ? '#ffffff' : '#f7fafc' }}">
+                        <tr style="background-color: <? !$strip ? '#ffffff' : '#f7fafc' ?>">
                             <td style="padding: 0.5rem;">Alimentos & Bebidas</td>
                             <td style="padding: 0.5rem;">Refeições</td>
                             <td style="padding: 0.5rem;">{{ $sumABQtdDayles }}</td>
@@ -660,7 +661,7 @@ if ($transportEvent != null) {
 
 
                         @if($hallEvent != null && $hallEvent->eventHallOpts != null && count($hallEvent->eventHallOpts) > 0)
-                        <tr style="background-color: {{ !$strip ? '#ffffff' : '#f7fafc' }}">
+                        <tr style="background-color: <? !$strip ? '#ffffff' : '#f7fafc' ?>">
                             <td style="padding: 0.5rem;">Salões e eventos</td>
                             <td style="padding: 0.5rem;">Serviços</td>
                             <td style="padding: 0.5rem;">{{ $sumHallQtdDayles }}</td>
@@ -672,7 +673,7 @@ if ($transportEvent != null) {
 
 
                         @if($addEvent != null && $addEvent->eventAddOpts != null && count($addEvent->eventAddOpts) > 0)
-                        <tr style="background-color: {{ !$strip ? '#ffffff' : '#f7fafc' }}">
+                        <tr style="background-color: <? !$strip ? '#ffffff' : '#f7fafc' ?>">
                             <td style="padding: 0.5rem;">Adicionais</td>
                             <td style="padding: 0.5rem;">Serviços</td>
                             <td style="padding: 0.5rem;">{{ $sumAddQtdDayles }}</td>
@@ -683,7 +684,7 @@ if ($transportEvent != null) {
                         @endif
 
                         @if($transportEvent != null && $transportEvent->eventTransportOpts != null && count($transportEvent->eventTransportOpts) > 0)
-                        <tr style="background-color: {{ !$strip ? '#ffffff' : '#f7fafc' }}">
+                        <tr style="background-color: <? !$strip ? '#ffffff' : '#f7fafc' ?>">
                             <td style="padding: 0.5rem;">Transportes</td>
                             <td style="padding: 0.5rem;">Veículos</td>
                             <td style="padding: 0.5rem;">{{ $sumTransportQtdDayles}}</td>
@@ -695,7 +696,7 @@ if ($transportEvent != null) {
                     </tbody>
                     <tfoot class="table-footer">
                         <tr style="background-color: #ebf8ff;">
-                            <td colspan="5" style="padding: 0.5rem;">
+                            <td colspan="5">
 
                                 <table style="width: 100%;">
                                     <tr>

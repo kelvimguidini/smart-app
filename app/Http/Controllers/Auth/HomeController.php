@@ -149,17 +149,16 @@ class HomeController extends Controller
      */
     public function waitApproval(Request $request)
     {
-        $query = $this->getQueryEventBase()->with('eventStatus');
 
-        $queryHotels = $query->where(function ($query) {
+        $queryHotels =  $this->getQueryEventBase()->with('eventStatus')->where(function ($query) {
             $query->whereHas('eventStatus', function ($query) {
-                $query->where('status_hotel', "AA");
+                $query->where('status_hotel', 'AA');
             });
         });
 
-        $queryTransports = $query->where(function ($query) {
+        $queryTransports =  $this->getQueryEventBase()->with('eventStatus')->where(function ($query) {
             $query->whereHas('eventStatus', function ($query) {
-                $query->where('status_transport', "AA");
+                $query->where('status_transport', 'AA');
             });
         });
 

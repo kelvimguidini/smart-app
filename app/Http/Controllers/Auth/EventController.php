@@ -122,28 +122,25 @@ class EventController extends Controller
         }
 
         if ($status_hotel && $status_hotel != ".::Selecione::.") {
-            $query->where(function ($query) use ($status_hotel) {
-                $query->whereHas('eventStatus', function ($query) use ($status_hotel) {
-                    $query->where('status_u_hotel', $status_hotel);
-                });
-                if ($status_hotel == 'N') {
-                    $query->orWhereDoesntHave('eventStatus');
-                }
+            $query->whereHas('eventStatus', function ($query) use ($status_hotel) {
+                $query->where('status_u_hotel', $status_hotel);
             });
+            if ($status_hotel == 'N') {
+                $query->orWhereDoesntHave('eventStatus');
+            }
         }
 
         if ($status_transport && $status_transport != ".::Selecione::.") {
-            $query->where(function ($query) use ($status_transport) {
-                $query->whereHas('eventStatus', function ($query) use ($status_transport) {
-                    $query->where('status_u_transport', $status_transport);
-                });
-                if ($status_transport == 'N') {
-                    $query->orWhereDoesntHave('eventStatus');
-                }
+
+            $query->whereHas('eventStatus', function ($query) use ($status_transport) {
+                $query->where('status_u_transport', $status_transport);
             });
+            if ($status_transport == 'N') {
+                $query->orWhereDoesntHave('eventStatus');
+            }
         }
 
-        $events = $query->paginate($perPage, ['*'], 'page', $page);
+        $events = $query->orderBy('created_at', 'desc')->paginate($perPage, ['*'], 'page', $page);
 
         return Inertia::render('Auth/Event/EventList', [
             'events' => $events,
@@ -415,10 +412,13 @@ class EventController extends Controller
                 $status_u_hotel = 'AL';
             }
             if ($request->done_hotel) {
-                $status_u_hotel = 'C';
+                $status_u_hotel = 'D';
             }
             if ($request->status_hotel == "A") {
-                $status_u_hotel = 'C';
+                $status_u_hotel = 'A';
+            }
+            if ($request->status_hotel == "AA") {
+                $status_u_hotel = 'AA';
             }
             if ($request->cancelment_hotel) {
                 $status_u_hotel = 'C';
@@ -448,10 +448,13 @@ class EventController extends Controller
                 $status_u_transport = 'AL';
             }
             if ($request->done_transport) {
-                $status_u_transport = 'C';
+                $status_u_transport = 'D';
             }
             if ($request->status_transport == "A") {
-                $status_u_transport = 'C';
+                $status_u_transport = 'A';
+            }
+            if ($request->status_transport == "AA") {
+                $status_u_transport = 'AA';
             }
             if ($request->cancelment_transport) {
                 $status_u_transport = 'C';
