@@ -15,6 +15,7 @@ return new class extends Migration
     public function up()
     {
         DB::unprepared("
+        DROP FUNCTION IF EXISTS formatar_data_ptbr;
 
         CREATE FUNCTION formatar_data_ptbr(dateValue DATE)
         RETURNS VARCHAR(255)
@@ -48,6 +49,6 @@ return new class extends Migration
      */
     public function down()
     {
-        //
+        DB::unprepared("DROP FUNCTION IF EXISTS formatar_data_ptbr;");
     }
 };

@@ -496,5 +496,6 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::get('dash-users-groups', [HomeController::class, 'userGroups'])
         ->name('dash-users-groups');
 
+
     //FIM dashboard
 });

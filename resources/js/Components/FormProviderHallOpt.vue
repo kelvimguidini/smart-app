@@ -145,7 +145,7 @@ onMounted(() => {
         symbol = props.eventHall.currency.symbol + ' ';
         formOpt.hall_id = props.eventHall.hall_id;
     }
-    $('.money').maskMoney({ prefix: symbol, allowNegative: false, thousands: '.', decimal: ',', affixesStay: true });
+    $('.money').maskMoney({ prefix: symbol, allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
 });
 
 

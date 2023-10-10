@@ -143,7 +143,7 @@ onMounted(() => {
         symbol = props.eventAdd.currency.symbol + ' ';
         formOpt.add_id = props.eventAdd.add_id;
     }
-    $('.money').maskMoney({ prefix: symbol, allowNegative: false, thousands: '.', decimal: ',', affixesStay: true });
+    $('.money').maskMoney({ prefix: symbol, allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
 });
 
 

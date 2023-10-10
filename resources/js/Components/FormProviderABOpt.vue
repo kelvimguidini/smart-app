@@ -151,7 +151,7 @@ onMounted(() => {
         symbol = props.eventAB.currency.symbol + ' ';
         formOpt.ab_id = props.eventAB.ab_id;
     }
-    $('.money').maskMoney({ prefix: symbol, allowNegative: false, thousands: '.', decimal: ',', affixesStay: true });
+    $('.money').maskMoney({ prefix: symbol, allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
 });
 
 

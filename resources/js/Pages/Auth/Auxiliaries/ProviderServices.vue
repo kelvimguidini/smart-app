@@ -47,8 +47,6 @@ onMounted(() => {
         form.city = e.params.data.id;
     });
 
-    $('.phone').mask('(00) 00000-0000');
-
     $('table').DataTable({
         language: {
             url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/pt-BR.json',

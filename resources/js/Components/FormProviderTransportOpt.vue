@@ -172,7 +172,7 @@ onMounted(() => {
     if (props.eventTransport != null) {
         symbol = props.eventTransport.currency.symbol + ' ';
     }
-    $('.money').maskMoney({ prefix: symbol, allowNegative: false, thousands: '.', decimal: ',', affixesStay: true });
+    $('.money').maskMoney({ prefix: symbol, allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
 
 });
 

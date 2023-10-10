@@ -188,7 +188,7 @@ if ($transportEvent != null) {
         }
 
         table {
-            font-size: 10pt;
+            font-size: 7pt;
             max-width: 19cm;
             min-width: 19cm;
             width: 100%;
@@ -199,7 +199,7 @@ if ($transportEvent != null) {
 
         th,
         td {
-            padding: 0.5rem;
+            padding: 0.3rem;
             height: 30px;
         }
 

@@ -176,7 +176,7 @@ if ($addEvent != null) {
 
         <div style="width: 92%; margin-bottom: 30px;">
             @if($hotelEvent != null && $hotelEvent->eventHotelsOpt != null && count($hotelEvent->eventHotelsOpt) > 0)
-            <table style="font-size: 10pt; max-width: 19cm; width: 100%; border-collapse: collapse; border: 1px solid gray; page-break-inside: avoid;">
+            <table style="max-width: 19cm; width: 100%; border-collapse: collapse; border: 1px solid gray; page-break-inside: avoid;">
                 <thead style="display: table-header-group;">
                     <tr style="background-color: rgba(233, 84, 13, 0.5)">
                         <th colspan="11" style="padding: 15px 5px; text-align: center;">Hospedagem</th>
@@ -241,7 +241,7 @@ if ($addEvent != null) {
 
 
             @if($abEvent != null && $abEvent->eventAbOpts != null && count($abEvent->eventAbOpts) > 0)
-            <table style="font-size: 10pt; max-width: 19cm; width: 100%; border-collapse: collapse; border: 1px solid gray; page-break-inside: avoid;">
+            <table style="max-width: 19cm; width: 100%; border-collapse: collapse; border: 1px solid gray; page-break-inside: avoid;">
                 <thead style="display: table-header-group;">
                     <tr style="background-color: rgba(233, 84, 13, 0.5)">
                         <th colspan="10" style="padding: 15px 5px; text-align: center;">Alimentos & Bebidas</th>
@@ -306,7 +306,7 @@ if ($addEvent != null) {
 
 
             @if($hallEvent != null && $hallEvent->eventHallOpts != null && count($hallEvent->eventHallOpts) > 0)
-            <table style="font-size: 10pt; max-width: 19cm; width: 100%; border-collapse: collapse; border: 1px solid gray; page-break-inside: avoid;">
+            <table style="max-width: 19cm; width: 100%; border-collapse: collapse; border: 1px solid gray; page-break-inside: avoid;">
                 <thead style="display: table-header-group;">
                     <tr style="background-color: rgba(233, 84, 13, 0.5)">
                         <th colspan="10" style="padding: 15px 5px; text-align: center;">Salões & Eventos</th>
@@ -372,7 +372,7 @@ if ($addEvent != null) {
 
 
             @if($addEvent != null && $addEvent->eventAddOpts != null && count($addEvent->eventAddOpts) > 0)
-            <table style="font-size: 10pt; max-width: 19cm; width: 100%; border-collapse: collapse; border: 1px solid gray; page-break-inside: avoid;">
+            <table style="max-width: 19cm; width: 100%; border-collapse: collapse; border: 1px solid gray; page-break-inside: avoid;">
                 <thead style="display: table-header-group;">
                     <tr style="background-color: rgba(233, 84, 13, 0.5)">
                         <th colspan="10" style="padding: 15px 5px; text-align: center;">Adicionais</th>

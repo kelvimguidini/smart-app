@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\ChaController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -19,5 +20,17 @@ use Inertia\Inertia;
 Route::get('/', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified', 'cors'])->name('dashboard');
+
+
+Route::get('cha-revelacao', [ChaController::class, 'jogo'])
+    ->name('cha-revelacao');
+
+
+Route::get('salvar-menino-menina', [ChaController::class, 'create'])
+    ->name('salvar-menino-menina');
+
+Route::post('salvar-menino-menina', [ChaController::class, 'store'])
+    ->name('salvar-menino-menina-save');
+
 
 require __DIR__ . '/auth.php';

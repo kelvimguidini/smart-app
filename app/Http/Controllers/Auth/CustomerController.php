@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -51,6 +52,7 @@ class CustomerController extends Controller
             if ($request->file('logo')) {
                 $path = Storage::putFile('public/logos', $request->file('logo'));
                 $url = Storage::url($path);
+                Artisan::call('files:copy');
             }
 
             if ($request->id > 0) {
