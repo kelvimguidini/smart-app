@@ -22,7 +22,8 @@ class EventAB extends Model
         'sended_mail_link',
         'token_budget',
         'iof',
-        'service_charge'
+        'service_charge',
+        'deadline_date'
     ];
     protected $table = 'event_ab';
 

@@ -150,6 +150,7 @@ class ProviderController extends Controller
                 $provider->invoice = $request->invoice;
                 $provider->internal_observation = $request->internal_observation;
                 $provider->customer_observation = $request->customer_observation;
+                $provider->deadline_date = $request->deadline;
 
                 $provider->iof = $request->iof;
                 $provider->service_charge = $request->service_charge;
@@ -170,7 +171,8 @@ class ProviderController extends Controller
                             'internal_observation' => $request->internal_observation,
                             'customer_observation' => $request->customer_observation,
                             'iof' => $request->iof,
-                            'service_charge' => $request->service_charge
+                            'service_charge' => $request->service_charge,
+                            'deadline_date' => $request->deadline
                         ]);
                         break;
                     case 'ab':
@@ -185,7 +187,8 @@ class ProviderController extends Controller
                             'internal_observation' => $request->internal_observation,
                             'customer_observation' => $request->customer_observation,
                             'iof' => $request->iof,
-                            'service_charge' => $request->service_charge
+                            'service_charge' => $request->service_charge,
+                            'deadline_date' => $request->deadline
                         ]);
                         break;
                     case 'hall':
@@ -200,7 +203,8 @@ class ProviderController extends Controller
                             'internal_observation' => $request->internal_observation,
                             'customer_observation' => $request->customer_observation,
                             'iof' => $request->iof,
-                            'service_charge' => $request->service_charge
+                            'service_charge' => $request->service_charge,
+                            'deadline_date' => $request->deadline
                         ]);
                         break;
                 }

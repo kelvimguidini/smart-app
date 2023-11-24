@@ -118,6 +118,9 @@ const sumTaxes = (evtr, taxType) => {
             case 'iva':
                 sum += ((unitSale(opt) * evtr.iva_percent) / 100) * daysBetween(opt.in, opt.out) * opt.count;
                 break;
+            case 'sc':
+                sum += ((unitSale(opt) * evtr.service_charge) / 100) * daysBetween(opt.in, opt.out) * opt.count;
+                break;
         }
 
     }
@@ -169,8 +172,8 @@ const showDetails = ref(false);
                     <template v-for="(evtr, index) in eventTransports" :key="evtr.id">
 
                         <tr>
-                            <th class="table-header table-header-c1" colspan="2">Transporte {{ index + 1 }}</th>
-                            <th class="text-left table-header table-header-c2" :colspan="showDetails ? 19 : 13">
+                            <th class="table-header table-header-c1" colspan="3">Transporte {{ index + 1 }}</th>
+                            <th class="text-left table-header table-header-c2" :colspan="showDetails ? 20 : 12">
                                 {{ evtr.transport.name }}
                             </th>
                             <th class="align-middle text-right table-header-c1 table-header" colspan="3">
@@ -214,8 +217,9 @@ const showDetails = ref(false);
                             <th colspan="2"></th>
                             <template v-if="showDetails">
                                 <th class="align-middle" colspan="2">ISS</th>
-                                <th class="align-middle" colspan="2">Servico</th>
+                                <th class="align-middle" colspan="2">Serviço</th>
                                 <th class="align-middle" colspan="2">IVA</th>
+                                <th class="align-middle" colspan="2">Tx. Turismo</th>
                             </template>
                             <th class="align-middle"></th>
                         </tr>
@@ -240,19 +244,21 @@ const showDetails = ref(false);
                             <th class="align-middle">Proposta Recebida</th>
                             <th class="align-middle">%</th>
                             <template v-if="showDetails">
-                                <th class="align-middle">Cliente</th>
-                                <th class="align-middle">Custo</th>
-                                <th class="align-middle">Cliente</th>
-                                <th class="align-middle">Custo</th>
-                                <th class="align-middle">Cliente</th>
-                                <th class="align-middle">Custo</th>
+                                <th class="align-middle">Cliente {{ evtr.iss_percent }}%</th>
+                                <th class="align-middle">Custo {{ evtr.iss_percent }}%</th>
+                                <th class="align-middle">Cliente {{ evtr.service_percent }}%</th>
+                                <th class="align-middle">Custo {{ evtr.service_percent }}%</th>
+                                <th class="align-middle">Cliente {{ evtr.iva_percent }}%</th>
+                                <th class="align-middle">Custo {{ evtr.iva_percent }}%</th>
+                                <th class="align-middle">Cliente {{ evtr.service_charge }}%</th>
+                                <th class="align-middle">Custo {{ evtr.service_charge }}%</th>
                             </template>
                             <th class="align-middle"></th>
                         </tr>
 
                         <!-- Opt TRs -->
                         <tr v-if="evtr.event_transport_opts.length == 0">
-                            <td :colspan="showDetails ? 24 : 18">
+                            <td :colspan="showDetails ? 29 : 21">
                                 <div class="alert alert-primary" role="alert">
                                     Nenhuma opção para transporte cadastrada!
                                 </div>
@@ -275,18 +281,17 @@ const showDetails = ref(false);
                             }}
                             </td>
                             <td class="align-middle">{{ opt.count }}</td>
-                            <td class="align-middle bg-secondary text-white">
+                            <td class="align-middle">
                                 {{ daysBetween(opt.in, opt.out) }}
                             </td>
-                            <td class="align-middle bg-danger text-white">
+                            <td class="align-middle bg-success text-white">
                                 {{ opt.kickback }}
                             </td>
                             <td class="align-middle bg-success text-white">
                                 {{ formatCurrency(unitSale(opt)) }}
                             </td>
                             <td class="align-middle bg-success text-white">
-                                {{ formatCurrency(unitSale(opt) * daysBetween(opt.in, opt.out) *
-                                    opt.count) }}
+                                {{ formatCurrency(unitSale(opt) * daysBetween(opt.in, opt.out) * opt.count) }}
                             </td>
                             <td class="align-middle bg-warning text-dark">
                                 {{ formatCurrency(unitCost(opt)) }}
@@ -298,28 +303,35 @@ const showDetails = ref(false);
                             <td class=" align-middle">{{
                                 formatCurrency(opt.received_proposal)
                             }}</td>
-                            <td class="align-middle bg-warning text-dark">{{
+                            <td class="align-middle">{{
                                 opt.received_proposal_percent
                             }}
                             </td>
                             <template v-if="showDetails">
-                                <td class="align-middle bg-success text-white">
-                                    {{ evtr.iss_percent }}</td>
-                                <td class=" align-middle">
-                                    {{ formatCurrency((unitSale(opt) * evtr.iss_percent) / 100) }}
+                                <td class="align-middle text-success">
+                                    <b>{{ formatCurrency((unitSale(opt) * evtr.iss_percent) / 100) }}</b>
                                 </td>
-                                <td class="align-middle bg-success text-white">
-                                    {{ evtr.service_percent }}
+                                <td class=" align-middle text-success">
+                                    <b>{{ formatCurrency((opt.received_proposal * evtr.iss_percent) / 100) }}</b>
+                                </td>
+                                <td class="align-middle">
+                                    <b>{{ formatCurrency((unitSale(opt) * evtr.service_percent) / 100) }}</b>
                                 </td>
                                 <td class=" align-middle">
-                                    {{ formatCurrency(((unitSale(opt)) * evtr.service_percent) /
-                                        100) }}
+                                    <b>{{ formatCurrency((opt.received_proposal * evtr.service_percent) / 100) }}</b>
                                 </td>
-                                <td class="align-middle bg-success text-white">{{
-                                    evtr.iva_percent
-                                }}</td>
+                                <td class="align-middle text-success">
+                                    <b>{{ formatCurrency((unitSale(opt) * evtr.iva_percent) / 100) }}</b>
+                                </td>
+                                <td class=" align-middle text-success">
+                                    <b>{{ formatCurrency((opt.received_proposal * evtr.iva_percent) / 100) }}</b>
+                                </td>
+
+                                <td class="align-middle">
+                                    <b>{{ formatCurrency((unitSale(opt) * evtr.service_charge) / 100) }}</b>
+                                </td>
                                 <td class=" align-middle">
-                                    {{ formatCurrency(((unitSale(opt)) * evtr.iva_percent) / 100) }}
+                                    <b>{{ formatCurrency((opt.received_proposal * evtr.service_charge) / 100) }}</b>
                                 </td>
                             </template>
                             <td class="align-middle">
@@ -356,7 +368,7 @@ const showDetails = ref(false);
                             <td colspan="7"></td>
                             <td class="align-middle text-rigth">Veículos:</td>
                             <td class="align-middle">{{ sumCount(evtr) }}</td>
-                            <td class="align-middle bg-warning text-dark">
+                            <td class="align-middle">
                                 {{ sumNts(evtr) }}
                             </td>
                             <td class="align-middle bg-success text-white" colspan="2">
@@ -371,10 +383,10 @@ const showDetails = ref(false);
                             <td class="align-middle bg-warning text-dark">
                                 {{ formatCurrency(sumCost(evtr)) }}
                             </td>
-                            <td class="align-middle bg-warning text-dark text-rigth">
+                            <td class="align-middle text-rigth">
                                 Média %
                             </td>
-                            <td class="align-middle bg-warning text-dark">
+                            <td class="align-middle">
                                 {{
                                     new Intl.NumberFormat({
                                         minimumFractionDigits: 2,
@@ -382,34 +394,30 @@ const showDetails = ref(false);
                                     }).format((1 - (sumCost(evtr) / sumSale(evtr))) * 100)
                                 }}
                             </td>
-                            <td class="align-middle" :colspan="showDetails ? 7 : 1"></td>
-                        </tr>
-
-                        <tr>
-                            <td class="align-middle text-dark text-left" colspan="3">
-                                OBSERVAÇÃO INTERNA:
-                            </td>
-                            <td class="align-middle text-dark text-left" :colspan="14">
-                                {{ evtr.internal_observation }}
-                            </td>
                             <template v-if="showDetails">
-                                <td class="align-middle bg-success text-white">
-                                    {{ formatCurrency(sumTaxes(evtr, 'iss')) }}
+                                <td class="align-middle text-success">
+                                    <b>{{ formatCurrency(sumTaxes(evtr, 'iss')) }}</b>
+                                </td>
+                                <td class="align-middle text-success">
+                                    <b>{{ formatCurrency((sumCost(evtr) * evtr.iss_percent) / 100) }}</b>
                                 </td>
                                 <td class="align-middle">
-                                    {{ formatCurrency((sumCost(evtr) * evtr.iss_percent) / 100) }}
-                                </td>
-                                <td class="align-middle bg-success text-white">
-                                    {{ formatCurrency(sumTaxes(evtr, 'serv')) }}
+                                    <b>{{ formatCurrency(sumTaxes(evtr, 'serv')) }}</b>
                                 </td>
                                 <td class="align-middle">
-                                    {{ formatCurrency((sumCost(evtr) * evtr.service_percent) / 100) }}
+                                    <b>{{ formatCurrency((sumCost(evtr) * evtr.service_percent) / 100) }}</b>
                                 </td>
-                                <td class="align-middle bg-success text-white">
-                                    {{ formatCurrency(sumTaxes(evtr, 'iva')) }}
+                                <td class="align-middle text-success">
+                                    <b>{{ formatCurrency(sumTaxes(evtr, 'iva')) }}</b>
+                                </td>
+                                <td class="align-middle text-success">
+                                    <b>{{ formatCurrency((sumCost(evtr) * evtr.iva_percent) / 100) }}</b>
                                 </td>
                                 <td class="align-middle">
-                                    {{ formatCurrency((sumCost(evtr) * evtr.iva_percent) / 100) }}
+                                    <b>{{ formatCurrency(sumTaxes(evtr, 'sc')) }}</b>
+                                </td>
+                                <td class="align-middle">
+                                    <b>{{ formatCurrency((sumCost(evtr) * evtr.service_charge) / 100) }}</b>
                                 </td>
                             </template>
                             <td class="align-middle"></td>
@@ -417,27 +425,43 @@ const showDetails = ref(false);
 
                         <tr>
                             <td class="align-middle text-dark text-left" colspan="3">
-                                OBSERVAÇÃO CLIENTE:
+                                <b>OBSERVAÇÃO INTERNA:</b>
                             </td>
-                            <td class="align-middle text-dark text-left" :colspan="14">
-                                {{ evtr.customer_observation }}
+                            <td class="align-middle text-dark text-left" colspan="10">
+                                <b>{{ evtr.internal_observation }}</b>
+                            </td>
+                            <td class="align-middle" colspan="2">
+                                Venda
+                            </td>
+                            <td class="align-middle" colspan="2">
+                                <b>{{ formatCurrency(sumSale(evtr) + sumTaxes(evtr, 'iss') +
+                                    sumTaxes(evtr, 'serv') + sumTaxes(evtr, 'iva') + sumTaxes(evtr, 'sc')) }}</b>
+                            </td>
+                            <template v-if="showDetails">
+                                <td colspan="8"></td>
+                            </template>
+                            <td></td>
+                        </tr>
+
+                        <tr>
+                            <td class="align-middle text-dark text-left" colspan="3">
+                                <b>OBSERVAÇÃO CLIENTE:</b>
+                            </td>
+                            <td class="align-middle text-dark text-left" colspan="10">
+                                <b>{{ evtr.customer_observation }}</b>
+                            </td>
+
+                            <td class="align-middle" colspan="2">
+                                Custo
+                            </td>
+                            <td class="align-middle" colspan="2">
+                                <b>{{ formatCurrency(((sumCost(evtr) * evtr.iss_percent) / 100) +
+                                    ((sumCost(evtr) * evtr.service_percent) / 100) + ((sumCost(evtr) *
+                                        evtr.iva_percent) / 100) + sumCost(evtr)) }}</b>
                             </td>
 
                             <template v-if="showDetails">
-                                <td class="align-middle bg-success text-white">
-                                    Venda
-                                </td>
-                                <td class="align-middle bg-success text-white" colspan="2">
-                                    {{ formatCurrency(sumSale(evtr) + sumTaxes(evtr, 'iss') +
-                                        sumTaxes(evtr, 'serv') + sumTaxes(evtr, 'iva')) }}
-                                </td>
-                                <td class="align-middle bg-warning text-white">
-                                    Custo
-                                </td>
-                                <td class="align-middle bg-warning text-white" colspan="2">
-                                    {{ formatCurrency(((sumCost(evtr) * evtr.iss_percent) / 100) +
-                                        ((sumCost(evtr) * evtr.service_percent) / 100) + ((sumCost(evtr) *
-                                            evtr.iva_percent) / 100) + sumCost(evtr)) }}
+                                <td colspan="8">
                                 </td>
                             </template>
                             <td></td>

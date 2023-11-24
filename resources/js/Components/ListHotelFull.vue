@@ -135,6 +135,9 @@ const sumTaxes = (evho, taxType) => {
             case 'iva':
                 sum += ((unitSale(opt) * evho.iva_percent) / 100) * daysBetween(opt.in, opt.out) * opt.count;
                 break;
+            case 'sc':
+                sum += ((unitSale(opt) * evho.service_charge) / 100) * daysBetween(opt.in, opt.out) * opt.count;
+                break;
         }
 
     }
@@ -186,7 +189,7 @@ const showDetails = ref(false);
 
                         <tr>
                             <th class="table-header table-header-c1" colspan="2">Hotel {{ index + 1 }}</th>
-                            <th class="text-left table-header table-header-c2" :colspan="showDetails ? 21 : 12">
+                            <th class="text-left table-header table-header-c2" :colspan="showDetails ? 23 : 12">
                                 {{ evho.hotel.name }}
                             </th>
                             <th class="align-middle text-right table-header-c1 table-header" colspan="3">
@@ -225,8 +228,9 @@ const showDetails = ref(false);
                             <th colspan="2"></th>
                             <template v-if="showDetails">
                                 <th class="align-middle" colspan="2">ISS</th>
-                                <th class="align-middle" colspan="2">Servico</th>
+                                <th class="align-middle" colspan="2">Serviço</th>
                                 <th class="align-middle" colspan="2">IVA</th>
+                                <th class="align-middle" colspan="2">Tx. Turismo</th>
                                 <th colspan="3" class="align-middle">Comparativo</th>
                             </template>
                             <th class="align-middle"></th>
@@ -250,12 +254,14 @@ const showDetails = ref(false);
                             <th class="align-middle">Proposta Recebida</th>
                             <th class="align-middle">%</th>
                             <template v-if="showDetails">
-                                <th class="align-middle">Cliente</th>
-                                <th class="align-middle">Custo</th>
-                                <th class="align-middle">Cliente</th>
-                                <th class="align-middle">Custo</th>
-                                <th class="align-middle">Cliente</th>
-                                <th class="align-middle">Custo</th>
+                                <th class="align-middle">Cliente {{ evho.iss_percent }}%</th>
+                                <th class="align-middle">Custo {{ evho.iss_percent }}%</th>
+                                <th class="align-middle">Cliente {{ evho.service_percent }}%</th>
+                                <th class="align-middle">Custo {{ evho.service_percent }}%</th>
+                                <th class="align-middle">Cliente {{ evho.iva_percent }}%</th>
+                                <th class="align-middle">Custo {{ evho.iva_percent }}%</th>
+                                <th class="align-middle">Cliente {{ evho.service_charge }}%</th>
+                                <th class="align-middle">Custo {{ evho.service_charge }}%</th>
 
                                 <th class="align-middle">Trivago</th>
                                 <th class="align-middle">Website HTL</th>
@@ -266,7 +272,7 @@ const showDetails = ref(false);
 
                         <!-- Opt TRs -->
                         <tr v-if="evho.event_hotels_opt.length == 0">
-                            <td :colspan="showDetails ? 23 : 14">
+                            <td :colspan="showDetails ? 28 : 17">
                                 <div class="alert alert-primary" role="alert">
                                     Nenhuma opção para hotel cadastrada!
                                 </div>
@@ -277,8 +283,7 @@ const showDetails = ref(false);
                             <td class="align-middle">{{ opt.broker.name }}</td>
                             <td class="align-middle">{{ opt.regime.name }}</td>
                             <td class="align-middle">{{ opt.purpose.name }}</td>
-                            <td class="align-middle">{{ opt.category_hotel.name }}
-                            </td>
+                            <td class="align-middle">{{ opt.category_hotel.name }}</td>
                             <td class="align-middle">{{ opt.apto_hotel.name }}</td>
                             <td class="align-middle">{{
                                 new Date(opt.in).toLocaleDateString()
@@ -289,18 +294,17 @@ const showDetails = ref(false);
                             }}
                             </td>
                             <td class="align-middle">{{ opt.count }}</td>
-                            <td class="align-middle bg-secondary text-white">
+                            <td class="align-middle">
                                 {{ daysBetween(opt.in, opt.out) }}
                             </td>
-                            <td class="align-middle bg-danger text-white">
+                            <td class="align-middle bg-success text-white">
                                 {{ opt.kickback }}
                             </td>
                             <td class="align-middle bg-success text-white">
                                 {{ formatCurrency(unitSale(opt)) }}
                             </td>
                             <td class="align-middle bg-success text-white">
-                                {{ formatCurrency(unitSale(opt) * daysBetween(opt.in, opt.out) *
-                                    opt.count) }}
+                                {{ formatCurrency(unitSale(opt) * daysBetween(opt.in, opt.out) * opt.count) }}
                             </td>
                             <td class="align-middle bg-warning text-dark">
                                 {{ formatCurrency(unitCost(opt)) }}
@@ -312,39 +316,46 @@ const showDetails = ref(false);
                             <td class=" align-middle">{{
                                 formatCurrency(opt.received_proposal)
                             }}</td>
-                            <td class="align-middle bg-warning text-dark">{{
+                            <td class="align-middle">{{
                                 opt.received_proposal_percent
                             }}
                             </td>
                             <template v-if="showDetails">
-                                <td class="align-middle bg-success text-white">
-                                    {{ evho.iss_percent }}</td>
+                                <td class="align-middle text-success">
+                                    <b>{{ formatCurrency((unitSale(opt) * evho.iss_percent) / 100) }}</b>
+                                </td>
+                                <td class=" align-middle text-success">
+                                    <b>{{ formatCurrency((opt.received_proposal * evho.iss_percent) / 100) }}</b>
+                                </td>
+                                <td class="align-middle">
+                                    <b>{{ formatCurrency((unitSale(opt) * evho.service_percent) / 100) }}</b>
+                                </td>
                                 <td class=" align-middle">
-                                    {{ formatCurrency((unitSale(opt) * evho.iss_percent) / 100) }}
+                                    <b>{{ formatCurrency((opt.received_proposal * evho.service_percent) / 100) }}</b>
                                 </td>
-                                <td class="align-middle bg-success text-white">
-                                    {{ evho.service_percent }}
+                                <td class="align-middle text-success">
+                                    <b>{{ formatCurrency((unitSale(opt) * evho.iva_percent) / 100) }}</b>
                                 </td>
-                                <td class=" align-middle ">
-                                    {{ formatCurrency(((unitSale(opt)) * evho.service_percent) /
-                                        100) }}
-                                </td>
-                                <td class="align-middle bg-success text-white">{{
-                                    evho.iva_percent
-                                }}</td>
-                                <td class=" align-middle ">
-                                    {{ formatCurrency(((unitSale(opt)) * evho.iva_percent) / 100) }}
+                                <td class=" align-middle text-success">
+                                    <b>{{ formatCurrency((opt.received_proposal * evho.iva_percent) / 100) }}</b>
                                 </td>
 
-                                <td class=" align-middle bg-secondary text-white">{{
+                                <td class="align-middle">
+                                    <b>{{ formatCurrency((unitSale(opt) * evho.service_charge) / 100) }}</b>
+                                </td>
+                                <td class=" align-middle">
+                                    <b>{{ formatCurrency((opt.received_proposal * evho.service_charge) / 100) }}</b>
+                                </td>
+
+                                <td class="align-middle bg-secondary text-white">{{
                                     formatCurrency(opt.compare_trivago)
                                 }}
                                 </td>
-                                <td class=" align-middle bg-secondary text-white">{{
+                                <td class="align-middle bg-secondary text-white">{{
                                     formatCurrency(opt.compare_website_htl)
                                 }}
                                 </td>
-                                <td class=" align-middle bg-secondary text-white">
+                                <td class="align-middle bg-secondary text-white">
                                     {{ formatCurrency(opt.compare_omnibess) }}
                                 </td>
                             </template>
@@ -392,7 +403,7 @@ const showDetails = ref(false);
                             <td class="align-middle">{{ roomNights(evho) }}</td>
                             <td class="align-middle text-rigth"># Aptos:</td>
                             <td class="align-middle">{{ sumCount(evho) }}</td>
-                            <td class="align-middle bg-warning text-dark">
+                            <td class="align-middle">
                                 {{ sumNts(evho) }}
                             </td>
                             <td class="align-middle bg-success text-white" colspan="2">
@@ -407,10 +418,10 @@ const showDetails = ref(false);
                             <td class="align-middle bg-warning text-dark">
                                 {{ formatCurrency(sumCost(evho)) }}
                             </td>
-                            <td class="align-middle bg-warning text-dark text-rigth">
+                            <td class="align-middle text-rigth">
                                 Média %
                             </td>
-                            <td class="align-middle bg-warning text-dark">
+                            <td class="align-middle">
                                 {{
                                     new Intl.NumberFormat({
                                         minimumFractionDigits: 2,
@@ -419,7 +430,31 @@ const showDetails = ref(false);
                                 }}
                             </td>
                             <template v-if="showDetails">
-                                <td class="align-middle" colspan="9"></td>
+                                <td class="align-middle text-success">
+                                    <b>{{ formatCurrency(sumTaxes(evho, 'iss')) }}</b>
+                                </td>
+                                <td class="align-middle text-success">
+                                    <b>{{ formatCurrency((sumCost(evho) * evho.iss_percent) / 100) }}</b>
+                                </td>
+                                <td class="align-middle">
+                                    <b>{{ formatCurrency(sumTaxes(evho, 'serv')) }}</b>
+                                </td>
+                                <td class="align-middle">
+                                    <b>{{ formatCurrency((sumCost(evho) * evho.service_percent) / 100) }}</b>
+                                </td>
+                                <td class="align-middle text-success">
+                                    <b>{{ formatCurrency(sumTaxes(evho, 'iva')) }}</b>
+                                </td>
+                                <td class="align-middle text-success">
+                                    <b>{{ formatCurrency((sumCost(evho) * evho.iva_percent) / 100) }}</b>
+                                </td>
+                                <td class="align-middle">
+                                    <b>{{ formatCurrency(sumTaxes(evho, 'sc')) }}</b>
+                                </td>
+                                <td class="align-middle">
+                                    <b>{{ formatCurrency((sumCost(evho) * evho.service_charge) / 100) }}</b>
+                                </td>
+                                <td class="align-middle" colspan="3"></td>
                             </template>
                             <td class="align-middle"></td>
                         </tr>
@@ -428,29 +463,18 @@ const showDetails = ref(false);
                             <td class="align-middle text-dark text-left" colspan="3">
                                 OBSERVAÇÃO INTERNA:
                             </td>
-                            <td class="align-middle text-dark text-left" :colspan="showDetails ? 13 : 13">
-                                {{ evho.internal_observation }}
+                            <td class="align-middle text-dark text-left" colspan="9">
+                                <b>{{ evho.internal_observation }}</b>
+                            </td>
+                            <td class="align-middle" colspan="2">
+                                Venda
+                            </td>
+                            <td class="align-middle" colspan="2">
+                                <b>{{ formatCurrency(sumSale(evho) + sumTaxes(evho, 'iss') +
+                                    sumTaxes(evho, 'serv') + sumTaxes(evho, 'iva') + sumTaxes(evho, 'sc')) }}</b>
                             </td>
                             <template v-if="showDetails">
-                                <td class="align-middle bg-success text-white">
-                                    {{ formatCurrency(sumTaxes(evho, 'iss')) }}
-                                </td>
-                                <td class="align-middle">
-                                    {{ formatCurrency((sumCost(evho) * evho.iss_percent) / 100) }}
-                                </td>
-                                <td class="align-middle bg-success text-white">
-                                    {{ formatCurrency(sumTaxes(evho, 'serv')) }}
-                                </td>
-                                <td class="align-middle">
-                                    {{ formatCurrency((sumCost(evho) * evho.service_percent) / 100) }}
-                                </td>
-                                <td class="align-middle bg-success text-white">
-                                    {{ formatCurrency(sumTaxes(evho, 'iva')) }}
-                                </td>
-                                <td class="align-middle">
-                                    {{ formatCurrency((sumCost(evho) * evho.iva_percent) / 100) }}
-                                </td>
-                                <td colspan="3"></td>
+                                <td colspan="11"></td>
                             </template>
                             <td class="align-middle"></td>
                         </tr>
@@ -459,27 +483,21 @@ const showDetails = ref(false);
                             <td class="align-middle text-dark text-left" colspan="3">
                                 OBSERVAÇÃO CLIENTE:
                             </td>
-                            <td class="align-middle text-dark text-left" :colspan="showDetails ? 13 : 13">
-                                {{ evho.customer_observation }}
+                            <td class="align-middle text-dark text-left" colspan="9">
+                                <b>{{ evho.customer_observation }}</b>
+                            </td>
+
+                            <td class="align-middle" colspan="2">
+                                Custo
+                            </td>
+                            <td class="align-middle" colspan="2">
+                                <b>{{ formatCurrency(((sumCost(evho) * evho.iss_percent) / 100) +
+                                    ((sumCost(evho) * evho.service_percent) / 100) + ((sumCost(evho) *
+                                        evho.iva_percent) / 100) + sumCost(evho)) }}</b>
                             </td>
 
                             <template v-if="showDetails">
-                                <td class="align-middle bg-success text-white">
-                                    Venda
-                                </td>
-                                <td class="align-middle bg-success text-white" colspan="2">
-                                    {{ formatCurrency(sumSale(evho) + sumTaxes(evho, 'iss') +
-                                        sumTaxes(evho, 'serv') + sumTaxes(evho, 'iva')) }}
-                                </td>
-                                <td class="align-middle bg-warning text-white">
-                                    Custo
-                                </td>
-                                <td class="align-middle bg-warning text-white" colspan="2">
-                                    {{ formatCurrency(((sumCost(evho) * evho.iss_percent) / 100) +
-                                        ((sumCost(evho) * evho.service_percent) / 100) + ((sumCost(evho) *
-                                            evho.iva_percent) / 100) + sumCost(evho)) }}
-                                </td>
-                                <td colspan="3"></td>
+                                <td colspan="11"></td>
                             </template>
                             <td></td>
                         </tr>

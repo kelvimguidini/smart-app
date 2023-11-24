@@ -12,7 +12,8 @@ class EventAdd extends Model
     protected $fillable = [
         'event_id', 'add_id', 'currency_id', 'iss_percent', 'service_percent', 'iva_percent', 'invoice', 'internal_observation', 'customer_observation', 'sended_mail_link', 'token_budget',
         'iof',
-        'service_charge'
+        'service_charge',
+        'deadline_date'
     ];
     protected $table = 'event_add';
 

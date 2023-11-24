@@ -5,6 +5,8 @@ import { useForm } from '@inertiajs/inertia-vue3';
 import Loader from '@/Components/Loader.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
+import Datepicker from 'vue3-datepicker';
+import { ptBR } from 'date-fns/locale';
 
 const props = defineProps({
     eventProvider: {
@@ -50,6 +52,7 @@ const form = useForm({
     iva_percent: null,
     service_charge: null,
     iof: null,
+    deadline: '',
 
     internal_observation: '',
     customer_observation: '',
@@ -102,6 +105,7 @@ const submit = () => {
 const selectProvider = (id) => {
     var prov = props.providers.filter((item) => { return item.id == id })[0] || null;
 
+
     if (prov) {
         form.provider_id = parseInt(id);
         form.city = prov.city;
@@ -109,8 +113,6 @@ const selectProvider = (id) => {
         form.iss_percent = prov.iss_percent;
         form.iva_percent = prov.iva_percent;
         form.service_percent = prov.service_percent;
-        form.iof = prov.iof;
-        form.service_charge = prov.service_charge;
 
 
         if (props.selectCallBack && typeof props.selectCallBack === 'function') {
@@ -137,20 +139,6 @@ const edit = () => {
 
     if (props.eventProvider != null) {
 
-        form.id = props.eventProvider.id;
-        form.event_id = props.eventProvider.event_id;
-        form.provider_id = props.eventProvider.provider_id;
-        form.currency = props.eventProvider.currency_id;
-        form.invoice = props.eventProvider.invoice == true;
-        form.iss_percent = props.eventProvider.iss_percent;
-        form.service_percent = props.eventProvider.service_percent;
-        form.iva_percent = props.eventProvider.iva_percent;
-        form.iof = props.eventProvider.iof;
-        form.service_charge = props.eventProvider.service_charge;
-
-        form.internal_observation = props.eventProvider.internal_observation;
-        form.customer_observation = props.eventProvider.customer_observation;
-
         switch (props.type) {
             case 'hotel':
                 selectProvider(props.eventProvider.hotel_id);
@@ -173,6 +161,22 @@ const edit = () => {
                 $('#hotel-select' + props.type).val(props.eventProvider.transport_id).trigger('change');
                 break;
         }
+
+        form.id = props.eventProvider.id;
+        form.event_id = props.eventProvider.event_id;
+
+        form.currency = props.eventProvider.currency_id;
+        form.invoice = props.eventProvider.invoice == true;
+        form.iss_percent = props.eventProvider.iss_percent;
+        form.service_percent = props.eventProvider.service_percent;
+        form.iva_percent = props.eventProvider.iva_percent;
+
+        form.iof = props.eventProvider.iof;
+        form.service_charge = props.eventProvider.service_charge;
+        form.deadline = new Date(props.eventProvider.deadline_date);
+
+        form.internal_observation = props.eventProvider.internal_observation;
+        form.customer_observation = props.eventProvider.customer_observation;
 
         $('#currency' + props.type).val(props.eventProvider.currency_id).trigger('change');
     }
@@ -309,7 +313,7 @@ const isLoader = ref(false);
             </div>
 
 
-            <div class="col-lg-3">
+            <div class="col">
                 <div class="row">
                     <div class="col">
                         <div class="form-group">
@@ -324,6 +328,21 @@ const isLoader = ref(false);
                             <InputLabel for="service_charge" value="Taxa de Turismo:" />
                             <TextInput type="number" class="form-control percent" v-model="form.service_charge" required
                                 autofocus min="0" step=".1" autocomplete="service_charge" />
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="row">
+
+                    <div class="col">
+                        <div class="form-group">
+                            <InputLabel for="in" value="Prazo:" />
+
+                            <datepicker v-model="form.deadline" class="form-control" :locale="ptBR" inputFormat="dd/MM/yyyy"
+                                weekdayFormat="EEEEEE" />
                         </div>
                     </div>
                 </div>

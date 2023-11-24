@@ -32,7 +32,7 @@ function unitSale($opt)
 
 function sumTaxesProvider($eventP, $opt)
 {
-    return ((unitSale($opt) * $eventP['iss_percent']) / 100) + ((unitSale($opt) * $eventP['service_percent']) / 100) + ((unitSale($opt) * $eventP['iva_percent']) / 100);
+    return ((unitSale($opt) * $eventP['iss_percent']) / 100) + ((unitSale($opt) * $eventP['service_percent']) / 100) + ((unitSale($opt) * $eventP['iva_percent']) / 100) + ((unitSale($opt) * $eventP['service_charge']) / 100);
 }
 
 function sumTotal($rate, $taxes, $qtdDayle)
@@ -78,13 +78,24 @@ $sumTotalTransportValue = 0;
 $percIOF = 0;
 $percService = 10;
 
-$hotelEvent = $event->event_hotels->firstWhere('hotel_id', $provider->id);
-$abEvent = $event->event_abs->firstWhere('ab_id', $provider->id);
-$hallEvent = $event->event_halls->firstWhere('hall_id', $provider->id);
-$addEvent = $event->event_adds->firstWhere('add_id', $provider->id);
-$transportEvent = $event->event_transports->firstWhere('transport_id', $provider->id);
+$hotelEvent  = null;
+$abEvent = null;
+$hallEvent  = null;
+$addEvent  = null;
+$transportEvent = null;
+
+if ($provider != null) {
+    $hotelEvent = $event->event_hotels->firstWhere('hotel_id', $provider->id);
+    $abEvent = $event->event_abs->firstWhere('ab_id', $provider->id);
+    $hallEvent = $event->event_halls->firstWhere('hall_id', $provider->id);
+    $addEvent = $event->event_adds->firstWhere('add_id', $provider->id);
+    $transportEvent = $event->event_transports->firstWhere('transport_id', $provider->id);
+}
 
 $strip = false;
+
+$qtdLinhas = 0;
+$rodapeSize = 13;
 
 if ($hotelEvent != null) {
     if ($hotelEvent->iof > 0) {
@@ -93,10 +104,11 @@ if ($hotelEvent != null) {
     if ($hotelEvent->service_charge > 0) {
         $percService = $hotelEvent->service_charge;
     }
-
+    $rodapeSize++;
+    $qtdLinhas += 4;
     foreach ($hotelEvent->eventHotelsOpt as $item) {
-
-        $rate = floatval($item->received_proposal);
+        $qtdLinhas++;
+        $rate = floatval(unitSale($item));
         $taxes = floatval(sumTaxesProvider($hotelEvent, $item));
         $qtdDayle = $item->count * daysBetween($item->in, $item->out);
 
@@ -112,8 +124,11 @@ if ($abEvent != null) {
     if ($abEvent->service_charge > 0) {
         $percService = $abEvent->service_charge;
     }
+    $rodapeSize++;
+    $qtdLinhas += 4;
     foreach ($abEvent->eventAbOpts as $item) {
-        $rate = floatval($item->received_proposal);
+        $qtdLinhas++;
+        $rate = floatval(unitSale($item));
         $taxes = floatval(sumTaxesProvider($abEvent, $item));
         $qtdDayle = $item->count * daysBetween($item->in, $item->out);
 
@@ -129,8 +144,11 @@ if ($hallEvent != null) {
     if ($hallEvent->service_charge > 0) {
         $percService = $hallEvent->service_charge;
     }
+    $rodapeSize++;
+    $qtdLinhas += 4;
     foreach ($hallEvent->eventHallOpts as $item) {
-        $rate = floatval($item->received_proposal);
+        $qtdLinhas++;
+        $rate = floatval(unitSale($item));
         $taxes = floatval(sumTaxesProvider($hallEvent, $item));
 
         $sumHallValueRate += $rate;
@@ -145,8 +163,11 @@ if ($addEvent != null) {
     if ($addEvent->service_charge > 0) {
         $percService = $addEvent->service_charge;
     }
+    $rodapeSize++;
+    $qtdLinhas += 4;
     foreach ($addEvent->eventAddOpts as $item) {
-        $rate = floatval($item->received_proposal);
+        $qtdLinhas++;
+        $rate = floatval(unitSale($item));
         $taxes = floatval(sumTaxesProvider($hallEvent, $item));
         $qtdDayle = $item->count * daysBetween($item->in, $item->out);
 
@@ -162,9 +183,11 @@ if ($transportEvent != null) {
     if ($transportEvent->service_charge > 0) {
         $percService = $transportEvent->service_charge;
     }
+    $rodapeSize++;
+    $qtdLinhas += 4;
     foreach ($transportEvent->eventTransportOpts as $item) {
-
-        $rate = floatval($item->received_proposal);
+        $qtdLinhas++;
+        $rate = floatval(unitSale($item));
         $taxes = floatval(sumTaxesProvider($transportEvent, $item));
         $qtdDayle = $item->count * daysBetween($item->in, $item->out);
 
@@ -194,7 +217,7 @@ if ($transportEvent != null) {
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
-            page-break-inside: avoid;
+            page-break-inside: auto;
         }
 
         th,
@@ -326,7 +349,7 @@ if ($transportEvent != null) {
                 <div class="left">
                     <div class="seta">
                         <div class="arrow">
-                            <div class="title">Proposta n° {{ $provider->id }}</div>
+                            <div class="title">Proposta n° {{ $provider != null ? $provider->id : '' }}</div>
                         </div>
                     </div>
 
@@ -341,13 +364,13 @@ if ($transportEvent != null) {
                     </div>
                 </div>
                 <div class="right">
-                    <img src="{{ asset($event->customer->logo) }}" style="width: 150px;" alt="{{ $event->customer->name}}">
+                    <img src="{{ asset($event->customer->logo) }}" width="150px" style="width: 150px;" alt="{{ $event->customer->name}}">
                 </div>
             </header>
 
             <div class="event-info row">
                 <div class="line">
-                    <p>Fornecedor: <span class="event-data">{{ $provider->name }}</p>
+                    <p>Fornecedor: <span class="event-data">{{$provider != null ?  $provider->name : ''}}</p>
                 </div>
             </div>
 
@@ -383,14 +406,14 @@ if ($transportEvent != null) {
                             <td style="padding: 0.5rem;">{{ $item->count }}</td>
                             <td style="padding: 0.5rem;">{{ daysBetween($item->in, $item->out) }}</td>
 
-                            <td style="padding: 0.5rem;">{{ formatCurrency($item->received_proposal, $hotelEvent->currency->symbol) }}</td>
+                            <td style="padding: 0.5rem;">{{ formatCurrency(unitSale($item), $hotelEvent->currency->symbol) }}</td>
                             <td style="padding: 0.5rem;">
                                 {{ formatCurrency(sumTaxesProvider($hotelEvent, $item), $hotelEvent->currency->symbol) }}
                             </td>
                             <td style="padding: 0.5rem;">
-                                {{ formatCurrency($item->received_proposal + sumTaxesProvider($hotelEvent, $item), $hotelEvent->currency->symbol) }}
+                                {{ formatCurrency(unitSale($item) + sumTaxesProvider($hotelEvent, $item), $hotelEvent->currency->symbol) }}
                             </td>
-                            <td style="padding: 0.5rem;">{{ formatCurrency(sumTotal($item->received_proposal, sumTaxesProvider($hotelEvent, $item), $item->count * daysBetween($item->in, $item->out)), $hotelEvent->currency->symbol) }}
+                            <td style="padding: 0.5rem;">{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($hotelEvent, $item), $item->count * daysBetween($item->in, $item->out)), $hotelEvent->currency->symbol) }}
                             </td>
                         </tr>
                         @endforeach
@@ -398,7 +421,9 @@ if ($transportEvent != null) {
                     <tfoot class="table-footer">
                         <tr style="background-color: #ffe0b1">
                             <td colspan="2" style="padding: 0.5rem;"><b>Comentários:</b></td>
-                            <td colspan="9" style="padding: 0.5rem;">{{ $hotelEvent->customer_observation }}</td>
+                            <td colspan="7" style="padding: 0.5rem;">{{ $hotelEvent->customer_observation }}</td>
+                            <td style="padding: 0.5rem;"><b>Prazo</b></td>
+                            <td style="padding: 0.5rem;">{{ $hotelEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($hotelEvent->deadline_date)) }}</td>
                         </tr>
                     </tfoot>
 
@@ -435,14 +460,14 @@ if ($transportEvent != null) {
                             <td style="padding: 0.5rem;">{{ $item->count }}</td>
                             <td style="padding: 0.5rem;">{{ daysBetween($item->in, $item->out) }}</td>
 
-                            <td style="padding: 0.5rem;">{{ formatCurrency($item->received_proposal, $abEvent->currency->symbol) }}</td>
+                            <td style="padding: 0.5rem;">{{ formatCurrency(unitSale($item), $abEvent->currency->symbol) }}</td>
                             <td style="padding: 0.5rem;">
                                 {{ formatCurrency(sumTaxesProvider($abEvent, $item), $abEvent->currency->symbol) }}
                             </td>
                             <td style="padding: 0.5rem;">
-                                {{ formatCurrency($item->received_proposal + sumTaxesProvider($abEvent, $item), $abEvent->currency->symbol) }}
+                                {{ formatCurrency(unitSale($item) + sumTaxesProvider($abEvent, $item), $abEvent->currency->symbol) }}
                             </td>
-                            <td style="padding: 0.5rem;">{{ formatCurrency(sumTotal($item->received_proposal, sumTaxesProvider($abEvent, $item), $item->count * daysBetween($item->in, $item->out)), $abEvent->currency->symbol) }}
+                            <td style="padding: 0.5rem;">{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($abEvent, $item), $item->count * daysBetween($item->in, $item->out)), $abEvent->currency->symbol) }}
                             </td>
                         </tr>
                         @endforeach
@@ -450,7 +475,9 @@ if ($transportEvent != null) {
                     <tfoot class="table-footer">
                         <tr style="background-color: #ffe0b1">
                             <td colspan="2" style="padding: 0.5rem;"><b>Comentários:</b></td>
-                            <td colspan="9" style="padding: 0.5rem;">{{ $abEvent->customer_observation }}</td>
+                            <td colspan="6" style="padding: 0.5rem;">{{ $abEvent->customer_observation }}</td>
+                            <td style="padding: 0.5rem;"><b>Prazo</b></td>
+                            <td style="padding: 0.5rem;">{{ $abEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($abEvent->deadline_date)) }}</td>
                         </tr>
                     </tfoot>
 
@@ -489,14 +516,14 @@ if ($transportEvent != null) {
                             <td style="padding: 0.5rem;">{{ $item->count }}</td>
                             <td style="padding: 0.5rem;">{{ daysBetween($item->in, $item->out) }}</td>
 
-                            <td style="padding: 0.5rem;">{{ formatCurrency($item->received_proposal, $hallEvent->currency->symbol) }}</td>
+                            <td style="padding: 0.5rem;">{{ formatCurrency(unitSale($item), $hallEvent->currency->symbol) }}</td>
                             <td style="padding: 0.5rem;">
                                 {{ formatCurrency(sumTaxesProvider($hallEvent, $item), $hallEvent->currency->symbol) }}
                             </td>
                             <td style="padding: 0.5rem;">
-                                {{ formatCurrency($item->received_proposal + sumTaxesProvider($hallEvent, $item), $hallEvent->currency->symbol) }}
+                                {{ formatCurrency(unitSale($item) + sumTaxesProvider($hallEvent, $item), $hallEvent->currency->symbol) }}
                             </td>
-                            <td style="padding: 0.5rem;">{{ formatCurrency(sumTotal($item->received_proposal, sumTaxesProvider($hallEvent, $item), $item->count * daysBetween($item->in, $item->out)), $hallEvent->currency->symbol) }}
+                            <td style="padding: 0.5rem;">{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($hallEvent, $item), $item->count * daysBetween($item->in, $item->out)), $hallEvent->currency->symbol) }}
                             </td>
                         </tr>
                         @endforeach
@@ -504,7 +531,9 @@ if ($transportEvent != null) {
                     <tfoot class="table-footer">
                         <tr style="background-color: #ffe0b1">
                             <td colspan="2" style="padding: 0.5rem;"><b>Comentários:</b></td>
-                            <td colspan="9" style="padding: 0.5rem;">{{ $hallEvent->customer_observation }}</td>
+                            <td colspan="7" style="padding: 0.5rem;">{{ $hallEvent->customer_observation }}</td>
+                            <td style="padding: 0.5rem;"><b>Prazo</b></td>
+                            <td style="padding: 0.5rem;">{{ $hallEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($hallEvent->deadline_date)) }}</td>
                         </tr>
                     </tfoot>
 
@@ -543,14 +572,14 @@ if ($transportEvent != null) {
                             <td style="padding: 0.5rem;">{{ $item->count }}</td>
                             <td style="padding: 0.5rem;">{{ daysBetween($item->in, $item->out) }}</td>
 
-                            <td style="padding: 0.5rem;">{{ formatCurrency($item->received_proposal, $addEvent->currency->symbol) }}</td>
+                            <td style="padding: 0.5rem;">{{ formatCurrency(unitSale($item), $addEvent->currency->symbol) }}</td>
                             <td style="padding: 0.5rem;">
                                 {{ formatCurrency(sumTaxesProvider($addEvent, $item), $addEvent->currency->symbol) }}
                             </td>
                             <td style="padding: 0.5rem;">
-                                {{ formatCurrency($item->received_proposal + sumTaxesProvider($addEvent, $item), $addEvent->currency->symbol) }}
+                                {{ formatCurrency(unitSale($item) + sumTaxesProvider($addEvent, $item), $addEvent->currency->symbol) }}
                             </td>
-                            <td style="padding: 0.5rem;">{{ formatCurrency(sumTotal($item->received_proposal, sumTaxesProvider($addEvent, $item), $item->count * daysBetween($item->in, $item->out)), $addEvent->currency->symbol) }}
+                            <td style="padding: 0.5rem;">{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($addEvent, $item), $item->count * daysBetween($item->in, $item->out)), $addEvent->currency->symbol) }}
                             </td>
                         </tr>
                         @endforeach
@@ -558,13 +587,14 @@ if ($transportEvent != null) {
                     <tfoot class="table-footer">
                         <tr style="background-color: #ffe0b1">
                             <td colspan="2" style="padding: 0.5rem;"><b>Comentários:</b></td>
-                            <td colspan="9" style="padding: 0.5rem;">{{ $addEvent->customer_observation }}</td>
+                            <td colspan="7" style="padding: 0.5rem;">{{ $addEvent->customer_observation }}</td>
+                            <td style="padding: 0.5rem;"><b>Prazo</b></td>
+                            <td style="padding: 0.5rem;">{{ $addEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($addEvent->deadline_date)) }}</td>
                         </tr>
                     </tfoot>
 
                 </table>
                 @endif
-
 
 
                 @if($transportEvent != null && $transportEvent->eventTransportOpts != null && count($transportEvent->eventTransportOpts) > 0)
@@ -600,14 +630,14 @@ if ($transportEvent != null) {
                             <td style="padding: 0.5rem;">{{ $item->count }}</td>
                             <td style="padding: 0.5rem;">{{ daysBetween($item->in, $item->out) }}</td>
 
-                            <td style="padding: 0.5rem;">{{ formatCurrency($item->received_proposal, $transportEvent->currency->symbol) }}</td>
+                            <td style="padding: 0.5rem;">{{ formatCurrency(unitSale($item), $transportEvent->currency->symbol) }}</td>
                             <td style="padding: 0.5rem;">
                                 {{ formatCurrency(sumTaxesProvider($transportEvent, $item), $transportEvent->currency->symbol) }}
                             </td>
                             <td style="padding: 0.5rem;">
-                                {{ formatCurrency($item->received_proposal + sumTaxesProvider($transportEvent, $item), $transportEvent->currency->symbol) }}
+                                {{ formatCurrency(unitSale($item) + sumTaxesProvider($transportEvent, $item), $transportEvent->currency->symbol) }}
                             </td>
-                            <td style="padding: 0.5rem;">{{ formatCurrency(sumTotal($item->received_proposal, sumTaxesProvider($transportEvent, $item), $item->count * daysBetween($item->in, $item->out)), $transportEvent->currency->symbol) }}
+                            <td style="padding: 0.5rem;">{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($transportEvent, $item), $item->count * daysBetween($item->in, $item->out)), $transportEvent->currency->symbol) }}
                             </td>
                         </tr>
                         @endforeach
@@ -615,14 +645,25 @@ if ($transportEvent != null) {
                     <tfoot class="table-footer">
                         <tr style="background-color: #ffe0b1">
                             <td colspan="2" style="padding: 0.5rem;"><b>Comentários:</b></td>
-                            <td colspan="10" style="padding: 0.5rem;">{{ $transportEvent->customer_observation }}</td>
+                            <td colspan="6" style="padding: 0.5rem;">{{ $transportEvent->customer_observation }}</td>
+                            <td style="padding: 0.5rem;"><b>Prazo</b></td>
+                            <td style="padding: 0.5rem;">{{ $transportEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($transportEvent->deadline_date)) }}</td>
                         </tr>
                     </tfoot>
 
                 </table>
                 @endif
 
-                <table style="page-break-before: always;">
+                <?php
+                $quebrar = false;
+
+                if ($qtdLinhas <= 19 && ($qtdLinhas + $rodapeSize) > 19) {
+                    $quebrar = true;
+                } elseif ($qtdLinhas > 19 && ($qtdLinhas % 27) + $rodapeSize > 27) {
+                    $quebrar = true;
+                }
+                ?>
+                <table style="<?= $quebrar ? "page-break-before: always;" : "" ?>">
                     <thead>
                         <tr>
                             <th colspan="5" style="padding: 0.5rem; text-align:center;">
@@ -720,11 +761,8 @@ if ($transportEvent != null) {
                 </table>
             </div>
 
-
-
             <hr style="border-top: 1px solid black;">
 
-            <div style="height: 250px;"></div>
 
 
             <footer id="footer" style="width:100%; border-collapse: collapse;">
