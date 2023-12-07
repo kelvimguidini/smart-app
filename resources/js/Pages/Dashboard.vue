@@ -103,51 +103,6 @@ const pieHotelStatus = (hotel) => {
     });
 }
 
-const pieTransportStatus = (hotel) => {
-    // Set new default font family and font color to mimic Bootstrap's default styling
-    Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
-    Chart.defaults.global.defaultFontColor = '#858796';
-
-    const chartData = Object.keys(hotel).map((key) => ({
-        label: key,
-        value: hotel[key],
-        backgroundColor: generateColor(),
-    }));
-    eventStatus.value.data.transports = chartData;
-
-    // Pie Chart Example
-    var ctx = document.getElementById("pie-transport-status");
-
-    var myPieChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: chartData.map((item) => item.label),
-            datasets: [{
-                data: chartData.map((item) => item.value),
-                backgroundColor: chartData.map((item) => item.backgroundColor),
-                hoverBackgroundColor: chartData.map((item) => item.backgroundColor),
-                hoverBorderColor: "rgba(234, 236, 244, 1)",
-            }],
-        },
-        options: {
-            maintainAspectRatio: false,
-            tooltips: {
-                backgroundColor: "rgb(255,255,255)",
-                bodyFontColor: "#858796",
-                borderColor: '#dddfeb',
-                borderWidth: 1,
-                xPadding: 15,
-                yPadding: 15,
-                displayColors: false,
-                caretPadding: 10,
-            },
-            legend: {
-                display: false
-            },
-            cutoutPercentage: 80,
-        },
-    });
-}
 
 const fetchPendingValidate = () => {
     axios
@@ -183,8 +138,7 @@ const fetchEventStatus = () => {
     axios
         .get('dash-event-status')
         .then(response => {
-            pieHotelStatus(response.data.hotel);
-            pieTransportStatus(response.data.transport);
+            pieHotelStatus(response.data);
         })
         .catch(error => {
             eventStatus.value.error = true;
@@ -418,7 +372,7 @@ const number_format = (number, decimals, dec_point, thousands_sep) => {
                                 <div class="col mr-2">
                                     <div class="text-xs font-weight-bold text-uppercase mb-1"
                                         :class="{ 'text-primary': !waitApproval.loading && !waitApproval.error, 'text-danger': waitApproval.error, 'text-muted': waitApproval.loading }">
-                                        AGUARDANDO APROVAÇÃO (HOTEL)
+                                        Fechado com o cliente
                                     </div>
                                     <div class="h5 mb-0 font-weight-bold"
                                         :class="{ 'text-gray-800': !waitApproval.loading && !waitApproval.error, 'text-muted': waitApproval.loading }">
@@ -443,7 +397,7 @@ const number_format = (number, decimals, dec_point, thousands_sep) => {
                                 <div class="col mr-2">
                                     <div class="text-xs font-weight-bold text-uppercase mb-1"
                                         :class="{ 'text-success': !waitApproval.loading && !waitApproval.error, 'text-danger': waitApproval.error, 'text-muted': waitApproval.loading }">
-                                        AGUARDANDO APROVAÇÃO (TRANSPORTE)
+                                        Cancelados
                                     </div>
                                     <div class="h5 mb-0 font-weight-bold"
                                         :class="{ 'text-gray-800': !waitApproval.loading && !waitApproval.error, 'text-muted': waitApproval.loading }">
@@ -556,7 +510,7 @@ const number_format = (number, decimals, dec_point, thousands_sep) => {
                     <div class="card shadow mb-4">
                         <!-- Card Header - Dropdown -->
                         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                            <h6 class="m-0 font-weight-bold text-primary">Eventos Por Status do Hotel</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Status</h6>
                         </div>
                         <!-- Card Body -->
                         <div class="card-body">
@@ -613,33 +567,7 @@ const number_format = (number, decimals, dec_point, thousands_sep) => {
                     </div>
 
                 </div>
-                <!-- Pie Chart -->
-                <div class="col-xl-4 col-lg-5">
-                    <div class="card shadow mb-4">
-                        <!-- Card Header - Dropdown -->
-                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                            <h6 class="m-0 font-weight-bold text-primary">Eventos Por Status de Transporte</h6>
-                        </div>
-                        <!-- Card Body -->
-                        <div class="card-body">
-                            <div class="chart-pie pt-4 pb-2">
-                                <canvas id="pie-transport-status"></canvas>
-                            </div>
-                            <div v-if="eventStatus.loading" class="text-center">
-                                Carregando...
-                            </div>
-                            <div v-else-if="eventStatus.error" class="text-center text-danger">
-                                Ocorreu um erro ao carregar os dados..
-                            </div>
-                            <div v-else class="mt-4 text-center small">
-                                <span v-for="(  data, index  ) in   eventStatus.data.transports  " class="mr-2">
-                                    <i class="fas fa-circle" :style="{ color: data.backgroundColor }"></i> {{ data.label
-                                    }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
             </div>
 
         </div>

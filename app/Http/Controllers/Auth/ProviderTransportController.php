@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\Constants;
 use App\Mail\PdfEmail;
+use App\Models\City;
 use App\Models\Event;
 use App\Models\EventTransport;
 use App\Models\ProviderTransport;
+use App\Models\StatusHistory;
 use App\Models\User;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -29,16 +31,15 @@ class ProviderTransportController extends Controller
      */
     public function create(Request $request)
     {
-        $userId =  Auth::user()->id;
         if (Gate::allows('admin_provider_transport')) {
-            $hotels = ProviderTransport::get();
+            $hotels = ProviderTransport::with('city')->get();
         } else {
             abort(403);
         }
 
         return Inertia::render('Auth/Auxiliaries/ProviderTransport', [
             'hotels' => $hotels,
-            'cities' =>  Constants::CITIES,
+            'cities' => City::all()
         ]);
     }
 
@@ -59,7 +60,6 @@ class ProviderTransportController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'city' => 'required|string|max:255',
             'contact' => 'required|string|max:255',
             'phone' => 'required|string|max:255',
             'email' => 'required|string|max:255|email',
@@ -71,7 +71,7 @@ class ProviderTransportController extends Controller
                 $hotel = ProviderTransport::find($request->id);
 
                 $hotel->name = $request->name;
-                $hotel->city = $request->city;
+                $hotel->city_id = $request->city;
                 $hotel->contact = $request->contact;
                 $hotel->phone = $request->phone;
                 $hotel->email = $request->email;
@@ -85,7 +85,7 @@ class ProviderTransportController extends Controller
 
                 $hotel = ProviderTransport::create([
                     'name' => $request->name,
-                    'city' => $request->city,
+                    'city_id' => $request->city,
                     'contact' => $request->contact,
                     'phone' => $request->phone,
                     'email' => $request->email,
@@ -126,6 +126,15 @@ class ProviderTransportController extends Controller
 
             if ($request->id > 0) {
 
+                $history = StatusHistory::with('user')->where('table', "event_transports")
+                    ->where('table_id', $request->id)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+
+                if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
+                }
+
                 $provider = EventTransport::find($request->id);
                 $provider->transport_id = $request->provider_id;
 
@@ -159,6 +168,14 @@ class ProviderTransportController extends Controller
                     'service_charge' => $request->service_charge,
                     'deadline_date' => $request->deadline
                 ]);
+
+
+                $status = StatusHistory::create([
+                    'status' => "created",
+                    'user_id' => Auth::user()->id,
+                    'table' => "event_transports",
+                    'table_id' => $provider->id
+                ]);
             }
         } catch (Exception $e) {
             throw $e;
@@ -178,6 +195,14 @@ class ProviderTransportController extends Controller
             abort(403);
         }
         try {
+            $history = StatusHistory::with('user')->where('table', "event_transports")
+                ->where('table_id', $request->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser apagado devido ao status atual!', 'type' => 'warning']);
+            }
 
             $r = ProviderTransport::find($request->id);
 

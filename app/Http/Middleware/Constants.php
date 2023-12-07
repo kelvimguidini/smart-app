@@ -22,6 +22,7 @@ class Constants extends Middleware
         ['name' => "air_operator", "title" => "Operador de Aéreo", "verifyId" => true],
         ['name' => "apto_admin", "title" => "Administrar Apartamento de Hotel"],
         ['name' => "category_admin", "title" => "Administrar Categorias de Hotel"],
+        ['name' => "city_admin", "title" => "Administrar Cidades"],
         ['name' => "purpose_admin", "title" => "Administrar Propósito Hotel"],
         ['name' => "regime_admin", "title" => "Administrar Regimes"],
         ['name' => "broker_admin", "title" => "Administrar Brokers"],
@@ -41,11 +42,75 @@ class Constants extends Middleware
         ['name' => "vehicle_admin", "title" => "Administrar Veículo"],
         ['name' => "car_model_admin", "title" => "Administrar Modelo Carro"],
         ['name' => "transport_service_admin", "title" => "Administrar Serviço Transporte"],
-        ['name' => "change_status_admin", "title" => "Administrar Status"],
         ['name' => "admin_provider_service", "title" => "Administrar Fornecedor Serviço"],
         ['name' => "admin_provider_transport", "title" => "Administrar Fornecedor Transporte"],
+        ['name' => "status_level_1", "title" => "Status Nível 1"],
+        ['name' => "status_level_2", "title" => "Status Nível 2"],
     ];
 
+
+    const STATUS = [
+        'created' => [
+            'label' => "Solicitado",
+            'level' => 1,
+            'flow' => ['briefing']
+        ],
+        'briefing' => [
+            'label' => "Reunião de Briefing",
+            'level' => 1,
+            'flow' => ['provider_requested']
+        ],
+        'provider_requested' => [
+            'label' => "Pedido ao Fornecedor",
+            'level' => 1,
+            'flow' => ['provider_responsed']
+        ],
+        'provider_responsed' => [
+            'label' => "Resposta do Fornecedor",
+            'level' => 1,
+            'flow' => ['sent_maneger']
+        ],
+        'sent_maneger' => [
+            'label' => "Enviado para o Gestor",
+            'level' => 1,
+            'flow' => ['approved_by_manager', 'add_information']
+        ],
+        'approved_by_manager' => [
+            'label' => "Aprovado pelo Gestor",
+            'level' => 2,
+            'flow' => ['sent_to_customer', 'change_request']
+        ],
+        'add_information' => [
+            'label' => "Informações Adicionais",
+            'level' => 2,
+            'flow' => ['added_information']
+        ],
+        'added_information' => [
+            'label' => "Informações Adicionadas",
+            'level' => 2,
+            'flow' => ['sent_maneger']
+        ],
+        'change_request' => [
+            'label' => "Pedido de Alteração",
+            'level' => 1,
+            'flow' => ['provider_requested']
+        ],
+        'sent_to_customer' => [
+            'label' => "Enviado ao Cliente",
+            'level' => 1,
+            'flow' => ['change_request', 'dating_with_customer', 'Cancelled']
+        ],
+        'dating_with_customer' => [
+            'label' => "Fechado com Cliente",
+            'level' => 1,
+            'flow' => []
+        ],
+        'Cancelled' => [
+            'label' => "Cancelado",
+            'level' => 1,
+            'flow' => []
+        ],
+    ];
 
     const UFS = [
         ['name' => "Rondônia", "uf" => "RO"],
@@ -76,7 +141,6 @@ class Constants extends Middleware
         ['name' => "Goiás", "uf" => "GO"],
         ['name' => "Distrito Federal", "uf" => "DF"],
     ];
-
 
     const CITIES = [
         ['uf' => 'AC', 'name' => 'Acrelandia'],

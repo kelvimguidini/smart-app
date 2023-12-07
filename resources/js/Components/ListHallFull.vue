@@ -51,6 +51,15 @@ const daysBetween = (date1, date2) => {
     return Math.ceil(difference / (1000 * 60 * 60 * 24));
 }
 
+const statusBlockEdit = () => {
+    if (props.eventHall && props.eventHall.status_history) {
+        var status = props.eventHall.status_history.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0].status; // TODO ordenar por data e pegar o ultimo registro
+
+        return (status == "prescribed_by_manager" || status == "sented_to_customer" || status == "dating_with_customer" || status == "Cancelled")
+    }
+    return false;
+}
+
 const formatCurrency = (value) => {
     value = Math.round(value * 100) / 100;
     let sigla = 'BRL';
@@ -202,7 +211,7 @@ const showDetails = ref(false);
 
                                 <Modal modal-title="Confirmar Remoção" :ok-botton-callback="deleteEventHotel"
                                     :ok-botton-callback-param="{ 'id': evHall.id, 'event_id': evHall.event_id }"
-                                    btn-class="btn btn-sm btn-danger btn-icon-split m-1">
+                                    btn-class="btn btn-sm btn-danger btn-icon-split m-1" :btnDisabled="statusBlockEdit()">
                                     <template v-slot:button>
                                         <span class="icon text-white-50">
                                             <i class="fas fa-trash"></i>
@@ -343,14 +352,14 @@ const showDetails = ref(false);
                             <td class="align-middle">
                                 <div class="d-flex">
                                     <PrimaryButton
-                                        :disabled="!(eventHall != null && eventHall.id > 0 && eventHall.id == opt.event_hall_id)"
+                                        :disabled="!(eventHall != null && eventHall.id > 0 && eventHall.id == opt.event_hall_id) || statusBlockEdit()"
                                         type="button" css-class="btn btn-info btn-circle btn-sm text-white" title="Editar"
                                         v-on:click="editOpt(opt)">
                                         <i class="fas fa-edit"></i>
                                     </PrimaryButton>
 
                                     <PrimaryButton
-                                        :disabled="!(eventHall != null && eventHall.id > 0 && eventHall.id == opt.event_hall_id)"
+                                        :disabled="!(eventHall != null && eventHall.id > 0 && eventHall.id == opt.event_hall_id) || statusBlockEdit()"
                                         type="button" css-class="btn btn-info btn-circle btn-sm text-white" title="Duplicar"
                                         v-on:click="duplicate(opt)">
                                         <i class="fas fa-clone"></i>
@@ -358,7 +367,8 @@ const showDetails = ref(false);
 
                                     <Modal :key="index" :modal-title="'Confirmar Remoção'" :ok-botton-callback="deleteOpt"
                                         :ok-botton-callback-param="opt.id"
-                                        btn-class="btn btn-danger btn-circle btn-sm text-white">
+                                        btn-class="btn btn-danger btn-circle btn-sm text-white"
+                                        :btnDisabled="statusBlockEdit()">
                                         <template v-slot:button>
                                             <i class="fas fa-trash"></i>
                                         </template>

@@ -120,7 +120,7 @@ class BudgetController extends Controller
         $msg = $request->message != null && $request->message != "!" ? urldecode($request->message) : "";
         if ($request->linkEmail == "true" || $request->linkEmail == "1") {
             $msg .= '<div style="text-align: center;">
-                        <a href="' . route('budget', ['token' => $request->link]) . '" class="btn btn-primary" style="display: inline-block; padding: 10px 20px; border-radius: 5px; color: #fff; background-color: #007bff; border-color: #007bff; text-decoration: none;">Abrir o formulário</a>
+                        <a href="' . route('budget', ['token' => $request->link]) . '" class="btn btn-sm btn-primary" style="display: inline-block; padding: 10px 20px; border-radius: 5px; color: #fff; background-color: #007bff; border-color: #007bff; text-decoration: none;">Abrir o formulário</a>
                         <p style="font-size: 12px; margin-top: 10px;">Se o botão não aparecer, copie e cole esta URL: <a href="' . route('budget', ['token' => $request->link]) . '" style="text-decoration: underline; color: #007bff;">' . route('budget', ['token' => $request->link]) . '</a></p>
                     </div>';
         }
@@ -415,7 +415,7 @@ class BudgetController extends Controller
             'body' => '<p style="font-size: 16px; line-height: 1.4em; color: #333; font-family: Arial, sans-serif;">
             Prezado(a),<br><br>O fornecedor já preencheu o formulário do link que foi enviado. Para aprovar, entre em sua area do sistema ou acesse o seguinte link:
           </p>
-          <a href="' . route('event-list') . '" class="btn btn-primary" style="display: inline-block; padding: 10px 20px; border-radius: 5px; color: #fff; background-color: #007bff; border-color: #007bff; text-decoration: none;">Aprovar Orçamento</a>
+          <a href="' . route('event-list') . '" class="btn btn-sm btn-primary" style="display: inline-block; padding: 10px 20px; border-radius: 5px; color: #fff; background-color: #007bff; border-color: #007bff; text-decoration: none;">Aprovar Orçamento</a>
           <p style="font-size: 12px; margin-top: 10px;">Se o botão não aparecer, copie e cole esta URL: <a href="' . route('event-list')  . '" style="text-decoration: underline; color: #007bff;">' . route('event-list') . '</a></p>
           ',
             'hasAttachment' => false,

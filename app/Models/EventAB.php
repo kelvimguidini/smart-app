@@ -141,4 +141,10 @@ class EventAB extends Model
     {
         return $this->hasMany(ProviderBudget::class, 'event_ab_id', 'id');
     }
+    public function status_his()
+    {
+        return $this->hasMany(StatusHistory::class, 'table_id', 'id')
+            ->where('table', 'event_abs')
+            ->orderByDesc('created_at');
+    }
 }

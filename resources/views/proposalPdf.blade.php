@@ -318,8 +318,8 @@ if ($transportEvent != null) {
         }
 
         .right {
-            transform: translateY(50%);
-            width: 150px;
+            /* transform: translateY(50%); */
+            /* width: 150px; */
             float: right;
         }
 
@@ -364,7 +364,7 @@ if ($transportEvent != null) {
                     </div>
                 </div>
                 <div class="right">
-                    <img src="{{ asset($event->customer->logo) }}" width="150px" style="width: 150px;" alt="{{ $event->customer->name}}">
+                    <img src="{{ asset($event->customer->logo) }}" style="max-width: 175px; max-height: 175px;" alt="{{ $event->customer->name}}">
                 </div>
             </header>
 

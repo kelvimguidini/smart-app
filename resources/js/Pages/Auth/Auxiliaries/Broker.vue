@@ -69,9 +69,9 @@ const edit = (broker) => {
     form.phone = broker.phone;
     form.email = broker.email;
     form.national = broker.national == true || broker.national == 1;
-    form.city = broker.city;
+    form.city = broker.city_id;
 
-    $('#city').val(broker.city).trigger('change');
+    $('#city').val(form.city).trigger('change');
     $('.phone').val(form.phone).trigger('keyup');
 };
 
@@ -127,10 +127,11 @@ const submit = () => {
 
                                                 <select class="form-control" id="city" :required="required">
                                                     <option>.::Selecione::.</option>
-                                                    <option v-for="(option, index) in cities"
-                                                        :selected="option.name == form.city" :value="option.name">
-                                                        {{ option.name }} - {{ option.uf }}
+                                                    <option v-for="(option, index) in cities" :value="option.id">
+                                                        {{ option.name }} - {{ option.states ? option.states :
+                                                            option.country }}
                                                     </option>
+
                                                 </select>
 
                                                 <InputError class="mt-2 text-danger" :message="form.errors.city" />
@@ -234,7 +235,9 @@ const submit = () => {
                                                 :class="{ 'table-info': inEdition == broker.id }">
                                                 <th scope="row">{{ broker.id }}</th>
                                                 <td>{{ broker.name }}</td>
-                                                <td>{{ broker.city }}</td>
+                                                <td>{{ broker.city?.name }} - {{ broker.city?.states ?
+                                                    broker.city.states :
+                                                    broker.city?.country }}</td>
                                                 <td>{{ broker.contact }}</td>
                                                 <td class="phone">{{ broker.phone }}</td>
                                                 <td>{{ broker.email }}</td>

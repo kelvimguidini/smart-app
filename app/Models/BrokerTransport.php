@@ -12,7 +12,7 @@ class BrokerTransport extends Model
 
     protected $fillable = [
         'name',
-        'city',
+        'city_id',
         'contact',
         'phone',
         'email',
@@ -38,5 +38,10 @@ class BrokerTransport extends Model
     public function event_transports_opt()
     {
         return $this->belongsTo(EventTransportOpt::class);
+    }
+
+    public function city()
+    {
+        return $this->hasOne(City::class,  'id', 'city_id');
     }
 }

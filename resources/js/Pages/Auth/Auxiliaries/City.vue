@@ -11,17 +11,17 @@ import { onMounted, ref } from 'vue';
 
 
 const props = defineProps({
-    crds: Array,
-    customers: Array
+    cities: Array,
+    ufs: Array
 });
 
-const crdInEdition = ref(0);
+const cityInEdition = ref(0);
 
 const form = useForm({
     id: 0,
     name: '',
-    number: '',
-    customer_id: ''
+    states: '',
+    country: ''
 });
 
 const formDelete = useForm({
@@ -37,28 +37,19 @@ onMounted(() => {
         },
     });
 
-    var options = {
-        onKeyPress: function (crd, e, field, options) {
-            var masks = ['00.000.00000', '00.000.0000.00000'];
-            var mask = crd.length > 11 ? masks[1] : masks[0];
-            field.mask(mask, options);
-        }
-    };
-    $('.number').mask('00.000.00000', options);
-
-    $('#customer_id').select2({
+    $('#uf').select2({
         theme: "bootstrap4", language: "pt-Br"
     }).on('select2:select', (e) => {
-        form.customer_id = e.params.data.id;
+        form.states = e.params.data.id;
     });
 });
 
 const isLoader = ref(false);
 
-const deleteCRD = (id) => {
+const deleteCity = (id) => {
     isLoader.value = true;
     formDelete.id = id;
-    formDelete.delete(route('crd-delete'), {
+    formDelete.delete(route('city-delete'), {
         onFinish: () => {
             isLoader.value = false;
             formDelete.reset();
@@ -66,21 +57,23 @@ const deleteCRD = (id) => {
     });
 };
 
-const edit = (crd) => {
-    crdInEdition.value = crd.id;
-    form.name = crd.name;
-    form.number = crd.number;
-    form.customer_id = crd.customer_id;
-    form.id = crd.id;
+const edit = (city) => {
+    cityInEdition.value = city.id;
+    form.name = city.name;
+    if (city.country.toLowerCase() != 'brasil') {
+        form.states = city.states;
+        $('#uf').val(form.states).trigger('change');
+    }
+    form.country = city.country;
+    form.id = city.id;
 
-    $('#customer_id').val(crd.customer_id).trigger('change');
 };
 
 const submit = () => {
-    form.post(route('crd-save'), {
+    form.post(route('city-save'), {
         onSuccess: () => {
-            crdInEdition.value = 0;
-            $('#customer_id').val().trigger('change');
+            $('#uf').val().trigger('change');
+            cityInEdition.value = 0;
             form.reset();
         },
     });
@@ -91,10 +84,10 @@ const submit = () => {
     <AuthenticatedLayout>
         <Loader v-bind:show="isLoader"></Loader>
 
-        <Head title="CRD's" />
+        <Head title="Cidades" />
         <template #header>
             <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                <h1 class="h3 mb-0 text-gray-800">CRD's</h1>
+                <h1 class="h3 mb-0 text-gray-800">Cidades</h1>
             </div>
         </template>
         <div class="row">
@@ -108,39 +101,44 @@ const submit = () => {
                                 <form @submit.prevent="submit">
 
                                     <div class="row">
+
                                         <div class="col">
                                             <div class="form-group">
-                                                <InputLabel for="name" value="Nome:" />
+                                                <InputLabel for="number" value="País:" />
+                                                <TextInput type="text" class="form-control number" v-model="form.country"
+                                                    required autofocus autocomplete="number" />
+                                                <InputError class="mt-2 text-danger" :message="form.errors.country" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <InputLabel for="customer_id" value="Estado:" />
+
+                                                <select v-if="form.country.toLowerCase() == 'brasil'" class="form-control"
+                                                    id="uf">
+                                                    <option>.::Selecione::.</option>
+                                                    <option v-for="(option, index) in ufs"
+                                                        :selected="option.uf == form.states" :value="option.uf">
+                                                        {{ option.name }}
+                                                    </option>
+                                                </select>
+                                                <TextInput v-else type="text" class="form-control number"
+                                                    v-model="form.states" autofocus autocomplete="number" />
+
+                                                <InputError class="mt-2 text-danger" :message="form.errors.states" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <InputLabel for="name" value="Cidade:" />
                                                 <TextInput type="text" class="form-control" v-model="form.name" required
                                                     autofocus autocomplete="name" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.name" />
                                             </div>
                                         </div>
-                                        <div class="col">
 
-                                            <div class="form-group">
-                                                <InputLabel for="number" value="Número:" />
-                                                <TextInput type="text" class="form-control number" v-model="form.number"
-                                                    required autofocus autocomplete="number" />
-                                                <InputError class="mt-2 text-danger" :message="form.errors.number" />
-                                            </div>
-
-                                        </div>
-                                        <div class="col">
-                                            <div class="form-group">
-                                                <InputLabel for="customer_id" value="Cliente:" />
-
-                                                <select class="form-control" id="customer_id" :required="required">
-                                                    <option>.::Selecione::.</option>
-                                                    <option v-for="(option, index) in customers"
-                                                        :selected="option.id == form.customer_id" :value="option.id">
-                                                        {{ option.name }}
-                                                    </option>
-                                                </select>
-
-                                                <InputError class="mt-2 text-danger" :message="form.errors.crd_id" />
-                                            </div>
-                                        </div>
                                     </div>
                                     <div class="flex items-center justify-end mt-4 rigth">
                                         <PrimaryButton css-class="btn btn-primary float-right m-1"
@@ -149,8 +147,8 @@ const submit = () => {
                                                 role="status" aria-hidden="true"></span>
                                             Salvar
                                         </PrimaryButton>
-                                        <PrimaryButton v-if="crdInEdition > 0" css-class="btn btn-info float-right m-1"
-                                            v-on:click="form.reset(); crdInEdition = 0; $('#customer_id').val().trigger('change');"
+                                        <PrimaryButton v-if="cityInEdition > 0" css-class="btn btn-info float-right m-1"
+                                            v-on:click="form.reset(); cityInEdition = 0; $('#uf').val().trigger('change');"
                                             :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                                             Novo
                                         </PrimaryButton>
@@ -170,29 +168,39 @@ const submit = () => {
                                         <thead>
                                             <tr>
                                                 <th scope="col">#</th>
-                                                <th scope="col">Nome</th>
-                                                <th scope="col">Número</th>
-                                                <th scope="col">Cliente</th>
+                                                <th scope="col">Cidade</th>
+                                                <th scope="col">Estado</th>
+                                                <th scope="col">País</th>
                                                 <th scope="col">Ações</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr v-for="(crd, index) in crds"
-                                                :class="{ 'table-info': crdInEdition == crd.id }">
-                                                <th scope="row">{{ crd.id }}</th>
-                                                <td>{{ crd.name }}</td>
-                                                <td>{{ crd.number }}</td>
-                                                <td>{{ crd.customer != null ? crd.customer.name : ' - ' }}</td>
+                                            <tr v-for="(city, index) in cities"
+                                                :class="{ 'table-info': cityInEdition == city.id }">
+                                                <th scope="row">{{ city.id }}</th>
+                                                <td>{{ city.name }}</td>
+                                                <td>{{
+                                                    city.states !== null
+                                                    ? (
+                                                        city.country.toLowerCase() === 'brasil'
+                                                            ? (ufs.find((s) => s.uf === city.states)?.name || ' - ')
+                                                            : city.states
+                                                    )
+                                                    : ' - '
+                                                }}
+                                                </td>
+                                                <td>{{ city.country }}</td>
                                                 <td>
-                                                    <button class="btn btn-info btn-icon-split mr-2" v-on:click="edit(crd)">
+                                                    <button class="btn btn-info btn-icon-split mr-2"
+                                                        v-on:click="edit(city)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-edit"></i>
                                                         </span>
                                                         <span class="text">Editar</span>
                                                     </button>
 
-                                                    <Modal :key="index" :modal-title="'Confirmar Exclusão de ' + crd.name"
-                                                        :ok-botton-callback="deleteCRD" :ok-botton-callback-param="crd.id"
+                                                    <Modal :key="index" :modal-title="'Confirmar Exclusão de ' + city.name"
+                                                        :ok-botton-callback="deleteCity" :ok-botton-callback-param="city.id"
                                                         btn-class="btn btn-danger btn-icon-split">
                                                         <template v-slot:button>
                                                             <span class="icon text-white-50">

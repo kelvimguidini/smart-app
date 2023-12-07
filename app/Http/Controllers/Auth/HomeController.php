@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\Constants;
 use App\Models\Event;
 use App\Models\EventStatus;
 use App\Models\ProviderBudget;
 use App\Models\Role;
+use App\Models\StatusHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -79,67 +81,30 @@ class HomeController extends Controller
     {
         $query = $this->getQueryEventBase();
 
-        $statusFields = [
-            'N' => 'Novo',
-            'S' => 'Solicitação',
-            'PF' => 'Pedido de Fornecedor',
-            'B' => 'Briefing',
-            'R' => 'Resposta',
-            'P' => 'Preço',
-            'EC' => 'Envio ao Cliente',
-            'AL' => 'Alteração',
-            'CA' => 'Cancelado',
-            'A' => 'Aprovado',
-            'C' => 'Concluído'
-        ];
+        $statusFields = Constants::STATUS;
+
+        $ultimosStatus = StatusHistory::select('status', 'id', 'table', 'table_id', 'created_at')
+            ->from('status_history as s1')
+            ->where('created_at', '=', function ($query) {
+                $query->select(DB::raw('MAX(created_at)'))
+                    ->from('status_history as s2')
+                    ->whereColumn('s1.table', '=', 's2.table')
+                    ->whereColumn('s1.table_id', '=', 's2.table_id');
+            })
+            ->get();
 
 
-        $events = $query->with('eventStatus')->get();
+        $contagemPorStatus = [];
 
-        $statusCountsHotel = [];
-        $statusCountsTransport = [];
+        foreach ($ultimosStatus as $status) {
+            // Use o array de constantes para mapear o label do status
+            $label = Constants::STATUS[$status->status]['label'] ?? $status->status;
 
-        // Loop through the events and count the occurrences of each status
-        foreach ($events as $event) {
-
-            $statusHotel = $event->eventStatus[0]->status_u_hotel ?? 'N';
-            $statusTransport = $event->eventStatus[0]->status_u_transport ?? 'N';
-
-
-            // For Hotel status
-            if (isset($statusFields[$statusHotel])) {
-                $statusLabelHotel = $statusFields[$statusHotel];
-
-                if (!isset($statusCountsHotel[$statusLabelHotel])) {
-                    $statusCountsHotel[$statusLabelHotel] = 1;
-                } else {
-                    $statusCountsHotel[$statusLabelHotel]++;
-                }
-            }
-
-            // For Transport status
-            if (isset($statusFields[$statusTransport])) {
-                $statusLabelTransport = $statusFields[$statusTransport];
-
-                if (!isset($statusCountsTransport[$statusLabelTransport])) {
-                    $statusCountsTransport[$statusLabelTransport] = 1;
-                } else {
-                    $statusCountsTransport[$statusLabelTransport]++;
-                }
-            }
+            // Incrementa a contagem para o status atual
+            $contagemPorStatus[$label] = ($contagemPorStatus[$label] ?? 0) + 1;
         }
 
-        // Remove any statuses that don't have any events (null or not found in the result)
-        $statusCountsHotel = array_filter($statusCountsHotel);
-        $statusCountsTransport = array_filter($statusCountsTransport);
-
-
-        $response = [
-            'hotel' => $statusCountsHotel,
-            'transport' => $statusCountsTransport,
-        ];
-
-        return response()->json($response);
+        return response()->json($contagemPorStatus);
     }
 
     /**
@@ -150,17 +115,23 @@ class HomeController extends Controller
     public function waitApproval(Request $request)
     {
 
-        $queryHotels =  $this->getQueryEventBase()->with('eventStatus')->where(function ($query) {
-            $query->whereHas('eventStatus', function ($query) {
-                $query->where('status_hotel', 'AA');
-            });
-        });
+        $queryHotels = StatusHistory::select('status', 'id', 'table', 'table_id', 'created_at')
+            ->from('status_history as s1')
+            ->where('created_at', '=', function ($query) {
+                $query->select(DB::raw('MAX(created_at)'))
+                    ->from('status_history as s2')
+                    ->whereColumn('s1.table', '=', 's2.table')
+                    ->whereColumn('s1.table_id', '=', 's2.table_id');
+            })->where('status', 'dating_with_customer')->get();
 
-        $queryTransports =  $this->getQueryEventBase()->with('eventStatus')->where(function ($query) {
-            $query->whereHas('eventStatus', function ($query) {
-                $query->where('status_transport', 'AA');
-            });
-        });
+        $queryTransports = StatusHistory::select('status', 'id', 'table', 'table_id', 'created_at')
+            ->from('status_history as s1')
+            ->where('created_at', '=', function ($query) {
+                $query->select(DB::raw('MAX(created_at)'))
+                    ->from('status_history as s2')
+                    ->whereColumn('s1.table', '=', 's2.table')
+                    ->whereColumn('s1.table_id', '=', 's2.table_id');
+            })->where('status', 'Cancelled')->get();
 
         $counts = [
             'hotels' => $queryHotels->count(),
@@ -243,7 +214,6 @@ class HomeController extends Controller
             ->get()
             ->keyBy('month'); // Indexa os resultados pelo campo 'month'
 
-        $result = (object)array();
         // Preencher os meses ausentes com event_count e register_count igual a zero
         for ($i = 0; $i < 12; $i++) {
             // Obter o mês e o ano

@@ -41,6 +41,8 @@ use App\Http\Controllers\Auth\TransportController;
 use App\Http\Controllers\Auth\TransportServiceController;
 use App\Http\Controllers\Auth\VehicleController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\Auth\StatusHistoryController;
+use App\Http\Controllers\Auth\CityController;
 use App\Models\ProviderTransport;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Route;
@@ -149,6 +151,22 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     Route::delete('crd-delete', [CrdController::class, 'delete'])
         ->name('crd-delete');
+
+
+
+    Route::get('city', [CityController::class, 'create'])
+        ->name('city');
+
+    Route::post('city-save', [CityController::class, 'store'])
+        ->name('city-save');
+
+    Route::delete('city-delete', [CityController::class, 'delete'])
+        ->name('city-delete');
+
+
+    Route::get('cities', [CityController::class, 'searchCities'])
+        ->name('cities');
+
 
 
     Route::get('apto', [AptoController::class, 'create'])
@@ -369,10 +387,6 @@ Route::middleware(['auth', 'cors'])->group(function () {
         ->name('event-delete');
 
 
-    Route::post('event-status-save', [EventController::class, 'statusStore'])
-        ->name('event-status-save');
-
-
     Route::get('invoice/{download}/{provider_id}/{event_id}/{emails?}/{copyMe?}/{message?}', [ProviderController::class, 'invoicingPdf'])
         ->name('invoice');
 
@@ -498,4 +512,13 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
 
     //FIM dashboard
+
+    //status
+    Route::get('status-history/{table}/{table_id}', [StatusHistoryController::class, 'listHistory'])
+        ->name('status-history');
+
+
+    Route::post('event-status-save', [StatusHistoryController::class, 'statusStore'])
+        ->name('event-status-save');
+    //FIM status
 });

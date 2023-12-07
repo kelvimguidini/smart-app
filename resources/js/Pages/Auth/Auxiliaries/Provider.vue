@@ -24,6 +24,8 @@ const form = useForm({
     contact: '',
     phone: '',
     email: '',
+    email_reservations: '',
+    contact_reservations: '',
     national: false,
     service_percent: null,
     iva_percent: null,
@@ -33,6 +35,7 @@ const form = useForm({
 const formDelete = useForm({
     id: 0
 });
+
 
 onMounted(() => {
 
@@ -64,13 +67,15 @@ const edit = (hotel) => {
         form.contact = hotel.contact;
         form.phone = hotel.phone;
         form.email = hotel.email;
+        form.email_reservations = hotel.email_reservations;
+        form.contact_reservations = hotel.contact_reservations;
         form.national = hotel.national == true || hotel.national == 1;
-        form.city = hotel.city;
+        form.city = hotel.city_id;
         form.iss_percent = hotel.iss_percent;
         form.service_percent = hotel.service_percent;
         form.iva_percent = hotel.iva_percent;
 
-        $('#city').val(hotel.city).trigger('change');
+        $('#city').val(hotel.city_id).trigger('change');
         $('.phone').val(form.phone).trigger('keyup');
     }
 };
@@ -136,11 +141,12 @@ const deleteHotel = (id) => {
                                     <div class="form-group">
                                         <InputLabel for="city" value="Cidade:" />
 
+
                                         <select class="form-control" id="city" :required="required">
                                             <option>.::Selecione::.</option>
-                                            <option v-for="(option, index) in cities" :selected="option.name == form.city"
-                                                :value="option.name">
-                                                {{ option.name }} - {{ option.uf }}
+                                            <option v-for="(option, index) in cities" :value="option.id">
+                                                {{ option.name }} - {{ option.states ? option.states :
+                                                    option.country }}
                                             </option>
                                         </select>
 
@@ -202,7 +208,29 @@ const deleteHotel = (id) => {
                                     </div>
                                 </div>
 
-                                <div class="col">
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <InputLabel for="email_reservations" value="E-mail Reserva:" />
+                                        <TextInput type="email" class="form-control" v-model="form.email_reservations"
+                                            required autofocus autocomplete="email_reservations" />
+                                        <InputError class="mt-2 text-danger" :message="form.errors.email_reservations" />
+                                    </div>
+                                </div>
+
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <InputLabel for="contact_reservations" value="Contato Reserva:" />
+                                        <TextInput type="text" class="form-control" v-model="form.contact_reservations"
+                                            required autofocus autocomplete="contact_reservations" />
+                                        <InputError class="mt-2 text-danger" :message="form.errors.contact_reservations" />
+                                    </div>
+                                </div>
+
+                                <div class="col-3">
                                     <div class="form-group">
                                         <InputLabel for="national" value=" " />
 
@@ -270,7 +298,9 @@ const deleteHotel = (id) => {
                                     <tr v-for="(hotel, index) in hotels" :class="{ 'table-info': inEdition == hotel.id }">
                                         <th scope="row">{{ hotel.id }}</th>
                                         <td>{{ hotel.name }}</td>
-                                        <td>{{ hotel.city }}</td>
+                                        <td>{{ hotel.city?.name || ' - ' }} - {{ hotel.city?.states ?
+                                            hotel.city.states :
+                                            hotel.city?.country || ' - ' }}</td>
                                         <td>{{ hotel.contact }}</td>
                                         <td class="phone">{{ hotel.phone }}</td>
                                         <td>{{ hotel.email }}</td>

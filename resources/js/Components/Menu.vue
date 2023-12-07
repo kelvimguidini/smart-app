@@ -1,6 +1,5 @@
 <script setup>
 import { Link } from '@inertiajs/inertia-vue3';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
 const props = defineProps({
     //! Menu settings
     menuTitle: {

@@ -129,4 +129,10 @@ class EventTransport extends Model
     {
         return $this->hasMany(ProviderBudget::class, 'event_transport_id', 'id');
     }
+    public function status_his()
+    {
+        return $this->hasMany(StatusHistory::class, 'table_id', 'id')
+            ->where('table', 'event_transports')
+            ->orderByDesc('created_at');
+    }
 }

@@ -179,11 +179,6 @@ class Event extends Model
         return $this->hasMany(EventTransport::class, 'event_id', 'id');
     }
 
-    public function eventStatus()
-    {
-        return $this->hasMany(EventStatus::class, 'event_id', 'id');
-    }
-
     public function eventLocals()
     {
         return $this->hasMany(EventLocal::class, 'event_id', 'id');

@@ -11,6 +11,7 @@ use App\Models\EventHall;
 use App\Models\EventHotel;
 use App\Models\EventTransport;
 use App\Models\EventTransportOpt;
+use App\Models\StatusHistory;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -56,6 +57,15 @@ class TransportController extends Controller
         try {
 
             if ($request->id > 0) {
+                $history = StatusHistory::with('user')->where('table', 'event_transports')
+                    ->where('table_id', $request->event_transport_id)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+
+                if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
+                }
+
                 $opt = EventTransportOpt::find($request->id);
 
                 $opt->event_transport_id = $request->event_transport_id;
@@ -116,6 +126,15 @@ class TransportController extends Controller
         }
         try {
 
+            $history = StatusHistory::with('user')->where('table', 'event_transports')
+                ->where('table_id', $request->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
+            }
+
             $r = EventTransport::find($request->id);
 
             $r->delete();
@@ -141,6 +160,15 @@ class TransportController extends Controller
         try {
 
             $r = EventTransportOpt::find($request->id);
+
+            $history = StatusHistory::with('user')->where('table', 'event_transports')
+                ->where('table_id', $r->event_transport_id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser apagado devido ao status atual!', 'type' => 'warning']);
+            }
 
             $r->delete();
         } catch (Exception $e) {

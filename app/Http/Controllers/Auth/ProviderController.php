@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\Constants;
 use App\Mail\PdfEmail;
+use App\Models\City;
 use App\Models\Event;
 use App\Models\EventAB;
 use App\Models\EventHall;
 use App\Models\EventHotel;
 use App\Models\Provider;
+use App\Models\StatusHistory;
 use App\Models\User;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -31,16 +33,15 @@ class ProviderController extends Controller
      */
     public function create(Request $request)
     {
-        $userId =  Auth::user()->id;
         if (Gate::allows('admin_provider')) {
-            $hotels = Provider::get();
+            $hotels = Provider::with('city')->get();
         } else {
             abort(403);
         }
 
         return Inertia::render('Auth/Auxiliaries/Provider', [
             'hotels' => $hotels,
-            'cities' =>  Constants::CITIES,
+            'cities' => City::all()
         ]);
     }
 
@@ -61,7 +62,6 @@ class ProviderController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'city' => 'required|string|max:255',
             'contact' => 'required|string|max:255',
             'phone' => 'required|string|max:255',
             'email' => 'required|string|max:255|email',
@@ -73,9 +73,11 @@ class ProviderController extends Controller
                 $hotel = Provider::find($request->id);
 
                 $hotel->name = $request->name;
-                $hotel->city = $request->city;
+                $hotel->city_id = $request->city;
                 $hotel->contact = $request->contact;
                 $hotel->phone = $request->phone;
+                $hotel->email_reservations = $request->email_reservations;
+                $hotel->contact_reservations = $request->contact_reservations;
                 $hotel->email = $request->email;
                 $hotel->national = $request->national;
                 $hotel->iss_percent = $request->iss_percent;
@@ -87,14 +89,24 @@ class ProviderController extends Controller
 
                 $hotel = Provider::create([
                     'name' => $request->name,
-                    'city' => $request->city,
+                    'city_id' => $request->city,
                     'contact' => $request->contact,
                     'phone' => $request->phone,
                     'email' => $request->email,
+                    'email_reservations' => $request->email_reservations,
+                    'contact_reservations' => $request->contact_reservations,
                     'national' => $request->national,
                     'iss_percent' => $request->iss_percent,
                     'service_percent' => $request->service_percent,
                     'iva_percent' => $request->iva_percent
+                ]);
+
+
+                $status = StatusHistory::create([
+                    'status' => "created",
+                    'user_id' => Auth::user()->id,
+                    'table' => "EventAdds",
+                    'table_id' => $hotel->id
                 ]);
             }
         } catch (Exception $e) {
@@ -125,6 +137,15 @@ class ProviderController extends Controller
         ]);
 
         try {
+
+            $history = StatusHistory::with('user')->where('table', "event_" . $request->type . "s")
+                ->where('table_id', $request->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
+            }
 
             if ($request->id > 0) {
                 switch ($request->type) {
@@ -208,6 +229,13 @@ class ProviderController extends Controller
                         ]);
                         break;
                 }
+
+                $status = StatusHistory::create([
+                    'status' => "created",
+                    'user_id' => Auth::user()->id,
+                    'table' => "event_" . $request->type . "s",
+                    'table_id' => $provider->id
+                ]);
             }
         } catch (Exception $e) {
             throw $e;

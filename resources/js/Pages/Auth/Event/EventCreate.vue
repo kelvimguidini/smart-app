@@ -620,7 +620,7 @@ const newEventProv = (type) => {
                                             <div class="form-group">
                                                 <button v-if="form.countries.length > 1"
                                                     @click.prevent="removeCountry(index)"
-                                                    class="btn btn-danger btn-icon-split">
+                                                    class="btn-sm btn-danger btn-icon-split">
                                                     <span class="icon text-white-50">
                                                         <i class="fas fa-trash"></i>
                                                     </span>
@@ -630,7 +630,7 @@ const newEventProv = (type) => {
                                             <hr />
                                         </template>
                                         <button @click.prevent="addCountry"
-                                            class="btn btn-info btn-icon-split float-right m-1">
+                                            class="btn-sm btn-info btn-icon-split float-right m-1">
                                             <span class="icon text-white-50">
                                                 <i class="fas fa-plus"></i>
                                             </span>
@@ -754,7 +754,7 @@ const newEventProv = (type) => {
                                 </div>
                             </div>
                             <div class="flex items-center justify-end mt-4 rigth">
-                                <PrimaryButton css-class="btn btn-primary float-right m-1"
+                                <PrimaryButton css-class="btn-sm btn-primary float-right m-1"
                                     :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                                     <span v-if="form.processing" class="spinner-border spinner-border-sm" role="status"
                                         aria-hidden="true"></span>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\Constants;
 use App\Models\Broker;
 use App\Models\BrokerTransport;
+use App\Models\City;
 use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -24,10 +25,10 @@ class BrokerTransportController extends Controller
             abort(403);
         }
 
-        $t = BrokerTransport::all();
+        $t = BrokerTransport::with('city')->get();
         return Inertia::render('Auth/Auxiliaries/BrokerTransport', [
             'brokers' => $t,
-            'cities' =>  Constants::CITIES,
+            'cities' => City::all()
         ]);
     }
 
@@ -47,7 +48,6 @@ class BrokerTransportController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'city' => 'required|string|max:255',
             'contact' => 'required|string|max:255',
             'phone' => 'required|string|max:255',
             'email' => 'required|string|max:255|email',
@@ -59,7 +59,7 @@ class BrokerTransportController extends Controller
                 $broker = BrokerTransport::find($request->id);
 
                 $broker->name = $request->name;
-                $broker->city = $request->city;
+                $broker->city_id = $request->city;
                 $broker->contact = $request->contact;
                 $broker->phone = $request->phone;
                 $broker->email = $request->email;
@@ -69,7 +69,7 @@ class BrokerTransportController extends Controller
 
                 $broker = BrokerTransport::create([
                     'name' => $request->name,
-                    'city' => $request->city,
+                    'city_id' => $request->city,
                     'contact' => $request->contact,
                     'phone' => $request->phone,
                     'email' => $request->email,

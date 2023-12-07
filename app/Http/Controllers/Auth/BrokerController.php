@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\Constants;
 use App\Models\Broker;
+use App\Models\City;
 use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -26,7 +27,7 @@ class BrokerController extends Controller
         $t = Broker::all();
         return Inertia::render('Auth/Auxiliaries/Broker', [
             'brokers' => $t,
-            'cities' =>  Constants::CITIES,
+            'cities' => City::all()
         ]);
     }
 
@@ -46,7 +47,6 @@ class BrokerController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'city' => 'required|string|max:255',
             'contact' => 'required|string|max:255',
             'phone' => 'required|string|max:255',
             'email' => 'required|string|max:255|email',
@@ -58,7 +58,7 @@ class BrokerController extends Controller
                 $broker = Broker::find($request->id);
 
                 $broker->name = $request->name;
-                $broker->city = $request->city;
+                $broker->city_id = $request->city;
                 $broker->contact = $request->contact;
                 $broker->phone = $request->phone;
                 $broker->email = $request->email;
@@ -68,7 +68,7 @@ class BrokerController extends Controller
 
                 $broker = Broker::create([
                     'name' => $request->name,
-                    'city' => $request->city,
+                    'city_id' => $request->city,
                     'contact' => $request->contact,
                     'phone' => $request->phone,
                     'email' => $request->email,

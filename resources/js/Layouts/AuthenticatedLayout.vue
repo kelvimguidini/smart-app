@@ -261,6 +261,12 @@ const menuItem = [
                 active: route().current('crd'),
                 role: 'crd_admin'
             },
+            {
+                link: route().current('city') ? '' : route('city'),
+                name: 'Cidade',
+                active: route().current('city'),
+                role: 'city_admin'
+            },
         ]
     },
     {

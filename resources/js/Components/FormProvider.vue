@@ -105,10 +105,11 @@ const submit = () => {
 const selectProvider = (id) => {
     var prov = props.providers.filter((item) => { return item.id == id })[0] || null;
 
-
+console.log(prov);
     if (prov) {
         form.provider_id = parseInt(id);
-        form.city = prov.city;
+        form.city = prov.hotel.city?.name + ' - ' + prov.city?.states ? prov.city?.states :
+            prov.city?.country
 
         form.iss_percent = prov.iss_percent;
         form.iva_percent = prov.iva_percent;

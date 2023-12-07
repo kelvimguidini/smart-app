@@ -11,8 +11,10 @@ class Provider extends Model
 
     protected $fillable = [
         'name',
-        'city',
+        'city_id',
         'contact',
+        'phone_reservations',
+        'contact_reservations',
         'phone',
         'email',
         'national',
@@ -35,10 +37,12 @@ class Provider extends Model
      */
     protected $id = 'id';
     protected $name = 'name';
-    protected $city = 'city';
+    protected $city_id = 'city_id';
     protected $contact = 'contact';
     protected $phone = 'phone';
     protected $email = 'email';
+    protected $email_reservations = 'email_reservations';
+    protected $contact_reservations = 'contact_reservations';
     protected $national = 'national';
     protected $iss_percent = 'iss_percent';
     protected $service_percent = 'service_percent';
@@ -50,5 +54,10 @@ class Provider extends Model
     public function event_hotels()
     {
         return $this->belongsTo(EventHotel::class);
+    }
+
+    public function city()
+    {
+        return $this->hasOne(City::class,  'id', 'city_id');
     }
 }

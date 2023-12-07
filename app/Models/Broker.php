@@ -12,7 +12,7 @@ class Broker extends Model
 
     protected $fillable = [
         'name',
-        'city',
+        'city_id',
         'contact',
         'phone',
         'email',
@@ -43,5 +43,10 @@ class Broker extends Model
     public function event_abs_opt()
     {
         return $this->belongsTo(EventABOpt::class);
+    }
+
+    public function city()
+    {
+        return $this->hasOne(City::class,  'id', 'city_id');
     }
 }

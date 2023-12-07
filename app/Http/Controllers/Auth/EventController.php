@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\Constants;
 use App\Models\Apto;
 use App\Models\Brand;
 use App\Models\Broker;
@@ -33,12 +34,14 @@ use App\Models\Service;
 use App\Models\ServiceAdd;
 use App\Models\ServiceHall;
 use App\Models\ServiceType;
+use App\Models\StatusHistory;
 use App\Models\TransportService;
 use App\Models\User;
 use App\Models\Vehicle;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
 
@@ -62,16 +65,15 @@ class EventController extends Controller
         $city = $request->city;
         $consultant = $request->consultant;
         $client = $request->client;
-        $status_hotel = $request->status_hotel;
-        $status_transport = $request->status_transport;
+        $status = $request->status;
 
         if (Gate::allows('event_admin')) {
-            $query = Event::with(['eventStatus', 'crd', 'customer', 'event_hotels.hotel', 'event_abs.ab', 'event_halls.hall', 'event_adds.add', 'event_transports.transport', 'event_transports.providerBudget.user', 'event_hotels.providerBudget.user', 'event_abs.providerBudget.user', 'event_halls.providerBudget.user', 'event_adds.providerBudget.user'])
+            $query = Event::with(['crd', 'customer', 'event_hotels.hotel', 'event_abs.ab', 'event_halls.hall', 'event_adds.add', 'event_transports.transport', 'event_transports.providerBudget.user', 'event_hotels.providerBudget.user', 'event_abs.providerBudget.user', 'event_halls.providerBudget.user', 'event_adds.providerBudget.user'])
                 ->with('hotelOperator')
                 ->with('airOperator')
                 ->with('landOperator');
         } else if (Gate::allows('hotel_operator') || Gate::allows('land_operator') || Gate::allows('air_operator')) {
-            $query = Event::with(['eventStatus', 'crd', 'customer', 'event_hotels.hotel', 'event_abs.ab', 'event_halls.hall', 'event_adds.add', 'event_transports.transport', 'event_transports.providerBudget.user', 'event_hotels.providerBudget.user', 'event_abs.providerBudget.user', 'event_halls.providerBudget.user', 'event_adds.providerBudget.user'])
+            $query = Event::with(['crd', 'customer', 'event_hotels.hotel', 'event_abs.ab', 'event_halls.hall', 'event_adds.add', 'event_transports.transport', 'event_transports.providerBudget.user', 'event_hotels.providerBudget.user', 'event_abs.providerBudget.user', 'event_halls.providerBudget.user', 'event_adds.providerBudget.user'])
                 ->with(['hotelOperator' => function ($query) use ($userId) {
                     $query->where('id', '=', $userId);
                 }])
@@ -120,24 +122,31 @@ class EventController extends Controller
         if ($client && $client != ".::Selecione::.") {
             $query->where('customer_id', $client);
         }
+        // $query->orderByDesc('created_at')->first('status', $status);
+        if ($status && $status != ".::Selecione::.") {
 
-        if ($status_hotel && $status_hotel != ".::Selecione::.") {
-            $query->whereHas('eventStatus', function ($query) use ($status_hotel) {
-                $query->where('status_u_hotel', $status_hotel);
+            $query->where(function ($query) use ($status) {
+
+                $query->whereHas('event_hotels', function ($query) use ($status) {
+                    $query->where(DB::raw('(select h.status from status_history as h where h.table = "event_hotels" and h.table_id = event_hotel.id order by h.created_at desc limit 1)'), $status);
+                });
+
+                $query->orWhereHas('event_abs', function ($query) use ($status) {
+                    $query->where(DB::raw('(select h.status from status_history as h where h.table = "event_abs" and h.table_id = event_ab.id order by h.created_at desc limit 1)'), $status);
+                });
+
+                $query->orWhereHas('event_halls', function ($query) use ($status) {
+                    $query->where(DB::raw('(select h.status from status_history as h where h.table = "event_halls" and h.table_id = event_hall.id order by h.created_at desc limit 1)'), $status);
+                });
+
+                $query->orWhereHas('event_adds', function ($query) use ($status) {
+                    $query->where(DB::raw('(select h.status from status_history as h where h.table = "event_adds" and h.table_id = event_add.id order by h.created_at desc limit 1)'), $status);
+                });
+
+                $query->orWhereHas('event_transports', function ($query) use ($status) {
+                    $query->where(DB::raw('(select h.status from status_history as h where h.table = "event_transports" and h.table_id = event_transport.id order by h.created_at desc limit 1)'), $status);
+                });
             });
-            if ($status_hotel == 'N') {
-                $query->orWhereDoesntHave('eventStatus');
-            }
-        }
-
-        if ($status_transport && $status_transport != ".::Selecione::.") {
-
-            $query->whereHas('eventStatus', function ($query) use ($status_transport) {
-                $query->where('status_u_transport', $status_transport);
-            });
-            if ($status_transport == 'N') {
-                $query->orWhereDoesntHave('eventStatus');
-            }
         }
 
         $events = $query->orderBy('created_at', 'desc')->paginate($perPage, ['*'], 'page', $page);
@@ -152,7 +161,8 @@ class EventController extends Controller
                 'client' => $client,
             ],
             'customers' => Customer::all(),
-            'users' => User::all()
+            'users' => User::all(),
+            'allStatus' => Constants::STATUS
         ]);
     }
 
@@ -201,20 +211,20 @@ class EventController extends Controller
 
         $users = User::all();
 
-        $eventHotel = $request->tab == 1 ? EventHotel::with(['eventHotelsOpt', 'hotel', 'currency', 'event'])->find($request->ehotel) : null;
-        $eventHotels = EventHotel::with(['eventHotelsOpt.broker', 'eventHotelsOpt.regime', 'eventHotelsOpt.purpose', 'eventHotelsOpt.apto_hotel', 'eventHotelsOpt.category_hotel', 'hotel', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
+        $eventHotel = $request->tab == 1 ? EventHotel::with(['eventHotelsOpt', 'hotel.city', 'currency', 'event', 'status_his'])->find($request->ehotel) : null;
+        $eventHotels = EventHotel::with(['eventHotelsOpt.broker', 'eventHotelsOpt.regime', 'eventHotelsOpt.purpose', 'eventHotelsOpt.apto_hotel', 'eventHotelsOpt.category_hotel', 'hotel.city', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
 
-        $eventAB = $request->tab == 2 ? EventAB::with(['eventAbOpts', 'ab', 'currency', 'event'])->find($request->ehotel) : null;
-        $eventABs = EventAB::with(['eventAbOpts.broker', 'eventAbOpts.service', 'eventAbOpts.service_type', 'eventAbOpts.local', 'ab', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
+        $eventAB = $request->tab == 2 ? EventAB::with(['eventAbOpts', 'ab.city', 'currency', 'event', 'status_his'])->find($request->ehotel) : null;
+        $eventABs = EventAB::with(['eventAbOpts.broker', 'eventAbOpts.service', 'eventAbOpts.service_type', 'eventAbOpts.local', 'ab.city', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
 
-        $eventHall = $request->tab == 3 ? EventHall::with(['eventHallOpts', 'hall', 'currency', 'event'])->find($request->ehotel) : null;
-        $eventHalls = EventHall::with(['eventHallOpts.broker', 'eventHallOpts.service', 'eventHallOpts.purpose', 'hall', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
+        $eventHall = $request->tab == 3 ? EventHall::with(['eventHallOpts', 'hall.city', 'currency', 'event', 'status_his'])->find($request->ehotel) : null;
+        $eventHalls = EventHall::with(['eventHallOpts.broker', 'eventHallOpts.service', 'eventHallOpts.purpose', 'hall.city', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
 
-        $eventAdd = $request->tab == 4 ? EventAdd::with(['eventAddOpts', 'add', 'currency', 'event'])->find($request->ehotel) : null;
-        $eventAdds = EventAdd::with(['eventAddOpts', 'eventAddOpts.frequency', 'eventAddOpts.measure', 'eventAddOpts.service', 'add', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
+        $eventAdd = $request->tab == 4 ? EventAdd::with(['eventAddOpts', 'add.city', 'currency', 'event', 'status_his'])->find($request->ehotel) : null;
+        $eventAdds = EventAdd::with(['eventAddOpts', 'eventAddOpts.frequency', 'eventAddOpts.measure', 'eventAddOpts.service', 'add.city', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
 
-        $eventTransport = $request->tab == 5 ? EventTransport::with(['eventTransportOpts', 'transport', 'currency', 'event'])->find($request->ehotel) : null;
-        $eventTransports = EventTransport::with(['eventTransportOpts', 'eventTransportOpts.broker', 'eventTransportOpts.vehicle', 'eventTransportOpts.model', 'eventTransportOpts.service', 'eventTransportOpts.brand', 'transport', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
+        $eventTransport = $request->tab == 5 ? EventTransport::with(['eventTransportOpts', 'transport.city', 'currency', 'event', 'status_his'])->find($request->ehotel) : null;
+        $eventTransports = EventTransport::with(['eventTransportOpts', 'eventTransportOpts.broker', 'eventTransportOpts.vehicle', 'eventTransportOpts.model', 'eventTransportOpts.service', 'eventTransportOpts.brand', 'transport.city', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
 
         return Inertia::render('Auth/Event/EventCreate', [
             'crds' => $crds,
@@ -369,177 +379,6 @@ class EventController extends Controller
         return redirect()->route('event-edit',  ['id' => $event->id, 'tab' => 1])->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
     }
 
-
-    /**
-     * Handle an incoming registration request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
-    public function statusStore(Request $request)
-    {
-        if (!Gate::allows('change_status_admin')) {
-            abort(403);
-        }
-
-        try {
-
-            $statusByEv = EventStatus::where('event_id', $request->event_id);
-
-            //STATUS HOTEL
-            $status_u_hotel = 'N';
-            if ($request->request_hotel) {
-                $status_u_hotel = 'S';
-            }
-            if ($request->briefing_hotel) {
-                $status_u_hotel = 'B';
-            }
-            if ($request->provider_order_hotel) {
-                $status_u_hotel = 'PF';
-            }
-            if ($request->response_hotel) {
-                $status_u_hotel = 'R';
-            }
-            if ($request->pricing_hotel) {
-                $status_u_hotel = 'P';
-            }
-            if ($request->custumer_send_hotel) {
-                $status_u_hotel = 'EC';
-            }
-            if ($request->change_hotel) {
-                $status_u_hotel = 'AL';
-            }
-            if ($request->done_hotel) {
-                $status_u_hotel = 'D';
-            }
-            if ($request->status_hotel == "A") {
-                $status_u_hotel = 'A';
-            }
-            if ($request->status_hotel == "AA") {
-                $status_u_hotel = 'AA';
-            }
-            if ($request->cancelment_hotel) {
-                $status_u_hotel = 'C';
-            }
-
-            //STATUS TRANSPORT
-            $status_u_transport = 'N';
-            if ($request->request_transport) {
-                $status_u_transport = 'S';
-            }
-            if ($request->briefing_transport) {
-                $status_u_transport = 'B';
-            }
-            if ($request->provider_order_transport) {
-                $status_u_transport = 'PF';
-            }
-            if ($request->response_transport) {
-                $status_u_transport = 'R';
-            }
-            if ($request->pricing_transport) {
-                $status_u_transport = 'P';
-            }
-            if ($request->custumer_send_transport) {
-                $status_u_transport = 'EC';
-            }
-            if ($request->change_transport) {
-                $status_u_transport = 'AL';
-            }
-            if ($request->done_transport) {
-                $status_u_transport = 'D';
-            }
-            if ($request->status_transport == "A") {
-                $status_u_transport = 'A';
-            }
-            if ($request->status_transport == "AA") {
-                $status_u_transport = 'AA';
-            }
-            if ($request->cancelment_transport) {
-                $status_u_transport = 'C';
-            }
-
-            if ($statusByEv->exists() || $request->id > 0) {
-                $status = EventStatus::find($request->id);
-
-                // Se não houver registro para o ID específico, atribui o primeiro registro encontrado
-                if (!$status) {
-                    $status = $statusByEv->first();
-                }
-
-                $status->observation_hotel = $request->observation_hotel;
-                $status->observation_transport = $request->observation_transport;
-
-                $status->request_hotel = $request->request_hotel;
-                $status->provider_order_hotel = $request->provider_order_hotel;
-                $status->briefing_hotel = $request->briefing_hotel;
-                $status->response_hotel = $request->response_hotel;
-                $status->pricing_hotel = $request->pricing_hotel;
-                $status->custumer_send_hotel = $request->custumer_send_hotel;
-                $status->change_hotel = $request->change_hotel;
-                $status->done_hotel = $request->done_hotel;
-                $status->cancelment_hotel = $request->cancelment_hotel;
-
-                $status->aproved_hotel = $request->status_hotel == "A" && $status->status_hotel = $request->status_hotel ? User::find(Auth::user()->id)->name : '';
-                $status->status_hotel = $request->status_hotel;
-                $status->status_u_hotel = $status_u_hotel;
-
-
-                $status->briefing_transport = $request->briefing_transport;
-                $status->request_transport = $request->request_transport;
-                $status->provider_order_transport = $request->provider_order_transport;
-                $status->response_transport = $request->response_transport;
-                $status->pricing_transport = $request->pricing_transport;
-                $status->custumer_send_transport = $request->custumer_send_transport;
-                $status->done_transport = $request->done_transport;
-                $status->change_transport = $request->change_transport;
-                $status->cancelment_transport = $request->cancelment_transport;
-
-                $status->aproved_transport = $request->status_transport == "A" && $status->status_transport = $request->status_transport ? User::find(Auth::user()->id)->name : '';
-                $status->status_transport = $request->status_transport;
-
-                $status->status_u_transport = $status_u_transport;
-
-                $status->save();
-            } else {
-
-                $status = EventStatus::create([
-                    'event_id' => $request->event_id,
-                    'observation_hotel' => $request->observation_hotel,
-                    'observation_transport' => $request->observation_transport,
-                    'request_hotel' => $request->request_hotel,
-                    'provider_order_hotel' => $request->provider_order_hotel,
-                    'briefing_hotel' => $request->briefing_hotel,
-                    'response_hotel' => $request->response_hotel,
-                    'pricing_hotel' => $request->pricing_hotel,
-                    'custumer_send_hotel' => $request->custumer_send_hotel,
-                    'change_hotel' => $request->change_hotel,
-                    'done_hotel' => $request->done_hotel,
-                    'cancelment_hotel' => $request->cancelment_hotel,
-                    'status_hotel' => $request->status_hotel,
-                    'aproved_hotel' => $request->status_hotel == "A" ? User::find(Auth::user()->id)->name : '',
-                    'status_u_hotel' => $status_u_hotel,
-
-                    'request_transport' => $request->request_transport,
-                    'provider_order_transport' => $request->provider_order_transport,
-                    'briefing_transport' => $request->briefing_transport,
-                    'response_transport' => $request->response_transport,
-                    'pricing_transport' => $request->pricing_transport,
-                    'custumer_send_transport' => $request->custumer_send_transport,
-                    'change_transport' => $request->change_transport,
-                    'response_transport' => $request->response_transport,
-                    'cancelment_transport' => $request->cancelment_transport,
-                    'status_transport' => $request->status_transport,
-                    'aproved_transport' => $request->status_transport == "A" ? User::find(Auth::user()->id)->name : '',
-                    'status_u_transport' => $status_u_transport,
-                ]);
-            }
-        } catch (Exception $e) {
-            throw $e;
-        }
-        return redirect()->back()->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
-    }
 
 
     /**

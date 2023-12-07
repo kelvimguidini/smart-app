@@ -3,18 +3,20 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Modal from '@/Components/Modal.vue';
 import Loader from '@/Components/Loader.vue';
 import { Head, Link, useForm } from '@inertiajs/inertia-vue3';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import TextInput from '@/Components/TextInput.vue';
 import CKEditor from '@/Components/CKEditor.vue';
 import Datepicker from 'vue3-datepicker';
 import { ptBR } from 'date-fns/locale'
 import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
 
 const props = defineProps({
     events: Array,
     filters: Object,
     customers: Array,
-    users: Array
+    users: Array,
+    allStatus: Object
 });
 
 const formDelete = useForm({
@@ -22,35 +24,15 @@ const formDelete = useForm({
 });
 
 const formStatus = useForm({
-    id: 0,
-    event_id: 0,
 
-    observation_hotel: '',
-    observation_transport: '',
-
-    request_hotel: '',
-    provider_order_hotel: '',
-    briefing_hotel: '',
-    response_hotel: '',
-    pricing_hotel: '',
-    custumer_send_hotel: '',
-    change_hotel: '',
-    done_hotel: '',
-    cancelment_hotel: '',
-
+    table: '',
+    table_id: 0,
     status_hotel: '',
-
-    request_transport: '',
-    provider_order_transport: '',
-    briefing_transport: '',
-    response_transport: '',
-    pricing_transport: '',
-    custumer_send_transport: '',
-    change_transport: '',
-    done_transport: '',
-    cancelment_transport: '',
-
-    status_transport: '',
+    observation_hotel: '',
+    notify: false,
+    emailsLink: '',
+    messageLink: '',
+    copyMeLink: false
 });
 
 const formFilters = useForm({
@@ -59,8 +41,7 @@ const formFilters = useForm({
     city: '',
     consultant: '',
     client: '',
-    status_hotel: '',
-    status_transport: '',
+    status: '',
 });
 
 const submitForm = () => {
@@ -73,7 +54,6 @@ const submitForm = () => {
         },
     });
 };
-
 
 onMounted(() => {
     //Basico
@@ -92,14 +72,7 @@ onMounted(() => {
     $('#status_hotel').select2({
         theme: "bootstrap4", language: "pt-Br"
     }).on('select2:select', (e) => {
-        formFilters.status_hotel = e.params.data.id;
-    });
-
-
-    $('#status_transport').select2({
-        theme: "bootstrap4", language: "pt-Br"
-    }).on('selec2:select', (e) => {
-        formFilters.status_transport = e.params.data.id;
+        formFilters.status = e.params.data.id;
     });
 
 
@@ -109,64 +82,60 @@ onMounted(() => {
         formStatus.status_hotel = e.params.data.id;
     });
 
-
-    $('.s_transport').select2({
-        theme: "bootstrap4", language: "pt-Br"
-    }).on('selec2:select', (e) => {
-        alert(e.params.data.id);
-        formStatus.status_transport = e.params.data.id;
-    });
 });
 
 const showInvoicement = (status) => {
     if (Array.isArray(status) && status.length > 0) {
         status = status[0];
     }
-    return status.status_u_hotel == 'A' || status.status_u_transport == 'A';
+    return false;
 };
 
-const editStatus = (status, event_id) => {
-    formStatus.event_id = event_id;
+const getStatusLabel = (status) => {
+    return props.allStatus[status] ? props.allStatus[status].label : 'Status Desconhecido';
+};
 
-    if (Array.isArray(status) && status.length > 0) {
-        status = status[0];
-    }
+const editStatus = async (event_id, table, table_id, permissions) => {
+    try {
+        // Inicie o carregamento
+        isLoader.value = true;
 
-    if (status != null) {
-        formStatus.id = status.id;
+        // Faça a chamada ao endpoint
+        const response = await axios.get(route('status-history', {
+            table: table, // Substitua 'events' pelo nome real da tabela
+            table_id: table_id
+        }));
+        var currentStatus = response.data[0];
+        var currentStatusInfo = props.allStatus[currentStatus.status] || {};
+        var allowedFlows = currentStatusInfo.flow || [];
 
-        formStatus.observation_hotel = status.observation_hotel;
-        formStatus.observation_transport = status.observation_transport;
 
-        formStatus.request_hotel = status.request_hotel && new Date(status.request_hotel);
-        formStatus.provider_order_hotel = status.provider_order_hotel && new Date(status.provider_order_hotel);
-        formStatus.briefing_hotel = status.briefing_hotel && new Date(status.briefing_hotel);
-        formStatus.response_hotel = status.response_hotel && new Date(status.response_hotel);
-        formStatus.pricing_hotel = status.pricing_hotel && new Date(status.pricing_hotel);
-        formStatus.custumer_send_hotel = status.custumer_send_hotel && new Date(status.custumer_send_hotel);
-        formStatus.change_hotel = status.change_hotel && new Date(status.change_hotel);
-        formStatus.done_hotel = status.done_hotel && new Date(status.done_hotel);
-        formStatus.cancelment_hotel = status.cancelment_hotel && new Date(status.cancelment_hotel);
+        statusOptions.value = Object.entries(props.allStatus).filter(([key, status]) =>
+            allowedFlows.includes(key)
+            &&
+            (
+                (status.level === 1 && permissions.some((p) => p.name === 'status_level_1' || p.name === 'status_level_2')) ||
+                (status.level === 2 && permissions.some((p) => p.name === 'status_level_2'))
+            )
+        );
 
-        formStatus.status_hotel = status.status_hotel;
-        $('.s_hotel').val(status.status_hotel).trigger('change');
+        formStatus.table = table;
+        formStatus.table_id = table_id;
+        formStatus.event_id = event_id;
 
-        formStatus.request_transport = status.request_transport && new Date(status.request_transport);
-        formStatus.provider_order_transport = status.provider_order_transport && new Date(status.provider_order_transport);
-        formStatus.briefing_transport = status.briefing_transport && new Date(status.briefing_transport);
-        formStatus.response_transport = status.response_transport && new Date(status.response_transport);
-        formStatus.pricing_transport = status.pricing_transport && new Date(status.pricing_transport);
-        formStatus.custumer_send_transport = status.custumer_send_transport && new Date(status.custumer_send_transport);
-        formStatus.change_transport = status.change_transport && new Date(status.change_transport);
-        formStatus.done_transport = status.done_transport && new Date(status.done_transport);
-        formStatus.cancelment_transport = status.cancelment_transport && new Date(status.cancelment_transport);
+        history.value = response.data;
 
-        formStatus.status_transport = status.status_transport;
-        $('.s_transport').val(status.status_transport).trigger('change');
-    } else {
-        formStatus.reset();
+    } catch (error) {
+        console.error('Erro ao obter o histórico de status:', error);
+        // Adicione a lógica para lidar com o erro, se necessário
+    } finally {
+        // Encerre o carregamento, mesmo se ocorrer um erro
+        isLoader.value = false;
     }
 };
+
+const history = ref([]);
+const statusOptions = ref({});
 
 const saveStatus = () => {
     isLoader.value = true;
@@ -177,7 +146,6 @@ const saveStatus = () => {
         },
     });
 }
-
 const isLoader = ref(false);
 const emails = ref('');
 const sendEmail = ref(true);
@@ -390,6 +358,8 @@ const providersByEvent = (event) => {
                 token_budget: current.token_budget,
                 providerBudget: current.provider_budget,
                 type: 'Hotel',
+                table: 'event_hotels',
+                table_id: current.id
             });
         }
     }, {});
@@ -406,6 +376,8 @@ const providersByEvent = (event) => {
                 token_budget: current.token_budget,
                 providerBudget: current.provider_budget,
                 type: 'Hotel',
+                table: 'event_abs',
+                table_id: current.id
             });
         }
     }, {});
@@ -422,6 +394,8 @@ const providersByEvent = (event) => {
                 token_budget: current.token_budget,
                 providerBudget: current.provider_budget,
                 type: 'Hotel',
+                table: 'event_halls',
+                table_id: current.id
             });
         }
     }, {});
@@ -438,6 +412,8 @@ const providersByEvent = (event) => {
                 token_budget: current.token_budget,
                 providerBudget: current.provider_budget,
                 type: 'Provedor',
+                table: 'event_adds',
+                table_id: current.id
             });
         }
     }, {});
@@ -455,7 +431,9 @@ const providersByEvent = (event) => {
                 sended_mail: current.sended_mail,
                 token_budget: current.token_budget,
                 providerBudget: current.provider_budget,
-                isTransport: true
+                isTransport: true,
+                table: 'event_transports',
+                table_id: current.id
             });
         }
     }, {});
@@ -537,63 +515,16 @@ const providersByEvent = (event) => {
                                         <label for="start-date">Status hotel:</label>
                                         <select class="form-control" id="status_hotel">
                                             <option>.::Selecione::.</option>
-                                            <option value="N" :selected="'N' == formFilters.status_hotel">Novo</option>
-                                            <option value="S" :selected="'S' == formFilters.status_hotel">Solicitação
-                                            </option>
-                                            <option value="PF" :selected="'PF' == formFilters.status_hotel">Pedido de
-                                                Fornecedor
-                                            </option>
-                                            <option value="B" :selected="'B' == formFilters.status_hotel">Briefing</option>
-                                            <option value="R" :selected="'R' == formFilters.status_hotel">Resposta</option>
-                                            <option value="P" :selected="'P' == formFilters.status_hotel">Preço</option>
-                                            <option value="EC" :selected="'EC' == formFilters.status_hotel">Envio ao Cliente
-                                            </option>
-                                            <option value="AL" :selected="'AL' == formFilters.status_hotel">Alteração
-                                            </option>
-                                            <option value="CA" :selected="'CA' == formFilters.status_hotel">Cancelado
-                                            </option>
-                                            <option value="A" :selected="'A' == formFilters.status_hotel">Aprovado</option>
-                                            <option value="AA" :selected="'AA' == formFilters.status_hotel">Aguardando
-                                                Aprovação</option>
-                                            <option value="C" :selected="'C' == formFilters.status_hotel">Concluído</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-3">
-                                    <div class="form-group">
-                                        <label for="start-date">Status transporte:</label>
-                                        <select class="form-control" id="status_transport">
-                                            <option>.::Selecione::.</option>
-                                            <option value="N" :selected="'N' == formFilters.status_transport">Novo</option>
-                                            <option value="S" :selected="'S' == formFilters.status_transport">Solicitação
-                                            </option>
-                                            <option value="PF" :selected="'PF' == formFilters.status_transport">Pedido de
-                                                Fornecedor
-                                            </option>
-                                            <option value="B" :selected="'B' == formFilters.status_transport">Briefing
-                                            </option>
-                                            <option value="R" :selected="'R' == formFilters.status_transport">Resposta
-                                            </option>
-                                            <option value="P" :selected="'P' == formFilters.status_transport">Preço</option>
-                                            <option value="EC" :selected="'EC' == formFilters.status_transport">Envio ao
-                                                Cliente
-                                            </option>
-                                            <option value="AL" :selected="'AL' == formFilters.status_transport">Alteração
-                                            </option>
-                                            <option value="CA" :selected="'CA' == formFilters.status_transport">Cancelado
-                                            </option>
-                                            <option value="A" :selected="'A' == formFilters.status_transport">Aprovado
-                                            </option>
-                                            <option value="AA" :selected="'AA' == formFilters.status_hotel">Aguardando
-                                                Aprovação
-                                            </option>
-                                            <option value="C" :selected="'C' == formFilters.status_transport">Concluído
+
+                                            <option v-for="(key, index) in Object.keys(allStatus)" :key="index"
+                                                :value="key">
+                                                {{ allStatus[key].label }}
                                             </option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Filtrar</button>
+                            <button type="submit" class="btn-sm btn-primary">Filtrar</button>
                         </form>
                     </div>
                 </div>
@@ -608,7 +539,7 @@ const providersByEvent = (event) => {
                 <div class="card mb-4 py-3 border-left-secondary">
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table" id="dataTable" width="100%" cellspacing="0">
+                            <table class="table table-sm" id="dataTable" width="100%" cellspacing="0">
                                 <thead>
                                     <tr>
                                         <th scope="col">#</th>
@@ -634,283 +565,9 @@ const providersByEvent = (event) => {
                                             <td @click="showHideEventDetails(event.id)">{{ new
                                                 Date(event.date_final).toLocaleDateString() }}</td>
                                             <td>
-                                                <Modal
-                                                    v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin')"
-                                                    :key="index" modal-title="Follow UP" :ok-botton-callback="saveStatus"
-                                                    :content-big="true" btn-class="btn btn-success btn-icon-split mr-2">
-                                                    <template v-slot:button>
-                                                        <div v-on:click="editStatus(event.event_status, event.id)">
-                                                            <span class="icon text-white-50">
-                                                                <i class="fas fa-arrows-alt-v"></i>
-                                                            </span>
-                                                            <span class="text">Follow UP</span>
-                                                        </div>
-                                                    </template>
-                                                    <template v-slot:content>
-
-                                                        <div class="container">
-                                                            <div class="row">
-
-                                                                <div class="col-6">
-                                                                    <h2>Tabela de Hospedagem</h2>
-                                                                    <table class="table">
-                                                                        <tbody>
-                                                                            <tr>
-                                                                                <th>Data da Solicitação
-                                                                                </th>
-                                                                                <td>
-                                                                                    <datepicker
-                                                                                        v-model="formStatus.request_hotel"
-                                                                                        class="form-control" :locale="ptBR"
-                                                                                        inputFormat="dd/MM/yyyy"
-                                                                                        weekdayFormat="EEEEEE" />
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>Reunião de Briefing</th>
-                                                                                <td>
-                                                                                    <datepicker
-                                                                                        v-model="formStatus.briefing_hotel"
-                                                                                        class="form-control" :locale="ptBR"
-                                                                                        inputFormat="dd/MM/yyyy"
-                                                                                        weekdayFormat="EEEEEE" />
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>Pedido ao Fornecedor</th>
-                                                                                <td>
-                                                                                    <datepicker
-                                                                                        v-model="formStatus.provider_order_hotel"
-                                                                                        class="form-control" :locale="ptBR"
-                                                                                        inputFormat="dd/MM/yyyy"
-                                                                                        weekdayFormat="EEEEEE" />
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>Chegada Resposta</th>
-                                                                                <td>
-                                                                                    <datepicker
-                                                                                        v-model="formStatus.response_hotel"
-                                                                                        class="form-control" :locale="ptBR"
-                                                                                        inputFormat="dd/MM/yyyy"
-                                                                                        weekdayFormat="EEEEEE" />
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>Precificação pelo Gestor</th>
-                                                                                <td>
-                                                                                    <datepicker
-                                                                                        v-model="formStatus.pricing_hotel"
-                                                                                        class="form-control" :locale="ptBR"
-                                                                                        inputFormat="dd/MM/yyyy"
-                                                                                        weekdayFormat="EEEEEE" />
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>Enviado ao Cliente</th>
-                                                                                <td>
-                                                                                    <datepicker
-                                                                                        v-model="formStatus.custumer_send_hotel"
-                                                                                        class="form-control" :locale="ptBR"
-                                                                                        inputFormat="dd/MM/yyyy"
-                                                                                        weekdayFormat="EEEEEE" />
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>Pedido de Alteração</th>
-                                                                                <td>
-                                                                                    <datepicker
-                                                                                        v-model="formStatus.change_hotel"
-                                                                                        class="form-control" :locale="ptBR"
-                                                                                        inputFormat="dd/MM/yyyy"
-                                                                                        weekdayFormat="EEEEEE" />
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>Fechado com Cliente</th>
-                                                                                <td>
-                                                                                    <datepicker
-                                                                                        v-model="formStatus.done_hotel"
-                                                                                        class="form-control" :locale="ptBR"
-                                                                                        inputFormat="dd/MM/yyyy"
-                                                                                        weekdayFormat="EEEEEE" />
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>Cancelamento</th>
-                                                                                <td>
-                                                                                    <datepicker
-                                                                                        v-model="formStatus.cancelment_hotel"
-                                                                                        class="form-control" :locale="ptBR"
-                                                                                        inputFormat="dd/MM/yyyy"
-                                                                                        weekdayFormat="EEEEEE" />
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>Status</th>
-                                                                                <td>
-                                                                                    <select class="form-control s_hotel">
-                                                                                        <option>.::Selecione::.</option>
-                                                                                        <option value="AA">
-                                                                                            Aguardando Aprovação
-                                                                                        </option>
-                                                                                        <option value="A">
-                                                                                            Aprovado <span
-                                                                                                v-if="formStatus.aproved_hotel && formStatus.status_hotel == 'A'">por
-                                                                                                {{ formStatus.aproved_hotel
-                                                                                                }}</span>
-                                                                                        </option>
-                                                                                    </select>
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td colspan="2">
-                                                                                    <div class="form-group">
-                                                                                        <InputLabel for="observation_hotel"
-                                                                                            value="Obs:" />
-                                                                                        <textarea class="form-control"
-                                                                                            v-model="formStatus.observation_hotel"></textarea>
-                                                                                    </div>
-                                                                                </td>
-                                                                            </tr>
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-
-                                                                <div class="col-6">
-                                                                    <h2>Tabela de Transporte</h2>
-                                                                    <table class="table">
-                                                                        <tbody>
-                                                                            <tr>
-                                                                                <th>Data da Solicitação</th>
-                                                                                <td>
-                                                                                    <datepicker
-                                                                                        v-model="formStatus.request_transport"
-                                                                                        class="form-control" :locale="ptBR"
-                                                                                        inputFormat="dd/MM/yyyy"
-                                                                                        weekdayFormat="EEEEEE" />
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>Reunião de Briefing</th>
-                                                                                <td>
-                                                                                    <datepicker
-                                                                                        v-model="formStatus.briefing_transport"
-                                                                                        class="form-control" :locale="ptBR"
-                                                                                        inputFormat="dd/MM/yyyy"
-                                                                                        weekdayFormat="EEEEEE" />
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>Pedido ao Fornecedor</th>
-                                                                                <td>
-                                                                                    <datepicker
-                                                                                        v-model="formStatus.provider_order_transport"
-                                                                                        class="form-control" :locale="ptBR"
-                                                                                        inputFormat="dd/MM/yyyy"
-                                                                                        weekdayFormat="EEEEEE" />
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>Chegada Resposta</th>
-                                                                                <td>
-                                                                                    <datepicker
-                                                                                        v-model="formStatus.response_transport"
-                                                                                        class="form-control" :locale="ptBR"
-                                                                                        inputFormat="dd/MM/yyyy"
-                                                                                        weekdayFormat="EEEEEE" />
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>Precificação pelo Gestor</th>
-                                                                                <td>
-                                                                                    <datepicker
-                                                                                        v-model="formStatus.pricing_transport"
-                                                                                        class="form-control" :locale="ptBR"
-                                                                                        inputFormat="dd/MM/yyyy"
-                                                                                        weekdayFormat="EEEEEE" />
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>Enviado ao Cliente</th>
-                                                                                <td>
-                                                                                    <datepicker
-                                                                                        v-model="formStatus.custumer_send_transport"
-                                                                                        class="form-control" :locale="ptBR"
-                                                                                        inputFormat="dd/MM/yyyy"
-                                                                                        weekdayFormat="EEEEEE" />
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>Pedido de Alteração</th>
-                                                                                <td>
-                                                                                    <datepicker
-                                                                                        v-model="formStatus.change_transport"
-                                                                                        class="form-control" :locale="ptBR"
-                                                                                        inputFormat="dd/MM/yyyy"
-                                                                                        weekdayFormat="EEEEEE" />
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>Fechado com Cliente</th>
-                                                                                <td>
-                                                                                    <datepicker
-                                                                                        v-model="formStatus.done_transport"
-                                                                                        class="form-control" :locale="ptBR"
-                                                                                        inputFormat="dd/MM/yyyy"
-                                                                                        weekdayFormat="EEEEEE" />
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>Cancelamento</th>
-                                                                                <td>
-                                                                                    <datepicker
-                                                                                        v-model="formStatus.cancelment_transport"
-                                                                                        class="form-control" :locale="ptBR"
-                                                                                        inputFormat="dd/MM/yyyy"
-                                                                                        weekdayFormat="EEEEEE" />
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>Status</th>
-                                                                                <td>
-                                                                                    <select
-                                                                                        class="form-control s_transport">
-                                                                                        <option>.::Selecione::.</option>
-                                                                                        <option value="AA">Aguardando
-                                                                                            Aprovação</option>
-                                                                                        <option value="A">
-                                                                                            Aprovado <span
-                                                                                                v-if="formStatus.aproved_transport && formStatus.status_transport == 'A'">por
-                                                                                                {{
-                                                                                                    formStatus.aproved_transport
-                                                                                                }}</span>
-                                                                                        </option>
-                                                                                    </select>
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <td colspan="2">
-                                                                                    <div class="form-group">
-                                                                                        <InputLabel
-                                                                                            for="observation_transport"
-                                                                                            value="Obs:" />
-                                                                                        <textarea class="form-control"
-                                                                                            v-model="formStatus.observation_transport"></textarea>
-                                                                                    </div>
-                                                                                </td>
-                                                                            </tr>
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </template>
-                                                </Modal>
-
                                                 <Link
                                                     v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin')"
-                                                    class="btn btn-info btn-icon-split mr-2"
+                                                    class="btn-sm btn-info btn-icon-split mr-2"
                                                     :href="route('event-edit', { id: event.id })">
                                                 <span class="icon text-white-50">
                                                     <i class="fas fa-edit"></i>
@@ -922,7 +579,7 @@ const providersByEvent = (event) => {
                                                     v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin')"
                                                     :key="index" :modal-title="'Confirmar Exclusão de ' + event.name"
                                                     :ok-botton-callback="deleteEvent" :ok-botton-callback-param="event.id"
-                                                    btn-class="btn btn-danger btn-icon-split mr-2">
+                                                    btn-class="btn-sm btn-danger btn-icon-split mr-2">
                                                     <template v-slot:button>
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-trash"></i>
@@ -941,13 +598,170 @@ const providersByEvent = (event) => {
                                                 <th scope="row"></th>
                                                 <td colspan="5">{{ prov.type }}:
                                                     {{ prov.name }} | {{ prov.city }}</td>
-
                                                 <td>
+
+                                                    <Modal
+                                                        v-if="$page.props.auth.permissions.some((p) => p.name === 'status_level_1' || p.name === 'status_level_2')"
+                                                        :key="index" modal-title="Follow UP" :content-big="true"
+                                                        btn-class="btn-sm btn-success btn-icon-split mr-2">
+                                                        <template v-slot:button>
+                                                            <div
+                                                                v-on:click="editStatus(event.id, prov.table, prov.table_id, $page.props.auth.permissions)">
+                                                                <span class="icon text-white-50">
+                                                                    <i class="fas fa-arrows-alt-v"></i>
+                                                                </span>
+                                                                <span class="text">Follow UP</span>
+                                                            </div>
+                                                        </template>
+                                                        <template v-slot:content>
+                                                            <div class="container">
+                                                                <div class="row">
+                                                                    <div class="col-6">
+                                                                        <div class="form-group">
+
+                                                                            <label class="form-check-label"
+                                                                                for="status_hotel">
+                                                                                Status:
+                                                                            </label>
+                                                                            <select class="form-control s_hotel"
+                                                                                v-model="formStatus.status_hotel">
+
+                                                                                <option>.::Selecione::.</option>
+                                                                                <option v-for="option in statusOptions"
+                                                                                    :key="option[0]" :value="option[0]">
+                                                                                    {{ option[1].label }}
+                                                                                </option>
+                                                                            </select>
+                                                                        </div>
+
+                                                                        <div class="form-group">
+                                                                            <label class="form-check-label"
+                                                                                for="observation_hotel">
+                                                                                Obs:
+                                                                            </label>
+                                                                            <textarea class="form-control"
+                                                                                v-model="formStatus.observation_hotel"></textarea>
+                                                                        </div>
+
+                                                                    </div>
+
+                                                                    <div class="col-6">
+                                                                        <div class="row">
+                                                                            <div class="col">
+                                                                                <div class="form-group">
+                                                                                    <div class="form-check">
+                                                                                        <input class="form-check-input"
+                                                                                            v-model="formStatus.notify"
+                                                                                            type="checkbox"
+                                                                                            id="autoSizingCheck-l">
+                                                                                        <label class="form-check-label"
+                                                                                            for="autoSizingCheck-l">
+                                                                                            Avisar Por E-mail
+                                                                                        </label>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="row" v-if="formStatus.notify">
+                                                                            <div class="col-12">
+
+                                                                                <div class="form-group">
+                                                                                    <InputLabel value="Enviar para:" />
+                                                                                    <TextInput type="text"
+                                                                                        class="form-control"
+                                                                                        v-model="formStatus.emailsLink" />
+                                                                                </div>
+
+                                                                                <div class="alert alert-warning "
+                                                                                    role="alert">
+                                                                                    <h4
+                                                                                        class="alert-heading text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                                                        Separe os e-mails com ; (ponto e
+                                                                                        vírgula)
+                                                                                        caso tenha mais de 1
+                                                                                    </h4>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <div class="col-12">
+                                                                                <div class="form-group">
+                                                                                    <div class="form-check">
+                                                                                        <InputLabel value=" " />
+                                                                                        <CKEditor
+                                                                                            v-model:contentCode="formStatus.messageLink"
+                                                                                            :height="150" />
+                                                                                    </div>
+                                                                                </div>
+
+                                                                            </div>
+
+                                                                            <div class="col-12">
+                                                                                <div class="form-group">
+                                                                                    <div class="form-check">
+                                                                                        <input class="form-check-input"
+                                                                                            v-model="formStatus.copyMeLink"
+                                                                                            type="checkbox"
+                                                                                            id="check-copyme-link">
+                                                                                        <label class="form-check-label"
+                                                                                            for="check-copyme-link">
+                                                                                            Enviar cópia para mim
+                                                                                        </label>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="flex items-center justify-end mt-4 rigth">
+                                                                        <button type="button"
+                                                                            class="btn-sm btn-primary float-right m-1"
+                                                                            v-on:click="saveStatus()" data-dismiss="modal">
+                                                                            Tramitar
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <!-- Tabela de Histórico de Status -->
+                                                                    <div class="col-12">
+                                                                        <h2>Histórico de Status</h2>
+                                                                        <table class="table table-sm">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th>Data da Alteração</th>
+                                                                                    <th>Status</th>
+                                                                                    <th>Alterado Por</th>
+                                                                                    <th>Observação</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                <!-- Dados fictícios no histórico (substitua pelos dados reais) -->
+                                                                                <tr v-for="(historyItem, index) in history"
+                                                                                    :key="index">
+                                                                                    <td>{{ new
+                                                                                        Date(historyItem.created_at).toLocaleDateString()
+                                                                                    }}</td>
+                                                                                    <td>{{
+                                                                                        getStatusLabel(historyItem.status)
+                                                                                    }}</td>
+                                                                                    <td>{{ historyItem.user.name }}</td>
+                                                                                    <td>{{ historyItem.observation }}</td>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                    </Modal>
+
+
                                                     <Modal :key="index" modal-title="Link para orçamento"
                                                         v-if="!prov.isTransport" :ok-botton-callback="createLink"
                                                         :ok-botton-callback-param="{ event_id: event.id, provider_id: prov.id, emails: emailsLink, download: !sendEmailLink, message: messageLink, copyMe: copyMeLink, attachment: attachmentLink, link: token, linkEmail: linkEmail }"
                                                         :ok-botton-label="sendEmailLink ? 'Enviar link por e-mail' : 'Baixar PDF'"
-                                                        :btn-class="prov.sended_mail_link ? 'btn btn-danger btn-icon-split mr-2' : 'btn btn-secondary btn-icon-split mr-2'">
+                                                        :btn-class="prov.sended_mail_link ? 'btn-sm btn-danger btn-icon-split mr-2' : 'btn-sm btn-secondary btn-icon-split mr-2'">
 
                                                         <template v-slot:button>
                                                             <div v-on:click="newObjcts(prov.token_budget, prov.email)">
@@ -969,7 +783,8 @@ const providersByEvent = (event) => {
                                                                     {{ route('budget', { token: prov.token_budget })
                                                                     }}<br>
                                                                     Você pode baixar o PDF ou enviar por e-mail<span
-                                                                        v-if="prov.sended_mail_link"> novamente</span>!
+                                                                        v-if="prov.sended_mail_link">
+                                                                        novamente</span>!
                                                                 </h4>
                                                             </div>
 
@@ -1070,7 +885,7 @@ const providersByEvent = (event) => {
                                                         modal-title="Aprovar ou recusar orçamento do fornecedor"
                                                         :btn-blank="true" :btn-is-link="true" ok-botton-label="Avaliar"
                                                         :url="route('budget', { token: prov.token_budget, prove: true, user: $page.props.auth.user.id })"
-                                                        btn-class="btn btn-info btn-icon-split mr-2">
+                                                        btn-class="btn-sm btn-info btn-icon-split mr-2">
 
                                                         <template v-slot:button>
                                                             <div>
@@ -1098,7 +913,7 @@ const providersByEvent = (event) => {
                                                         modal-title="Aprovação do orçamento do fornecedor" :btn-blank="true"
                                                         :btn-is-link="true" ok-botton-label="Avaliar"
                                                         :url="route('budget', { token: prov.token_budget, prove: true })"
-                                                        btn-class="btn btn-info btn-icon-split mr-2">
+                                                        btn-class="btn-sm btn-info btn-icon-split mr-2">
 
                                                         <template v-slot:button>
                                                             <div>
@@ -1139,7 +954,7 @@ const providersByEvent = (event) => {
                                                         :ok-botton-callback="sendProposal"
                                                         :ok-botton-callback-param="{ event_id: event.id, provider_id: prov.id, emails: emails, download: !sendEmail, message: message, copyMe: copyMe }"
                                                         :ok-botton-label="!sendEmail ? 'Baixar PDF' : 'Enviar Proposta'"
-                                                        :btn-class="prov.sended_mail ? 'btn btn-danger btn-icon-split mr-2' : 'btn btn-secondary btn-icon-split mr-2'">
+                                                        :btn-class="prov.sended_mail ? 'btn-sm btn-danger btn-icon-split mr-2' : 'btn-sm btn-secondary btn-icon-split mr-2'">
                                                         <template v-slot:button>
                                                             <div @click="{
                                                                 emails = event.customer != null ? event.customer.email : '';
@@ -1231,7 +1046,7 @@ const providersByEvent = (event) => {
                                                         :ok-botton-callback="sendInvoice"
                                                         :ok-botton-callback-param="{ event_id: event.id, emails: emailsInvoice, download: !sendEmailInvoice, provider_id: prov.id, message: messageInvoice, copyMe: copyMeInvoice }"
                                                         :ok-botton-label="!sendEmailInvoice ? 'Baixar PDF' : 'Enviar Faturamento'"
-                                                        btn-class="btn btn-secondary btn-icon-split ">
+                                                        btn-class="btn-sm btn-secondary btn-icon-split ">
                                                         <template v-slot:button>
                                                             <div @click="{
                                                                 emailsInvoice = '';

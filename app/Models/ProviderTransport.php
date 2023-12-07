@@ -11,7 +11,7 @@ class ProviderTransport extends Model
 
     protected $fillable = [
         'name',
-        'city',
+        'city_id',
         'contact',
         'phone',
         'email',
@@ -33,7 +33,7 @@ class ProviderTransport extends Model
      */
     protected $id = 'id';
     protected $name = 'name';
-    protected $city = 'city';
+    protected $city_id = 'city_id';
     protected $contact = 'contact';
     protected $phone = 'phone';
     protected $email = 'email';
@@ -45,5 +45,10 @@ class ProviderTransport extends Model
     public function event_hotels()
     {
         return $this->belongsTo(EventHotel::class);
+    }
+
+    public function city()
+    {
+        return $this->hasOne(City::class,  'id', 'city_id');
     }
 }
