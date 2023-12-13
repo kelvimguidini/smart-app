@@ -156,8 +156,8 @@ const deleteHotel = (id) => {
                                 <div class="col">
                                     <div class="form-group">
                                         <InputLabel for="contact" value="Contato:" />
-                                        <TextInput type="text" class="form-control" v-model="form.contact" required
-                                            autofocus autocomplete="contact" />
+                                        <TextInput type="text" class="form-control" v-model="form.contact" autofocus
+                                            autocomplete="contact" />
                                         <InputError class="mt-2 text-danger" :message="form.errors.contact" />
                                     </div>
 
@@ -166,7 +166,7 @@ const deleteHotel = (id) => {
                                     <div class="form-group">
                                         <InputLabel for="phone" value="Telefone:" />
                                         <TextInput id="phone" type="text" class="form-control phone" v-model="form.phone"
-                                            required autofocus autocomplete="phone" />
+                                            autofocus autocomplete="phone" />
                                         <InputError class="mt-2 text-danger" :message="form.errors.phone" />
                                     </div>
 
@@ -178,7 +178,7 @@ const deleteHotel = (id) => {
                                 <div class="col-3">
                                     <div class="form-group">
                                         <InputLabel for="email" value="E-mail:" />
-                                        <TextInput type="email" class="form-control" v-model="form.email" required autofocus
+                                        <TextInput type="email" class="form-control" v-model="form.email" autofocus
                                             autocomplete="email" />
                                         <InputError class="mt-2 text-danger" :message="form.errors.email" />
                                     </div>
@@ -216,7 +216,7 @@ const deleteHotel = (id) => {
                                     <div class="form-group">
                                         <InputLabel for="email_reservations" value="E-mail Reserva:" />
                                         <TextInput type="email" class="form-control" v-model="form.email_reservations"
-                                            required autofocus autocomplete="email_reservations" />
+                                            autofocus autocomplete="email_reservations" />
                                         <InputError class="mt-2 text-danger" :message="form.errors.email_reservations" />
                                     </div>
                                 </div>
@@ -225,7 +225,7 @@ const deleteHotel = (id) => {
                                     <div class="form-group">
                                         <InputLabel for="contact_reservations" value="Contato Reserva:" />
                                         <TextInput type="text" class="form-control" v-model="form.contact_reservations"
-                                            required autofocus autocomplete="contact_reservations" />
+                                            autofocus autocomplete="contact_reservations" />
                                         <InputError class="mt-2 text-danger" :message="form.errors.contact_reservations" />
                                     </div>
                                 </div>
@@ -247,7 +247,7 @@ const deleteHotel = (id) => {
                                                     <input class="form-check-input" v-model="form.national" :value="false"
                                                         type="radio" id="autoSizingCheck">
                                                     <label class="form-check-label" for="autoSizingCheck">
-                                                        Fornecedor Interacional
+                                                        Fornecedor Internacional
                                                     </label>
                                                 </div>
                                             </div>
@@ -278,7 +278,8 @@ const deleteHotel = (id) => {
                 <div class="card mb-4 py-3 border-left-secondary">
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-striped hotels-table" id="dataTable" width="100%" cellspacing="0">
+                            <table class="table table-sm table-striped hotels-table" id="dataTable" width="100%"
+                                cellspacing="0">
                                 <thead>
                                     <tr>
                                         <th scope="col">#</th>
@@ -287,9 +288,6 @@ const deleteHotel = (id) => {
                                         <th scope="col">Contato</th>
                                         <th scope="col">Telefone</th>
                                         <th scope="col">E-mail</th>
-                                        <th scope="col">IVA</th>
-                                        <th scope="col">ISS</th>
-                                        <th scope="col">Serviço</th>
                                         <th scope="col">Tipo</th>
                                         <th scope="col">Ações</th>
                                     </tr>
@@ -304,12 +302,10 @@ const deleteHotel = (id) => {
                                         <td>{{ hotel.contact }}</td>
                                         <td class="phone">{{ hotel.phone }}</td>
                                         <td>{{ hotel.email }}</td>
-                                        <td>{{ hotel.iva_percent }}</td>
-                                        <td>{{ hotel.iss_percent }}</td>
-                                        <td>{{ hotel.service_percent }}</td>
                                         <td>{{ hotel.national ? "Nacional" : "Internacional" }}</td>
                                         <td>
-                                            <button class="btn btn-info btn-icon-split mr-2" v-on:click="edit(hotel)">
+                                            <button class="btn btn-sm btn-info btn-icon-split mr-2"
+                                                v-on:click="edit(hotel)">
                                                 <span class="icon text-white-50">
                                                     <i class="fas fa-edit"></i>
                                                 </span>
@@ -318,7 +314,7 @@ const deleteHotel = (id) => {
 
                                             <Modal :key="index" :modal-title="'Confirmar Exclusão de ' + hotel.name"
                                                 :ok-botton-callback="deleteHotel" :ok-botton-callback-param="hotel.id"
-                                                btn-class="btn btn-danger btn-icon-split">
+                                                btn-class="btn btn-sm btn-danger btn-icon-split">
                                                 <template v-slot:button>
                                                     <span class="icon text-white-50">
                                                         <i class="fas fa-trash"></i>

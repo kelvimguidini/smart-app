@@ -1,6 +1,6 @@
 <script setup>
 
-import '@/vendor/chart.js/Chart.min.js';
+import Chart from 'chart.js/auto';
 
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/inertia-vue3';
@@ -58,8 +58,8 @@ onMounted(() => {
 
 const pieHotelStatus = (hotel) => {
     // Set new default font family and font color to mimic Bootstrap's default styling
-    Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
-    Chart.defaults.global.defaultFontColor = '#858796';
+    // Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+    // Chart.defaults.global.defaultFontColor = '#858796';
 
     const chartData = Object.keys(hotel).map((key) => ({
         label: key,

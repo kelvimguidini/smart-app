@@ -7,7 +7,7 @@ import TextInput from '@/Components/TextInput.vue';
 import Modal from '@/Components/Modal.vue';
 import Loader from '@/Components/Loader.vue';
 import { Head, useForm } from '@inertiajs/inertia-vue3';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch, computed } from 'vue';
 
 
 const props = defineProps({
@@ -37,12 +37,26 @@ onMounted(() => {
         },
     });
 
-    $('#uf').select2({
-        theme: "bootstrap4", language: "pt-Br"
+    $('#uf-brasil').select2({
+        theme: 'bootstrap4',
+        language: 'pt-Br',
     }).on('select2:select', (e) => {
         form.states = e.params.data.id;
     });
+    $('.select2').hide();
+    $('#uf-brasil').hide();
 });
+
+
+watch(form, () => {
+    if (form.country.toLowerCase() === 'brasil') {
+        $('.select2').show();
+        $('#uf-brasil').show();
+    } else {
+        $('.select2').hide();
+        $('#uf-brasil').hide();
+    }
+}, { deep: true });
 
 const isLoader = ref(false);
 
@@ -60,9 +74,10 @@ const deleteCity = (id) => {
 const edit = (city) => {
     cityInEdition.value = city.id;
     form.name = city.name;
+
     if (city.country.toLowerCase() != 'brasil') {
         form.states = city.states;
-        $('#uf').val(form.states).trigger('change');
+        $('#uf-brasil').val(form.states).trigger('change');
     }
     form.country = city.country;
     form.id = city.id;
@@ -70,9 +85,10 @@ const edit = (city) => {
 };
 
 const submit = () => {
+
     form.post(route('city-save'), {
         onSuccess: () => {
-            $('#uf').val().trigger('change');
+            $('#uf-brasil').val().trigger('change');
             cityInEdition.value = 0;
             form.reset();
         },
@@ -115,16 +131,17 @@ const submit = () => {
                                             <div class="form-group">
                                                 <InputLabel for="customer_id" value="Estado:" />
 
-                                                <select v-if="form.country.toLowerCase() == 'brasil'" class="form-control"
-                                                    id="uf">
+                                                <select v-show="form.country.toLowerCase() == 'brasil'" class="form-control"
+                                                    id="uf-brasil">
                                                     <option>.::Selecione::.</option>
                                                     <option v-for="(option, index) in ufs"
                                                         :selected="option.uf == form.states" :value="option.uf">
                                                         {{ option.name }}
                                                     </option>
                                                 </select>
-                                                <TextInput v-else type="text" class="form-control number"
-                                                    v-model="form.states" autofocus autocomplete="number" />
+                                                <TextInput v-show="form.country.toLowerCase() != 'brasil'" type="text"
+                                                    class="form-control number" v-model="form.states" autofocus
+                                                    autocomplete="number" />
 
                                                 <InputError class="mt-2 text-danger" :message="form.errors.states" />
                                             </div>
@@ -148,7 +165,7 @@ const submit = () => {
                                             Salvar
                                         </PrimaryButton>
                                         <PrimaryButton v-if="cityInEdition > 0" css-class="btn btn-info float-right m-1"
-                                            v-on:click="form.reset(); cityInEdition = 0; $('#uf').val().trigger('change');"
+                                            v-on:click="form.reset(); cityInEdition = 0; $('#uf-brasil').val().trigger('change');"
                                             :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                                             Novo
                                         </PrimaryButton>
