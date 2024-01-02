@@ -129,10 +129,12 @@ $strip = false;
         td {
             padding: 0.2rem;
             height: 30px;
+            padding: 0.5rem;
         }
 
         th {
             text-align: center;
+            padding: 0.5rem;
         }
 
         tbody tr:nth-child(odd) {
@@ -161,7 +163,7 @@ $strip = false;
             width: 100%;
             margin: -10px;
             margin-bottom: 40px;
-            height: 260px;
+            height: 175px;
         }
 
         .left {
@@ -191,7 +193,7 @@ $strip = false;
             font-style: normal;
             color: rgb(250, 249, 249);
             text-decoration: none;
-            font-size: 28px;
+            font-size: 24px;
             margin: 0;
         }
 
@@ -510,7 +512,7 @@ $strip = false;
 
                     <tfoot class="table-footer">
                         <tr>
-                            <td colspan="11" style="padding: 0;">
+                            <td colspan="10" style="padding: 0;">
                                 <table style="width: 100%;">
                                     <tr class="table-subheader">
                                         <td class="align-middle custom-bg-success-text-white">
@@ -546,14 +548,14 @@ $strip = false;
 
                         <tr style="background-color: #ffe0b1">
                             <td colspan="2"><b>Comentários:</b></td>
-                            <td colspan="6">{{ $abEvent->internal_observation }}</td>
+                            <td colspan="5">{{ $abEvent->internal_observation }}</td>
                             <td>Comissão</td>
                             <td style="background-color: #ffc670; color: #000"><b>{{ $abEvent->service_charge }}%</b></td>
                             <td>{{ formatCurrency(($sumABValueRate * $abEvent->service_charge) / 100, $abEvent->currency->symbol) }}</td>
                         </tr>
 
                         <tr>
-                            <td colspan="11" style="padding: 0;">
+                            <td colspan="10" style="padding: 0;">
 
                                 <table style="border-collapse: collapse; width: 100%; text-align: center;">
                                     <tr>
@@ -576,7 +578,7 @@ $strip = false;
                                     </tr>
                                     <tr>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA DE SERVIÇO ({{ $abEvent->service_percent }}%)</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalABValueValue * $abEvent->service_percent) / 100, $abEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalABValue * $abEvent->service_percent) / 100, $abEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA DE SERVIÇO ({{ $abEvent->service_percent }}%)</td>
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumABValueRate * $abEvent->service_percent) / 100, $abEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff; background-color: #ffe5e5; color: #000">TOTAL COM TAXAS A PAGAR</td>
@@ -683,7 +685,7 @@ $strip = false;
                                             Total Venda
                                         </td>
                                         <td class="align-middle">
-                                            {{ formatCurrency($sumTotalHallValueValue, $hallEvent->currency->symbol) }}
+                                            {{ formatCurrency($sumTotalHallValue, $hallEvent->currency->symbol) }}
                                         </td>
                                         <td class="align-middle custom-bg-success-text-white">
                                             Total Custo
@@ -1041,7 +1043,7 @@ $strip = false;
                                     </tr>
                                     <tr>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA DE SERVIÇO ({{ $transportEvent->service_percent }}%)</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalTransportValueValue * $transportEvent->service_percent) / 100, $transportEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalTransportValue * $transportEvent->service_percent) / 100, $transportEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA DE SERVIÇO ({{ $transportEvent->service_percent }}%)</td>
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTransportValueRate * $transportEvent->service_percent) / 100, $transportEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff; background-color: #ffe5e5; color: #000">TOTAL COM TAXAS A PAGAR</td>
@@ -1106,11 +1108,11 @@ $strip = false;
                         <tr style="background-color: <? !$strip ? '#ffffff' : '#f7fafc' ?>">
                             <td>Alimentos & Bebidas</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumABValueRate, $abEvent->currency->symbol) }}</td>
-                            <td>{{ formatCurrency($sumTotalAbValue - $sumABValueRate, $abEvent->currency->symbol) }}</td>
-                            <td class="custom-bg-success-text-white">{{ formatCurrency($sumTotalAbValue - $sumABValueRate, $abEvent->currency->symbol) }}</td>
+                            <td>{{ formatCurrency($sumTotalABValue - $sumABValueRate, $abEvent->currency->symbol) }}</td>
+                            <td class="custom-bg-success-text-white">{{ formatCurrency($sumTotalABValue - $sumABValueRate, $abEvent->currency->symbol) }}</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumABValueRate, $abEvent->currency->symbol) }}</td>
-                            <td>{{ formatCurrency($sumTotalAbValue - $sumABValueRate, $abEvent->currency->symbol) }}</td>
-                            <td class="custom-bg-success-text-white">{{ formatCurrency($sumTotalAbValue - $sumABValueRate, $abEvent->currency->symbol) }}</td>
+                            <td>{{ formatCurrency($sumTotalABValue - $sumABValueRate, $abEvent->currency->symbol) }}</td>
+                            <td class="custom-bg-success-text-white">{{ formatCurrency($sumTotalABValue - $sumABValueRate, $abEvent->currency->symbol) }}</td>
                         </tr>
                         <?php $strip = !$strip; ?>
                         @endif
