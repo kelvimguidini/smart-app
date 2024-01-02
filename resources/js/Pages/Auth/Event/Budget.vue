@@ -95,6 +95,16 @@ const daysBetween = (date1, date2) => {
     return Math.ceil(difference / (1000 * 60 * 60 * 24));
 }
 
+const daysBetween1 = (date1, date2) => {
+    // Convert both dates to milliseconds
+    var one = new Date(date1).getTime();
+    var two = new Date(date2).getTime();
+    // Calculate the difference in milliseconds
+    var difference = Math.abs(one - two);
+    // Convert back to days and return
+    return Math.ceil(difference / (1000 * 60 * 60 * 24)) + 1;
+}
+
 const form = useForm({
     comissionsHotel: [],
     valuesHotel: [],
@@ -585,7 +595,7 @@ const submit = () => {
                                     {{ item.count }}
                                 </td>
                                 <td class="px-6 py-4">
-                                    {{ daysBetween(item.in, item.out) }}
+                                    {{ daysBetween1(item.in, item.out) }}
                                 </td>
                                 <td class="px-6 py-4">
                                     <input type="number" v-model="form.comissionsAb[index]" :disabled="prove"

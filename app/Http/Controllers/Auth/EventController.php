@@ -67,13 +67,17 @@ class EventController extends Controller
         $client = $request->client;
         $status = $request->status;
 
+        $query = Event::with(['crd', 'customer', 'event_hotels.hotel', 'event_abs.ab', 'event_halls.hall', 'event_adds.add', 'event_transports.transport', 'event_transports.providerBudget.user', 'event_hotels.providerBudget.user', 'event_abs.providerBudget.user', 'event_halls.providerBudget.user', 'event_adds.providerBudget.user'])
+            ->with(['event_hotels.status_his', 'event_abs.status_his', 'event_halls.status_his', 'event_adds.status_his', 'event_transports.status_his']);
+
+
         if (Gate::allows('event_admin')) {
-            $query = Event::with(['crd', 'customer', 'event_hotels.hotel', 'event_abs.ab', 'event_halls.hall', 'event_adds.add', 'event_transports.transport', 'event_transports.providerBudget.user', 'event_hotels.providerBudget.user', 'event_abs.providerBudget.user', 'event_halls.providerBudget.user', 'event_adds.providerBudget.user'])
+            $query
                 ->with('hotelOperator')
                 ->with('airOperator')
                 ->with('landOperator');
         } else if (Gate::allows('hotel_operator') || Gate::allows('land_operator') || Gate::allows('air_operator')) {
-            $query = Event::with(['crd', 'customer', 'event_hotels.hotel', 'event_abs.ab', 'event_halls.hall', 'event_adds.add', 'event_transports.transport', 'event_transports.providerBudget.user', 'event_hotels.providerBudget.user', 'event_abs.providerBudget.user', 'event_halls.providerBudget.user', 'event_adds.providerBudget.user'])
+            $query
                 ->with(['hotelOperator' => function ($query) use ($userId) {
                     $query->where('id', '=', $userId);
                 }])
@@ -86,6 +90,7 @@ class EventController extends Controller
         } else {
             abort(403);
         }
+
 
         // Aplicar filtros se estiverem presentes
         if ($startDate && $endDate) {
@@ -109,7 +114,6 @@ class EventController extends Controller
                 $query->where('cidade', $city);
             });
         }
-
 
         if ($consultant && $consultant != ".::Selecione::.") {
             $query->where(function ($query) use ($consultant) {
@@ -182,9 +186,9 @@ class EventController extends Controller
         $crds = CRD::with("customer")->get();
         $customers = Customer::all();
         $users = User::all();
-        $providers = Provider::get();
-        $providersService = ProviderServices::get();
-        $providersTranport = ProviderTransport::get();
+        $providers = Provider::with("city")->get();
+        $providersService = ProviderServices::with("city")->get();
+        $providersTranport = ProviderTransport::with("city")->get();
 
         $brokers = Broker::all();
         $currencies = Currency::all();
@@ -291,10 +295,7 @@ class EventController extends Controller
             'cc' => 'required|string|max:255',
             'date' => 'required|date',
             'date_final' => 'required|date|after_or_equal:in',
-            'crd_id' => 'required|numeric',
-            'hotel_operator' => 'required|numeric',
-            'air_operator' => 'required|numeric',
-            'land_operator' => 'required|numeric'
+            'crd_id' => 'required|numeric'
         ]);
 
         try {
@@ -378,7 +379,6 @@ class EventController extends Controller
         }
         return redirect()->route('event-edit',  ['id' => $event->id, 'tab' => 1])->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
     }
-
 
 
     /**

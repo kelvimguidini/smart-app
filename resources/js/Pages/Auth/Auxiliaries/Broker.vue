@@ -184,7 +184,7 @@ const submit = () => {
                                                             <input class="form-check-input" v-model="form.national"
                                                                 :value="false" type="radio" id="autoSizingCheck">
                                                             <label class="form-check-label" for="autoSizingCheck">
-                                                                Broker Interacional
+                                                                Broker Internacional
                                                             </label>
                                                         </div>
                                                     </div>

@@ -387,8 +387,13 @@ Route::middleware(['auth', 'cors'])->group(function () {
         ->name('event-delete');
 
 
-    Route::get('invoice/{download}/{provider_id}/{event_id}/{emails?}/{copyMe?}/{message?}', [ProviderController::class, 'invoicingPdf'])
+    Route::get('invoice/{download}/{provider_id}/{event_id}', [ProviderController::class, 'invoicingPdf'])
+
         ->name('invoice');
+
+
+    Route::post('invoice-email', [ProviderController::class, 'invoicingPdf'])
+        ->name('invoice-email');
 
 
     //HOTEL
@@ -484,11 +489,18 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::post('budget-prove', [BudgetController::class, 'prove'])
         ->name('budget-prove');
 
-    Route::get('create-link/{download}/{provider_id}/{event_id}/{link}/{emails?}/{copyMe?}/{message?}/{attachment?}/{linkEmail?}', [BudgetController::class, 'createLink'])
+    Route::get('create-link/{download}/{provider_id}/{event_id}/{link}', [BudgetController::class, 'createLink'])
         ->name('create-link');
 
-    Route::get('proposal-hotel/{download}/{provider_id}/{event_id}/{emails?}/{copyMe?}/{message?}', [ProviderController::class, 'proposalPdf'])
+    Route::post('create-link-email', [BudgetController::class, 'createLink'])
+        ->name('create-link-email');
+
+    Route::get('proposal-hotel/{download}/{provider_id}/{event_id}', [ProviderController::class, 'proposalPdf'])
         ->name('proposal-hotel');
+
+
+    Route::post('proposal-hotel-email', [ProviderController::class, 'proposalPdf'])
+        ->name('proposal-hotel-email');
     //FIM HOTEL
 
     //dashboard
@@ -520,5 +532,10 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     Route::post('event-status-save', [StatusHistoryController::class, 'statusStore'])
         ->name('event-status-save');
+
+
+    Route::post('send-mail', [StatusHistoryController::class, 'sendMail'])
+        ->name('event-status-send-email');
+
     //FIM status
 });

@@ -285,7 +285,7 @@ class ProviderController extends Controller
         $provider = $request->provider_id;
         $event = $request->event_id;
 
-        $eventBank = Event::with([
+        $eventDataBase = Event::with([
             'customer',
             'event_hotels.hotel' => function ($query) use ($provider) {
                 $query->where('id', '=', $provider);
@@ -317,23 +317,23 @@ class ProviderController extends Controller
 
         $providers = collect();
 
-        if ($eventBank->event_hotels->isNotEmpty()) {
-            $providers = $providers->concat($eventBank->event_hotels->pluck('hotel'));
+        if ($eventDataBase->event_hotels->isNotEmpty()) {
+            $providers = $providers->concat($eventDataBase->event_hotels->pluck('hotel'));
         }
 
-        if ($eventBank->event_abs->isNotEmpty()) {
-            $providers = $providers->concat($eventBank->event_abs->pluck('ab'));
+        if ($eventDataBase->event_abs->isNotEmpty()) {
+            $providers = $providers->concat($eventDataBase->event_abs->pluck('ab'));
         }
 
-        if ($eventBank->event_halls->isNotEmpty()) {
-            $providers = $providers->concat($eventBank->event_halls->pluck('hall'));
+        if ($eventDataBase->event_halls->isNotEmpty()) {
+            $providers = $providers->concat($eventDataBase->event_halls->pluck('hall'));
         }
 
-        $providerBank = $providers->filter()->unique()->values()->first();
+        $providerDataBase = $providers->filter()->unique()->values()->first();
 
         $arr = array(
-            "providerBank" => $providerBank,
-            "eventBank" => $eventBank
+            "providerDataBase" => $providerDataBase,
+            "eventDataBase" => $eventDataBase
         );
 
         $pdf = $this->createPDF($arr, 1);
@@ -412,14 +412,13 @@ class ProviderController extends Controller
         $provider = $request->provider_id;
         $event = $request->event_id;
 
-        $eventBank = Event::with([
+        $eventDataBase = Event::with([
             'customer',
             'event_hotels.hotel',
             'event_abs.ab',
             'event_halls.hall',
-            'eventStatus',
 
-            'event_hotels.eventHotelsOpt', 'event_hotels.eventHotelsOpt.regime', 'event_hotels.eventHotelsOpt.apto_hotel', 'event_hotels.eventHotelsOpt.category_hotel', 'event_hotels.currency',
+            'event_hotels.eventHotelsOpt', 'event_hotels.eventHotelsOpt.category_hotel', 'event_hotels.currency',
             'event_abs.eventAbOpts', 'event_abs.eventAbOpts.Local', 'event_abs.eventAbOpts.service_type', 'event_abs.currency',
             'event_halls.eventHallOpts', 'event_halls.eventHallOpts.purpose', 'event_halls.currency',
 
@@ -427,23 +426,23 @@ class ProviderController extends Controller
 
         $providers = collect();
 
-        if ($eventBank->event_hotels->isNotEmpty()) {
-            $providers = $providers->concat($eventBank->event_hotels->pluck('hotel'));
+        if ($eventDataBase->event_hotels->isNotEmpty()) {
+            $providers = $providers->concat($eventDataBase->event_hotels->pluck('hotel'));
         }
 
-        if ($eventBank->event_abs->isNotEmpty()) {
-            $providers = $providers->concat($eventBank->event_abs->pluck('ab'));
+        if ($eventDataBase->event_abs->isNotEmpty()) {
+            $providers = $providers->concat($eventDataBase->event_abs->pluck('ab'));
         }
 
-        if ($eventBank->event_halls->isNotEmpty()) {
-            $providers = $providers->concat($eventBank->event_halls->pluck('hall'));
+        if ($eventDataBase->event_halls->isNotEmpty()) {
+            $providers = $providers->concat($eventDataBase->event_halls->pluck('hall'));
         }
 
-        $providerBank = $providers->filter()->unique()->values()->first();
+        $providerDataBase = $providers->filter()->unique()->values()->first();
 
         $arr = array(
-            "providerBank" => $providerBank,
-            "eventBank" => $eventBank
+            "providerDataBase" => $providerDataBase,
+            "eventDataBase" => $eventDataBase
         );
 
         $pdf = $this->createPDF($arr, 2);
@@ -502,15 +501,15 @@ class ProviderController extends Controller
         switch ($type) {
             case 1:
                 $html = view('proposalPdf', [
-                    'event' => $paramters['eventBank'],
-                    'provider' => $paramters['providerBank']
+                    'event' => $paramters['eventDataBase'],
+                    'provider' => $paramters['providerDataBase']
                 ])->render();
 
                 break;
             case 2:
                 $html = view('invoicePDF', [
-                    'event' => $paramters['eventBank'],
-                    'provider' => $paramters['providerBank']
+                    'event' => $paramters['eventDataBase'],
+                    'provider' => $paramters['providerDataBase']
                 ])->render();
 
                 break;
@@ -518,7 +517,7 @@ class ProviderController extends Controller
                 $html = "<div class=\"text-truncate\">Sem Conteudo a ser apresentado</div>";
                 break;
         }
-        //return $html;
+        // return $html;
         // Carregue o HTML no Dompdf
         $pdf->loadHtml($html);
 

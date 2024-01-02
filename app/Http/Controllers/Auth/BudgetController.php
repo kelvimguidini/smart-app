@@ -46,7 +46,7 @@ class BudgetController extends Controller
 
         if ($request->download == "true" || $request->attachment == "true") {
 
-            $eventBank = Event::with('customer')->with([
+            $eventDataBase = Event::with('customer')->with([
                 'event_hotels.hotel' => function ($query) use ($provider) {
                     $query->where('id', '=', $provider);
                 },
@@ -84,28 +84,28 @@ class BudgetController extends Controller
 
             $providers = collect();
 
-            if ($eventBank->event_hotels->isNotEmpty()) {
-                $providers = $providers->concat($eventBank->event_hotels->pluck('hotel'));
+            if ($eventDataBase->event_hotels->isNotEmpty()) {
+                $providers = $providers->concat($eventDataBase->event_hotels->pluck('hotel'));
             }
 
-            if ($eventBank->event_abs->isNotEmpty()) {
-                $providers = $providers->concat($eventBank->event_abs->pluck('ab'));
+            if ($eventDataBase->event_abs->isNotEmpty()) {
+                $providers = $providers->concat($eventDataBase->event_abs->pluck('ab'));
             }
 
-            if ($eventBank->event_halls->isNotEmpty()) {
-                $providers = $providers->concat($eventBank->event_halls->pluck('hall'));
+            if ($eventDataBase->event_halls->isNotEmpty()) {
+                $providers = $providers->concat($eventDataBase->event_halls->pluck('hall'));
             }
 
-            if ($eventBank->event_adds->isNotEmpty()) {
-                $providers = $providers->concat($eventBank->event_adds->pluck('add'));
+            if ($eventDataBase->event_adds->isNotEmpty()) {
+                $providers = $providers->concat($eventDataBase->event_adds->pluck('add'));
             }
 
-            $providerBank = $providers->filter()->unique()->values()->first();
+            $providerDataBase = $providers->filter()->unique()->values()->first();
 
 
             $arr = array(
-                "providerBank" => $providerBank,
-                "eventBank" => $eventBank
+                "providerDataBase" => $providerDataBase,
+                "eventDataBase" => $eventDataBase
             );
 
             $pdf = $this->createPDF($arr, 1);
@@ -241,11 +241,11 @@ class BudgetController extends Controller
                 ->first();
 
 
-            $eventBank = Event::with('hotelOperator')->find($event);
+            $eventDataBase = Event::with('hotelOperator')->find($event);
 
             return Inertia::render('Auth/Event/Budget', [
                 'tokenValid' => true,
-                'event' => $eventBank,
+                'event' => $eventDataBase,
                 'providerCity' => $providerCity,
                 'providerName' => $providerName,
                 'eventHotel' => $eventHotel,
@@ -561,8 +561,8 @@ class BudgetController extends Controller
         switch ($type) {
             case 1:
                 $html = view('budgetPdf', [
-                    'event' => $paramters['eventBank'],
-                    'provider' => $paramters['providerBank']
+                    'event' => $paramters['eventDataBase'],
+                    'provider' => $paramters['providerDataBase']
                 ])->render();
 
                 break;

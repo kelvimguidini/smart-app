@@ -48,7 +48,7 @@ const daysBetween = (date1, date2) => {
     // Calculate the difference in milliseconds
     var difference = Math.abs(one - two);
     // Convert back to days and return
-    return Math.ceil(difference / (1000 * 60 * 60 * 24));
+    return Math.ceil(difference / (1000 * 60 * 60 * 24)) + 1;
 }
 
 const statusBlockEdit = () => {

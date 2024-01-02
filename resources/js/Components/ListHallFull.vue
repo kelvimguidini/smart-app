@@ -48,7 +48,7 @@ const daysBetween = (date1, date2) => {
     // Calculate the difference in milliseconds
     var difference = Math.abs(one - two);
     // Convert back to days and return
-    return Math.ceil(difference / (1000 * 60 * 60 * 24));
+    return Math.ceil(difference / (1000 * 60 * 60 * 24)) + 1;
 }
 
 const statusBlockEdit = () => {
@@ -230,7 +230,7 @@ const showDetails = ref(false);
                         <tr class="table-subheader">
                             <th colspan="11" class="text-left">{{ evHall.hall.national
                                 ? "Nacional" : "Internacional" }}
-                                {{ evHall.hall.city }}</th>
+                            </th>
                             <th colspan="2" class="align-middle">Valor de Venda</th>
                             <th colspan="2" class="align-middle">Valor de Custo</th>
 

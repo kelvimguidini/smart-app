@@ -6,7 +6,6 @@ $props = [
     'secondaryColor' => '#FFFFFF',
     'accentColor' => '#FF0000'
 ];
-
 function daysBetween($date1, $date2)
 {
     // Convert both dates to UNIX timestamp
@@ -16,6 +15,17 @@ function daysBetween($date1, $date2)
     $difference = abs($one - $two);
     // Convert back to days and return
     return ceil($difference / (60 * 60 * 24));
+}
+
+function daysBetween1($date1, $date2)
+{
+    // Convert both dates to UNIX timestamp
+    $one = strtotime($date1);
+    $two = strtotime($date2);
+    // Calculate the difference in seconds
+    $difference = abs($one - $two);
+    // Convert back to days and return
+    return ceil($difference / (60 * 60 * 24)) + 1;
 }
 
 function formatCurrency($value, $symbol = 'BRL')
@@ -130,7 +140,7 @@ if ($abEvent != null) {
         $qtdLinhas++;
         $rate = floatval(unitSale($item));
         $taxes = floatval(sumTaxesProvider($abEvent, $item));
-        $qtdDayle = $item->count * daysBetween($item->in, $item->out);
+        $qtdDayle = $item->count * daysBetween1($item->in, $item->out);
 
         $sumABValueRate += $rate;
         $sumABQtdDayles += $qtdDayle;
@@ -152,8 +162,8 @@ if ($hallEvent != null) {
         $taxes = floatval(sumTaxesProvider($hallEvent, $item));
 
         $sumHallValueRate += $rate;
-        $sumHallQtdDayles += daysBetween($item->in, $item->out);
-        $sumTotalHallValue += ($rate + $taxes) * daysBetween($item->in, $item->out);
+        $sumHallQtdDayles += daysBetween1($item->in, $item->out);
+        $sumTotalHallValue += ($rate + $taxes) * daysBetween1($item->in, $item->out);
     }
 }
 if ($addEvent != null) {
@@ -168,12 +178,12 @@ if ($addEvent != null) {
     foreach ($addEvent->eventAddOpts as $item) {
         $qtdLinhas++;
         $rate = floatval(unitSale($item));
-        $taxes = floatval(sumTaxesProvider($hallEvent, $item));
-        $qtdDayle = $item->count * daysBetween($item->in, $item->out);
+        $taxes = floatval(sumTaxesProvider($addEvent, $item));
+        $qtdDayle = $item->count * daysBetween1($item->in, $item->out);
 
         $sumAddValueRate += $rate;
         $sumAddQtdDayles += $qtdDayle;
-        $sumTotalAddValue += ($rate + $taxes) * daysBetween($item->in, $item->out);
+        $sumTotalAddValue += ($rate + $taxes) * daysBetween1($item->in, $item->out);
     }
 }
 if ($transportEvent != null) {
@@ -189,11 +199,11 @@ if ($transportEvent != null) {
         $qtdLinhas++;
         $rate = floatval(unitSale($item));
         $taxes = floatval(sumTaxesProvider($transportEvent, $item));
-        $qtdDayle = $item->count * daysBetween($item->in, $item->out);
+        $qtdDayle = $item->count * daysBetween1($item->in, $item->out);
 
         $sumTransportValueRate += $rate;
         $sumTransportQtdDayles += $qtdDayle;
-        $sumTotalTransportValue += ($rate + $taxes) * daysBetween($item->in, $item->out);
+        $sumTotalTransportValue += ($rate + $taxes) * daysBetween1($item->in, $item->out);
     }
 }
 ?>
@@ -342,14 +352,13 @@ if ($transportEvent != null) {
 <body>
 
     <body>
-
         <div id="app">
 
             <header class="header">
                 <div class="left">
                     <div class="seta">
                         <div class="arrow">
-                            <div class="title">Proposta n° {{ $provider != null ? $provider->id : '' }}</div>
+                            <div class="title">Proposta n° {{ $event != null ? $event->code : '' }}</div>
                         </div>
                     </div>
 
@@ -379,12 +388,9 @@ if ($transportEvent != null) {
                 <table>
                     <thead style="display: table-header-group;">
                         <tr>
-                            <th colspan="11" style="padding: 0.5rem; text-align: center;">Hospedagem</th>
+                            <th colspan="8" style="padding: 0.5rem; text-align: center;">Hospedagem</th>
                         </tr>
                         <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
-                            <th style="padding: 0.5rem;">Cat. Apto</th>
-                            <th style="padding: 0.5rem;">Regime</th>
-                            <th style="padding: 0.5rem;">Tipo Apto</th>
                             <th style="padding: 0.5rem;">IN</th>
                             <th style="padding: 0.5rem;">Out</th>
                             <th style="padding: 0.5rem;">Qtd</th>
@@ -398,9 +404,6 @@ if ($transportEvent != null) {
                     <tbody>
                         @foreach($hotelEvent->eventHotelsOpt as $key => $item)
                         <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
-                            <td style="padding: 0.5rem;">{{ $item->category_hotel->name }}</td>
-                            <td style="padding: 0.5rem;">{{ $item->regime->name }}</td>
-                            <td style="padding: 0.5rem;">{{ $item->apto_hotel->name }}</td>
                             <td style="padding: 0.5rem;">{{ date("d/m/Y", strtotime($item->in)) }}</td>
                             <td style="padding: 0.5rem;">{{ date("d/m/Y", strtotime($item->out)) }}</td>
                             <td style="padding: 0.5rem;">{{ $item->count }}</td>
@@ -421,7 +424,7 @@ if ($transportEvent != null) {
                     <tfoot class="table-footer">
                         <tr style="background-color: #ffe0b1">
                             <td colspan="2" style="padding: 0.5rem;"><b>Comentários:</b></td>
-                            <td colspan="7" style="padding: 0.5rem;">{{ $hotelEvent->customer_observation }}</td>
+                            <td colspan="4" style="padding: 0.5rem;">{{ $hotelEvent->customer_observation }}</td>
                             <td style="padding: 0.5rem;"><b>Prazo</b></td>
                             <td style="padding: 0.5rem;">{{ $hotelEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($hotelEvent->deadline_date)) }}</td>
                         </tr>
@@ -458,7 +461,7 @@ if ($transportEvent != null) {
                             <td style="padding: 0.5rem;">{{ date("d/m/Y", strtotime($item->in)) }}</td>
                             <td style="padding: 0.5rem;">{{ date("d/m/Y", strtotime($item->out)) }}</td>
                             <td style="padding: 0.5rem;">{{ $item->count }}</td>
-                            <td style="padding: 0.5rem;">{{ daysBetween($item->in, $item->out) }}</td>
+                            <td style="padding: 0.5rem;">{{ daysBetween1($item->in, $item->out) }}</td>
 
                             <td style="padding: 0.5rem;">{{ formatCurrency(unitSale($item), $abEvent->currency->symbol) }}</td>
                             <td style="padding: 0.5rem;">
@@ -467,7 +470,7 @@ if ($transportEvent != null) {
                             <td style="padding: 0.5rem;">
                                 {{ formatCurrency(unitSale($item) + sumTaxesProvider($abEvent, $item), $abEvent->currency->symbol) }}
                             </td>
-                            <td style="padding: 0.5rem;">{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($abEvent, $item), $item->count * daysBetween($item->in, $item->out)), $abEvent->currency->symbol) }}
+                            <td style="padding: 0.5rem;">{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($abEvent, $item), $item->count * daysBetween1($item->in, $item->out)), $abEvent->currency->symbol) }}
                             </td>
                         </tr>
                         @endforeach
@@ -514,7 +517,7 @@ if ($transportEvent != null) {
                             <td style="padding: 0.5rem;">{{ date("d/m/Y", strtotime($item->in)) }}</td>
                             <td style="padding: 0.5rem;">{{ date("d/m/Y", strtotime($item->out)) }}</td>
                             <td style="padding: 0.5rem;">{{ $item->count }}</td>
-                            <td style="padding: 0.5rem;">{{ daysBetween($item->in, $item->out) }}</td>
+                            <td style="padding: 0.5rem;">{{ daysBetween1($item->in, $item->out) }}</td>
 
                             <td style="padding: 0.5rem;">{{ formatCurrency(unitSale($item), $hallEvent->currency->symbol) }}</td>
                             <td style="padding: 0.5rem;">
@@ -523,7 +526,7 @@ if ($transportEvent != null) {
                             <td style="padding: 0.5rem;">
                                 {{ formatCurrency(unitSale($item) + sumTaxesProvider($hallEvent, $item), $hallEvent->currency->symbol) }}
                             </td>
-                            <td style="padding: 0.5rem;">{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($hallEvent, $item), $item->count * daysBetween($item->in, $item->out)), $hallEvent->currency->symbol) }}
+                            <td style="padding: 0.5rem;">{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($hallEvent, $item), $item->count * daysBetween1($item->in, $item->out)), $hallEvent->currency->symbol) }}
                             </td>
                         </tr>
                         @endforeach
@@ -570,7 +573,7 @@ if ($transportEvent != null) {
                             <td style="padding: 0.5rem;">{{ date("d/m/Y", strtotime($item->in)) }}</td>
                             <td style="padding: 0.5rem;">{{ date("d/m/Y", strtotime($item->out)) }}</td>
                             <td style="padding: 0.5rem;">{{ $item->count }}</td>
-                            <td style="padding: 0.5rem;">{{ daysBetween($item->in, $item->out) }}</td>
+                            <td style="padding: 0.5rem;">{{ daysBetween1($item->in, $item->out) }}</td>
 
                             <td style="padding: 0.5rem;">{{ formatCurrency(unitSale($item), $addEvent->currency->symbol) }}</td>
                             <td style="padding: 0.5rem;">
@@ -579,7 +582,7 @@ if ($transportEvent != null) {
                             <td style="padding: 0.5rem;">
                                 {{ formatCurrency(unitSale($item) + sumTaxesProvider($addEvent, $item), $addEvent->currency->symbol) }}
                             </td>
-                            <td style="padding: 0.5rem;">{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($addEvent, $item), $item->count * daysBetween($item->in, $item->out)), $addEvent->currency->symbol) }}
+                            <td style="padding: 0.5rem;">{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($addEvent, $item), $item->count * daysBetween1($item->in, $item->out)), $addEvent->currency->symbol) }}
                             </td>
                         </tr>
                         @endforeach
@@ -628,7 +631,7 @@ if ($transportEvent != null) {
                             <td style="padding: 0.5rem;">{{ date("d/m/Y", strtotime($item->in)) }}</td>
                             <td style="padding: 0.5rem;">{{ date("d/m/Y", strtotime($item->out)) }}</td>
                             <td style="padding: 0.5rem;">{{ $item->count }}</td>
-                            <td style="padding: 0.5rem;">{{ daysBetween($item->in, $item->out) }}</td>
+                            <td style="padding: 0.5rem;">{{ daysBetween1($item->in, $item->out) }}</td>
 
                             <td style="padding: 0.5rem;">{{ formatCurrency(unitSale($item), $transportEvent->currency->symbol) }}</td>
                             <td style="padding: 0.5rem;">
@@ -637,7 +640,7 @@ if ($transportEvent != null) {
                             <td style="padding: 0.5rem;">
                                 {{ formatCurrency(unitSale($item) + sumTaxesProvider($transportEvent, $item), $transportEvent->currency->symbol) }}
                             </td>
-                            <td style="padding: 0.5rem;">{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($transportEvent, $item), $item->count * daysBetween($item->in, $item->out)), $transportEvent->currency->symbol) }}
+                            <td style="padding: 0.5rem;">{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($transportEvent, $item), $item->count * daysBetween1($item->in, $item->out)), $transportEvent->currency->symbol) }}
                             </td>
                         </tr>
                         @endforeach
@@ -742,9 +745,9 @@ if ($transportEvent != null) {
                                 <table style="width: 100%;">
                                     <tr>
                                         <td style="height: 18px; width: 15%; float: left; background-color: #ffd18c; padding: 0.5rem;">IOF: </td>
-                                        <td style="height: 18px; width: 15%; float: left; background-color: #ffe3b9; padding: 0.5rem;">{{ $percIOF }}</td>
+                                        <td style="height: 18px; width: 15%; float: left; background-color: #ffe3b9; padding: 0.5rem;">{{ $percIOF }}%</td>
                                         <td style="height: 18px; width: 15%; float: left; background-color: #ffd18c; padding: 0.5rem;">Taxa de Serviço: </td>
-                                        <td style="height: 18px; width: 15%; float: left; background-color: #ffe3b9; padding: 0.5rem;">{{ $percService }}</td>
+                                        <td style="height: 18px; width: 15%; float: left; background-color: #ffe3b9; padding: 0.5rem;">{{ $percService }}%</td>
                                         <td style="height: 18px; width: 15%; float: left; background-color: #ffd18c; padding: 0.5rem;">Valor Total: </td>
                                         <td style="height: 18px; width: 15%; float: left; background-color: #ffe3b9; padding: 0.5rem;">
                                             {{ formatCurrency($sumTotalHotelValue +
@@ -767,11 +770,7 @@ if ($transportEvent != null) {
 
             <footer id="footer" style="width:100%; border-collapse: collapse;">
 
-                <div class="event-info row" style="text-align: right; margin-left: -20px;">
-                    <div class="line">
-                        <p>PRAZO: <span class="event-data">{{date("d/m/Y", strtotime($event->date)) }}</p>
-                    </div>
-                </div>
+
                 <div style="margin-top: 70px; display: table; width: 100%;">
                     <div style="display: table-cell; text-align: center;">
                         <div style="width: 7cm; margin: 0 auto;">

@@ -212,7 +212,7 @@ class ProviderServicesController extends Controller
         $provider = $request->provider_id;
         $event = $request->event_id;
 
-        $eventBank = Event::with([
+        $eventDataBase = Event::with([
             'customer',
             'event_adds.add' => function ($query) use ($provider) {
                 $query->where('id', '=', $provider);
@@ -227,16 +227,16 @@ class ProviderServicesController extends Controller
 
         $providers = collect();
 
-        if ($eventBank->event_adds->isNotEmpty()) {
-            $providers = $providers->concat($eventBank->event_adds->pluck('add'));
+        if ($eventDataBase->event_adds->isNotEmpty()) {
+            $providers = $providers->concat($eventDataBase->event_adds->pluck('add'));
         }
 
 
-        $providerBank = $providers->filter()->unique()->values()->first();
+        $providerDataBase = $providers->filter()->unique()->values()->first();
 
         $arr = array(
-            "providerBank" => $providerBank,
-            "eventBank" => $eventBank
+            "providerDataBase" => $providerDataBase,
+            "eventDataBase" => $eventDataBase
         );
 
         $pdf = $this->createPDF($arr, 1);
@@ -304,8 +304,8 @@ class ProviderServicesController extends Controller
         switch ($type) {
             case 1:
                 $html = view('proposalPdf', [
-                    'event' => $paramters['eventBank'],
-                    'provider' => $paramters['providerBank']
+                    'event' => $paramters['eventDataBase'],
+                    'provider' => $paramters['providerDataBase']
                 ])->render();
 
                 break;

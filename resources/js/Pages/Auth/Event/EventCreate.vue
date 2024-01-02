@@ -719,7 +719,7 @@ const newEventProv = (type) => {
 
                                     <div class="form-group">
                                         <InputLabel for="hotel_operator" value="Operador - Hotel:" />
-                                        <select class="form-control" id="hotel_operator" :required="required">
+                                        <select class="form-control" id="hotel_operator">
                                             <option>.::Selecione::.</option>
                                             <option v-for="(option, index) in users"
                                                 :selected="option.id == form.hotel_operator" :value="option.id">
@@ -730,7 +730,7 @@ const newEventProv = (type) => {
                                     </div>
                                     <div class="form-group">
                                         <InputLabel for="land_operator" value="Operador - Terrestre:" />
-                                        <select class="form-control" id="land_operator" required="required">
+                                        <select class="form-control" id="land_operator">
                                             <option>.::Selecione::.</option>
                                             <option v-for="(option, index) in users"
                                                 :selected="option.id == form.land_operator" :value="option.id">
@@ -741,7 +741,7 @@ const newEventProv = (type) => {
                                     </div>
                                     <div class="form-group">
                                         <InputLabel for="air_operator" value="Operador - Aéreo:" />
-                                        <select class="form-control" id="air_operator" required="required">
+                                        <select class="form-control" id="air_operator">
                                             <option>.::Selecione::.</option>
                                             <option v-for="(option, index) in users"
                                                 :selected="option.id == form.air_operator" :value="option.id">

@@ -18,6 +18,17 @@ function daysBetween($date1, $date2)
     return ceil($difference / (60 * 60 * 24));
 }
 
+function daysBetween1($date1, $date2)
+{
+    // Convert both dates to UNIX timestamp
+    $one = strtotime($date1);
+    $two = strtotime($date2);
+    // Calculate the difference in seconds
+    $difference = abs($one - $two);
+    // Convert back to days and return
+    return ceil($difference / (60 * 60 * 24)) + 1;
+}
+
 function formatCurrency($value, $symbol = 'BRL')
 {
     $value = round($value * 100) / 100;
@@ -92,7 +103,7 @@ if ($abEvent != null) {
     foreach ($abEvent->eventAbOpts as $item) {
         $rate = floatval($item->received_proposal);
         $taxes = floatval(sumTaxesProvider($abEvent, $item));
-        $qtdDayle = $item->count * daysBetween($item->in, $item->out);
+        $qtdDayle = $item->count * daysBetween1($item->in, $item->out);
 
         $sumABValueRate += $rate;
         $sumABQtdDayles += $qtdDayle;
@@ -105,19 +116,19 @@ if ($hallEvent != null) {
         $taxes = floatval(sumTaxesProvider($hallEvent, $item));
 
         $sumHallValueRate += $rate;
-        $sumHallQtdDayles += daysBetween($item->in, $item->out);
-        $sumTotalHallValue += ($rate + $taxes) * daysBetween($item->in, $item->out);
+        $sumHallQtdDayles += daysBetween1($item->in, $item->out);
+        $sumTotalHallValue += ($rate + $taxes) * daysBetween1($item->in, $item->out);
     }
 }
 if ($addEvent != null) {
     foreach ($addEvent->eventAddOpts as $item) {
         $rate = floatval($item->received_proposal);
         $taxes = floatval(sumTaxesProvider($hallEvent, $item));
-        $qtdDayle = $item->count * daysBetween($item->in, $item->out);
+        $qtdDayle = $item->count * daysBetween1($item->in, $item->out);
 
         $sumAddValueRate += $rate;
         $sumAddQtdDayles += $qtdDayle;
-        $sumTotalAddValue += ($rate + $taxes) * daysBetween($item->in, $item->out);
+        $sumTotalAddValue += ($rate + $taxes) * daysBetween1($item->in, $item->out);
     }
 }
 ?>
@@ -269,7 +280,7 @@ if ($addEvent != null) {
                         <td style="border: 1px solid gray; padding: 10px 3px;">{{ date("d/m/Y", strtotime($item->in)) }}</td>
                         <td style="border: 1px solid gray; padding: 10px 3px;">{{ date("d/m/Y", strtotime($item->out)) }}</td>
                         <td style="border: 1px solid gray; padding: 10px 3px;">{{ $item->count }}</td>
-                        <td style="border: 1px solid gray; padding: 10px 3px;">{{ daysBetween($item->in, $item->out) }}</td>
+                        <td style="border: 1px solid gray; padding: 10px 3px;">{{ daysBetween1($item->in, $item->out) }}</td>
 
                         <td style="border: 1px solid gray; padding: 10px 3px;"></td>
                         <td style="border: 1px solid gray; padding: 10px 3px;"></td>
@@ -334,7 +345,7 @@ if ($addEvent != null) {
                         <td style="border: 1px solid gray; padding: 10px 3px;">{{ date("d/m/Y", strtotime($item->in)) }}</td>
                         <td style="border: 1px solid gray; padding: 10px 3px;">{{ date("d/m/Y", strtotime($item->out)) }}</td>
                         <td style="border: 1px solid gray; padding: 10px 3px;">{{ $item->count }}</td>
-                        <td style="border: 1px solid gray; padding: 10px 3px;">{{ daysBetween($item->in, $item->out) }}</td>
+                        <td style="border: 1px solid gray; padding: 10px 3px;">{{ daysBetween1($item->in, $item->out) }}</td>
 
                         <td style="border: 1px solid gray; padding: 10px 3px;"></td>
                         <td style="border: 1px solid gray; padding: 10px 3px;"></td>
@@ -401,7 +412,7 @@ if ($addEvent != null) {
                         <td style="border: 1px solid gray; padding: 10px 3px;">{{ date("d/m/Y", strtotime($item->in)) }}</td>
                         <td style="border: 1px solid gray; padding: 10px 3px;">{{ date("d/m/Y", strtotime($item->out)) }}</td>
                         <td style="border: 1px solid gray; padding: 10px 3px;">{{ $item->count }}</td>
-                        <td style="border: 1px solid gray; padding: 10px 3px;">{{ daysBetween($item->in, $item->out) }}</td>
+                        <td style="border: 1px solid gray; padding: 10px 3px;">{{ daysBetween1($item->in, $item->out) }}</td>
 
                         <td style="border: 1px solid gray; padding: 10px 3px;"></td>
                         <td style="border: 1px solid gray; padding: 10px 3px;"></td>

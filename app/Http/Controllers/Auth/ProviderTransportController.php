@@ -221,7 +221,7 @@ class ProviderTransportController extends Controller
         $provider = $request->provider_id;
         $event = $request->event_id;
 
-        $eventBank = Event::with([
+        $eventDataBase = Event::with([
             'customer',
             'event_transports.transport' => function ($query) use ($provider) {
                 $query->where('id', '=', $provider);
@@ -236,15 +236,15 @@ class ProviderTransportController extends Controller
 
         $providers = collect();
 
-        if ($eventBank->event_transports->isNotEmpty()) {
-            $providers = $providers->concat($eventBank->event_transports->pluck('transport'));
+        if ($eventDataBase->event_transports->isNotEmpty()) {
+            $providers = $providers->concat($eventDataBase->event_transports->pluck('transport'));
         }
 
-        $providerBank = $providers->filter()->unique()->values()->first();
+        $providerDataBase = $providers->filter()->unique()->values()->first();
 
         $arr = array(
-            "providerBank" => $providerBank,
-            "eventBank" => $eventBank
+            "providerDataBase" => $providerDataBase,
+            "eventDataBase" => $eventDataBase
         );
 
         $pdf = $this->createPDF($arr, 1);
@@ -311,8 +311,8 @@ class ProviderTransportController extends Controller
         switch ($type) {
             case 1:
                 $html = view('proposalPdf', [
-                    'event' => $paramters['eventBank'],
-                    'provider' => $paramters['providerBank']
+                    'event' => $paramters['eventDataBase'],
+                    'provider' => $paramters['providerDataBase']
                 ])->render();
 
                 break;

@@ -26,7 +26,7 @@ const proxyContent = computed({
 
     set(val) {
         emit('update:content', val);
-        emit('update:contentCode', encodeURIComponent(val));
+        emit('update:contentCode', val);
     },
 });
 

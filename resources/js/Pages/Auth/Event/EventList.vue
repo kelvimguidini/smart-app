@@ -84,15 +84,8 @@ onMounted(() => {
 
 });
 
-const showInvoicement = (status) => {
-    if (Array.isArray(status) && status.length > 0) {
-        status = status[0];
-    }
-    return false;
-};
-
 const getStatusLabel = (status) => {
-    return props.allStatus[status] ? props.allStatus[status].label : 'Status Desconhecido';
+    return props.allStatus[status] ? props.allStatus[status].label : 'Solicitado';
 };
 
 const editStatus = async (event_id, table, table_id, permissions) => {
@@ -146,6 +139,18 @@ const saveStatus = () => {
         },
     });
 }
+
+
+const sendEmailNoChangeStatus = () => {
+    isLoader.value = true;
+    formStatus.post(route('event-status-send-email'), {
+        onFinish: () => {
+            isLoader.value = false;
+            formStatus.reset();
+        },
+    });
+}
+
 const isLoader = ref(false);
 const emails = ref('');
 const sendEmail = ref(true);
@@ -220,9 +225,7 @@ const createLink = (array) => {
             }
         }, 1000);
     } else {
-        const formLink = useForm({});
-
-        formLink.get(route('create-link', {
+        const formLink = useForm({
             download: array['download'],
             provider_id: array['provider_id'],
             event_id: array['event_id'],
@@ -232,7 +235,9 @@ const createLink = (array) => {
             attachment: array['attachment'],
             link: array['link'],
             linkEmail: array['linkEmail'],
-        }), {
+        });
+
+        formLink.post(route('create-link-email'), {
             onFinish: () => {
                 isLoader.value = false;
                 flash.value = {
@@ -283,17 +288,15 @@ const sendProposal = (array) => {
         }, 1000);
     } else {
         const formProposal = useForm({
-
-        });
-
-        formProposal.get(route('proposal-hotel', {
             download: array['download'],
             provider_id: array['provider_id'],
             event_id: array['event_id'],
             message: array['message'],
             emails: array['emails'],
             copyMe: array['copyMe']
-        }), {
+        });
+
+        formProposal.post(route('proposal-hotel-email'), {
             onFinish: () => {
                 isLoader.value = false;
             },
@@ -325,16 +328,16 @@ const sendInvoice = (array) => {
             }
         }, 1000);
     } else {
-        const formInvoice = useForm({});
-
-        formInvoice.get(route('invoice', {
+        const formInvoice = useForm({
             download: array['download'],
             provider_id: array['provider_id'],
             event_id: array['event_id'],
             message: array['message'],
             emails: array['emails'],
             copyMe: array['copyMe']
-        }), {
+        });
+
+        formInvoice.post(route('invoice-email'), {
             onFinish: () => {
                 isLoader.value = false;
             },
@@ -348,6 +351,7 @@ const providersByEvent = (event) => {
 
     event.event_hotels && event.event_hotels.map((current) => {
         if (!groups.some(g => g.type == 'Hotel' && g.id == current.hotel.id)) {
+
             groups.push({
                 id: current.hotel.id,
                 name: current.hotel.name,
@@ -359,7 +363,8 @@ const providersByEvent = (event) => {
                 providerBudget: current.provider_budget,
                 type: 'Hotel',
                 table: 'event_hotels',
-                table_id: current.id
+                table_id: current.id,
+                status: current.status_his[0]?.status
             });
         }
     }, {});
@@ -377,7 +382,8 @@ const providersByEvent = (event) => {
                 providerBudget: current.provider_budget,
                 type: 'Hotel',
                 table: 'event_abs',
-                table_id: current.id
+                table_id: current.id,
+                status: current.status_his[0]?.status
             });
         }
     }, {});
@@ -395,7 +401,8 @@ const providersByEvent = (event) => {
                 providerBudget: current.provider_budget,
                 type: 'Hotel',
                 table: 'event_halls',
-                table_id: current.id
+                table_id: current.id,
+                status: current.status_his[0]?.status
             });
         }
     }, {});
@@ -413,7 +420,8 @@ const providersByEvent = (event) => {
                 providerBudget: current.provider_budget,
                 type: 'Provedor',
                 table: 'event_adds',
-                table_id: current.id
+                table_id: current.id,
+                status: current.status_his[0]?.status
             });
         }
     }, {});
@@ -433,7 +441,8 @@ const providersByEvent = (event) => {
                 providerBudget: current.provider_budget,
                 isTransport: true,
                 table: 'event_transports',
-                table_id: current.id
+                table_id: current.id,
+                status: current.status_his[0]?.status
             });
         }
     }, {});
@@ -596,8 +605,12 @@ const providersByEvent = (event) => {
                                         <template v-if="showEventDetails == event.id">
                                             <tr v-for="(prov, index) in  providersByEvent(event)">
                                                 <th scope="row"></th>
-                                                <td colspan="5">{{ prov.type }}:
-                                                    {{ prov.name }} | {{ prov.city }}</td>
+                                                <td colspan="3">
+                                                    {{ prov.type }}: {{ prov.name }}
+                                                </td>
+                                                <td colspan="2">
+                                                    status: <b>{{ getStatusLabel(prov.status) }}</b>
+                                                </td>
                                                 <td>
 
                                                     <Modal
@@ -615,111 +628,150 @@ const providersByEvent = (event) => {
                                                         </template>
                                                         <template v-slot:content>
                                                             <div class="container">
-                                                                <div class="row">
-                                                                    <div class="col-6">
-                                                                        <div class="form-group">
 
-                                                                            <label class="form-check-label"
-                                                                                for="status_hotel">
-                                                                                Status:
-                                                                            </label>
-                                                                            <select class="form-control s_hotel"
-                                                                                v-model="formStatus.status_hotel">
 
-                                                                                <option>.::Selecione::.</option>
-                                                                                <option v-for="option in statusOptions"
-                                                                                    :key="option[0]" :value="option[0]">
-                                                                                    {{ option[1].label }}
-                                                                                </option>
-                                                                            </select>
-                                                                        </div>
+                                                                <div class="card mb-4 py-3 border-left-primary">
+                                                                    <div class="card-body">
 
-                                                                        <div class="form-group">
-                                                                            <label class="form-check-label"
-                                                                                for="observation_hotel">
-                                                                                Obs:
-                                                                            </label>
-                                                                            <textarea class="form-control"
-                                                                                v-model="formStatus.observation_hotel"></textarea>
-                                                                        </div>
-
-                                                                    </div>
-
-                                                                    <div class="col-6">
                                                                         <div class="row">
-                                                                            <div class="col">
+                                                                            <div class="col-6">
                                                                                 <div class="form-group">
-                                                                                    <div class="form-check">
-                                                                                        <input class="form-check-input"
-                                                                                            v-model="formStatus.notify"
-                                                                                            type="checkbox"
-                                                                                            id="autoSizingCheck-l">
-                                                                                        <label class="form-check-label"
-                                                                                            for="autoSizingCheck-l">
-                                                                                            Avisar Por E-mail
-                                                                                        </label>
+
+                                                                                    <label class="form-check-label"
+                                                                                        for="status_hotel">
+                                                                                        Status:
+                                                                                    </label>
+                                                                                    <select class="form-control s_hotel"
+                                                                                        v-model="formStatus.status_hotel">
+
+                                                                                        <option>.::Selecione::.</option>
+                                                                                        <option
+                                                                                            v-for="option in statusOptions"
+                                                                                            :key="option[0]"
+                                                                                            :value="option[0]">
+                                                                                            {{ option[1].label }}
+                                                                                        </option>
+                                                                                    </select>
+                                                                                </div>
+
+                                                                                <div class="form-group">
+                                                                                    <label class="form-check-label"
+                                                                                        for="observation_hotel">
+                                                                                        Obs:
+                                                                                    </label>
+                                                                                    <textarea class="form-control"
+                                                                                        v-model="formStatus.observation_hotel"></textarea>
+                                                                                </div>
+
+                                                                            </div>
+
+                                                                            <div class="col-6">
+                                                                                <div
+                                                                                    class="card mb-4 py-3 border-left-success">
+                                                                                    <div class="card-body">
+                                                                                        <div class="row">
+                                                                                            <div class="col">
+                                                                                                <div class="form-group">
+                                                                                                    <div class="form-check">
+                                                                                                        <input
+                                                                                                            class="form-check-input"
+                                                                                                            v-model="formStatus.notify"
+                                                                                                            type="checkbox"
+                                                                                                            id="autoSizingCheck-l">
+                                                                                                        <label
+                                                                                                            class="form-check-label"
+                                                                                                            for="autoSizingCheck-l">
+                                                                                                            Avisar Por
+                                                                                                            E-mail
+                                                                                                        </label>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+
+                                                                                        <div class="row"
+                                                                                            v-if="formStatus.notify">
+                                                                                            <div class="col-12">
+
+                                                                                                <div class="form-group">
+                                                                                                    <InputLabel
+                                                                                                        value="Enviar para:" />
+                                                                                                    <TextInput type="text"
+                                                                                                        class="form-control"
+                                                                                                        v-model="formStatus.emailsLink" />
+                                                                                                </div>
+
+                                                                                                <div class="alert alert-warning "
+                                                                                                    role="alert">
+                                                                                                    <h4
+                                                                                                        class="alert-heading text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                                                                        Separe os e-mails
+                                                                                                        com ;
+                                                                                                        (ponto e
+                                                                                                        vírgula)
+                                                                                                    </h4>
+                                                                                                </div>
+                                                                                            </div>
+
+                                                                                            <div class="col-12">
+                                                                                                <div class="form-group">
+                                                                                                    <div class="form-check">
+                                                                                                        <InputLabel
+                                                                                                            value=" " />
+                                                                                                        <CKEditor
+                                                                                                            v-model:contentCode="formStatus.messageLink"
+                                                                                                            :height="150" />
+                                                                                                    </div>
+                                                                                                </div>
+
+                                                                                            </div>
+
+                                                                                            <div class="col-12">
+                                                                                                <div class="form-group">
+                                                                                                    <div class="form-check">
+                                                                                                        <input
+                                                                                                            class="form-check-input"
+                                                                                                            v-model="formStatus.copyMeLink"
+                                                                                                            type="checkbox"
+                                                                                                            id="check-copyme-link">
+                                                                                                        <label
+                                                                                                            class="form-check-label"
+                                                                                                            for="check-copyme-link">
+                                                                                                            Enviar cópia
+                                                                                                            para mim
+                                                                                                        </label>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+
+                                                                                            <div
+                                                                                                class="flex items-center justify-end mt-4 rigth">
+                                                                                                <button type="button"
+                                                                                                    class="btn-sm btn-primary float-right m-1"
+                                                                                                    v-on:click="sendEmailNoChangeStatus()"
+                                                                                                    data-dismiss="modal">
+                                                                                                    Enviar e-mail sem
+                                                                                                    tramitar
+                                                                                                </button>
+                                                                                            </div>
+
+                                                                                        </div>
                                                                                     </div>
                                                                                 </div>
+
                                                                             </div>
+
+                                                                            <div
+                                                                                class="flex items-center justify-end mt-4 rigth">
+                                                                                <button type="button"
+                                                                                    class="btn-sm btn-primary float-right m-1"
+                                                                                    v-on:click="saveStatus()"
+                                                                                    data-dismiss="modal">
+                                                                                    Tramitar
+                                                                                </button>
+                                                                            </div>
+
                                                                         </div>
-
-                                                                        <div class="row" v-if="formStatus.notify">
-                                                                            <div class="col-12">
-
-                                                                                <div class="form-group">
-                                                                                    <InputLabel value="Enviar para:" />
-                                                                                    <TextInput type="text"
-                                                                                        class="form-control"
-                                                                                        v-model="formStatus.emailsLink" />
-                                                                                </div>
-
-                                                                                <div class="alert alert-warning "
-                                                                                    role="alert">
-                                                                                    <h4
-                                                                                        class="alert-heading text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                                                        Separe os e-mails com ; (ponto e
-                                                                                        vírgula)
-                                                                                        caso tenha mais de 1
-                                                                                    </h4>
-                                                                                </div>
-                                                                            </div>
-
-                                                                            <div class="col-12">
-                                                                                <div class="form-group">
-                                                                                    <div class="form-check">
-                                                                                        <InputLabel value=" " />
-                                                                                        <CKEditor
-                                                                                            v-model:contentCode="formStatus.messageLink"
-                                                                                            :height="150" />
-                                                                                    </div>
-                                                                                </div>
-
-                                                                            </div>
-
-                                                                            <div class="col-12">
-                                                                                <div class="form-group">
-                                                                                    <div class="form-check">
-                                                                                        <input class="form-check-input"
-                                                                                            v-model="formStatus.copyMeLink"
-                                                                                            type="checkbox"
-                                                                                            id="check-copyme-link">
-                                                                                        <label class="form-check-label"
-                                                                                            for="check-copyme-link">
-                                                                                            Enviar cópia para mim
-                                                                                        </label>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div class="flex items-center justify-end mt-4 rigth">
-                                                                        <button type="button"
-                                                                            class="btn-sm btn-primary float-right m-1"
-                                                                            v-on:click="saveStatus()" data-dismiss="modal">
-                                                                            Tramitar
-                                                                        </button>
                                                                     </div>
                                                                 </div>
                                                                 <div class="row">
@@ -817,7 +869,6 @@ const providersByEvent = (event) => {
                                                                         <h4
                                                                             class="alert-heading text-xs font-weight-bold text-primary text-uppercase mb-1">
                                                                             Separe os e-mails com ; (ponto e vírgula)
-                                                                            caso tenha mais de 1
                                                                         </h4>
                                                                     </div>
                                                                 </div>
@@ -838,9 +889,9 @@ const providersByEvent = (event) => {
                                                                         <div class="form-check">
                                                                             <input class="form-check-input"
                                                                                 v-model="copyMeLink" type="checkbox"
-                                                                                id="check-copyme-link">
+                                                                                id="check-copyme-link-10">
                                                                             <label class="form-check-label"
-                                                                                for="check-copyme-link">
+                                                                                for="check-copyme-link-10">
                                                                                 Enviar cópia para mim
                                                                             </label>
                                                                         </div>
@@ -1001,7 +1052,6 @@ const providersByEvent = (event) => {
                                                                         <h4
                                                                             class="alert-heading text-xs font-weight-bold text-primary text-uppercase mb-1">
                                                                             Separe os e-mails com ; (ponto e vírgula)
-                                                                            caso tenha mais de 1
                                                                         </h4>
                                                                     </div>
                                                                 </div>
@@ -1042,7 +1092,7 @@ const providersByEvent = (event) => {
                                                     </Modal>
 
                                                     <Modal modal-title="Faturamento"
-                                                        v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin') && showInvoicement(event.event_status)"
+                                                        v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin') && prov.status == 'dating_with_customer'"
                                                         :ok-botton-callback="sendInvoice"
                                                         :ok-botton-callback-param="{ event_id: event.id, emails: emailsInvoice, download: !sendEmailInvoice, provider_id: prov.id, message: messageInvoice, copyMe: copyMeInvoice }"
                                                         :ok-botton-label="!sendEmailInvoice ? 'Baixar PDF' : 'Enviar Faturamento'"
@@ -1067,9 +1117,9 @@ const providersByEvent = (event) => {
                                                                         <div class="form-check">
                                                                             <input class="form-check-input"
                                                                                 v-model="sendEmailInvoice" type="checkbox"
-                                                                                id="autoSizingCheck">
+                                                                                id="autoSizingCheck-fat">
                                                                             <label class="form-check-label"
-                                                                                for="autoSizingCheck">
+                                                                                for="autoSizingCheck-fat">
                                                                                 Enviar E-mail
                                                                             </label>
                                                                         </div>
@@ -1090,7 +1140,6 @@ const providersByEvent = (event) => {
                                                                         <h4
                                                                             class="alert-heading text-xs font-weight-bold text-primary text-uppercase mb-1">
                                                                             Separe os e-mails com ; (ponto e vírgula)
-                                                                            caso tenha mais de 1
                                                                         </h4>
                                                                     </div>
                                                                 </div>

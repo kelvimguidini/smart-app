@@ -231,7 +231,7 @@ const showDetails = ref(false);
                         <tr class="table-subheader">
                             <th colspan="10" class="text-left">{{ evho.hotel.national
                                 ? "Nacional" : "Internacional" }}
-                                {{ evho.hotel.city }}</th>
+                            </th>
                             <th colspan="2" class="align-middle">Valor de Venda</th>
                             <th colspan="2" class="align-middle">Valor de Custo</th>
                             <th colspan="2"></th>
