@@ -446,7 +446,7 @@ class ProviderController extends Controller
         );
 
         $pdf = $this->createPDF($arr, 2);
-        //return $pdf;
+        return $pdf;
         // Renderize o HTML como PDF
         $pdf->render();
         // Retorna o PDF como um arquivo de download
@@ -517,7 +517,7 @@ class ProviderController extends Controller
                 $html = "<div class=\"text-truncate\">Sem Conteudo a ser apresentado</div>";
                 break;
         }
-        // return $html;
+        return $html;
         // Carregue o HTML no Dompdf
         $pdf->loadHtml($html);
 

@@ -31,7 +31,7 @@ const formStatus = useForm({
     observation_hotel: '',
     notify: false,
     emailsLink: '',
-    messageLink: '',
+    messageLink: 'teste',
     copyMeLink: false
 });
 
@@ -130,8 +130,17 @@ const editStatus = async (event_id, table, table_id, permissions) => {
 const history = ref([]);
 const statusOptions = ref({});
 
-const saveStatus = () => {
+const saveStatus = (event, prov) => {
     isLoader.value = true;
+    formStatus.messageLink += `<br><br>
+<p><b>Evento:</b> <span style="color: #333;">${event.name}</span></p>
+    <p><b>Código:</b> <span style="color: #333;">${event.code}</span></p>
+<p><b>CRD:</b> <span style="color: #333;">${event.crd != null ? event.crd.name : ""}</span></p>
+<p><b>CC:</b> <span style="color: #333;">${event.cost_center}</span></p>
+<p><b>Solicitante:</b> <span style="color: #333;">${event.requester}</span></p>
+<p><b>Base de pax:</b> <span style="color: #333;">${event.pax_base}</span></p>
+<p><b>Fornecedor:</b> <span style="color: #333;">${prov.name}</span></p>
+`;
     formStatus.post(route('event-status-save'), {
         onFinish: () => {
             isLoader.value = false;
@@ -141,8 +150,17 @@ const saveStatus = () => {
 }
 
 
-const sendEmailNoChangeStatus = () => {
+const sendEmailNoChangeStatus = (event, prov) => {
     isLoader.value = true;
+    formStatus.messageLink += `<br><br>
+    <p><b>Evento:</b> <span style="color: #333;">${event.name}</span></p>
+    <p><b>Código:</b> <span style="color: #333;">${event.code}</span></p>
+<p><b>CRD:</b> <span style="color: #333;">${event.crd != null ? event.crd.name : ""}</span></p>
+<p><b>CC:</b> <span style="color: #333;">${event.cost_center}</span></p>
+<p><b>Solicitante:</b> <span style="color: #333;">${event.requester}</span></p>
+<p><b>Base de pax:</b> <span style="color: #333;">${event.pax_base}</span></p>
+<p><b>Fornecedor:</b> <span style="color: #333;">${prov.name}</span></p>
+      `;
     formStatus.post(route('event-status-send-email'), {
         onFinish: () => {
             isLoader.value = false;
@@ -619,7 +637,7 @@ const providersByEvent = (event) => {
                                                         btn-class="btn-sm btn-success btn-icon-split mr-2">
                                                         <template v-slot:button>
                                                             <div
-                                                                v-on:click="editStatus(event.id, prov.table, prov.table_id, $page.props.auth.permissions)">
+                                                                v-on:click="editStatus(event.id, prov.table, prov.table_id, $page.props.auth.permissions);">
                                                                 <span class="icon text-white-50">
                                                                     <i class="fas fa-arrows-alt-v"></i>
                                                                 </span>
@@ -720,7 +738,9 @@ const providersByEvent = (event) => {
                                                                                                             value=" " />
                                                                                                         <CKEditor
                                                                                                             v-model:contentCode="formStatus.messageLink"
-                                                                                                            :height="150" />
+                                                                                                            :height="150">
+
+                                                                                                        </CKEditor>
                                                                                                     </div>
                                                                                                 </div>
 
@@ -748,7 +768,7 @@ const providersByEvent = (event) => {
                                                                                                 class="flex items-center justify-end mt-4 rigth">
                                                                                                 <button type="button"
                                                                                                     class="btn-sm btn-primary float-right m-1"
-                                                                                                    v-on:click="sendEmailNoChangeStatus()"
+                                                                                                    v-on:click="sendEmailNoChangeStatus(event, prov)"
                                                                                                     data-dismiss="modal">
                                                                                                     Enviar e-mail sem
                                                                                                     tramitar
@@ -765,7 +785,7 @@ const providersByEvent = (event) => {
                                                                                 class="flex items-center justify-end mt-4 rigth">
                                                                                 <button type="button"
                                                                                     class="btn-sm btn-primary float-right m-1"
-                                                                                    v-on:click="saveStatus()"
+                                                                                    v-on:click="saveStatus(event, prov)"
                                                                                     data-dismiss="modal">
                                                                                     Tramitar
                                                                                 </button>

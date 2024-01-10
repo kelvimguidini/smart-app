@@ -163,7 +163,7 @@ $strip = false;
             width: 100%;
             margin: -10px;
             margin-bottom: 40px;
-            height: 175px;
+            height: 290px;
         }
 
         .left {
@@ -173,8 +173,8 @@ $strip = false;
 
         .arrow {
             display: inline-block;
-            margin: 15px 0 0 -19px;
-            padding: 13px 50px;
+            margin: 13px 0 0 -13px;
+            padding: 13px 35px;
             background-color: #e9540d;
             position: relative;
         }
@@ -184,7 +184,7 @@ $strip = false;
             position: absolute;
             top: 0px;
             left: 100%;
-            border: 33px solid transparent;
+            border: 30px solid transparent;
             border-left: 45px solid #e9540d;
         }
 
@@ -282,18 +282,15 @@ $strip = false;
                             <p>Solicitante: <span class="event-data">{{$event->requester }}</span></p>
                             <p>Base de pax: <span class="event-data">{{$event->pax_base }}</span></p>
                         </div>
+                        <div class="line">
+                            <p>Fornecedor: <span class="event-data">{{$provider != null ?  $provider->name : ''}}</p>
+                        </div>
                     </div>
                 </div>
                 <div class="right">
                     <img src="{{ asset($event->customer->logo) }}" style="width: 130px;" alt="{{ $event->customer->name}}">
                 </div>
             </header>
-
-            <div class="event-info row">
-                <div class="line">
-                    <p>Fornecedor: <span class="event-data">{{$provider != null ?  $provider->name : ''}}</p>
-                </div>
-            </div>
 
             <div>
 

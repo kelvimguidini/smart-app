@@ -26,6 +26,7 @@
             border-radius: 5px;
             overflow: hidden;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border: #e9540d solid 2px;
         }
 
         /* Cabeçalho */
@@ -89,6 +90,8 @@
         <div class="body">
             <p>{!! $body !!}</p>
 
+
+            <hr style="border-top: #e9540d solid 1px;">
 
             {{ __('Regards') }},<br>
             {{ config('app.name') }},<br><br>
