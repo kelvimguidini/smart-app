@@ -321,26 +321,28 @@ const showDetails = ref(false);
                                     <b>{{ formatCurrency((unitSale(opt) * evtr.iss_percent) / 100) }}</b>
                                 </td>
                                 <td class=" align-middle text-success">
-                                    <b>{{ formatCurrency((opt.received_proposal * evtr.iss_percent) / 100) }}</b>
+                                    <b>{{ formatCurrency((unitCost(opt) * evtr.iss_percent) / 100) }}</b>
                                 </td>
+
                                 <td class="align-middle">
                                     <b>{{ formatCurrency((unitSale(opt) * evtr.service_percent) / 100) }}</b>
                                 </td>
                                 <td class=" align-middle">
-                                    <b>{{ formatCurrency((opt.received_proposal * evtr.service_percent) / 100) }}</b>
+                                    <b>{{ formatCurrency((unitCost(opt) * evtr.service_percent) / 100) }}</b>
                                 </td>
+
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((unitSale(opt) * evtr.iva_percent) / 100) }}</b>
                                 </td>
                                 <td class=" align-middle text-success">
-                                    <b>{{ formatCurrency((opt.received_proposal * evtr.iva_percent) / 100) }}</b>
+                                    <b>{{ formatCurrency((unitCost(opt) * evtr.iva_percent) / 100) }}</b>
                                 </td>
 
                                 <td class="align-middle">
                                     <b>{{ formatCurrency((unitSale(opt) * evtr.service_charge) / 100) }}</b>
                                 </td>
                                 <td class=" align-middle">
-                                    <b>{{ formatCurrency((opt.received_proposal * evtr.service_charge) / 100) }}</b>
+                                    <b>{{ formatCurrency((unitCost(opt) * evtr.service_charge) / 100) }}</b>
                                 </td>
                             </template>
                             <td class="align-middle">

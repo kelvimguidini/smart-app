@@ -48,7 +48,7 @@ const daysBetween = (date1, date2) => {
     // Calculate the difference in milliseconds
     var difference = Math.abs(one - two);
     // Convert back to days and return
-    return Math.ceil(difference / (1000 * 60 * 60 * 24)) +1;
+    return Math.ceil(difference / (1000 * 60 * 60 * 24)) + 1;
 }
 
 const statusBlockEdit = () => {
@@ -317,31 +317,35 @@ const showDetails = ref(false);
                             }}
                             </td>
                             <template v-if="showDetails">
+
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((unitSale(opt) * evab.iss_percent) / 100) }}</b>
                                 </td>
                                 <td class=" align-middle text-success">
-                                    <b>{{ formatCurrency((opt.received_proposal * evab.iss_percent) / 100) }}</b>
+                                    <b>{{ formatCurrency((unitCost(opt) * evab.iss_percent) / 100) }}</b>
                                 </td>
+
                                 <td class="align-middle">
                                     <b>{{ formatCurrency((unitSale(opt) * evab.service_percent) / 100) }}</b>
                                 </td>
                                 <td class=" align-middle">
-                                    <b>{{ formatCurrency((opt.received_proposal * evab.service_percent) / 100) }}</b>
+                                    <b>{{ formatCurrency((unitCost(opt) * evab.service_percent) / 100) }}</b>
                                 </td>
+
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((unitSale(opt) * evab.iva_percent) / 100) }}</b>
                                 </td>
                                 <td class=" align-middle text-success">
-                                    <b>{{ formatCurrency((opt.received_proposal * evab.iva_percent) / 100) }}</b>
+                                    <b>{{ formatCurrency((unitCost(opt) * evab.iva_percent) / 100) }}</b>
                                 </td>
 
                                 <td class="align-middle">
                                     <b>{{ formatCurrency((unitSale(opt) * evab.service_charge) / 100) }}</b>
                                 </td>
                                 <td class=" align-middle">
-                                    <b>{{ formatCurrency((opt.received_proposal * evab.service_charge) / 100) }}</b>
+                                    <b>{{ formatCurrency((unitCost(opt) * evab.service_charge) / 100) }}</b>
                                 </td>
+
                             </template>
                             <td class="align-middle">
                                 <div class="d-flex">

@@ -94,7 +94,7 @@ class StatusHistoryController extends Controller
             $user = User::find(Auth::user()->id);
             $data = [
                 'body' => $request->messageLink != null ? urldecode($request->messageLink) : "",
-                'hasAttachment' => true,
+                'hasAttachment' => false,
                 'signature' => $user->signature != null ? $user->signature : "",
                 'subject' => $sub
             ];

@@ -323,30 +323,33 @@ const showDetails = ref(false);
                             }}
                             </td>
                             <template v-if="showDetails">
+
+                                <td class=" align-middle text-success">
+                                    <b>{{ formatCurrency((unitCost(opt) * evHall.iss_percent) / 100) }}</b>
+                                </td>
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((unitSale(opt) * evHall.iss_percent) / 100) }}</b>
                                 </td>
-                                <td class=" align-middle text-success">
-                                    <b>{{ formatCurrency((opt.received_proposal * evHall.iss_percent) / 100) }}</b>
+
+                                <td class=" align-middle">
+                                    <b>{{ formatCurrency((unitCost(opt) * evHall.service_percent) / 100) }}</b>
                                 </td>
                                 <td class="align-middle">
                                     <b>{{ formatCurrency((unitSale(opt) * evHall.service_percent) / 100) }}</b>
                                 </td>
-                                <td class=" align-middle">
-                                    <b>{{ formatCurrency((opt.received_proposal * evHall.service_percent) / 100) }}</b>
+
+                                <td class=" align-middle text-success">
+                                    <b>{{ formatCurrency((unitCost(opt) * evHall.iva_percent) / 100) }}</b>
                                 </td>
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((unitSale(opt) * evHall.iva_percent) / 100) }}</b>
                                 </td>
-                                <td class=" align-middle text-success">
-                                    <b>{{ formatCurrency((opt.received_proposal * evHall.iva_percent) / 100) }}</b>
-                                </td>
 
+                                <td class=" align-middle">
+                                    <b>{{ formatCurrency((unitCost(opt) * evHall.service_charge) / 100) }}</b>
+                                </td>
                                 <td class="align-middle">
                                     <b>{{ formatCurrency((unitSale(opt) * evHall.service_charge) / 100) }}</b>
-                                </td>
-                                <td class=" align-middle">
-                                    <b>{{ formatCurrency((opt.received_proposal * evHall.service_charge) / 100) }}</b>
                                 </td>
                             </template>
                             <td class="align-middle">
