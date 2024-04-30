@@ -390,12 +390,16 @@ if ($transportEvent != null) {
                 <table>
                     <thead style="display: table-header-group;">
                         <tr>
-                            <th colspan="8" style="padding: 0.5rem; text-align: center;">Hospedagem</th>
+                            <th colspan="10" style="padding: 0.5rem; text-align: center;">Hospedagem</th>
                         </tr>
                         <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                             <th>IN</th>
                             <th>Out</th>
                             <th>Qtd</th>
+
+                            <th>Tipo</th>
+                            <th>Categoria</th>
+
                             <th>Diárias</th>
                             <th>Valor</th>
                             <th>Taxas</th>
@@ -409,8 +413,11 @@ if ($transportEvent != null) {
                             <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
                             <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
                             <td>{{ $item->count }}</td>
-                            <td>{{ daysBetween($item->in, $item->out) }}</td>
 
+                            <td>{{ $item->apto_hotel->name }}</td>
+                            <td>{{ $item->category_hotel->name }}</td>
+
+                            <td>{{ daysBetween($item->in, $item->out) }}</td>
                             <td>{{ formatCurrency(unitSale($item), $hotelEvent->currency->symbol) }}</td>
                             <td>
                                 {{ formatCurrency(sumTaxesProvider($hotelEvent, $item), $hotelEvent->currency->symbol) }}
@@ -425,8 +432,8 @@ if ($transportEvent != null) {
                     </tbody>
                     <tfoot class="table-footer">
                         <tr style="background-color: #ffe0b1">
-                            <td colspan="2"><b>Comentários:</b></td>
-                            <td colspan="4">{{ $hotelEvent->customer_observation }}</td>
+                            <td colspan="1"><b>Comentários:</b></td>
+                            <td colspan="7">{{ $hotelEvent->customer_observation }}</td>
                             <td><b>Prazo</b></td>
                             <td>{{ $hotelEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($hotelEvent->deadline_date)) }}</td>
                         </tr>
