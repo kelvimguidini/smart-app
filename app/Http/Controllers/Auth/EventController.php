@@ -292,7 +292,6 @@ class EventController extends Controller
             'code' => 'required|string|max:255',
             'requester' => 'required|string|max:255',
             'paxBase' => 'required|string|max:255',
-            'cc' => 'required|string|max:255',
             'date' => 'required|date',
             'date_final' => 'required|date|after_or_equal:in',
             'crd_id' => 'required|numeric'

@@ -593,7 +593,7 @@ const newEventProv = (type) => {
                                         <InputError class="mt-2 text-danger" :message="form.errors.name" />
                                     </div>
                                     <div class="form-group">
-                                        <InputLabel for="code" value="Código do Evento:" />
+                                        <InputLabel for="code" value="Código do Zendesk:" />
                                         <TextInput type="text" class="form-control" v-model="form.code" required autofocus
                                             autocomplete="code" />
                                         <InputError class="mt-2 text-danger" :message="form.errors.code" />
@@ -677,7 +677,7 @@ const newEventProv = (type) => {
 
                                     <div class="form-group">
                                         <InputLabel for="cc" value="Centro de Custo:" />
-                                        <TextInput type="text" class="form-control" v-model="form.cc" required autofocus
+                                        <TextInput type="text" class="form-control" v-model="form.cc" autofocus
                                             autocomplete="cc" />
                                         <InputError class="mt-2 text-danger" :message="form.errors.cc" />
                                     </div>
@@ -710,7 +710,7 @@ const newEventProv = (type) => {
                                             <option>.::Selecione::.</option>
                                             <option v-for="(option, index) in crds" :selected="option.id == form.crd_id"
                                                 :value="option.id">
-                                                {{ option.name }}
+                                                {{ option.number }}
                                             </option>
                                         </select>
 

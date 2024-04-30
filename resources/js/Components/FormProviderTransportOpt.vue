@@ -306,7 +306,7 @@ const isLoader = ref(false);
                     <div class="col-lg-4">
 
                         <div class="form-group">
-                            <InputLabel for="received_proposal_percent" value="(%):" />
+                            <InputLabel for="received_proposal_percent" value="Markup (%):" />
                             <TextInput type="number" class="form-control percent"
                                 v-model="formOpt.received_proposal_percent" required autofocus min="0" step=".1"
                                 autocomplete="received_proposal_percent" />

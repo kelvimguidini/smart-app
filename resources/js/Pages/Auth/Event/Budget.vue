@@ -495,7 +495,7 @@ const submit = () => {
                         <tfoot>
                             <tr>
                                 <td class="px-6 py-4" colspan="2">
-                                    <label class="font-bold">Taxa de Hospedagem (%):</label>
+                                    <label class="font-bold">Taxa de Serviço (%):</label>
                                 </td>
                                 <td class="px-6 py-4" colspan="3">
                                     <input type="number" :disabled="prove" v-model="form.hostingFeeHotel"
@@ -614,7 +614,7 @@ const submit = () => {
                         <tfoot>
                             <tr>
                                 <td class="px-6 py-4" colspan="2">
-                                    <label class="font-bold">Taxa de Hospedagem (%):</label>
+                                    <label class="font-bold">Taxa de Serviço (%):</label>
                                 </td>
                                 <td class="px-6 py-4" colspan="3">
                                     <input type="number" :disabled="prove" v-model="form.hostingFeeAb"

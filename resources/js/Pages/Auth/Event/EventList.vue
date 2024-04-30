@@ -572,7 +572,7 @@ const providersByEvent = (event) => {
                                         <th scope="col">#</th>
                                         <th scope="col">Cliente</th>
                                         <th scope="col">Nome</th>
-                                        <th scope="col">Código do Evento</th>
+                                        <th scope="col">Código do Zendesk</th>
                                         <th scope="col">Data</th>
                                         <th scope="col">Data Final</th>
                                         <th scope="col">Ações</th>
