@@ -241,6 +241,8 @@ class HomeController extends Controller
             $month = substr($monthYear, 0, 3);
             $year = substr($monthYear, -4);
             $monthIndex = array_search($month, $monthsIndex);
+            $monthIndex = str_pad($monthIndex, 2, '0', STR_PAD_LEFT);
+
             return $year .  $monthIndex;
         })->values();
 

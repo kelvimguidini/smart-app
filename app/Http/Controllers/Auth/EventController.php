@@ -66,6 +66,7 @@ class EventController extends Controller
         $consultant = $request->consultant;
         $client = $request->client;
         $status = $request->status;
+        $eventCode = $request->eventCode;
 
         $query = Event::with(['crd', 'customer', 'event_hotels.hotel', 'event_abs.ab', 'event_halls.hall', 'event_adds.add', 'event_transports.transport', 'event_transports.providerBudget.user', 'event_hotels.providerBudget.user', 'event_abs.providerBudget.user', 'event_halls.providerBudget.user', 'event_adds.providerBudget.user'])
             ->with(['event_hotels.status_his', 'event_abs.status_his', 'event_halls.status_his', 'event_adds.status_his', 'event_transports.status_his']);
@@ -113,6 +114,11 @@ class EventController extends Controller
             $query->whereHas('eventLocals', function ($query) use ($city) {
                 $query->where('cidade', $city);
             });
+        }
+
+        // Aplicar filtro de cidade, se estiver presente
+        if ($eventCode) {
+            $query->where('code', $eventCode);
         }
 
         if ($consultant && $consultant != ".::Selecione::.") {

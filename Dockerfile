@@ -13,6 +13,10 @@ RUN apt-get update && apt-get install -y \
 # Instale o Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
+# Instale o Node.js e o npm
+RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
+RUN apt-get install -y nodejs
+
 # Defina o diretório de trabalho como o diretório do aplicativo Laravel
 WORKDIR /var/www/html
 
@@ -21,6 +25,9 @@ COPY . .
 
 # Instale as dependências do Composer
 RUN composer update
+
+# Instale as dependências do Node.js
+RUN npm install
 
 # Defina as permissões adequadas
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
@@ -39,4 +46,4 @@ RUN echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.
     && echo "xdebug.client_host=host.docker.internal" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 # Comando padrão para executar a aplicação Laravel
-CMD php artisan serve --host=0.0.0.0 --port=8000
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]

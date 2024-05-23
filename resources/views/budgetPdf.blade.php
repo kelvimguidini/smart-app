@@ -226,7 +226,6 @@ if ($transportEvent != null) {
             min-width: 19cm;
             width: 100%;
             border-collapse: collapse;
-            table-layout: fixed;
             page-break-inside: auto;
         }
 
@@ -235,6 +234,7 @@ if ($transportEvent != null) {
             padding: 0.3rem;
             height: 30px;
             padding: 0.5rem;
+            text-align: center;
         }
 
         th {
@@ -267,8 +267,8 @@ if ($transportEvent != null) {
             padding: 10px;
             width: 100%;
             margin: -10px;
-            margin-bottom: 40px;
-            height: 175px;
+            margin-bottom: 10px;
+            height: 150px;
         }
 
         .left {
@@ -279,7 +279,7 @@ if ($transportEvent != null) {
         .arrow {
             display: inline-block;
             margin: 15px 0 0 -19px;
-            padding: 15px 50px;
+            padding: 12px 40px;
             background-color: #e9540d;
             position: relative;
         }
@@ -287,9 +287,9 @@ if ($transportEvent != null) {
         .arrow:before {
             content: "";
             position: absolute;
-            top: 0px;
+            top: -0px;
             left: 100%;
-            border: 33px solid transparent;
+            border: 20px solid transparent;
             border-left: 45px solid #e9540d;
         }
 
@@ -298,7 +298,7 @@ if ($transportEvent != null) {
             font-style: normal;
             color: rgb(250, 249, 249);
             text-decoration: none;
-            font-size: 24px;
+            font-size: 9pt;
             margin: 0;
         }
 
@@ -309,6 +309,7 @@ if ($transportEvent != null) {
         .line {
             margin-bottom: 10px;
             white-space: nowrap;
+            font-size: 7pt;
         }
 
         .line p {

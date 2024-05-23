@@ -24,8 +24,8 @@ export default defineConfig({
         noExternal: ['@inertiajs/server'],
     },
     server: {
-        host: 'https://smart4bts.com.br',
-        // host: 'local.api-smart.com',
+        // host: 'https://smart4bts.com.br',
+        host: 'local.api-smart.com',
         watch: {
             // Recarrega a página sempre que um arquivo for alterado
             usePolling: true,
@@ -39,8 +39,8 @@ export default defineConfig({
         hmr: true,
         proxy: {
             "/": {
-                // target: "local.api-smart.com",
-                target: "https://smart4bts.com.br",
+                target: "local.api-smart.com",
+                // target: "https://smart4bts.com.br",
             }
         },
         https: true,

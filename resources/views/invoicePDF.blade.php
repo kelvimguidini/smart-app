@@ -121,15 +121,15 @@ $strip = false;
             min-width: 19cm;
             width: 100%;
             border-collapse: collapse;
-            table-layout: fixed;
-            page-break-inside: avoid;
+            page-break-inside: auto;
         }
 
         th,
         td {
-            padding: 0.2rem;
+            padding: 0.3rem;
             height: 30px;
             padding: 0.5rem;
+            text-align: center;
         }
 
         th {
@@ -162,8 +162,8 @@ $strip = false;
             padding: 10px;
             width: 100%;
             margin: -10px;
-            margin-bottom: 40px;
-            height: 290px;
+            margin-bottom: 10px;
+            height: 150px;
         }
 
         .left {
@@ -171,10 +171,11 @@ $strip = false;
             width: calc(100% - 180px);
         }
 
+
         .arrow {
             display: inline-block;
-            margin: 13px 0 0 -13px;
-            padding: 13px 35px;
+            margin: 15px 0 0 -19px;
+            padding: 12px 40px;
             background-color: #e9540d;
             position: relative;
         }
@@ -182,9 +183,9 @@ $strip = false;
         .arrow:before {
             content: "";
             position: absolute;
-            top: 0px;
+            top: -0px;
             left: 100%;
-            border: 30px solid transparent;
+            border: 20px solid transparent;
             border-left: 45px solid #e9540d;
         }
 
@@ -193,7 +194,7 @@ $strip = false;
             font-style: normal;
             color: rgb(250, 249, 249);
             text-decoration: none;
-            font-size: 24px;
+            font-size: 9pt;
             margin: 0;
         }
 
@@ -204,6 +205,7 @@ $strip = false;
         .line {
             margin-bottom: 10px;
             white-space: nowrap;
+            font-size: 7pt;
         }
 
         .line p {
@@ -225,8 +227,8 @@ $strip = false;
         }
 
         .right {
-            transform: translateY(50%);
-            width: 130px;
+            /* transform: translateY(50%); */
+            /* width: 150px; */
             float: right;
         }
 
@@ -242,11 +244,6 @@ $strip = false;
             text-align: center;
             font-size: 14px;
             margin-bottom: -10px;
-        }
-
-        .custom-bg-success-text-white {
-            background-color: #e9540d;
-            color: rgb(250, 249, 249);
         }
     </style>
 </head>

@@ -210,161 +210,125 @@ const isLoader = ref(false);
 
     <form @submit.prevent="submit">
         <div class="row">
-            <div class="col">
+            <div class="col-md-6 col-lg-4 mb-3">
                 <div class="form-group">
                     <InputLabel for="hotel" value="Fornecedor:" />
-
-                    <select class="form-control" :id="'hotel-select' + type" :required="required">
+                    <select class="form-control form-control-sm" :id="'hotel-select' + type" :required="required">
                         <option>.::Selecione::.</option>
                         <option v-for="(option, index) in providers" :selected="option.id == form.provider_id"
                             :value="option.id">
                             {{ option.name }}
                         </option>
                     </select>
-
                     <InputError class="mt-2 text-danger" :message="form.errors.hotel" />
                 </div>
             </div>
-            <div class="col">
+            <div class="col-md-6 col-lg-4 mb-3">
                 <div class="form-group">
                     <InputLabel for="city" value="Cidade:" />
-                    <TextInput type="text" class="form-control" v-model="form.city" disabled="true" />
+                    <TextInput type="text" class="form-control form-control-sm" v-model="form.city" disabled="true" />
                 </div>
             </div>
-            <div class="col">
+            <div class="col-md-6 col-lg-4 mb-3">
                 <div class="row">
-                    <div class="col">
+                    <div class="col-4">
                         <div class="form-group">
                             <InputLabel for="iss_percent" value="ISS:" />
-                            <TextInput type="number" class="form-control percent" v-model="form.iss_percent" required
+                            <TextInput type="number" class="form-control form-control-sm percent" v-model="form.iss_percent" required
                                 autofocus min="0" step=".1" autocomplete="iss_percent" />
                         </div>
                     </div>
-
-                    <div class="col">
+                    <div class="col-4">
                         <div class="form-group">
                             <InputLabel for="service_percent" value="Serviço:" />
-                            <TextInput type="number" class="form-control percent" v-model="form.service_percent" required
+                            <TextInput type="number" class="form-control form-control-sm percent" v-model="form.service_percent" required
                                 autofocus min="0" step=".1" autocomplete="service_percent" />
                         </div>
                     </div>
-
-                    <div class="col">
+                    <div class="col-4">
                         <div class="form-group">
                             <InputLabel for="iva_percent" value="IVA:" />
-                            <TextInput type="number" class="form-control percent" v-model="form.iva_percent" required
+                            <TextInput type="number" class="form-control form-control-sm percent" v-model="form.iva_percent" required
                                 autofocus min="0" step=".1" autocomplete="iva_percent" />
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col">
+            <div class="col-md-6 col-lg-4 mb-3">
                 <div class="row">
-                    <div class="col">
-
+                    <div class="col-6">
                         <div class="form-group">
                             <InputLabel for="currencies" value="Moeda:" />
-
-                            <select class="form-control" :id="'currency' + type" :required="required">
+                            <select class="form-control form-control-sm" :id="'currency' + type" :required="required">
                                 <option>.::Selecione::.</option>
                                 <option v-for="(option, index) in currencies" :selected="option.id == form.currency"
                                     :value="option.id">
                                     {{ option.name }}
                                 </option>
                             </select>
-
                             <InputError class="mt-2 text-danger" :message="form.errors.currency" />
                         </div>
                     </div>
-
-                    <div class="col">
-
+                    <div class="col-6">
                         <div class="form-group">
                             <InputLabel for="invoice" value="Nota Fiscal" />
-                            <select class="form-control" v-model="form.invoice">
+                            <select class="form-control form-control-sm" v-model="form.invoice">
                                 <option :value="false">Não</option>
                                 <option :value="true">Sim</option>
                             </select>
                         </div>
-
                     </div>
                 </div>
-
             </div>
-
-
-        </div>
-
-        <div class="row">
-            <div class="col-lg-3">
-
+            <div class="col-md-6 col-lg-4 mb-3">
                 <div class="form-group">
                     <InputLabel for="internal_observation" value="Observação Interna:" />
-                    <textarea class="form-control" v-model="form.internal_observation"></textarea>
+                    <textarea class="form-control form-control-sm" v-model="form.internal_observation"></textarea>
                 </div>
-
             </div>
-
-            <div class="col-lg-3">
+            <div class="col-md-6 col-lg-4 mb-3">
                 <div class="form-group">
                     <InputLabel for="customer_observation" value="Observação Cliente:" />
-                    <textarea class="form-control" v-model="form.customer_observation"></textarea>
+                    <textarea class="form-control form-control-sm" v-model="form.customer_observation"></textarea>
                 </div>
             </div>
-
-
-            <div class="col">
+            <div class="col-md-6 col-lg-4 mb-3">
                 <div class="row">
-                    <div class="col">
+                    <div class="col-6">
                         <div class="form-group">
                             <InputLabel for="iof" value="IOF:" />
-                            <TextInput type="number" class="form-control percent" v-model="form.iof" required autofocus
+                            <TextInput type="number" class="form-control form-control-sm percent" v-model="form.iof" required autofocus
                                 min="0" step=".1" autocomplete="iof" />
                         </div>
                     </div>
-
-                    <div class="col">
+                    <div class="col-6">
                         <div class="form-group">
                             <InputLabel for="service_charge" value="Taxa de Turismo:" />
-                            <TextInput type="number" class="form-control percent" v-model="form.service_charge" required
+                            <TextInput type="number" class="form-control form-control-sm percent" v-model="form.service_charge" required
                                 autofocus min="0" step=".1" autocomplete="service_charge" />
                         </div>
                     </div>
-
                 </div>
             </div>
-
-            <div class="col">
-                <div class="row">
-
-                    <div class="col">
-                        <div class="form-group">
-                            <InputLabel for="in" value="Prazo:" />
-
-                            <datepicker v-model="form.deadline" class="form-control" :locale="ptBR" inputFormat="dd/MM/yyyy"
-                                weekdayFormat="EEEEEE" />
-                        </div>
-                    </div>
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="form-group">
+                    <InputLabel for="in" value="Prazo:" />
+                    <datepicker v-model="form.deadline" class="form-control form-control-sm" :locale="ptBR" inputFormat="dd/MM/yyyy"
+                        weekdayFormat="EEEEEE" />
                 </div>
             </div>
-
-            <div class="col">
-                <div class="items-center justify-end mt-4 rigth">
-                    <PrimaryButton css-class="btn btn-primary float-right m-1" :class="{ 'opacity-25': form.processing }"
-                        :disabled="form.processing">
-                        <span v-if="form.processing" class="spinner-border spinner-border-sm" role="status"
-                            aria-hidden="true"></span>
-                        Salvar
-                    </PrimaryButton>
-
-
-                    <PrimaryButton type="button" v-if="eventProvider != null && eventProvider.id > 0"
-                        css-class="btn btn-info float-right m-1" v-on:click="newEventProvider();">
-                        Novo
-                    </PrimaryButton>
-
-                </div>
+            <div class="col-12 d-flex justify-content-end">
+                <PrimaryButton css-class="btn btn-primary m-1" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                    <span v-if="form.processing" class="spinner-border spinner-border-sm" role="status"
+                        aria-hidden="true"></span>
+                    Salvar
+                </PrimaryButton>
+                <PrimaryButton type="button" v-if="eventProvider != null && eventProvider.id > 0"
+                    css-class="btn btn-info m-1" v-on:click="newEventProvider();">
+                    Novo
+                </PrimaryButton>
             </div>
         </div>
     </form>
+
 </template>

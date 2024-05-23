@@ -42,6 +42,7 @@ const formFilters = useForm({
     consultant: '',
     client: '',
     status: '',
+    eventCode: ''
 });
 
 const submitForm = () => {
@@ -95,13 +96,12 @@ const editStatus = async (event_id, table, table_id, permissions) => {
 
         // Faça a chamada ao endpoint
         const response = await axios.get(route('status-history', {
-            table: table, // Substitua 'events' pelo nome real da tabela
+            table: table, 
             table_id: table_id
         }));
         var currentStatus = response.data[0];
         var currentStatusInfo = props.allStatus[currentStatus.status] || {};
         var allowedFlows = currentStatusInfo.flow || [];
-
 
         statusOptions.value = Object.entries(props.allStatus).filter(([key, status]) =>
             allowedFlows.includes(key)
@@ -133,20 +133,26 @@ const statusOptions = ref({});
 const saveStatus = (event, prov) => {
     isLoader.value = true;
     formStatus.messageLink += `<br><br>
-<p><b>Evento:</b> <span style="color: #333;">${event.name}</span></p>
-    <p><b>Código:</b> <span style="color: #333;">${event.code}</span></p>
-<p><b>CRD:</b> <span style="color: #333;">${event.crd != null ? event.crd.name : ""}</span></p>
-<p><b>CC:</b> <span style="color: #333;">${event.cost_center}</span></p>
-<p><b>Solicitante:</b> <span style="color: #333;">${event.requester}</span></p>
-<p><b>Base de pax:</b> <span style="color: #333;">${event.pax_base}</span></p>
-<p><b>Fornecedor:</b> <span style="color: #333;">${prov.name}</span></p>
-`;
-    formStatus.post(route('event-status-save'), {
-        onFinish: () => {
-            isLoader.value = false;
-            formStatus.reset();
-        },
-    });
+        <p><b>Evento:</b> <span style="color: #333;">${event.name}</span></p>
+            <p><b>Código:</b> <span style="color: #333;">${event.code}</span></p>
+        <p><b>CRD:</b> <span style="color: #333;">${event.crd != null ? event.crd.name : ""}</span></p>
+        <p><b>CC:</b> <span style="color: #333;">${event.cost_center}</span></p>
+        <p><b>Solicitante:</b> <span style="color: #333;">${event.requester}</span></p>
+        <p><b>Base de pax:</b> <span style="color: #333;">${event.pax_base}</span></p>
+        <p><b>Fornecedor:</b> <span style="color: #333;">${prov.name}</span></p>
+        `;
+
+    if (!formStatus.status_hotel || formStatus.status_hotel === '.::Selecione::.') {
+        alert("Por favor, selecione um status de hotel válido.");
+        isLoader.value = false;
+    } else {
+        formStatus.post(route('event-status-save'), {
+            onFinish: () => {
+                isLoader.value = false;
+                formStatus.reset();
+            },
+        });
+    }
 }
 
 
@@ -550,6 +556,12 @@ const providersByEvent = (event) => {
                                         </select>
                                     </div>
                                 </div>
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label for="code">Código do Zendesk:</label>
+                                        <input type="text" id="code" v-model="formFilters.eventCode" class="form-control">
+                                    </div>
+                                </div>
                             </div>
                             <button type="submit" class="btn-sm btn-primary">Filtrar</button>
                         </form>
@@ -660,7 +672,7 @@ const providersByEvent = (event) => {
                                                                                         Status:
                                                                                     </label>
                                                                                     <select class="form-control s_hotel"
-                                                                                        v-model="formStatus.status_hotel">
+                                                                                        v-model="formStatus.status_hotel" required="required">
 
                                                                                         <option>.::Selecione::.</option>
                                                                                         <option
