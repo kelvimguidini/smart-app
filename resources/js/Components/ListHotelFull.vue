@@ -76,7 +76,7 @@ const formatCurrency = (value) => {
 }
 
 const unitCost = (opt) => {
-    return opt.received_proposal - ((opt.received_proposal * opt.kickback) / 100);
+    return opt.received_proposal - ((opt.received_proposal) / 100);
 }
 
 const unitSale = (opt) => {
@@ -145,7 +145,7 @@ const sumTaxes = (evho, taxType) => {
                 sum += ((unitSale(opt) * evho.iva_percent) / 100) * daysBetween(opt.in, opt.out) * opt.count;
                 break;
             case 'sc':
-                sum += ((unitSale(opt) * evho.service_charge) / 100) * daysBetween(opt.in, opt.out) * opt.count;
+                //sum += ((unitSale(opt) * evho.service_charge) / 100) * daysBetween(opt.in, opt.out) * opt.count;
                 break;
         }
 

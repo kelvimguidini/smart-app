@@ -36,7 +36,7 @@ function formatCurrency($value, $symbol = 'BRL')
 
 function unitSale($opt)
 {
-    $unitCost = $opt['received_proposal'] - (($opt['received_proposal'] * $opt['kickback']) / 100);
+    $unitCost = $opt['received_proposal'] - (($opt['received_proposal']) / 100);
     return ceil($unitCost / $opt['received_proposal_percent']);
 }
 
@@ -68,22 +68,27 @@ function hexToRgb($hex, $a)
 $sumTotalHotelValue = 0;
 $sumQtdDayles = 0;
 $sumValueRate = 0;
+$totalKickback = 0;
 
 $sumTotalABValue = 0;
 $sumABQtdDayles = 0;
 $sumABValueRate = 0;
+$totalKickbackAB = 0;
 
 $sumTotalHallValue = 0;
 $sumHallQtdDayles = 0;
 $sumHallValueRate = 0;
+$totalKickbackHall = 0;
 
 $sumTotalAddValue = 0;
 $sumAddQtdDayles = 0;
 $sumAddValueRate = 0;
+$totalKickbackAdd = 0;
 
 $sumTransportValueRate = 0;
 $sumTransportQtdDayles = 0;
 $sumTotalTransportValue = 0;
+$totalKickbackTransport = 0;
 
 $percIOF = 0;
 $percService = 10;
@@ -266,19 +271,17 @@ $strip = false;
                         <div class="line">
                             <p>De: <span class="event-data">{{date("d/m/Y", strtotime($event->date)) }}</span></p>
                             <p>Até: <span class="event-data">{{date("d/m/Y", strtotime($event->date_final)) }}</span></p>
+
+                            <p>Solicitante: <span class="event-data">{{$event->requester }}</span></p>
+                            <p>Base de pax: <span class="event-data">{{$event->pax_base }}</span></p>
                         </div>
                         <div class="line">
                             <p>Evento: <span class="event-data">{{ $event->name }}</p>
-                        </div>
-                        <div class="line">
+
                             <p>CRD: <span class="event-data">{{$event->crd != null ? $event->crd->name : "" }}</span></p>
                             <p>CC: <span class="event-data">{{$event->cost_center }}</span></p>
                         </div>
 
-                        <div class="line">
-                            <p>Solicitante: <span class="event-data">{{$event->requester }}</span></p>
-                            <p>Base de pax: <span class="event-data">{{$event->pax_base }}</span></p>
-                        </div>
                         <div class="line">
                             <p>Fornecedor: <span class="event-data">{{$provider != null ?  $provider->name : ''}}</p>
                         </div>
@@ -329,6 +332,8 @@ $strip = false;
 
                         $sumValueRate += $rate * $qtdDayle;
                         $sumQtdDayles += $qtdDayle;
+
+                        $totalKickback += ($sumValueRate * floatval($item->kickback)) / 100;
                         $sumTotalHotelValue += sumTotal($rate, $taxes, $qtdDayle);
                         ?>
                         <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
@@ -356,30 +361,30 @@ $strip = false;
                         <tr>
                             <td colspan="11" style="padding: 0;">
                                 <table style="width: 100%;">
-                                    <tr class="table-subheader">
-                                        <td class="align-middle custom-bg-success-text-white">
+                                    <tr class="table-subheader" style="background-color: #ffe0b1">
+                                        <th class="align-middle custom-bg-success-text-white">
                                             Room Nights:
-                                        </td>
+                                        </th>
                                         <td class="align-middle">{{ $sumQtdDayles }}</td>
-                                        <td class="align-middle custom-bg-success-text-white">DIÁRIA MÉDIA</td>
+                                        <th class="align-middle custom-bg-success-text-white">DIÁRIA MÉDIA</th>
                                         <td class="align-middle">
                                             {{ formatCurrency($sumValueRate / $sumQtdDayles, $hotelEvent->currency->symbol) }}
                                         </td>
-                                        <td class="align-middle custom-bg-success-text-white">
+                                        <th class="align-middle custom-bg-success-text-white">
                                             EMITIR NOTA FISCAL?
-                                        </td>
+                                        </th>
                                         <td class="align-middle">
                                             {{ $hotelEvent->invoice ? 'Sim' : 'Não' }}
                                         </td>
-                                        <td class="align-middle custom-bg-success-text-white">
+                                        <th class="align-middle custom-bg-success-text-white">
                                             Total Venda
-                                        </td>
+                                        </th>
                                         <td class="align-middle">
                                             {{ formatCurrency($sumTotalHotelValue, $hotelEvent->currency->symbol) }}
                                         </td>
-                                        <td class="align-middle custom-bg-success-text-white">
+                                        <th class="align-middle custom-bg-success-text-white">
                                             Total Custo
-                                        </td>
+                                        </th>
                                         <td class="align-middle">
                                             {{ formatCurrency($sumValueRate, $hotelEvent->currency->symbol) }}
                                         </td>
@@ -390,10 +395,9 @@ $strip = false;
 
                         <tr style="background-color: #ffe0b1">
                             <td colspan="2"><b>Comentários:</b></td>
-                            <td colspan="6">{{ $hotelEvent->internal_observation }}</td>
+                            <td colspan="7">{{ $hotelEvent->internal_observation }}</td>
                             <td>Comissão</td>
-                            <td style="background-color: #ffc670; color: #000"><b>{{ $hotelEvent->service_charge }}%</b></td>
-                            <td>{{ formatCurrency(($sumValueRate * $hotelEvent->service_charge) / 100, $hotelEvent->currency->symbol) }}</td>
+                            <td style="background-color: #ffc670; color: #000"><b>{{ formatCurrency($totalKickback, $hotelEvent->currency->symbol) }}</b></td>
                         </tr>
 
                         <tr>
@@ -480,6 +484,7 @@ $strip = false;
 
                         $sumABValueRate += $rate;
                         $sumABQtdDayles += $qtdDayle;
+                        $totalKickbackAB += ($sumABValueRate * floatval($item->kickback)) / 100;
                         $sumTotalABValue += sumTotal($rate, $taxes, $qtdDayle);
                         ?>
 
@@ -508,30 +513,30 @@ $strip = false;
                         <tr>
                             <td colspan="10" style="padding: 0;">
                                 <table style="width: 100%;">
-                                    <tr class="table-subheader">
-                                        <td class="align-middle custom-bg-success-text-white">
+                                    <tr class="table-subheader" style="background-color: #ffe0b1">
+                                        <th class="align-middle custom-bg-success-text-white">
                                             Room Nights:
-                                        </td>
+                                        </th>
                                         <td class="align-middle">{{ $sumABQtdDayles }}</td>
-                                        <td class="align-middle custom-bg-success-text-white">DIÁRIA MÉDIA</td>
+                                        <th class="align-middle custom-bg-success-text-white">DIÁRIA MÉDIA</th>
                                         <td class="align-middle">
                                             {{ formatCurrency($sumABValueRate / $sumABQtdDayles, $abEvent->currency->symbol) }}
                                         </td>
-                                        <td class="align-middle custom-bg-success-text-white">
+                                        <th class="align-middle custom-bg-success-text-white">
                                             EMITIR NOTA FISCAL?
-                                        </td>
+                                        </th>
                                         <td class="align-middle">
                                             {{ $abEvent->invoice ? 'Sim' : 'Não' }}
                                         </td>
-                                        <td class="align-middle custom-bg-success-text-white">
+                                        <th class="align-middle custom-bg-success-text-white">
                                             Total Venda
-                                        </td>
+                                        </th>
                                         <td class="align-middle">
                                             {{ formatCurrency($sumTotalABValue, $abEvent->currency->symbol) }}
                                         </td>
-                                        <td class="align-middle custom-bg-success-text-white">
+                                        <th class="align-middle custom-bg-success-text-white">
                                             Total Custo
-                                        </td>
+                                        </th>
                                         <td class="align-middle">
                                             {{ formatCurrency($sumABValueRate, $abEvent->currency->symbol) }}
                                         </td>
@@ -542,10 +547,9 @@ $strip = false;
 
                         <tr style="background-color: #ffe0b1">
                             <td colspan="2"><b>Comentários:</b></td>
-                            <td colspan="5">{{ $abEvent->internal_observation }}</td>
+                            <td colspan="6">{{ $abEvent->internal_observation }}</td>
                             <td>Comissão</td>
-                            <td style="background-color: #ffc670; color: #000"><b>{{ $abEvent->service_charge }}%</b></td>
-                            <td>{{ formatCurrency(($sumABValueRate * $abEvent->service_charge) / 100, $abEvent->currency->symbol) }}</td>
+                            <td style="background-color: #ffc670; color: #000"><b>{{ formatCurrency($totalKickbackAB, $hotelEvent->currency->symbol) }}</b></td>
                         </tr>
 
                         <tr>
@@ -633,6 +637,7 @@ $strip = false;
 
                         $sumHallValueRate += $rate;
                         $sumHallQtdDayles += daysBetween1($item->in, $item->out);
+                        $totalKickbackHall += ($sumHallValueRate * floatval($item->kickback)) / 100;
                         $sumTotalHallValue += ($rate + $taxes) * daysBetween1($item->in, $item->out);
                         ?>
                         <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
@@ -660,30 +665,30 @@ $strip = false;
                         <tr>
                             <td colspan="11" style="padding: 0;">
                                 <table style="width: 100%;">
-                                    <tr class="table-subheader">
-                                        <td class="align-middle custom-bg-success-text-white">
+                                    <tr class="table-subheader" style="background-color: #ffe0b1">
+                                        <th class="align-middle custom-bg-success-text-white">
                                             Room Nights:
-                                        </td>
+                                        </th>
                                         <td class="align-middle">{{ $sumHallQtdDayles }}</td>
-                                        <td class="align-middle custom-bg-success-text-white">DIÁRIA MÉDIA</td>
+                                        <th class="align-middle custom-bg-success-text-white">DIÁRIA MÉDIA</th>
                                         <td class="align-middle">
                                             {{ formatCurrency($sumHallValueRate / $sumHallQtdDayles, $hallEvent->currency->symbol) }}
                                         </td>
-                                        <td class="align-middle custom-bg-success-text-white">
+                                        <th class="align-middle custom-bg-success-text-white">
                                             EMITIR NOTA FISCAL?
-                                        </td>
+                                        </th>
                                         <td class="align-middle">
                                             {{ $hallEvent->invoice ? 'Sim' : 'Não' }}
                                         </td>
-                                        <td class="align-middle custom-bg-success-text-white">
+                                        <th class="align-middle custom-bg-success-text-white">
                                             Total Venda
-                                        </td>
+                                        </th>
                                         <td class="align-middle">
                                             {{ formatCurrency($sumTotalHallValue, $hallEvent->currency->symbol) }}
                                         </td>
-                                        <td class="align-middle custom-bg-success-text-white">
+                                        <th class="align-middle custom-bg-success-text-white">
                                             Total Custo
-                                        </td>
+                                        </th>
                                         <td class="align-middle">
                                             {{ formatCurrency($sumHallValueRate, $hallEvent->currency->symbol) }}
                                         </td>
@@ -694,10 +699,9 @@ $strip = false;
 
                         <tr style="background-color: #ffe0b1">
                             <td colspan="2"><b>Comentários:</b></td>
-                            <td colspan="6">{{ $hallEvent->internal_observation }}</td>
+                            <td colspan="7">{{ $hallEvent->internal_observation }}</td>
                             <td>Comissão</td>
-                            <td style="background-color: #ffc670; color: #000"><b>{{ $hallEvent->service_charge }}%</b></td>
-                            <td>{{ formatCurrency(($sumHallValueRate * $hallEvent->service_charge) / 100, $hallEvent->currency->symbol) }}</td>
+                            <td style="background-color: #ffc670; color: #000"><b>{{ formatCurrency($totalKickbackHall, $hotelEvent->currency->symbol) }}</b></td>
                         </tr>
 
                         <tr>
@@ -786,6 +790,7 @@ $strip = false;
 
                         $sumAddValueRate += $rate;
                         $sumAddQtdDayles += $qtdDayle;
+                        $totalKickbackAdd += ($sumAddValueRate * floatval($item->kickback)) / 100;
                         $sumTotalAddValue += sumTotal($rate, $taxes, daysBetween1($item->in, $item->out));
                         ?>
 
@@ -816,30 +821,30 @@ $strip = false;
                         <tr>
                             <td colspan="11" style="padding: 0;">
                                 <table style="width: 100%;">
-                                    <tr class="table-subheader">
-                                        <td class="align-middle custom-bg-success-text-white">
+                                    <tr class="table-subheader" style="background-color: #ffe0b1">
+                                        <th class="align-middle custom-bg-success-text-white">
                                             Room Nights:
-                                        </td>
+                                        </th>
                                         <td class="align-middle">{{ $sumAddQtdDayles }}</td>
-                                        <td class="align-middle custom-bg-success-text-white">DIÁRIA MÉDIA</td>
+                                        <th class="align-middle custom-bg-success-text-white">DIÁRIA MÉDIA</th>
                                         <td class="align-middle">
                                             {{ formatCurrency($sumAddValueRate / $sumAddQtdDayles, $addEvent->currency->symbol) }}
                                         </td>
-                                        <td class="align-middle custom-bg-success-text-white">
+                                        <th class="align-middle custom-bg-success-text-white">
                                             EMITIR NOTA FISCAL?
-                                        </td>
+                                        </th>
                                         <td class="align-middle">
                                             {{ $addEvent->invoice ? 'Sim' : 'Não' }}
                                         </td>
-                                        <td class="align-middle custom-bg-success-text-white">
+                                        <th class="align-middle custom-bg-success-text-white">
                                             Total Venda
-                                        </td>
+                                        </th>
                                         <td class="align-middle">
                                             {{ formatCurrency($sumTotalAddValue, $addEvent->currency->symbol) }}
                                         </td>
-                                        <td class="align-middle custom-bg-success-text-white">
+                                        <th class="align-middle custom-bg-success-text-white">
                                             Total Custo
-                                        </td>
+                                        </th>
                                         <td class="align-middle">
                                             {{ formatCurrency($sumAddValueRate, $addEvent->currency->symbol) }}
                                         </td>
@@ -850,10 +855,9 @@ $strip = false;
 
                         <tr style="background-color: #ffe0b1">
                             <td colspan="2"><b>Comentários:</b></td>
-                            <td colspan="6">{{ $addEvent->internal_observation }}</td>
+                            <td colspan="7">{{ $addEvent->internal_observation }}</td>
                             <td>Comissão</td>
-                            <td style="background-color: #ffc670; color: #000"><b>{{ $addEvent->service_charge }}%</b></td>
-                            <td>{{ formatCurrency(($sumAddValueRate * $addEvent->service_charge) / 100, $addEvent->currency->symbol) }}</td>
+                            <td style="background-color: #ffc670; color: #000"><b>{{ formatCurrency($totalKickbackAdd, $hotelEvent->currency->symbol) }}</b></td>
                         </tr>
 
                         <tr>
@@ -943,6 +947,7 @@ $strip = false;
 
                         $sumTransportValueRate += $rate;
                         $sumTransportQtdDayles += $qtdDayle;
+                        $totalKickbackTransport += ($sumTransportValueRate * floatval($item->kickback)) / 100;
                         $sumTotalTransportValue += sumTotal($rate, $taxes, daysBetween1($item->in, $item->out));
                         ?>
                         <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
@@ -973,30 +978,30 @@ $strip = false;
                         <tr>
                             <td colspan="11" style="padding: 0;">
                                 <table style="width: 100%;">
-                                    <tr class="table-subheader">
-                                        <td class="align-middle custom-bg-success-text-white">
+                                    <tr class="table-subheader" style="background-color: #ffe0b1">
+                                        <th class="align-middle custom-bg-success-text-white">
                                             Room Nights:
-                                        </td>
+                                        </th>
                                         <td class="align-middle">{{ $sumTransportQtdDayles }}</td>
-                                        <td class="align-middle custom-bg-success-text-white">DIÁRIA MÉDIA</td>
+                                        <th class="align-middle custom-bg-success-text-white">DIÁRIA MÉDIA</th>
                                         <td class="align-middle">
                                             {{ formatCurrency($sumTransportValueRate / $sumTransportQtdDayles, $transportEvent->currency->symbol) }}
                                         </td>
-                                        <td class="align-middle custom-bg-success-text-white">
+                                        <th class="align-middle custom-bg-success-text-white">
                                             EMITIR NOTA FISCAL?
-                                        </td>
+                                        </th>
                                         <td class="align-middle">
                                             {{ $transportEvent->invoice ? 'Sim' : 'Não' }}
                                         </td>
-                                        <td class="align-middle custom-bg-success-text-white">
+                                        <th class="align-middle custom-bg-success-text-white">
                                             Total Venda
-                                        </td>
+                                        </th>
                                         <td class="align-middle">
                                             {{ formatCurrency($sumTotalTransportValue, $transportEvent->currency->symbol) }}
                                         </td>
-                                        <td class="align-middle custom-bg-success-text-white">
+                                        <th class="align-middle custom-bg-success-text-white">
                                             Total Custo
-                                        </td>
+                                        </th>
                                         <td class="align-middle">
                                             {{ formatCurrency($sumTransportValueRate, $transportEvent->currency->symbol) }}
                                         </td>
@@ -1007,10 +1012,9 @@ $strip = false;
 
                         <tr style="background-color: #ffe0b1">
                             <td colspan="2"><b>Comentários:</b></td>
-                            <td colspan="6">{{ $transportEvent->internal_observation }}</td>
+                            <td colspan="7">{{ $transportEvent->internal_observation }}</td>
                             <td>Comissão</td>
-                            <td style="background-color: #ffc670; color: #000"><b>{{ $transportEvent->service_charge }}%</b></td>
-                            <td>{{ formatCurrency(($sumTransportValueRate * $transportEvent->service_charge) / 100, $transportEvent->currency->symbol) }}</td>
+                            <td style="background-color: #ffc670; color: #000"><b>{{ formatCurrency($totalKickbackTransport, $hotelEvent->currency->symbol) }}</b></td>
                         </tr>
 
                         <tr>

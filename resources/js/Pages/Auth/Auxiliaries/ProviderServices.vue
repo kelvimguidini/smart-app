@@ -157,7 +157,7 @@ const deleteHotel = (id) => {
                                     <div class="form-group">
                                         <InputLabel for="contact" value="Contato:" />
                                         <TextInput type="text" class="form-control" v-model="form.contact" autofocus
-                                            autocomplete="contact" />
+                                            autocomplete="contact" required />
                                         <InputError class="mt-2 text-danger" :message="form.errors.contact" />
                                     </div>
 
