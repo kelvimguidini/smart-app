@@ -420,7 +420,7 @@ $strip = false;
                                             {{ formatCurrency(($sumValueRate * $hotelEvent->iss_percent) / 100, $hotelEvent->currency->symbol) }}
                                         </td>
                                         <td class="custom-bg-success-text-white" style="background-color: #c1d9ff; border: 1px solid #ffffff; color: #000">TOTAL COM TAXAS CLIENTE</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumValueRate, $hotelEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalHotelValue, $hotelEvent->currency->symbol) }}</td>
                                     </tr>
                                     <tr>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA DE SERVIÇO ({{ $hotelEvent->service_percent }}%)</td>
@@ -428,7 +428,7 @@ $strip = false;
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA DE SERVIÇO ({{ $hotelEvent->service_percent }}%)</td>
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumValueRate * $hotelEvent->service_percent) / 100, $hotelEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff; background-color: #ffe5e5; color: #000">TOTAL COM TAXAS A PAGAR</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalHotelValue, $hotelEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumValueRate, $hotelEvent->currency->symbol) }}</td>
                                     </tr>
 
                                     <tr>
@@ -436,8 +436,8 @@ $strip = false;
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalHotelValue * $hotelEvent->iva_percent) / 100, $hotelEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IVA ({{ $hotelEvent->iva_percent }}%)</td>
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumValueRate * $hotelEvent->iva_percent) / 100, $hotelEvent->currency->symbol) }}</td>
-                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">COMISSÃO & TAXAS INCLUSAS</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalHotelValue + (($sumValueRate * $hotelEvent->service_charge) / 100), $hotelEvent->currency->symbol) }}</td>
+                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">LUCRO TOTAL</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalHotelValue - $sumValueRate, $hotelEvent->currency->symbol) }}</td>
                                     </tr>
                                 </table>
 
@@ -572,7 +572,7 @@ $strip = false;
                                             {{ formatCurrency(($sumABValueRate * $abEvent->iss_percent) / 100, $abEvent->currency->symbol) }}
                                         </td>
                                         <td class="custom-bg-success-text-white" style="background-color: #c1d9ff; border: 1px solid #ffffff; color: #000">TOTAL COM TAXAS CLIENTE</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumABValueRate, $abEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalABValue, $abEvent->currency->symbol) }}</td>
                                     </tr>
                                     <tr>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA DE SERVIÇO ({{ $abEvent->service_percent }}%)</td>
@@ -580,7 +580,7 @@ $strip = false;
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA DE SERVIÇO ({{ $abEvent->service_percent }}%)</td>
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumABValueRate * $abEvent->service_percent) / 100, $abEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff; background-color: #ffe5e5; color: #000">TOTAL COM TAXAS A PAGAR</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalABValue, $abEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumABValueRate, $abEvent->currency->symbol) }}</td>
                                     </tr>
 
                                     <tr>
@@ -588,8 +588,8 @@ $strip = false;
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalABValue * $abEvent->iva_percent) / 100, $abEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IVA ({{ $abEvent->iva_percent }}%)</td>
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumABValueRate * $abEvent->iva_percent) / 100, $abEvent->currency->symbol) }}</td>
-                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">COMISSÃO & TAXAS INCLUSAS</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalABValue + (($sumABValueRate * $abEvent->service_charge) / 100), $abEvent->currency->symbol) }}</td>
+                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">LUCRO TOTAL</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalABValue - $sumABValueRate, $abEvent->currency->symbol) }}</td>
                                     </tr>
                                 </table>
 
@@ -724,7 +724,7 @@ $strip = false;
                                             {{ formatCurrency(($sumHallValueRate * $hallEvent->iss_percent) / 100, $hallEvent->currency->symbol) }}
                                         </td>
                                         <td class="custom-bg-success-text-white" style="background-color: #c1d9ff; border: 1px solid #ffffff; color: #000">TOTAL COM TAXAS CLIENTE</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumHallValueRate, $hallEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalHallValue, $hallEvent->currency->symbol) }}</td>
                                     </tr>
                                     <tr>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA DE SERVIÇO ({{ $hallEvent->service_percent }}%)</td>
@@ -732,7 +732,7 @@ $strip = false;
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA DE SERVIÇO ({{ $hallEvent->service_percent }}%)</td>
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumHallValueRate * $hallEvent->service_percent) / 100, $hallEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff; background-color: #ffe5e5; color: #000">TOTAL COM TAXAS A PAGAR</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalHallValue, $hallEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumHallValueRate, $hallEvent->currency->symbol) }}</td>
                                     </tr>
 
                                     <tr>
@@ -740,8 +740,8 @@ $strip = false;
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalHallValue * $hallEvent->iva_percent) / 100, $hallEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IVA ({{ $hallEvent->iva_percent }}%)</td>
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumHallValueRate * $hallEvent->iva_percent) / 100, $hallEvent->currency->symbol) }}</td>
-                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">COMISSÃO & TAXAS INCLUSAS</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalHallValue + (($sumHallValueRate * $hallEvent->service_charge) / 100), $hallEvent->currency->symbol) }}</td>
+                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">LUCRO TOTAL</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalHallValue - $sumHallValueRate, $hallEvent->currency->symbol) }}</td>
                                     </tr>
                                 </table>
 
@@ -880,7 +880,7 @@ $strip = false;
                                             {{ formatCurrency(($sumAddValueRate * $addEvent->iss_percent) / 100, $addEvent->currency->symbol) }}
                                         </td>
                                         <td class="custom-bg-success-text-white" style="background-color: #c1d9ff; border: 1px solid #ffffff; color: #000">TOTAL COM TAXAS CLIENTE</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumAddValueRate, $addEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalAddValue, $addEvent->currency->symbol) }}</td>
                                     </tr>
                                     <tr>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA DE SERVIÇO ({{ $addEvent->service_percent }}%)</td>
@@ -888,7 +888,7 @@ $strip = false;
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA DE SERVIÇO ({{ $addEvent->service_percent }}%)</td>
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumAddValueRate * $addEvent->service_percent) / 100, $addEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff; background-color: #ffe5e5; color: #000">TOTAL COM TAXAS A PAGAR</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalAddValue, $addEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumAddValueRate, $addEvent->currency->symbol) }}</td>
                                     </tr>
 
                                     <tr>
@@ -896,8 +896,8 @@ $strip = false;
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalAddValue * $addEvent->iva_percent) / 100, $addEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IVA ({{ $addEvent->iva_percent }}%)</td>
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumAddValueRate * $addEvent->iva_percent) / 100, $addEvent->currency->symbol) }}</td>
-                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">COMISSÃO & TAXAS INCLUSAS</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalAddValue + (($sumValueRate * $addEvent->service_charge) / 100), $addEvent->currency->symbol) }}</td>
+                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">LUCRO TOTAL</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalAddValue - $sumAddValueRate, $addEvent->currency->symbol) }}</td>
                                     </tr>
                                 </table>
 
@@ -1037,7 +1037,7 @@ $strip = false;
                                             {{ formatCurrency(($sumTransportValueRate * $transportEvent->iss_percent) / 100, $transportEvent->currency->symbol) }}
                                         </td>
                                         <td class="custom-bg-success-text-white" style="background-color: #c1d9ff; border: 1px solid #ffffff; color: #000">TOTAL COM TAXAS CLIENTE</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTransportValueRate, $transportEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalTransportValue, $transportEvent->currency->symbol) }}</td>
                                     </tr>
                                     <tr>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA DE SERVIÇO ({{ $transportEvent->service_percent }}%)</td>
@@ -1045,7 +1045,7 @@ $strip = false;
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA DE SERVIÇO ({{ $transportEvent->service_percent }}%)</td>
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTransportValueRate * $transportEvent->service_percent) / 100, $transportEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff; background-color: #ffe5e5; color: #000">TOTAL COM TAXAS A PAGAR</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalTransportValue, $transportEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTransportValueRate, $transportEvent->currency->symbol) }}</td>
                                     </tr>
 
                                     <tr>
@@ -1053,8 +1053,8 @@ $strip = false;
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalTransportValue * $transportEvent->iva_percent) / 100, $transportEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IVA ({{ $transportEvent->iva_percent }}%)</td>
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTransportValueRate * $transportEvent->iva_percent) / 100, $transportEvent->currency->symbol) }}</td>
-                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">COMISSÃO & TAXAS INCLUSAS</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalTransportValue + (($sumTransportValueRate * $transportEvent->service_charge) / 100), $transportEvent->currency->symbol) }}</td>
+                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">LUCRO TOTAL</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalTransportValue - $sumTransportValueRate, $transportEvent->currency->symbol) }}</td>
                                     </tr>
                                 </table>
 

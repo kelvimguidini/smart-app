@@ -60,12 +60,9 @@ const statusBlockEdit = () => {
     return false;
 }
 
-const formatCurrency = (value) => {
+const formatCurrency = (value, sigla = 'BRL')  => {
     value = Math.round(value * 100) / 100;
-    let sigla = 'BRL';
-    if (props.eventTransport != null) {
-        sigla = props.eventTransport.currency.sigla;
-    }
+    
     return new Intl.NumberFormat('pt-BR', {
         style: 'currency',
         currency: sigla,
@@ -297,20 +294,20 @@ const showDetails = ref(false);
                                 {{ opt.kickback }}
                             </td>
                             <td class="align-middle bg-success text-white">
-                                {{ formatCurrency(unitSale(opt)) }}
+                                {{ formatCurrency(unitSale(opt), evtr.currency.sigla) }}
                             </td>
                             <td class="align-middle bg-success text-white">
-                                {{ formatCurrency(unitSale(opt) * daysBetween(opt.in, opt.out) * opt.count) }}
+                                {{ formatCurrency(unitSale(opt) * daysBetween(opt.in, opt.out) * opt.count, evtr.currency.sigla) }}
                             </td>
                             <td class="align-middle bg-warning text-dark">
-                                {{ formatCurrency(unitCost(opt)) }}
+                                {{ formatCurrency(unitCost(opt), evtr.currency.sigla) }}
                             </td>
                             <td class="align-middle bg-warning text-dark">
                                 {{ formatCurrency(unitCost(opt) * daysBetween(opt.in, opt.out) *
-                                    opt.count) }}
+                                    opt.count, evtr.currency.sigla) }}
                             </td>
                             <td class=" align-middle">{{
-                                formatCurrency(opt.received_proposal)
+                                formatCurrency(opt.received_proposal, evtr.currency.sigla)
                             }}</td>
                             <td class="align-middle">{{
                                 opt.received_proposal_percent
@@ -318,31 +315,31 @@ const showDetails = ref(false);
                             </td>
                             <template v-if="showDetails">
                                 <td class="align-middle text-success">
-                                    <b>{{ formatCurrency((unitSale(opt) * evtr.iss_percent) / 100) }}</b>
+                                    <b>{{ formatCurrency((unitSale(opt) * evtr.iss_percent) / 100, evtr.currency.sigla) }}</b>
                                 </td>
                                 <td class=" align-middle text-success">
-                                    <b>{{ formatCurrency((unitCost(opt) * evtr.iss_percent) / 100) }}</b>
+                                    <b>{{ formatCurrency((unitCost(opt) * evtr.iss_percent) / 100, evtr.currency.sigla) }}</b>
                                 </td>
 
                                 <td class="align-middle">
-                                    <b>{{ formatCurrency((unitSale(opt) * evtr.service_percent) / 100) }}</b>
+                                    <b>{{ formatCurrency((unitSale(opt) * evtr.service_percent) / 100, evtr.currency.sigla) }}</b>
                                 </td>
                                 <td class=" align-middle">
-                                    <b>{{ formatCurrency((unitCost(opt) * evtr.service_percent) / 100) }}</b>
+                                    <b>{{ formatCurrency((unitCost(opt) * evtr.service_percent) / 100, evtr.currency.sigla) }}</b>
                                 </td>
 
                                 <td class="align-middle text-success">
-                                    <b>{{ formatCurrency((unitSale(opt) * evtr.iva_percent) / 100) }}</b>
+                                    <b>{{ formatCurrency((unitSale(opt) * evtr.iva_percent) / 100, evtr.currency.sigla) }}</b>
                                 </td>
                                 <td class=" align-middle text-success">
-                                    <b>{{ formatCurrency((unitCost(opt) * evtr.iva_percent) / 100) }}</b>
+                                    <b>{{ formatCurrency((unitCost(opt) * evtr.iva_percent) / 100, evtr.currency.sigla) }}</b>
                                 </td>
 
                                 <td class="align-middle">
-                                    <b>{{ formatCurrency((unitSale(opt) * evtr.service_charge) / 100) }}</b>
+                                    <b>{{ formatCurrency((unitSale(opt) * evtr.service_charge) / 100, evtr.currency.sigla) }}</b>
                                 </td>
                                 <td class=" align-middle">
-                                    <b>{{ formatCurrency((unitCost(opt) * evtr.service_charge) / 100) }}</b>
+                                    <b>{{ formatCurrency((unitCost(opt) * evtr.service_charge) / 100, evtr.currency.sigla) }}</b>
                                 </td>
                             </template>
                             <td class="align-middle">
@@ -387,13 +384,13 @@ const showDetails = ref(false);
                                 Total venda:
                             </td>
                             <td class="align-middle bg-success text-white">
-                                {{ formatCurrency(sumSale(evtr)) }}
+                                {{ formatCurrency(sumSale(evtr), evtr.currency.sigla) }}
                             </td>
                             <td class="align-middle bg-warning text-dark text-rigth">
                                 Total Custo
                             </td>
                             <td class="align-middle bg-warning text-dark">
-                                {{ formatCurrency(sumCost(evtr)) }}
+                                {{ formatCurrency(sumCost(evtr), evtr.currency.sigla) }}
                             </td>
                             <td class="align-middle text-rigth">
                                 Média %
@@ -408,28 +405,28 @@ const showDetails = ref(false);
                             </td>
                             <template v-if="showDetails">
                                 <td class="align-middle text-success">
-                                    <b>{{ formatCurrency(sumTaxes(evtr, 'iss')) }}</b>
+                                    <b>{{ formatCurrency(sumTaxes(evtr, 'iss'), evtr.currency.sigla) }}</b>
                                 </td>
                                 <td class="align-middle text-success">
-                                    <b>{{ formatCurrency((sumCost(evtr) * evtr.iss_percent) / 100) }}</b>
+                                    <b>{{ formatCurrency((sumCost(evtr) * evtr.iss_percent) / 100, evtr.currency.sigla) }}</b>
                                 </td>
                                 <td class="align-middle">
-                                    <b>{{ formatCurrency(sumTaxes(evtr, 'serv')) }}</b>
+                                    <b>{{ formatCurrency(sumTaxes(evtr, 'serv'), evtr.currency.sigla) }}</b>
                                 </td>
                                 <td class="align-middle">
-                                    <b>{{ formatCurrency((sumCost(evtr) * evtr.service_percent) / 100) }}</b>
+                                    <b>{{ formatCurrency((sumCost(evtr) * evtr.service_percent) / 100, evtr.currency.sigla) }}</b>
                                 </td>
                                 <td class="align-middle text-success">
-                                    <b>{{ formatCurrency(sumTaxes(evtr, 'iva')) }}</b>
+                                    <b>{{ formatCurrency(sumTaxes(evtr, 'iva'), evtr.currency.sigla) }}</b>
                                 </td>
                                 <td class="align-middle text-success">
-                                    <b>{{ formatCurrency((sumCost(evtr) * evtr.iva_percent) / 100) }}</b>
+                                    <b>{{ formatCurrency((sumCost(evtr) * evtr.iva_percent) / 100, evtr.currency.sigla) }}</b>
                                 </td>
                                 <td class="align-middle">
-                                    <b>{{ formatCurrency(sumTaxes(evtr, 'sc')) }}</b>
+                                    <b>{{ formatCurrency(sumTaxes(evtr, 'sc'), evtr.currency.sigla) }}</b>
                                 </td>
                                 <td class="align-middle">
-                                    <b>{{ formatCurrency((sumCost(evtr) * evtr.service_charge) / 100) }}</b>
+                                    <b>{{ formatCurrency((sumCost(evtr) * evtr.service_charge) / 100, evtr.currency.sigla) }}</b>
                                 </td>
                             </template>
                             <td class="align-middle"></td>
@@ -447,7 +444,7 @@ const showDetails = ref(false);
                             </td>
                             <td class="align-middle" colspan="2">
                                 <b>{{ formatCurrency(sumSale(evtr) + sumTaxes(evtr, 'iss') +
-                                    sumTaxes(evtr, 'serv') + sumTaxes(evtr, 'iva') + sumTaxes(evtr, 'sc')) }}</b>
+                                    sumTaxes(evtr, 'serv') + sumTaxes(evtr, 'iva') + sumTaxes(evtr, 'sc'), evtr.currency.sigla) }}</b>
                             </td>
                             <template v-if="showDetails">
                                 <td colspan="8"></td>
@@ -467,7 +464,7 @@ const showDetails = ref(false);
                                 Custo
                             </td>
                             <td class="align-middle" colspan="2">
-                                <b>{{ formatCurrency(((sumCost(evtr) * evtr.iss_percent) / 100) +
+                                <b>{{ formatCurrency(((sumCost(evtr) * evtr.iss_percent) / 100, evtr.currency.sigla) +
                                     ((sumCost(evtr) * evtr.service_percent) / 100) + ((sumCost(evtr) *
                                         evtr.iva_percent) / 100) + sumCost(evtr)) }}</b>
                             </td>
