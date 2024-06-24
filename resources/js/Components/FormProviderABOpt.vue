@@ -64,6 +64,7 @@ const duplicate = (opt, edit = false) => {
     formOpt.in = new Date(opt.in);
     formOpt.out = new Date(opt.out);
     formOpt.received_proposal = opt.received_proposal;
+    formOpt.received_proposal_percent = opt.received_proposal_percent;
     formOpt.kickback = opt.kickback;
     formOpt.count = opt.count;
 
@@ -147,9 +148,9 @@ onMounted(() => {
     }
 
     let symbol = 'R$ ';
-    if (props.eventAB != null) {
-        symbol = props.eventAB.currency.symbol + ' ';
-        formOpt.ab_id = props.eventAB.ab_id;
+    if (props.eventAb != null) {
+        symbol = props.eventAb.currency.symbol + ' ';
+        formOpt.ab_id = props.eventAb.ab_id;
     }
     $('.money').maskMoney({ prefix: symbol, allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
 });

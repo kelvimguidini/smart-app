@@ -28,10 +28,15 @@ function daysBetween1($date1, $date2)
     return ceil($difference / (60 * 60 * 24)) + 1;
 }
 
-function formatCurrency($value, $symbol = 'BRL')
+$symbolGeral = 'BRL';
+function formatCurrency($value, $symbol = '')
 {
+    global $symbolGeral;
+    if ($symbol != '') {
+        $symbolGeral = $symbol;
+    }
     $value = round($value * 100) / 100;
-    return $symbol . ' ' . number_format($value, 2, ',', '.');
+    return $symbolGeral . ' ' . number_format($value, 2, ',', '.');
 }
 
 function unitSale($opt)

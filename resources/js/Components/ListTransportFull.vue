@@ -76,7 +76,10 @@ const unitCost = (opt) => {
 }
 
 const unitSale = (opt) => {
-    return Math.ceil(unitCost(opt) / opt.received_proposal_percent)
+    if(opt.received_proposal_percent > 0){
+        return Math.ceil(unitCost(opt) / opt.received_proposal_percent);
+    }
+    return unitCost(opt);
 }
 
 const sumCount = (evtr) => {
@@ -215,7 +218,7 @@ const showDetails = ref(false);
 
                             <th class="text-left" colspan="11">
                                 {{ evtr.transport.national ? "Nacional" : "Internacional" }}
-                                {{ evtr.transport.city }}
+                                {{ evtr.transport.national ? evtr.transport.city :  evtr.transport.city.name + ' - ' + evtr.transport.city.country }}
                             </th>
 
                             <th colspan="2" class="align-middle">Valor de Venda</th>

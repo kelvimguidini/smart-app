@@ -76,7 +76,10 @@ const unitCost = (opt) => {
 }
 
 const unitSale = (opt) => {
-    return Math.ceil(unitCost(opt) / opt.received_proposal_percent)
+    if(opt.received_proposal_percent > 0){
+        return Math.ceil(unitCost(opt) / opt.received_proposal_percent);
+    }
+    return unitCost(opt);
 }
 
 const roomNights = (evab) => {

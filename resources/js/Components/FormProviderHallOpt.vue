@@ -67,6 +67,7 @@ const duplicate = (opt, isEdit = false) => {
     formOpt.received_proposal = opt.received_proposal;
     formOpt.kickback = opt.kickback;
     formOpt.count = opt.count;
+    formOpt.received_proposal_percent = opt.received_proposal_percent;
 
     $('#broker').val(opt.broker_id).trigger('change');
     $('#service').val(opt.service_id).trigger('change');
@@ -183,7 +184,7 @@ const isLoader = ref(false);
 
                 <div class="form-group">
                     <InputLabel for="name" value="Descrição:" />
-                    <TextInput type="text" class="form-control" v-model="formOpt.name" autofocus autocomplete="name" />
+                    <TextInput type="text" class="form-control" v-model="formOpt.name" autofocus autocomplete="name" required />
                 </div>
 
                 <div class="form-group">

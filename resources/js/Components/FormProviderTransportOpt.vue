@@ -79,6 +79,7 @@ const duplicate = (opt, edit = false) => {
     formOpt.in = new Date(opt.in);
     formOpt.out = new Date(opt.out);
     formOpt.received_proposal = opt.received_proposal;
+    formOpt.received_proposal_percent = opt.received_proposal_percent;
     formOpt.kickback = opt.kickback;
     formOpt.count = opt.count;
 
