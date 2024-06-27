@@ -252,7 +252,7 @@ const isLoader = ref(false);
                         <div class="form-group">
                             <InputLabel for="kickback" id="kickback" value="Comissão (%):" />
                             <TextInput type="number" class="form-control" v-model="formOpt.kickback" required autofocus
-                                min="0" step=".1" autocomplete="kickback" />
+                                min="0" step="0.01" autocomplete="kickback" />
                         </div>
                     </div>
                 </div>
@@ -272,7 +272,7 @@ const isLoader = ref(false);
                         <div class="form-group">
                             <InputLabel for="received_proposal_percent" value="Markup (%):" />
                             <TextInput type="number" class="form-control percent"
-                                v-model="formOpt.received_proposal_percent" required autofocus min="0" step=".1"
+                                v-model="formOpt.received_proposal_percent" required autofocus min="0" step="0.01"
                                 autocomplete="received_proposal_percent" />
                         </div>
 

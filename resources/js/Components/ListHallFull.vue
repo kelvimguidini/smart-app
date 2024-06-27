@@ -72,7 +72,7 @@ const formatCurrency = (value, sigla = 'BRL') => {
 }
 
 const unitCost = (opt) => {
-    return opt.received_proposal - ((opt.received_proposal * opt.kickback) / 100);
+    return opt.received_proposal;
 }
 
 const unitSale = (opt) => {

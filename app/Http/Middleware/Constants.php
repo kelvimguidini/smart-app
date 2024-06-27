@@ -87,7 +87,7 @@ class Constants extends Middleware
         ],
         'added_information' => [
             'label' => "Informações Adicionadas",
-            'level' => 2,
+            'level' => 1,
             'flow' => ['sent_maneger']
         ],
         'change_request' => [

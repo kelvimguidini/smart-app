@@ -36,13 +36,22 @@ function formatCurrency($value, $symbol = 'BRL')
 
 function unitSale($opt)
 {
-    $unitCost = $opt['received_proposal'] - (($opt['received_proposal']) / 100);
-    return ceil($unitCost / $opt['received_proposal_percent']);
+    if ($opt['received_proposal_percent'] == 0) {
+        return $opt['received_proposal'];
+    }
+
+    return ceil($opt['received_proposal'] / $opt['received_proposal_percent']);
 }
+
 
 function sumTaxesProvider($eventP, $opt)
 {
-    return ((unitSale($opt) * $eventP['iss_percent']) / 100) + ((unitSale($opt) * $eventP['service_percent']) / 100) + ((unitSale($opt) * $eventP['iva_percent']) / 100);
+    return ((unitSale($opt) * $eventP['iss_percent']) / 100) + ((unitSale($opt) * $eventP['service_percent']) / 100) + ((unitSale($opt) * $eventP['iva_percent']) / 100) + ((unitSale($opt) * $eventP['service_charge']) / 100);
+}
+
+function sumTaxesProviderCost($eventP, $opt)
+{
+    return (($opt['received_proposal'] * $eventP['iss_percent']) / 100) + (($opt['received_proposal'] * $eventP['service_percent']) / 100) + (($opt['received_proposal'] * $eventP['iva_percent']) / 100) + (($opt['received_proposal'] * $eventP['service_charge']) / 100);
 }
 
 function sumTotal($rate, $taxes, $qtdDayle)
@@ -65,10 +74,14 @@ function hexToRgb($hex, $a)
 }
 
 
-$sumTotalHotelValue = 0;
+$sumTotalHotelSale = 0;
+$sumTotalHotelSaleTaxa = 0;
+$sumTaxeHotelCost = 0;
+$sumTaxeHotelSale = 0;
+$sumTotalHotelCost = 0;
 $sumQtdDayles = 0;
-$sumValueRate = 0;
 $totalKickback = 0;
+
 
 $sumTotalABValue = 0;
 $sumABQtdDayles = 0;
@@ -288,7 +301,7 @@ $strip = false;
                     </div>
                 </div>
                 <div class="right">
-                    <img src="{{ asset($event->customer->logo) }}" style="width: 130px;" alt="{{ $event->customer->name}}">
+                    <img src="{{ asset($event->customer->logo) }}" style="max-width: 100px; max-height: 100px;" alt="{{ $event->customer->name}}">
                 </div>
             </header>
 
@@ -326,15 +339,20 @@ $strip = false;
                     <tbody>
                         @foreach ($hotelEvent->eventHotelsOpt as $key => $item)
                         <?php
-                        $rate = floatval($item->received_proposal);
-                        $taxes = floatval(sumTaxesProvider($hotelEvent, $item));
+                        $taxes = sumTaxesProvider($hotelEvent, $item);
                         $qtdDayle = $item->count * daysBetween($item->in, $item->out);
 
-                        $sumValueRate += $rate * $qtdDayle;
+                        $taxesCost = sumTaxesProviderCost($hotelEvent, $item);
+                        $sumTaxeHotelCost += $taxesCost * $qtdDayle;
+                        $sumTaxeHotelSale += $taxes * $qtdDayle;
+
                         $sumQtdDayles += $qtdDayle;
 
-                        $totalKickback += ($sumValueRate * floatval($item->kickback)) / 100;
-                        $sumTotalHotelValue += sumTotal($rate, $taxes, $qtdDayle);
+                        $totalKickback += ($item->received_proposal * $qtdDayle * $item->kickback) / 100;
+                        $sumTotalHotelCost += sumTotal($item->received_proposal, $taxesCost, $qtdDayle);
+
+                        $sumTotalHotelSale += sumTotal(unitSale($item), $taxes, $qtdDayle);
+
                         ?>
                         <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
                             <td>{{ $item->category_hotel->name }}</td>
@@ -345,18 +363,21 @@ $strip = false;
                             <td>{{ $item->count }}</td>
                             <td>{{ daysBetween($item->in, $item->out) }}</td>
 
-                            <td>{{ formatCurrency($item->received_proposal, $hotelEvent->currency->symbol) }}</td>
+                            <td>{{ formatCurrency(unitSale($item), $hotelEvent->currency->symbol) }}</td>
                             <td>
                                 {{ formatCurrency(sumTaxesProvider($hotelEvent, $item), $hotelEvent->currency->symbol) }}
                             </td>
                             <td>
-                                {{ formatCurrency($item->received_proposal + sumTaxesProvider($hotelEvent, $item), $hotelEvent->currency->symbol) }}
+                                {{ formatCurrency(unitSale($item) + sumTaxesProvider($hotelEvent, $item), $hotelEvent->currency->symbol) }}
                             </td>
-                            <td>{{ formatCurrency(sumTotal($item->received_proposal, sumTaxesProvider($hotelEvent, $item), $item->count * daysBetween($item->in, $item->out)), $hotelEvent->currency->symbol) }}
+                            <td>{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($hotelEvent, $item), $item->count * daysBetween($item->in, $item->out)), $hotelEvent->currency->symbol) }}
                             </td>
                         </tr>
                         @endforeach
                     </tbody>
+                    <?php
+                    $sumTotalHotelSaleTaxa = ((($sumTotalHotelSale * $hotelEvent->iof) / 100) + $sumTotalHotelSale) * 1.10;
+                    ?>
                     <tfoot class="table-footer">
                         <tr>
                             <td colspan="11" style="padding: 0;">
@@ -368,7 +389,7 @@ $strip = false;
                                         <td class="align-middle">{{ $sumQtdDayles }}</td>
                                         <th class="align-middle custom-bg-success-text-white">DIÁRIA MÉDIA</th>
                                         <td class="align-middle">
-                                            {{ formatCurrency($sumValueRate / $sumQtdDayles, $hotelEvent->currency->symbol) }}
+                                            {{ formatCurrency($sumTotalHotelSale / $sumQtdDayles, $hotelEvent->currency->symbol) }}
                                         </td>
                                         <th class="align-middle custom-bg-success-text-white">
                                             EMITIR NOTA FISCAL?
@@ -380,14 +401,15 @@ $strip = false;
                                             Total Venda
                                         </th>
                                         <td class="align-middle">
-                                            {{ formatCurrency($sumTotalHotelValue, $hotelEvent->currency->symbol) }}
+                                            {{ formatCurrency($sumTotalHotelSale, $hotelEvent->currency->symbol) }}
                                         </td>
                                         <th class="align-middle custom-bg-success-text-white">
                                             Total Custo
                                         </th>
                                         <td class="align-middle">
-                                            {{ formatCurrency($sumValueRate, $hotelEvent->currency->symbol) }}
+                                            {{ formatCurrency($sumTotalHotelCost, $hotelEvent->currency->symbol) }}
                                         </td>
+
                                     </tr>
                                 </table>
                             </td>
@@ -395,9 +417,7 @@ $strip = false;
 
                         <tr style="background-color: #ffe0b1">
                             <td colspan="2"><b>Comentários:</b></td>
-                            <td colspan="7">{{ $hotelEvent->internal_observation }}</td>
-                            <td>Comissão</td>
-                            <td style="background-color: #ffc670; color: #000"><b>{{ formatCurrency($totalKickback, $hotelEvent->currency->symbol) }}</b></td>
+                            <td colspan="9">{{ $hotelEvent->internal_observation }}</td>
                         </tr>
 
                         <tr>
@@ -410,34 +430,59 @@ $strip = false;
                                         <th></th>
                                         <td></td>
                                     </tr>
+
                                     <tr>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">ISS ({{ $hotelEvent->iss_percent }}%)</td>
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">
-                                            {{ formatCurrency(($sumTotalHotelValue * $hotelEvent->iss_percent) / 100, $hotelEvent->currency->symbol) }}
+                                            {{ formatCurrency(($sumTotalHotelSale * $hotelEvent->iss_percent) / 100, $hotelEvent->currency->symbol) }}
                                         </td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">ISS ({{ $hotelEvent->iss_percent }}%)</td>
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">
-                                            {{ formatCurrency(($sumValueRate * $hotelEvent->iss_percent) / 100, $hotelEvent->currency->symbol) }}
+                                            {{ formatCurrency(($sumTotalHotelCost * $hotelEvent->iss_percent) / 100, $hotelEvent->currency->symbol) }}
                                         </td>
                                         <td class="custom-bg-success-text-white" style="background-color: #c1d9ff; border: 1px solid #ffffff; color: #000">TOTAL COM TAXAS CLIENTE</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalHotelValue, $hotelEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalHotelSaleTaxa, $hotelEvent->currency->symbol) }}</td>
                                     </tr>
+
                                     <tr>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA DE SERVIÇO ({{ $hotelEvent->service_percent }}%)</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalHotelValue * $hotelEvent->service_percent) / 100, $hotelEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalHotelSale * $hotelEvent->service_percent) / 100, $hotelEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA DE SERVIÇO ({{ $hotelEvent->service_percent }}%)</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumValueRate * $hotelEvent->service_percent) / 100, $hotelEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalHotelCost * $hotelEvent->service_percent) / 100, $hotelEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff; background-color: #ffe5e5; color: #000">TOTAL COM TAXAS A PAGAR</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumValueRate, $hotelEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalHotelCost, $hotelEvent->currency->symbol) }}</td>
                                     </tr>
 
                                     <tr>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IVA ({{ $hotelEvent->iva_percent }}%)</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalHotelValue * $hotelEvent->iva_percent) / 100, $hotelEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalHotelSale * $hotelEvent->iva_percent) / 100, $hotelEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IVA ({{ $hotelEvent->iva_percent }}%)</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumValueRate * $hotelEvent->iva_percent) / 100, $hotelEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalHotelCost * $hotelEvent->iva_percent) / 100, $hotelEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">LUCRO TOTAL</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalHotelValue - $sumValueRate, $hotelEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalHotelSaleTaxa - $sumTotalHotelCost, $hotelEvent->currency->symbol) }}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO ({{ $hotelEvent->service_charge }}%)</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalHotelSale * $hotelEvent->service_charge) / 100, $hotelEvent->currency->symbol) }}</td>
+                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO ({{ $hotelEvent->service_charge }}%)</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalHotelCost * $hotelEvent->service_charge) / 100, $hotelEvent->currency->symbol) }}</td>
+                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Comissão</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($totalKickback, $hotelEvent->currency->symbol) }}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $hotelEvent->iof }}%)</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalHotelSale * $hotelEvent->iof) / 100, $hotelEvent->currency->symbol) }}</td>
+                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $hotelEvent->iof }}%)</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalHotelCost * $hotelEvent->iof) / 100, $hotelEvent->currency->symbol) }}</td>
+                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;" colspan="2"></td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Serviço 4BTS (10.00%)</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalHotelSale * 0.10, $hotelEvent->currency->symbol) }}</td>
+                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;" colspan="4"></td>
                                     </tr>
                                 </table>
 
@@ -1077,28 +1122,27 @@ $strip = false;
                         <tr>
                             <th></th>
                             <th colspan="3" style="color: #000; background-color: #c1d9ff; border: 1px solid #ffffff;">Cliente</th>
-                            <th colspan="3" style="color: #000; background-color: #ffe5e5; border: 1px solid #ffffff;">A pagar</th>
+                            <th colspan="2" style="color: #000; background-color: #ffe5e5; border: 1px solid #ffffff;">A pagar</th>
                         </tr>
                         <tr>
                             <th class="custom-bg-success-text-white">Resumo</th>
                             <th style="background-color: #c1d9ff; border: 1px solid #ffffff;">Tarifas</th>
-                            <th style="background-color: #c1d9ff; border: 1px solid #ffffff;">Taxas</th>
+                            <th style="background-color: #c1d9ff; border: 1px solid #ffffff;">Taxas 4BTS</th>
                             <th style="background-color: #c1d9ff; border: 1px solid #ffffff;">Impostos</th>
                             <th style="background-color: #ffe5e5; border: 1px solid #ffffff;">Tarifas</th>
-                            <th style="background-color: #ffe5e5; border: 1px solid #ffffff;">Taxas</th>
                             <th style="background-color: #ffe5e5; border: 1px solid #ffffff;">Impostos</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody>$sumTaxeHotelCost = 0;
+                        = 0;
                         @if($hotelEvent != null && $hotelEvent->eventHotelsOpt != null && count($hotelEvent->eventHotelsOpt) > 0)
                         <tr style="background-color: <? !$strip ? '#ffffff' : '#f7fafc' ?>">
                             <td>Hospedagem</td>
-                            <td class="custom-bg-success-text-white">{{ formatCurrency($sumValueRate, $hotelEvent->currency->symbol) }}</td>
-                            <td>{{ formatCurrency($sumTotalHotelValue - $sumValueRate, $hotelEvent->currency->symbol) }}</td>
-                            <td class="custom-bg-success-text-white">{{ formatCurrency($sumTotalHotelValue - $sumValueRate, $hotelEvent->currency->symbol) }}</td>
-                            <td class="custom-bg-success-text-white">{{ formatCurrency($sumValueRate, $hotelEvent->currency->symbol) }}</td>
-                            <td>{{ formatCurrency($sumTotalHotelValue - $sumValueRate, $hotelEvent->currency->symbol) }}</td>
-                            <td class="custom-bg-success-text-white">{{ formatCurrency($sumTotalHotelValue - $sumValueRate, $hotelEvent->currency->symbol) }}</td>
+                            <td class="custom-bg-success-text-white">{{ formatCurrency($sumTotalHotelSaleTaxa, $hotelEvent->currency->symbol) }}</td>
+                            <td>{{ formatCurrency($sumTotalHotelSale * 0.1, $hotelEvent->currency->symbol) }}</td>
+                            <td class="custom-bg-success-text-white">{{ formatCurrency($sumTaxeHotelSale, $hotelEvent->currency->symbol) }}</td>
+                            <td class="custom-bg-success-text-white">{{ formatCurrency($sumTotalHotelCost, $hotelEvent->currency->symbol) }}</td>
+                            <td class="custom-bg-success-text-white">{{ formatCurrency($sumTaxeHotelCost, $hotelEvent->currency->symbol) }}</td>
                         </tr>
                         <?php $strip = !$strip; ?>
                         @endif
@@ -1110,7 +1154,6 @@ $strip = false;
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumTotalABValue - $sumABValueRate, $abEvent->currency->symbol) }}</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumABValueRate, $abEvent->currency->symbol) }}</td>
                             <td>{{ formatCurrency($sumTotalABValue - $sumABValueRate, $abEvent->currency->symbol) }}</td>
-                            <td class="custom-bg-success-text-white">{{ formatCurrency($sumTotalABValue - $sumABValueRate, $abEvent->currency->symbol) }}</td>
                         </tr>
                         <?php $strip = !$strip; ?>
                         @endif
@@ -1123,8 +1166,6 @@ $strip = false;
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumTotalHallValue - $sumHallValueRate, $hallEvent->currency->symbol) }}</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumHallValueRate, $hallEvent->currency->symbol) }}</td>
                             <td>{{ formatCurrency($sumTotalHallValue - $sumHallValueRate, $hallEvent->currency->symbol) }}</td>
-                            <td class="custom-bg-success-text-white">{{ formatCurrency($sumTotalHallValue - $sumHallValueRate, $hallEvent->currency->symbol) }}</td>
-
                         </tr>
                         <?php $strip = !$strip; ?>
                         @endif
@@ -1137,8 +1178,6 @@ $strip = false;
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumTotalAddValue - $sumAddValueRate, $addEvent->currency->symbol) }}</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumAddValueRate, $addEvent->currency->symbol) }}</td>
                             <td>{{ formatCurrency($sumTotalAddValue - $sumAddValueRate, $addEvent->currency->symbol) }}</td>
-                            <td class="custom-bg-success-text-white">{{ formatCurrency($sumTotalAddValue - $sumAddValueRate, $addEvent->currency->symbol) }}</td>
-
                         </tr>
                         <?php $strip = !$strip; ?>
                         @endif
@@ -1150,7 +1189,6 @@ $strip = false;
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumTotalTransportValue - $sumTransportValueRate, $transportEvent->currency->symbol) }}</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumTransportValueRate, $transportEvent->currency->symbol) }}</td>
                             <td>{{ formatCurrency($sumTotalTransportValue - $sumTransportValueRate, $transportEvent->currency->symbol) }}</td>
-                            <td class="custom-bg-success-text-white">{{ formatCurrency($sumTotalTransportValue - $sumTransportValueRate, $transportEvent->currency->symbol) }}</td>
                         </tr>
                         @endif
                     </tbody>
@@ -1162,31 +1200,20 @@ $strip = false;
                     <tr style="background-color: #ebf8ff; color: #000;">
                         <td colspan="2" style="background-color: #ebf8ff;">TOTAL CLIENTE</td>
                         <td colspan="3" style="background-color: #ffe3b9; padding: 0.5rem;">
-                            {{ formatCurrency($sumTotalHotelValue +
-                                        $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue + $sumTotalTransportValue + ((($sumTotalHotelValue +
-                                        $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue + $sumTotalTransportValue) * $percIOF) / 100) +
-                                        ((($sumTotalHotelValue +
-                                        $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue + $sumTotalTransportValue) * $percService) / 100)) }}
+                            {{ formatCurrency($sumTotalHotelSaleTaxa + $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue + $sumTotalTransportValue) }}
                         </td>
                     </tr>
                     <tr style="background-color: #ebf8ff; color: #000; ">
                         <td colspan="2" style="background-color: #ebf8ff;">TOTAL A PAGAR</td>
                         <td colspan="3" style="background-color: #ffe3b9; padding: 0.5rem;">
-                            {{ formatCurrency($sumTotalHotelValue +
-                                        $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue + $sumTotalTransportValue + ((($sumTotalHotelValue +
-                                        $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue + $sumTotalTransportValue) * $percIOF) / 100) +
-                                        ((($sumTotalHotelValue +
-                                        $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue + $sumTotalTransportValue) * $percService) / 100)) }}
+                            {{ formatCurrency($sumTotalHotelCost + $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue + $sumTotalTransportValue) }}
                         </td>
                     </tr>
                     <tr style="background-color: #ebf8ff;">
                         <td colspan="2" style="background-color: #ebf8ff;">LUCRO TOTAL</td>
                         <td colspan="3" style="background-color: #ffe3b9; padding: 0.5rem;">
-                            {{ formatCurrency($sumTotalHotelValue +
-                                        $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue + $sumTotalTransportValue + ((($sumTotalHotelValue +
-                                        $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue + $sumTotalTransportValue) * $percIOF) / 100) +
-                                        ((($sumTotalHotelValue +
-                                        $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue + $sumTotalTransportValue) * $percService) / 100)) }}
+                            {{ formatCurrency(($sumTotalHotelSaleTaxa + $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue + $sumTotalTransportValue)
+                                - ($sumTotalHotelCost + $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue + $sumTotalTransportValue)) }}
                         </td>
                     </tr>
                 </tbody>

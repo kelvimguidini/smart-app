@@ -41,8 +41,11 @@ function formatCurrency($value, $symbol = '')
 
 function unitSale($opt)
 {
-    $unitCost = $opt['received_proposal'] - ($opt['received_proposal'] / 100);
-    return ceil($unitCost / $opt['received_proposal_percent']);
+    if ($opt['received_proposal_percent'] == 0) {
+        return $opt['received_proposal'];
+    }
+
+    return ceil($opt['received_proposal'] / $opt['received_proposal_percent']);
 }
 
 function sumTaxesProvider($eventP, $opt)

@@ -53,7 +53,7 @@ const isLoader = ref(false);
 const deleteBroker = (id) => {
     isLoader.value = true;
     formDelete.id = id;
-    formDelete.delete(route('broker-trans-delete'), {
+    formDelete.delete(route('broker-delete'), {
         onFinish: () => {
             isLoader.value = false;
             formDelete.reset();
@@ -82,7 +82,7 @@ const newItem = (() => {
 });
 
 const submit = () => {
-    form.post(route('broker-trans-save'), {
+    form.post(route('broker-save'), {
         onSuccess: () => {
             newItem();
             isLoader.value = false;

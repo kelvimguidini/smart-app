@@ -188,7 +188,7 @@ const deleteHotel = (id) => {
                                     <div class="form-group">
                                         <InputLabel for="iss_percent" value="ISS:" />
                                         <TextInput type="number" class="form-control percent" v-model="form.iss_percent"
-                                            required autofocus min="0" step=".1" autocomplete="iss_percent" />
+                                            required autofocus min="0" step="0.01" autocomplete="iss_percent" />
                                     </div>
                                 </div>
 
@@ -196,7 +196,7 @@ const deleteHotel = (id) => {
                                     <div class="form-group">
                                         <InputLabel for="service_percent" value="Serviço:" />
                                         <TextInput type="number" class="form-control percent" v-model="form.service_percent"
-                                            required autofocus min="0" step=".1" autocomplete="service_percent" />
+                                            required autofocus min="0" step="0.01" autocomplete="service_percent" />
                                     </div>
                                 </div>
 
@@ -204,7 +204,7 @@ const deleteHotel = (id) => {
                                     <div class="form-group">
                                         <InputLabel for="iva_percent" value="IVA:" />
                                         <TextInput type="number" class="form-control percent" v-model="form.iva_percent"
-                                            required autofocus min="0" step=".1" autocomplete="iva_percent" />
+                                            required autofocus min="0" step="0.01" autocomplete="iva_percent" />
                                     </div>
                                 </div>
 
