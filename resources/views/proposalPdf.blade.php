@@ -287,7 +287,7 @@ if ($transportEvent != null) {
         .arrow {
             display: inline-block;
             margin: 15px 0 0 -19px;
-            padding: 12px 40px;
+            padding: 9px 40px;
             background-color: #e9540d;
             position: relative;
         }
@@ -295,7 +295,7 @@ if ($transportEvent != null) {
         .arrow:before {
             content: "";
             position: absolute;
-            top: -0px;
+            top: -3px;
             left: 100%;
             border: 20px solid transparent;
             border-left: 45px solid #e9540d;

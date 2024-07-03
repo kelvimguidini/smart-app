@@ -5,6 +5,7 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # Instale as dependências do Laravel e a extensão PDO MySQL
 RUN apt-get update && apt-get install -y \
+    git \
     libzip-dev \
     zip \
     unzip \
@@ -24,7 +25,7 @@ WORKDIR /var/www/html
 COPY . .
 
 # Instale as dependências do Composer
-RUN composer update
+RUN composer install --prefer-dist --no-progress --no-interaction
 
 # Instale as dependências do Node.js
 RUN npm install

@@ -414,13 +414,35 @@ class ProviderController extends Controller
 
         $eventDataBase = Event::with([
             'customer',
-            'event_hotels.hotel',
-            'event_abs.ab',
-            'event_halls.hall',
+            'event_hotels.hotel' => function ($query) use ($provider) {
+                $query->where('id', '=', $provider);
+            },
+            'event_abs.ab' => function ($query) use ($provider) {
+                $query->where('id', '=', $provider);
+            },
+            'event_halls.hall' => function ($query) use ($provider) {
+                $query->where('id', '=', $provider);
+            },
 
-            'event_hotels.eventHotelsOpt', 'event_hotels.eventHotelsOpt.category_hotel', 'event_hotels.currency',
-            'event_abs.eventAbOpts', 'event_abs.eventAbOpts.Local', 'event_abs.eventAbOpts.service_type', 'event_abs.currency',
-            'event_halls.eventHallOpts', 'event_halls.eventHallOpts.purpose', 'event_halls.currency',
+            'event_hotels.eventHotelsOpt' => function ($query) use ($provider) {
+                $query->whereHas('event_hotel', function ($query) use ($provider) {
+                    $query->where('hotel_id', '=', $provider);
+                });
+            },
+            'event_hotels.eventHotelsOpt.category_hotel',
+            'event_hotels.currency',
+            'event_abs.eventAbOpts' => function ($query) use ($provider) {
+                $query->whereHas('event_ab', function ($query) use ($provider) {
+                    $query->where('ab_id', '=', $provider);
+                });
+            }, 'event_abs.eventAbOpts.Local', 'event_abs.eventAbOpts.service_type', 'event_abs.currency',
+            'event_halls.eventHallOpts' => function ($query) use ($provider) {
+                $query->whereHas('event_hall', function ($query) use ($provider) {
+                    $query->where('hall_id', '=', $provider);
+                });
+            },
+            'event_halls.eventHallOpts.purpose',
+            'event_halls.currency',
 
         ])->find($event);
 

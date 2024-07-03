@@ -25,7 +25,7 @@ class Provider extends Model
         'service_charge',
         'has_hotel',
         'has_ab',
-        'has_hall'
+        'has_hall',
     ];
 
     protected $table = 'provider';
