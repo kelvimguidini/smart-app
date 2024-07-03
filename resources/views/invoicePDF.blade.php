@@ -412,12 +412,12 @@ $strip = false;
                                 </table>
                             </td>
                         </tr>
-
+                        @if($hotelEvent->internal_observation != null && $hotelEvent->internal_observation != "")
                         <tr style="background-color: #ffe0b1">
                             <td colspan="2"><b>Comentários:</b></td>
                             <td colspan="9">{{ $hotelEvent->internal_observation }}</td>
                         </tr>
-
+                        @endif
                         <tr>
                             <td colspan="11" style="padding: 0;">
 
@@ -514,7 +514,7 @@ $strip = false;
                         @foreach ($abEvent->eventAbOpts as $key => $item)
                         <?php
                         $taxesAb = sumTaxesProvider($abEvent, $item);
-                        $qtdDayleAb = $item->count * daysBetween($item->in, $item->out);
+                        $qtdDayleAb = $item->count * daysBetween1($item->in, $item->out);
 
                         $taxesCostAb = sumTaxesProviderCost($abEvent, $item);
                         $sumTaxeAbCost += $taxesCostAb * $qtdDayleAb;
@@ -542,7 +542,7 @@ $strip = false;
                             <td>{{ formatCurrency(unitSale($item), $abEvent->currency->symbol) }}</td>
                             <td>{{ formatCurrency(sumTaxesProvider($abEvent, $item), $abEvent->currency->symbol) }}</td>
                             <td>{{ formatCurrency(unitSale($item) + sumTaxesProvider($abEvent, $item), $abEvent->currency->symbol) }}</td>
-                            <td>{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($abEvent, $item), $item->count * daysBetween($item->in, $item->out)), $abEvent->currency->symbol) }}</td>
+                            <td>{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($abEvent, $item), $item->count * daysBetween1($item->in, $item->out)), $abEvent->currency->symbol) }}</td>
 
                         </tr>
                         @endforeach
@@ -570,10 +570,12 @@ $strip = false;
                             </td>
                         </tr>
 
+                        @if($abEvent->internal_observation != null && $abEvent->internal_observation != "")
                         <tr style="background-color: #ffe0b1">
                             <td colspan="2"><b>Comentários:</b></td>
                             <td colspan="8">{{ $abEvent->internal_observation }}</td>
                         </tr>
+                        @endif
 
                         <tr>
                             <td colspan="10" style="padding: 0;">
@@ -674,7 +676,7 @@ $strip = false;
                         @foreach ($hallEvent->eventHallOpts as $key => $item)
                         <?php
                         $taxesHall = sumTaxesProvider($hallEvent, $item);
-                        $qtdDayleHall = $item->count * daysBetween($item->in, $item->out);
+                        $qtdDayleHall = $item->count * daysBetween1($item->in, $item->out);
 
                         $taxesCostHall = sumTaxesProviderCost($hallEvent, $item);
                         $sumTaxeHallCost += $taxesCostHall * $qtdDayleHall;
@@ -701,7 +703,7 @@ $strip = false;
                             <td>{{ formatCurrency(unitSale($item), $hallEvent->currency->symbol) }}</td>
                             <td>{{ formatCurrency(sumTaxesProvider($hallEvent, $item), $hallEvent->currency->symbol) }}</td>
                             <td>{{ formatCurrency(unitSale($item) + sumTaxesProvider($hallEvent, $item), $hallEvent->currency->symbol) }}</td>
-                            <td>{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($hallEvent, $item), $item->count * daysBetween($item->in, $item->out)), $hallEvent->currency->symbol) }}</td>
+                            <td>{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($hallEvent, $item), $item->count * daysBetween1($item->in, $item->out)), $hallEvent->currency->symbol) }}</td>
 
                         </tr>
                         @endforeach
@@ -723,10 +725,12 @@ $strip = false;
                             <td class="align-middle">{{ formatCurrency($sumTotalHallCost, $hallEvent->currency->symbol) }}</td>
                         </tr>
 
+                        @if($hallEvent->internal_observation != null && $hallEvent->internal_observation != "")
                         <tr style="background-color: #ffe0b1">
                             <td colspan="2"><b>Comentários:</b></td>
-                            <td colspan="9">{{ $hallEvent->internal_observation }}</td>
+                            <td colspan="8">{{ $hallEvent->internal_observation }}</td>
                         </tr>
+                        @endif
 
                         <tr>
                             <td colspan="11" style="padding: 0;">
@@ -827,7 +831,7 @@ $strip = false;
                         @foreach ($addEvent->eventAddOpts as $key => $item)
                         <?php
                         $taxesAdd = sumTaxesProvider($addEvent, $item);
-                        $qtdDayleAdd = $item->count * daysBetween($item->in, $item->out);
+                        $qtdDayleAdd = $item->count * daysBetween1($item->in, $item->out);
 
                         $taxesCostAdd = sumTaxesProviderCost($addEvent, $item);
                         $sumTaxeAddCost += $taxesCostAdd * $qtdDayleAdd;
@@ -855,7 +859,7 @@ $strip = false;
                             <td>{{ formatCurrency(unitSale($item), $addEvent->currency->symbol) }}</td>
                             <td>{{ formatCurrency(sumTaxesProvider($addEvent, $item), $addEvent->currency->symbol) }}</td>
                             <td>{{ formatCurrency(unitSale($item) + sumTaxesProvider($addEvent, $item), $addEvent->currency->symbol) }}</td>
-                            <td>{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($addEvent, $item), $item->count * daysBetween($item->in, $item->out)), $addEvent->currency->symbol) }}</td>
+                            <td>{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($addEvent, $item), $item->count * daysBetween1($item->in, $item->out)), $addEvent->currency->symbol) }}</td>
 
                         </tr>
                         @endforeach
@@ -884,10 +888,12 @@ $strip = false;
                             </td>
                         </tr>
 
+                        @if($addEvent->internal_observation != null && $addEvent->internal_observation != "")
                         <tr style="background-color: #ffe0b1">
                             <td colspan="2"><b>Comentários:</b></td>
-                            <td colspan="9">{{ $addEvent->internal_observation }}</td>
+                            <td colspan="8">{{ $addEvent->internal_observation }}</td>
                         </tr>
+                        @endif
 
                         <tr>
                             <td colspan="11" style="padding: 0;">
@@ -988,7 +994,7 @@ $strip = false;
                         <?php
 
                         $taxesTransport = sumTaxesProvider($transportEvent, $item);
-                        $qtdDayleTransport = $item->count * daysBetween($item->in, $item->out);
+                        $qtdDayleTransport = $item->count * daysBetween1($item->in, $item->out);
 
                         $taxesCostTransport = sumTaxesProviderCost($transportEvent, $item);
                         $sumTaxeTransportCost += $taxesCostTransport * $qtdDayleTransport;
@@ -1017,7 +1023,7 @@ $strip = false;
                             <td>{{ formatCurrency(unitSale($item), $transportEvent->currency->symbol) }}</td>
                             <td>{{ formatCurrency(sumTaxesProvider($transportEvent, $item), $transportEvent->currency->symbol) }}</td>
                             <td>{{ formatCurrency(unitSale($item) + sumTaxesProvider($transportEvent, $item), $transportEvent->currency->symbol) }}</td>
-                            <td>{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($transportEvent, $item), $item->count * daysBetween($item->in, $item->out)), $transportEvent->currency->symbol) }}</td>
+                            <td>{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($transportEvent, $item), $item->count * daysBetween1($item->in, $item->out)), $transportEvent->currency->symbol) }}</td>
 
                         </tr>
                         @endforeach
@@ -1046,10 +1052,12 @@ $strip = false;
                             </td>
                         </tr>
 
+                        @if($transportEvent->internal_observation != null && $transportEvent->internal_observation != "")
                         <tr style="background-color: #ffe0b1">
                             <td colspan="2"><b>Comentários:</b></td>
-                            <td colspan="9">{{ $transportEvent->internal_observation }}</td>
+                            <td colspan="8">{{ $transportEvent->internal_observation }}</td>
                         </tr>
+                        @endif
 
                         <tr>
                             <td colspan="11" style="padding: 0;">

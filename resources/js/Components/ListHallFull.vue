@@ -323,33 +323,33 @@ const showDetails = ref(false);
                             }}
                             </td>
                             <template v-if="showDetails">
-
-                                <td class=" align-middle text-success">
-                                    <b>{{ formatCurrency((unitCost(opt) * evHall.iss_percent) / 100, evHall.currency.sigla) }}</b>
-                                </td>
+                                
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((unitSale(opt) * evHall.iss_percent) / 100, evHall.currency.sigla) }}</b>
                                 </td>
-
-                                <td class=" align-middle">
-                                    <b>{{ formatCurrency((unitCost(opt) * evHall.service_percent) / 100, evHall.currency.sigla) }}</b>
+                                <td class=" align-middle text-success">
+                                    <b>{{ formatCurrency((unitCost(opt) * evHall.iss_percent) / 100, evHall.currency.sigla) }}</b>
                                 </td>
+
                                 <td class="align-middle">
                                     <b>{{ formatCurrency((unitSale(opt) * evHall.service_percent) / 100, evHall.currency.sigla) }}</b>
                                 </td>
-
-                                <td class=" align-middle text-success">
-                                    <b>{{ formatCurrency((unitCost(opt) * evHall.iva_percent) / 100, evHall.currency.sigla) }}</b>
+                                <td class=" align-middle">
+                                    <b>{{ formatCurrency((unitCost(opt) * evHall.service_percent) / 100, evHall.currency.sigla) }}</b>
                                 </td>
+
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((unitSale(opt) * evHall.iva_percent) / 100, evHall.currency.sigla) }}</b>
                                 </td>
-
-                                <td class=" align-middle">
-                                    <b>{{ formatCurrency((unitCost(opt) * evHall.service_charge) / 100, evHall.currency.sigla) }}</b>
+                                <td class=" align-middle text-success">
+                                    <b>{{ formatCurrency((unitCost(opt) * evHall.iva_percent) / 100, evHall.currency.sigla) }}</b>
                                 </td>
+
                                 <td class="align-middle">
                                     <b>{{ formatCurrency((unitSale(opt) * evHall.service_charge) / 100, evHall.currency.sigla) }}</b>
+                                </td>
+                                <td class=" align-middle">
+                                    <b>{{ formatCurrency((unitCost(opt) * evHall.service_charge) / 100, evHall.currency.sigla) }}</b>
                                 </td>
                             </template>
                             <td class="align-middle">
@@ -424,30 +424,35 @@ const showDetails = ref(false);
                                 }}
                             </td>
                             <template v-if="showDetails">
+
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency(sumTaxes(evHall, 'iss'), evHall.currency.sigla) }}</b>
                                 </td>
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((sumCost(evHall) * evHall.iss_percent) / 100, evHall.currency.sigla) }}</b>
                                 </td>
+
                                 <td class="align-middle">
                                     <b>{{ formatCurrency(sumTaxes(evHall, 'serv'), evHall.currency.sigla) }}</b>
                                 </td>
                                 <td class="align-middle">
                                     <b>{{ formatCurrency((sumCost(evHall) * evHall.service_percent) / 100, evHall.currency.sigla) }}</b>
                                 </td>
+
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency(sumTaxes(evHall, 'iva'), evHall.currency.sigla) }}</b>
                                 </td>
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((sumCost(evHall) * evHall.iva_percent) / 100, evHall.currency.sigla) }}</b>
                                 </td>
+
                                 <td class="align-middle">
                                     <b>{{ formatCurrency(sumTaxes(evHall, 'sc'), evHall.currency.sigla) }}</b>
                                 </td>
                                 <td class="align-middle">
                                     <b>{{ formatCurrency((sumCost(evHall) * evHall.service_charge) / 100, evHall.currency.sigla) }}</b>
                                 </td>
+
                             </template>
                             <td class="align-middle"></td>
                         </tr>
