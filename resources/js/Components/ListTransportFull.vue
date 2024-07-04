@@ -218,7 +218,7 @@ const showDetails = ref(false);
 
                             <th class="text-left" colspan="11">
                                 {{ evtr.transport.national ? "Nacional" : "Internacional" }}
-                                {{ evtr.transport.national ? evtr.transport.city :  evtr.transport.city.name + ' - ' + evtr.transport.city.country }}
+                                {{ evtr.transport.national ? evtr.transport.city.name + ' - ' + evtr.transport.city.states :  evtr.transport.city.name + ' - ' + evtr.transport.city.country }}
                             </th>
 
                             <th colspan="2" class="align-middle">Valor de Venda</th>

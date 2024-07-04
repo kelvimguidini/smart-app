@@ -306,6 +306,14 @@ class EventController extends Controller
         try {
 
             if ($request->id > 0) {
+                $history = StatusHistory::with('user')->where('table', 'event_transports')
+                    ->where('table_id', $request->id)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+
+                if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
+                }
 
                 $event = Event::find($request->id);
 
@@ -397,7 +405,14 @@ class EventController extends Controller
             abort(403);
         }
         try {
+            $history = StatusHistory::with('user')->where('table', 'event_transports')
+                ->where('table_id', $request->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
 
+            if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
+            }
             $r = Event::find($request->id);
 
             $r->delete();

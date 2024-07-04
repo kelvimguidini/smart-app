@@ -11,6 +11,7 @@ use App\Models\EventHall;
 use App\Models\EventHotel;
 use App\Models\EventHotelOpt;
 use App\Models\Provider;
+use App\Models\StatusHistory;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -61,6 +62,15 @@ class HotelController extends Controller
         try {
 
             if ($request->id > 0) {
+                $history = StatusHistory::with('user')->where('table', 'event_transports')
+                    ->where('table_id', $request->event_hotel_id)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+
+                if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
+                }
+
                 $opt = EventHotelOpt::find($request->id);
 
                 $opt->event_hotel_id = $request->event_hotel_id;
@@ -141,6 +151,14 @@ class HotelController extends Controller
             abort(403);
         }
         try {
+            $history = StatusHistory::with('user')->where('table', 'event_transports')
+                ->where('table_id', $request->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
+            }
 
             $r = EventHotel::find($request->id);
 
@@ -165,6 +183,14 @@ class HotelController extends Controller
             abort(403);
         }
         try {
+            $history = StatusHistory::with('user')->where('table', 'event_transports')
+                ->where('table_id', $request->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
+            }
 
             $r = EventHotelOpt::find($request->id);
 

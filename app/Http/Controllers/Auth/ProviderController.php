@@ -306,12 +306,20 @@ class ProviderController extends Controller
                 $query->whereHas('event_ab', function ($query) use ($provider) {
                     $query->where('ab_id', '=', $provider);
                 });
-            }, 'event_abs.eventAbOpts.Local', 'event_abs.eventAbOpts.service_type', 'event_abs.currency',
+            },
+            'event_abs.eventAbOpts.Local', 'event_abs.eventAbOpts.service_type', 'event_abs.currency',
             'event_halls.eventHallOpts' => function ($query) use ($provider) {
                 $query->whereHas('event_hall', function ($query) use ($provider) {
                     $query->where('hall_id', '=', $provider);
                 });
-            }, 'event_halls.eventHallOpts.purpose', 'event_halls.currency',
+            },
+            'event_halls.eventHallOpts.purpose', 'event_halls.currency',
+            'event_transport.eventTransportOpts' => function ($query) use ($provider) {
+                $query->whereHas('event_ab', function ($query) use ($provider) {
+                    $query->where('ab_id', '=', $provider);
+                });
+            },
+            'event_transport.eventTransportOpts.brand', 'event_transport.eventTransportOpts.vehicle', 'event_transport.eventTransportOpts.model', 'event_transport.currency',
 
         ])->find($event);
 
@@ -441,8 +449,13 @@ class ProviderController extends Controller
                     $query->where('hall_id', '=', $provider);
                 });
             },
-            'event_halls.eventHallOpts.purpose',
-            'event_halls.currency',
+            'event_halls.eventHallOpts.purpose', 'event_halls.currency',
+            'event_transport.eventTransportOpts' => function ($query) use ($provider) {
+                $query->whereHas('event_ab', function ($query) use ($provider) {
+                    $query->where('ab_id', '=', $provider);
+                });
+            },
+            'event_transport.eventTransportOpts.brand', 'event_transport.eventTransportOpts.vehicle', 'event_transport.eventTransportOpts.model', 'event_transport.currency',
 
         ])->find($event);
 

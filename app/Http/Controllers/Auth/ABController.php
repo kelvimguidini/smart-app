@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\EventAB;
 use App\Models\EventABOpt;
+use App\Models\StatusHistory;
 use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -43,6 +44,16 @@ class ABController extends Controller
         try {
 
             if ($request->id > 0) {
+
+                $history = StatusHistory::with('user')->where('table', 'event_transports')
+                    ->where('table_id', $request->event_ab_id)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+
+                if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
+                }
+
                 $opt = EventABOpt::find($request->id);
 
                 $opt->event_ab_id = $request->event_ab_id;
@@ -92,6 +103,14 @@ class ABController extends Controller
             abort(403);
         }
         try {
+            $history = StatusHistory::with('user')->where('table', 'event_transports')
+                ->where('table_id', $request->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
+            }
 
             $r = EventAB::find($request->id);
 
@@ -116,6 +135,14 @@ class ABController extends Controller
             abort(403);
         }
         try {
+            $history = StatusHistory::with('user')->where('table', 'event_transports')
+                ->where('table_id', $request->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
+            }
 
             $r = EventABOpt::find($request->id);
 

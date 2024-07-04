@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\EventHall;
 use App\Models\EventHallOpt;
+use App\Models\StatusHistory;
 use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -42,6 +43,16 @@ class HallController extends Controller
         try {
 
             if ($request->id > 0) {
+
+                $history = StatusHistory::with('user')->where('table', 'event_transports')
+                    ->where('table_id', $request->event_hall_id)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+
+                if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
+                }
+
                 $opt = EventHallOpt::find($request->id);
 
                 $opt->event_hall_id = $request->event_hall_id;
@@ -95,6 +106,14 @@ class HallController extends Controller
             abort(403);
         }
         try {
+            $history = StatusHistory::with('user')->where('table', 'event_transports')
+                ->where('table_id', $request->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
+            }
 
             $r = EventHall::find($request->id);
 
@@ -119,7 +138,14 @@ class HallController extends Controller
             abort(403);
         }
         try {
+            $history = StatusHistory::with('user')->where('table', 'event_transports')
+                ->where('table_id', $request->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
 
+            if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
+            }
             $r = EventHallOpt::find($request->id);
 
             $r->delete();
