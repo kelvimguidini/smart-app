@@ -6,7 +6,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ..:/var/www/html
+      - /mnt/F:\Projetos\4BTS\smart-app:/var/www/html
     depends_on:
       - mysql
 
@@ -20,7 +20,7 @@ services:
       MYSQL_USER: apismart
       MYSQL_PASSWORD: casanova
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql369
 
 volumes:
   mysql_data:

@@ -392,6 +392,7 @@ $strip = false;
                     </tbody>
                     <?php
                     $sumTotalHotelSaleTaxa = ((($sumTotalHotelSale * $hotelEvent->iof) / 100) + $sumTotalHotelSale) * 1.10;
+                    $sumTotalHotelCost = ((($sumTotalHotelCost * $hotelEvent->iof) / 100) + $sumTotalHotelCost);
                     ?>
                     <tfoot class="table-footer">
                         <tr>
@@ -549,6 +550,7 @@ $strip = false;
                     </tbody>
                     <?php
                     $sumTotalAbSaleTaxa = ((($sumTotalAbSale * $abEvent->iof) / 100) + $sumTotalAbSale) * 1.10;
+                    $sumTotalAbCost = ((($sumTotalAbCost * $hotelEvent->iof) / 100) + $sumTotalAbCost);
                     ?>
                     <tfoot class="table-footer">
                         <tr>
@@ -710,6 +712,7 @@ $strip = false;
                     </tbody>
                     <?php
                     $sumTotalHallSaleTaxa = ((($sumTotalHallSale * $hallEvent->iof) / 100) + $sumTotalHallSale) * 1.10;
+                    $sumTotalHallCost = ((($sumTotalHallCost * $hotelEvent->iof) / 100) + $sumTotalHallCost);
                     ?>
                     <tfoot class="table-footer">
                         <tr class="table-subheader" style="background-color: #ffe0b1">
@@ -867,6 +870,7 @@ $strip = false;
 
                     <?php
                     $sumTotalAddSaleTaxa = ((($sumTotalAddSale * $addEvent->iof) / 100) + $sumTotalAddSale) * 1.10;
+                    $sumTotalAddCost = ((($sumTotalAddCost * $hotelEvent->iof) / 100) + $sumTotalAddCost);
                     ?>
                     <tfoot class="table-footer">
                         <tr>
@@ -1031,6 +1035,7 @@ $strip = false;
 
                     <?php
                     $sumTotalTransportSaleTaxa = ((($sumTotalTransportSale * $transportEvent->iof) / 100) + $sumTotalTransportSale) * 1.10;
+                    $sumTotalTransportCost = ((($sumTotalTransportCost * $hotelEvent->iof) / 100) + $sumTotalTransportCost);
                     ?>
                     <tfoot class="table-footer">
                         <tr>

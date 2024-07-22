@@ -467,10 +467,12 @@ const showDetails = ref(false);
                                 Custo
                             </td>
                             <td class="align-middle" colspan="2">
-                                <b>{{ formatCurrency(((sumCost(evtr) * evtr.iss_percent) / 100, evtr.currency.sigla) +
+                                <b>{{ formatCurrency(((sumCost(evtr) * evtr.iss_percent) / 100) +
                                     ((sumCost(evtr) * evtr.service_percent) / 100) + ((sumCost(evtr) *
-                                        evtr.iva_percent) / 100) + sumCost(evtr)) }}</b>
+                                    evtr.iva_percent) / 100) + sumCost(evtr), evtr.currency.sigla) }}
+                                </b>
                             </td>
+                          
 
                             <template v-if="showDetails">
                                 <td colspan="8">

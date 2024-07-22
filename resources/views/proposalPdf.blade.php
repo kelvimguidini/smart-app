@@ -665,7 +665,7 @@ if ($transportEvent != null) {
                     <tfoot class="table-footer">
                         <tr style="background-color: #ffe0b1">
                             <td colspan="2"><b>Comentários:</b></td>
-                            <td colspan="6">{{ $transportEvent->customer_observation }}</td>
+                            <td colspan="8">{{ $transportEvent->customer_observation }}</td>
                             <td><b>Prazo</b></td>
                             <td>{{ $transportEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($transportEvent->deadline_date)) }}</td>
                         </tr>

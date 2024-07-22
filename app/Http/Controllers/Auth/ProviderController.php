@@ -276,15 +276,8 @@ class ProviderController extends Controller
         return redirect()->back()->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
     }
 
-    public function proposalPdf(Request $request)
+    private function getEventDataBase($provider, $event)
     {
-        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator') && !Gate::allows('land_operator')) {
-            abort(403);
-        }
-
-        $provider = $request->provider_id;
-        $event = $request->event_id;
-
         $eventDataBase = Event::with([
             'customer',
             'event_hotels.hotel' => function ($query) use ($provider) {
@@ -294,6 +287,12 @@ class ProviderController extends Controller
                 $query->where('id', '=', $provider);
             },
             'event_halls.hall' => function ($query) use ($provider) {
+                $query->where('id', '=', $provider);
+            },
+            'event_transports.transport' => function ($query) use ($provider) {
+                $query->where('id', '=', $provider);
+            },
+            'event_adds.transport' => function ($query) use ($provider) {
                 $query->where('id', '=', $provider);
             },
 
@@ -314,12 +313,20 @@ class ProviderController extends Controller
                 });
             },
             'event_halls.eventHallOpts.purpose', 'event_halls.currency',
-            'event_transport.eventTransportOpts' => function ($query) use ($provider) {
-                $query->whereHas('event_ab', function ($query) use ($provider) {
-                    $query->where('ab_id', '=', $provider);
+
+            'event_adds.eventAddOpts' => function ($query) use ($provider) {
+                $query->whereHas('event_add', function ($query) use ($provider) {
+                    $query->where('add_id', '=', $provider);
                 });
             },
-            'event_transport.eventTransportOpts.brand', 'event_transport.eventTransportOpts.vehicle', 'event_transport.eventTransportOpts.model', 'event_transport.currency',
+            'event_adds.eventAddOpts.measure', 'event_adds.eventAddOpts.service', 'event_adds.frequency', 'event_adds.currency',
+
+            'event_transports.eventTransportOpts' => function ($query) use ($provider) {
+                $query->whereHas('event_transport', function ($query) use ($provider) {
+                    $query->where('transport_id', '=', $provider);
+                });
+            },
+            'event_transports.eventTransportOpts.brand', 'event_transports.eventTransportOpts.vehicle', 'event_transports.eventTransportOpts.model', 'event_transports.currency',
 
         ])->find($event);
 
@@ -337,14 +344,29 @@ class ProviderController extends Controller
             $providers = $providers->concat($eventDataBase->event_halls->pluck('hall'));
         }
 
+        if ($eventDataBase->event_transports->isNotEmpty()) {
+            $providers = $providers->concat($eventDataBase->event_transports->pluck('transport'));
+        }
+
+        if ($eventDataBase->event_adds->isNotEmpty()) {
+            $providers = $providers->concat($eventDataBase->event_adds->pluck('add'));
+        }
+
         $providerDataBase = $providers->filter()->unique()->values()->first();
 
-        $arr = array(
+        return array(
             "providerDataBase" => $providerDataBase,
             "eventDataBase" => $eventDataBase
         );
+    }
 
-        $pdf = $this->createPDF($arr, 1);
+    public function proposalPdf(Request $request)
+    {
+        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator') && !Gate::allows('land_operator')) {
+            abort(403);
+        }
+
+        $pdf = $this->createPDF($this->getEventDataBase($request->provider_id, $request->event_id), 1);
         //return $pdf;
         // Renderize o HTML como PDF
         $pdf->render();
@@ -371,8 +393,8 @@ class ProviderController extends Controller
 
             DB::table('email_log')->insert(
                 array(
-                    'event_id' => $event,
-                    'provider_id' => $provider,
+                    'event_id' => $request->event_id,
+                    'provider_id' => $request->provider_id,
                     'sender_id' => $user->id,
                     'body' => urldecode($request->message),
                     'attachment' => $pdf->output(),
@@ -382,7 +404,7 @@ class ProviderController extends Controller
             );
 
             // Encontre o registro existente com base no event_id e provider_id
-            $eventHotel = EventHotel::where('event_id', $event)->where('hotel_id', $provider)->first();
+            $eventHotel = EventHotel::where('event_id', $request->event_id)->where('hotel_id', $request->provider_id)->first();
 
             if ($eventHotel) {
                 // Atualize o valor sended_email para true
@@ -390,7 +412,7 @@ class ProviderController extends Controller
                 $eventHotel->update();
             }
             // Encontre o registro existente com base no event_id e provider_id
-            $eventAb = EventAB::where('event_id', $event)->where('ab_id', $provider)->first();
+            $eventAb = EventAB::where('event_id', $request->event_id)->where('ab_id', $request->provider_id)->first();
 
             if ($eventAb) {
                 // Atualize o valor sended_email para true
@@ -398,7 +420,7 @@ class ProviderController extends Controller
                 $eventAb->update();
             }
             // Encontre o registro existente com base no event_id e provider_id
-            $eventHall = EventHall::where('event_id', $event)->where('hall_id', $provider)->first();
+            $eventHall = EventHall::where('event_id', $request->event_id)->where('hall_id', $request->provider_id)->first();
 
             if ($eventHall) {
                 // Atualize o valor sended_email para true
@@ -417,70 +439,8 @@ class ProviderController extends Controller
             abort(403);
         }
 
-        $provider = $request->provider_id;
-        $event = $request->event_id;
+        $pdf = $this->createPDF($this->getEventDataBase($request->provider_id, $request->event_id), 2);
 
-        $eventDataBase = Event::with([
-            'customer',
-            'event_hotels.hotel' => function ($query) use ($provider) {
-                $query->where('id', '=', $provider);
-            },
-            'event_abs.ab' => function ($query) use ($provider) {
-                $query->where('id', '=', $provider);
-            },
-            'event_halls.hall' => function ($query) use ($provider) {
-                $query->where('id', '=', $provider);
-            },
-
-            'event_hotels.eventHotelsOpt' => function ($query) use ($provider) {
-                $query->whereHas('event_hotel', function ($query) use ($provider) {
-                    $query->where('hotel_id', '=', $provider);
-                });
-            },
-            'event_hotels.eventHotelsOpt.category_hotel',
-            'event_hotels.currency',
-            'event_abs.eventAbOpts' => function ($query) use ($provider) {
-                $query->whereHas('event_ab', function ($query) use ($provider) {
-                    $query->where('ab_id', '=', $provider);
-                });
-            }, 'event_abs.eventAbOpts.Local', 'event_abs.eventAbOpts.service_type', 'event_abs.currency',
-            'event_halls.eventHallOpts' => function ($query) use ($provider) {
-                $query->whereHas('event_hall', function ($query) use ($provider) {
-                    $query->where('hall_id', '=', $provider);
-                });
-            },
-            'event_halls.eventHallOpts.purpose', 'event_halls.currency',
-            'event_transport.eventTransportOpts' => function ($query) use ($provider) {
-                $query->whereHas('event_ab', function ($query) use ($provider) {
-                    $query->where('ab_id', '=', $provider);
-                });
-            },
-            'event_transport.eventTransportOpts.brand', 'event_transport.eventTransportOpts.vehicle', 'event_transport.eventTransportOpts.model', 'event_transport.currency',
-
-        ])->find($event);
-
-        $providers = collect();
-
-        if ($eventDataBase->event_hotels->isNotEmpty()) {
-            $providers = $providers->concat($eventDataBase->event_hotels->pluck('hotel'));
-        }
-
-        if ($eventDataBase->event_abs->isNotEmpty()) {
-            $providers = $providers->concat($eventDataBase->event_abs->pluck('ab'));
-        }
-
-        if ($eventDataBase->event_halls->isNotEmpty()) {
-            $providers = $providers->concat($eventDataBase->event_halls->pluck('hall'));
-        }
-
-        $providerDataBase = $providers->filter()->unique()->values()->first();
-
-        $arr = array(
-            "providerDataBase" => $providerDataBase,
-            "eventDataBase" => $eventDataBase
-        );
-
-        $pdf = $this->createPDF($arr, 2);
         //return $pdf;
         // Renderize o HTML como PDF
         $pdf->render();
@@ -507,7 +467,7 @@ class ProviderController extends Controller
 
             DB::table('email_log')->insert(
                 array(
-                    'event_id' => $event,
+                    'event_id' => $request->event_id,
                     'sender_id' => $user->id,
                     'body' => urldecode($request->message),
                     'attachment' => $pdf->output(),
