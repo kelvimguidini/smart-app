@@ -46,6 +46,7 @@ class HallController extends Controller
 
                 $history = StatusHistory::with('user')->where('table', 'event_transports')
                     ->where('table_id', $request->event_hall_id)
+                    ->where('table', 'event_halls')
                     ->orderBy('created_at', 'desc')
                     ->first();
 
@@ -108,6 +109,7 @@ class HallController extends Controller
         try {
             $history = StatusHistory::with('user')->where('table', 'event_transports')
                 ->where('table_id', $request->id)
+                ->where('table', 'event_halls')
                 ->orderBy('created_at', 'desc')
                 ->first();
 
@@ -140,6 +142,7 @@ class HallController extends Controller
         try {
             $history = StatusHistory::with('user')->where('table', 'event_transports')
                 ->where('table_id', $request->id)
+                ->where('table', 'event_halls')
                 ->orderBy('created_at', 'desc')
                 ->first();
 

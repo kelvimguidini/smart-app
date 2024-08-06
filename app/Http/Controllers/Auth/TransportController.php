@@ -59,6 +59,7 @@ class TransportController extends Controller
             if ($request->id > 0) {
                 $history = StatusHistory::with('user')->where('table', 'event_transports')
                     ->where('table_id', $request->event_transport_id)
+                    ->where('table', 'event_transports')
                     ->orderBy('created_at', 'desc')
                     ->first();
 
@@ -128,6 +129,7 @@ class TransportController extends Controller
 
             $history = StatusHistory::with('user')->where('table', 'event_transports')
                 ->where('table_id', $request->id)
+                ->where('table', 'event_transports')
                 ->orderBy('created_at', 'desc')
                 ->first();
 
@@ -163,6 +165,7 @@ class TransportController extends Controller
 
             $history = StatusHistory::with('user')->where('table', 'event_transports')
                 ->where('table_id', $r->event_transport_id)
+                ->where('table', 'event_transports')
                 ->orderBy('created_at', 'desc')
                 ->first();
 

@@ -64,6 +64,7 @@ class HotelController extends Controller
             if ($request->id > 0) {
                 $history = StatusHistory::with('user')->where('table', 'event_transports')
                     ->where('table_id', $request->event_hotel_id)
+                    ->where('table', 'event_hotels')
                     ->orderBy('created_at', 'desc')
                     ->first();
 
@@ -153,6 +154,7 @@ class HotelController extends Controller
         try {
             $history = StatusHistory::with('user')->where('table', 'event_transports')
                 ->where('table_id', $request->id)
+                ->where('table', 'event_hotels')
                 ->orderBy('created_at', 'desc')
                 ->first();
 
@@ -185,6 +187,7 @@ class HotelController extends Controller
         try {
             $history = StatusHistory::with('user')->where('table', 'event_transports')
                 ->where('table_id', $request->id)
+                ->where('table', 'event_hotels')
                 ->orderBy('created_at', 'desc')
                 ->first();
 

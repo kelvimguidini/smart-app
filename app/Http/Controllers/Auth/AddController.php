@@ -46,6 +46,7 @@ class AddController extends Controller
 
                 $history = StatusHistory::with('user')->where('table', 'event_transports')
                     ->where('table_id', $request->event_add_id)
+                    ->where('table', 'EventAdds')
                     ->orderBy('created_at', 'desc')
                     ->first();
 
@@ -106,6 +107,7 @@ class AddController extends Controller
         try {
             $history = StatusHistory::with('user')->where('table', 'event_transports')
                 ->where('table_id', $request->id)
+                ->where('table', 'EventAdds')
                 ->orderBy('created_at', 'desc')
                 ->first();
 
@@ -139,6 +141,7 @@ class AddController extends Controller
         try {
             $history = StatusHistory::with('user')->where('table', 'event_transports')
                 ->where('table_id', $request->id)
+                ->where('table', 'EventAdds')
                 ->orderBy('created_at', 'desc')
                 ->first();
 

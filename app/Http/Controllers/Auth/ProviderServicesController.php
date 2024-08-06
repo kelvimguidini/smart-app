@@ -125,6 +125,7 @@ class ProviderServicesController extends Controller
 
                 $history = StatusHistory::with('user')->where('table', "event_adds")
                     ->where('table_id', $request->id)
+                    ->where('table', 'EventAdds')
                     ->orderBy('created_at', 'desc')
                     ->first();
 
