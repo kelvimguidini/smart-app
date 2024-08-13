@@ -8,24 +8,36 @@ $props = [
 ];
 function daysBetween($date1, $date2)
 {
-    // Convert both dates to UNIX timestamp
-    $one = strtotime($date1);
-    $two = strtotime($date2);
-    // Calculate the difference in seconds
-    $difference = abs($one - $two);
-    // Convert back to days and return
-    return ceil($difference / (60 * 60 * 24));
+    // Convert both dates to DateTime objects
+    $date1 = new DateTime($date1);
+    $date2 = new DateTime($date2);
+
+    // Set both dates to the start of the day (00:00:00)
+    $date1->setTime(0, 0, 0);
+    $date2->setTime(0, 0, 0);
+
+    // Calculate the difference in days
+    $interval = $date1->diff($date2);
+
+    // Return the absolute value of the difference in days
+    return ceil($interval->days);
 }
 
 function daysBetween1($date1, $date2)
 {
-    // Convert both dates to UNIX timestamp
-    $one = strtotime($date1);
-    $two = strtotime($date2);
-    // Calculate the difference in seconds
-    $difference = abs($one - $two);
-    // Convert back to days and return
-    return ceil($difference / (60 * 60 * 24)) + 1;
+    // Convert both dates to DateTime objects
+    $date1 = new DateTime($date1);
+    $date2 = new DateTime($date2);
+
+    // Set both dates to the start of the day (00:00:00)
+    $date1->setTime(0, 0, 0);
+    $date2->setTime(0, 0, 0);
+
+    // Calculate the difference in days
+    $interval = $date1->diff($date2);
+
+    // Return the absolute value of the difference in days
+    return ceil($interval->days) + 1;
 }
 
 function formatCurrency($value, $symbol = 'BRL')

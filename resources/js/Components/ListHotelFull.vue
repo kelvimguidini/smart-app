@@ -43,14 +43,28 @@ const props = defineProps({
 
 //FUNÇÕES GERAIS
 const daysBetween = (date1, date2) => {
-    // Convert both dates to milliseconds
-    var one = new Date(date1).getTime();
-    var two = new Date(date2).getTime();
+    // Helper function to truncate hours, minutes, seconds, and milliseconds
+    const truncateToDate = (date) => {
+        const d = new Date(date);
+        d.setHours(0, 0, 0, 0);
+        return d;
+    }
+
+    // Truncate both dates to remove time part
+    const truncatedDate1 = truncateToDate(date1);
+    const truncatedDate2 = truncateToDate(date2);
+
+    // Convert both truncated dates to milliseconds
+    const one = truncatedDate1.getTime();
+    const two = truncatedDate2.getTime();
+
     // Calculate the difference in milliseconds
-    var difference = Math.abs(one - two);
+    const difference = Math.abs(one - two);
+
     // Convert back to days and return
     return Math.ceil(difference / (1000 * 60 * 60 * 24));
 }
+
 
 const statusBlockEdit = () => {
     if (props.eventHotel && props.eventHotel.status_history) {
