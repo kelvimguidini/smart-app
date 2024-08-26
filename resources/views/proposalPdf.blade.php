@@ -223,9 +223,10 @@ if ($transportEvent != null) {
 
         $sumTransportValueRate += $rate;
         $sumTransportQtdDayles += $qtdDayle;
-        $sumTotalTransportValue += ($rate + $taxes) * daysBetween1($item->in, $item->out);
+        $sumTotalTransportValue += ($rate + $taxes) * $qtdDayle;
     }
 }
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -691,7 +692,7 @@ if ($transportEvent != null) {
 
                 if ($qtdLinhas <= 19 && ($qtdLinhas + $rodapeSize) > 19) {
                     $quebrar = true;
-                } elseif ($qtdLinhas > 19 && ($qtdLinhas % 27) + $rodapeSize > 27) {
+                } elseif ($qtdLinhas > 19 && ($qtdLinhas % 27) + $rodapeSize > 24) {
                     $quebrar = true;
                 }
                 ?>
@@ -704,7 +705,7 @@ if ($transportEvent != null) {
                         </tr>
                         <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                             <th>Serviços</th>
-                            <th colspan="2">Totais de</th>
+                            <th colspan="2" style="text-align: left;">Totais de:</th>
                             <th>Preço médio</th>
                             <th>Total do Pedido</th>
                         </tr>
