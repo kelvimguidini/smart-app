@@ -12,14 +12,14 @@ function daysBetween($date1, $date2)
     // Convert both dates to DateTime objects
     $date1 = new DateTime($date1);
     $date2 = new DateTime($date2);
-    
+
     // Set both dates to the start of the day (00:00:00)
     $date1->setTime(0, 0, 0);
     $date2->setTime(0, 0, 0);
-    
+
     // Calculate the difference in days
     $interval = $date1->diff($date2);
-    
+
     // Return the absolute value of the difference in days
     return ceil($interval->days);
 }
@@ -28,14 +28,14 @@ function daysBetween1($date1, $date2)
     // Convert both dates to DateTime objects
     $date1 = new DateTime($date1);
     $date2 = new DateTime($date2);
-    
+
     // Set both dates to the start of the day (00:00:00)
     $date1->setTime(0, 0, 0);
     $date2->setTime(0, 0, 0);
-    
+
     // Calculate the difference in days
     $interval = $date1->diff($date2);
-    
+
     // Return the absolute value of the difference in days
     return ceil($interval->days) + 1;
 }
@@ -101,6 +101,12 @@ $sumHotelCost = 0;
 $sumHotelSale = 0;
 $sumQtdDayles = 0;
 $totalKickback = 0;
+
+$sumTotalHotelCostTaxa = 0;
+$sumTotalAbCostTaxa = 0;
+$sumTotalHallCostTaxa = 0;
+$sumTotalAddCostTaxa  = 0;
+$sumTotalTransportCostTaxa = 0;
 
 
 $sumTotalAbSale = 0;
@@ -388,8 +394,8 @@ $strip = false;
                         $sumTotalHotelCost += sumTotal($item->received_proposal, $taxesCost, $qtdDayle);
                         $sumTotalHotelSale += sumTotal(unitSale($item), $taxes, $qtdDayle);
 
-                        $sumTaxeHotelCost += ($taxesCost * $qtdDayle) + (($sumTotalHotelCost * $hotelEvent->iof) / 100);
-                        $sumTaxeHotelSale += ($taxes * $qtdDayle) + (($sumTotalHotelSale * $hotelEvent->iof) / 100);
+                        $sumTaxeHotelCost += ($taxesCost * $qtdDayle);
+                        $sumTaxeHotelSale += ($taxes * $qtdDayle);
                         ?>
                         <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
                             <td>{{ $item->category_hotel->name }}</td>
@@ -400,7 +406,7 @@ $strip = false;
                             <td>{{ $item->count }}</td>
                             <td>{{ daysBetween($item->in, $item->out) }}</td>
 
-                            <td>{{ formatCurrency(unitSale($item), $hotelEvent->currency->symbol) }}</td>
+                            <td>{{ formatCurrency(unitSale($item) , $hotelEvent->currency->symbol) }}</td>
                             <td>{{ formatCurrency(sumTaxesProvider($hotelEvent, $item), $hotelEvent->currency->symbol) }}</td>
                             <td>{{ formatCurrency(unitSale($item) + sumTaxesProvider($hotelEvent, $item), $hotelEvent->currency->symbol) }}</td>
                             <td>{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($hotelEvent, $item), $item->count * daysBetween($item->in, $item->out)), $hotelEvent->currency->symbol) }}</td>
@@ -410,6 +416,10 @@ $strip = false;
                     <?php
                     $sumTotalHotelSaleTaxa = ((($sumTotalHotelSale * $hotelEvent->iof) / 100) + $sumTotalHotelSale) * 1.10;
                     $sumTotalHotelCostTaxa = ((($sumTotalHotelCost * $hotelEvent->iof) / 100) + $sumTotalHotelCost);
+
+                    $hotelTaxa4BTS = ((($sumTotalHotelSale * $hotelEvent->iof) / 100) + $sumTotalHotelSale) * 0.10;
+                    $sumTaxeHotelCost += (($sumTotalHotelCost * $hotelEvent->iof) / 100);
+                    $sumTaxeHotelSale += (($sumTotalHotelSale * $hotelEvent->iof) / 100);
                     ?>
                     <tfoot class="table-footer">
                         <tr>
@@ -496,7 +506,7 @@ $strip = false;
 
                                     <tr>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Serviço 4BTS (10.00%)</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(((($sumTotalHotelSale * $hotelEvent->iof) / 100) + $sumTotalHotelSale) * 0.10, $hotelEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($hotelTaxa4BTS, $hotelEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;" colspan="4"></td>
                                     </tr>
                                 </table>
@@ -545,8 +555,8 @@ $strip = false;
                         $sumTotalAbCost += sumTotal($item->received_proposal, $taxesCostAb, $qtdDayleAb);
                         $sumTotalAbSale += sumTotal(unitSale($item), $taxesAb, $qtdDayleAb);
 
-                        $sumTaxeAbCost += ($taxesCostAb * $qtdDayleAb) + (($sumTotalAbCost * $abEvent->iof) / 100);
-                        $sumTaxeAbSale += ($taxesAb * $qtdDayleAb) + (($sumTotalAbSale * $abEvent->iof) / 100);
+                        $sumTaxeAbCost += ($taxesCostAb * $qtdDayleAb);
+                        $sumTaxeAbSale += ($taxesAb * $qtdDayleAb);
                         ?>
 
                         <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
@@ -568,6 +578,10 @@ $strip = false;
                     <?php
                     $sumTotalAbSaleTaxa = ((($sumTotalAbSale * $abEvent->iof) / 100) + $sumTotalAbSale) * 1.10;
                     $sumTotalAbCostTaxa = ((($sumTotalAbCost * $hotelEvent->iof) / 100) + $sumTotalAbCost);
+
+                    $abTaxa4BTS = ((($sumTotalAbSale * $abEvent->iof) / 100) + $sumTotalAbSale) * 0.10;
+                    $sumTaxeAbCost += (($sumTotalAbCost * $abEvent->iof) / 100);
+                    $sumTaxeAbSale += (($sumTotalAbSale * $abEvent->iof) / 100);
                     ?>
                     <tfoot class="table-footer">
                         <tr>
@@ -656,7 +670,7 @@ $strip = false;
 
                                     <tr>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Serviço 4BTS (10.00%)</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(((($sumTotalAbSale * $abEvent->iof) / 100) + $sumTotalAbSale) * 0.10, $abEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($abTaxa4BTS, $abEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;" colspan="4"></td>
                                     </tr>
                                 </table>
@@ -709,8 +723,8 @@ $strip = false;
                         $sumTotalHallSale += sumTotal(unitSale($item), $taxesHall, $qtdDayleHall);
 
 
-                        $sumTaxeHallCost += ($taxesCostHall * $qtdDayleHall) + (($sumTotalHallCost * $hallEvent->iof) / 100);
-                        $sumTaxeHallSale += ($taxesHall * $qtdDayleHall) + (($sumTotalHallSale * $hallEvent->iof) / 100);
+                        $sumTaxeHallCost += ($taxesCostHall * $qtdDayleHall);
+                        $sumTaxeHallSale += ($taxesHall * $qtdDayleHall);
                         ?>
                         <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
                             <td>{{ $item->name }}</td>
@@ -732,6 +746,10 @@ $strip = false;
                     <?php
                     $sumTotalHallSaleTaxa = ((($sumTotalHallSale * $hallEvent->iof) / 100) + $sumTotalHallSale) * 1.10;
                     $sumTotalHallCostTaxa = ((($sumTotalHallCost * $hotelEvent->iof) / 100) + $sumTotalHallCost);
+
+                    $hallTaxa4BTS = ((($sumTotalHallSale * $hallEvent->iof) / 100) + $sumTotalHallSale) * 0.10;
+                    $sumTaxeHallCost += (($sumTotalHallCost * $hallEvent->iof) / 100);
+                    $sumTaxeHallSale += (($sumTotalHallSale * $hallEvent->iof) / 100);
                     ?>
                     <tfoot class="table-footer">
                         <tr class="table-subheader" style="background-color: #ffe0b1">
@@ -814,7 +832,7 @@ $strip = false;
 
                                     <tr>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Serviço 4BTS (10.00%)</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(((($sumTotalHallSale * $hallEvent->iof) / 100) + $sumTotalHallSale) * 0.10, $hallEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($hallTaxa4BTS, $hallEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;" colspan="4"></td>
                                     </tr>
                                 </table>
@@ -866,8 +884,8 @@ $strip = false;
                         $sumTotalAddCost += sumTotal($item->received_proposal, $taxesCostAdd, $qtdDayleAdd);
                         $sumTotalAddSale += sumTotal(unitSale($item), $taxesAdd, $qtdDayleAdd);
 
-                        $sumTaxeAddCost += ($taxesCostAdd * $qtdDayleAdd) + (($sumTotalAddCost * $addEvent->iof) / 100);
-                        $sumTaxeAddSale += ($taxesAdd * $qtdDayleAdd) + (($sumTotalAddSale * $addEvent->iof) / 100);
+                        $sumTaxeAddCost += ($taxesCostAdd * $qtdDayleAdd);
+                        $sumTaxeAddSale += ($taxesAdd * $qtdDayleAdd);
                         ?>
 
                         <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
@@ -891,6 +909,10 @@ $strip = false;
                     <?php
                     $sumTotalAddSaleTaxa = ((($sumTotalAddSale * $addEvent->iof) / 100) + $sumTotalAddSale) * 1.10;
                     $sumTotalAddCostTaxa = ((($sumTotalAddCost * $hotelEvent->iof) / 100) + $sumTotalAddCost);
+
+                    $addTaxa4BTS = ((($sumTotalAddSale * $addEvent->iof) / 100) + $sumTotalAddSale) * 0.10;
+                    $sumTaxeAddCost += (($sumTotalAddCost * $addEvent->iof) / 100);
+                    $sumTaxeAddSale += (($sumTotalAddSale * $addEvent->iof) / 100);
                     ?>
                     <tfoot class="table-footer">
                         <tr>
@@ -979,7 +1001,7 @@ $strip = false;
 
                                     <tr>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Serviço 4BTS (10.00%)</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(((($sumTotalAddSale * $addEvent->iof) / 100) + $sumTotalAddSale) * 0.10, $addEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($addTaxa4BTS, $addEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;" colspan="4"></td>
                                     </tr>
                                 </table>
@@ -1032,8 +1054,8 @@ $strip = false;
                         $sumTotalTransportSale += sumTotal(unitSale($item), $taxesTransport, $qtdDayleTransport);
 
 
-                        $sumTaxeTransportCost += ($taxesCostTransport * $qtdDayleTransport) + (($sumTotalTransportCost * $transportEvent->iof) / 100);
-                        $sumTaxeTransportSale += ($taxesTransport * $qtdDayleTransport) + (($sumTotalTransportSale * $transportEvent->iof) / 100);
+                        $sumTaxeTransportCost += ($taxesCostTransport * $qtdDayleTransport);
+                        $sumTaxeTransportSale += ($taxesTransport * $qtdDayleTransport);
                         ?>
                         <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
                             <td>{{ $item->brand->name }}</td>
@@ -1057,6 +1079,10 @@ $strip = false;
                     <?php
                     $sumTotalTransportSaleTaxa = ((($sumTotalTransportSale * $transportEvent->iof) / 100) + $sumTotalTransportSale) * 1.10;
                     $sumTotalTransportCostTaxa = ((($sumTotalTransportCost * $transportEvent->iof) / 100) + $sumTotalTransportCost);
+
+                    $transportTaxa4BTS = ((($sumTotalTransportSale * $transportEvent->iof) / 100) + $sumTotalTransportSale) * 0.10;
+                    $sumTaxeTransportCost += (($sumTotalTransportCost * $transportEvent->iof) / 100);
+                    $sumTaxeTransportSale += (($sumTotalTransportSale * $transportEvent->iof) / 100);
                     ?>
                     <tfoot class="table-footer">
                         <tr>
@@ -1145,7 +1171,7 @@ $strip = false;
 
                                     <tr>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Serviço 4BTS (10.00%)</td>
-                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(((($sumTotalTransportSale * $transportEvent->iof) / 100) + $sumTotalTransportSale) * 0.10, $transportEvent->currency->symbol) }}</td>
+                                        <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($transportTaxa4BTS, $transportEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;" colspan="4"></td>
                                     </tr>
                                 </table>
@@ -1186,19 +1212,18 @@ $strip = false;
                         <tr style="background-color: <? !$strip ? '#ffffff' : '#f7fafc' ?>">
                             <td>Hospedagem</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumHotelSale, $hotelEvent->currency->symbol) }}</td>
-                            <td>{{ formatCurrency($sumTotalHotelSale * 0.1, $hotelEvent->currency->symbol) }}</td>
+                            <td>{{ formatCurrency($hotelTaxa4BTS, $hotelEvent->currency->symbol) }}</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumTaxeHotelSale, $hotelEvent->currency->symbol) }}</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumHotelCost, $hotelEvent->currency->symbol) }}</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumTaxeHotelCost, $hotelEvent->currency->symbol) }}</td>
                         </tr>
-
                         <?php $strip = !$strip; ?>
                         @endif
                         @if($abEvent != null && $abEvent->eventAbOpts != null && count($abEvent->eventAbOpts) > 0)
                         <tr style="background-color: <? !$strip ? '#ffffff' : '#f7fafc' ?>">
                             <td>Alimentos & Bebidas</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumAbSale, $abEvent->currency->symbol) }}</td>
-                            <td>{{ formatCurrency($sumTotalAbSale * 0.1, $abEvent->currency->symbol) }}</td>
+                            <td>{{ formatCurrency($abTaxa4BTS, $abEvent->currency->symbol) }}</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumTaxeAbSale, $abEvent->currency->symbol) }}</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumAbCost, $abEvent->currency->symbol) }}</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumTaxeAbCost, $abEvent->currency->symbol) }}</td>
@@ -1210,7 +1235,7 @@ $strip = false;
                         <tr style="background-color: <? !$strip ? '#ffffff' : '#f7fafc' ?>">
                             <td>Salões/ Eventos</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumHallSale, $hallEvent->currency->symbol) }}</td>
-                            <td>{{ formatCurrency($sumTotalHallSale * 0.1, $hallEvent->currency->symbol) }}</td>
+                            <td>{{ formatCurrency($hallTaxa4BTS, $hallEvent->currency->symbol) }}</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumTaxeHallSale, $hallEvent->currency->symbol) }}</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumHallCost, $hallEvent->currency->symbol) }}</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumTaxeHallCost, $hallEvent->currency->symbol) }}</td>
@@ -1222,7 +1247,7 @@ $strip = false;
                         <tr style="background-color: <? !$strip ? '#ffffff' : '#f7fafc' ?>">
                             <td>Adicionais</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumAddSale, $addEvent->currency->symbol) }}</td>
-                            <td>{{ formatCurrency($sumTotalAddSale * 0.1, $addEvent->currency->symbol) }}</td>
+                            <td>{{ formatCurrency($addTaxa4BTS, $addEvent->currency->symbol) }}</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumTaxeAddSale, $addEvent->currency->symbol) }}</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumAddCost, $addEvent->currency->symbol) }}</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumTaxeAddCost, $addEvent->currency->symbol) }}</td>
@@ -1233,7 +1258,7 @@ $strip = false;
                         <tr>
                             <td>Transporte</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumTransportSale, $transportEvent->currency->symbol) }}</td>
-                            <td>{{ formatCurrency($sumTotalTransportSale * 0.1, $transportEvent->currency->symbol) }}</td>
+                            <td>{{ formatCurrency($transportTaxa4BTS, $transportEvent->currency->symbol) }}</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumTaxeTransportSale, $transportEvent->currency->symbol) }}</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumTransportCost, $transportEvent->currency->symbol) }}</td>
                             <td class="custom-bg-success-text-white">{{ formatCurrency($sumTaxeTransportCost, $transportEvent->currency->symbol) }}</td>
@@ -1254,14 +1279,14 @@ $strip = false;
                     <tr style="background-color: #ebf8ff; color: #000; ">
                         <td colspan="2" style="background-color: #ebf8ff;">TOTAL A PAGAR</td>
                         <td colspan="3" style="background-color: #ffe3b9; padding: 0.5rem;">
-                            {{ formatCurrency($sumTotalHotelCost + $sumTotalAbCost + $sumTotalHallCost + $sumTotalAddCost + $sumTotalTransportCost) }}
+                            {{ formatCurrency($sumTotalHotelCostTaxa + $sumTotalAbCostTaxa + $sumTotalHallCostTaxa + $sumTotalAddCostTaxa + $sumTotalTransportCostTaxa) }}
                         </td>
                     </tr>
                     <tr style="background-color: #ebf8ff;">
                         <td colspan="2" style="background-color: #ebf8ff;">LUCRO TOTAL</td>
                         <td colspan="3" style="background-color: #ffe3b9; padding: 0.5rem;">
                             {{ formatCurrency(($sumTotalHotelSaleTaxa + $sumTotalAbSaleTaxa + $sumTotalHallSaleTaxa + $sumTotalAddSaleTaxa + $sumTotalTransportSaleTaxa)
-                                - ($sumTotalHotelCost + $sumTotalAbCost + $sumTotalHallCost + $sumTotalAddCost + $sumTotalTransportCost)) }}
+                            - ($sumTotalHotelCostTaxa + $sumTotalAbCostTaxa + $sumTotalHallCostTaxa + $sumTotalAddCostTaxa + $sumTotalTransportCostTaxa)) }}
                         </td>
                     </tr>
                 </tbody>
