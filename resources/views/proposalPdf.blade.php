@@ -774,17 +774,18 @@ if ($transportEvent != null) {
 
                                 <table style="width: 100%;">
                                     <tr>
+                                        <?php
+                                        $total = $sumTotalHotelValue + $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue + $sumTotalTransportValue;
+                                        $totalIOF = ($total * $percIOF) / 100;
+                                        $totalServico = ((($total * $percIOF) / 100) + $total) * ($percService / 100);
+                                        ?>
                                         <td style="height: 18px; width: 15%; float: left; background-color: #ffd18c; padding: 0.5rem;">IOF: </td>
-                                        <td style="height: 18px; width: 15%; float: left; background-color: #ffe3b9; padding: 0.5rem;">{{ $percIOF }}%</td>
+                                        <td style="height: 18px; width: 15%; float: left; background-color: #ffe3b9; padding: 0.5rem;">{{ $percIOF }}% ({{formatCurrency($totalIOF)}})</td>
                                         <td style="height: 18px; width: 15%; float: left; background-color: #ffd18c; padding: 0.5rem;">Taxa de Serviço: </td>
-                                        <td style="height: 18px; width: 15%; float: left; background-color: #ffe3b9; padding: 0.5rem;">{{ $percService }}%</td>
+                                        <td style="height: 18px; width: 15%; float: left; background-color: #ffe3b9; padding: 0.5rem;">{{ $percService }}% ({{formatCurrency($totalServico)}})</td>
                                         <td style="height: 18px; width: 15%; float: left; background-color: #ffd18c; padding: 0.5rem;">Valor Total: </td>
                                         <td style="height: 18px; width: 15%; float: left; background-color: #ffe3b9; padding: 0.5rem;">
-                                            {{ formatCurrency($sumTotalHotelValue +
-                                        $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue + $sumTotalTransportValue + ((($sumTotalHotelValue +
-                                        $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue + $sumTotalTransportValue) * $percIOF) / 100) +
-                                        ((($sumTotalHotelValue +
-                                        $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue + $sumTotalTransportValue) * $percService) / 100)) }}
+                                            {{ formatCurrency($total + $totalIOF + $totalServico) }}
                                         </td>
                                     </tr>
                                 </table>

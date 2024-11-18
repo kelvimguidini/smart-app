@@ -213,7 +213,7 @@ const showDetails = ref(false);
                         <tr>
                             <th class="table-header table-header-c1" colspan="2">Hotel {{ index + 1 }}</th>
                             <th class="text-left table-header table-header-c2" :colspan="showDetails ? 23 : 12">
-                                {{ evho.hotel.name }}
+                                {{ evho.hotel?.name }}
                             </th>
                             <th class="align-middle text-right table-header-c1 table-header" colspan="3">
                                 <Link class="btn btn-info btn-sm btn-icon-split" :disabled="statusBlockEdit()"
@@ -303,11 +303,11 @@ const showDetails = ref(false);
                         </tr>
 
                         <tr v-for="opt in evho.event_hotels_opt">
-                            <td class="align-middle">{{ opt.broker.name }}</td>
-                            <td class="align-middle">{{ opt.regime.name }}</td>
-                            <td class="align-middle">{{ opt.purpose.name }}</td>
-                            <td class="align-middle">{{ opt.category_hotel.name }}</td>
-                            <td class="align-middle">{{ opt.apto_hotel.name }}</td>
+                            <td class="align-middle">{{ opt.broker?.name }}</td>
+                            <td class="align-middle">{{ opt.regime?.name }}</td>
+                            <td class="align-middle">{{ opt.purpose?.name }}</td>
+                            <td class="align-middle">{{ opt.category_hotel?.name }}</td>
+                            <td class="align-middle">{{ opt.apto_hotel?.name }}</td>
                             <td class="align-middle">{{
                                 new Date(opt.in).toLocaleDateString()
                             }}
