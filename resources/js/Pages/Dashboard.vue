@@ -47,13 +47,85 @@ const groups = ref({
 });
 // Outros dados do dashboard
 
+const dashboardData = ref({
+    pendingValidate: null,
+    eventStatus: null,
+    waitApproval: null,
+    linksApproved: null,
+    byMonths: null,
+    userGroups: null,
+    loading: true,
+    error: false,
+});
+
+const fetchDashboardData = async () => {
+    try {
+        const response = await axios.get('/dashboard-data'); // Chamada única
+        const data = response.data;
+
+        try {
+            renderWaitApproval(data.waitApproval);
+        } catch (error) {
+            waitApproval.value.error = true;
+            console.error("Erro ao processar waitApproval:", error);
+        }
+
+        try {
+            renderEventStatus(data.eventStatus);
+        } catch (error) {
+            eventStatus.value.error = true;
+            console.error("Erro ao processar eventStatus:", error);
+        }
+
+        try {
+            renderPendingValidate(data.pendingValidate);
+        } catch (error) {
+            pendingValidate.value.error = true;
+            console.error("Erro ao processar pendingValidate:", error);
+        }
+
+        try {
+            renderLinksApproved(data.linksApproved);
+        } catch (error) {
+            linksApproved.value.error = true;
+            console.error("Erro ao processar linksApproved:", error);
+        }
+
+        try {
+            renderEventMonth(data.byMonths);
+        } catch (error) {
+            events.value.error = true;
+            console.error("Erro ao processar eventMonth:", error);
+        }
+
+        try {
+            renderUserGroups(data.userGroups);
+        } catch (error) {
+            groups.value.error = true;
+            console.error("Erro ao processar userGroups:", error);
+        }
+  
+    } catch (error) {
+        console.error(error);
+        waitApproval.value.loading = false;
+        eventStatus.value.loading = false;
+        pendingValidate.value.loading = false;
+        linksApproved.value.loading = false;
+        events.value.loading = false;
+        groups.value.loading = false;
+
+        waitApproval.value.error = true;
+        eventStatus.value.error = true;
+        pendingValidate.value.error = true;
+        linksApproved.value.error = true;
+        events.value.error = true;
+        groups.value.error = true;
+    }
+};
+
+
 onMounted(() => {
-    fetchPendingValidate();
-    fetchEventStatus();
-    fetchWaitApproval();
-    fetchEventMonth();
-    fetchLinksApproved();
-    fetchUserGroups();
+    fetchDashboardData();
 });
 
 const pieHotelStatus = (hotel) => {
@@ -75,7 +147,7 @@ const pieHotelStatus = (hotel) => {
     var myPieChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: chartData.map((item) => item.label),
+            // labels: chartData.map((item) => item.label),
             datasets: [{
                 data: chartData.map((item) => item.value),
                 backgroundColor: chartData.map((item) => item.backgroundColor),
@@ -104,62 +176,32 @@ const pieHotelStatus = (hotel) => {
 }
 
 
-const fetchPendingValidate = () => {
-    axios
-        .get('dash-pending-validate')
-        .then(response => {
-            pendingValidate.value.data = response.data;
-        })
-        .catch(error => {
-            pendingValidate.value.error = true;
-            console.error(error);
-        })
-        .finally(() => {
-            pendingValidate.value.loading = false;
-        });
+const renderPendingValidate = (response) => {
+    pendingValidate.value.data = response;
+    pendingValidate.value.loading = false;
 };
 
-const fetchLinksApproved = () => {
-    axios
-        .get('dash-links-approved')
-        .then(response => {
-            linksApproved.value.data = response.data;
-        })
-        .catch(error => {
-            linksApproved.value.error = true;
-            console.error(error);
-        })
-        .finally(() => {
-            linksApproved.value.loading = false;
-        });
+const renderLinksApproved = (response) => {
+    linksApproved.value.data = response;
+    linksApproved.value.loading = false;
 };
 
-const fetchEventStatus = () => {
-    axios
-        .get('dash-event-status')
-        .then(response => {
-            pieHotelStatus(response.data);
-        })
-        .catch(error => {
-            eventStatus.value.error = true;
-            console.error(error);
-        })
-        .finally(() => {
-            eventStatus.value.loading = false;
-        });
+const renderEventStatus = (response) => {
+
+    pieHotelStatus(response.original);
+    eventStatus.value.loading = false;
+
 };
 
-const fetchEventMonth = () => {
-    axios
-        .get('dash-by-months')
-        .then(response => {
-            events.value.data = response.data;
+const renderEventMonth = (response) => {
+    
+            events.value.data = response.original;
             // Area Chart Example
             var ctx = document.getElementById("area-event");
             var myLineChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: response.data.map(function (item) {
+                    labels: response.original.map(function (item) {
                         return item.month;
                     }),
                     datasets: [
@@ -176,7 +218,7 @@ const fetchEventMonth = () => {
                             pointHoverBorderColor: "rgba(78, 115, 223, 1)",
                             pointHitRadius: 10,
                             pointBorderWidth: 2,
-                            data: response.data.map(function (item) {
+                            data: response.original.map(function (item) {
                                 return item.event_count;
                             }),
                         },
@@ -193,7 +235,7 @@ const fetchEventMonth = () => {
                             pointHoverBorderColor: "rgba(115, 223, 78, 1)",
                             pointHitRadius: 10,
                             pointBorderWidth: 2,
-                            data: response.data.map(function (item) {
+                            data: response.original.map(function (item) {
                                 return item.register_count;
                             }),
                         }
@@ -267,45 +309,18 @@ const fetchEventMonth = () => {
                 }
             });
 
-        })
-        .catch(error => {
-            events.value.error = true;
-            console.error(error);
-        })
-        .finally(() => {
             events.value.loading = false;
-        });
 };
 
-const fetchWaitApproval = () => {
-    axios
-        .get('dash-wait-approval')
-        .then(response => {
-            waitApproval.value.data = response.data;
-        })
-        .catch(error => {
-            waitApproval.value.error = true;
-            console.error(error);
-        })
-        .finally(() => {
-            waitApproval.value.loading = false;
-        });
+const renderWaitApproval = (response) => {
+    waitApproval.value.data = response.original;
+    waitApproval.value.loading = false;
 };
 
-const fetchUserGroups = () => {
-    axios
-        .get('dash-users-groups')
-        .then(response => {
-            groups.value.data = response.data;
-        })
-        .catch(error => {
-            groups.value.error = true;
-            console.error(error);
-        })
-        .finally(() => {
-            groups.value.loading = false;
-        });
-}; ' '
+const renderUserGroups = (response) => {
+    groups.value.data = response.original;
+    groups.value.loading = false;
+};
 
 const generateColor = () => {
 

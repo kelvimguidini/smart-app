@@ -18,6 +18,24 @@ use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
+
+    public function fetchDashboardData(Request $request)
+    {
+        try {
+            return response()->json([
+                'pendingValidate' => $this->pendingValidate($request), // Chamando o método existente
+                'eventStatus' => $this->eventStatus($request),         // Chamando o método existente
+                'waitApproval' => $this->waitApproval($request),       // Chamando o método existente
+                'linksApproved' => $this->linksApproved($request),     // Chamando o método existente
+                'byMonths' => $this->byMonths($request),               // Chamando o método existente
+                'userGroups' => $this->userGroups($request),           // Chamando o método existente
+            ]);
+        } catch (\Exception $e) {
+            // Captura erros para depuração
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
     /**
      * Display the registration view.
      *
@@ -148,9 +166,10 @@ class HomeController extends Controller
      */
     public function linksApproved(Request $request)
     {
-        return ProviderBudget::selectRaw('(SUM(approved) / COUNT(*)) * 100 AS budget_approval_rate')
+        return ProviderBudget::selectRaw('ROUND((SUM(approved) / COUNT(*)) * 100, 1) AS budget_approval_rate')
             ->value('budget_approval_rate');
     }
+
 
     /**
      * Display the registration view.
@@ -168,8 +187,18 @@ class HomeController extends Controller
 
 
         $monthsIndex = [
-            'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-            'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+            'Jan',
+            'Fev',
+            'Mar',
+            'Abr',
+            'Mai',
+            'Jun',
+            'Jul',
+            'Ago',
+            'Set',
+            'Out',
+            'Nov',
+            'Dez'
         ];
         // Array de tradução dos meses para português
         $months = [

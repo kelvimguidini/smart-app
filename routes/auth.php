@@ -43,7 +43,6 @@ use App\Http\Controllers\Auth\VehicleController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\Auth\StatusHistoryController;
 use App\Http\Controllers\Auth\CityController;
-use App\Models\ProviderTransport;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Route;
 
@@ -504,6 +503,9 @@ Route::middleware(['auth', 'cors'])->group(function () {
     //FIM HOTEL
 
     //dashboard
+    Route::get('/dashboard-data', [HomeController::class, 'fetchDashboardData'])
+        ->name('dashboard-data');
+
     Route::get('dash-pending-validate', [HomeController::class, 'pendingValidate'])
         ->name('dash-pending-validate');
 
