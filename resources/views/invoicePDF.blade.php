@@ -195,13 +195,13 @@ $strip = false;
         td {
             padding: 0.3rem;
             height: 30px;
-            padding: 0.5rem;
+            padding: 0.3rem;
             text-align: center;
         }
 
         th {
             text-align: center;
-            padding: 0.5rem;
+            padding: 0.3rem;
         }
 
         tbody tr:nth-child(odd) {
@@ -361,7 +361,7 @@ $strip = false;
                 <table>
                     <thead style="display: table-header-group;">
                         <tr>
-                            <th colspan="11" style="padding: 0.5rem; text-align: center;">Hospedagem</th>
+                            <th colspan="11" style="padding: 0.3rem; text-align: center;">Hospedagem</th>
                         </tr>
                         <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                             <th>Cat. Apto</th>
@@ -523,7 +523,7 @@ $strip = false;
                 <table>
                     <thead style="display: table-header-group;">
                         <tr>
-                            <th colspan="10" style="padding: 0.5rem; text-align: center;">Alimentos & Bebidas</th>
+                            <th colspan="10" style="padding: 0.3rem; text-align: center;">Alimentos & Bebidas</th>
                         </tr>
                         <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                             <th>Refeição</th>
@@ -689,7 +689,7 @@ $strip = false;
                 <table>
                     <thead style="display: table-header-group;">
                         <tr>
-                            <th colspan="11" style="padding: 0.5rem; text-align: center;">Salões & Eventos {{$hallEvent->hall->name }}</th>
+                            <th colspan="11" style="padding: 0.3rem; text-align: center;">Salões & Eventos {{$hallEvent->hall->name }}</th>
                         </tr>
                         <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                             <th>Nome</th>
@@ -851,7 +851,7 @@ $strip = false;
                 <table>
                     <thead style="display: table-header-group;">
                         <tr>
-                            <th colspan="11" style="padding: 0.5rem; text-align: center;">Adicionais {{$addEvent->add->name }}</th>
+                            <th colspan="11" style="padding: 0.3rem; text-align: center;">Adicionais {{$addEvent->add->name }}</th>
                         </tr>
                         <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                             <th>Serviço</th>
@@ -1018,7 +1018,7 @@ $strip = false;
                 <table>
                     <thead style="display: table-header-group;">
                         <tr>
-                            <th colspan="12" style="padding: 0.5rem; text-align: center;">Transporte Terrestre {{$transportEvent->transport->name }}</th>
+                            <th colspan="12" style="padding: 0.3rem; text-align: center;">Transporte Terrestre {{$transportEvent->transport->name }}</th>
                         </tr>
                         <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                             <th>Marca</th>
@@ -1188,7 +1188,7 @@ $strip = false;
                 <table style="page-break-before: always;">
                     <thead>
                         <tr>
-                            <th colspan="7" style="padding: 0.5rem; text-align:center;">
+                            <th colspan="7" style="padding: 0.3rem; text-align:center;">
                                 Resumo da Proposta
                             </th>
                         </tr>
@@ -1272,19 +1272,19 @@ $strip = false;
                 <tbody>
                     <tr style="background-color: #ebf8ff; color: #000;">
                         <td colspan="2" style="background-color: #ebf8ff;">TOTAL CLIENTE</td>
-                        <td colspan="3" style="background-color: #ffe3b9; padding: 0.5rem;">
+                        <td colspan="3" style="background-color: #ffe3b9; padding: 0.3rem;">
                             {{ formatCurrency($sumTotalHotelSaleTaxa + $sumTotalAbSaleTaxa + $sumTotalHallSaleTaxa + $sumTotalAddSaleTaxa + $sumTotalTransportSaleTaxa) }}
                         </td>
                     </tr>
                     <tr style="background-color: #ebf8ff; color: #000; ">
                         <td colspan="2" style="background-color: #ebf8ff;">TOTAL A PAGAR</td>
-                        <td colspan="3" style="background-color: #ffe3b9; padding: 0.5rem;">
+                        <td colspan="3" style="background-color: #ffe3b9; padding: 0.3rem;">
                             {{ formatCurrency($sumTotalHotelCostTaxa + $sumTotalAbCostTaxa + $sumTotalHallCostTaxa + $sumTotalAddCostTaxa + $sumTotalTransportCostTaxa) }}
                         </td>
                     </tr>
                     <tr style="background-color: #ebf8ff;">
                         <td colspan="2" style="background-color: #ebf8ff;">LUCRO TOTAL</td>
-                        <td colspan="3" style="background-color: #ffe3b9; padding: 0.5rem;">
+                        <td colspan="3" style="background-color: #ffe3b9; padding: 0.3rem;">
                             {{ formatCurrency(($sumTotalHotelSaleTaxa + $sumTotalAbSaleTaxa + $sumTotalHallSaleTaxa + $sumTotalAddSaleTaxa + $sumTotalTransportSaleTaxa)
                             - ($sumTotalHotelCostTaxa + $sumTotalAbCostTaxa + $sumTotalHallCostTaxa + $sumTotalAddCostTaxa + $sumTotalTransportCostTaxa)) }}
                         </td>

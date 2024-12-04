@@ -88,22 +88,27 @@ function hexToRgb($hex, $a)
 $sumTotalHotelValue = 0;
 $sumQtdDayles = 0;
 $sumValueRate = 0;
+$sumTotalHotelValueRate = 0;
 
 $sumTotalABValue = 0;
 $sumABQtdDayles = 0;
 $sumABValueRate = 0;
+$sumTotalABValueRate = 0;
 
 $sumTotalHallValue = 0;
 $sumHallQtdDayles = 0;
 $sumHallValueRate = 0;
+$sumTotalHallValueRate = 0;
 
 $sumTotalAddValue = 0;
 $sumAddQtdDayles = 0;
 $sumAddValueRate = 0;
+$sumTotalAddValueRate = 0;
 
 $sumTransportValueRate = 0;
 $sumTransportQtdDayles = 0;
 $sumTotalTransportValue = 0;
+$sumTotalTransportValueRate = 0;
 
 $percIOF = 0;
 $percService = 10;
@@ -131,9 +136,6 @@ if ($hotelEvent != null) {
     if ($hotelEvent->iof > 0) {
         $percIOF = $hotelEvent->iof;
     }
-    if ($hotelEvent->service_charge > 0) {
-        $percService = $hotelEvent->service_charge;
-    }
     $rodapeSize++;
     $qtdLinhas += 4;
     foreach ($hotelEvent->eventHotelsOpt as $item) {
@@ -142,6 +144,7 @@ if ($hotelEvent != null) {
         $taxes = floatval(sumTaxesProvider($hotelEvent, $item));
         $qtdDayle = $item->count * daysBetween($item->in, $item->out);
 
+        $sumTotalHotelValueRate += $rate * $qtdDayle;
         $sumValueRate += $rate;
         $sumQtdDayles += $qtdDayle;
         $sumTotalHotelValue += ($rate + $taxes) * $qtdDayle;
@@ -151,9 +154,6 @@ if ($abEvent != null) {
     if ($abEvent->iof > 0) {
         $percIOF = $abEvent->iof;
     }
-    if ($abEvent->service_charge > 0) {
-        $percService = $abEvent->service_charge;
-    }
     $rodapeSize++;
     $qtdLinhas += 4;
     foreach ($abEvent->eventAbOpts as $item) {
@@ -162,6 +162,7 @@ if ($abEvent != null) {
         $taxes = floatval(sumTaxesProvider($abEvent, $item));
         $qtdDayle = $item->count * daysBetween1($item->in, $item->out);
 
+        $sumTotalABValueRate += $rate * $qtdDayle;
         $sumABValueRate += $rate;
         $sumABQtdDayles += $qtdDayle;
         $sumTotalABValue += ($rate + $taxes) * $qtdDayle;
@@ -171,27 +172,23 @@ if ($hallEvent != null) {
     if ($hallEvent->iof > 0) {
         $percIOF = $hallEvent->iof;
     }
-    if ($hallEvent->service_charge > 0) {
-        $percService = $hallEvent->service_charge;
-    }
     $rodapeSize++;
     $qtdLinhas += 4;
     foreach ($hallEvent->eventHallOpts as $item) {
         $qtdLinhas++;
         $rate = floatval(unitSale($item));
         $taxes = floatval(sumTaxesProvider($hallEvent, $item));
+        $qtdDayle = $item->count * daysBetween1($item->in, $item->out);
 
+        $sumTotalHallValueRate += $rate * $qtdDayle;
         $sumHallValueRate += $rate;
-        $sumHallQtdDayles += daysBetween1($item->in, $item->out);
-        $sumTotalHallValue += ($rate + $taxes) * daysBetween1($item->in, $item->out);
+        $sumHallQtdDayles +=  $qtdDayle;
+        $sumTotalHallValue += ($rate + $taxes) *  $qtdDayle;
     }
 }
 if ($addEvent != null) {
     if ($addEvent->iof > 0) {
         $percIOF = $addEvent->iof;
-    }
-    if ($addEvent->service_charge > 0) {
-        $percService = $addEvent->service_charge;
     }
     $rodapeSize++;
     $qtdLinhas += 4;
@@ -201,6 +198,7 @@ if ($addEvent != null) {
         $taxes = floatval(sumTaxesProvider($addEvent, $item));
         $qtdDayle = $item->count * daysBetween1($item->in, $item->out);
 
+        $sumTotalAddValueRate += $rate * $qtdDayle;
         $sumAddValueRate += $rate;
         $sumAddQtdDayles += $qtdDayle;
         $sumTotalAddValue += ($rate + $taxes) * daysBetween1($item->in, $item->out);
@@ -210,9 +208,7 @@ if ($transportEvent != null) {
     if ($transportEvent->iof > 0) {
         $percIOF = $transportEvent->iof;
     }
-    if ($transportEvent->service_charge > 0) {
-        $percService = $transportEvent->service_charge;
-    }
+
     $rodapeSize++;
     $qtdLinhas += 4;
     foreach ($transportEvent->eventTransportOpts as $item) {
@@ -221,6 +217,7 @@ if ($transportEvent != null) {
         $taxes = floatval(sumTaxesProvider($transportEvent, $item));
         $qtdDayle = $item->count * daysBetween1($item->in, $item->out);
 
+        $sumTotalTransportValueRate += $rate * $qtdDayle;
         $sumTransportValueRate += $rate;
         $sumTransportQtdDayles += $qtdDayle;
         $sumTotalTransportValue += ($rate + $taxes) * $qtdDayle;
@@ -254,13 +251,13 @@ if ($transportEvent != null) {
         td {
             padding: 0.3rem;
             height: 30px;
-            padding: 0.5rem;
+            padding: 0.3rem;
             text-align: center;
         }
 
         th {
             text-align: center;
-            padding: 0.5rem;
+            padding: 0.3rem;
         }
 
         tbody tr:nth-child(odd) {
@@ -411,7 +408,7 @@ if ($transportEvent != null) {
                 <table>
                     <thead style="display: table-header-group;">
                         <tr>
-                            <th colspan="10" style="padding: 0.5rem; text-align: center;">Hospedagem</th>
+                            <th colspan="10" style="padding: 0.3rem; text-align: center;">Hospedagem</th>
                         </tr>
                         <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                             <th>IN</th>
@@ -468,7 +465,7 @@ if ($transportEvent != null) {
                 <table>
                     <thead style="display: table-header-group;">
                         <tr>
-                            <th colspan="10" style="padding: 0.5rem; text-align: center;">Alimentos & Bebidas</th>
+                            <th colspan="10" style="padding: 0.3rem; text-align: center;">Alimentos & Bebidas</th>
                         </tr>
                         <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                             <th>Refeição</th>
@@ -522,7 +519,7 @@ if ($transportEvent != null) {
                 <table>
                     <thead style="display: table-header-group;">
                         <tr>
-                            <th colspan="11" style="padding: 0.5rem; text-align: center;">Salões & Eventos</th>
+                            <th colspan="11" style="padding: 0.3rem; text-align: center;">Salões & Eventos</th>
                         </tr>
                         <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                             <th>Nome</th>
@@ -578,7 +575,7 @@ if ($transportEvent != null) {
                 <table>
                     <thead style="display: table-header-group;">
                         <tr>
-                            <th colspan="11" style="padding: 0.5rem; text-align: center;">Adicionais</th>
+                            <th colspan="11" style="padding: 0.3rem; text-align: center;">Adicionais</th>
                         </tr>
                         <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                             <th>Serviço</th>
@@ -634,7 +631,7 @@ if ($transportEvent != null) {
                 <table>
                     <thead style="display: table-header-group;">
                         <tr>
-                            <th colspan="12" style="padding: 0.5rem; text-align: center;">Transporte Terrestre</th>
+                            <th colspan="12" style="padding: 0.3rem; text-align: center;">Transporte Terrestre</th>
                         </tr>
                         <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                             <th>Marca</th>
@@ -699,7 +696,7 @@ if ($transportEvent != null) {
                 <table style="<?= $quebrar ? "page-break-before: always;" : "" ?>">
                     <thead>
                         <tr>
-                            <th colspan="5" style="padding: 0.5rem; text-align:center;">
+                            <th colspan="5" style="padding: 0.3rem; text-align:center;">
                                 Resumo da Proposta
                             </th>
                         </tr>
@@ -762,7 +759,7 @@ if ($transportEvent != null) {
                             <td>Transportes</td>
                             <td>Veículos</td>
                             <td>{{ $sumTransportQtdDayles}}</td>
-                            <td>{{ formatCurrency($sumValueRate / count($transportEvent->eventTransportOpts))}}</td>
+                            <td>{{ formatCurrency($sumTransportValueRate / count($transportEvent->eventTransportOpts))}}</td>
                             <td>{{ formatCurrency($sumTotalTransportValue)}}</td>
                         </tr>
                         <?php $strip = !$strip; ?>
@@ -776,15 +773,16 @@ if ($transportEvent != null) {
                                     <tr>
                                         <?php
                                         $total = $sumTotalHotelValue + $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue + $sumTotalTransportValue;
+
                                         $totalIOF = ($total * $percIOF) / 100;
                                         $totalServico = ((($total * $percIOF) / 100) + $total) * ($percService / 100);
                                         ?>
-                                        <td style="height: 18px; width: 15%; float: left; background-color: #ffd18c; padding: 0.5rem;">IOF: </td>
-                                        <td style="height: 18px; width: 15%; float: left; background-color: #ffe3b9; padding: 0.5rem;">{{ $percIOF }}% ({{formatCurrency($totalIOF)}})</td>
-                                        <td style="height: 18px; width: 15%; float: left; background-color: #ffd18c; padding: 0.5rem;">Taxa de Serviço: </td>
-                                        <td style="height: 18px; width: 15%; float: left; background-color: #ffe3b9; padding: 0.5rem;">{{ $percService }}% ({{formatCurrency($totalServico)}})</td>
-                                        <td style="height: 18px; width: 15%; float: left; background-color: #ffd18c; padding: 0.5rem;">Valor Total: </td>
-                                        <td style="height: 18px; width: 15%; float: left; background-color: #ffe3b9; padding: 0.5rem;">
+                                        <td style="height: 18px; width: 15%; float: left; background-color: #ffd18c; padding: 0.3rem;">IOF: </td>
+                                        <td style="height: 18px; width: 15%; float: left; background-color: #ffe3b9; padding: 0.3rem;">{{ $percIOF }}% ({{formatCurrency($totalIOF)}})</td>
+                                        <td style="height: 18px; width: 15%; float: left; background-color: #ffd18c; padding: 0.3rem;">Taxa de Serviço: </td>
+                                        <td style="height: 18px; width: 15%; float: left; background-color: #ffe3b9; padding: 0.3rem;">{{ $percService }}% ({{formatCurrency($totalServico)}})</td>
+                                        <td style="height: 18px; width: 15%; float: left; background-color: #ffd18c; padding: 0.3rem;">Valor Total: </td>
+                                        <td style="height: 18px; width: 15%; float: left; background-color: #ffe3b9; padding: 0.3rem;">
                                             {{ formatCurrency($total + $totalIOF + $totalServico) }}
                                         </td>
                                     </tr>

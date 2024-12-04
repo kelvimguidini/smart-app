@@ -806,7 +806,7 @@ const providersByEvent = (event) => {
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                                <div class="row">
+                                                                <div class="row" v-if="$page.props.auth.permissions.some((p) => p.name === 'status_historico')">
                                                                     <!-- Tabela de Histórico de Status -->
                                                                     <div class="col-12">
                                                                         <h2>Histórico de Status</h2>
