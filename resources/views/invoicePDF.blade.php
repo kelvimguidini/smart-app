@@ -908,7 +908,7 @@ $strip = false;
 
                     <?php
                     $sumTotalAddSaleTaxa = ((($sumTotalAddSale * $addEvent->iof) / 100) + $sumTotalAddSale) * 1.10;
-                    $sumTotalAddCostTaxa = ((($sumTotalAddCost * $hotelEvent->iof) / 100) + $sumTotalAddCost);
+                    $sumTotalAddCostTaxa = ((($sumTotalAddCost * $addEvent->iof) / 100) + $sumTotalAddCost);
 
                     $addTaxa4BTS = ((($sumTotalAddSale * $addEvent->iof) / 100) + $sumTotalAddSale) * 0.10;
                     $sumTaxeAddCost += (($sumTotalAddCost * $addEvent->iof) / 100);

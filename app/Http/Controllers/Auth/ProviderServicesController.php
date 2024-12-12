@@ -125,7 +125,7 @@ class ProviderServicesController extends Controller
 
                 $history = StatusHistory::with('user')->where('table', "event_adds")
                     ->where('table_id', $request->id)
-                    ->where('table', 'EventAdds')
+                    ->where('table', 'event_adds')
                     ->orderBy('created_at', 'desc')
                     ->first();
 
@@ -170,7 +170,7 @@ class ProviderServicesController extends Controller
                 $status = StatusHistory::create([
                     'status' => "created",
                     'user_id' => Auth::user()->id,
-                    'table' => "EventAdds",
+                    'table' => "event_adds",
                     'table_id' => $provider->id
                 ]);
             }
@@ -222,7 +222,11 @@ class ProviderServicesController extends Controller
                 $query->whereHas('event_add', function ($query) use ($provider) {
                     $query->where('add_id', '=', $provider);
                 });
-            }, 'event_adds.eventAddOpts.service', 'event_adds.eventAddOpts.measure', 'event_adds.eventAddOpts.frequency', 'event_adds.currency',
+            },
+            'event_adds.eventAddOpts.service',
+            'event_adds.eventAddOpts.measure',
+            'event_adds.eventAddOpts.frequency',
+            'event_adds.currency',
 
         ])->find($event);
 

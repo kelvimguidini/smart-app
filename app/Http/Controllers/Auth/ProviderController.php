@@ -11,6 +11,7 @@ use App\Models\EventAB;
 use App\Models\EventHall;
 use App\Models\EventHotel;
 use App\Models\Provider;
+use App\Models\ProviderServices;
 use App\Models\StatusHistory;
 use App\Models\User;
 use Dompdf\Dompdf;
@@ -82,6 +83,23 @@ class ProviderController extends Controller
                 $hotel->iva_percent = $request->iva_percent;
 
                 $hotel->save();
+
+                // $hotelService = ProviderServices::where('name', $request->name)->first();
+
+                // if ($hotelService) {
+
+                //     $hotelService->name = $request->name;
+                //     $hotelService->city_id = $request->city;
+                //     $hotelService->contact = $request->contact;
+                //     $hotelService->phone = $request->phone;
+                //     $hotelService->email = $request->email;
+                //     $hotelService->national = $request->national;
+                //     $hotelService->iss_percent = $request->iss_percent;
+                //     $hotelService->service_percent = $request->service_percent;
+                //     $hotelService->iva_percent = $request->iva_percent;
+
+                //     $hotelService->save();
+                // }
             } else {
 
                 $hotel = Provider::create([
@@ -98,11 +116,22 @@ class ProviderController extends Controller
                     'iva_percent' => $request->iva_percent
                 ]);
 
+                $hotelService = ProviderServices::create([
+                    'name' => $request->name,
+                    'city_id' => $request->city,
+                    'contact' => $request->contact,
+                    'phone' => $request->phone,
+                    'email' => $request->email,
+                    'national' => $request->national,
+                    'iss_percent' => $request->iss_percent,
+                    'service_percent' => $request->service_percent,
+                    'iva_percent' => $request->iva_percent
+                ]);
 
                 $status = StatusHistory::create([
                     'status' => "created",
                     'user_id' => Auth::user()->id,
-                    'table' => "EventAdds",
+                    'table' => "event_adds",
                     'table_id' => $hotel->id
                 ]);
             }
@@ -361,6 +390,7 @@ class ProviderController extends Controller
         }
 
         $providerDataBase = $providers->filter()->unique()->values()->first();
+
 
         return array(
             "providerDataBase" => $providerDataBase,
