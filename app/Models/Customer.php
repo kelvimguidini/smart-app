@@ -29,14 +29,10 @@ class Customer extends Model
     protected $id = 'id';
 
 
-    /**
-     * The primary key associated with the table.
-     *
-     * @var string
-     */
-    protected $name = 'name';
-
-
+    public function setNameAttribute($value)
+    {
+        $this->attributes['name'] = strtoupper($value);
+    }
     /**
      * The primary key associated with the table.
      *

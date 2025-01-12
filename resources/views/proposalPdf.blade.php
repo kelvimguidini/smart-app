@@ -201,7 +201,7 @@ if ($addEvent != null) {
         $sumTotalAddValueRate += $rate * $qtdDayle;
         $sumAddValueRate += $rate;
         $sumAddQtdDayles += $qtdDayle;
-        $sumTotalAddValue += ($rate + $taxes) * daysBetween1($item->in, $item->out);
+        $sumTotalAddValue += ($rate + $taxes) * $qtdDayle;
     }
 }
 if ($transportEvent != null) {

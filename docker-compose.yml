@@ -5,8 +5,9 @@ services:
     build: .
     ports:
       - "8000:8000"
+      - "9001:9001" # Porta do Xdebug
     volumes:
-      - /mnt/F:\Projetos\4BTS\smart-app:/var/www/html
+      - F:\Projetos\4BTS\smart-app:/var/www/html
     depends_on:
       - mysql
 

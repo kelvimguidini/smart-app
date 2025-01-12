@@ -35,6 +35,7 @@ class BrokerTransport extends Model
      */
     protected $name = 'name';
 
+
     public function event_transports_opt()
     {
         return $this->belongsTo(EventTransportOpt::class);

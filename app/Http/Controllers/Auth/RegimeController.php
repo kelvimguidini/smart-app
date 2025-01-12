@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Apto;
 use App\Models\Regime;
 use Exception;
 use Illuminate\Http\Request;

@@ -15,6 +15,7 @@ return new class extends Migration
     public function up()
     {
         DB::unprepared("
+        SET GLOBAL log_bin_trust_function_creators = 1;
         DROP FUNCTION IF EXISTS formatar_data_ptbr;
 
         CREATE FUNCTION formatar_data_ptbr(dateValue DATE)

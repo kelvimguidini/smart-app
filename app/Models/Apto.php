@@ -28,6 +28,10 @@ class Apto extends Model
      */
     protected $name = 'name';
 
+    public function setNameAttribute($value)
+    {
+        $this->attributes['name'] = strtoupper($value);
+    }
 
     public function hotels()
     {

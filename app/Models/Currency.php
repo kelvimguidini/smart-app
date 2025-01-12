@@ -20,13 +20,17 @@ class Currency extends Model
      */
     protected $id = 'id';
 
-    /**
-     * The primary key associated with the table.
-     *
-     * @var int
-     */
-    protected $sigla = 'sigla';
 
+    /**
+     * Define o valor do atributo 'sigla' para maiúsculas antes de salvar.
+     *
+     * @param string $value
+     * @return void
+     */
+    public function setSiglaAttribute($value)
+    {
+        $this->attributes['sigla'] = strtoupper($value);
+    }
 
     /**
      * The primary key associated with the table.
