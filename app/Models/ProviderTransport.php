@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\UniqueNameTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProviderTransport extends Model
 {
     use SoftDeletes;
+    use UniqueNameTrait;
 
     protected $fillable = [
         'name',

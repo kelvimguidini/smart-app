@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\UniqueNameTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ServiceType extends Model
 {
     use SoftDeletes;
+    use UniqueNameTrait;
 
     protected $fillable = ['name'];
     protected $table = 'service_type';
@@ -30,6 +32,6 @@ class ServiceType extends Model
 
     public function event_abs_opt()
     {
-        return $this->belongsTo(EventABOptOpt::class);
+        return $this->belongsTo(EventABOpt::class);
     }
 }

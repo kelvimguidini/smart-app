@@ -407,7 +407,7 @@ class BudgetController extends Controller
                 ]);
             }
         } catch (Exception $e) {
-            return redirect()->back()->with('flash', ['message' => 'Aconteceu um erro ao salvar: ' . $e->getMessage(), 'type' => 'error', 'show' => true]);
+            return redirect()->back()->with('flash', ['message' => 'Aconteceu um erro ao salvar: ' . $e->getMessage(), 'type' => 'danger', 'show' => true]);
         }
 
         $event = Event::with('hotelOperator')->find($request->eventId);
@@ -440,7 +440,7 @@ class BudgetController extends Controller
     public function prove(Request $request)
     {
         if (!Gate::allows('save_budget', $request->user)) {
-            return redirect()->back()->with('flash', ['message' => 'Você não tem autorização para aprovar esse orçamento!', 'type' => 'error', 'show' => true]);
+            return redirect()->back()->with('flash', ['message' => 'Você não tem autorização para aprovar esse orçamento!', 'type' => 'danger', 'show' => true]);
         }
 
         try {
@@ -540,7 +540,7 @@ class BudgetController extends Controller
                 $budget->save();
             }
         } catch (Exception $e) {
-            return redirect()->back()->with('flash', ['message' => 'Aconteceu um erro ao salvar: ' . $e->getMessage(), 'type' => 'error', 'show' => true]);
+            return redirect()->back()->with('flash', ['message' => 'Aconteceu um erro ao salvar: ' . $e->getMessage(), 'type' => 'danger', 'show' => true]);
         }
 
         return redirect()->back()->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success', 'show' => true]);

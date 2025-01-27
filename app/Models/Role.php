@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\UniqueNameTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -11,6 +12,7 @@ class Role extends Model
 {
     use HasFactory;
     use SoftDeletes;
+    use UniqueNameTrait;
 
     protected $fillable = ['name', 'active'];
     protected $table = 'roles';

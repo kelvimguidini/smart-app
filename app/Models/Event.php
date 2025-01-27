@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\UniqueNameTrait;
 use DateTime;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -10,6 +11,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Event extends Model
 {
     use SoftDeletes;
+    use UniqueNameTrait;
+
     protected $fillable = [
         'name',
         'code',

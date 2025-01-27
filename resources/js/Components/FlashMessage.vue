@@ -24,7 +24,7 @@ onMounted(() => {
             props.show = false;
             $(this).remove()
         });
-    }, 7000); // milliseconds
+    }, 20000); // milliseconds
 });
 
 var cssMessage = "display: block; position: fixed; top: 0; right: 0; padding-top: 10px; padding-right: 10px; z-index: 9999";

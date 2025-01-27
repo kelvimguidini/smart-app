@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Middleware\Constants;
 use App\Mail\PdfEmail;
 use App\Models\City;
 use App\Models\Event;

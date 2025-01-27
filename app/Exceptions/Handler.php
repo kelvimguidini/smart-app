@@ -47,4 +47,20 @@ class Handler extends ExceptionHandler
             return redirect()->back()->with('flash', ['message' => $e->getMessage(), 'type' => 'danger']);
         });
     }
+
+    /**
+     * Render an exception into an HTTP response.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \Throwable $exception
+     * @return \Illuminate\Http\Response
+     */
+    public function render($request, Throwable $exception)
+    {
+        // Trate todas as exceções e redirecione com mensagem flash
+        return redirect()->back()->with('flash', [
+            'message' => $exception->getMessage(),
+            'type' => 'danger',
+        ]);
+    }
 }
