@@ -41,18 +41,19 @@ class HallController extends Controller
         ]);
 
         try {
+            $history = StatusHistory::with('user')->where('table', 'event_halls')
+                ->where('table_id', $request->event_hall_id)
+                ->where('table', 'event_halls')
+                ->latest('created_at')
+                ->first();
+
+            if ($history && ($history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
+            }
 
             if ($request->id > 0) {
 
-                $history = StatusHistory::with('user')->where('table', 'event_transports')
-                    ->where('table_id', $request->event_hall_id)
-                    ->where('table', 'event_halls')
-                    ->orderBy('created_at', 'desc')
-                    ->first();
 
-                if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
-                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
-                }
 
                 $opt = EventHallOpt::find($request->id);
 
@@ -107,14 +108,15 @@ class HallController extends Controller
             abort(403);
         }
         try {
-            $history = StatusHistory::with('user')->where('table', 'event_transports')
+            $history = StatusHistory::with('user')->where('table', 'event_halls')
                 ->where('table_id', $request->id)
                 ->where('table', 'event_halls')
-                ->orderBy('created_at', 'desc')
+                ->latest('created_at')
                 ->first();
 
-            if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
-                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
+
+            if ($history && ($history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser apagado devido ao status atual!', 'type' => 'danger']);
             }
 
             $r = EventHall::find($request->id);
@@ -140,18 +142,31 @@ class HallController extends Controller
             abort(403);
         }
         try {
-            $history = StatusHistory::with('user')->where('table', 'event_transports')
-                ->where('table_id', $request->id)
-                ->where('table', 'event_halls')
-                ->orderBy('created_at', 'desc')
+            $opt = EventHallOpt::with('event_halls')->find($request->id);
+            $eventHotel = $opt->event_hall()->first();
+
+            if (!$eventHotel) {
+                return redirect()->back()->with('flash', [
+                    'message' => 'Erro: Registro não associado a um hotel válido!',
+                    'type' => 'danger'
+                ]);
+            }
+
+            // Buscar o status mais recente do EventHotel
+            $history = StatusHistory::where('table', 'event_halls')
+                ->where('table_id', $eventHotel->id)
+                ->latest('created_at')
                 ->first();
 
-            if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
-                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
+            // Verifica se o status atual impede a exclusão
+            if ($history && in_array($history->status, ['dating_with_customer', 'Cancelled'])) {
+                return redirect()->back()->with('flash', [
+                    'message' => 'Esse registro não pode ser apagado devido ao status atual!',
+                    'type' => 'danger'
+                ]);
             }
-            $r = EventHallOpt::find($request->id);
-
-            $r->delete();
+            // Excluir o registro do Opt
+            $opt->delete();
         } catch (Exception $e) {
 
             throw $e;

@@ -306,13 +306,34 @@ class EventController extends Controller
         try {
 
             if ($request->id > 0) {
-                $history = StatusHistory::with('user')->where('table', 'event_transports')
-                    ->where('table_id', $request->id)
-                    ->orderBy('created_at', 'desc')
-                    ->first();
+                // Obtém os IDs das tabelas de eventos vinculadas ao evento principal
+                $relatedTables = [
+                    'event_hotels' => EventHotel::where('event_id', $request->id)->pluck('id')->toArray(),
+                    'event_abs' => EventAB::where('event_id', $request->id)->pluck('id')->toArray(),
+                    'event_halls' => EventHall::where('event_id', $request->id)->pluck('id')->toArray(),
+                    'event_adds' => EventAdd::where('event_id', $request->id)->pluck('id')->toArray(),
+                    'event_transports' => EventTransport::where('event_id', $request->id)->pluck('id')->toArray(),
+                ];
 
-                if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
-                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
+                // Achata os IDs coletados em um único array
+                $allTableIds = array_merge(...array_values($relatedTables));
+
+                // Busca no StatusHistory se há algum registro com status proibido
+                $historyExists = StatusHistory::whereIn('table', array_keys($relatedTables))
+                    ->whereIn('table_id', $allTableIds)
+                    ->whereIn('status', ['dating_with_customer', 'Cancelled'])
+                    ->orderBy('created_at', 'desc')
+                    ->get()
+                    ->groupBy('table_id') // Agrupa os históricos por `table_id`
+                    ->map(fn($history) => $history->first()) // Pega apenas o último registro de cada grupo
+                    ->contains(fn($latest) => in_array($latest->status, ['dating_with_customer', 'Cancelled']));
+
+
+                if ($historyExists) {
+                    return redirect()->back()->with('flash', [
+                        'message' => 'Esse evento não pode ser atualizado porque existe um ou mais cadastros finalizados!',
+                        'type' => 'danger'
+                    ]);
                 }
 
                 $event = Event::find($request->id);
@@ -405,14 +426,32 @@ class EventController extends Controller
             abort(403);
         }
         try {
-            // $history = StatusHistory::with('user')->where('table', 'event_transports')
-            //     ->where('table_id', $request->id)
-            //     ->orderBy('created_at', 'desc')
-            //     ->first();
 
-            // if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
-            //     return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
-            // }
+            // Obtém os IDs das tabelas de eventos vinculadas ao evento principal
+            $relatedTables = [
+                'event_hotels' => EventHotel::where('event_id', $request->id)->pluck('id')->toArray(),
+                'event_abs' => EventAB::where('event_id', $request->id)->pluck('id')->toArray(),
+                'event_halls' => EventHall::where('event_id', $request->id)->pluck('id')->toArray(),
+                'event_adds' => EventAdd::where('event_id', $request->id)->pluck('id')->toArray(),
+                'event_transports' => EventTransport::where('event_id', $request->id)->pluck('id')->toArray(),
+            ];
+
+            // Achata os IDs coletados em um único array
+            $allTableIds = array_merge(...array_values($relatedTables));
+
+            // Busca no StatusHistory se há algum registro com status proibido
+            $historyExists = StatusHistory::whereIn('table', array_keys($relatedTables))
+                ->whereIn('table_id', $allTableIds)
+                ->whereIn('status', ['dating_with_customer'])
+                ->exists();
+
+            if ($historyExists) {
+                return redirect()->back()->with('flash', [
+                    'message' => 'Esse evento não pode ser apagado porque existe um ou mais cadastros finalizados!',
+                    'type' => 'danger'
+                ]);
+            }
+
             $r = Event::find($request->id);
 
             $r->delete();

@@ -66,9 +66,9 @@ const truncateToDate = (date) => {
 
 const statusBlockEdit = () => {
     if (props.eventAB && props.eventAB.status_history) {
-        var status = props.eventAB.status_history.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0].status; // TODO ordenar por data e pegar o ultimo registro
+        var status = props.eventAB.status_history.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0].status; 
 
-        return (status == "prescribed_by_manager" || status == "sented_to_customer" || status == "dating_with_customer" || status == "Cancelled")
+        return (status == "dating_with_customer" || status == "Cancelled")
     }
     return false;
 }

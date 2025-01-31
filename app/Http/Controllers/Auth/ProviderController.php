@@ -82,23 +82,6 @@ class ProviderController extends Controller
                 $hotel->iva_percent = $request->iva_percent;
 
                 $hotel->save();
-
-                // $hotelService = ProviderServices::where('name', $request->name)->first();
-
-                // if ($hotelService) {
-
-                //     $hotelService->name = $request->name;
-                //     $hotelService->city_id = $request->city;
-                //     $hotelService->contact = $request->contact;
-                //     $hotelService->phone = $request->phone;
-                //     $hotelService->email = $request->email;
-                //     $hotelService->national = $request->national;
-                //     $hotelService->iss_percent = $request->iss_percent;
-                //     $hotelService->service_percent = $request->service_percent;
-                //     $hotelService->iva_percent = $request->iva_percent;
-
-                //     $hotelService->save();
-                // }
             } else {
 
                 $hotel = Provider::create([
@@ -163,16 +146,16 @@ class ProviderController extends Controller
 
         try {
 
-            $history = StatusHistory::with('user')->where('table', "event_" . $request->type . "s")
-                ->where('table_id', $request->id)
-                ->orderBy('created_at', 'desc')
-                ->first();
-
-            if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
-                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
-            }
-
             if ($request->id > 0) {
+                $history = StatusHistory::with('user')->where('table', "event_" . $request->type . "s")
+                    ->where('table_id', $request->id)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+
+                if ($history && ($history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
+                }
+
                 switch ($request->type) {
                     case 'hotel':
                         $provider = EventHotel::find($request->id);

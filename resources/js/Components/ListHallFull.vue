@@ -68,7 +68,7 @@ const statusBlockEdit = () => {
     if (props.eventHall && props.eventHall.status_history) {
         var status = props.eventHall.status_history.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0].status; // TODO ordenar por data e pegar o ultimo registro
 
-        return (status == "prescribed_by_manager" || status == "sented_to_customer" || status == "dating_with_customer" || status == "Cancelled")
+        return (status == "dating_with_customer" || status == "Cancelled")
     }
     return false;
 }

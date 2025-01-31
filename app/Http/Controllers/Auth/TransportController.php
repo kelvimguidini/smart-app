@@ -55,17 +55,17 @@ class TransportController extends Controller
         ]);
 
         try {
+            $history = StatusHistory::with('user')->where('table', 'event_transports')
+                ->where('table_id', $request->event_transport_id)
+                ->where('table', 'event_transports')
+                ->latest('created_at')
+                ->first();
+
+            if ($history && ($history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
+            }
 
             if ($request->id > 0) {
-                $history = StatusHistory::with('user')->where('table', 'event_transports')
-                    ->where('table_id', $request->event_transport_id)
-                    ->where('table', 'event_transports')
-                    ->orderBy('created_at', 'desc')
-                    ->first();
-
-                if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
-                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
-                }
 
                 $opt = EventTransportOpt::find($request->id);
 
@@ -130,11 +130,11 @@ class TransportController extends Controller
             $history = StatusHistory::with('user')->where('table', 'event_transports')
                 ->where('table_id', $request->id)
                 ->where('table', 'event_transports')
-                ->orderBy('created_at', 'desc')
+                ->latest('created_at')
                 ->first();
 
-            if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
-                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
+            if ($history && ($history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser apagado devido ao status atual!', 'type' => 'danger']);
             }
 
             $r = EventTransport::find($request->id);
@@ -161,19 +161,32 @@ class TransportController extends Controller
         }
         try {
 
-            $r = EventTransportOpt::find($request->id);
 
-            $history = StatusHistory::with('user')->where('table', 'event_transports')
-                ->where('table_id', $r->event_transport_id)
-                ->where('table', 'event_transports')
-                ->orderBy('created_at', 'desc')
-                ->first();
+            $opt = EventTransportOpt::with('event_transports')->find($request->id);
+            $eventHotel = $opt->event_transport()->first();
 
-            if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
-                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser apagado devido ao status atual!', 'type' => 'warning']);
+            if (!$eventHotel) {
+                return redirect()->back()->with('flash', [
+                    'message' => 'Erro: Registro não associado a um hotel válido!',
+                    'type' => 'danger'
+                ]);
             }
 
-            $r->delete();
+            // Buscar o status mais recente do EventHotel
+            $history = StatusHistory::where('table', 'event_transports')
+                ->where('table_id', $eventHotel->id)
+                ->latest('created_at')
+                ->first();
+
+            // Verifica se o status atual impede a exclusão
+            if ($history && in_array($history->status, ['dating_with_customer', 'Cancelled'])) {
+                return redirect()->back()->with('flash', [
+                    'message' => 'Esse registro não pode ser apagado devido ao status atual!',
+                    'type' => 'danger'
+                ]);
+            }
+            // Excluir o registro do Opt
+            $opt->delete();
         } catch (Exception $e) {
 
             throw $e;
@@ -210,22 +223,35 @@ class TransportController extends Controller
                 $query->whereHas('event_hotel', function ($query) use ($provider) {
                     $query->where('hotel_id', '=', $provider);
                 });
-            }, 'event_hotels.eventHotelsOpt.regime', 'event_hotels.eventHotelsOpt.apto_hotel', 'event_hotels.eventHotelsOpt.category_hotel', 'event_hotels.currency',
+            },
+            'event_hotels.eventHotelsOpt.regime',
+            'event_hotels.eventHotelsOpt.apto_hotel',
+            'event_hotels.eventHotelsOpt.category_hotel',
+            'event_hotels.currency',
             'event_abs.eventAbOpts' => function ($query) use ($provider) {
                 $query->whereHas('event_ab', function ($query) use ($provider) {
                     $query->where('ab_id', '=', $provider);
                 });
-            }, 'event_abs.eventAbOpts.Local', 'event_abs.eventAbOpts.service_type', 'event_abs.currency',
+            },
+            'event_abs.eventAbOpts.Local',
+            'event_abs.eventAbOpts.service_type',
+            'event_abs.currency',
             'event_halls.eventHallOpts' => function ($query) use ($provider) {
                 $query->whereHas('event_hall', function ($query) use ($provider) {
                     $query->where('hall_id', '=', $provider);
                 });
-            }, 'event_halls.eventHallOpts.purpose', 'event_halls.currency',
+            },
+            'event_halls.eventHallOpts.purpose',
+            'event_halls.currency',
             'event_adds.eventAddOpts' => function ($query) use ($provider) {
                 $query->whereHas('event_add', function ($query) use ($provider) {
                     $query->where('add_id', '=', $provider);
                 });
-            }, 'event_adds.eventAddOpts.service', 'event_adds.eventAddOpts.measure', 'event_adds.eventAddOpts.frequency', 'event_adds.currency',
+            },
+            'event_adds.eventAddOpts.service',
+            'event_adds.eventAddOpts.measure',
+            'event_adds.eventAddOpts.frequency',
+            'event_adds.currency',
         ])->find($event);
 
         $providers = collect();

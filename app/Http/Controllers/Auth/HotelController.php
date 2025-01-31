@@ -60,17 +60,17 @@ class HotelController extends Controller
         ]);
 
         try {
+            $history = StatusHistory::with('user')->where('table', 'event_hotels')
+                ->where('table_id', $request->event_hotel_id)
+                ->where('table', 'event_hotels')
+                ->latest('created_at')
+                ->first();
+
+            if ($history && ($history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
+            }
 
             if ($request->id > 0) {
-                $history = StatusHistory::with('user')->where('table', 'event_transports')
-                    ->where('table_id', $request->event_hotel_id)
-                    ->where('table', 'event_hotels')
-                    ->orderBy('created_at', 'desc')
-                    ->first();
-
-                if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
-                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
-                }
 
                 $opt = EventHotelOpt::find($request->id);
 
@@ -152,14 +152,14 @@ class HotelController extends Controller
             abort(403);
         }
         try {
-            $history = StatusHistory::with('user')->where('table', 'event_transports')
+            $history = StatusHistory::with('user')->where('table', 'event_hotels')
                 ->where('table_id', $request->id)
                 ->where('table', 'event_hotels')
-                ->orderBy('created_at', 'desc')
+                ->latest('created_at')
                 ->first();
 
-            if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
-                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
+            if ($history && ($history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser apagado devido ao status atual!', 'type' => 'danger']);
             }
 
             $r = EventHotel::find($request->id);
@@ -185,19 +185,32 @@ class HotelController extends Controller
             abort(403);
         }
         try {
-            $history = StatusHistory::with('user')->where('table', 'event_transports')
-                ->where('table_id', $request->id)
-                ->where('table', 'event_hotels')
-                ->orderBy('created_at', 'desc')
-                ->first();
 
-            if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
-                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
+            $opt = EventHotelOpt::with('event_hotel')->find($request->id);
+            $eventHotel = $opt->event_hotel()->first();
+
+            if (!$eventHotel) {
+                return redirect()->back()->with('flash', [
+                    'message' => 'Erro: Registro não associado a um hotel válido!',
+                    'type' => 'danger'
+                ]);
             }
 
-            $r = EventHotelOpt::find($request->id);
+            // Buscar o status mais recente do EventHotel
+            $history = StatusHistory::where('table', 'event_hotels')
+                ->where('table_id', $eventHotel->id)
+                ->latest('created_at')
+                ->first();
 
-            $r->delete();
+            // Verifica se o status atual impede a exclusão
+            if ($history && in_array($history->status, ['dating_with_customer', 'Cancelled'])) {
+                return redirect()->back()->with('flash', [
+                    'message' => 'Esse registro não pode ser apagado devido ao status atual!',
+                    'type' => 'danger'
+                ]);
+            }
+            // Excluir o registro do Opt
+            $opt->delete();
         } catch (Exception $e) {
 
             throw $e;

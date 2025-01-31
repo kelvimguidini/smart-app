@@ -128,8 +128,8 @@ class ProviderTransportController extends Controller
                     ->orderBy('created_at', 'desc')
                     ->first();
 
-                if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
-                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'warning']);
+                if ($history && ($history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
                 }
 
                 $provider = EventTransport::find($request->id);
@@ -197,8 +197,8 @@ class ProviderTransportController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->first();
 
-            if ($history && ($history->status == "prescribed_by_manager" || $history->status == "sented_to_customer" || $history->status == "dating_with_customer" || $history->status == "Cancelled")) {
-                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser apagado devido ao status atual!', 'type' => 'warning']);
+            if ($history && ($history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser apagado devido ao status atual!', 'type' => 'danger']);
             }
 
             $r = ProviderTransport::find($request->id);
@@ -230,7 +230,13 @@ class ProviderTransportController extends Controller
                 $query->whereHas('event_transport', function ($query) use ($provider) {
                     $query->where('transport_id', '=', $provider);
                 });
-            }, 'event_transports.eventTransportOpts.broker', 'event_transports.eventTransportOpts.vehicle', 'event_transports.eventTransportOpts.model', 'event_transports.eventTransportOpts.service', 'event_transports.eventTransportOpts.brand', 'event_transports.currency',
+            },
+            'event_transports.eventTransportOpts.broker',
+            'event_transports.eventTransportOpts.vehicle',
+            'event_transports.eventTransportOpts.model',
+            'event_transports.eventTransportOpts.service',
+            'event_transports.eventTransportOpts.brand',
+            'event_transports.currency',
 
         ])->find($event);
 

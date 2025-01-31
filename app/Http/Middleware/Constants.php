@@ -79,7 +79,7 @@ class Constants extends Middleware
         'approved_by_manager' => [
             'label' => "Aprovado pelo Gestor",
             'level' => 2,
-            'flow' => ['sent_to_customer', 'change_request']
+            'flow' => ['sent_to_customer', 'change_request', 'dating_with_customer']
         ],
         'add_information' => [
             'label' => "Informações Adicionais",
@@ -104,12 +104,12 @@ class Constants extends Middleware
         'dating_with_customer' => [
             'label' => "Fechado com Cliente",
             'level' => 1,
-            'flow' => []
+            'flow' => ['add_information']
         ],
         'Cancelled' => [
             'label' => "Cancelado",
             'level' => 1,
-            'flow' => []
+            'flow' => ['added_information']
         ],
     ];
 
