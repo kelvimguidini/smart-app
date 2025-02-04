@@ -11,6 +11,22 @@ use Illuminate\Support\Facades\Gate;
 
 class ServiceHallController extends Controller
 {
+    public function activateM($id)
+    {
+        if (!Gate::allows('service_hall_admin')) {
+            abort(403);
+        }
+        return $this->activate($id, ServiceHall::class);
+    }
+
+    public function deactivateM($id)
+    {
+        if (!Gate::allows('service_hall_admin')) {
+            abort(403);
+        }
+        return $this->deactivate($id, ServiceHall::class);
+    }
+
     /**
      * Display the registration view.
      *
@@ -22,7 +38,7 @@ class ServiceHallController extends Controller
             abort(403);
         }
 
-        $t = ServiceHall::all();
+        $t = ServiceHall::withoutGlobalScope('active')->get();
         return Inertia::render('Auth/Auxiliaries/ServiceHall', [
             'services' => $t
         ]);
@@ -49,7 +65,7 @@ class ServiceHallController extends Controller
 
             if ($request->id > 0) {
 
-                $obj = ServiceHall::find($request->id);
+                $obj = ServiceHall::withoutGlobalScope('active')->find($request->id);
 
                 $obj->name = $request->name;
                 $obj->save();
@@ -77,7 +93,7 @@ class ServiceHallController extends Controller
         }
         try {
 
-            $r = ServiceHall::find($request->id);
+            $r = ServiceHall::withoutGlobalScope('active')->find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

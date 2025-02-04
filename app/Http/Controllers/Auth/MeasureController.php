@@ -11,6 +11,22 @@ use Illuminate\Support\Facades\Gate;
 
 class MeasureController extends Controller
 {
+    public function activateM($id)
+    {
+        if (!Gate::allows('measure_admin')) {
+            abort(403);
+        }
+        return $this->activate($id, Measure::class);
+    }
+
+    public function deactivateM($id)
+    {
+        if (!Gate::allows('measure_admin')) {
+            abort(403);
+        }
+        return $this->deactivate($id, Measure::class);
+    }
+
     /**
      * Display the registration view.
      *
@@ -22,7 +38,7 @@ class MeasureController extends Controller
             abort(403);
         }
 
-        $t = Measure::all();
+        $t = Measure::withoutGlobalScope('active')->get();
         return Inertia::render('Auth/Auxiliaries/Measure', [
             'measures' => $t
         ]);
@@ -49,7 +65,7 @@ class MeasureController extends Controller
 
             if ($request->id > 0) {
 
-                $obj = Measure::find($request->id);
+                $obj = Measure::withoutGlobalScope('active')->find($request->id);
 
                 $obj->name = $request->name;
                 $obj->save();
@@ -77,7 +93,7 @@ class MeasureController extends Controller
         }
         try {
 
-            $r = Measure::find($request->id);
+            $r = Measure::withoutGlobalScope('active')->find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

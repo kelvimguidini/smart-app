@@ -12,6 +12,22 @@ use Illuminate\Support\Facades\Gate;
 
 class ServiceTypeController extends Controller
 {
+    public function activateM($id)
+    {
+        if (!Gate::allows('service_type_admin')) {
+            abort(403);
+        }
+        return $this->activate($id, ServiceType::class);
+    }
+
+    public function deactivateM($id)
+    {
+        if (!Gate::allows('service_type_admin')) {
+            abort(403);
+        }
+        return $this->deactivate($id, ServiceType::class);
+    }
+
     /**
      * Display the registration view.
      *
@@ -23,7 +39,7 @@ class ServiceTypeController extends Controller
             abort(403);
         }
 
-        $t = ServiceType::all();
+        $t = ServiceType::withoutGlobalScope('active')->get();
         return Inertia::render('Auth/Auxiliaries/ServiceType', [
             'serviceTypes' => $t
         ]);
@@ -50,7 +66,7 @@ class ServiceTypeController extends Controller
 
             if ($request->id > 0) {
 
-                $obj = ServiceType::find($request->id);
+                $obj = ServiceType::withoutGlobalScope('active')->find($request->id);
 
                 $obj->name = $request->name;
                 $obj->save();
@@ -78,7 +94,7 @@ class ServiceTypeController extends Controller
         }
         try {
 
-            $r = ServiceType::find($request->id);
+            $r = ServiceType::withoutGlobalScope('active')->find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

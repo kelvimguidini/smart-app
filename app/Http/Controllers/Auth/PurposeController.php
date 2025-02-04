@@ -12,6 +12,22 @@ use Illuminate\Support\Facades\Gate;
 
 class PurposeController extends Controller
 {
+    public function activateM($id)
+    {
+        if (!Gate::allows('purpose_admin')) {
+            abort(403);
+        }
+        return $this->activate($id, Purpose::class);
+    }
+
+    public function deactivateM($id)
+    {
+        if (!Gate::allows('purpose_admin')) {
+            abort(403);
+        }
+        return $this->deactivate($id, Purpose::class);
+    }
+
     /**
      * Display the registration view.
      *
@@ -23,7 +39,7 @@ class PurposeController extends Controller
             abort(403);
         }
 
-        $t = Purpose::all();
+        $t = Purpose::withoutGlobalScope('active')->get();
         return Inertia::render('Auth/Auxiliaries/Purpose', [
             'purposes' => $t
         ]);
@@ -50,7 +66,7 @@ class PurposeController extends Controller
 
             if ($request->id > 0) {
 
-                $purpose = Purpose::find($request->id);
+                $purpose = Purpose::withoutGlobalScope('active')->find($request->id);
 
                 $purpose->name = $request->name;
                 $purpose->save();
@@ -78,7 +94,7 @@ class PurposeController extends Controller
         }
         try {
 
-            $r = Purpose::find($request->id);
+            $r = Purpose::withoutGlobalScope('active')->find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

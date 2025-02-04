@@ -12,6 +12,22 @@ use Illuminate\Support\Facades\Gate;
 
 class CurrencyController extends Controller
 {
+    public function activateM($id)
+    {
+        if (!Gate::allows('currency_admin')) {
+            abort(403);
+        }
+        return $this->activate($id, Currency::class);
+    }
+
+    public function deactivateM($id)
+    {
+        if (!Gate::allows('currency_admin')) {
+            abort(403);
+        }
+        return $this->deactivate($id, Currency::class);
+    }
+
     /**
      * Display the registration view.
      *
@@ -23,7 +39,7 @@ class CurrencyController extends Controller
             abort(403);
         }
 
-        $t = Currency::all();
+        $t = Currency::withoutGlobalScope('active')->get();
         return Inertia::render('Auth/Auxiliaries/Currency', [
             'currencies' => $t
         ]);
@@ -50,7 +66,7 @@ class CurrencyController extends Controller
 
             if ($request->id > 0) {
 
-                $currency = Currency::find($request->id);
+                $currency = Currency::withoutGlobalScope('active')->find($request->id);
 
                 $currency->name = $request->name;
                 $currency->sigla = $request->sigla;
@@ -82,7 +98,7 @@ class CurrencyController extends Controller
         }
         try {
 
-            $r = Currency::find($request->id);
+            $r = Currency::withoutGlobalScope('active')->find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

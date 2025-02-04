@@ -13,6 +13,22 @@ use Illuminate\Support\Facades\Gate;
 
 class BrokerController extends Controller
 {
+    public function activateM($id)
+    {
+        if (!Gate::allows('broker_admin')) {
+            abort(403);
+        }
+        return $this->activate($id, Broker::class);
+    }
+
+    public function deactivateM($id)
+    {
+        if (!Gate::allows('broker_admin')) {
+            abort(403);
+        }
+        return $this->deactivate($id, Broker::class);
+    }
+
     /**
      * Display the registration view.
      *
@@ -24,7 +40,7 @@ class BrokerController extends Controller
             abort(403);
         }
 
-        $t = Broker::all();
+        $t = Broker::withoutGlobalScope('active')->get();
         return Inertia::render('Auth/Auxiliaries/Broker', [
             'brokers' => $t,
             'cities' => City::all()
@@ -55,7 +71,7 @@ class BrokerController extends Controller
 
             if ($request->id > 0) {
 
-                $broker = Broker::find($request->id);
+                $broker = Broker::withoutGlobalScope('active')->find($request->id);
 
                 $broker->name = $request->name;
                 $broker->city_id = $request->city;
@@ -93,7 +109,7 @@ class BrokerController extends Controller
         }
         try {
 
-            $r = Broker::find($request->id);
+            $r = Broker::withoutGlobalScope('active')->find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

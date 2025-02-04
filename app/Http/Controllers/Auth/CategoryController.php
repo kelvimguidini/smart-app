@@ -11,6 +11,24 @@ use Illuminate\Support\Facades\Gate;
 
 class CategoryController extends Controller
 {
+    public function activateM($id)
+    {
+        if (!Gate::allows('category_admin')) {
+            abort(403);
+        }
+
+        return $this->activate($id, Category::class);
+    }
+
+    public function deactivateM($id)
+    {
+        if (!Gate::allows('category_admin')) {
+            abort(403);
+        }
+
+        return $this->deactivate($id, Category::class);
+    }
+
     /**
      * Display the registration view.
      *
@@ -22,7 +40,7 @@ class CategoryController extends Controller
             abort(403);
         }
 
-        $t = Category::all();
+        $t = Category::withoutGlobalScope('active')->get();
         return Inertia::render('Auth/Auxiliaries/Category', [
             'categories' => $t
         ]);
@@ -49,7 +67,7 @@ class CategoryController extends Controller
 
             if ($request->id > 0) {
 
-                $Category = Category::find($request->id);
+                $Category = Category::withoutGlobalScope('active')->find($request->id);
 
                 $Category->name = $request->name;
                 $Category->save();
@@ -77,7 +95,7 @@ class CategoryController extends Controller
         }
         try {
 
-            $r = Category::find($request->id);
+            $r = Category::withoutGlobalScope('active')->find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

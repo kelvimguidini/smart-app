@@ -13,6 +13,22 @@ use Illuminate\Support\Facades\Storage;
 
 class CustomerController extends Controller
 {
+    public function activateM($id)
+    {
+        if (!Gate::allows('customer_admin')) {
+            abort(403);
+        }
+        return $this->activate($id, Customer::class);
+    }
+
+    public function deactivateM($id)
+    {
+        if (!Gate::allows('customer_admin')) {
+            abort(403);
+        }
+        return $this->deactivate($id, Customer::class);
+    }
+
     /**
      * Display the registration view.
      *
@@ -24,7 +40,7 @@ class CustomerController extends Controller
             abort(403);
         }
 
-        $t = Customer::all();
+        $t = Customer::withoutGlobalScope('active')->get();
         return Inertia::render('Auth/Auxiliaries/Customer', [
             'customers' => $t
         ]);
@@ -57,7 +73,7 @@ class CustomerController extends Controller
 
             if ($request->id > 0) {
 
-                $customer = Customer::find($request->id);
+                $customer = Customer::withoutGlobalScope('active')->find($request->id);
 
                 $customer->name = $request->name;
                 $customer->color = $request->color;
@@ -100,7 +116,7 @@ class CustomerController extends Controller
         }
         try {
 
-            $r = Customer::find($request->id);
+            $r = Customer::withoutGlobalScope('active')->find($request->id);
 
             $r->delete();
 

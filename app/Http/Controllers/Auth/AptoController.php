@@ -11,6 +11,21 @@ use Illuminate\Support\Facades\Gate;
 
 class AptoController extends Controller
 {
+    public function activateM($id)
+    {
+        if (!Gate::allows('apto_admin')) {
+            abort(403);
+        }
+        return $this->activate($id, Apto::class);
+    }
+
+    public function deactivateM($id)
+    {
+        if (!Gate::allows('apto_admin')) {
+            abort(403);
+        }
+        return $this->deactivate($id, Apto::class);
+    }
     /**
      * Display the registration view.
      *
@@ -22,7 +37,7 @@ class AptoController extends Controller
             abort(403);
         }
 
-        $t = Apto::all();
+        $t = Apto::withoutGlobalScope('active')->get();
         return Inertia::render('Auth/Auxiliaries/Apto', [
             'aptos' => $t
         ]);
@@ -49,7 +64,7 @@ class AptoController extends Controller
 
             if ($request->id > 0) {
 
-                $Apto = Apto::find($request->id);
+                $Apto = Apto::withoutGlobalScope('active')->find($request->id);
 
                 $Apto->name = $request->name;
                 $Apto->save();
@@ -77,7 +92,7 @@ class AptoController extends Controller
         }
         try {
 
-            $r = Apto::find($request->id);
+            $r = Apto::withoutGlobalScope('active')->find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

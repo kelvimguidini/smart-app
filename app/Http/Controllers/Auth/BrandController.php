@@ -11,6 +11,22 @@ use Illuminate\Support\Facades\Gate;
 
 class BrandController extends Controller
 {
+    public function activateM($id)
+    {
+        if (!Gate::allows('brand_admin')) {
+            abort(403);
+        }
+        return $this->activate($id, Brand::class);
+    }
+
+    public function deactivateM($id)
+    {
+        if (!Gate::allows('brand_admin')) {
+            abort(403);
+        }
+        return $this->deactivate($id, Brand::class);
+    }
+
     /**
      * Display the registration view.
      *
@@ -22,7 +38,7 @@ class BrandController extends Controller
             abort(403);
         }
 
-        $t = Brand::all();
+        $t = Brand::withoutGlobalScope('active')->get();
         return Inertia::render('Auth/Auxiliaries/Brand', [
             'brands' => $t
         ]);
@@ -49,7 +65,7 @@ class BrandController extends Controller
 
             if ($request->id > 0) {
 
-                $brand = Brand::find($request->id);
+                $brand = Brand::withoutGlobalScope('active')->find($request->id);
 
                 $brand->name = $request->name;
                 $brand->save();
@@ -77,7 +93,7 @@ class BrandController extends Controller
         }
         try {
 
-            $r = Brand::find($request->id);
+            $r = Brand::withoutGlobalScope('active')->find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

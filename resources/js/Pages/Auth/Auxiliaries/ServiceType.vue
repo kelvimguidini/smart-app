@@ -62,6 +62,24 @@ const submit = () => {
         },
     });
 };
+
+const activate = (id) => {
+    isLoader.value = true;
+    form.put(route('service_types-activate', id), {
+        onFinish: () => {
+            isLoader.value = false;
+        },
+    });
+};
+
+const deactivate = (id) => {
+    isLoader.value = true;
+    form.put(route('service_types-deactivate', id), {
+        onFinish: () => {
+            isLoader.value = false;
+        },
+    });
+};
 </script>
 
 <template>
@@ -155,6 +173,23 @@ const submit = () => {
                                                             Tem certeza que deseja apagar esse registro?
                                                         </template>
                                                     </Modal>
+
+
+                                                    <button v-if="!brand.active" class="btn btn-success btn-icon-split mr-2"
+                                                        v-on:click="activate(brand.id)">
+                                                        <span class="icon text-white-50">
+                                                            <i class="fas fa-check"></i>
+                                                        </span>
+                                                        <span class="text">Ativar</span>
+                                                    </button>
+
+                                                    <button v-if="brand.active" class="btn btn-warning btn-icon-split mr-2"
+                                                        v-on:click="deactivate(brand.id)">
+                                                        <span class="icon text-white-50">
+                                                            <i class="fas fa-ban"></i>
+                                                        </span>
+                                                        <span class="text">Inativar</span>
+                                                    </button>
 
                                                 </td>
                                             </tr>

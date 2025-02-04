@@ -11,6 +11,22 @@ use Illuminate\Support\Facades\Gate;
 
 class FrequencyController extends Controller
 {
+    public function activateM($id)
+    {
+        if (!Gate::allows('frequency_admin')) {
+            abort(403);
+        }
+        return $this->activate($id, Frequency::class);
+    }
+
+    public function deactivateM($id)
+    {
+        if (!Gate::allows('frequency_admin')) {
+            abort(403);
+        }
+        return $this->deactivate($id, Frequency::class);
+    }
+
     /**
      * Display the registration view.
      *
@@ -22,7 +38,7 @@ class FrequencyController extends Controller
             abort(403);
         }
 
-        $t = Frequency::all();
+        $t = Frequency::withoutGlobalScope('active')->get();
         return Inertia::render('Auth/Auxiliaries/Frequency', [
             'frequencies' => $t
         ]);
@@ -49,7 +65,7 @@ class FrequencyController extends Controller
 
             if ($request->id > 0) {
 
-                $obj = Frequency::find($request->id);
+                $obj = Frequency::withoutGlobalScope('active')->find($request->id);
 
                 $obj->name = $request->name;
                 $obj->save();
@@ -77,7 +93,7 @@ class FrequencyController extends Controller
         }
         try {
 
-            $r = Frequency::find($request->id);
+            $r = Frequency::withoutGlobalScope('active')->find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

@@ -11,6 +11,22 @@ use Illuminate\Support\Facades\Gate;
 
 class RegimeController extends Controller
 {
+    public function activateM($id)
+    {
+        if (!Gate::allows('regime_admin')) {
+            abort(403);
+        }
+        return $this->activate($id, Regime::class);
+    }
+
+    public function deactivateM($id)
+    {
+        if (!Gate::allows('regime_admin')) {
+            abort(403);
+        }
+        return $this->deactivate($id, Regime::class);
+    }
+
     /**
      * Display the registration view.
      *
@@ -22,7 +38,7 @@ class RegimeController extends Controller
             abort(403);
         }
 
-        $t = Regime::all();
+        $t = Regime::withoutGlobalScope('active')->get();
         return Inertia::render('Auth/Auxiliaries/Regime', [
             'regimes' => $t
         ]);
@@ -49,7 +65,7 @@ class RegimeController extends Controller
 
             if ($request->id > 0) {
 
-                $regime = Regime::find($request->id);
+                $regime = Regime::withoutGlobalScope('active')->find($request->id);
 
                 $regime->name = $request->name;
                 $regime->save();
@@ -77,7 +93,7 @@ class RegimeController extends Controller
         }
         try {
 
-            $r = Regime::find($request->id);
+            $r = Regime::withoutGlobalScope('active')->find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

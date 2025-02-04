@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Activatable;
 use App\Traits\UniqueNameTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -9,10 +10,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Brand extends Model
 {
-    use SoftDeletes;
     use UniqueNameTrait;
+    use Activatable;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'active'];
     protected $table = 'car_brand';
 
     /**

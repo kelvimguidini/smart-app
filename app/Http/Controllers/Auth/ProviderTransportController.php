@@ -23,6 +23,22 @@ use Illuminate\Support\Facades\Mail;
 
 class ProviderTransportController extends Controller
 {
+    public function activateM($id)
+    {
+        if (!Gate::allows('admin_provider_transport')) {
+            abort(403);
+        }
+        return $this->activate($id, ProviderTransport::class);
+    }
+
+    public function deactivateM($id)
+    {
+        if (!Gate::allows('admin_provider_transport')) {
+            abort(403);
+        }
+        return $this->deactivate($id, ProviderTransport::class);
+    }
+
 
     /**
      * Display the registration view.
@@ -32,7 +48,7 @@ class ProviderTransportController extends Controller
     public function create(Request $request)
     {
         if (Gate::allows('admin_provider_transport')) {
-            $hotels = ProviderTransport::with('city')->get();
+            $hotels = ProviderTransport::with('city')->withoutGlobalScope('active')->get();
         } else {
             abort(403);
         }
@@ -65,7 +81,7 @@ class ProviderTransportController extends Controller
         try {
 
             if ($request->id > 0) {
-                $hotel = ProviderTransport::find($request->id);
+                $hotel = ProviderTransport::withoutGlobalScope('active')->find($request->id);
 
                 $hotel->name = $request->name;
                 $hotel->city_id = $request->city;
@@ -201,7 +217,7 @@ class ProviderTransportController extends Controller
                 return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser apagado devido ao status atual!', 'type' => 'danger']);
             }
 
-            $r = ProviderTransport::find($request->id);
+            $r = ProviderTransport::withoutGlobalScope('active')->find($request->id);
 
             $r->delete();
         } catch (Exception $e) {
