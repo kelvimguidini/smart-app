@@ -20,8 +20,7 @@ jobs:
 
       - name: Install PHP dependencies
         run: composer install --no-dev --prefer-dist
-        with:
-          php-version: '8.1'
+
 
       - name: Install Frontend Dependencies & Build
         run: |
@@ -31,6 +30,7 @@ jobs:
       - name: Upload Files via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
+          php-version: '8.1'
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}

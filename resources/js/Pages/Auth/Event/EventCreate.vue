@@ -677,7 +677,7 @@ const newEventProv = (type) => {
 
                                     <div class="form-group">
                                         <InputLabel for="cc" value="Centro de Custo:" />
-                                        <TextInput type="text" class="form-control" v-model="form.cc" autofocus
+                                        <TextInput type="number" class="form-control" v-model="form.cc" autofocus
                                             autocomplete="cc" required />
                                         <InputError class="mt-2 text-danger" :message="form.errors.cc" />
                                     </div>
