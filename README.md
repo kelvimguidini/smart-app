@@ -53,18 +53,7 @@ DB_PASSWORD=casanova
 Executar migration para criação das tabelas do projeto
 
 ```sh
-php artisan migrate:fresh --seed
-```
-
-Usuário inicial: 
-admin@admin.com'
-Admin
-
-
-
-####### Executar ao commitar
-
-
+php artisan migrate:fresh 
 php artisan db:seed --class=CitySeeder
 php artisan db:seed --class=VehicleSeeder
 php artisan db:seed --class=DatabaseSeeder
@@ -72,7 +61,9 @@ php artisan db:seed --class=StatusHistorySeeder
 php artisan db:seed --class=IncrementalPermissionsSeeder
 php artisan db:seed --class=TransportSeeder
 
+```
 
+Usuário inicial: 
+admin@admin.com'
+Admin
 
-
-enviar node_module
