@@ -18,9 +18,13 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Setup PHP (PHP 8.1)
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+
       - name: Install PHP dependencies
         run: composer install --no-dev --prefer-dist
-
 
       - name: Install Frontend Dependencies & Build
         run: |
@@ -30,12 +34,11 @@ jobs:
       - name: Upload Files via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          php-version: '8.1'
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./
-          server-dir: /www
+          local-dir: ./ 
+          server-dir: /www/  # Certifique-se de que o diretório termina com "/"
           exclude: |
             **/.git*
             **/node_modules/**
