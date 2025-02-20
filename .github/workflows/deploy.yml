@@ -37,6 +37,9 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          port: 2121
+          protocol: ftps
+          timeout: 300
           local-dir: ./ 
           server-dir: /www/  # Certifique-se de que o diretório termina com "/"
           exclude: |
