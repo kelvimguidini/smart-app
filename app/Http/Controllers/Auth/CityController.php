@@ -14,6 +14,22 @@ use Illuminate\Support\Facades\Gate;
 
 class CityController extends Controller
 {
+    public function activateM($id)
+    {
+        if (!Gate::allows('city_admin')) {
+            abort(403);
+        }
+        return $this->activate($id, City::class);
+    }
+
+    public function deactivateM($id)
+    {
+        if (!Gate::allows('city_admin')) {
+            abort(403);
+        }
+        return $this->deactivate($id, City::class);
+    }
+
     /**
      * Display the registration view.
      *
@@ -25,7 +41,7 @@ class CityController extends Controller
             abort(403);
         }
 
-        $t = City::get();
+        $t = City::withoutGlobalScope('active')->get();
         return Inertia::render('Auth/Auxiliaries/City', [
             'cities' => $t,
             'ufs' => Constants::UFS
@@ -54,7 +70,7 @@ class CityController extends Controller
 
             if ($request->id > 0) {
 
-                $city = City::find($request->id);
+                $city = City::withoutGlobalScope('active')->find($request->id);
 
                 $city->name = $request->name;
                 $city->states = $request->states;
@@ -86,7 +102,7 @@ class CityController extends Controller
         }
         try {
 
-            $r = City::find($request->id);
+            $r = City::withoutGlobalScope('active')->find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

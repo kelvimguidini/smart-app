@@ -13,6 +13,23 @@ use Illuminate\Support\Facades\Gate;
 
 class TransportServiceController extends Controller
 {
+    public function activateM($id)
+    {
+        if (!Gate::allows('transport_service_admin')) {
+            abort(403);
+        }
+        return $this->activate($id, TransportService::class);
+    }
+
+    public function deactivateM($id)
+    {
+        if (!Gate::allows('transport_service_admin')) {
+            abort(403);
+        }
+        return $this->deactivate($id, TransportService::class);
+    }
+
+
     /**
      * Display the registration view.
      *
@@ -24,7 +41,7 @@ class TransportServiceController extends Controller
             abort(403);
         }
 
-        $t = TransportService::all();
+        $t = TransportService::withoutGlobalScope('active')->get();
         return Inertia::render('Auth/Auxiliaries/TransportService', [
             'transportServices' => $t
         ]);
@@ -51,7 +68,7 @@ class TransportServiceController extends Controller
 
             if ($request->id > 0) {
 
-                $TransportService = TransportService::find($request->id);
+                $TransportService = TransportService::withoutGlobalScope('active')->find($request->id);
 
                 $TransportService->name = $request->name;
                 $TransportService->save();
@@ -79,7 +96,7 @@ class TransportServiceController extends Controller
         }
         try {
 
-            $r = TransportService::find($request->id);
+            $r = TransportService::withoutGlobalScope('active')->find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

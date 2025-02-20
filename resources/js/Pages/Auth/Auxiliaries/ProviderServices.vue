@@ -107,6 +107,24 @@ const deleteHotel = (id) => {
         },
     });
 };
+
+const activate = (id) => {
+    isLoader.value = true;
+    form.put(route('provider_services-activate', id), {
+        onFinish: () => {
+            isLoader.value = false;
+        },
+    });
+};
+
+const deactivate = (id) => {
+    isLoader.value = true;
+    form.put(route('provider_services-deactivate', id), {
+        onFinish: () => {
+            isLoader.value = false;
+        },
+    });
+};
 </script>
 
 <template>
@@ -292,7 +310,7 @@ const deleteHotel = (id) => {
 
                                             <Modal :key="index" :modal-title="'Confirmar Exclusão de ' + hotel.name"
                                                 :ok-botton-callback="deleteHotel" :ok-botton-callback-param="hotel.id"
-                                                btn-class="btn btn-sm btn-danger btn-icon-split">
+                                                btn-class="btn btn-sm btn-danger btn-icon-split  mr-2">
                                                 <template v-slot:button>
                                                     <span class="icon text-white-50">
                                                         <i class="fas fa-trash"></i>
@@ -303,6 +321,23 @@ const deleteHotel = (id) => {
                                                     Tem certeza que deseja apagar esse registro?
                                                 </template>
                                             </Modal>
+
+
+                                            <button v-if="!hotel.active" class="btn btn-sm btn-success btn-icon-split mr-2"
+                                                        v-on:click="activate(hotel.id)">
+                                                        <span class="icon text-white-50">
+                                                            <i class="fas fa-check"></i>
+                                                        </span>
+                                                        <span class="text">Ativar</span>
+                                                    </button>
+
+                                                    <button v-if="hotel.active" class="btn btn-sm btn-warning btn-icon-split mr-2"
+                                                        v-on:click="deactivate(hotel.id)">
+                                                        <span class="icon text-white-50">
+                                                            <i class="fas fa-ban"></i>
+                                                        </span>
+                                                        <span class="text">Inativar</span>
+                                                    </button>
 
                                         </td>
                                     </tr>

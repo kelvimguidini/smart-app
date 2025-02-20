@@ -23,6 +23,21 @@ use Illuminate\Support\Facades\Mail;
 
 class ProviderServicesController extends Controller
 {
+    public function activateM($id)
+    {
+        if (!Gate::allows('admin_provider_service')) {
+            abort(403);
+        }
+        return $this->activate($id, ProviderServices::class);
+    }
+
+    public function deactivateM($id)
+    {
+        if (!Gate::allows('admin_provider_service')) {
+            abort(403);
+        }
+        return $this->deactivate($id, ProviderServices::class);
+    }
 
     /**
      * Display the registration view.
@@ -32,7 +47,7 @@ class ProviderServicesController extends Controller
     public function create(Request $request)
     {
         if (Gate::allows('event_admin')) {
-            $hotels = ProviderServices::with('city')->get();
+            $hotels = ProviderServices::with('city')->withoutGlobalScope('active')->get();
         } else {
             abort(403);
         }
@@ -65,7 +80,7 @@ class ProviderServicesController extends Controller
         try {
 
             if ($request->id > 0) {
-                $hotel = ProviderServices::find($request->id);
+                $hotel = ProviderServices::withoutGlobalScope('active')->find($request->id);
 
                 $hotel->name = $request->name;
                 $hotel->city_id = $request->city;
@@ -193,7 +208,7 @@ class ProviderServicesController extends Controller
         }
         try {
 
-            $r = ProviderServices::find($request->id);
+            $r = ProviderServices::withoutGlobalScope('active')->find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

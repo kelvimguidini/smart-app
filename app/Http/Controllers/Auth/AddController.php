@@ -141,7 +141,7 @@ class AddController extends Controller
 
 
 
-            $opt = EventAddOpt::with('event_adds')->find($request->id);
+            $opt = EventAddOpt::with('event_add')->find($request->id);
             $eventHotel = $opt->event_add()->first();
 
             if (!$eventHotel) {
@@ -152,7 +152,7 @@ class AddController extends Controller
             }
 
             // Buscar o status mais recente do EventHotel
-            $history = StatusHistory::where('table', 'event_adds')
+            $history = StatusHistory::where('table', 'event_add')
                 ->where('table_id', $eventHotel->id)
                 ->latest('created_at')
                 ->first();

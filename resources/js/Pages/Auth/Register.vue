@@ -231,7 +231,7 @@ onMounted(() => {
                                         </td>
                                         <td>
                                             <Modal :modal-title="'Permissões para ' + user.name"
-                                                btn-class="btn btn-info btn-icon-split mr-2">
+                                                btn-class="btn btn-sm btn-info btn-icon-split mr-2">
                                                 <template v-slot:button>
                                                     <span class="icon text-white-50">
                                                         <i class="fas fa-list"></i>
@@ -275,7 +275,7 @@ onMounted(() => {
 
                                             <Modal :key="index" :modal-title="'Confirmar Exclusão de ' + user.name"
                                                 :ok-botton-callback="deleteUser" :ok-botton-callback-param="user.id"
-                                                btn-class="btn btn-danger btn-icon-split">
+                                                btn-class="btn  btn-sm btn-danger btn-icon-split mr-2">
                                                 <template v-slot:button>
                                                     <span class="icon text-white-50">
                                                         <i class="fas fa-trash"></i>

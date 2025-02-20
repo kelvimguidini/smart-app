@@ -85,6 +85,8 @@ const props = defineProps({
     },
 });
 
+const imageUrl = new URL('/resources/images/logo.png', import.meta.url).href;
+
 const daysBetween = (date1, date2) => {
 // Helper function to truncate hours, minutes, seconds, and milliseconds
 const truncateToDate = (date) => {
@@ -974,7 +976,7 @@ const submit = () => {
                 </div>
                 <div style="display: flex;padding:10px;text-align:right;justify-content: flex-end;">
                     <img style="width:4rem;height:4rem;margin-right:25px;vertical-align:middle;left:1;"
-                        src="/storage/logos/logo.png" alt="4BTS">
+                        :src="imageUrl" alt="4BTS">
                 </div>
             </div>
         </div>

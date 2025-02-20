@@ -85,6 +85,25 @@ const submit = () => {
         },
     });
 };
+
+
+const activate = (id) => {
+    isLoader.value = true;
+    form.put(route('crds-activate', id), {
+        onFinish: () => {
+            isLoader.value = false;
+        },
+    });
+};
+
+const deactivate = (id) => {
+    isLoader.value = true;
+    form.put(route('crds-deactivate', id), {
+        onFinish: () => {
+            isLoader.value = false;
+        },
+    });
+};
 </script>
 
 <template>
@@ -184,7 +203,7 @@ const submit = () => {
                                                 <td>{{ crd.number }}</td>
                                                 <td>{{ crd.customer != null ? crd.customer.name : ' - ' }}</td>
                                                 <td>
-                                                    <button class="btn btn-info btn-icon-split mr-2" v-on:click="edit(crd)">
+                                                    <button class="btn btn-sm btn-info btn-icon-split mr-2" v-on:click="edit(crd)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-edit"></i>
                                                         </span>
@@ -193,7 +212,7 @@ const submit = () => {
 
                                                     <Modal :key="index" :modal-title="'Confirmar Exclusão de ' + crd.name"
                                                         :ok-botton-callback="deleteCRD" :ok-botton-callback-param="crd.id"
-                                                        btn-class="btn btn-danger btn-icon-split">
+                                                        btn-class="btn  btn-sm btn-danger btn-icon-split mr-2">
                                                         <template v-slot:button>
                                                             <span class="icon text-white-50">
                                                                 <i class="fas fa-trash"></i>
@@ -204,6 +223,23 @@ const submit = () => {
                                                             Tem certeza que deseja apagar esse registro?
                                                         </template>
                                                     </Modal>
+
+
+                                                    <button v-if="!crd.active" class="btn btn-sm btn-success btn-icon-split mr-2"
+                                                        v-on:click="activate(crd.id)">
+                                                        <span class="icon text-white-50">
+                                                            <i class="fas fa-check"></i>
+                                                        </span>
+                                                        <span class="text">Ativar</span>
+                                                    </button>
+
+                                                    <button v-if="crd.active" class="btn btn-sm btn-warning btn-icon-split mr-2"
+                                                        v-on:click="deactivate(crd.id)">
+                                                        <span class="icon text-white-50">
+                                                            <i class="fas fa-ban"></i>
+                                                        </span>
+                                                        <span class="text">Inativar</span>
+                                                    </button>
 
                                                 </td>
                                             </tr>

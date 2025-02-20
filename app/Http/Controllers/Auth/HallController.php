@@ -142,7 +142,7 @@ class HallController extends Controller
             abort(403);
         }
         try {
-            $opt = EventHallOpt::with('event_halls')->find($request->id);
+            $opt = EventHallOpt::with('event_hall')->find($request->id);
             $eventHotel = $opt->event_hall()->first();
 
             if (!$eventHotel) {
@@ -153,7 +153,7 @@ class HallController extends Controller
             }
 
             // Buscar o status mais recente do EventHotel
-            $history = StatusHistory::where('table', 'event_halls')
+            $history = StatusHistory::where('table', 'event_hall')
                 ->where('table_id', $eventHotel->id)
                 ->latest('created_at')
                 ->first();

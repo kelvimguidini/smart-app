@@ -12,6 +12,22 @@ use Illuminate\Support\Facades\Gate;
 
 class CrdController extends Controller
 {
+    public function activateM($id)
+    {
+        if (!Gate::allows('crd_admin')) {
+            abort(403);
+        }
+        return $this->activate($id, CRD::class);
+    }
+
+    public function deactivateM($id)
+    {
+        if (!Gate::allows('crd_admin')) {
+            abort(403);
+        }
+        return $this->deactivate($id, CRD::class);
+    }
+
     /**
      * Display the registration view.
      *
@@ -23,7 +39,7 @@ class CrdController extends Controller
             abort(403);
         }
 
-        $t = CRD::with('customer')->get();
+        $t = CRD::with('customer')->withoutGlobalScope('active')->get();
         return Inertia::render('Auth/Auxiliaries/CRD', [
             'crds' => $t,
             'customers' => Customer::all()
@@ -52,7 +68,7 @@ class CrdController extends Controller
 
             if ($request->id > 0) {
 
-                $crd = CRD::find($request->id);
+                $crd = CRD::withoutGlobalScope('active')->find($request->id);
 
                 $crd->name = $request->name;
                 $crd->number = $request->number;
@@ -84,7 +100,7 @@ class CrdController extends Controller
         }
         try {
 
-            $r = CRD::find($request->id);
+            $r = CRD::withoutGlobalScope('active')->find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

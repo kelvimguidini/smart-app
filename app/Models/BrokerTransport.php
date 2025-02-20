@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Activatable;
 use App\Traits\UniqueNameTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -11,6 +12,7 @@ class BrokerTransport extends Model
 {
     use SoftDeletes;
     use UniqueNameTrait;
+    use Activatable;
 
     protected $fillable = [
         'name',
@@ -18,7 +20,8 @@ class BrokerTransport extends Model
         'contact',
         'phone',
         'email',
-        'national'
+        'national',
+        'active'
     ];
     protected $table = 'broker_transport';
 

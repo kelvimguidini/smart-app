@@ -162,7 +162,7 @@ class TransportController extends Controller
         try {
 
 
-            $opt = EventTransportOpt::with('event_transports')->find($request->id);
+            $opt = EventTransportOpt::with('event_transport')->find($request->id);
             $eventHotel = $opt->event_transport()->first();
 
             if (!$eventHotel) {

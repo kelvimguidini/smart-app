@@ -9,7 +9,6 @@ import Loader from '@/Components/Loader.vue';
 import { Head, useForm } from '@inertiajs/inertia-vue3';
 import { onMounted, ref } from 'vue';
 
-
 const props = defineProps({
     brands: Array
 });
@@ -25,17 +24,15 @@ const formDelete = useForm({
     id: 0
 });
 
+const isLoader = ref(false);
 
 onMounted(() => {
-
     $('table').DataTable({
         language: {
             url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/pt-BR.json',
         },
     });
 });
-
-const isLoader = ref(false);
 
 const deleteBrand = (id) => {
     isLoader.value = true;
@@ -59,6 +56,24 @@ const submit = () => {
         onSuccess: () => {
             form.reset();
             inEdition.value = 0;
+        },
+    });
+};
+
+const activate = (id) => {
+    isLoader.value = true;
+    form.put(route('brand-activate', id), {
+        onFinish: () => {
+            isLoader.value = false;
+        },
+    });
+};
+
+const deactivate = (id) => {
+    isLoader.value = true;
+    form.put(route('brand-deactivate', id), {
+        onFinish: () => {
+            isLoader.value = false;
         },
     });
 };
@@ -132,7 +147,7 @@ const submit = () => {
                                                 <th scope="row">{{ brand.id }}</th>
                                                 <td>{{ brand.name }}</td>
                                                 <td>
-                                                    <button class="btn btn-info btn-icon-split mr-2"
+                                                    <button class="btn btn-sm btn-info btn-icon-split mr-2"
                                                         v-on:click="edit(brand)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-edit"></i>
@@ -143,7 +158,7 @@ const submit = () => {
                                                     <Modal :key="index" :modal-title="'Confirmar Exclusão de ' + brand.name"
                                                         :ok-botton-callback="deleteBrand"
                                                         :ok-botton-callback-param="brand.id"
-                                                        btn-class="btn btn-danger btn-icon-split">
+                                                        btn-class="btn  btn-sm btn-danger btn-icon-split mr-2">
                                                         <template v-slot:button>
                                                             <span class="icon text-white-50">
                                                                 <i class="fas fa-trash"></i>
@@ -154,6 +169,22 @@ const submit = () => {
                                                             Tem certeza que deseja apagar esse registro?
                                                         </template>
                                                     </Modal>
+
+                                                    <button v-if="!brand.active" class="btn btn-sm btn-success btn-icon-split mr-2"
+                                                        v-on:click="activate(brand.id)">
+                                                        <span class="icon text-white-50">
+                                                            <i class="fas fa-check"></i>
+                                                        </span>
+                                                        <span class="text">Ativar</span>
+                                                    </button>
+
+                                                    <button v-if="brand.active" class="btn btn-sm btn-warning btn-icon-split mr-2"
+                                                        v-on:click="deactivate(brand.id)">
+                                                        <span class="icon text-white-50">
+                                                            <i class="fas fa-ban"></i>
+                                                        </span>
+                                                        <span class="text">Inativar</span>
+                                                    </button>
 
                                                 </td>
                                             </tr>

@@ -11,6 +11,22 @@ use Illuminate\Support\Facades\Gate;
 
 class LocalController extends Controller
 {
+    public function activateM($id)
+    {
+        if (!Gate::allows('local_admin')) {
+            abort(403);
+        }
+        return $this->activate($id, Local::class);
+    }
+
+    public function deactivateM($id)
+    {
+        if (!Gate::allows('local_admin')) {
+            abort(403);
+        }
+        return $this->deactivate($id, Local::class);
+    }
+
     /**
      * Display the registration view.
      *
@@ -22,7 +38,7 @@ class LocalController extends Controller
             abort(403);
         }
 
-        $t = Local::all();
+        $t = Local::withoutGlobalScope('active')->get();
         return Inertia::render('Auth/Auxiliaries/Local', [
             'locals' => $t
         ]);
@@ -49,7 +65,7 @@ class LocalController extends Controller
 
             if ($request->id > 0) {
 
-                $local = Local::find($request->id);
+                $local = Local::withoutGlobalScope('active')->find($request->id);
 
                 $local->name = $request->name;
                 $local->save();
@@ -77,7 +93,7 @@ class LocalController extends Controller
         }
         try {
 
-            $r = Local::find($request->id);
+            $r = Local::withoutGlobalScope('active')->find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

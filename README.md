@@ -64,8 +64,15 @@ Admin
 
 ####### Executar ao commitar
 
+
+php artisan db:seed --class=CitySeeder
+php artisan db:seed --class=VehicleSeeder
+php artisan db:seed --class=DatabaseSeeder
+php artisan db:seed --class=StatusHistorySeeder
 php artisan db:seed --class=IncrementalPermissionsSeeder
 php artisan db:seed --class=TransportSeeder
+
+
 
 
 enviar node_module

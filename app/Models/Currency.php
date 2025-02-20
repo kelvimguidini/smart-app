@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Activatable;
 use App\Traits\UniqueNameTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -11,8 +12,9 @@ class Currency extends Model
 {
     use SoftDeletes;
     use UniqueNameTrait;
+    use Activatable;
 
-    protected $fillable = ['name', 'symbol', 'sigla'];
+    protected $fillable = ['name', 'symbol', 'sigla', 'active'];
     protected $table = 'currency';
 
     /**

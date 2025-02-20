@@ -25,6 +25,22 @@ use Illuminate\Support\Facades\Mail;
 
 class ProviderController extends Controller
 {
+    public function activateM($id)
+    {
+        if (!Gate::allows('admin_provider')) {
+            abort(403);
+        }
+        return $this->activate($id, Provider::class);
+    }
+
+    public function deactivateM($id)
+    {
+        if (!Gate::allows('admin_provider')) {
+            abort(403);
+        }
+        return $this->deactivate($id, Provider::class);
+    }
+
 
     /**
      * Display the registration view.
@@ -34,7 +50,7 @@ class ProviderController extends Controller
     public function create(Request $request)
     {
         if (Gate::allows('admin_provider')) {
-            $hotels = Provider::with('city')->get();
+            $hotels = Provider::with('city')->withoutGlobalScope('active')->get();
         } else {
             abort(403);
         }
@@ -67,7 +83,7 @@ class ProviderController extends Controller
         try {
 
             if ($request->id > 0) {
-                $hotel = Provider::find($request->id);
+                $hotel = Provider::withoutGlobalScope('active')->find($request->id);
 
                 $hotel->name = $request->name;
                 $hotel->city_id = $request->city;

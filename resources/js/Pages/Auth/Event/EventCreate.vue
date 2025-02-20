@@ -842,7 +842,7 @@ const newEventProv = (type) => {
                     <div id="table">
                         <ListABFull :event-a-b="eventAB" :event-a-bs="eventABs" :edit-opt="editOptAB"
                             :duplicate="duplicateAB" :delete-opt="deleteOptAB" :mount-call-back="mount"
-                            :new-event-hotel="newEventProv"></ListABFull>
+                            :new-event-ab="newEventProv"></ListABFull>
                     </div>
 
                     <div id="form-ab" class="card mb-4 py-3 border-left-primary">

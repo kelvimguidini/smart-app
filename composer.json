@@ -12,7 +12,7 @@
         "barryvdh/laravel-dompdf": "^2.0",
         "doctrine/dbal": "^3.6",
         "dompdf/dompdf": "^2.0",
-        "fruitcake/laravel-cors": "^3.0",
+        "fruitcake/laravel-cors": "*",
         "guzzlehttp/guzzle": "^7.2",
         "inertiajs/inertia-laravel": "^0.6.3",
         "laravel/framework": "^9.19",

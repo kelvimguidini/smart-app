@@ -11,6 +11,22 @@ use Illuminate\Support\Facades\Gate;
 
 class ServiceAddController extends Controller
 {
+    public function activateM($id)
+    {
+        if (!Gate::allows('service_add_admin')) {
+            abort(403);
+        }
+        return $this->activate($id, ServiceAdd::class);
+    }
+
+    public function deactivateM($id)
+    {
+        if (!Gate::allows('service_add_admin')) {
+            abort(403);
+        }
+        return $this->deactivate($id, ServiceAdd::class);
+    }
+
     /**
      * Display the registration view.
      *
@@ -22,7 +38,7 @@ class ServiceAddController extends Controller
             abort(403);
         }
 
-        $t = ServiceAdd::all();
+        $t = ServiceAdd::withoutGlobalScope('active')->get();
         return Inertia::render('Auth/Auxiliaries/ServiceAdd', [
             'services' => $t
         ]);
@@ -49,7 +65,7 @@ class ServiceAddController extends Controller
 
             if ($request->id > 0) {
 
-                $obj = ServiceAdd::find($request->id);
+                $obj = ServiceAdd::withoutGlobalScope('active')->find($request->id);
 
                 $obj->name = $request->name;
                 $obj->save();
@@ -77,7 +93,7 @@ class ServiceAddController extends Controller
         }
         try {
 
-            $r = ServiceAdd::find($request->id);
+            $r = ServiceAdd::withoutGlobalScope('active')->find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

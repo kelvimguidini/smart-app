@@ -1,9 +1,12 @@
 <?php
 
-use App\Http\Controllers\Auth\ChaController;
+use App\Http\Controllers\ChaController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\BrandController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,15 +25,6 @@ Route::get('/', function () {
 })->middleware(['auth', 'verified', 'cors'])->name('dashboard');
 
 
-Route::get('cha-revelacao', [ChaController::class, 'jogo'])
-    ->name('cha-revelacao');
-
-
-Route::get('salvar-menino-menina', [ChaController::class, 'create'])
-    ->name('salvar-menino-menina');
-
-Route::post('salvar-menino-menina', [ChaController::class, 'store'])
-    ->name('salvar-menino-menina-save');
 
 
 require __DIR__ . '/auth.php';

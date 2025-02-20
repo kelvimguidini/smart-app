@@ -12,6 +12,9 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        'https://smart4bts.com.br'
+        'https://smart4bts.com.br',
+        'sanctum/csrf-cookie',
+        'localhost:8000',
+        'localhost:5173',
     ];
 }

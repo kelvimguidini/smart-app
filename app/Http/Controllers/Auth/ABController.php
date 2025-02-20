@@ -141,7 +141,7 @@ class ABController extends Controller
         try {
 
 
-            $opt = EventABOpt::with('event_abs')->find($request->id);
+            $opt = EventABOpt::with('event_ab')->find($request->id);
             $eventHotel = $opt->event_ab()->first();
 
             if (!$eventHotel) {
@@ -152,7 +152,7 @@ class ABController extends Controller
             }
 
             // Buscar o status mais recente do EventHotel
-            $history = StatusHistory::where('table', 'event_abs')
+            $history = StatusHistory::where('table', 'event_ab')
                 ->where('table_id', $eventHotel->id)
                 ->latest('created_at')
                 ->first();

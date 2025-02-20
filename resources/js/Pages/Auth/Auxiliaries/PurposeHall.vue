@@ -62,6 +62,25 @@ const submit = () => {
         },
     });
 };
+
+
+const activate = (id) => {
+    isLoader.value = true;
+    form.put(route('purpose_halls-activate', id), {
+        onFinish: () => {
+            isLoader.value = false;
+        },
+    });
+};
+
+const deactivate = (id) => {
+    isLoader.value = true;
+    form.put(route('purpose_halls-deactivate', id), {
+        onFinish: () => {
+            isLoader.value = false;
+        },
+    });
+};
 </script>
 
 <template>
@@ -132,7 +151,7 @@ const submit = () => {
                                                 <th scope="row">{{ purpose.id }}</th>
                                                 <td>{{ purpose.name }}</td>
                                                 <td>
-                                                    <button class="btn btn-info btn-icon-split mr-2"
+                                                    <button class="btn btn-sm btn-info btn-icon-split mr-2"
                                                         v-on:click="edit(purpose)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-edit"></i>
@@ -144,7 +163,7 @@ const submit = () => {
                                                         :modal-title="'Confirmar Exclusão de ' + purpose.name"
                                                         :ok-botton-callback="deletePurpose"
                                                         :ok-botton-callback-param="purpose.id"
-                                                        btn-class="btn btn-danger btn-icon-split">
+                                                        btn-class="btn  btn-sm btn-danger btn-icon-split mr-2">
                                                         <template v-slot:button>
                                                             <span class="icon text-white-50">
                                                                 <i class="fas fa-trash"></i>
@@ -155,6 +174,23 @@ const submit = () => {
                                                             Tem certeza que deseja apagar esse registro?
                                                         </template>
                                                     </Modal>
+
+
+                                                    <button v-if="!purpose.active" class="btn btn-sm btn-success btn-icon-split mr-2"
+                                                        v-on:click="activate(purpose.id)">
+                                                        <span class="icon text-white-50">
+                                                            <i class="fas fa-check"></i>
+                                                        </span>
+                                                        <span class="text">Ativar</span>
+                                                    </button>
+
+                                                    <button v-if="purpose.active" class="btn btn-sm btn-warning btn-icon-split mr-2"
+                                                        v-on:click="deactivate(purpose.id)">
+                                                        <span class="icon text-white-50">
+                                                            <i class="fas fa-ban"></i>
+                                                        </span>
+                                                        <span class="text">Inativar</span>
+                                                    </button>
 
                                                 </td>
                                             </tr>

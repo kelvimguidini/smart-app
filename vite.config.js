@@ -10,7 +10,7 @@ export default defineConfig({
             ssr: 'resources/js/ssr.js',
             refresh: true,
         }),
-        basicSsl(),
+        // basicSsl(),
         vue({
             template: {
                 transformAssetUrls: {
@@ -25,7 +25,7 @@ export default defineConfig({
     },
     server: {
         // host: 'https://smart4bts.com.br',
-        host: 'local.api-smart.com',
+        host: 'localhost',
         watch: {
             // Recarrega a página sempre que um arquivo for alterado
             usePolling: true,
@@ -38,11 +38,16 @@ export default defineConfig({
         cors: true,
         hmr: true,
         proxy: {
+            '/api': {
+                target: 'http://localhost:8000',
+                changeOrigin: true,
+                secure: false,
+            },
             "/": {
-                target: "local.api-smart.com",
+                target: "http://localhost:8000",
                 // target: "https://smart4bts.com.br",
             }
         },
-        https: true,
+        https: false,
     },
 });

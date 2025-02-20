@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Activatable;
 use App\Traits\UniqueNameTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -10,6 +11,7 @@ class Provider extends Model
 {
     use SoftDeletes;
     use UniqueNameTrait;
+    use Activatable;
 
     protected $fillable = [
         'name',
@@ -28,6 +30,7 @@ class Provider extends Model
         'has_hotel',
         'has_ab',
         'has_hall',
+        'active'
     ];
 
     protected $table = 'provider';

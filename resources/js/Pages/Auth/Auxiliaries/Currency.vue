@@ -66,6 +66,24 @@ const submit = () => {
         },
     });
 };
+
+const activate = (id) => {
+    isLoader.value = true;
+    form.put(route('currencies-activate', id), {
+        onFinish: () => {
+            isLoader.value = false;
+        },
+    });
+};
+
+const deactivate = (id) => {
+    isLoader.value = true;
+    form.put(route('currencies-deactivate', id), {
+        onFinish: () => {
+            isLoader.value = false;
+        },
+    });
+};
 </script>
 
 <template>
@@ -159,7 +177,7 @@ const submit = () => {
                                                 <td>{{ currency.sigla }}</td>
                                                 <td>{{ currency.symbol }}</td>
                                                 <td>
-                                                    <button class="btn btn-info btn-icon-split mr-2"
+                                                    <button class="btn btn-sm btn-info btn-icon-split mr-2"
                                                         v-on:click="edit(currency)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-edit"></i>
@@ -171,7 +189,7 @@ const submit = () => {
                                                         :modal-title="'Confirmar Exclusão de ' + currency.name"
                                                         :ok-botton-callback="deleteCurrency"
                                                         :ok-botton-callback-param="currency.id"
-                                                        btn-class="btn btn-danger btn-icon-split">
+                                                        btn-class="btn  btn-sm btn-danger btn-icon-split mr-2">
                                                         <template v-slot:button>
                                                             <span class="icon text-white-50">
                                                                 <i class="fas fa-trash"></i>
@@ -182,6 +200,23 @@ const submit = () => {
                                                             Tem certeza que deseja apagar esse registro?
                                                         </template>
                                                     </Modal>
+
+
+                                                    <button v-if="!currency.active" class="btn btn-sm btn-success btn-icon-split mr-2"
+                                                        v-on:click="activate(currency.id)">
+                                                        <span class="icon text-white-50">
+                                                            <i class="fas fa-check"></i>
+                                                        </span>
+                                                        <span class="text">Ativar</span>
+                                                    </button>
+
+                                                    <button v-if="currency.active" class="btn btn-sm btn-warning btn-icon-split mr-2"
+                                                        v-on:click="deactivate(currency.id)">
+                                                        <span class="icon text-white-50">
+                                                            <i class="fas fa-ban"></i>
+                                                        </span>
+                                                        <span class="text">Inativar</span>
+                                                    </button>
 
                                                 </td>
                                             </tr>

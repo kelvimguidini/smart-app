@@ -12,6 +12,22 @@ use Illuminate\Support\Facades\Gate;
 
 class CarModelController extends Controller
 {
+    public function activateM($id)
+    {
+        if (!Gate::allows('car_model_admin')) {
+            abort(403);
+        }
+        return $this->activate($id, CarModel::class);
+    }
+
+    public function deactivateM($id)
+    {
+        if (!Gate::allows('car_model_admin')) {
+            abort(403);
+        }
+        return $this->deactivate($id, CarModel::class);
+    }
+
     /**
      * Display the registration view.
      *
@@ -23,7 +39,7 @@ class CarModelController extends Controller
             abort(403);
         }
 
-        $t = CarModel::all();
+        $t = CarModel::withoutGlobalScope('active')->get();
         return Inertia::render('Auth/Auxiliaries/CarModel', [
             'carModels' => $t
         ]);
@@ -50,7 +66,7 @@ class CarModelController extends Controller
 
             if ($request->id > 0) {
 
-                $CarModel = CarModel::find($request->id);
+                $CarModel = CarModel::withoutGlobalScope('active')->find($request->id);
 
                 $CarModel->name = $request->name;
                 $CarModel->save();
@@ -78,7 +94,7 @@ class CarModelController extends Controller
         }
         try {
 
-            $r = CarModel::find($request->id);
+            $r = CarModel::withoutGlobalScope('active')->find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

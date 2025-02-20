@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Activatable;
 use App\Traits\UniqueNameTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -11,6 +12,7 @@ class Customer extends Model
 {
     use SoftDeletes;
     use UniqueNameTrait;
+    use Activatable;
 
     protected $fillable = [
         'name',
@@ -20,6 +22,7 @@ class Customer extends Model
         'email',
         'color',
         'responsibleAuthorizing',
+        'active'
     ];
     protected $table = 'customer';
 

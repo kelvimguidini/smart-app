@@ -12,6 +12,22 @@ use Illuminate\Support\Facades\Gate;
 
 class PurposeHallController extends Controller
 {
+    public function activateM($id)
+    {
+        if (!Gate::allows('purpose_hall_admin')) {
+            abort(403);
+        }
+        return $this->activate($id, PurposeHall::class);
+    }
+
+    public function deactivateM($id)
+    {
+        if (!Gate::allows('purpose_hall_admin')) {
+            abort(403);
+        }
+        return $this->deactivate($id, PurposeHall::class);
+    }
+
     /**
      * Display the registration view.
      *
@@ -23,7 +39,7 @@ class PurposeHallController extends Controller
             abort(403);
         }
 
-        $t = PurposeHall::all();
+        $t = PurposeHall::withoutGlobalScope('active')->get();
         return Inertia::render('Auth/Auxiliaries/PurposeHall', [
             'purposes' => $t
         ]);
@@ -50,7 +66,7 @@ class PurposeHallController extends Controller
 
             if ($request->id > 0) {
 
-                $obj = PurposeHall::find($request->id);
+                $obj = PurposeHall::withoutGlobalScope('active')->find($request->id);
 
                 $obj->name = $request->name;
                 $obj->save();
@@ -78,7 +94,7 @@ class PurposeHallController extends Controller
         }
         try {
 
-            $r = PurposeHall::find($request->id);
+            $r = PurposeHall::withoutGlobalScope('active')->find($request->id);
 
             $r->delete();
         } catch (Exception $e) {

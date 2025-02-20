@@ -172,7 +172,7 @@ const submit = () => {
                                                 <th scope="row">{{ role.id }}</th>
                                                 <td>{{ role.name }}</td>
                                                 <td>
-                                                    <button class="btn btn-info btn-icon-split mr-2"
+                                                    <button class="btn btn-sm btn-info btn-icon-split mr-2"
                                                         v-on:click="edit(role)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-edit"></i>
@@ -180,7 +180,7 @@ const submit = () => {
                                                         <span class="text">Editar</span>
                                                     </button>
                                                     <Modal :modal-title="'Permissões para ' + role.name"
-                                                        btn-class="btn btn-info btn-icon-split mr-2">
+                                                        btn-class="btn btn-sm btn-info btn-icon-split mr-2">
                                                         <template v-slot:button>
                                                             <span class="icon text-white-50">
                                                                 <i class="fas fa-list"></i>
@@ -218,7 +218,7 @@ const submit = () => {
 
                                                     <Modal :key="index" :modal-title="'Confirmar Exclusão de ' + role.name"
                                                         :ok-botton-callback="deleteRole" :ok-botton-callback-param="role.id"
-                                                        btn-class="btn btn-danger btn-icon-split">
+                                                        btn-class="btn  btn-sm btn-danger btn-icon-split mr-2">
                                                         <template v-slot:button>
                                                             <span class="icon text-white-50">
                                                                 <i class="fas fa-trash"></i>

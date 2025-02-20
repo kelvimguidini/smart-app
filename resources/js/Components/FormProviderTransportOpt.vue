@@ -60,6 +60,10 @@ const formOpt = useForm({
 });
 
 const editOpt = (opt) => {
+    if (!opt.id || typeof opt.id !== 'number') {
+        console.error("ID inválido:", opt.id);
+        return;
+    }
     formOpt.id = opt.id;
 
     duplicate(opt, true);

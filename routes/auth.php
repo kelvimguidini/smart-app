@@ -540,4 +540,82 @@ Route::middleware(['auth', 'cors'])->group(function () {
         ->name('event-status-send-email');
 
     //FIM status
+
+    //ativar - desativar
+    Route::put('/brands/activate/{id}', [BrandController::class, 'activateM'])->name('brand-activate');
+    Route::put('/brands/deactivate/{id}', [BrandController::class, 'deactivateM'])->name('brand-deactivate');
+
+    Route::put('/categories/activate/{id}', [CategoryController::class, 'activateM'])->name('categories-activate');
+    Route::put('/categories/deactivate/{id}', [CategoryController::class, 'deactivateM'])->name('categories-deactivate');
+
+    Route::put('/aptos/activate/{id}', [AptoController::class, 'activateM'])->name('aptos-activate');
+    Route::put('/aptos/deactivate/{id}', [AptoController::class, 'deactivateM'])->name('aptos-deactivate');
+
+    Route::put('/vehicles/activate/{id}', [VehicleController::class, 'activateM'])->name('vehicles-activate');
+    Route::put('/vehicles/deactivate/{id}', [VehicleController::class, 'deactivateM'])->name('vehicles-deactivate');
+
+    Route::put('/transport_services/activate/{id}', [TransportServiceController::class, 'activateM'])->name('transport_services-activate');
+    Route::put('/transport_services/deactivate/{id}', [TransportServiceController::class, 'deactivateM'])->name('transport_services-deactivate');
+
+    Route::put('/service_types/activate/{id}', [ServiceTypeController::class, 'activateM'])->name('service_types-activate');
+    Route::put('/service_types/deactivate/{id}', [ServiceTypeController::class, 'deactivateM'])->name('service_types-deactivate');
+
+    Route::put('/service_halls/activate/{id}', [ServiceHallController::class, 'activateM'])->name('service_halls-activate');
+    Route::put('/service_halls/deactivate/{id}', [ServiceHallController::class, 'deactivateM'])->name('service_halls-deactivate');
+
+    Route::put('/service_adds/activate/{id}', [ServiceAddController::class, 'activateM'])->name('service_adds-activate');
+    Route::put('/service_adds/deactivate/{id}', [ServiceAddController::class, 'deactivateM'])->name('service_adds-deactivate');
+
+    Route::put('/services/activate/{id}', [ServiceController::class, 'activateM'])->name('services-activate');
+    Route::put('/services/deactivate/{id}', [ServiceController::class, 'deactivateM'])->name('services-deactivate');
+
+    Route::put('/regimes/activate/{id}', [RegimeController::class, 'activateM'])->name('regimes-activate');
+    Route::put('/regimes/deactivate/{id}', [RegimeController::class, 'deactivateM'])->name('regimes-deactivate');
+
+    Route::put('/purposes/activate/{id}', [PurposeController::class, 'activateM'])->name('purposes-activate');
+    Route::put('/purposes/deactivate/{id}', [PurposeController::class, 'deactivateM'])->name('purposes-deactivate');
+
+    Route::put('/purpose_halls/activate/{id}', [PurposeHallController::class, 'activateM'])->name('purpose_halls-activate');
+    Route::put('/purpose_halls/deactivate/{id}', [PurposeHallController::class, 'deactivateM'])->name('purpose_halls-deactivate');
+
+    Route::put('/provider_transports/activate/{id}', [ProviderTransportController::class, 'activateM'])->name('provider_transports-activate');
+    Route::put('/provider_transports/deactivate/{id}', [ProviderTransportController::class, 'deactivateM'])->name('provider_transports-deactivate');
+
+    Route::put('/provider_services/activate/{id}', [ProviderServicesController::class, 'activateM'])->name('provider_services-activate');
+    Route::put('/provider_services/deactivate/{id}', [ProviderServicesController::class, 'deactivateM'])->name('provider_services-deactivate');
+
+    Route::put('/providers/activate/{id}', [ProviderController::class, 'activateM'])->name('providers-activate');
+    Route::put('/providers/deactivate/{id}', [ProviderController::class, 'deactivateM'])->name('providers-deactivate');
+
+    Route::put('/measures/activate/{id}', [MeasureController::class, 'activateM'])->name('measures-activate');
+    Route::put('/measures/deactivate/{id}', [MeasureController::class, 'deactivateM'])->name('measures-deactivate');
+
+    Route::put('/locals/activate/{id}', [LocalController::class, 'activateM'])->name('locals-activate');
+    Route::put('/locals/deactivate/{id}', [LocalController::class, 'deactivateM'])->name('locals-deactivate');
+
+    Route::put('/frequencies/activate/{id}', [FrequencyController::class, 'activateM'])->name('frequencies-activate');
+    Route::put('/frequencies/deactivate/{id}', [FrequencyController::class, 'deactivateM'])->name('frequencies-deactivate');
+
+    Route::put('/customers/activate/{id}', [CustomerController::class, 'activateM'])->name('customers-activate');
+    Route::put('/customers/deactivate/{id}', [CustomerController::class, 'deactivateM'])->name('customers-deactivate');
+
+    Route::put('/currencies/activate/{id}', [CurrencyController::class, 'activateM'])->name('currencies-activate');
+    Route::put('/currencies/deactivate/{id}', [CurrencyController::class, 'deactivateM'])->name('currencies-deactivate');
+
+    Route::put('/crds/activate/{id}', [CrdController::class, 'activateM'])->name('crds-activate');
+    Route::put('/crds/deactivate/{id}', [CrdController::class, 'deactivateM'])->name('crds-deactivate');
+
+    Route::put('/cities/activate/{id}', [CityController::class, 'activateM'])->name('cities-activate');
+    Route::put('/cities/deactivate/{id}', [CityController::class, 'deactivateM'])->name('cities-deactivate');
+
+    Route::put('/car_models/activate/{id}', [CarModelController::class, 'activateM'])->name('car_models-activate');
+    Route::put('/car_models/deactivate/{id}', [CarModelController::class, 'deactivateM'])->name('car_models-deactivate');
+
+    Route::put('/broker_transports/activate/{id}', [BrokerTransportController::class, 'activateM'])->name('broker_transports-activate');
+    Route::put('/broker_transports/deactivate/{id}', [BrokerTransportController::class, 'deactivateM'])->name('broker_transports-deactivate');
+
+    Route::put('/brokers/activate/{id}', [BrokerController::class, 'activateM'])->name('brokers-activate');
+    Route::put('/brokers/deactivate/{id}', [BrokerController::class, 'deactivateM'])->name('brokers-deactivate');
+
+    //FIM ativar - desativar
 });
