@@ -18,6 +18,10 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install PHP dependencies
+        run: composer install --no-dev --prefer-dist
+
+
       - name: Install Frontend Dependencies & Build
         run: |
           npm install
