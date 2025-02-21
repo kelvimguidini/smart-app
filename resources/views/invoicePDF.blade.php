@@ -325,7 +325,7 @@ $strip = false;
                 <div class="left">
                     <div class="seta">
                         <div class="arrow">
-                            <div class="title">Faturamento N° {{ $event != null ? $event->code : '' }}</div>
+                            <div class="title">TICKET N° {{ $event != null ? $event->code : '' }}</div>
                         </div>
                     </div>
 
@@ -336,12 +336,20 @@ $strip = false;
 
                             <p>Solicitante: <span class="event-data">{{$event->requester }}</span></p>
                             <p>Base de pax: <span class="event-data">{{$event->pax_base }}</span></p>
+
+                            <p>Setor: <span class="event-data">{{$event->sector }}</span></p>
                         </div>
                         <div class="line">
                             <p>Evento: <span class="event-data">{{ $event->name }}</p>
 
                             <p>CRD: <span class="event-data">{{$event->crd != null ? $event->crd->number . ": " . $event->crd->name: "" }}</span></p>
                             <p>CC: <span class="event-data">{{$event->cost_center }}</span></p>
+
+                            <p>Operador :
+                                <span class="event-data">
+                                    {{ $transportEvent ? $event->landOperator->name ?? 'Sem operador' : $event->hotelOperator->name ?? 'Sem operador' }}
+                                </span>
+                            </p>
                         </div>
 
                         <div class="line">

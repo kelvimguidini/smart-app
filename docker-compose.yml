@@ -7,6 +7,8 @@ services:
       - "8000:8000"
     volumes:
       - F:\Projetos\4BTS\smart-app:/var/www/html
+      - /var/www/html/vendor
+      - /var/www/html/node_modules
     depends_on:
       - mysql
 

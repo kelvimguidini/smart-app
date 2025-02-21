@@ -1050,7 +1050,7 @@ const providersByEvent = (event) => {
                                                                     <i v-if="prov.sended_mail"
                                                                         class="fas fa-exclamation-triangle"></i>
                                                                 </span>
-                                                                <span class="text">Proposta Hotel</span>
+                                                                <span class="text">Proposta</span>
                                                             </div>
                                                         </template>
                                                         <template v-slot:content>
