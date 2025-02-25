@@ -74,13 +74,6 @@ Route::middleware(['guest', 'cors'])->group(function () {
     Route::get('verify-email/{id}/{hash}', [VerifyEmailController::class, '__invoke'])
         ->middleware(['throttle:6,1'])
         ->name('verification.verify');
-
-    Route::get('new-event/{params}', function ($params) {
-        $paramsCript = Crypt::decryptString($params);
-        $parameters = json_decode($paramsCript, true);
-
-        return app()->make('App\Http\Controllers\HotelController')->mostrarPagina($parameters['event'], $parameters['provider']);
-    });
 });
 
 Route::middleware(['cors'])->group(function () {
@@ -90,6 +83,13 @@ Route::middleware(['cors'])->group(function () {
 
     Route::post('budget-save', [BudgetController::class, 'store'])
         ->name('budget-save');
+
+    Route::get('new-event/{params}', function ($params) {
+        $paramsCript = Crypt::decryptString($params);
+        $parameters = json_decode($paramsCript, true);
+
+        return app()->make('App\Http\Controllers\HotelController')->mostrarPagina($parameters['event'], $parameters['provider']);
+    });
 });
 
 Route::middleware(['auth', 'cors'])->group(function () {

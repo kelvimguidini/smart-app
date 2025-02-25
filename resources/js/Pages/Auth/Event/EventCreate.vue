@@ -685,7 +685,6 @@ const newEventProv = (type) => {
                                 <div class="col-lg-4">
 
                                     <div class="row">
-
                                         <div class="col">
                                             <div class="form-group">
                                                 <InputLabel for="date" value="Data do Evento:" />
@@ -703,6 +702,7 @@ const newEventProv = (type) => {
                                             </div>
                                         </div>
                                     </div>
+
                                     <div class="form-group">
                                         <InputLabel for="CRD" value="CRD:" />
 

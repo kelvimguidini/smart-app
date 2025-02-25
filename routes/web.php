@@ -22,7 +22,7 @@ use App\Http\Controllers\CategoryController;
 
 Route::get('/', function () {
     return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified', 'cors'])->name('dashboard');
+})->middleware(['auth', 'cors'])->name('dashboard');
 
 
 

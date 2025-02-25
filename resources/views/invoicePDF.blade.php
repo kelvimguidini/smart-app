@@ -347,7 +347,13 @@ $strip = false;
 
                             <p>Operador :
                                 <span class="event-data">
-                                    {{ $transportEvent ? $event->landOperator->name ?? 'Sem operador' : $event->hotelOperator->name ?? 'Sem operador' }}
+                                    @if ($transportEvent)
+                                    {{ $event->landOperator->name ?? 'Sem operador' }}
+                                    @elseif ($hotelEvent || $abEvent || $hallEvent || $addEvent)
+                                    {{ $event->hotelOperator->name ?? 'Sem operador' }}
+                                    @else
+                                    {{ 'Sem operador' }}
+                                    @endif
                                 </span>
                             </p>
                         </div>
