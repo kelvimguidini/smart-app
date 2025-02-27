@@ -12,7 +12,7 @@ class Authenticate extends Middleware
     public function handle($request, Closure $next, ...$guards)
     {
         if (!Auth::check()) {
-            return redirect('/logar'); // Redirecionamento absoluto
+            return redirect('/login'); // Redirecionamento absoluto
         }
 
         return $next($request);

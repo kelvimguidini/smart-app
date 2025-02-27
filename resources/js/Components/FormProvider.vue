@@ -1,12 +1,10 @@
 <script setup>
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import { onMounted, ref, defineExpose } from 'vue';
+import { onMounted, ref, defineExpose, watch } from 'vue';
 import { useForm } from '@inertiajs/inertia-vue3';
 import Loader from '@/Components/Loader.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
-import Datepicker from 'vue3-datepicker';
-import { ptBR } from 'date-fns/locale';
 
 const props = defineProps({
     eventProvider: {
@@ -105,7 +103,6 @@ const submit = () => {
 const selectProvider = (id) => {
     var prov = props.providers.filter((item) => { return item.id == id })[0] || null;
 
-    console.log(prov);
     if (prov) {
         form.provider_id = parseInt(id);
         form.city = prov.city?.name + ' - ' + (prov.city?.states ? prov.city?.states : prov.city?.country);
@@ -202,6 +199,22 @@ onMounted(() => {
 });
 
 const isLoader = ref(false);
+
+const date = ref(new Date());
+
+const updateForm = () => {
+    form.deadline = date.value ? date.value.toISOString().split('T')[0] : '';
+};
+
+watch(
+    () => props.eventProvider,
+    (newEvent) => {
+        if (newEvent) {
+            date.value = new Date(newEvent.deadline_date);
+        }
+    },
+    { immediate: true }
+);
 </script>
 
 
@@ -234,22 +247,25 @@ const isLoader = ref(false);
                     <div class="col-4">
                         <div class="form-group">
                             <InputLabel for="iss_percent" value="ISS:" />
-                            <TextInput type="number" class="form-control form-control-sm percent" v-model="form.iss_percent" required
-                                autofocus min="0" step="0.01" autocomplete="iss_percent" />
+                            <TextInput type="number" class="form-control form-control-sm percent"
+                                v-model="form.iss_percent" required autofocus min="0" step="0.01"
+                                autocomplete="iss_percent" />
                         </div>
                     </div>
                     <div class="col-4">
                         <div class="form-group">
                             <InputLabel for="service_percent" value="Serviço:" />
-                            <TextInput type="number" class="form-control form-control-sm percent" v-model="form.service_percent" required
-                                autofocus min="0" step="0.01" autocomplete="service_percent" />
+                            <TextInput type="number" class="form-control form-control-sm percent"
+                                v-model="form.service_percent" required autofocus min="0" step="0.01"
+                                autocomplete="service_percent" />
                         </div>
                     </div>
                     <div class="col-4">
                         <div class="form-group">
                             <InputLabel for="iva_percent" value="IVA:" />
-                            <TextInput type="number" class="form-control form-control-sm percent" v-model="form.iva_percent" required
-                                autofocus min="0" step="0.01" autocomplete="iva_percent" />
+                            <TextInput type="number" class="form-control form-control-sm percent"
+                                v-model="form.iva_percent" required autofocus min="0" step="0.01"
+                                autocomplete="iva_percent" />
                         </div>
                     </div>
                 </div>
@@ -297,28 +313,39 @@ const isLoader = ref(false);
                     <div class="col-6">
                         <div class="form-group">
                             <InputLabel for="iof" value="IOF:" />
-                            <TextInput type="number" class="form-control form-control-sm percent" v-model="form.iof" required autofocus
-                                min="0" step="0.01" autocomplete="iof" />
+                            <TextInput type="number" class="form-control form-control-sm percent" v-model="form.iof"
+                                required autofocus min="0" step="0.01" autocomplete="iof" />
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="form-group">
                             <InputLabel for="service_charge" value="Taxa de Turismo:" />
-                            <TextInput type="number" class="form-control form-control-sm percent" v-model="form.service_charge" required
-                                autofocus min="0" step="0.01" autocomplete="service_charge" />
+                            <TextInput type="number" class="form-control form-control-sm percent"
+                                v-model="form.service_charge" required autofocus min="0" step="0.01"
+                                autocomplete="service_charge" />
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-6 col-lg-4 mb-3">
                 <div class="form-group">
-                    <InputLabel for="in" value="Prazo:" />
-                    <datepicker v-model="form.deadline" class="form-control form-control-sm" :locale="ptBR" inputFormat="dd/MM/yyyy"
-                        weekdayFormat="EEEEEE" />
+
+                    <VDatePicker v-model="date" @update:modelValue="updateForm">
+                        <template #default="{ inputValue, inputEvents }">
+
+                            <InputLabel for="in" value="Prazo:" />
+                            <TextInput readonly class="form-control custom-datepicker" :value="inputValue"
+                                v-on="inputEvents" />
+                            <InputError class="mt-2 text-danger" :message="form.errors.date" />
+
+                        </template>
+                    </VDatePicker>
+
                 </div>
             </div>
             <div class="col-12 d-flex justify-content-end">
-                <PrimaryButton css-class="btn btn-primary m-1" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                <PrimaryButton css-class="btn btn-primary m-1" :class="{ 'opacity-25': form.processing }"
+                    :disabled="form.processing">
                     <span v-if="form.processing" class="spinner-border spinner-border-sm" role="status"
                         aria-hidden="true"></span>
                     Salvar

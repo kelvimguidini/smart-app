@@ -5,7 +5,6 @@ import Loader from '@/Components/Loader.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import { useForm } from '@inertiajs/inertia-vue3';
 import TextInput from '@/Components/TextInput.vue';
-import Datepicker from 'vue3-datepicker';
 
 const props = defineProps({
     eventHotel: {
@@ -69,6 +68,7 @@ const editOpt = (opt) => {
     duplicate(opt, true);
 }
 
+
 const duplicate = (opt, edit = false) => {
     if (!edit) {
         formOpt.id = 0;
@@ -90,6 +90,7 @@ const duplicate = (opt, edit = false) => {
     formOpt.compare_trivago = opt.compare_trivago;
     formOpt.compare_website_htl = opt.compare_website_htl;
     formOpt.compare_omnibess = opt.compare_omnibess;
+    setRange(opt);
 
     $('#broker').val(opt.broker_id).trigger('change');
     $('#regime').val(opt.regime_id).trigger('change');
@@ -196,16 +197,24 @@ onMounted(() => {
 });
 
 
-watch(
-    () => ({
-        hotelSelected: props.hotelSelected,
-    }),
-    (newValues, oldValues) => {
-        if (newValues.hotelSelected != oldValues.hotelSelected) {
-            formOpt.hotel_id = newValues.hotelSelected;
-        }
-    }
-);
+const range = ref({
+    start: new Date(),
+    end: new Date(),
+});
+
+
+const updateForm = () => {
+    formOpt.in = range.value.start ? range.value.start.toISOString().split('T')[0] : '';
+    formOpt.out = range.value.end ? range.value.end.toISOString().split('T')[0] : '';
+};
+
+
+const setRange = (opt) => {
+    range.value = {  // 🔥 Criando um novo objeto para garantir a reatividade
+        start: new Date(opt.in),
+        end: new Date(opt.out),
+    };
+};
 
 
 const isLoader = ref(false);
@@ -273,28 +282,39 @@ const isLoader = ref(false);
                 </div>
 
                 <div class="row">
+                    <VDatePicker v-model="range" is-range expanded :columns="2" @update:modelValue="updateForm">
+                        <template #default="{ inputValue, inputEvents }">
+
+                            <div class="col">
+                                <div class="form-group">
+                                    <InputLabel for="in" value="IN:" />
+                                    <TextInput readonly class="form-control custom-datepicker" :value="inputValue.start"
+                                        v-on="inputEvents.start" />
+                                    <InputError class="mt-2 text-danger" :message="formOpt.errors.in" />
+                                </div>
+                            </div>
+
+                            <div class="col">
+                                <div class="form-group">
+                                    <InputLabel for="out" value="OUT:" />
+                                    <TextInput readonly class="form-control custom-datepicker" :value="inputValue.end"
+                                        v-on="inputEvents.end" />
+                                    <InputError class="mt-2 text-danger" :message="formOpt.errors.out" />
+                                </div>
+                            </div>
+                        </template>
+                    </VDatePicker>
+
+                </div>
+                <div class="row">
                     <div class="col">
-                        <div class="form-group">
-                            <InputLabel for="in" value="IN:" />
-
-                            <datepicker v-model="formOpt.in" class="form-control" :locale="ptBR" inputFormat="dd/MM/yyyy"
-                                weekdayFormat="EEEEEE" />
-                        </div>
-
                         <div class="form-group">
                             <InputLabel for="count" value="QTD:" />
-                            <TextInput type="number" class="form-control" v-model="formOpt.count" required autofocus min="0"
-                                autocomplete="count" />
+                            <TextInput type="number" class="form-control" v-model="formOpt.count" required autofocus
+                                min="0" autocomplete="count" />
                         </div>
                     </div>
-
                     <div class="col">
-                        <div class="form-group">
-                            <InputLabel for="out" value="OUT:" />
-
-                            <datepicker v-model="formOpt.out" class="form-control" :locale="ptBR" inputFormat="dd/MM/yyyy"
-                                weekdayFormat="EEEEEE" />
-                        </div>
 
                         <div class="form-group">
                             <InputLabel for="kickback" id="kickback" value="Comissão (%):" />
@@ -303,13 +323,13 @@ const isLoader = ref(false);
                         </div>
                     </div>
                 </div>
-
                 <div class="row">
                     <div class="col">
                         <div class="form-group">
                             <InputLabel for="received_proposal" value="Proposta Recebida:" />
                             <TextInput type="text" id="received_proposal" class="form-control money"
-                                v-model="formOpt.received_proposal" required autofocus autocomplete="received_proposal" />
+                                v-model="formOpt.received_proposal" required autofocus
+                                autocomplete="received_proposal" />
                         </div>
                     </div>
 
@@ -330,24 +350,25 @@ const isLoader = ref(false);
 
                 <div class="form-group">
                     <InputLabel for="compare_trivago" value="Comparação Trivago:" />
-                    <TextInput id="compare_trivago" type="text" class="form-control money" v-model="formOpt.compare_trivago"
-                        required autofocus autocomplete="compare_trivago" />
+                    <TextInput id="compare_trivago" type="text" class="form-control money"
+                        v-model="formOpt.compare_trivago" required autofocus autocomplete="compare_trivago" />
                 </div>
 
                 <div class="form-group">
-                    <InputLabel for="compare_website_htl" value="comparação Website Htl" />
+                    <InputLabel for="compare_website_htl" value="Comparação Website Htl" />
                     <TextInput id="compare_website_htl" type="text" class="form-control money"
                         v-model="formOpt.compare_website_htl" required autofocus autocomplete="compare_website_htl" />
                 </div>
 
                 <div class="form-group">
-                    <InputLabel for="compare_omnibess" value="comparação Omnibess:" />
+                    <InputLabel for="compare_omnibess" value="Comparação Omnibess:" />
                     <TextInput id="compare_omnibess" type="text" class="form-control money"
                         v-model="formOpt.compare_omnibess" required autofocus autocomplete="compare_omnibess" />
                 </div>
 
                 <div class="flex items-center justify-end mt-4 rigth">
-                    <PrimaryButton css-class="btn btn-primary float-right m-1" :class="{ 'opacity-25': formOpt.processing }"
+                    <PrimaryButton css-class="btn btn-primary float-right m-1"
+                        :class="{ 'opacity-25': formOpt.processing }"
                         :disabled="formOpt.processing || eventHotel == null || eventHotel.id == 0">
                         <i class="fa fa-save" v-if="formOpt.id > 0"></i>
                         <i class="fa fa-plus" v-else></i>

@@ -5,7 +5,6 @@ import Loader from '@/Components/Loader.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import { useForm } from '@inertiajs/inertia-vue3';
 import TextInput from '@/Components/TextInput.vue';
-import Datepicker from 'vue3-datepicker';
 
 const props = defineProps({
     eventTransport: {
@@ -82,10 +81,13 @@ const duplicate = (opt, edit = false) => {
     formOpt.observation = opt.observation;
     formOpt.in = new Date(opt.in);
     formOpt.out = new Date(opt.out);
+    range.value.start = formOpt.in;
+    range.value.end = formOpt.out;
     formOpt.received_proposal = opt.received_proposal;
     formOpt.received_proposal_percent = opt.received_proposal_percent;
     formOpt.kickback = opt.kickback;
     formOpt.count = opt.count;
+    setRange(opt);
 
     $('#broker').val(opt.broker_id).trigger('change');
     $('#vehicle').val(opt.vehicle_id).trigger('change');
@@ -193,6 +195,24 @@ watch(
     }
 );
 
+const range = ref({
+    start: new Date(),
+    end: new Date(),
+});
+
+
+const updateForm = () => {
+    formOpt.in = range.value.start ? range.value.start.toISOString().split('T')[0] : '';
+    formOpt.out = range.value.end ? range.value.end.toISOString().split('T')[0] : '';
+};
+
+
+const setRange = (opt) => {
+    range.value = {  // 🔥 Criando um novo objeto para garantir a reatividade
+        start: new Date(opt.in),
+        end: new Date(opt.out),
+    };
+};
 
 const isLoader = ref(false);
 </script>
@@ -267,15 +287,36 @@ const isLoader = ref(false);
 
             <div class="col-lg-4">
 
+                
+                <div class="row">
+                    <VDatePicker v-model="range" is-range expanded :columns="2" @update:modelValue="updateForm">
+                        <template #default="{ inputValue, inputEvents }">
+
+                            <div class="col">
+                                <div class="form-group">
+                                    <InputLabel for="in" value="IN:" />
+                                    <TextInput readonly class="form-control custom-datepicker" :value="inputValue.start"
+                                        v-on="inputEvents.start" />
+                                    <InputError class="mt-2 text-danger" :message="formOpt.errors.in" />
+                                </div>
+                            </div>
+
+                            <div class="col">
+                                <div class="form-group">
+                                    <InputLabel for="out" value="OUT:" />
+                                    <TextInput readonly class="form-control custom-datepicker" :value="inputValue.end"
+                                        v-on="inputEvents.end" />
+                                    <InputError class="mt-2 text-danger" :message="formOpt.errors.out" />
+                                </div>
+                            </div>
+                        </template>
+                    </VDatePicker>
+
+                </div>
+
                 <div class="row">
                     <div class="col">
-                        <div class="form-group">
-                            <InputLabel for="in" value="IN:" />
-
-                            <datepicker v-model="formOpt.in" class="form-control" :locale="ptBR" inputFormat="dd/MM/yyyy"
-                                weekdayFormat="EEEEEE" />
-                        </div>
-
+                        
                         <div class="form-group">
                             <InputLabel for="count" value="QTD:" />
                             <TextInput type="number" class="form-control" v-model="formOpt.count" required autofocus min="0"
@@ -284,12 +325,6 @@ const isLoader = ref(false);
                     </div>
 
                     <div class="col">
-                        <div class="form-group">
-                            <InputLabel for="out" value="OUT:" />
-
-                            <datepicker v-model="formOpt.out" class="form-control" :locale="ptBR" inputFormat="dd/MM/yyyy"
-                                weekdayFormat="EEEEEE" />
-                        </div>
 
                         <div class="form-group">
                             <InputLabel for="kickback" id="kickback" value="Comissão (%):" />
@@ -297,6 +332,7 @@ const isLoader = ref(false);
                                 min="0" step="0.01" autocomplete="kickback" />
                         </div>
                     </div>
+
                 </div>
 
                 <div class="row">

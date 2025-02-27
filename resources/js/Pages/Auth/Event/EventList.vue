@@ -3,11 +3,9 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Modal from '@/Components/Modal.vue';
 import Loader from '@/Components/Loader.vue';
 import { Head, Link, useForm } from '@inertiajs/inertia-vue3';
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import TextInput from '@/Components/TextInput.vue';
 import CKEditor from '@/Components/CKEditor.vue';
-import Datepicker from 'vue3-datepicker';
-import { ptBR } from 'date-fns/locale'
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 
@@ -24,7 +22,6 @@ const formDelete = useForm({
 });
 
 const formStatus = useForm({
-
     table: '',
     table_id: 0,
     status_hotel: '',
@@ -473,6 +470,30 @@ const providersByEvent = (event) => {
 
     return groups;
 }
+
+
+const startDate = ref(new Date());
+const endDate = ref(new Date());
+
+
+const updateFormStart = () => {
+    formFilters.startDate = startDate.value ? startDate.value.toISOString().split('T')[0] : '';
+};
+
+const updateFormEnd = () => {
+    formFilters.endDate = endDate.value ? endDate.value.toISOString().split('T')[0] : '';
+};
+watch(
+    () => props.filters,
+    (newEvent) => {
+        if (newEvent) {
+            startDate.value = new Date(newEvent.startDate);
+            endDate.value = new Date(newEvent.endDate);
+        }
+    },
+    { immediate: true }
+);
+
 </script>
 <style>
 .cursor-pointer {
@@ -499,16 +520,30 @@ const providersByEvent = (event) => {
                             <div class="row">
                                 <div class="col">
                                     <div class="form-group">
-                                        <label for="start-date">Data de Início:</label>
-                                        <datepicker v-model="formFilters.startDate" class="form-control" :locale="ptBR"
-                                            inputFormat="dd/MM/yyyy" weekdayFormat="EEEEEE" />
+                                        
+                                        <VDatePicker v-model="dateStart" @update:modelValue="updateFormStart" :max-date="dateEnd">
+                                            <template #default="{ inputValue, inputEvents }">
+
+                                                <label for="start-date">Data de Início:</label>
+                                                <TextInput class="form-control custom-datepicker" :value="inputValue"
+                                                    v-on="inputEvents" />
+
+                                            </template>
+                                        </VDatePicker>
+
                                     </div>
                                 </div>
                                 <div class="col">
                                     <div class="form-group">
-                                        <label for="end-date">Data de Fim:</label>
-                                        <datepicker v-model="formFilters.endDate" class="form-control" :locale="ptBR"
-                                            inputFormat="dd/MM/yyyy" weekdayFormat="EEEEEE" />
+                                        <VDatePicker v-model="dateEnd" @update:modelValue="updateFormEnd" :min-date="dateStart">
+                                            <template #default="{ inputValue, inputEvents }">
+
+                                                <label for="end-date">Data de Fim:</label>
+                                                <TextInput class="form-control custom-datepicker" :value="inputValue"
+                                                    v-on="inputEvents" />
+
+                                            </template>
+                                        </VDatePicker>
                                     </div>
                                 </div>
                                 <div class="col">

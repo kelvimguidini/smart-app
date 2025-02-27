@@ -5,7 +5,6 @@ import Loader from '@/Components/Loader.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import { useForm } from '@inertiajs/inertia-vue3';
 import TextInput from '@/Components/TextInput.vue';
-import Datepicker from 'vue3-datepicker';
 
 const props = defineProps({
     eventAdd: {
@@ -62,10 +61,13 @@ const duplicate = (opt, isEdit = false) => {
     formOpt.pax = opt.pax;
     formOpt.in = new Date(opt.in);
     formOpt.out = new Date(opt.out);
+    range.value.start = formOpt.in;
+    range.value.end = formOpt.out;
     formOpt.received_proposal = opt.received_proposal;
     formOpt.received_proposal_percent = opt.received_proposal_percent;
     formOpt.kickback = opt.kickback;
     formOpt.count = opt.count;
+    setRange(opt);
 
     $('#measure').val(opt.measure_id).trigger('change');
     $('#service').val(opt.service_id).trigger('change');
@@ -149,6 +151,25 @@ onMounted(() => {
 
 
 const isLoader = ref(false);
+
+const range = ref({
+    start: new Date(),
+    end: new Date(),
+});
+
+
+const updateForm = () => {
+    formOpt.in = range.value.start ? range.value.start.toISOString().split('T')[0] : '';
+    formOpt.out = range.value.end ? range.value.end.toISOString().split('T')[0] : '';
+};
+
+
+const setRange = (opt) => {
+    range.value = {  // 🔥 Criando um novo objeto para garantir a reatividade
+        start: new Date(opt.in),
+        end: new Date(opt.out),
+    };
+};
 </script>
 
 
@@ -210,21 +231,29 @@ const isLoader = ref(false);
 
 
                 <div class="row">
-                    <div class="col">
-                        <div class="form-group">
-                            <InputLabel for="in" value="IN:" />
-                            <datepicker v-model="formOpt.in" class="form-control" :locale="ptBR" inputFormat="dd/MM/yyyy"
-                                weekdayFormat="EEEEEE" />
-                        </div>
-                    </div>
+                    
+                    <VDatePicker v-model="range" is-range expanded :columns="2" @update:modelValue="updateForm">
+                        <template #default="{ inputValue, inputEvents }">
 
-                    <div class="col">
-                        <div class="form-group">
-                            <InputLabel for="out" value="OUT:" />
-                            <datepicker v-model="formOpt.out" class="form-control" :locale="ptBR" inputFormat="dd/MM/yyyy"
-                                weekdayFormat="EEEEEE" />
-                        </div>
-                    </div>
+                            <div class="col">
+                                <div class="form-group">
+                                    <InputLabel for="in" value="IN:" />
+                                    <TextInput readonly class="form-control custom-datepicker" :value="inputValue.start"
+                                        v-on="inputEvents.start" />
+                                    <InputError class="mt-2 text-danger" :message="formOpt.errors.in" />
+                                </div>
+                            </div>
+
+                            <div class="col">
+                                <div class="form-group">
+                                    <InputLabel for="out" value="OUT:" />
+                                    <TextInput readonly class="form-control custom-datepicker" :value="inputValue.end"
+                                        v-on="inputEvents.end" />
+                                    <InputError class="mt-2 text-danger" :message="formOpt.errors.out" />
+                                </div>
+                            </div>
+                        </template>
+                    </VDatePicker>
                 </div>
 
             </div>

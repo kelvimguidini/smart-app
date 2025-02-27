@@ -6,9 +6,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import Loader from '@/Components/Loader.vue';
 import { Head, useForm } from '@inertiajs/inertia-vue3';
-import { ref, onMounted } from 'vue';
-import Datepicker from 'vue3-datepicker';
-import { ptBR } from 'date-fns/locale';
+import { ref, onMounted, computed, watch } from 'vue';
 import ListHotelFull from '@/Components/ListHotelFull.vue';
 import ListABFull from '@/Components/ListABFull.vue';
 import ListHallFull from '@/Components/ListHallFull.vue';
@@ -20,6 +18,7 @@ import FormProviderABOpt from '@/Components/FormProviderABOpt.vue';
 import FormProviderHallOpt from '@/Components/FormProviderHallOpt.vue';
 import FormProviderAddOpt from '@/Components/FormProviderAddOpt.vue';
 import FormProviderTransportOpt from '@/Components/FormProviderTransportOpt.vue';
+
 
 const props = defineProps({
     crds: {
@@ -171,6 +170,7 @@ const props = defineProps({
     },
 });
 
+
 const edit = (event) => {
     if (event != null) {
         form.id = event.id;
@@ -266,10 +266,10 @@ onMounted(() => {
         form.land_operator = e.params.data.id;
     });
 
-
     //Basico - Fim
     mount();
 });
+
 
 const addCountry = () => {
     form.countries.push({
@@ -322,6 +322,29 @@ const form = useForm({
 const formDelete = useForm({
     id: 0
 });
+
+
+const range = ref({
+    start: new Date(),
+    end: new Date(),
+});
+
+
+const updateForm = () => {
+    form.date = range.value.start ? range.value.start.toISOString().split('T')[0] : '';
+    form.date_final = range.value.end ? range.value.end.toISOString().split('T')[0] : '';
+};
+
+watch(
+    () => props.event,
+    (newEvent) => {
+        if (newEvent) {
+            range.value.start = new Date(newEvent.date);
+            range.value.end = new Date(newEvent.date_final);
+        }
+    },
+    { immediate: true }
+);
 //FIM FORMS
 
 //VARIAVEIS
@@ -525,6 +548,7 @@ const newEventProv = (type) => {
     }
 };
 
+
 </script>
 <style>
 .v3dp__popout[data-v-2e128338] {
@@ -588,14 +612,14 @@ const newEventProv = (type) => {
 
                                     <div class="form-group">
                                         <InputLabel for="name" value="Nome do Evento:" />
-                                        <TextInput type="text" class="form-control" v-model="form.name" required autofocus
-                                            autocomplete="name" />
+                                        <TextInput type="text" class="form-control" v-model="form.name" required
+                                            autofocus autocomplete="name" />
                                         <InputError class="mt-2 text-danger" :message="form.errors.name" />
                                     </div>
                                     <div class="form-group">
                                         <InputLabel for="code" value="Código do Zendesk:" />
-                                        <TextInput type="text" class="form-control" v-model="form.code" required autofocus
-                                            autocomplete="code" />
+                                        <TextInput type="text" class="form-control" v-model="form.code" required
+                                            autofocus autocomplete="code" />
                                         <InputError class="mt-2 text-danger" :message="form.errors.code" />
                                     </div>
 
@@ -663,8 +687,8 @@ const newEventProv = (type) => {
 
                                     <div class="form-group">
                                         <InputLabel for="sector" value="Setor:" />
-                                        <TextInput type="text" class="form-control" v-model="form.sector" required autofocus
-                                            autocomplete="sector" />
+                                        <TextInput type="text" class="form-control" v-model="form.sector" required
+                                            autofocus autocomplete="sector" />
                                         <InputError class="mt-2 text-danger" :message="form.errors.sector" />
                                     </div>
 
@@ -685,22 +709,34 @@ const newEventProv = (type) => {
                                 <div class="col-lg-4">
 
                                     <div class="row">
-                                        <div class="col">
-                                            <div class="form-group">
-                                                <InputLabel for="date" value="Data do Evento:" />
-                                                <datepicker v-model="form.date" class="form-control" :locale="ptBR"
-                                                    inputFormat="dd/MM/yyyy" weekdayFormat="EEEEEE" />
-                                                <InputError class="mt-2 text-danger" :message="form.errors.date" />
-                                            </div>
-                                        </div>
-                                        <div class="col">
-                                            <div class="form-group">
-                                                <InputLabel for="date_final" value="Data do Evento Fim:" />
-                                                <datepicker v-model="form.date_final" class="form-control custom-datepicker"
-                                                    :locale="ptBR" inputFormat="dd/MM/yyyy" weekdayFormat="EEEEEE" />
-                                                <InputError class="mt-2 text-danger" :message="form.errors.date_final" />
-                                            </div>
-                                        </div>
+
+                                        <VDatePicker v-model="range" is-range expanded :columns="2"
+                                            @update:modelValue="updateForm">
+                                            <template #default="{ inputValue, inputEvents }">
+                                                <div class="col">
+                                                    <div class="form-group">
+                                                        <InputLabel for="date" value="Data do Evento:" />
+                                                        <TextInput readonly class="form-control custom-datepicker"
+                                                            :value="inputValue.start" v-on="inputEvents.start" />
+                                                        <InputError class="mt-2 text-danger"
+                                                            :message="form.errors.date" />
+                                                    </div>
+
+                                                </div>
+
+                                                <div class="col">
+                                                    <div class="form-group">
+                                                        <InputLabel for="date_final" value="Data do Evento Fim:" />
+                                                        <TextInput readonly class="form-control custom-datepicker"
+                                                            :value="inputValue.end" v-on="inputEvents.end" />
+                                                        <InputError class="mt-2 text-danger"
+                                                            :message="form.errors.date_final" />
+                                                    </div>
+                                                </div>
+
+                                            </template>
+                                        </VDatePicker>
+
                                     </div>
 
                                     <div class="form-group">
@@ -782,7 +818,8 @@ const newEventProv = (type) => {
                             <a class="nav-link" href="#form-hotel">Cadastro Hotel</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" v-bind:class="{ 'disabled': !(eventHotel != null && eventHotel.id > 0) }"
+                            <a class="nav-link"
+                                v-bind:class="{ 'disabled': !(eventHotel != null && eventHotel.id > 0) }"
                                 href="#hotel-opt">Cadastro Detalhe</a>
                         </li>
                     </ul>
@@ -795,8 +832,8 @@ const newEventProv = (type) => {
                     <div id="form-hotel" class="card mb-4 py-3 border-left-primary">
                         <div class="card-body">
                             <FormProvider :event-provider="eventHotel" :currencies="currencies" :providers="providers"
-                                type="hotel" :select-call-back="selectHotel" :event-id="event.id" :mount-call-back="mount"
-                                ref="formProviderHotelRef">
+                                type="hotel" :select-call-back="selectHotel" :event-id="event.id"
+                                :mount-call-back="mount" ref="formProviderHotelRef">
                             </FormProvider>
                         </div>
                     </div>
@@ -912,7 +949,8 @@ const newEventProv = (type) => {
                                 <div class="card">
                                     <div class="card-body">
                                         <FormProviderHallOpt :event-hall="eventHall" :brokers="brokers"
-                                            :purposes="purposesHall" :services="servicesHall" ref="formProviderOptRefHall">
+                                            :purposes="purposesHall" :services="servicesHall"
+                                            ref="formProviderOptRefHall">
                                         </FormProviderHallOpt>
                                     </div>
                                 </div>
@@ -995,8 +1033,9 @@ const newEventProv = (type) => {
                     </ul>
                     <div id="table-trans">
                         <ListTransportFull :event-transport="eventTransport" :event-transports="eventTransports"
-                            :edit-opt="editOptTransport" :duplicate="duplicateTransport" :delete-opt="deleteOptTransport"
-                            :mount-call-back="mount" :new-event-transport="newEventProv"></ListTransportFull>
+                            :edit-opt="editOptTransport" :duplicate="duplicateTransport"
+                            :delete-opt="deleteOptTransport" :mount-call-back="mount"
+                            :new-event-transport="newEventProv"></ListTransportFull>
                     </div>
 
                     <div id="form-trans" class="card mb-4 py-3 border-left-primary">

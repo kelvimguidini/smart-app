@@ -11,6 +11,8 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 /* import specific icons */
 import { faUserSecret } from '@fortawesome/free-solid-svg-icons'
+import VCalendar from 'v-calendar';
+import 'v-calendar/style.css';
 
 /* add icons to the library */
 library.add(faUserSecret)
@@ -26,6 +28,7 @@ createServer((page) =>
         setup({ app, props, plugin }) {
             return createSSRApp({ render: () => h(app, props) })
                 .use(plugin)
+                .use(VCalendar, {})
                 .component('font-awesome-icon', FontAwesomeIcon)
                 .use(ZiggyVue, {
                     ...page.props.ziggy,
