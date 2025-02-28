@@ -387,12 +387,14 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
 
     Route::get('invoice/{download}/{provider_id}/{event_id}', [ProviderController::class, 'invoicingPdf'])
-
         ->name('invoice');
 
 
     Route::post('invoice-email', [ProviderController::class, 'invoicingPdf'])
         ->name('invoice-email');
+
+    Route::post('event/save-exchange-rate', [EventController::class, 'saveExchangeRate'])
+        ->name('event-save-exchange-rate');
 
 
     //HOTEL

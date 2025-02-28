@@ -7,7 +7,6 @@ use DateTime;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-
 class Event extends Model
 {
     use SoftDeletes;
@@ -27,6 +26,7 @@ class Event extends Model
         'hotel_operator',
         'air_operator',
         'land_operator',
+        'exchange_rate', // Adicione este campo
     ];
     protected $table = 'event';
 

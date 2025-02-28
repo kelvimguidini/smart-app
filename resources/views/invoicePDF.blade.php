@@ -360,6 +360,10 @@ $strip = false;
 
                         <div class="line">
                             <p>Fornecedor: <span class="event-data">{{$provider != null ?  $provider->name : ''}}</p>
+
+                            @if($event->exchange_rate != null && $event->exchange_rate != 0 && $event->exchange_rate != 1)
+                            <p>Câmbio <span class="event-data">{{$event->exchange_rate}}</span></p>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -1284,24 +1288,51 @@ $strip = false;
 
             <table style="width: 50%; min-width: 9cm; max-width: 9cm; margin-top: 30px;">
                 <tbody>
+                    <?php
+                    $totalCliente = $sumTotalHotelSaleTaxa + $sumTotalAbSaleTaxa + $sumTotalHallSaleTaxa + $sumTotalAddSaleTaxa + $sumTotalTransportSaleTaxa;
+                    $totalAPagar = $sumTotalHotelCostTaxa + $sumTotalAbCostTaxa + $sumTotalHallCostTaxa + $sumTotalAddCostTaxa + $sumTotalTransportCostTaxa;
+                    $lucroTotal = $totalCliente - $totalAPagar;
+
+                    $formattedTotalCliente = formatCurrency($totalCliente);
+                    $formattedTotalAPagar = formatCurrency($totalAPagar);
+                    $formattedLucroTotal = formatCurrency($lucroTotal);
+                    $formattedTotalClienteBRL = $event->exchange_rate != null && $event->exchange_rate != 0 && $event->exchange_rate != 1 ? formatCurrency($totalCliente * $event->exchange_rate, 'R$') : null;
+                    $formattedTotalAPagarBRL = $event->exchange_rate != null && $event->exchange_rate != 0 && $event->exchange_rate != 1 ? formatCurrency($totalAPagar * $event->exchange_rate, 'R$') : null;
+                    $formattedLucroTotalBRL = $event->exchange_rate != null && $event->exchange_rate != 0 && $event->exchange_rate != 1 ? formatCurrency($lucroTotal * $event->exchange_rate, 'R$') : null;
+                    ?>
+
                     <tr style="background-color: #ebf8ff; color: #000;">
                         <td colspan="2" style="background-color: #ebf8ff;">TOTAL CLIENTE</td>
                         <td colspan="3" style="background-color: #ffe3b9; padding: 0.3rem;">
-                            {{ formatCurrency($sumTotalHotelSaleTaxa + $sumTotalAbSaleTaxa + $sumTotalHallSaleTaxa + $sumTotalAddSaleTaxa + $sumTotalTransportSaleTaxa) }}
+                            {{ $formattedTotalCliente }}
                         </td>
+                        @if($formattedTotalClienteBRL)
+                        <td style="background-color: #ffe3b9; padding: 0.3rem;">
+                            {{ $formattedTotalClienteBRL }}
+                        </td>
+                        @endif
                     </tr>
                     <tr style="background-color: #ebf8ff; color: #000; ">
                         <td colspan="2" style="background-color: #ebf8ff;">TOTAL A PAGAR</td>
                         <td colspan="3" style="background-color: #ffe3b9; padding: 0.3rem;">
-                            {{ formatCurrency($sumTotalHotelCostTaxa + $sumTotalAbCostTaxa + $sumTotalHallCostTaxa + $sumTotalAddCostTaxa + $sumTotalTransportCostTaxa) }}
+                            {{ $formattedTotalAPagar }}
                         </td>
+                        @if($formattedTotalAPagarBRL)
+                        <td style="background-color: #ffe3b9; padding: 0.3rem;">
+                            {{ $formattedTotalAPagarBRL }}
+                        </td>
+                        @endif
                     </tr>
                     <tr style="background-color: #ebf8ff;">
                         <td colspan="2" style="background-color: #ebf8ff;">LUCRO TOTAL</td>
                         <td colspan="3" style="background-color: #ffe3b9; padding: 0.3rem;">
-                            {{ formatCurrency(($sumTotalHotelSaleTaxa + $sumTotalAbSaleTaxa + $sumTotalHallSaleTaxa + $sumTotalAddSaleTaxa + $sumTotalTransportSaleTaxa)
-                            - ($sumTotalHotelCostTaxa + $sumTotalAbCostTaxa + $sumTotalHallCostTaxa + $sumTotalAddCostTaxa + $sumTotalTransportCostTaxa)) }}
+                            {{ $formattedLucroTotal }}
                         </td>
+                        @if($formattedLucroTotalBRL)
+                        <td style="background-color: #ffe3b9; padding: 0.3rem;">
+                            {{ $formattedLucroTotalBRL }}
+                        </td>
+                        @endif
                     </tr>
                 </tbody>
             </table>

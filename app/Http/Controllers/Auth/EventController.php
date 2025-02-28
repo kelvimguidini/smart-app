@@ -462,4 +462,18 @@ class EventController extends Controller
 
         return redirect()->back()->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
     }
+
+    public function saveExchangeRate(Request $request)
+    {
+        $request->validate([
+            'event_id' => 'required|exists:event,id',
+            'exchange_rate' => 'required|numeric'
+        ]);
+
+        $event = Event::find($request->event_id);
+        $event->exchange_rate = $request->exchange_rate;
+        $event->save();
+
+        return redirect()->back()->with('flash', ['message' => 'Câmbio salvo com sucesso!', 'type' => 'success']);
+    }
 }
