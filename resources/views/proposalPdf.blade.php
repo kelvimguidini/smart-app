@@ -634,10 +634,11 @@ if ($transportEvent != null) {
                             <th colspan="12" style="padding: 0.3rem; text-align: center;">Transporte Terrestre</th>
                         </tr>
                         <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
-                            <th>Marca</th>
+                            <!-- <th>Marca</th> -->
                             <th>Veículo</th>
                             <th>Modelo</th>
                             <th>Serviço</th>
+                            <th>OBS</th>
                             <th>De</th>
                             <th>Até</th>
                             <th>Qtd</th>
@@ -651,10 +652,11 @@ if ($transportEvent != null) {
                     <tbody>
                         @foreach($transportEvent->eventTransportOpts as $key => $item)
                         <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
-                            <td>{{ $item->brand->name }}</td>
+                            <!-- <td>{{ $item->brand->name }}</td> -->
                             <td>{{ $item->vehicle->name }}</td>
                             <td>{{ $item->model->name }}</td>
                             <td>{{ $item->service->name }}</td>
+                            <td>{{ $item->observation }}</td>
                             <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
                             <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
                             <td>{{ $item->count }}</td>
