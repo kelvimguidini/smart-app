@@ -127,14 +127,14 @@ onMounted(() => {
                                             <div class="form-group">
 
                                                 <InputLabel for="name" value="Nome" />
-                                                <TextInput id="name" type="text" class="form-control" v-model="form.name"
-                                                    required autofocus autocomplete="name" />
+                                                <TextInput id="name" type="text" class="form-control"
+                                                    v-model="form.name" required autofocus autocomplete="name" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.name" />
                                             </div>
                                             <div class="form-group">
                                                 <InputLabel for="Phone" value="Telefone" />
-                                                <TextInput id="phone" type="text" class="form-control" v-model="form.phone"
-                                                    required autofocus autocomplete="phone" />
+                                                <TextInput id="phone" type="text" class="form-control"
+                                                    v-model="form.phone" required autofocus autocomplete="phone" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.phone" />
                                             </div>
                                         </div>
@@ -142,8 +142,8 @@ onMounted(() => {
                                             <div class="form-group">
 
                                                 <InputLabel for="email" value="Email" />
-                                                <TextInput id="email" type="email" class="form-control" v-model="form.email"
-                                                    required autocomplete="username" />
+                                                <TextInput id="email" type="email" class="form-control"
+                                                    v-model="form.email" required autocomplete="username" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.email" />
                                             </div>
 
@@ -162,7 +162,7 @@ onMounted(() => {
                                         <InputLabel for="role" value="Grupo de acesso:" />
                                         <div class="card">
                                             <div class="card-body">
-                                                <div class="form-check" v-for="(role, index) in  roles">
+                                                <div class="form-check" v-for="(role, index) in roles">
                                                     <input v-model="form.roles" class="form-check-input" type="checkbox"
                                                         :value="role.id" :id="role.name">
                                                     <label class="form-check-label" :for="role.name">
@@ -186,8 +186,8 @@ onMounted(() => {
                                 </PrimaryButton>
 
                                 <PrimaryButton v-if="userInEdition > 0" css-class="btn btn-info float-right m-1"
-                                    v-on:click="form.reset(); userInEdition = 0" :class="{ 'opacity-25': form.processing }"
-                                    :disabled="form.processing">
+                                    v-on:click="form.reset(); userInEdition = 0"
+                                    :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                                     Novo
                                 </PrimaryButton>
 
@@ -214,7 +214,8 @@ onMounted(() => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="(user, index) in users" :class="{ 'table-info': userInEdition == user.id }">
+                                    <tr v-for="(user, index) in users"
+                                        :class="{ 'table-info': userInEdition == user.id }">
                                         <th>{{ user.id }}</th>
                                         <td>{{ user.name }}</td>
                                         <td>{{ user.email }}</td>
@@ -266,7 +267,8 @@ onMounted(() => {
                                                 </template>
                                             </Modal>
 
-                                            <button class="btn btn-primary btn-icon-split mr-2" v-on:click="edit(user)">
+                                            <button class="btn btn-primary btn-icon-split btn-sm mr-2"
+                                                v-on:click="edit(user)">
                                                 <span class="icon text-white-50">
                                                     <i class="fas fa-edit"></i>
                                                 </span>

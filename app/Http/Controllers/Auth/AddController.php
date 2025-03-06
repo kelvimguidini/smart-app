@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\EventAdd;
 use App\Models\EventAddOpt;
 use App\Models\StatusHistory;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
 
@@ -41,14 +43,18 @@ class AddController extends Controller
         ]);
 
         try {
-            $history = StatusHistory::with('user')->where('table', 'event_adds')
-                ->where('table_id', $request->event_add_id)
-                ->where('table', 'event_adds')
-                ->latest('created_at')
-                ->first();
 
-            if ($history && ($history->status == "dating_with_customer" || $history->status == "Cancelled")) {
-                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
+            $user = User::find(Auth::user()->id);
+            if (!$user->getPermissions()->contains('name', 'status_level_2')) {
+                $history = StatusHistory::with('user')->where('table', 'event_adds')
+                    ->where('table_id', $request->event_add_id)
+                    ->where('table', 'event_adds')
+                    ->latest('created_at')
+                    ->first();
+
+                if ($history && ($history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
+                }
             }
 
             if ($request->id > 0) {
@@ -104,16 +110,19 @@ class AddController extends Controller
             abort(403);
         }
         try {
-            $history = StatusHistory::with('user')->where('table', 'event_adds')
-                ->where('table_id', $request->id)
-                ->where('table', 'event_adds')
-                ->latest('created_at')
-                ->first();
 
-            if ($history && ($history->status == "dating_with_customer" || $history->status == "Cancelled")) {
-                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser apagado devido ao status atual!', 'type' => 'danger']);
+            $user = User::find(Auth::user()->id);
+            if (!$user->getPermissions()->contains('name', 'status_level_2')) {
+                $history = StatusHistory::with('user')->where('table', 'event_adds')
+                    ->where('table_id', $request->id)
+                    ->where('table', 'event_adds')
+                    ->latest('created_at')
+                    ->first();
+
+                if ($history && ($history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser apagado devido ao status atual!', 'type' => 'danger']);
+                }
             }
-
 
             $r = EventAdd::find($request->id);
 
@@ -151,18 +160,22 @@ class AddController extends Controller
                 ]);
             }
 
-            // Buscar o status mais recente do EventHotel
-            $history = StatusHistory::where('table', 'event_add')
-                ->where('table_id', $eventHotel->id)
-                ->latest('created_at')
-                ->first();
 
-            // Verifica se o status atual impede a exclusão
-            if ($history && in_array($history->status, ['dating_with_customer', 'Cancelled'])) {
-                return redirect()->back()->with('flash', [
-                    'message' => 'Esse registro não pode ser apagado devido ao status atual!',
-                    'type' => 'danger'
-                ]);
+            $user = User::find(Auth::user()->id);
+            if (!$user->getPermissions()->contains('name', 'status_level_2')) {
+                // Buscar o status mais recente do EventHotel
+                $history = StatusHistory::where('table', 'event_add')
+                    ->where('table_id', $eventHotel->id)
+                    ->latest('created_at')
+                    ->first();
+
+                // Verifica se o status atual impede a exclusão
+                if ($history && in_array($history->status, ['dating_with_customer', 'Cancelled'])) {
+                    return redirect()->back()->with('flash', [
+                        'message' => 'Esse registro não pode ser apagado devido ao status atual!',
+                        'type' => 'danger'
+                    ]);
+                }
             }
             // Excluir o registro do Opt
             $opt->delete();

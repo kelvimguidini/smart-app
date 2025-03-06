@@ -163,13 +163,17 @@ class ProviderController extends Controller
         try {
 
             if ($request->id > 0) {
-                $history = StatusHistory::with('user')->where('table', "event_" . $request->type . "s")
-                    ->where('table_id', $request->id)
-                    ->orderBy('created_at', 'desc')
-                    ->first();
 
-                if ($history && ($history->status == "dating_with_customer" || $history->status == "Cancelled")) {
-                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
+                $user = User::find(Auth::user()->id);
+                if (!$user->getPermissions()->contains('name', 'status_level_2')) {
+                    $history = StatusHistory::with('user')->where('table', "event_" . $request->type . "s")
+                        ->where('table_id', $request->id)
+                        ->orderBy('created_at', 'desc')
+                        ->first();
+
+                    if ($history && ($history->status == "dating_with_customer" || $history->status == "Cancelled")) {
+                        return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
+                    }
                 }
 
                 switch ($request->type) {

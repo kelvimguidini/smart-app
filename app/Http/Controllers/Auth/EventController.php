@@ -318,22 +318,25 @@ class EventController extends Controller
                 // Achata os IDs coletados em um único array
                 $allTableIds = array_merge(...array_values($relatedTables));
 
-                // Busca no StatusHistory se há algum registro com status proibido
-                $historyExists = StatusHistory::whereIn('table', array_keys($relatedTables))
-                    ->whereIn('table_id', $allTableIds)
-                    ->whereIn('status', ['dating_with_customer', 'Cancelled'])
-                    ->orderBy('created_at', 'desc')
-                    ->get()
-                    ->groupBy('table_id') // Agrupa os históricos por `table_id`
-                    ->map(fn($history) => $history->first()) // Pega apenas o último registro de cada grupo
-                    ->contains(fn($latest) => in_array($latest->status, ['dating_with_customer', 'Cancelled']));
+                $user = User::find(Auth::user()->id);
+                if (!$user->getPermissions()->contains('name', 'status_level_2')) {
+                    // Busca no StatusHistory se há algum registro com status proibido
+                    $historyExists = StatusHistory::whereIn('table', array_keys($relatedTables))
+                        ->whereIn('table_id', $allTableIds)
+                        ->whereIn('status', ['dating_with_customer', 'Cancelled'])
+                        ->orderBy('created_at', 'desc')
+                        ->get()
+                        ->groupBy('table_id') // Agrupa os históricos por `table_id`
+                        ->map(fn($history) => $history->first()) // Pega apenas o último registro de cada grupo
+                        ->contains(fn($latest) => in_array($latest->status, ['dating_with_customer', 'Cancelled']));
 
 
-                if ($historyExists) {
-                    return redirect()->back()->with('flash', [
-                        'message' => 'Esse evento não pode ser atualizado porque existe um ou mais cadastros finalizados!',
-                        'type' => 'danger'
-                    ]);
+                    if ($historyExists) {
+                        return redirect()->back()->with('flash', [
+                            'message' => 'Esse evento não pode ser atualizado porque existe um ou mais cadastros finalizados!',
+                            'type' => 'danger'
+                        ]);
+                    }
                 }
 
                 $event = Event::find($request->id);
@@ -439,17 +442,22 @@ class EventController extends Controller
             // Achata os IDs coletados em um único array
             $allTableIds = array_merge(...array_values($relatedTables));
 
-            // Busca no StatusHistory se há algum registro com status proibido
-            $historyExists = StatusHistory::whereIn('table', array_keys($relatedTables))
-                ->whereIn('table_id', $allTableIds)
-                ->whereIn('status', ['dating_with_customer'])
-                ->exists();
+            $user = User::find(Auth::user()->id);
 
-            if ($historyExists) {
-                return redirect()->back()->with('flash', [
-                    'message' => 'Esse evento não pode ser apagado porque existe um ou mais cadastros finalizados!',
-                    'type' => 'danger'
-                ]);
+            // Verifica se o usuário tem a permissão 'status_level_2'
+            if (!$user->getPermissions()->contains('name', 'status_level_2')) {
+                // Busca no StatusHistory se há algum registro com status proibido
+                $historyExists = StatusHistory::whereIn('table', array_keys($relatedTables))
+                    ->whereIn('table_id', $allTableIds)
+                    ->whereIn('status', ['dating_with_customer'])
+                    ->exists();
+
+                if ($historyExists) {
+                    return redirect()->back()->with('flash', [
+                        'message' => 'Esse evento não pode ser apagado porque existe um ou mais cadastros finalizados!',
+                        'type' => 'danger'
+                    ]);
+                }
             }
 
             $r = Event::find($request->id);
