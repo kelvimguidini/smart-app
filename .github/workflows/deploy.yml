@@ -23,6 +23,9 @@ jobs:
         with:
           php-version: '8.1'
 
+      - name: Install PHP dependencies
+        run: composer install --no-dev --prefer-dist
+
       - name: Install Frontend Dependencies & Build
         run: |
           npm install
