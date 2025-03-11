@@ -194,8 +194,15 @@ class ProviderTransportController extends Controller
         } catch (Exception $e) {
             throw $e;
         }
-
-        return redirect()->route('event-edit',  ['id' => $request->event_id, 'tab' => 5, 'ehotel' => $provider->id])->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
+        return response()->json([
+            'redirect' => route('event-edit', [
+                'id' => $request->event_id,
+                'tab' => 5,
+                'ehotel' => $provider->id
+            ]),
+            'flash' => ['message' => 'Registro salvo com sucesso', 'type' => 'success']
+        ]);
+        // return redirect()->route('event-edit',  ['id' => $request->event_id, 'tab' => 5, 'ehotel' => $provider->id])->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
     }
 
     /**

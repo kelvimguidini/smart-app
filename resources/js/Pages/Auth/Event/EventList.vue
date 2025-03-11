@@ -24,7 +24,7 @@ const formFilters = useForm({
     status: '',
     eventCode: ''
 });
-
+const isLoader = ref(false);
 const submitForm = () => {
     // Obter os valores dos filtros
     isLoader.value = true;
@@ -218,6 +218,8 @@ watch(
 <template>
     <AuthenticatedLayout>
 
+        <Loader v-bind:show="isLoader" />
+
         <Head title="Eventos" />
         <template #header>
             <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -369,8 +371,7 @@ watch(
                                                 </td>
                                                 <td>
                                                     <ProviderActions :event="event" :index="index" :prov="prov"
-                                                        :isLoader="isLoader" :get-status-label="getStatusLabel"
-                                                        :allStatus="allStatus" />
+                                                        :get-status-label="getStatusLabel" :allStatus="allStatus" />
                                                 </td>
                                             </tr>
                                             <tr v-if="providersByEvent(event).length === 0">
