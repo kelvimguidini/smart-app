@@ -44,8 +44,10 @@ jobs:
           server-dir: /www/  # Certifique-se de que o diretório termina com "/"
           exclude: |
             **/.git*
+            **/node_modules/**
             **/tests/**
             **/storage/**
+            **/vendor/**
             **/public/storage/**
             **vite.config.js**
             **.env**
