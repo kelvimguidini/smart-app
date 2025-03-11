@@ -31,7 +31,13 @@ jobs:
           npm install
           npm run build
 
+      - name: Check for changes in composer.json or package.json
+        id: check_changes
+        run: |
+          git diff --name-only HEAD^ HEAD | grep -E 'composer.json|package.json' || echo "no changes" > no_changes
+
       - name: Upload Files via FTP
+        if: steps.check_changes.outputs.no_changes != 'no changes'
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -40,15 +46,43 @@ jobs:
           port: 2121
           protocol: ftps
           timeout: 30000
-          local-dir: ./ 
+          local-dir: ./
           server-dir: /www/  # Certifique-se de que o diretório termina com "/"
           exclude: |
             **/.git*
-            **/node_modules/**
             **/tests/**
             **/storage/**
-            **/vendor/**
             **/public/storage/**
             **vite.config.js**
             **.env**
             **nginx.conf**
+          include: |
+            vendor/**
+            node_modules/**
+
+      - name: Upload Files via FTP (without vendor and node_modules)
+        if: steps.check_changes.outputs.no_changes == 'no changes'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 2121
+          protocol: ftps
+          timeout: 30000
+          local-dir: ./
+          server-dir: /www/  # Certifique-se de que o diretório termina com "/"
+          exclude: |
+            **/.git*
+            **/tests/**
+            **/storage/**
+            **/public/storage/**
+            **vite.config.js**
+            **.env**
+            **nginx.conf**
+            vendor/**
+            node_modules/**
+
+      - name: Verify Deployment
+        run: |
+          echo "Deployment completed"
