@@ -23,7 +23,8 @@ class EventAB extends Model
         'token_budget',
         'iof',
         'service_charge',
-        'deadline_date'
+        'deadline_date',
+        'order'
     ];
     protected $table = 'event_ab';
 

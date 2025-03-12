@@ -310,7 +310,7 @@ onMounted(() => {
 
         <Menu :menu-items="menuItem" :menu-title="$page.props.appName"></Menu>
 
-        <FlashMessage v-if="$page.props.flash != null" :show="$page.props.flash != null"
+        <FlashMessage ref="flashMessage" v-if="$page.props.flash != null" :show="$page.props.flash != null"
             :message="$page.props.flash.message" :type="$page.props.flash.type"></FlashMessage>
 
         <!-- Content Wrapper -->

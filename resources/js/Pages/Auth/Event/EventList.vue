@@ -6,6 +6,7 @@ import { ref, onMounted, watch } from 'vue';
 import TextInput from '@/Components/TextInput.vue';
 import EventActions from '@/Components/EventActions.vue';
 import ProviderActions from '@/Components/ProviderActions.vue';
+import draggable from 'vuedraggable';
 
 const props = defineProps({
     events: Array,
@@ -185,6 +186,22 @@ const providersByEvent = (event) => {
     return groups;
 }
 
+const updateOrder = (event) => {
+    const providers = providersByEvent(event);
+    providers.forEach((provider, index) => {
+        provider.order = index;
+    });
+
+    // Enviar a nova ordem para o backend
+    axios.post(route('update-provider-order'), {
+        event_id: event.id,
+        providers: providers
+    }).then(response => {
+        console.log('Ordem atualizada com sucesso');
+    }).catch(error => {
+        console.error('Erro ao atualizar a ordem', error);
+    });
+};
 
 const startDate = ref(new Date());
 const endDate = ref(new Date());
@@ -361,19 +378,18 @@ watch(
                                             </td>
                                         </tr>
                                         <template v-if="showEventDetails == event.id">
-                                            <tr v-for="(prov, index) in providersByEvent(event)">
-                                                <th scope="row"></th>
-                                                <td colspan="3">
-                                                    {{ prov.type }}: {{ prov.name }}
-                                                </td>
-                                                <td colspan="2">
-                                                    status: <b>{{ getStatusLabel(prov.status) }}</b>
-                                                </td>
-                                                <td>
-                                                    <ProviderActions :event="event" :index="index" :prov="prov"
-                                                        :get-status-label="getStatusLabel" :allStatus="allStatus" />
-                                                </td>
-                                            </tr>
+                                            <draggable :list="providersByEvent(event)" @end="updateOrder(event)">
+                                                <tr v-for="(prov, index) in providersByEvent(event)" :key="prov.id">
+                                                    <th scope="row"></th>
+                                                    <td colspan="3">{{ prov.type }}: {{ prov.name }}</td>
+                                                    <td colspan="2">status: <b>{{ getStatusLabel(prov.status) }}</b>
+                                                    </td>
+                                                    <td>
+                                                        <ProviderActions :event="event" :index="index" :prov="prov"
+                                                            :get-status-label="getStatusLabel" :allStatus="allStatus" />
+                                                    </td>
+                                                </tr>
+                                            </draggable>
                                             <tr v-if="providersByEvent(event).length === 0">
                                                 <th scope="row"></th>
                                                 <td colspan="6">Sem registro</td>
