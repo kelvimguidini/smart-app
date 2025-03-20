@@ -1,12 +1,11 @@
 <script setup>
+import { ref, reactive, onMounted, watch, getCurrentInstance } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Loader from '@/Components/Loader.vue';
-import { Head, useForm } from '@inertiajs/inertia-vue3';
-import { ref, onMounted, watch } from 'vue';
-import TextInput from '@/Components/TextInput.vue';
 import EventActions from '@/Components/EventActions.vue';
 import ProviderActions from '@/Components/ProviderActions.vue';
 import draggable from 'vuedraggable';
+import { Head, useForm } from '@inertiajs/inertia-vue3';
 
 const props = defineProps({
     events: Array,
@@ -25,11 +24,16 @@ const formFilters = useForm({
     status: '',
     eventCode: ''
 });
+
 const isLoader = ref(false);
+const showEventDetails = ref(0);
+const eventProviders = reactive({}); // Armazena os provedores por evento
+
+// Acessa a instância do Vue para usar $root
+const { proxy } = getCurrentInstance();
+
 const submitForm = () => {
-    // Obter os valores dos filtros
     isLoader.value = true;
-    // Fazer uma chamada Axios para enviar os dados dos filtros para o backend
     formFilters.post(route('event-list.filter'), {
         onFinish: () => {
             isLoader.value = false;
@@ -66,28 +70,10 @@ onMounted(() => {
 
 });
 
-const getStatusLabel = (status) => {
-    return props.allStatus[status] ? props.allStatus[status].label : 'Solicitado';
-};
-
-const showEventDetails = ref(0);
-
-const showHideEventDetails = (id) => {
-
-    if (showEventDetails.value == id) {
-        showEventDetails.value = 0;
-    } else {
-        showEventDetails.value = id;
-    }
-};
-
 const providersByEvent = (event) => {
-
-    var groups = [];
-
-    event.event_hotels && event.event_hotels.map((current) => {
-        if (!groups.some(g => g.type == 'Hotel' && g.id == current.hotel.id)) {
-
+    const groups = [];
+    event.event_hotels?.forEach((current) => {
+        if (!groups.some(g => g.type === 'Hotel' && g.id === current.hotel.id)) {
             groups.push({
                 id: current.hotel.id,
                 name: current.hotel.name,
@@ -100,10 +86,11 @@ const providersByEvent = (event) => {
                 type: 'Hotel',
                 table: 'event_hotels',
                 table_id: current.id,
-                status: current.status_his[0]?.status
+                status: current.status_his[0]?.status,
+                order: current.order
             });
         }
-    }, {});
+    });
 
     event.event_abs && event.event_abs.map((current) => {
         if (!groups.some(g => g.type == 'Hotel' && g.id == current.ab.id)) {
@@ -119,7 +106,8 @@ const providersByEvent = (event) => {
                 type: 'Hotel',
                 table: 'event_abs',
                 table_id: current.id,
-                status: current.status_his[0]?.status
+                status: current.status_his[0]?.status,
+                order: current.order
             });
         }
     }, {});
@@ -138,7 +126,8 @@ const providersByEvent = (event) => {
                 type: 'Hotel',
                 table: 'event_halls',
                 table_id: current.id,
-                status: current.status_his[0]?.status
+                status: current.status_his[0]?.status,
+                order: current.order
             });
         }
     }, {});
@@ -157,7 +146,8 @@ const providersByEvent = (event) => {
                 type: 'Provedor',
                 table: 'event_adds',
                 table_id: current.id,
-                status: current.status_his[0]?.status
+                status: current.status_his[0]?.status,
+                order: current.order
             });
         }
     }, {});
@@ -178,34 +168,56 @@ const providersByEvent = (event) => {
                 isTransport: true,
                 table: 'event_transports',
                 table_id: current.id,
-                status: current.status_his[0]?.status
+                status: current.status_his[0]?.status,
+                order: current.order
             });
         }
     }, {});
 
-    return groups;
-}
+    return groups.sort((a, b) => a.order - b.order);
+};
 
-const updateOrder = (event) => {
-    const providers = providersByEvent(event);
+const showHideEventDetails = (id, event) => {
+    if (showEventDetails.value === id) {
+        showEventDetails.value = 0;
+    } else {
+        showEventDetails.value = id;
+        // Carrega os provedores do evento na variável reativa
+        eventProviders[id] = providersByEvent(event);
+    }
+};
+
+
+const updateOrder = (eventId) => {
+    const providers = eventProviders[eventId];
     providers.forEach((provider, index) => {
         provider.order = index;
     });
 
-    // Enviar a nova ordem para o backend
     axios.post(route('update-provider-order'), {
-        event_id: event.id,
-        providers: providers
+        event_id: eventId,
+        providers: providers,
+        type: providers[0]?.table.toLowerCase()
     }).then(response => {
         console.log('Ordem atualizada com sucesso');
+        if (proxy.$refs.flashMessage) {
+            proxy.$refs.flashMessage.showMessage('Ordem atualizada com sucesso', 'success');
+        }
     }).catch(error => {
         console.error('Erro ao atualizar a ordem', error);
+        if (proxy.$refs.flashMessage) {
+            proxy.$refs.flashMessage.showMessage('Erro ao atualizar a ordem', 'danger');
+        }
     });
 };
 
+const getStatusLabel = (status) => {
+    return props.allStatus[status] ? props.allStatus[status].label : 'Solicitado';
+};
+
+
 const startDate = ref(new Date());
 const endDate = ref(new Date());
-
 
 const updateFormStart = () => {
     formFilters.startDate = startDate.value ? startDate.value.toISOString().split('T')[0] : '';
@@ -214,6 +226,7 @@ const updateFormStart = () => {
 const updateFormEnd = () => {
     formFilters.endDate = endDate.value ? endDate.value.toISOString().split('T')[0] : '';
 };
+
 watch(
     () => props.filters,
     (newEvent) => {
@@ -224,17 +237,10 @@ watch(
     },
     { immediate: true }
 );
-
 </script>
-<style>
-.cursor-pointer {
-    cursor: pointer;
-}
-</style>
 
 <template>
     <AuthenticatedLayout>
-
         <Loader v-bind:show="isLoader" />
 
         <Head title="Eventos" />
@@ -341,12 +347,11 @@ watch(
         </div>
 
         <div class="row">
-
             <div class="col-lg-12">
-
                 <div class="card mb-4 py-3 border-left-secondary">
                     <div class="card-body">
                         <div class="table-responsive">
+
                             <table class="table table-sm" id="dataTable" width="100%" cellspacing="0">
                                 <thead>
                                     <tr>
@@ -361,65 +366,84 @@ watch(
                                 </thead>
                                 <tbody>
                                     <template v-for="(event, index) in events.data">
+                                        <!-- Linha do evento principal -->
                                         <tr class="table-active cursor-pointer">
-                                            <th @click="showHideEventDetails(event.id)" scope="row">{{ event.id }}
-                                            </th>
-                                            <td @click="showHideEventDetails(event.id)">{{ event.customer != null ?
-                                                event.customer.name : ' - ' }}</td>
-                                            <td @click="showHideEventDetails(event.id)">{{ event.name }}</td>
-                                            <td @click="showHideEventDetails(event.id)">{{ event.code }}</td>
-                                            <td @click="showHideEventDetails(event.id)">{{ new
+                                            <th @click="showHideEventDetails(event.id, event)" scope="row">{{ event.id
+                                                }}</th>
+                                            <td @click="showHideEventDetails(event.id, event)">{{ event.customer ?
+                                                event.customer.name : '-' }}</td>
+                                            <td @click="showHideEventDetails(event.id, event)">{{ event.name }}</td>
+                                            <td @click="showHideEventDetails(event.id, event)">{{ event.code }}</td>
+                                            <td @click="showHideEventDetails(event.id, event)">{{ new
                                                 Date(event.date).toLocaleDateString() }}</td>
-                                            <td @click="showHideEventDetails(event.id)">{{ new
+                                            <td @click="showHideEventDetails(event.id, event)">{{ new
                                                 Date(event.date_final).toLocaleDateString() }}</td>
                                             <td>
                                                 <EventActions :event="event" :index="index" />
-
                                             </td>
                                         </tr>
-                                        <template v-if="showEventDetails == event.id">
-                                            <draggable :list="providersByEvent(event)" @end="updateOrder(event)">
-                                                <tr v-for="(prov, index) in providersByEvent(event)" :key="prov.id">
-                                                    <th scope="row"></th>
-                                                    <td colspan="3">{{ prov.type }}: {{ prov.name }}</td>
-                                                    <td colspan="2">status: <b>{{ getStatusLabel(prov.status) }}</b>
-                                                    </td>
-                                                    <td>
-                                                        <ProviderActions :event="event" :index="index" :prov="prov"
-                                                            :get-status-label="getStatusLabel" :allStatus="allStatus" />
-                                                    </td>
-                                                </tr>
-                                            </draggable>
-                                            <tr v-if="providersByEvent(event).length === 0">
-                                                <th scope="row"></th>
-                                                <td colspan="6">Sem registro</td>
-                                            </tr>
-                                        </template>
+
+                                        <!-- Tabela interna para fornecedores, mostrada quando o evento é expandido -->
+                                        <tr v-if="showEventDetails == event.id">
+                                            <td colspan="7">
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>Fornecedor</th>
+                                                            <th>Status</th>
+                                                            <th>Ações</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <draggable v-model="eventProviders[event.id]"
+                                                        @end="updateOrder(event.id)" item-key="id" tag="tbody">
+                                                        <template #item="{ element, index }">
+                                                            <tr :key="element.id" class="draggable">
+                                                                <th scope="row" class="handle">
+                                                                    <i class="fas fa-grip-vertical text-secondary"></i>
+                                                                </th>
+                                                                <td>{{ element.type }}: {{ element.name }}</td>
+                                                                <td><b>{{ getStatusLabel(element.status) }}</b></td>
+                                                                <td>
+                                                                    <ProviderActions :event="event" :index="index"
+                                                                        :prov="element"
+                                                                        :get-status-label="getStatusLabel"
+                                                                        :allStatus="allStatus" />
+                                                                </td>
+                                                            </tr>
+                                                        </template>
+                                                    </draggable>
+
+                                                    <tr v-if="eventProviders[event.id]?.length === 0">
+                                                        <td colspan="4" class="text-center">Sem registros</td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
                                     </template>
                                 </tbody>
                             </table>
+
+
                         </div>
 
                         <!-- Navegação da página -->
                         <nav aria-label="Page navigation example">
                             <ul class="pagination">
                                 <li class="page-item" :class="{ 'disabled': !events.prev_page_url }">
-                                    <a class="page-link" :href="route('event-list', { page: events.current_page - 1 })">
-                                        Anterior
-                                    </a>
+                                    <a class="page-link"
+                                        :href="route('event-list', { page: events.current_page - 1 })">Anterior</a>
                                 </li>
-
                                 <li class="page-item" v-for="page in events.last_page" :key="page"
                                     :class="{ 'active': page === events.current_page }">
                                     <a class="page-link" :href="route('event-list', { page: page })"
-                                        v-if="page !== events.current_page">{{ page }}</a>
+                                        v-if="page !== events.current_page">{{ page
+                                        }}</a>
                                     <a class="page-link" v-if="page === events.current_page">{{ page }}</a>
                                 </li>
-
                                 <li class="page-item" :class="{ 'disabled': !events.next_page_url }">
-                                    <a class="page-link" :href="route('event-list', { page: events.current_page + 1 })">
-                                        Proxima
-                                    </a>
+                                    <a class="page-link"
+                                        :href="route('event-list', { page: events.current_page + 1 })">Proxima</a>
                                 </li>
                             </ul>
                         </nav>
@@ -427,6 +451,26 @@ watch(
                 </div>
             </div>
         </div>
-
     </AuthenticatedLayout>
 </template>
+
+<style>
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.draggable {
+    cursor: move;
+}
+
+.handle {
+    cursor: move;
+    width: 30px;
+    text-align: center;
+    color: #6c757d;
+}
+
+.handle:hover {
+    color: #495057;
+}
+</style>

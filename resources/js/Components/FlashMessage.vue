@@ -35,7 +35,9 @@ onMounted(() => {
         showMessage(props.message, props.type);
     }
 });
-
+defineExpose({
+    showMessage,
+});
 const cssMessage = "display: block; position: fixed; top: 0; right: 0; padding-top: 10px; padding-right: 10px; z-index: 9999";
 const cssInner = "margin: 0 auto; box-shadow: 1px 1px 5px black;";
 

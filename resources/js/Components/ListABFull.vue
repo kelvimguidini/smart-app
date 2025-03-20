@@ -42,8 +42,8 @@ const props = defineProps({
 
 //FUNÇÕES GERAIS
 const daysBetween = (date1, date2) => {
-// Helper function to truncate hours, minutes, seconds, and milliseconds
-const truncateToDate = (date) => {
+    // Helper function to truncate hours, minutes, seconds, and milliseconds
+    const truncateToDate = (date) => {
         const d = new Date(date);
         d.setHours(0, 0, 0, 0);
         return d;
@@ -61,12 +61,12 @@ const truncateToDate = (date) => {
     const difference = Math.abs(one - two);
 
     // Convert back to days and return
-    return Math.ceil(difference / (1000 * 60 * 60 * 24))+ 1;
+    return Math.ceil(difference / (1000 * 60 * 60 * 24)) + 1;
 }
 
 const statusBlockEdit = () => {
     if (props.eventAB && props.eventAB.status_history) {
-        var status = props.eventAB.status_history.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0].status; 
+        var status = props.eventAB.status_history.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0].status;
 
         return (status == "dating_with_customer" || status == "Cancelled")
     }
@@ -75,7 +75,7 @@ const statusBlockEdit = () => {
 
 const formatCurrency = (value, sigla = 'BRL') => {
     value = Math.round(value * 100) / 100;
-    
+
     return new Intl.NumberFormat('pt-BR', {
         style: 'currency',
         currency: sigla,
@@ -89,7 +89,7 @@ const unitCost = (opt) => {
 }
 
 const unitSale = (opt) => {
-    if(opt.received_proposal_percent > 0){
+    if (opt.received_proposal_percent > 0) {
         return Math.ceil(unitCost(opt) / opt.received_proposal_percent);
     }
     return unitCost(opt);
@@ -206,7 +206,7 @@ const showDetails = ref(false);
             <table class="table table-sm table-bordered text-center" width="100%" cellspacing="0">
 
                 <tbody>
-                    <template v-for="(evab, index) in eventABs" :key="evab.id">
+                    <template v-for="(evab, index) in eventABs.sort((a, b) => a.order - b.order)" :key="evab.id">
 
                         <tr>
                             <th class="table-header table-header-c1" colspan="2">Hotel {{ index + 1 }}</th>
@@ -224,7 +224,8 @@ const showDetails = ref(false);
 
                                 <Modal modal-title="Confirmar Remoção" :ok-botton-callback="deleteEventHotel"
                                     :ok-botton-callback-param="{ 'id': evab.id, 'event_id': evab.event_id }"
-                                    btn-class="btn btn-sm btn-danger btn-icon-split m-1" :btnDisabled="statusBlockEdit()">
+                                    btn-class="btn btn-sm btn-danger btn-icon-split m-1"
+                                    :btnDisabled="statusBlockEdit()">
                                     <template v-slot:button>
                                         <span class="icon text-white-50">
                                             <i class="fas fa-trash"></i>
@@ -234,7 +235,7 @@ const showDetails = ref(false);
                                     <template v-slot:content>
                                         <span class="text-dark">Tem certeza que deseja remover o hotel {{
                                             evab.ab.name
-                                        }} do evento {{ evab.ab.name }}</span>
+                                            }} do evento {{ evab.ab.name }}</span>
                                     </template>
                                 </Modal>
                             </th>
@@ -313,7 +314,8 @@ const showDetails = ref(false);
                                 {{ formatCurrency(unitSale(opt), evab.currency.sigla) }}
                             </td>
                             <td class="align-middle bg-success text-white">
-                                {{ formatCurrency(unitSale(opt) * daysBetween(opt.in, opt.out) * opt.count, evab.currency.sigla) }}
+                                {{ formatCurrency(unitSale(opt) * daysBetween(opt.in, opt.out) * opt.count,
+                                evab.currency.sigla) }}
                             </td>
                             <td class="align-middle bg-warning text-dark">
                                 {{ formatCurrency(unitCost(opt), evab.currency.sigla) }}
@@ -324,39 +326,47 @@ const showDetails = ref(false);
                             </td>
                             <td class=" align-middle">{{
                                 formatCurrency(opt.received_proposal, evab.currency.sigla)
-                            }}</td>
+                                }}</td>
                             <td class="align-middle">{{
                                 opt.received_proposal_percent
-                            }}
+                                }}
                             </td>
                             <template v-if="showDetails">
 
                                 <td class="align-middle text-success">
-                                    <b>{{ formatCurrency((unitSale(opt) * evab.iss_percent) / 100, evab.currency.sigla) }}</b>
+                                    <b>{{ formatCurrency((unitSale(opt) * evab.iss_percent) / 100, evab.currency.sigla)
+                                        }}</b>
                                 </td>
                                 <td class=" align-middle text-success">
-                                    <b>{{ formatCurrency((unitCost(opt) * evab.iss_percent) / 100, evab.currency.sigla) }}</b>
+                                    <b>{{ formatCurrency((unitCost(opt) * evab.iss_percent) / 100, evab.currency.sigla)
+                                        }}</b>
                                 </td>
 
                                 <td class="align-middle">
-                                    <b>{{ formatCurrency((unitSale(opt) * evab.service_percent) / 100, evab.currency.sigla) }}</b>
+                                    <b>{{ formatCurrency((unitSale(opt) * evab.service_percent) / 100,
+                                        evab.currency.sigla) }}</b>
                                 </td>
                                 <td class=" align-middle">
-                                    <b>{{ formatCurrency((unitCost(opt) * evab.service_percent) / 100, evab.currency.sigla) }}</b>
+                                    <b>{{ formatCurrency((unitCost(opt) * evab.service_percent) / 100,
+                                        evab.currency.sigla) }}</b>
                                 </td>
 
                                 <td class="align-middle text-success">
-                                    <b>{{ formatCurrency((unitSale(opt) * evab.iva_percent) / 100, evab.currency.sigla) }}</b>
+                                    <b>{{ formatCurrency((unitSale(opt) * evab.iva_percent) / 100, evab.currency.sigla)
+                                        }}</b>
                                 </td>
                                 <td class=" align-middle text-success">
-                                    <b>{{ formatCurrency((unitCost(opt) * evab.iva_percent) / 100, evab.currency.sigla) }}</b>
+                                    <b>{{ formatCurrency((unitCost(opt) * evab.iva_percent) / 100, evab.currency.sigla)
+                                        }}</b>
                                 </td>
 
                                 <td class="align-middle">
-                                    <b>{{ formatCurrency((unitSale(opt) * evab.service_charge) / 100, evab.currency.sigla) }}</b>
+                                    <b>{{ formatCurrency((unitSale(opt) * evab.service_charge) / 100,
+                                        evab.currency.sigla) }}</b>
                                 </td>
                                 <td class=" align-middle">
-                                    <b>{{ formatCurrency((unitCost(opt) * evab.service_charge) / 100, evab.currency.sigla) }}</b>
+                                    <b>{{ formatCurrency((unitCost(opt) * evab.service_charge) / 100,
+                                        evab.currency.sigla) }}</b>
                                 </td>
 
                             </template>
@@ -364,20 +374,21 @@ const showDetails = ref(false);
                                 <div class="d-flex">
                                     <PrimaryButton
                                         :disabled="!(eventAB != null && eventAB.id > 0 && eventAB.id == opt.event_ab_id) || statusBlockEdit()"
-                                        type="button" css-class="btn btn-info btn-circle btn-sm text-white" title="Editar"
-                                        v-on:click="editOpt(opt)">
+                                        type="button" css-class="btn btn-info btn-circle btn-sm text-white"
+                                        title="Editar" v-on:click="editOpt(opt)">
                                         <i class="fas fa-edit"></i>
                                     </PrimaryButton>
 
                                     <PrimaryButton
                                         :disabled="!(eventAB != null && eventAB.id > 0 && eventAB.id == opt.event_ab_id) || statusBlockEdit()"
-                                        type="button" css-class="btn btn-info btn-circle btn-sm text-white" title="Duplicar"
-                                        v-on:click="duplicate(opt)">
+                                        type="button" css-class="btn btn-info btn-circle btn-sm text-white"
+                                        title="Duplicar" v-on:click="duplicate(opt)">
                                         <i class="fas fa-clone"></i>
                                     </PrimaryButton>
 
-                                    <Modal :key="index" :modal-title="'Confirmar Remoção'" :ok-botton-callback="deleteOpt"
-                                        :ok-botton-callback-param="opt.id" :btnDisabled="statusBlockEdit()"
+                                    <Modal :key="index" :modal-title="'Confirmar Remoção'"
+                                        :ok-botton-callback="deleteOpt" :ok-botton-callback-param="opt.id"
+                                        :btnDisabled="statusBlockEdit()"
                                         btn-class="btn btn-danger btn-circle btn-sm text-white">
                                         <template v-slot:button>
                                             <i class="fas fa-trash"></i>
@@ -435,25 +446,29 @@ const showDetails = ref(false);
                                     <b>{{ formatCurrency(sumTaxes(evab, 'iss'), evab.currency.sigla) }}</b>
                                 </td>
                                 <td class="align-middle text-success">
-                                    <b>{{ formatCurrency((sumCost(evab) * evab.iss_percent) / 100, evab.currency.sigla) }}</b>
+                                    <b>{{ formatCurrency((sumCost(evab) * evab.iss_percent) / 100, evab.currency.sigla)
+                                        }}</b>
                                 </td>
                                 <td class="align-middle">
                                     <b>{{ formatCurrency(sumTaxes(evab, 'serv'), evab.currency.sigla) }}</b>
                                 </td>
                                 <td class="align-middle">
-                                    <b>{{ formatCurrency((sumCost(evab) * evab.service_percent) / 100, evab.currency.sigla) }}</b>
+                                    <b>{{ formatCurrency((sumCost(evab) * evab.service_percent) / 100,
+                                        evab.currency.sigla) }}</b>
                                 </td>
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency(sumTaxes(evab, 'iva'), evab.currency.sigla) }}</b>
                                 </td>
                                 <td class="align-middle text-success">
-                                    <b>{{ formatCurrency((sumCost(evab) * evab.iva_percent) / 100, evab.currency.sigla) }}</b>
+                                    <b>{{ formatCurrency((sumCost(evab) * evab.iva_percent) / 100, evab.currency.sigla)
+                                        }}</b>
                                 </td>
                                 <td class="align-middle">
                                     <b>{{ formatCurrency(sumTaxes(evab, 'sc'), evab.currency.sigla) }}</b>
                                 </td>
                                 <td class="align-middle">
-                                    <b>{{ formatCurrency((sumCost(evab) * evab.service_charge) / 100, evab.currency.sigla) }}</b>
+                                    <b>{{ formatCurrency((sumCost(evab) * evab.service_charge) / 100,
+                                        evab.currency.sigla) }}</b>
                                 </td>
                             </template>
                             <td class="align-middle"></td>
@@ -471,7 +486,8 @@ const showDetails = ref(false);
                             </td>
                             <td class="align-middle" colspan="2">
                                 <b>{{ formatCurrency(sumSale(evab) + sumTaxes(evab, 'iss') +
-                                    sumTaxes(evab, 'serv') + sumTaxes(evab, 'iva') + sumTaxes(evab, 'sc'), evab.currency.sigla) }}</b>
+                                    sumTaxes(evab, 'serv') + sumTaxes(evab, 'iva') + sumTaxes(evab, 'sc'),
+                                    evab.currency.sigla) }}</b>
                             </td>
                             <template v-if="showDetails">
                                 <td colspan="8"></td>

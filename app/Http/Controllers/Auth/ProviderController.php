@@ -7,8 +7,10 @@ use App\Mail\PdfEmail;
 use App\Models\City;
 use App\Models\Event;
 use App\Models\EventAB;
+use App\Models\EventAdd;
 use App\Models\EventHall;
 use App\Models\EventHotel;
+use App\Models\EventTransport;
 use App\Models\Provider;
 use App\Models\ProviderServices;
 use App\Models\StatusHistory;
@@ -305,6 +307,32 @@ class ProviderController extends Controller
         }
 
         return redirect()->back()->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
+    }
+
+    public function updateOrder(Request $request)
+    {
+        $providers = $request->input('providers');
+
+        foreach ($providers as $provider) {
+            switch ($provider['table']) {
+                case 'event_hotels':
+                    EventHotel::where('id', $provider['id'])->update(['order' => $provider['order']]);
+                    break;
+                case 'event_abs':
+                    EventAB::where('id', $provider['id'])->update(['order' => $provider['order']]);
+                    break;
+                case 'event_halls':
+                    EventHall::where('id', $provider['id'])->update(['order' => $provider['order']]);
+                    break;
+                case 'event_adds':
+                    EventAdd::where('id', $provider['id'])->update(['order' => $provider['order']]);
+                    break;
+                case 'event_transports':
+                    EventTransport::where('id', $provider['id'])->update(['order' => $provider['order']]);
+                    break;
+            }
+        }
+        return response()->json(['message' => 'Ordem atualizada com sucesso']);
     }
 
     private function getEventDataBase($provider, $event)

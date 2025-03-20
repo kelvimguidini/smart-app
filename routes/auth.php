@@ -620,4 +620,6 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::put('/brokers/deactivate/{id}', [BrokerController::class, 'deactivateM'])->name('brokers-deactivate');
 
     //FIM ativar - desativar
+
+    Route::post('/update-provider-order', [ProviderController::class, 'updateOrder'])->name('update-provider-order');
 });
