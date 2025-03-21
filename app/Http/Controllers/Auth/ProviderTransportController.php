@@ -130,6 +130,7 @@ class ProviderTransportController extends Controller
             'provider_id' => 'required|integer',
             'event_id' => 'required|integer',
             'currency' => 'required|integer',
+            'taxa_4bts' => 'required|numeric|min:0|max:100',
         ]);
 
         try {
@@ -164,6 +165,7 @@ class ProviderTransportController extends Controller
 
                 $provider->iof = $request->iof;
                 $provider->service_charge = $request->service_charge;
+                $provider->taxa_4bts = $request->taxa_4bts;
 
                 $provider->save();
             } else {
@@ -179,6 +181,7 @@ class ProviderTransportController extends Controller
                     'internal_observation' => $request->internal_observation,
                     'customer_observation' => $request->customer_observation,
                     'iof' => $request->iof,
+                    'taxa_4bts' => $request->taxa_4bts,
                     'service_charge' => $request->service_charge,
                     'deadline_date' => $request->deadline
                 ]);
@@ -194,15 +197,15 @@ class ProviderTransportController extends Controller
         } catch (Exception $e) {
             throw $e;
         }
-        return response()->json([
-            'redirect' => route('event-edit', [
-                'id' => $request->event_id,
-                'tab' => 5,
-                'ehotel' => $provider->id
-            ]),
-            'flash' => ['message' => 'Registro salvo com sucesso', 'type' => 'success']
-        ]);
-        // return redirect()->route('event-edit',  ['id' => $request->event_id, 'tab' => 5, 'ehotel' => $provider->id])->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
+        // return response()->json([
+        //     'redirect' => route('event-edit', [
+        //         'id' => $request->event_id,
+        //         'tab' => 5,
+        //         'ehotel' => $provider->id
+        //     ]),
+        //     'flash' => ['message' => 'Registro salvo com sucesso', 'type' => 'success']
+        // ]);
+        return redirect()->route('event-edit',  ['id' => $request->event_id, 'tab' => 5, 'ehotel' => $provider->id])->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
     }
 
     /**

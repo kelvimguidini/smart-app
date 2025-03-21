@@ -2,11 +2,8 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller; // Atualize a importação
-use App\Http\Middleware\Constants;
-use App\Mail\PdfEmail;
+use App\Http\Controllers\Controller;
 use App\Models\City;
-use App\Models\Event;
 use App\Models\EventAdd;
 use App\Models\ProviderServices;
 use App\Models\StatusHistory;
@@ -14,10 +11,8 @@ use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Mail;
 
 class ProviderServicesController extends Controller // Atualize a herança
 {
@@ -130,6 +125,7 @@ class ProviderServicesController extends Controller // Atualize a herança
             'provider_id' => 'required|integer',
             'event_id' => 'required|integer',
             'currency' => 'required|integer',
+            'taxa_4bts' => 'required|numeric|min:0|max:100',
         ]);
 
         try {
@@ -165,6 +161,7 @@ class ProviderServicesController extends Controller // Atualize a herança
 
                 $provider->iof = $request->iof;
                 $provider->service_charge = $request->service_charge;
+                $provider->taxa_4bts = $request->taxa_4bts;
 
                 $provider->save();
             } else {
@@ -179,6 +176,7 @@ class ProviderServicesController extends Controller // Atualize a herança
                     'internal_observation' => $request->internal_observation,
                     'customer_observation' => $request->customer_observation,
                     'iof' => $request->iof,
+                    'taxa_4bts' => $request->taxa_4bts,
                     'service_charge' => $request->service_charge,
                     'deadline_date' => $request->deadline
                 ]);

@@ -51,10 +51,10 @@ const form = useForm({
     service_charge: null,
     iof: null,
     deadline: '',
-
     internal_observation: '',
     customer_observation: '',
-    type: ''
+    type: '',
+    taxa_4bts: null, // Novo campo
 });
 
 const submit = () => {
@@ -174,6 +174,8 @@ const edit = () => {
 
         form.internal_observation = props.eventProvider.internal_observation;
         form.customer_observation = props.eventProvider.customer_observation;
+
+        form.taxa_4bts = props.eventProvider.taxa_4bts;
 
         $('#currency' + props.type).val(props.eventProvider.currency_id).trigger('change');
     }
@@ -341,6 +343,13 @@ watch(
                         </template>
                     </VDatePicker>
 
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="form-group">
+                    <InputLabel for="taxa_4bts" value="Taxa 4BTS (%):" />
+                    <TextInput type="number" class="form-control form-control-sm percent" v-model="form.taxa_4bts"
+                        required autofocus min="0" step="0.01" autocomplete="taxa_4bts" />
                 </div>
             </div>
             <div class="col-12 d-flex justify-content-end">

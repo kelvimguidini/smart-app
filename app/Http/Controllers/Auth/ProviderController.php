@@ -160,6 +160,7 @@ class ProviderController extends Controller
             'provider_id' => 'required|integer',
             'event_id' => 'required|integer',
             'currency' => 'required|integer',
+            'taxa_4bts' => 'required|numeric|min:0|max:100',
         ]);
 
         try {
@@ -205,6 +206,7 @@ class ProviderController extends Controller
 
                 $provider->iof = $request->iof;
                 $provider->service_charge = $request->service_charge;
+                $provider->taxa_4bts = $request->taxa_4bts;
 
                 $provider->save();
             } else {
@@ -222,6 +224,7 @@ class ProviderController extends Controller
                             'internal_observation' => $request->internal_observation,
                             'customer_observation' => $request->customer_observation,
                             'iof' => $request->iof,
+                            'taxa_4bts' => $request->taxa_4bts,
                             'service_charge' => $request->service_charge,
                             'deadline_date' => $request->deadline
                         ]);
@@ -238,6 +241,7 @@ class ProviderController extends Controller
                             'internal_observation' => $request->internal_observation,
                             'customer_observation' => $request->customer_observation,
                             'iof' => $request->iof,
+                            'taxa_4bts' => $request->taxa_4bts,
                             'service_charge' => $request->service_charge,
                             'deadline_date' => $request->deadline
                         ]);
@@ -254,6 +258,7 @@ class ProviderController extends Controller
                             'internal_observation' => $request->internal_observation,
                             'customer_observation' => $request->customer_observation,
                             'iof' => $request->iof,
+                            'taxa_4bts' => $request->taxa_4bts,
                             'service_charge' => $request->service_charge,
                             'deadline_date' => $request->deadline
                         ]);

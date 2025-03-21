@@ -432,10 +432,10 @@ $strip = false;
                         @endforeach
                     </tbody>
                     <?php
-                    $sumTotalHotelSaleTaxa = ((($sumTotalHotelSale * $hotelEvent->iof) / 100) + $sumTotalHotelSale) * 1.10;
+                    $sumTotalHotelSaleTaxa = ((($sumTotalHotelSale * $hotelEvent->iof) / 100) + $sumTotalHotelSale) *  (1 + ($hotelEvent->taxa_4bts / 100));
                     $sumTotalHotelCostTaxa = ((($sumTotalHotelCost * $hotelEvent->iof) / 100) + $sumTotalHotelCost);
 
-                    $hotelTaxa4BTS = ((($sumTotalHotelSale * $hotelEvent->iof) / 100) + $sumTotalHotelSale) * 0.10;
+                    $hotelTaxa4BTS = ((($sumTotalHotelSale * $hotelEvent->iof) / 100) + $sumTotalHotelSale) * ($hotelEvent->taxa_4bts / 100);
                     $sumTaxeHotelCost += (($sumTotalHotelCost * $hotelEvent->iof) / 100);
                     $sumTaxeHotelSale += (($sumTotalHotelSale * $hotelEvent->iof) / 100);
                     ?>
@@ -523,7 +523,7 @@ $strip = false;
                                     </tr>
 
                                     <tr>
-                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Serviço 4BTS (10.00%)</td>
+                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Serviço 4BTS ({{ number_format($hotelEvent->taxa_4bts, 2) }}%)</td>
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($hotelTaxa4BTS, $hotelEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;" colspan="4"></td>
                                     </tr>
@@ -594,10 +594,10 @@ $strip = false;
                         @endforeach
                     </tbody>
                     <?php
-                    $sumTotalAbSaleTaxa = ((($sumTotalAbSale * $abEvent->iof) / 100) + $sumTotalAbSale) * 1.10;
-                    $sumTotalAbCostTaxa = ((($sumTotalAbCost * $hotelEvent->iof) / 100) + $sumTotalAbCost);
+                    $sumTotalAbSaleTaxa = ((($sumTotalAbSale * $abEvent->iof) / 100) + $sumTotalAbSale) *  (1 + ($abEvent->taxa_4bts / 100));
+                    $sumTotalAbCostTaxa = ((($sumTotalAbCost * $abEvent->iof) / 100) + $sumTotalAbCost);
 
-                    $abTaxa4BTS = ((($sumTotalAbSale * $abEvent->iof) / 100) + $sumTotalAbSale) * 0.10;
+                    $abTaxa4BTS = ((($sumTotalAbSale * $abEvent->iof) / 100) + $sumTotalAbSale) * ($abEvent->taxa_4bts / 100);
                     $sumTaxeAbCost += (($sumTotalAbCost * $abEvent->iof) / 100);
                     $sumTaxeAbSale += (($sumTotalAbSale * $abEvent->iof) / 100);
                     ?>
@@ -687,7 +687,7 @@ $strip = false;
                                     </tr>
 
                                     <tr>
-                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Serviço 4BTS (10.00%)</td>
+                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Serviço 4BTS ({{ number_format($abEvent->taxa_4bts, 2) }}%)</td>
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($abTaxa4BTS, $abEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;" colspan="4"></td>
                                     </tr>
@@ -762,10 +762,10 @@ $strip = false;
                         @endforeach
                     </tbody>
                     <?php
-                    $sumTotalHallSaleTaxa = ((($sumTotalHallSale * $hallEvent->iof) / 100) + $sumTotalHallSale) * 1.10;
-                    $sumTotalHallCostTaxa = ((($sumTotalHallCost * $hotelEvent->iof) / 100) + $sumTotalHallCost);
+                    $sumTotalHallSaleTaxa = ((($sumTotalHallSale * $hallEvent->iof) / 100) + $sumTotalHallSale) *  (1 + ($hallEvent->taxa_4bts / 100));
+                    $sumTotalHallCostTaxa = ((($sumTotalHallCost * $hallEvent->iof) / 100) + $sumTotalHallCost);
 
-                    $hallTaxa4BTS = ((($sumTotalHallSale * $hallEvent->iof) / 100) + $sumTotalHallSale) * 0.10;
+                    $hallTaxa4BTS = ((($sumTotalHallSale * $hallEvent->iof) / 100) + $sumTotalHallSale) * ($hallEvent->taxa_4bts / 100);
                     $sumTaxeHallCost += (($sumTotalHallCost * $hallEvent->iof) / 100);
                     $sumTaxeHallSale += (($sumTotalHallSale * $hallEvent->iof) / 100);
                     ?>
@@ -849,7 +849,7 @@ $strip = false;
                                     </tr>
 
                                     <tr>
-                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Serviço 4BTS (10.00%)</td>
+                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Serviço 4BTS ({{ number_format($hallEvent->taxa_4bts, 2) }}%)</td>
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($hallTaxa4BTS, $hallEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;" colspan="4"></td>
                                     </tr>
@@ -925,10 +925,10 @@ $strip = false;
                     </tbody>
 
                     <?php
-                    $sumTotalAddSaleTaxa = ((($sumTotalAddSale * $addEvent->iof) / 100) + $sumTotalAddSale) * 1.10;
+                    $sumTotalAddSaleTaxa = ((($sumTotalAddSale * $addEvent->iof) / 100) + $sumTotalAddSale) *  (1 + ($addEvent->taxa_4bts / 100));
                     $sumTotalAddCostTaxa = ((($sumTotalAddCost * $addEvent->iof) / 100) + $sumTotalAddCost);
 
-                    $addTaxa4BTS = ((($sumTotalAddSale * $addEvent->iof) / 100) + $sumTotalAddSale) * 0.10;
+                    $addTaxa4BTS = ((($sumTotalAddSale * $addEvent->iof) / 100) + $sumTotalAddSale) * ($addEvent->taxa_4bts / 100);
                     $sumTaxeAddCost += (($sumTotalAddCost * $addEvent->iof) / 100);
                     $sumTaxeAddSale += (($sumTotalAddSale * $addEvent->iof) / 100);
                     ?>
@@ -1018,7 +1018,7 @@ $strip = false;
                                     </tr>
 
                                     <tr>
-                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Serviço 4BTS (10.00%)</td>
+                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Serviço 4BTS ({{ number_format($addEvent->taxa_4bts, 2) }}%)</td>
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($addTaxa4BTS, $addEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;" colspan="4"></td>
                                     </tr>
@@ -1095,10 +1095,10 @@ $strip = false;
                     </tbody>
 
                     <?php
-                    $sumTotalTransportSaleTaxa = ((($sumTotalTransportSale * $transportEvent->iof) / 100) + $sumTotalTransportSale) * 1.10;
+                    $sumTotalTransportSaleTaxa = ((($sumTotalTransportSale * $transportEvent->iof) / 100) + $sumTotalTransportSale) *  (1 + ($transportEvent->taxa_4bts / 100));
                     $sumTotalTransportCostTaxa = ((($sumTotalTransportCost * $transportEvent->iof) / 100) + $sumTotalTransportCost);
 
-                    $transportTaxa4BTS = ((($sumTotalTransportSale * $transportEvent->iof) / 100) + $sumTotalTransportSale) * 0.10;
+                    $transportTaxa4BTS = ((($sumTotalTransportSale * $transportEvent->iof) / 100) + $sumTotalTransportSale) * ($transportEvent->taxa_4bts / 100);
                     $sumTaxeTransportCost += (($sumTotalTransportCost * $transportEvent->iof) / 100);
                     $sumTaxeTransportSale += (($sumTotalTransportSale * $transportEvent->iof) / 100);
                     ?>
@@ -1188,7 +1188,7 @@ $strip = false;
                                     </tr>
 
                                     <tr>
-                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Serviço 4BTS (10.00%)</td>
+                                        <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Serviço 4BTS ({{ number_format($transportEvent->taxa_4bts, 2) }}%)</td>
                                         <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($transportTaxa4BTS, $transportEvent->currency->symbol) }}</td>
                                         <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;" colspan="4"></td>
                                     </tr>

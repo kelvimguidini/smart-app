@@ -12,7 +12,8 @@ const props = defineProps({
     filters: Object,
     customers: Array,
     users: Array,
-    allStatus: Object
+    allStatus: Object,
+    flashMessage: Object,
 });
 
 const formFilters = useForm({
@@ -30,7 +31,7 @@ const showEventDetails = ref(0);
 const eventProviders = reactive({}); // Armazena os provedores por evento
 
 // Acessa a instância do Vue para usar $root
-const { proxy } = getCurrentInstance();
+
 
 const submitForm = () => {
     isLoader.value = true;
@@ -200,13 +201,13 @@ const updateOrder = (eventId) => {
         type: providers[0]?.table.toLowerCase()
     }).then(response => {
         console.log('Ordem atualizada com sucesso');
-        if (proxy.$refs.flashMessage) {
-            proxy.$refs.flashMessage.showMessage('Ordem atualizada com sucesso', 'success');
+        if (props.flashMessage) {
+            props.flashMessage.showMessage('Ordem atualizada com sucesso', 'success');
         }
     }).catch(error => {
         console.error('Erro ao atualizar a ordem', error);
-        if (proxy.$refs.flashMessage) {
-            proxy.$refs.flashMessage.showMessage('Erro ao atualizar a ordem', 'danger');
+        if (props.flashMessage) {
+            props.flashMessage.showMessage('Erro ao atualizar a ordem', 'danger');
         }
     });
 };
@@ -369,7 +370,7 @@ watch(
                                         <!-- Linha do evento principal -->
                                         <tr class="table-active cursor-pointer">
                                             <th @click="showHideEventDetails(event.id, event)" scope="row">{{ event.id
-                                                }}</th>
+                                            }}</th>
                                             <td @click="showHideEventDetails(event.id, event)">{{ event.customer ?
                                                 event.customer.name : '-' }}</td>
                                             <td @click="showHideEventDetails(event.id, event)">{{ event.name }}</td>

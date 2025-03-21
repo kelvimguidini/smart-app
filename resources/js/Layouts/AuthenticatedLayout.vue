@@ -40,6 +40,7 @@ import NavBarFake from '@/Components/NavBarFake.vue';
 import NavBar from '@/Components/NavBar.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
 import { Link } from '@inertiajs/inertia-vue3';
+import { useFlashMessage } from '@/Components/useFlashMessage';
 
 
 const menuItem = [
@@ -301,7 +302,7 @@ onMounted(() => {
     });
 });
 
-
+const { flashMessageRef } = useFlashMessage();
 </script>
 
 <template>
@@ -311,7 +312,8 @@ onMounted(() => {
         <Menu :menu-items="menuItem" :menu-title="$page.props.appName"></Menu>
 
         <FlashMessage ref="flashMessage" v-if="$page.props.flash != null" :show="$page.props.flash != null"
-            :message="$page.props.flash.message" :type="$page.props.flash.type"></FlashMessage>
+            :message="$page.props.flash.message" :type="$page.props.flash.type" v-bind="{ ref: flashMessageRef }">
+        </FlashMessage>
 
         <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
@@ -338,7 +340,7 @@ onMounted(() => {
                     </header>
                     <!-- Page Content -->
                     <main>
-                        <slot />
+                        <slot :flashMessage="$refs.flashMessage" />
                     </main>
 
                 </div>

@@ -23,6 +23,7 @@ class EventTransport extends Model
         'token_budget',
         'sended_mail',
         'iof',
+        'taxa_4bts',
         'service_charge',
         'deadline_date',
         'order'

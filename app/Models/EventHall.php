@@ -22,6 +22,7 @@ class EventHall extends Model
         'sended_mail_link',
         'token_budget',
         'iof',
+        'taxa_4bts',
         'service_charge',
         'deadline_date',
         'order'
