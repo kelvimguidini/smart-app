@@ -151,10 +151,10 @@
                                 <tr v-for="(historyItem, index) in history" :key="index">
                                     <td>{{ new
                                         Date(historyItem.created_at).toLocaleDateString()
-                                    }}</td>
+                                        }}</td>
                                     <td>{{
                                         getStatusLabel(historyItem.status)
-                                    }}</td>
+                                        }}</td>
                                     <td>{{ historyItem.user.name }}</td>
                                     <td>{{ historyItem.observation }}</td>
                                 </tr>
@@ -334,7 +334,7 @@
                         prov.providerBudget[0].user.name }}</p>
                     <p><strong>Data: </strong> {{ new
                         Date(prov.providerBudget[0].approval_date).toLocaleDateString()
-                    }}
+                        }}
                     </p>
                 </div>
             </div>
@@ -342,7 +342,7 @@
     </Modal>
 
     <Modal modal-title="Envio de Proposta"
-        v-if="prov && prov.providerBudget && $page.props.auth.permissions.some((p) => p.name === 'event_admin')"
+        v-if="prov && prov.providerBudget && $page.props.auth.permissions.some((p) => p.name === 'event_admin') && (prov.status == 'dating_with_customer' || prov.status == 'approved_by_manager' || prov.status == 'sent_to_customer')"
         :ok-botton-callback="sendProposal"
         :ok-botton-callback-param="{ event_id: event.id, provider_id: prov.id, emails: emails, download: !sendEmail, message: message, copyMe: copyMe }"
         :ok-botton-label="!sendEmail ? 'Baixar PDF' : 'Enviar Proposta'"
