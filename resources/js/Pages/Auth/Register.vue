@@ -99,6 +99,24 @@ onMounted(() => {
     $('#phone').mask('(00) 00000-0000');
 });
 
+
+const activate = (id) => {
+    isLoader.value = true;
+    form.put(route('register-activate', id), {
+        onFinish: () => {
+            isLoader.value = false;
+        },
+    });
+};
+
+const deactivate = (id) => {
+    isLoader.value = true;
+    form.put(route('register-deactivate', id), {
+        onFinish: () => {
+            isLoader.value = false;
+        },
+    });
+};
 </script>
 
 <template>
@@ -288,6 +306,26 @@ onMounted(() => {
                                                     Tem certeza que deseja apagar esse registro?
                                                 </template>
                                             </Modal>
+
+
+                                            <button v-if="!user.active"
+                                                class="btn btn-sm btn-success btn-icon-split mr-2"
+                                                v-on:click="activate(user.id)">
+                                                <span class="icon text-white-50">
+                                                    <i class="fas fa-check"></i>
+                                                </span>
+                                                <span class="text">Ativar</span>
+                                            </button>
+
+                                            <button v-if="user.active"
+                                                class="btn btn-sm btn-warning btn-icon-split mr-2"
+                                                v-on:click="deactivate(user.id)">
+                                                <span class="icon text-white-50">
+                                                    <i class="fas fa-ban"></i>
+                                                </span>
+                                                <span class="text">Inativar</span>
+                                            </button>
+
 
                                         </td>
                                     </tr>

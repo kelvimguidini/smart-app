@@ -26,6 +26,6 @@ class EmailVerificationNotificationController extends Controller
 
         $user->sendEmailVerificationNotification();
 
-        return Inertia::render('Auth/VerifyEmail', ['status' => session('status'), 'email' => $request->email]);
+        return Inertia::render('Auth/VerifyEmail', ['flash' => ['message' => session('status'), 'type' => 'warning'], 'email' => $request->email]);
     }
 }

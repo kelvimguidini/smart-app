@@ -28,15 +28,14 @@ class VerifyEmailController extends Controller
 
         $user = User::find($request->id);
 
-
-
-        if ($user->email_verified_at != null) {
-            return redirect()->route('login')->with('status',  'Conta já ativada, caso não se lembra da senha, use link abaixo');
+        if ($user == null) {
+            return redirect()->route('login')->with('flash', ['message' => 'Link inválido!', 'type' => 'danger']);
         }
 
-        // if($user->){
-        //     return redirect()->route('login')->with('status',  'Link inválido!');
-        // }
+        if ($user->email_verified_at != null) {
+            return redirect()->route('login')->with('flash', ['message' => 'Conta já ativada, caso não se lembra da senha, use link abaixo', 'type' => 'warning']);
+        }
+
 
         if ($user->markEmailAsVerified()) {
             event(new Verified($user));
@@ -53,6 +52,6 @@ class VerifyEmailController extends Controller
             return redirect()->route('password.reset', ['token' => $this->token, 'email' => $this->email, 'verified' => 1]);
         }
 
-        return redirect()->route('login')->with('status', [trans($status)]);
+        return redirect()->route('login')->with('status', [trans($status)])->with('flash', ['message' => trans($status), 'type' => 'warning']);
     }
 }

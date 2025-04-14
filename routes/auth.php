@@ -619,6 +619,9 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::put('/brokers/activate/{id}', [BrokerController::class, 'activateM'])->name('brokers-activate');
     Route::put('/brokers/deactivate/{id}', [BrokerController::class, 'deactivateM'])->name('brokers-deactivate');
 
+    Route::put('/register/activate/{id}', [RegisteredUserController::class, 'activateM'])->name('register-activate');
+    Route::put('/register/deactivate/{id}', [RegisteredUserController::class, 'deactivateM'])->name('register-deactivate');
+
     //FIM ativar - desativar
 
     Route::post('/update-provider-order', [ProviderController::class, 'updateOrder'])->name('update-provider-order');

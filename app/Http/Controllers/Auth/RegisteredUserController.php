@@ -14,6 +14,23 @@ use Inertia\Inertia;
 
 class RegisteredUserController extends Controller
 {
+
+    public function activateM($id)
+    {
+        if (!Gate::allows('local_admin')) {
+            abort(403);
+        }
+        return $this->activate($id, User::class);
+    }
+
+    public function deactivateM($id)
+    {
+        if (!Gate::allows('local_admin')) {
+            abort(403);
+        }
+        return $this->deactivate($id, User::class);
+    }
+
     /**
      * Display the registration view.
      *
@@ -25,7 +42,7 @@ class RegisteredUserController extends Controller
             abort(403);
         }
 
-        $users = User::with('roles')->get();
+        $users = User::withoutGlobalScope('active')->with('roles')->get();
         $roles = Role::all();
         // $userEdit = $request->id > 0 ? User::find($request->id) : null;
 
@@ -60,7 +77,7 @@ class RegisteredUserController extends Controller
                 'phone' => 'required|string|max:255',
             ]);
 
-            $userEdit = User::with('roles')->find($request->id);
+            $userEdit = User::withoutGlobalScope('active')->with('roles')->find($request->id);
 
             $userEdit->name = $request->name;
             $userEdit->email = $request->email;
@@ -129,7 +146,7 @@ class RegisteredUserController extends Controller
         }
         try {
 
-            $r = User::find($request->id);
+            $r = User::withoutGlobalScope('active')->find($request->id);
 
             $r->delete();
         } catch (Exception $e) {
