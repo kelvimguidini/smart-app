@@ -212,7 +212,8 @@ watch(
     () => props.eventProvider,
     (newEvent) => {
         if (newEvent) {
-            date.value = new Date(newEvent.deadline_date);
+            var dateOld = new Date(newEvent.deadline_date);
+            date.value = dateOld.setDate(dateOld.getDate() + 1);
         }
     },
     { immediate: true }
