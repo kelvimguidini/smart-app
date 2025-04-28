@@ -49,7 +49,7 @@ class StatusHistoryController extends Controller
         try {
 
             $status = StatusHistory::create([
-                'status' => $request->status_hotel,
+                'flash' => ['message' => $request->status_hotel, 'type' => 'warning'],
                 'user_id' => Auth::user()->id,
                 'observation' => $request->observation_hotel,
                 'table' => $request->table,

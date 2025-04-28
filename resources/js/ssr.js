@@ -19,6 +19,15 @@ library.add(faUserSecret)
 
 const appName = 'Laravel';
 
+// Inertia.on('success', (event) => {
+//     const flash = event.detail?.props?.flash;
+//     if (flash?.message) {
+//         window.dispatchEvent(new CustomEvent('global-flash', {
+//             detail: flash
+//         }));
+//     }
+// });
+
 createServer((page) =>
     createInertiaApp({
         page,

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 // Bootstrap core JavaScript
 import '@/vendor/jquery/jquery.min.js';
 import '@/vendor/bootstrap/js/bootstrap.bundle.min.js';
@@ -40,7 +40,6 @@ import NavBarFake from '@/Components/NavBarFake.vue';
 import NavBar from '@/Components/NavBar.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
 import { Link } from '@inertiajs/inertia-vue3';
-import { useFlashMessage } from '@/Components/useFlashMessage';
 
 
 const menuItem = [
@@ -292,6 +291,7 @@ const menuItem = [
     },
 ];
 
+
 onMounted(() => {
     $("#sidebarToggle, #sidebarToggleTop").on('click', function (e) {
         $("body").toggleClass("sidebar-toggled");
@@ -302,7 +302,6 @@ onMounted(() => {
     });
 });
 
-const { flashMessageRef } = useFlashMessage();
 </script>
 
 <template>
@@ -311,9 +310,8 @@ const { flashMessageRef } = useFlashMessage();
 
         <Menu :menu-items="menuItem" :menu-title="$page.props.appName"></Menu>
 
-        <FlashMessage ref="flashMessage" v-if="$page.props.flash != null" :show="$page.props.flash != null"
-            :message="$page.props.flash.message" :type="$page.props.flash.type" v-bind="{ ref: flashMessageRef }">
-        </FlashMessage>
+        <!-- FlashMessage Component -->
+        <FlashMessage ref="flashMessage" />
 
         <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
@@ -340,7 +338,7 @@ const { flashMessageRef } = useFlashMessage();
                     </header>
                     <!-- Page Content -->
                     <main>
-                        <slot :flashMessage="$refs.flashMessage" />
+                        <slot />
                     </main>
 
                 </div>

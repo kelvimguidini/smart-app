@@ -8,8 +8,7 @@ import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/inertia-vue3';
 
 defineProps({
-    canResetPassword: Boolean,
-    status: String,
+    canResetPassword: Boolean
 });
 
 const form = useForm({
@@ -29,10 +28,6 @@ const submit = () => {
     <GuestLayout>
 
         <Head title="Logar" />
-
-        <div v-if="status" class="mb-4 font-medium text-sm text-green-600">
-            {{ status }}
-        </div>
 
         <form @submit.prevent="submit">
             <div>

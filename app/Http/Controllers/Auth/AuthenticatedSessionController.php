@@ -23,7 +23,7 @@ class AuthenticatedSessionController extends Controller
     {
         return Inertia::render('Auth/Login', [
             'canResetPassword' => Route::has('password.request'),
-            'status' => session('status'),
+            'flash' => ['message' => session('status'), 'type' => 'warning'],
         ]);
     }
 
@@ -41,12 +41,15 @@ class AuthenticatedSessionController extends Controller
         if ($user == null) {
             return Inertia::render('Auth/Login', [
                 'canResetPassword' => Route::has('password.request'),
-                'status' => 'E-mail não encontrado!',
+                'flash' => ['message' => 'E-mail não encontrado!', 'type' => 'danger'],
                 'email' => $request->email
             ]);
         }
         if ($user->email_verified_at == null) {
-            return Inertia::render('Auth/VerifyEmail', ['status' => session('status'), 'email' => $request->email]);
+            return Inertia::render(
+                'Auth/VerifyEmail',
+                ['flash' => ['message' => session('status'), 'type' => 'warning'], 'email' => $request->email],
+            );
         }
 
         $request->authenticate();
