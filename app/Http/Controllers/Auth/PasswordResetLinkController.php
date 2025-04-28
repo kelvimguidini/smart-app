@@ -47,8 +47,6 @@ class PasswordResetLinkController extends Controller
             return redirect()->back()->with('flash', ['message' => trans($status), 'type' => 'warning']);
         }
 
-        throw ValidationException::withMessages([
-            'email' => [trans($status)],
-        ]);
+        return redirect()->back()->with('flash', ['message' => trans($status), 'type' => 'danger']);
     }
 }

@@ -33,9 +33,7 @@ class ConfirmablePasswordController extends Controller
             'email' => $request->user()->email,
             'password' => $request->password,
         ])) {
-            throw ValidationException::withMessages([
-                'password' => trans('auth.password'),
-            ]);
+            return redirect()->back()->with('flash', ['message' => trans('auth.password'), 'type' => 'danger']);
         }
 
         $request->session()->put('auth.password_confirmed_at', time());
