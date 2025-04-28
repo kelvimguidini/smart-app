@@ -151,10 +151,10 @@
                                 <tr v-for="(historyItem, index) in history" :key="index">
                                     <td>{{ new
                                         Date(historyItem.created_at).toLocaleDateString()
-                                        }}</td>
+                                    }}</td>
                                     <td>{{
                                         getStatusLabel(historyItem.status)
-                                        }}</td>
+                                    }}</td>
                                     <td>{{ historyItem.user.name }}</td>
                                     <td>{{ historyItem.observation }}</td>
                                 </tr>
@@ -334,7 +334,7 @@
                         prov.providerBudget[0].user.name }}</p>
                     <p><strong>Data: </strong> {{ new
                         Date(prov.providerBudget[0].approval_date).toLocaleDateString()
-                        }}
+                    }}
                     </p>
                 </div>
             </div>
@@ -547,7 +547,7 @@ const formStatus = useForm({
     observation_hotel: '',
     notify: false,
     emailsLink: '',
-    messageLink: 'teste',
+    messageLink: ' ',
     copyMeLink: false
 });
 
