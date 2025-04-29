@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class PasswordResetLinkController extends Controller
@@ -44,9 +43,13 @@ class PasswordResetLinkController extends Controller
         );
 
         if ($status == Password::RESET_LINK_SENT) {
-            return redirect()->back()->with('flash', ['message' => trans($status), 'type' => 'warning']);
+            return Inertia::render('Auth/ForgotPassword', [
+                'flash' => ['message' => trans($status), 'type' => 'warning'],
+            ]);
         }
 
-        return redirect()->back()->with('flash', ['message' => trans($status), 'type' => 'danger']);
+        return Inertia::render('Auth/ForgotPassword', [
+            'flash' => ['message' => trans($status), 'type' => 'danger'],
+        ]);
     }
 }

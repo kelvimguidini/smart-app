@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class ConfirmablePasswordController extends Controller
@@ -33,7 +32,9 @@ class ConfirmablePasswordController extends Controller
             'email' => $request->user()->email,
             'password' => $request->password,
         ])) {
-            return redirect()->back()->with('flash', ['message' => trans('auth.password'), 'type' => 'danger']);
+            return Inertia::render('Auth/ConfirmPassword', [
+                'flash' => ['message' => trans('auth.password'), 'type' => 'danger']
+            ]);
         }
 
         $request->session()->put('auth.password_confirmed_at', time());

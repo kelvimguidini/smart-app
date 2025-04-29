@@ -52,7 +52,14 @@ class AuthenticatedSessionController extends Controller
             );
         }
 
-        $request->authenticate();
+        $response = $request->authenticate();
+        if ($response === true) {
+            return Inertia::render('Auth/Login', [
+                'canResetPassword' => Route::has('password.request'),
+                'flash' => ['message' => trans('auth.failed'), 'type' => 'danger'],
+                'email' => $request->email
+            ]);
+        }
 
         $request->session()->regenerate();
 

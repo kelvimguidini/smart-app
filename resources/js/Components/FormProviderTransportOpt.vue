@@ -128,6 +128,13 @@ const submitOpt = () => {
 
             $('#tabs-transport').tabs({ active: 0 });
         },
+        onError: (errors) => {
+            console.error('Erro no backend:', errors);
+            isLoader.value = false; // Desativa o loader em caso de erro
+        },
+        onSuccess: () => {
+            isLoader.value = false; // Garante que o loader seja desativado após sucesso
+        },
     });
 };
 
@@ -175,6 +182,11 @@ onMounted(() => {
     if (props.eventTransport != null) {
         symbol = props.eventTransport.currency.symbol + ' ';
     }
+    var opt = {
+        in: range.start,
+        out: range.end,
+    };
+    setRange(opt);
     $('.money').maskMoney({ prefix: symbol, allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
 
 });
@@ -222,8 +234,8 @@ const isLoader = ref(false);
             <div class="col-lg-4">
                 <div class="form-group">
                     <InputLabel for="broker" value="Broker:" />
-                    <select class="form-control" id="broker" :required="required">
-                        <option>.::Selecione::.</option>
+                    <select class="form-control" id="broker" required="required">
+                        <option value="">.::Selecione::.</option>
                         <option v-for="(option, index) in brokers" :value="option.id">
                             {{ option.name }}
                         </option>
@@ -232,8 +244,8 @@ const isLoader = ref(false);
 
                 <div class="form-group">
                     <InputLabel for="vehicle" value="Veículo:" />
-                    <select class="form-control" id="vehicle" :required="required">
-                        <option>.::Selecione::.</option>
+                    <select class="form-control" id="vehicle" required="required">
+                        <option value="">.::Selecione::.</option>
                         <option v-for="(option, index) in vehicles" :value="option.id">
                             {{ option.name }}
                         </option>
@@ -242,8 +254,8 @@ const isLoader = ref(false);
 
                 <div class="form-group">
                     <InputLabel for="model" value="Modelo:" />
-                    <select class="form-control" id="model" :required="required">
-                        <option>.::Selecione::.</option>
+                    <select class="form-control" id="model" required="required">
+                        <option value="">.::Selecione::.</option>
                         <option v-for="(option, index) in models" :value="option.id">
                             {{ option.name }}
                         </option>
@@ -255,8 +267,8 @@ const isLoader = ref(false);
 
                 <div class="form-group">
                     <InputLabel for="service" value="Serviço:" />
-                    <select class="form-control" id="service" :required="required">
-                        <option>.::Selecione::.</option>
+                    <select class="form-control" id="service" required="required">
+                        <option value="">.::Selecione::.</option>
                         <option v-for="(option, index) in services" :value="option.id">
                             {{ option.name }}
                         </option>
@@ -265,14 +277,14 @@ const isLoader = ref(false);
 
                 <div class="form-group">
                     <InputLabel for="observation" value="OBS.:" />
-                    <TextInput type="text" class="form-control" v-model="formOpt.observation" autofocus
+                    <TextInput type="text" class="form-control" required v-model="formOpt.observation" autofocus
                         autocomplete="observation" />
                 </div>
 
                 <div class="form-group">
                     <InputLabel for="brand" value="Marca:" />
                     <select class="form-control" id="brand" :required="required">
-                        <option>.::Selecione::.</option>
+                        <option value="">.::Selecione::.</option>
                         <option v-for="(option, index) in brands" :value="option.id">
                             {{ option.name }}
                         </option>
@@ -364,4 +376,4 @@ const isLoader = ref(false);
             </div>
         </div>
     </form>
-</template>
+</t

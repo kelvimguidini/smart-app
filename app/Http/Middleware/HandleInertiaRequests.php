@@ -35,7 +35,7 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request)
     {
-        $session = $request->session()->get('flash');
+        $flash = $request->session()->get('flash');
         return array_merge(parent::share($request), [
             'auth' => [
                 'user' => $request->user(),
@@ -48,7 +48,7 @@ class HandleInertiaRequests extends Middleware
             },
             'appName' => env('APP_NAME'),
             'permissionList' => Constants::PERMISSIONS,
-            'flash' => $request->session()->get('flash'),
+            'flash' => $flash,
             'error' => $request->session()->get('error'), // Compartilha erros genéricos
         ]);
     }

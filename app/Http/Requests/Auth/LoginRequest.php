@@ -48,7 +48,7 @@ class LoginRequest extends FormRequest
         if (!Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
-            return redirect()->back()->with('flash', ['message' => trans('auth.failed'), 'type' => 'danger']);
+            return true;
         }
 
         RateLimiter::clear($this->throttleKey());

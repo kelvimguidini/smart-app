@@ -111,6 +111,12 @@ const submitOpt = () => {
             formOpt.id = 0;
 
             $('#tabs-hall').tabs({ active: 0 });
+        },        onError: (errors) => {
+            console.error('Erro no backend:', errors);
+            isLoader.value = false; // Desativa o loader em caso de erro
+        },
+        onSuccess: () => {
+            isLoader.value = false; // Garante que o loader seja desativado após sucesso
         },
     });
 };
@@ -148,6 +154,12 @@ onMounted(() => {
         symbol = props.eventHall.currency.symbol + ' ';
         formOpt.hall_id = props.eventHall.hall_id;
     }
+    var opt = {
+        in: range.start,
+        out: range.end,
+    };
+    setRange(opt);
+
     $('.money').maskMoney({ prefix: symbol, allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
 });
 
@@ -187,8 +199,8 @@ const setRange = (opt) => {
 
                 <div class="form-group">
                     <InputLabel for="service" value="Serviços:" />
-                    <select class="form-control" id="service" :required="required">
-                        <option>.::Selecione::.</option>
+                    <select class="form-control" id="service" required="required">
+                        <option value="">.::Selecione::.</option>
                         <option v-for="(option, index) in services" :value="option.id">
                             {{ option.name }}
                         </option>
@@ -197,8 +209,8 @@ const setRange = (opt) => {
 
                 <div class="form-group">
                     <InputLabel for="broker" value="Broker:" />
-                    <select class="form-control" id="broker" :required="required">
-                        <option>.::Selecione::.</option>
+                    <select class="form-control" id="broker" required="required">
+                        <option value="">.::Selecione::.</option>
                         <option v-for="(option, index) in brokers" :value="option.id">
                             {{ option.name }}
                         </option>
@@ -224,7 +236,7 @@ const setRange = (opt) => {
                 <div class="form-group">
                     <InputLabel for="purpose" value="Propósito:" />
                     <select class="form-control" id="purpose" :required="required">
-                        <option>.::Selecione::.</option>
+                        <option value="">.::Selecione::.</option>
                         <option v-for="(option, index) in purposes" :value="option.id">
                             {{ option.name }}
                         </option>

@@ -145,6 +145,13 @@ const submitOpt = () => {
 
             $('#tabs-hotel').tabs({ active: 0 });
         },
+        onError: (errors) => {
+            console.error('Erro no backend:', errors);
+            isLoader.value = false; // Desativa o loader em caso de erro
+        },
+        onSuccess: () => {
+            isLoader.value = false; // Garante que o loader seja desativado após sucesso
+        },
     });
 };
 
@@ -192,6 +199,12 @@ onMounted(() => {
     if (props.eventHotel != null) {
         symbol = props.eventHotel.currency.symbol + ' ';
     }
+    var opt = {
+        in: range.start,
+        out: range.end,
+    };
+    setRange(opt);
+    
     $('.money').maskMoney({ prefix: symbol, allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
 
 });
@@ -229,8 +242,8 @@ const isLoader = ref(false);
             <div class="col-lg-4">
                 <div class="form-group">
                     <InputLabel for="broker" value="Broker:" />
-                    <select class="form-control" id="broker" :required="required">
-                        <option>.::Selecione::.</option>
+                    <select class="form-control" id="broker" required="required">
+                        <option value="">.::Selecione::.</option>
                         <option v-for="(option, index) in brokers" :value="option.id">
                             {{ option.name }}
                         </option>
@@ -239,8 +252,8 @@ const isLoader = ref(false);
 
                 <div class="form-group">
                     <InputLabel for="regime" value="Regime:" />
-                    <select class="form-control" id="regime" :required="required">
-                        <option>.::Selecione::.</option>
+                    <select class="form-control" id="regime" required="required">
+                        <option value="">.::Selecione::.</option>
                         <option v-for="(option, index) in regimes" :value="option.id">
                             {{ option.name }}
                         </option>
@@ -249,8 +262,8 @@ const isLoader = ref(false);
 
                 <div class="form-group">
                     <InputLabel for="purpose" value="Proposito:" />
-                    <select class="form-control" id="purpose" :required="required">
-                        <option>.::Selecione::.</option>
+                    <select class="form-control" id="purpose" required="required">
+                        <option value="">.::Selecione::.</option>
                         <option v-for="(option, index) in purposes" :value="option.id">
                             {{ option.name }}
                         </option>
@@ -259,8 +272,8 @@ const isLoader = ref(false);
 
                 <div class="form-group">
                     <InputLabel for="cat" value="CAT.:" />
-                    <select class="form-control" id="cat" :required="required">
-                        <option>.::Selecione::.</option>
+                    <select class="form-control" id="cat" required="required">
+                        <option value="">.::Selecione::.</option>
                         <option v-for="(option, index) in catsHotel" :value="option.id">
                             {{ option.name }}
                         </option>
@@ -273,8 +286,8 @@ const isLoader = ref(false);
 
                 <div class="form-group">
                     <InputLabel for="apto" value="APTO:" />
-                    <select class="form-control" id="apto" :required="required">
-                        <option>.::Selecione::.</option>
+                    <select class="form-control" id="apto" required="required">
+                        <option value="">.::Selecione::.</option>
                         <option v-for="(option, index) in aptosHotel" :value="option.id">
                             {{ option.name }}
                         </option>

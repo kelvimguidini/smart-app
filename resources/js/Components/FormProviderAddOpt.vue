@@ -110,6 +110,13 @@ const submitOpt = () => {
 
             $('#tabs-add').tabs({ active: 0 });
         },
+        onError: (errors) => {
+            console.error('Erro no backend:', errors);
+            isLoader.value = false; // Desativa o loader em caso de erro
+        },
+        onSuccess: () => {
+            isLoader.value = false; // Garante que o loader seja desativado após sucesso
+        },
     });
 };
 
@@ -146,6 +153,12 @@ onMounted(() => {
         symbol = props.eventAdd.currency.symbol + ' ';
         formOpt.add_id = props.eventAdd.add_id;
     }
+    var opt = {
+        in: range.start,
+        out: range.end,
+    };
+    setRange(opt);
+    
     $('.money').maskMoney({ prefix: symbol, allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
 });
 
@@ -183,8 +196,8 @@ const setRange = (opt) => {
 
                 <div class="form-group">
                     <InputLabel for="service" value="Serviços:" />
-                    <select class="form-control" id="service" :required="required">
-                        <option>.::Selecione::.</option>
+                    <select class="form-control" id="service" required>
+                        <option value="">.::Selecione::.</option>
                         <option v-for="(option, index) in services" :value="option.id">
                             {{ option.name }}
                         </option>
@@ -199,8 +212,8 @@ const setRange = (opt) => {
 
                 <div class="form-group">
                     <InputLabel for="measure" value="Medida:" />
-                    <select class="form-control" id="measure" :required="required">
-                        <option>.::Selecione::.</option>
+                    <select class="form-control" id="measure" required="required">
+                        <option value="">.::Selecione::.</option>
                         <option v-for="(option, index) in measures" :value="option.id">
                             {{ option.name }}
                         </option>
@@ -221,8 +234,8 @@ const setRange = (opt) => {
 
                 <div class="form-group">
                     <InputLabel for="frequency" value="Frequência:" />
-                    <select class="form-control" id="frequency" :required="required">
-                        <option>.::Selecione::.</option>
+                    <select class="form-control" id="frequency" required="required">
+                        <option value="">.::Selecione::.</option>
                         <option v-for="(option, index) in frequencies" :value="option.id">
                             {{ option.name }}
                         </option>
