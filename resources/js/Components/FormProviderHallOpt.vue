@@ -63,8 +63,6 @@ const duplicate = (opt, isEdit = false) => {
     formOpt.pax = opt.pax;
     formOpt.in = new Date(opt.in);
     formOpt.out = new Date(opt.out);
-    range.value.start = formOpt.in;
-    range.value.end = formOpt.out;
     formOpt.received_proposal = opt.received_proposal;
     formOpt.kickback = opt.kickback;
     formOpt.count = opt.count;
