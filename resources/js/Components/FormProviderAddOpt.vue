@@ -167,14 +167,20 @@ const isLoader = ref(false);
 
 const range = ref({
     start: new Date(),
-    end: new Date(),
+    end: new Date(new Date().getTime() + 24 * 60 * 60 * 1000), // Adiciona 1 dia
 });
 
-
+// Função para atualizar `form.date` e `form.date_final` quando o usuário selecionar novas datas
 const updateForm = () => {
-    formOpt.in = range.value.start ? range.value.start.toISOString().split('T')[0] : '';
-    formOpt.out = range.value.end ? range.value.end.toISOString().split('T')[0] : '';
+    if (range.value && range.value.start && range.value.end) {
+        formOpt.in = range.value.start.toISOString().split('T')[0];
+        formOpt.out = range.value.end.toISOString().split('T')[0];
+    } else {
+        formOpt.in = '';
+        formOpt.out = '';
+    }
 };
+
 
 
 const setRange = (opt) => {
