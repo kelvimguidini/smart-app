@@ -83,20 +83,24 @@ class BudgetController extends Controller
             ])->find($event);
 
             $providers = collect();
-
-            if ($eventDataBase->event_hotels->isNotEmpty()) {
+            $table =  $request->type;
+            if ($eventDataBase->event_hotels->isNotEmpty() && $table == 'event_hotels') {
                 $providers = $providers->concat($eventDataBase->event_hotels->pluck('hotel'));
             }
 
-            if ($eventDataBase->event_abs->isNotEmpty()) {
+            if ($eventDataBase->event_abs->isNotEmpty() && $table == 'event_hotels') {
                 $providers = $providers->concat($eventDataBase->event_abs->pluck('ab'));
             }
 
-            if ($eventDataBase->event_halls->isNotEmpty()) {
+            if ($eventDataBase->event_halls->isNotEmpty() && $table == 'event_hotels') {
                 $providers = $providers->concat($eventDataBase->event_halls->pluck('hall'));
             }
 
-            if ($eventDataBase->event_adds->isNotEmpty()) {
+            if ($eventDataBase->event_transports->isNotEmpty() && $table == 'event_adds') {
+                $providers = $providers->concat($eventDataBase->event_transports->pluck('transport'));
+            }
+
+            if ($eventDataBase->event_adds->isNotEmpty() && $table == 'event_transports') {
                 $providers = $providers->concat($eventDataBase->event_adds->pluck('add'));
             }
 

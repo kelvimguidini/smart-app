@@ -4,7 +4,6 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Loader from '@/Components/Loader.vue';
 import EventActions from '@/Components/EventActions.vue';
 import ProviderActions from '@/Components/ProviderActions.vue';
-import draggable from 'vuedraggable';
 import { Head, useForm } from '@inertiajs/inertia-vue3';
 
 const props = defineProps({
@@ -189,29 +188,6 @@ const showHideEventDetails = (id, event) => {
 };
 
 
-const updateOrder = (eventId) => {
-    const providers = eventProviders[eventId];
-    providers.forEach((provider, index) => {
-        provider.order = index;
-    });
-
-    axios.post(route('update-provider-order'), {
-        event_id: eventId,
-        providers: providers,
-        type: providers[0]?.table.toLowerCase()
-    }).then(response => {
-        console.log('Ordem atualizada com sucesso');
-        if (props.flashMessage) {
-            props.flashMessage.showMessage('Ordem atualizada com sucesso', 'success');
-        }
-    }).catch(error => {
-        console.error('Erro ao atualizar a ordem', error);
-        if (props.flashMessage) {
-            props.flashMessage.showMessage('Erro ao atualizar a ordem', 'danger');
-        }
-    });
-};
-
 const getStatusLabel = (status) => {
     return props.allStatus[status] ? props.allStatus[status].label : 'Solicitado';
 };
@@ -297,7 +273,7 @@ watch(
                                     <div class="form-group">
                                         <label for="consultant">Consultor:</label>
                                         <select class="form-control" id="client" required="required">
-                                            <option>.::Selecione::.</option>
+                                            <option value="">.::Selecione::.</option>
                                             <option v-for="(option, index) in users"
                                                 :selected="option.id == formFilters.consultant" :value="option.id">
                                                 {{ option.name }}
@@ -309,7 +285,7 @@ watch(
                                     <div class="form-group">
                                         <label for="client">Cliente:</label>
                                         <select class="form-control" id="customer" :required="required">
-                                            <option>.::Selecione::.</option>
+                                            <option value="">.::Selecione::.</option>
                                             <option v-for="(option, index) in customers"
                                                 :selected="option.id == formFilters.client" :value="option.id">
                                                 {{ option.name }}
@@ -323,7 +299,7 @@ watch(
                                     <div class="form-group">
                                         <label for="start-date">Status hotel:</label>
                                         <select class="form-control" id="status_hotel">
-                                            <option>.::Selecione::.</option>
+                                            <option value="">.::Selecione::.</option>
 
                                             <option v-for="(key, index) in Object.keys(allStatus)" :key="index"
                                                 :value="key">
@@ -396,24 +372,22 @@ watch(
                                                             <th>Ações</th>
                                                         </tr>
                                                     </thead>
-                                                    <draggable v-model="eventProviders[event.id]"
-                                                        @end="updateOrder(event.id)" item-key="id" tag="tbody">
-                                                        <template #item="{ element, index }">
-                                                            <tr :key="element.id" class="draggable">
-                                                                <th scope="row" class="handle">
-                                                                    <i class="fas fa-grip-vertical text-secondary"></i>
-                                                                </th>
-                                                                <td>{{ element.type }}: {{ element.name }}</td>
-                                                                <td><b>{{ getStatusLabel(element.status) }}</b></td>
-                                                                <td>
-                                                                    <ProviderActions :event="event" :index="index"
-                                                                        :prov="element"
-                                                                        :get-status-label="getStatusLabel"
-                                                                        :allStatus="allStatus" />
-                                                                </td>
-                                                            </tr>
-                                                        </template>
-                                                    </draggable>
+                                                    <tbody v-if="showEventDetails == event.id">
+                                                        <tr v-for="(prov, index) in providersByEvent(event)">
+                                                            <th scope="row"></th>
+                                                            <td colspan="3">
+                                                                {{ prov.type }}: {{ prov.name }}
+                                                            </td>
+                                                            <td colspan="2">
+                                                                status: <b>{{ getStatusLabel(prov.status) }}</b>
+                                                            </td>
+                                                            <td>
+                                                                <ProviderActions :event="event" :index="index"
+                                                                    :prov="prov" :get-status-label="getStatusLabel"
+                                                                    :allStatus="allStatus" />
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
 
                                                     <tr v-if="eventProviders[event.id]?.length === 0">
                                                         <td colspan="4" class="text-center">Sem registros</td>
@@ -458,20 +432,5 @@ watch(
 <style>
 .cursor-pointer {
     cursor: pointer;
-}
-
-.draggable {
-    cursor: move;
-}
-
-.handle {
-    cursor: move;
-    width: 30px;
-    text-align: center;
-    color: #6c757d;
-}
-
-.handle:hover {
-    color: #495057;
 }
 </style>

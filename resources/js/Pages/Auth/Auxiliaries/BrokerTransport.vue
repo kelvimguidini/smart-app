@@ -147,7 +147,7 @@ const deactivate = (id) => {
                                                 <InputLabel for="city" value="Cidade:" />
 
                                                 <select class="form-control" id="city" :required="required">
-                                                    <option>.::Selecione::.</option>
+                                                    <option value="">.::Selecione::.</option>
                                                     <option v-for="(option, index) in cities" :value="option.id">
                                                         {{ option.name }} - {{ option.states ? option.states :
                                                             option.country }}
@@ -160,8 +160,8 @@ const deactivate = (id) => {
                                         <div class="col">
                                             <div class="form-group">
                                                 <InputLabel for="contact" value="Contato:" />
-                                                <TextInput type="text" class="form-control" v-model="form.contact" required
-                                                    autofocus autocomplete="contact" />
+                                                <TextInput type="text" class="form-control" v-model="form.contact"
+                                                    required autofocus autocomplete="contact" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.contact" />
                                             </div>
 
@@ -182,8 +182,8 @@ const deactivate = (id) => {
                                         <div class="col-3">
                                             <div class="form-group">
                                                 <InputLabel for="email" value="E-mail:" />
-                                                <TextInput type="email" class="form-control" v-model="form.email" required
-                                                    autofocus autocomplete="email" />
+                                                <TextInput type="email" class="form-control" v-model="form.email"
+                                                    required autofocus autocomplete="email" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.email" />
                                             </div>
                                         </div>
@@ -288,7 +288,8 @@ const deactivate = (id) => {
                                                     </Modal>
 
 
-                                                    <button v-if="!broker.active" class="btn btn-sm btn-success btn-icon-split mr-2"
+                                                    <button v-if="!broker.active"
+                                                        class="btn btn-sm btn-success btn-icon-split mr-2"
                                                         v-on:click="activate(broker.id)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-check"></i>
@@ -296,7 +297,8 @@ const deactivate = (id) => {
                                                         <span class="text">Ativar</span>
                                                     </button>
 
-                                                    <button v-if="broker.active" class="btn btn-sm btn-warning btn-icon-split mr-2"
+                                                    <button v-if="broker.active"
+                                                        class="btn btn-sm btn-warning btn-icon-split mr-2"
                                                         v-on:click="deactivate(broker.id)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-ban"></i>

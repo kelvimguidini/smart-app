@@ -386,7 +386,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
         ->name('event-delete');
 
 
-    Route::get('invoice/{download}/{provider_id}/{event_id}', [ProviderController::class, 'invoicingPdf'])
+    Route::get('invoice/{download}/{provider_id}/{event_id}/{type}', [ProviderController::class, 'invoicingPdf'])
         ->name('invoice');
 
 
@@ -490,13 +490,13 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::post('budget-prove', [BudgetController::class, 'prove'])
         ->name('budget-prove');
 
-    Route::get('create-link/{download}/{provider_id}/{event_id}/{link}', [BudgetController::class, 'createLink'])
+    Route::get('create-link/{download}/{provider_id}/{event_id}/{link}/{type}', [BudgetController::class, 'createLink'])
         ->name('create-link');
 
     Route::post('create-link-email', [BudgetController::class, 'createLink'])
         ->name('create-link-email');
 
-    Route::get('proposal-hotel/{download}/{provider_id}/{event_id}', [ProviderController::class, 'proposalPdf'])
+    Route::get('proposal-hotel/{download}/{provider_id}/{event_id}/{type}', [ProviderController::class, 'proposalPdf'])
         ->name('proposal-hotel');
 
 

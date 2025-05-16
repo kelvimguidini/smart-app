@@ -314,113 +314,83 @@ class ProviderController extends Controller
         return redirect()->back()->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
     }
 
-    public function updateOrder(Request $request)
+    private function getEventDataBase($provider, $event, $table)
     {
-        $providers = $request->input('providers');
+        $withRelations = ['customer'];
 
-        foreach ($providers as $provider) {
-            switch ($provider['table']) {
-                case 'event_hotels':
-                    EventHotel::where('id', $provider['id'])->update(['order' => $provider['order']]);
-                    break;
-                case 'event_abs':
-                    EventAB::where('id', $provider['id'])->update(['order' => $provider['order']]);
-                    break;
-                case 'event_halls':
-                    EventHall::where('id', $provider['id'])->update(['order' => $provider['order']]);
-                    break;
-                case 'event_adds':
-                    EventAdd::where('id', $provider['id'])->update(['order' => $provider['order']]);
-                    break;
-                case 'event_transports':
-                    EventTransport::where('id', $provider['id'])->update(['order' => $provider['order']]);
-                    break;
-            }
+        if ($table == 'event_hotels') {
+            $withRelations = array_merge($withRelations, [
+                'event_hotels.hotel' => fn($q) => $q->where('id', $provider),
+                'event_hotels.eventHotelsOpt' => fn($q) => $q->whereHas('event_hotel', fn($q) => $q->where('hotel_id', $provider))->orderBy('in'),
+                'event_hotels.eventHotelsOpt.regime',
+                'event_hotels.eventHotelsOpt.apto_hotel',
+                'event_hotels.eventHotelsOpt.category_hotel',
+                'event_hotels.currency',
+            ]);
         }
-        return response()->json(['message' => 'Ordem atualizada com sucesso']);
-    }
 
-    private function getEventDataBase($provider, $event)
-    {
-        $eventDataBase = Event::with([
-            'customer',
-            'event_hotels.hotel' => function ($query) use ($provider) {
-                $query->where('id', '=', $provider);
-            },
-            'event_abs.ab' => function ($query) use ($provider) {
-                $query->where('id', '=', $provider);
-            },
-            'event_halls.hall' => function ($query) use ($provider) {
-                $query->where('id', '=', $provider);
-            },
-            'event_transports.transport' => function ($query) use ($provider) {
-                $query->where('id', '=', $provider);
-            },
-            'event_adds.add' => function ($query) use ($provider) {
-                $query->where('id', '=', $provider);
-            },
-            'event_hotels.eventHotelsOpt' => function ($query) use ($provider) {
-                $query->whereHas('event_hotel', function ($query) use ($provider) {
-                    $query->where('hotel_id', '=', $provider);
-                });
-            },
-            'event_hotels.eventHotelsOpt.regime',
-            'event_hotels.eventHotelsOpt.apto_hotel',
-            'event_hotels.eventHotelsOpt.category_hotel',
-            'event_hotels.currency',
-            'event_abs.eventAbOpts' => function ($query) use ($provider) {
-                $query->whereHas('event_ab', function ($query) use ($provider) {
-                    $query->where('ab_id', '=', $provider);
-                });
-            },
-            'event_abs.eventAbOpts.Local',
-            'event_abs.eventAbOpts.service_type',
-            'event_abs.currency',
-            'event_halls.eventHallOpts' => function ($query) use ($provider) {
-                $query->whereHas('event_hall', function ($query) use ($provider) {
-                    $query->where('hall_id', '=', $provider);
-                });
-            },
-            'event_halls.eventHallOpts.purpose',
-            'event_halls.currency',
-            'event_adds.eventAddOpts' => function ($query) use ($provider) {
-                $query->whereHas('event_add', function ($query) use ($provider) {
-                    $query->where('add_id', '=', $provider);
-                });
-            },
-            'event_adds.eventAddOpts.measure',
-            'event_adds.eventAddOpts.service',
-            'event_adds.currency',
-            'event_transports.eventTransportOpts' => function ($query) use ($provider) {
-                $query->whereHas('event_transport', function ($query) use ($provider) {
-                    $query->where('transport_id', '=', $provider);
-                });
-            },
-            'event_transports.eventTransportOpts.brand',
-            'event_transports.eventTransportOpts.vehicle',
-            'event_transports.eventTransportOpts.model',
-            'event_transports.currency',
-        ])->find($event);
+        if ($table == 'event_hotels') {
+            $withRelations = array_merge($withRelations, [
+                'event_abs.ab' => fn($q) => $q->where('id', $provider),
+                'event_abs.eventAbOpts' => fn($q) => $q->whereHas('event_ab', fn($q) => $q->where('ab_id', $provider))->orderBy('in'),
+                'event_abs.eventAbOpts.Local',
+                'event_abs.eventAbOpts.service_type',
+                'event_abs.currency',
+            ]);
+        }
+
+        if ($table == 'event_hotels') {
+            $withRelations = array_merge($withRelations, [
+                'event_halls.hall' => fn($q) => $q->where('id', $provider),
+                'event_halls.eventHallOpts' => fn($q) => $q->whereHas('event_hall', fn($q) => $q->where('hall_id', $provider))->orderBy('in'),
+                'event_halls.eventHallOpts.purpose',
+                'event_halls.currency',
+            ]);
+        }
+
+        if ($table == 'event_adds') {
+            $withRelations = array_merge($withRelations, [
+                'event_adds.add' => fn($q) => $q->where('id', $provider),
+                'event_adds.eventAddOpts' => fn($q) => $q->whereHas('event_add', fn($q) => $q->where('add_id', $provider))->orderBy('in'),
+                'event_adds.eventAddOpts.measure',
+                'event_adds.eventAddOpts.service',
+                'event_adds.currency',
+            ]);
+        }
+
+        if ($table == 'event_transports') {
+            $withRelations = array_merge($withRelations, [
+                'event_transports.transport' => fn($q) => $q->where('id', $provider),
+                'event_transports.eventTransportOpts' => fn($q) => $q->whereHas('event_transport', fn($q) => $q->where('transport_id', $provider))->orderBy('in'),
+                'event_transports.eventTransportOpts.brand',
+                'event_transports.eventTransportOpts.vehicle',
+                'event_transports.eventTransportOpts.model',
+                'event_transports.currency',
+            ]);
+        }
+
+        $eventDataBase = Event::with($withRelations)->find($event);
+
 
         $providers = collect();
 
-        if ($eventDataBase->event_hotels->isNotEmpty()) {
+        if ($eventDataBase->event_hotels->isNotEmpty() && $table == 'event_hotels') {
             $providers = $providers->concat($eventDataBase->event_hotels->pluck('hotel'));
         }
 
-        if ($eventDataBase->event_abs->isNotEmpty()) {
+        if ($eventDataBase->event_abs->isNotEmpty() && $table == 'event_hotels') {
             $providers = $providers->concat($eventDataBase->event_abs->pluck('ab'));
         }
 
-        if ($eventDataBase->event_halls->isNotEmpty()) {
+        if ($eventDataBase->event_halls->isNotEmpty() && $table == 'event_hotels') {
             $providers = $providers->concat($eventDataBase->event_halls->pluck('hall'));
         }
 
-        if ($eventDataBase->event_transports->isNotEmpty()) {
+        if ($eventDataBase->event_transports->isNotEmpty() && $table == 'event_transports') {
             $providers = $providers->concat($eventDataBase->event_transports->pluck('transport'));
         }
 
-        if ($eventDataBase->event_adds->isNotEmpty()) {
+        if ($eventDataBase->event_adds->isNotEmpty() && $table == 'event_adds') {
             $providers = $providers->concat($eventDataBase->event_adds->pluck('add'));
         }
 
@@ -439,7 +409,7 @@ class ProviderController extends Controller
             abort(403);
         }
 
-        $pdf = $this->createPDF($this->getEventDataBase($request->provider_id, $request->event_id), 1);
+        $pdf = $this->createPDF($this->getEventDataBase($request->provider_id, $request->event_id, $request->type), 1);
         //return $pdf;
         // Renderize o HTML como PDF
         $pdf->render();
@@ -512,7 +482,7 @@ class ProviderController extends Controller
             abort(403);
         }
 
-        $pdf = $this->createPDF($this->getEventDataBase($request->provider_id, $request->event_id), 2);
+        $pdf = $this->createPDF($this->getEventDataBase($request->provider_id, $request->event_id, $request->type), 2);
 
         //return $pdf;
         // Renderize o HTML como PDF

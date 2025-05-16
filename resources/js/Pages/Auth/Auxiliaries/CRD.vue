@@ -150,7 +150,7 @@ const deactivate = (id) => {
                                                 <InputLabel for="customer_id" value="Cliente:" />
 
                                                 <select class="form-control" id="customer_id" :required="required">
-                                                    <option>.::Selecione::.</option>
+                                                    <option value="">.::Selecione::.</option>
                                                     <option v-for="(option, index) in customers"
                                                         :selected="option.id == form.customer_id" :value="option.id">
                                                         {{ option.name }}

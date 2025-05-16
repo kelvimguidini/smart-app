@@ -139,8 +139,8 @@ const deactivate = (id) => {
                                         <div class="col">
                                             <div class="form-group">
                                                 <InputLabel for="number" value="País:" />
-                                                <TextInput type="text" class="form-control number" v-model="form.country"
-                                                    required autofocus autocomplete="number" />
+                                                <TextInput type="text" class="form-control number"
+                                                    v-model="form.country" required autofocus autocomplete="number" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.country" />
                                             </div>
                                         </div>
@@ -149,9 +149,9 @@ const deactivate = (id) => {
                                             <div class="form-group">
                                                 <InputLabel for="customer_id" value="Estado:" />
 
-                                                <select v-show="form.country.toLowerCase() == 'brasil'" class="form-control"
-                                                    id="uf-brasil">
-                                                    <option>.::Selecione::.</option>
+                                                <select v-show="form.country.toLowerCase() == 'brasil'"
+                                                    class="form-control" id="uf-brasil">
+                                                    <option value="">.::Selecione::.</option>
                                                     <option v-for="(option, index) in ufs"
                                                         :selected="option.uf == form.states" :value="option.uf">
                                                         {{ option.name }}
@@ -216,12 +216,12 @@ const deactivate = (id) => {
                                                 <td>{{ city.name }}</td>
                                                 <td>{{
                                                     city.states !== null
-                                                    ? (
-                                                        city.country.toLowerCase() === 'brasil'
-                                                            ? (ufs.find((s) => s.uf === city.states)?.name || ' - ')
-                                                            : city.states
-                                                    )
-                                                    : ' - '
+                                                        ? (
+                                                            city.country.toLowerCase() === 'brasil'
+                                                                ? (ufs.find((s) => s.uf === city.states)?.name || ' - ')
+                                                                : city.states
+                                                        )
+                                                        : ' - '
                                                 }}
                                                 </td>
                                                 <td>{{ city.country }}</td>
@@ -234,8 +234,10 @@ const deactivate = (id) => {
                                                         <span class="text">Editar</span>
                                                     </button>
 
-                                                    <Modal :key="index" :modal-title="'Confirmar Exclusão de ' + city.name"
-                                                        :ok-botton-callback="deleteCity" :ok-botton-callback-param="city.id"
+                                                    <Modal :key="index"
+                                                        :modal-title="'Confirmar Exclusão de ' + city.name"
+                                                        :ok-botton-callback="deleteCity"
+                                                        :ok-botton-callback-param="city.id"
                                                         btn-class="btn  btn-sm btn-danger btn-icon-split mr-2">
                                                         <template v-slot:button>
                                                             <span class="icon text-white-50">
@@ -249,7 +251,8 @@ const deactivate = (id) => {
                                                     </Modal>
 
 
-                                                    <button v-if="!city.active" class="btn btn-sm btn-success btn-icon-split mr-2"
+                                                    <button v-if="!city.active"
+                                                        class="btn btn-sm btn-success btn-icon-split mr-2"
                                                         v-on:click="activate(city.id)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-check"></i>
@@ -257,7 +260,8 @@ const deactivate = (id) => {
                                                         <span class="text">Ativar</span>
                                                     </button>
 
-                                                    <button v-if="city.active" class="btn btn-sm btn-warning btn-icon-split mr-2"
+                                                    <button v-if="city.active"
+                                                        class="btn btn-sm btn-warning btn-icon-split mr-2"
                                                         v-on:click="deactivate(city.id)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-ban"></i>

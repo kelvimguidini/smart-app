@@ -68,8 +68,62 @@ class EventController extends Controller
         $status = $request->status;
         $eventCode = $request->eventCode;
 
-        $query = Event::with(['crd', 'customer', 'event_hotels.hotel', 'event_abs.ab', 'event_halls.hall', 'event_adds.add', 'event_transports.transport', 'event_transports.providerBudget.user', 'event_hotels.providerBudget.user', 'event_abs.providerBudget.user', 'event_halls.providerBudget.user', 'event_adds.providerBudget.user'])
-            ->with(['event_hotels.status_his', 'event_abs.status_his', 'event_halls.status_his', 'event_adds.status_his', 'event_transports.status_his']);
+        $query = Event::with([
+            'crd',
+            'customer',
+            'event_hotels' => function ($q) {
+                $q->with([
+                    'hotel',
+                    'status_his',
+                    'eventHotelsOpt' => function ($q2) {
+                        $q2->orderBy('in', 'asc');
+                    }
+                ]);
+            },
+            'event_abs' => function ($q) {
+                $q->with([
+                    'ab',
+                    'status_his',
+                    'eventAbOpts' => function ($q2) {
+                        $q2->orderBy('in', 'asc');
+                    }
+                ]);
+            },
+            'event_halls' => function ($q) {
+                $q->with([
+                    'hall',
+                    'status_his',
+                    'eventHallOpts' => function ($q2) {
+                        $q2->orderBy('in', 'asc');
+                    }
+                ]);
+            },
+            'event_adds' => function ($q) {
+                $q->with([
+                    'add',
+                    'status_his',
+                    'eventAddOpts' => function ($q2) {
+                        $q2->orderBy('in', 'asc');
+                    }
+                ]);
+            },
+            'event_transports' => function ($q) {
+                $q->with([
+                    'transport',
+                    'status_his',
+                    'providerBudget.user',
+                    'eventTransportOpts' => function ($q2) {
+                        $q2->orderBy('in', 'asc');
+                    }
+                ]);
+            },
+            'event_hotels.providerBudget.user',
+            'event_abs.providerBudget.user',
+            'event_halls.providerBudget.user',
+            'event_adds.providerBudget.user',
+            'event_transports.providerBudget.user',
+        ]);
+
 
 
         if (Gate::allows('event_admin')) {
@@ -221,20 +275,135 @@ class EventController extends Controller
 
         $users = User::all();
 
-        $eventHotel = $request->tab == 1 ? EventHotel::with(['eventHotelsOpt', 'hotel.city', 'currency', 'event', 'status_his'])->find($request->ehotel) : null;
-        $eventHotels = EventHotel::with(['eventHotelsOpt.broker', 'eventHotelsOpt.regime', 'eventHotelsOpt.purpose', 'eventHotelsOpt.apto_hotel', 'eventHotelsOpt.category_hotel', 'hotel.city', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
+        $eventHotel = $request->tab == 1
+            ? EventHotel::with([
+                'eventHotelsOpt' => function ($q) {
+                    $q->orderBy('in');
+                },
+                'hotel.city',
+                'currency',
+                'event',
+                'status_his'
+            ])->find($request->ehotel)
+            : null;
 
-        $eventAB = $request->tab == 2 ? EventAB::with(['eventAbOpts', 'ab.city', 'currency', 'event', 'status_his'])->find($request->ehotel) : null;
-        $eventABs = EventAB::with(['eventAbOpts.broker', 'eventAbOpts.service', 'eventAbOpts.service_type', 'eventAbOpts.local', 'ab.city', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
+        $eventHotels = EventHotel::with([
+            'eventHotelsOpt' => function ($q) {
+                $q->orderBy('in');
+            },
+            'eventHotelsOpt.broker',
+            'eventHotelsOpt.regime',
+            'eventHotelsOpt.purpose',
+            'eventHotelsOpt.apto_hotel',
+            'eventHotelsOpt.category_hotel',
+            'hotel.city',
+            'currency',
+            'event'
+        ])->where('event_id', '=', $request->id)->get();
 
-        $eventHall = $request->tab == 3 ? EventHall::with(['eventHallOpts', 'hall.city', 'currency', 'event', 'status_his'])->find($request->ehotel) : null;
-        $eventHalls = EventHall::with(['eventHallOpts.broker', 'eventHallOpts.service', 'eventHallOpts.purpose', 'hall.city', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
 
-        $eventAdd = $request->tab == 4 ? EventAdd::with(['eventAddOpts', 'add.city', 'currency', 'event', 'status_his'])->find($request->ehotel) : null;
-        $eventAdds = EventAdd::with(['eventAddOpts', 'eventAddOpts.frequency', 'eventAddOpts.measure', 'eventAddOpts.service', 'add.city', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
+        $eventAB = $request->tab == 2
+            ? EventAB::with([
+                'eventAbOpts' => function ($q) {
+                    $q->orderBy('in');
+                },
+                'ab.city',
+                'currency',
+                'event',
+                'status_his'
+            ])->find($request->ehotel)
+            : null;
 
-        $eventTransport = $request->tab == 5 ? EventTransport::with(['eventTransportOpts', 'transport.city', 'currency', 'event', 'status_his'])->find($request->ehotel) : null;
-        $eventTransports = EventTransport::with(['eventTransportOpts', 'eventTransportOpts.broker', 'eventTransportOpts.vehicle', 'eventTransportOpts.model', 'eventTransportOpts.service', 'eventTransportOpts.brand', 'transport.city', 'currency', 'event'])->where('event_id', '=', $request->id)->get();
+        $eventABs = EventAB::with([
+            'eventAbOpts' => function ($q) {
+                $q->orderBy('in');
+            },
+            'eventAbOpts.broker',
+            'eventAbOpts.service',
+            'eventAbOpts.service_type',
+            'eventAbOpts.local',
+            'ab.city',
+            'currency',
+            'event'
+        ])->where('event_id', '=', $request->id)->get();
+
+
+        $eventHall = $request->tab == 3
+            ? EventHall::with([
+                'eventHallOpts' => function ($q) {
+                    $q->orderBy('in');
+                },
+                'hall.city',
+                'currency',
+                'event',
+                'status_his'
+            ])->find($request->ehotel)
+            : null;
+
+        $eventHalls = EventHall::with([
+            'eventHallOpts' => function ($q) {
+                $q->orderBy('in');
+            },
+            'eventHallOpts.broker',
+            'eventHallOpts.service',
+            'eventHallOpts.purpose',
+            'hall.city',
+            'currency',
+            'event'
+        ])->where('event_id', '=', $request->id)->get();
+
+
+        $eventAdd = $request->tab == 4
+            ? EventAdd::with([
+                'eventAddOpts' => function ($q) {
+                    $q->orderBy('in');
+                },
+                'add.city',
+                'currency',
+                'event',
+                'status_his'
+            ])->find($request->ehotel)
+            : null;
+
+        $eventAdds = EventAdd::with([
+            'eventAddOpts' => function ($q) {
+                $q->orderBy('in');
+            },
+            'eventAddOpts.frequency',
+            'eventAddOpts.measure',
+            'eventAddOpts.service',
+            'add.city',
+            'currency',
+            'event'
+        ])->where('event_id', '=', $request->id)->get();
+
+
+        $eventTransport = $request->tab == 5
+            ? EventTransport::with([
+                'eventTransportOpts' => function ($q) {
+                    $q->orderBy('in');
+                },
+                'transport.city',
+                'currency',
+                'event',
+                'status_his'
+            ])->find($request->ehotel)
+            : null;
+
+        $eventTransports = EventTransport::with([
+            'eventTransportOpts' => function ($q) {
+                $q->orderBy('in');
+            },
+            'eventTransportOpts.broker',
+            'eventTransportOpts.vehicle',
+            'eventTransportOpts.model',
+            'eventTransportOpts.service',
+            'eventTransportOpts.brand',
+            'transport.city',
+            'currency',
+            'event'
+        ])->where('event_id', '=', $request->id)->get();
+
 
         return Inertia::render('Auth/Event/EventCreate', [
             'crds' => $crds,

@@ -675,7 +675,7 @@ const newEventProv = (type) => {
                                         <InputLabel for="customer" value="Empresa:" />
 
                                         <select class="form-control" id="customer" :required="required">
-                                            <option>.::Selecione::.</option>
+                                            <option value="">.::Selecione::.</option>
                                             <option v-for="(option, index) in customers"
                                                 :selected="option.id == form.customer" :value="option.id">
                                                 {{ option.name }}
@@ -743,7 +743,7 @@ const newEventProv = (type) => {
                                         <InputLabel for="CRD" value="CRD:" />
 
                                         <select class="form-control" id="crd_id" :required="required">
-                                            <option>.::Selecione::.</option>
+                                            <option value="">.::Selecione::.</option>
                                             <option v-for="(option, index) in crds" :selected="option.id == form.crd_id"
                                                 :value="option.id">
                                                 {{ option.number }}
@@ -756,7 +756,7 @@ const newEventProv = (type) => {
                                     <div class="form-group">
                                         <InputLabel for="hotel_operator" value="Operador - Hotel:" />
                                         <select class="form-control" id="hotel_operator">
-                                            <option>.::Selecione::.</option>
+                                            <option value="">.::Selecione::.</option>
                                             <option v-for="(option, index) in users"
                                                 :selected="option.id == form.hotel_operator" :value="option.id">
                                                 {{ option.name }}
@@ -767,7 +767,7 @@ const newEventProv = (type) => {
                                     <div class="form-group">
                                         <InputLabel for="land_operator" value="Operador - Terrestre:" />
                                         <select class="form-control" id="land_operator">
-                                            <option>.::Selecione::.</option>
+                                            <option value="">.::Selecione::.</option>
                                             <option v-for="(option, index) in users"
                                                 :selected="option.id == form.land_operator" :value="option.id">
                                                 {{ option.name }}
@@ -778,7 +778,7 @@ const newEventProv = (type) => {
                                     <div class="form-group">
                                         <InputLabel for="air_operator" value="Operador - Aéreo:" />
                                         <select class="form-control" id="air_operator">
-                                            <option>.::Selecione::.</option>
+                                            <option value="">.::Selecione::.</option>
                                             <option v-for="(option, index) in users"
                                                 :selected="option.id == form.air_operator" :value="option.id">
                                                 {{ option.name }}

@@ -162,7 +162,7 @@ const deactivate = (id) => {
                                         <InputLabel for="city" value="Cidade:" />
 
                                         <select class="form-control" id="city" :required="required">
-                                            <option>.::Selecione::.</option>
+                                            <option value="">.::Selecione::.</option>
                                             <option v-for="(option, index) in cities" :value="option.id">
                                                 {{ option.name }} - {{ option.states ? option.states :
                                                     option.country }}

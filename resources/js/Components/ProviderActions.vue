@@ -151,10 +151,10 @@
                                 <tr v-for="(historyItem, index) in history" :key="index">
                                     <td>{{ new
                                         Date(historyItem.created_at).toLocaleDateString()
-                                        }}</td>
+                                    }}</td>
                                     <td>{{
                                         getStatusLabel(historyItem.status)
-                                        }}</td>
+                                    }}</td>
                                     <td>{{ historyItem.user.name }}</td>
                                     <td>{{ historyItem.observation }}</td>
                                 </tr>
@@ -168,7 +168,7 @@
 
 
     <Modal :key="index" modal-title="Link para orçamento" v-if="!prov.isTransport" :ok-botton-callback="createLink"
-        :ok-botton-callback-param="{ event_id: event.id, provider_id: prov.id, emails: emailsLink, download: !sendEmailLink, message: messageLink, copyMe: copyMeLink, attachment: attachmentLink, link: token, linkEmail: linkEmail }"
+        :ok-botton-callback-param="{ event_id: event.id, provider_id: prov.id, emails: emailsLink, download: !sendEmailLink, message: messageLink, copyMe: copyMeLink, attachment: attachmentLink, link: token, linkEmail: linkEmail, type: prov.table }"
         :ok-botton-label="sendEmailLink ? 'Enviar link por e-mail' : 'Baixar PDF'"
         :btn-class="prov.sended_mail_link ? 'btn-sm btn-danger btn-icon-split mr-2' : 'btn-sm btn-secondary btn-icon-split mr-2'">
 
@@ -334,7 +334,7 @@
                         prov.providerBudget[0].user.name }}</p>
                     <p><strong>Data: </strong> {{ new
                         Date(prov.providerBudget[0].approval_date).toLocaleDateString()
-                        }}
+                    }}
                     </p>
                 </div>
             </div>
@@ -344,7 +344,7 @@
     <Modal modal-title="Envio de Proposta"
         v-if="prov && prov.providerBudget && $page.props.auth.permissions.some((p) => p.name === 'event_admin') && (prov.status == 'dating_with_customer' || prov.status == 'approved_by_manager' || prov.status == 'sent_to_customer')"
         :ok-botton-callback="sendProposal"
-        :ok-botton-callback-param="{ event_id: event.id, provider_id: prov.id, emails: emails, download: !sendEmail, message: message, copyMe: copyMe }"
+        :ok-botton-callback-param="{ event_id: event.id, provider_id: prov.id, emails: emails, download: !sendEmail, message: message, copyMe: copyMe, type: prov.table }"
         :ok-botton-label="!sendEmail ? 'Baixar PDF' : 'Enviar Proposta'"
         :btn-class="prov.sended_mail ? 'btn-sm btn-danger btn-icon-split mr-2' : 'btn-sm btn-secondary btn-icon-split mr-2'">
         <template v-slot:button>
@@ -424,7 +424,7 @@
     <Modal modal-title="Faturamento"
         v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin') && prov.status == 'dating_with_customer'"
         :ok-botton-callback="sendInvoice"
-        :ok-botton-callback-param="{ event_id: event.id, emails: emailsInvoice, download: !sendEmailInvoice, provider_id: prov.id, message: messageInvoice, copyMe: copyMeInvoice }"
+        :ok-botton-callback-param="{ event_id: event.id, emails: emailsInvoice, download: !sendEmailInvoice, provider_id: prov.id, message: messageInvoice, copyMe: copyMeInvoice, type: prov.table }"
         :ok-botton-label="!sendEmailInvoice ? 'Baixar PDF' : 'Enviar Faturamento'"
         btn-class="btn-sm btn-secondary btn-icon-split ">
         <template v-slot:button>
@@ -635,7 +635,8 @@ const createLink = (array) => {
             download: array['download'],
             provider_id: array['provider_id'],
             event_id: array['event_id'],
-            link: array['link']
+            link: array['link'],
+            type: array['type'],
         });
 
         const downloadWindow = window.open(downloadUrl, '_blank');
@@ -662,6 +663,7 @@ const createLink = (array) => {
             attachment: array['attachment'],
             link: array['link'],
             linkEmail: array['linkEmail'],
+            type: array['type'],
         });
 
         formLink.post(route('create-link-email'), {
@@ -701,6 +703,7 @@ const sendProposal = (array) => {
             download: array['download'],
             provider_id: array['provider_id'],
             event_id: array['event_id'],
+            type: array['type'],
         });
 
         const downloadWindow = window.open(downloadUrl, '_blank');
@@ -720,7 +723,8 @@ const sendProposal = (array) => {
             event_id: array['event_id'],
             message: array['message'],
             emails: array['emails'],
-            copyMe: array['copyMe']
+            copyMe: array['copyMe'],
+            type: array['type'],
         });
 
         formProposal.post(route('proposal-hotel-email'), {
@@ -742,6 +746,7 @@ const sendInvoice = (array) => {
             download: array['download'],
             provider_id: array['provider_id'],
             event_id: array['event_id'],
+            type: array['type'],
         });
 
         const downloadWindow = window.open(downloadUrl, '_blank');
@@ -761,7 +766,8 @@ const sendInvoice = (array) => {
             event_id: array['event_id'],
             message: array['message'],
             emails: array['emails'],
-            copyMe: array['copyMe']
+            copyMe: array['copyMe'],
+            type: array['type'],
         });
 
         formInvoice.post(route('invoice-email'), {

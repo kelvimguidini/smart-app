@@ -150,8 +150,8 @@ const deactivate = (id) => {
 
                                     <div class="form-group">
                                         <InputLabel for="name" value="Nome:" />
-                                        <TextInput type="text" class="form-control" v-model="form.name" required autofocus
-                                            autocomplete="name" />
+                                        <TextInput type="text" class="form-control" v-model="form.name" required
+                                            autofocus autocomplete="name" />
                                         <InputError class="mt-2 text-danger" :message="form.errors.name" />
                                     </div>
 
@@ -161,7 +161,7 @@ const deactivate = (id) => {
                                         <InputLabel for="city" value="Cidade:" />
 
                                         <select class="form-control" id="city" :required="required">
-                                            <option>.::Selecione::.</option>
+                                            <option value="">.::Selecione::.</option>
                                             <option v-for="(option, index) in cities" :value="option.id">
                                                 {{ option.name }} - {{ option.states ? option.states :
                                                     option.country }}
@@ -183,8 +183,8 @@ const deactivate = (id) => {
                                 <div class="col">
                                     <div class="form-group">
                                         <InputLabel for="phone" value="Telefone:" />
-                                        <TextInput id="phone" type="text" class="form-control phone" v-model="form.phone"
-                                            autofocus autocomplete="phone" />
+                                        <TextInput id="phone" type="text" class="form-control phone"
+                                            v-model="form.phone" autofocus autocomplete="phone" />
                                         <InputError class="mt-2 text-danger" :message="form.errors.phone" />
                                     </div>
 
@@ -213,8 +213,9 @@ const deactivate = (id) => {
                                 <div class="col-2">
                                     <div class="form-group">
                                         <InputLabel for="service_percent" value="Serviço:" />
-                                        <TextInput type="number" class="form-control percent" v-model="form.service_percent"
-                                            required autofocus min="0" step="0.01" autocomplete="service_percent" />
+                                        <TextInput type="number" class="form-control percent"
+                                            v-model="form.service_percent" required autofocus min="0" step="0.01"
+                                            autocomplete="service_percent" />
                                     </div>
                                 </div>
 
@@ -233,15 +234,15 @@ const deactivate = (id) => {
                                         <div class="card">
                                             <div class="card-body">
                                                 <div class="form-check">
-                                                    <input class="form-check-input" v-model="form.national" :value="true"
-                                                        type="radio" id="autoSizingCheck1">
+                                                    <input class="form-check-input" v-model="form.national"
+                                                        :value="true" type="radio" id="autoSizingCheck1">
                                                     <label class="form-check-label" for="autoSizingCheck1">
                                                         Fornecedor Nacional
                                                     </label>
                                                 </div>
                                                 <div class="form-check">
-                                                    <input class="form-check-input" v-model="form.national" :value="false"
-                                                        type="radio" id="autoSizingCheck">
+                                                    <input class="form-check-input" v-model="form.national"
+                                                        :value="false" type="radio" id="autoSizingCheck">
                                                     <label class="form-check-label" for="autoSizingCheck">
                                                         Fornecedor Internacional
                                                     </label>
@@ -289,7 +290,8 @@ const deactivate = (id) => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="(hotel, index) in hotels" :class="{ 'table-info': inEdition == hotel.id }">
+                                    <tr v-for="(hotel, index) in hotels"
+                                        :class="{ 'table-info': inEdition == hotel.id }">
                                         <th scope="row">{{ hotel.id }}</th>
                                         <td>{{ hotel.name }}</td>
                                         <td>{{ hotel.city?.name || ' - ' }} - {{ hotel.city?.states ?
@@ -323,21 +325,23 @@ const deactivate = (id) => {
                                             </Modal>
 
 
-                                            <button v-if="!hotel.active" class="btn btn-sm btn-success btn-icon-split mr-2"
-                                                        v-on:click="activate(hotel.id)">
-                                                        <span class="icon text-white-50">
-                                                            <i class="fas fa-check"></i>
-                                                        </span>
-                                                        <span class="text">Ativar</span>
-                                                    </button>
+                                            <button v-if="!hotel.active"
+                                                class="btn btn-sm btn-success btn-icon-split mr-2"
+                                                v-on:click="activate(hotel.id)">
+                                                <span class="icon text-white-50">
+                                                    <i class="fas fa-check"></i>
+                                                </span>
+                                                <span class="text">Ativar</span>
+                                            </button>
 
-                                                    <button v-if="hotel.active" class="btn btn-sm btn-warning btn-icon-split mr-2"
-                                                        v-on:click="deactivate(hotel.id)">
-                                                        <span class="icon text-white-50">
-                                                            <i class="fas fa-ban"></i>
-                                                        </span>
-                                                        <span class="text">Inativar</span>
-                                                    </button>
+                                            <button v-if="hotel.active"
+                                                class="btn btn-sm btn-warning btn-icon-split mr-2"
+                                                v-on:click="deactivate(hotel.id)">
+                                                <span class="icon text-white-50">
+                                                    <i class="fas fa-ban"></i>
+                                                </span>
+                                                <span class="text">Inativar</span>
+                                            </button>
 
                                         </td>
                                     </tr>
