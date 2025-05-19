@@ -124,11 +124,11 @@ if ($provider != null) {
         $hotelEvent = $event->event_hotels->firstWhere('hotel_id', $provider->id);
     }
 
-    if ($table == 'event_abs') {
+    if ($table == 'event_hotels') {
         $abEvent = $event->event_abs->firstWhere('ab_id', $provider->id);
     }
 
-    if ($table == 'event_halls') {
+    if ($table == 'event_hotels') {
         $hallEvent = $event->event_halls->firstWhere('hall_id', $provider->id);
     }
 
