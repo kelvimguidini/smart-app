@@ -160,11 +160,27 @@ $totalKickbackTransport = 0;
 
 $strip = false;
 
-$hotelEvent = $event->event_hotels->firstWhere('hotel_id', $provider->id);
-$abEvent = $event->event_abs->firstWhere('ab_id', $provider->id);
-$hallEvent = $event->event_halls->firstWhere('hall_id', $provider->id);
-$addEvent = $event->event_adds->firstWhere('add_id', $provider->id);
-$transportEvent = $event->event_transports->firstWhere('transport_id', $provider->id);
+if ($provider != null) {
+    if ($table == 'event_hotels') {
+        $hotelEvent = $event->event_hotels->firstWhere('hotel_id', $provider->id);
+    }
+
+    if ($table == 'event_abs') {
+        $abEvent = $event->event_abs->firstWhere('ab_id', $provider->id);
+    }
+
+    if ($table == 'event_halls') {
+        $hallEvent = $event->event_halls->firstWhere('hall_id', $provider->id);
+    }
+
+    if ($table == 'event_adds') {
+        $addEvent = $event->event_adds->firstWhere('add_id', $provider->id);
+    }
+
+    if ($table == 'event_transports') {
+        $transportEvent = $event->event_transports->firstWhere('transport_id', $provider->id);
+    }
+}
 
 $strip = false;
 

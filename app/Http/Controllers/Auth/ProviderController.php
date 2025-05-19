@@ -399,7 +399,8 @@ class ProviderController extends Controller
 
         return array(
             "providerDataBase" => $providerDataBase,
-            "eventDataBase" => $eventDataBase
+            "eventDataBase" => $eventDataBase,
+            "table" => $table
         );
     }
 
@@ -446,31 +447,55 @@ class ProviderController extends Controller
                 )
             );
 
-            // Encontre o registro existente com base no event_id e provider_id
-            $eventHotel = EventHotel::where('event_id', $request->event_id)->where('hotel_id', $request->provider_id)->first();
+            if ($request->type == 'event_hotels') {
+                $eventHotel = EventHotel::where('event_id', $request->event_id)->where('hotel_id', $request->provider_id)->first();
 
-            if ($eventHotel) {
-                // Atualize o valor sended_email para true
-                $eventHotel->sended_mail = true;
-                $eventHotel->update();
+                if ($eventHotel) {
+                    // Atualize o valor sended_email para true
+                    $eventHotel->sended_mail = true;
+                    $eventHotel->update();
+                }
             }
-            // Encontre o registro existente com base no event_id e provider_id
-            $eventAb = EventAB::where('event_id', $request->event_id)->where('ab_id', $request->provider_id)->first();
+            if ($request->type == 'event_hotels') {
+                // Encontre o registro existente com base no event_id e provider_id
+                $eventAdd = EventAdd::where('event_id', $request->event_id)->where('add_id', $request->provider_id)->first();
 
-            if ($eventAb) {
-                // Atualize o valor sended_email para true
-                $eventAb->sended_mail = true;
-                $eventAb->update();
+                if ($eventAdd) {
+                    // Atualize o valor sended_email para true
+                    $eventAdd->sended_mail = true;
+                    $eventAdd->update();
+                }
             }
-            // Encontre o registro existente com base no event_id e provider_id
-            $eventHall = EventHall::where('event_id', $request->event_id)->where('hall_id', $request->provider_id)->first();
+            if ($request->type == 'event_hotels') {
+                // Encontre o registro existente com base no event_id e provider_id
+                $eventAb = EventAB::where('event_id', $request->event_id)->where('ab_id', $request->provider_id)->first();
 
-            if ($eventHall) {
-                // Atualize o valor sended_email para true
-                $eventHall->sended_mail = true;
-                $eventHall->update();
+                if ($eventAb) {
+                    // Atualize o valor sended_email para true
+                    $eventAb->sended_mail = true;
+                    $eventAb->update();
+                }
             }
+            if ($request->type == 'event_hotels') {
+                // Encontre o registro existente com base no event_id e provider_id
+                $eventHall = EventHall::where('event_id', $request->event_id)->where('hall_id', $request->provider_id)->first();
 
+                if ($eventHall) {
+                    // Atualize o valor sended_email para true
+                    $eventHall->sended_mail = true;
+                    $eventHall->update();
+                }
+            }
+            if ($request->type == 'event_hotels') {
+                // Encontre o registro existente com base no event_id e provider_id
+                $eventT = EventTransport::where('event_id', $request->event_id)->where('transport_id', $request->provider_id)->first();
+
+                if ($eventT) {
+                    // Atualize o valor sended_email para true
+                    $eventT->sended_mail = true;
+                    $eventT->update();
+                }
+            }
             return redirect()->back()->with('flash', ['message' => 'E-mail enviado com sucesso!', 'type' => 'success']);
         }
     }
@@ -540,14 +565,16 @@ class ProviderController extends Controller
             case 1:
                 $html = view('proposalPdf', [
                     'event' => $paramters['eventDataBase'],
-                    'provider' => $paramters['providerDataBase']
+                    'provider' => $paramters['providerDataBase'],
+                    'table' => $paramters['table'],
                 ])->render();
 
                 break;
             case 2:
                 $html = view('invoicePDF', [
                     'event' => $paramters['eventDataBase'],
-                    'provider' => $paramters['providerDataBase']
+                    'provider' => $paramters['providerDataBase'],
+                    'table' => $paramters['table'],
                 ])->render();
 
                 break;
