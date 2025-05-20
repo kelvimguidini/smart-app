@@ -160,7 +160,14 @@ $totalKickbackTransport = 0;
 
 $strip = false;
 
+$hotelEvent = null;
+$abEvent = null;
+$hallEvent = null;
+$addEvent = null;
+$transportEvent = null;
+
 if ($provider != null) {
+
     if ($table == 'event_hotels') {
         $hotelEvent = $event->event_hotels->firstWhere('hotel_id', $provider->id);
     }
@@ -363,9 +370,9 @@ $strip = false;
 
                             <p>Operador :
                                 <span class="event-data">
-                                    @if ($transportEvent)
+                                    @if ($transportEvent != null)
                                     {{ $event->landOperator->name ?? 'Sem operador' }}
-                                    @elseif ($hotelEvent || $abEvent || $hallEvent || $addEvent)
+                                    @elseif ($hotelEvent != null || $abEvent != null || $hallEvent != null || $addEvent != null)
                                     {{ $event->hotelOperator->name ?? 'Sem operador' }}
                                     @else
                                     {{ 'Sem operador' }}
