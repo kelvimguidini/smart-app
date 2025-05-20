@@ -346,7 +346,7 @@ watch(
                                         <!-- Linha do evento principal -->
                                         <tr class="table-active cursor-pointer">
                                             <th @click="showHideEventDetails(event.id, event)" scope="row">{{ event.id
-                                            }}</th>
+                                                }}</th>
                                             <td @click="showHideEventDetails(event.id, event)">{{ event.customer ?
                                                 event.customer.name : '-' }}</td>
                                             <td @click="showHideEventDetails(event.id, event)">{{ event.name }}</td>
@@ -375,10 +375,10 @@ watch(
                                                     <tbody v-if="showEventDetails == event.id">
                                                         <tr v-for="(prov, index) in providersByEvent(event)">
                                                             <th scope="row"></th>
-                                                            <td colspan="3">
+                                                            <td>
                                                                 {{ prov.type }}: {{ prov.name }}
                                                             </td>
-                                                            <td colspan="2">
+                                                            <td>
                                                                 status: <b>{{ getStatusLabel(prov.status) }}</b>
                                                             </td>
                                                             <td>
