@@ -168,15 +168,15 @@ $transportEvent = null;
 
 if ($provider != null) {
 
-    if ($table == 'event_hotels') {
+    if ($table == 'event_hotels' || $table == 'event_abs' || $table == 'event_halls') {
         $hotelEvent = $event->event_hotels->firstWhere('hotel_id', $provider->id);
     }
 
-    if ($table == 'event_hotels') {
+    if ($table == 'event_hotels' || $table == 'event_abs' || $table == 'event_halls') {
         $abEvent = $event->event_abs->firstWhere('ab_id', $provider->id);
     }
 
-    if ($table == 'event_hotels') {
+    if ($table == 'event_hotels' || $table == 'event_abs' || $table == 'event_halls') {
         $hallEvent = $event->event_halls->firstWhere('hall_id', $provider->id);
     }
 

@@ -374,15 +374,15 @@ class ProviderController extends Controller
 
         $providers = collect();
 
-        if ($eventDataBase->event_hotels->isNotEmpty() && $table == 'event_hotels') {
+        if ($eventDataBase->event_hotels->isNotEmpty() && $table == 'event_hotels' || $table == 'event_abs' || $table == 'event_halls') {
             $providers = $providers->concat($eventDataBase->event_hotels->pluck('hotel'));
         }
 
-        if ($eventDataBase->event_abs->isNotEmpty() && $table == 'event_hotels') {
+        if ($eventDataBase->event_abs->isNotEmpty() && $table == 'event_hotels' || $table == 'event_abs' || $table == 'event_halls') {
             $providers = $providers->concat($eventDataBase->event_abs->pluck('ab'));
         }
 
-        if ($eventDataBase->event_halls->isNotEmpty() && $table == 'event_hotels') {
+        if ($eventDataBase->event_halls->isNotEmpty() && $table == 'event_hotels' || $table == 'event_abs' || $table == 'event_halls') {
             $providers = $providers->concat($eventDataBase->event_halls->pluck('hall'));
         }
 
