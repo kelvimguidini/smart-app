@@ -318,7 +318,7 @@ class ProviderController extends Controller
     {
         $withRelations = ['customer'];
 
-        if ($table == 'event_hotels') {
+        if ($table == 'event_hotels' || $table == 'event_abs' || $table == 'event_halls') {
             $withRelations = array_merge($withRelations, [
                 'event_hotels.hotel' => fn($q) => $q->where('id', $provider),
                 'event_hotels.eventHotelsOpt' => fn($q) => $q->whereHas('event_hotel', fn($q) => $q->where('hotel_id', $provider))->orderBy('in'),
@@ -329,7 +329,7 @@ class ProviderController extends Controller
             ]);
         }
 
-        if ($table == 'event_hotels') {
+        if ($table == 'event_hotels' || $table == 'event_abs' || $table == 'event_halls') {
             $withRelations = array_merge($withRelations, [
                 'event_abs.ab' => fn($q) => $q->where('id', $provider),
                 'event_abs.eventAbOpts' => fn($q) => $q->whereHas('event_ab', fn($q) => $q->where('ab_id', $provider))->orderBy('in'),
@@ -339,7 +339,7 @@ class ProviderController extends Controller
             ]);
         }
 
-        if ($table == 'event_hotels') {
+        if ($table == 'event_hotels' || $table == 'event_abs' || $table == 'event_halls') {
             $withRelations = array_merge($withRelations, [
                 'event_halls.hall' => fn($q) => $q->where('id', $provider),
                 'event_halls.eventHallOpts' => fn($q) => $q->whereHas('event_hall', fn($q) => $q->where('hall_id', $provider))->orderBy('in'),
