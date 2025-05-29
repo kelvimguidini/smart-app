@@ -329,7 +329,7 @@ if ($transportEvent != null) {
         .center {
             display: inline-block;
             vertical-align: top;
-            width: 400px;
+            width: calc(100% - 350px);
             margin: 0 0 auto 16px;
             height: 150px;
         }
@@ -416,7 +416,7 @@ if ($transportEvent != null) {
                             <div class="arrow" style="margin: 15px 0; padding: 9px 40px; background-color: #e9540d;">
                                 <div class="title">Proposta n° {{ $event != null ? $event->code : '' }}</div>
                             </div>
-                            <div class="event-info">
+                            <div>
                                 <img style="width: 150px;" src="{{ asset('/storage/logos/logo.png') }}" alt="4BTS">
                             </div>
                         </td>
@@ -443,7 +443,7 @@ if ($transportEvent != null) {
                                 </div>
                             </div>
                         </td>
-                        <td class="right" style="width: 150px; vertical-align: top; text-align: right;">
+                        <td class="right" style="width: 150px; vertical-align: top; text-align: left;">
                             <img src="{{ asset($event->customer->logo) }}" style="max-width: 100px; max-height: 100px;" alt="{{ $event->customer->name }}">
                         </td>
                     </tr>
