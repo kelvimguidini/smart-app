@@ -239,6 +239,14 @@ if ($transportEvent != null) {
     }
 }
 
+$operador = "";
+if ($transportEvent != null) {
+    $operador = $event->landOperator->name ?? 'Sem operador';
+} elseif ($hotelEvent != null || $abEvent != null || $hallEvent != null || $addEvent != null) {
+    $operador = $event->hotelOperator->name ?? 'Sem operador';
+} else {
+    $operador = "Sem operador";
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -296,78 +304,89 @@ if ($transportEvent != null) {
         }
 
         .header {
-            background: #e8e8e8;
+            background: #3e3e3e;
             padding: 10px;
             width: 100%;
             margin: -10px;
             margin-bottom: 10px;
             height: 150px;
+            text-align: start;
         }
 
+        /* Elementos laterais flutuam */
         .left {
             float: left;
-            width: calc(100% - 180px);
+            width: 200px;
+        }
+
+        .right {
+            float: right;
+            width: 150px;
+            text-align: right;
+        }
+
+        /* Centralização clássica */
+        .center {
+            display: inline-block;
+            vertical-align: top;
+            width: 400px;
+            margin: 0 0 auto 16px;
+            height: 150px;
+        }
+
+        .header-table {
+            border-collapse: collapse;
+            margin-bottom: 10px;
+            height: 150px;
+        }
+
+        .header-table td {
+            vertical-align: middle;
+            padding: 0;
         }
 
         .arrow {
             display: inline-block;
-            margin: 15px 0 0 -19px;
+            margin: 15px 0;
             padding: 9px 40px;
             background-color: #e9540d;
-            position: relative;
-        }
-
-        .arrow:before {
-            content: "";
-            position: absolute;
-            top: -3px;
-            left: 100%;
-            border: 20px solid transparent;
-            border-left: 45px solid #e9540d;
         }
 
         .title {
             font-weight: 900;
             font-style: normal;
-            color: rgb(250, 249, 249);
-            text-decoration: none;
+            color: #fff;
             font-size: 9pt;
             margin: 0;
         }
 
+        /* Info do evento */
         .event-info {
-            margin-left: 20px;
+            margin-top: 5px;
         }
 
         .line {
-            margin-bottom: 10px;
             white-space: nowrap;
-            font-size: 7pt;
+            font-size: 9pt;
+            text-align: start;
+            text-transform: uppercase;
+            padding: 0 8px;
+            height: 23px;
         }
 
         .line p {
             display: inline-block;
-            font-weight: 600;
-            font-style: normal;
-            color: rgb(0, 0, 0);
-            text-decoration: none;
-            margin-bottom: 0;
-            margin-right: 10px;
+            font-weight: 900;
+            color: rgb(216, 93, 16);
+            margin: 0 5px;
         }
 
         .event-data {
             font-weight: 700;
-            font-style: normal;
-            color: rgb(216, 93, 16);
-            text-decoration: none;
-            margin: 0;
+            color: #fff;
+            margin-left: 4px;
         }
 
-        .right {
-            /* transform: translateY(50%); */
-            /* width: 150px; */
-            float: right;
-        }
 
         .row {
             width: 100%;
@@ -391,31 +410,44 @@ if ($transportEvent != null) {
         <div id="app">
 
             <header class="header">
-                <div class="left">
-                    <div class="seta">
-                        <div class="arrow">
-                            <div class="title">Proposta n° {{ $event != null ? $event->code : '' }}</div>
-                        </div>
-                    </div>
-
-                    <div class="event-info">
-                        <div class="line">
-                            <p>De: <span class="event-data">{{date("d/m/Y", strtotime($event->date)) }}</span></p>
-                            <p>Até: <span class="event-data">{{date("d/m/Y", strtotime($event->date_final)) }}</span></p>
-                        </div>
-                        <div class="line">
-                            <p>Evento: <span class="event-data">{{ $event->name }}</p>
-                        </div>
-                    </div>
-                    <div class="event-info">
-                        <div class="line">
-                            <p>Fornecedor: <span class="event-data">{{$provider != null ?  $provider->name : ''}}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="right">
-                    <img src="{{ asset($event->customer->logo) }}" style="max-width: 100px; max-height: 100px;" alt="{{ $event->customer->name}}">
-                </div>
+                <table class="header-table" width="100%" style="margin-bottom: 10px; height: 150px;">
+                    <tr style="background-color: transparent;">
+                        <td class="left" style="width: 200px; vertical-align: top;">
+                            <div class="arrow" style="margin: 15px 0; padding: 9px 40px; background-color: #e9540d;">
+                                <div class="title">Proposta n° {{ $event != null ? $event->code : '' }}</div>
+                            </div>
+                            <div class="event-info">
+                                <img style="width: 150px;" src="{{ asset('/storage/logos/logo.png') }}" alt="4BTS">
+                            </div>
+                        </td>
+                        <td class="center" style="vertical-align: middle; text-align: left; padding: 0 16px;">
+                            <div class="event-info">
+                                <div class="line">
+                                    <p>Evento: <span class="event-data">{{ $event->name }}</span></p>
+                                </div>
+                            </div>
+                            <div class="event-info">
+                                <div class="line">
+                                    <p>De: <span class="event-data">{{ date("d/m/Y", strtotime($event->date)) }}</span></p>
+                                    <p>Até: <span class="event-data">{{ date("d/m/Y", strtotime($event->date_final)) }}</span></p>
+                                </div>
+                            </div>
+                            <div class="event-info">
+                                <div class="line">
+                                    <p>Fornecedor: <span class="event-data">{{ $provider != null ?  $provider->name : '' }}</span></p>
+                                </div>
+                            </div>
+                            <div class="event-info">
+                                <div class="line">
+                                    <p>Operador: <span class="event-data">{{ $operador }}</span></p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="right" style="width: 150px; vertical-align: top; text-align: right;">
+                            <img src="{{ asset($event->customer->logo) }}" style="max-width: 100px; max-height: 100px;" alt="{{ $event->customer->name }}">
+                        </td>
+                    </tr>
+                </table>
             </header>
 
             <div>
@@ -710,7 +742,7 @@ if ($transportEvent != null) {
                     $quebrar = true;
                 }
                 ?>
-                <table style="<?= $quebrar ? "page-break-before: always;" : "" ?>">
+                <table style="">
                     <thead>
                         <tr>
                             <th colspan="5" style="padding: 0.3rem; text-align:center;">
@@ -832,17 +864,11 @@ if ($transportEvent != null) {
                     </div>
                 </div>
 
-                <div class="header" style="background-color: #000; color: #fff; margin-bottom: 0; margin-top: 15px;">
-                    <div class="left">
-                        <div style="display: inline-block; padding: 10px; text-align: left;">
-                            <p>Tel.: (+55 21) 2025-7900</p>
-                            <p>Avenida das Americas, 3434 - Bloco 5 - Grupo 520</p>
-                            <p>Barra da Tijuca - Rio de Janeiro - 22.640-102</p>
+                <div style="color: #6e6e6e; margin-bottom: 0; margin-top: 15px;">
+                    <div>
+                        <div style="display: inline-block; padding: 10px;">
+                            <p>Telefone: (+55 21) 2025-7900 | Avenida das Americas, 3434 - Bloco 5 - Grupo 520 | www.4bts.com.br</p>
                         </div>
-                    </div>
-                    <div class="right" style="transform: initial;">
-                        <img style="width: 150px;" src="{{ asset('/storage/logos/logo.png') }}" alt="4BTS">
-                        <p>www.4BTS.com.br</p>
                     </div>
                 </div>
             </footer>
