@@ -258,7 +258,7 @@ if ($transportEvent != null) {
         }
 
         body {
-            font-family: Arial, sans-serif;
+            font-family: Helvetica, sans-serif;
         }
 
         table {
@@ -268,6 +268,19 @@ if ($transportEvent != null) {
             width: 100%;
             border-collapse: collapse;
             page-break-inside: auto;
+        }
+
+        thead {
+            display: table-header-group;
+        }
+
+        tfoot {
+            display: table-footer-group;
+        }
+
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
         }
 
         th,
@@ -281,6 +294,10 @@ if ($transportEvent != null) {
         th {
             text-align: center;
             padding: 0.3rem;
+        }
+
+        tbody tr:first-child {
+            page-break-inside: aways !important;
         }
 
         tbody tr:nth-child(odd) {
@@ -301,6 +318,10 @@ if ($transportEvent != null) {
 
         .table-footer {
             background-color: #ffe0b1;
+        }
+
+        .event-section {
+            page-break-inside: avoid;
         }
 
         .header {
@@ -350,10 +371,11 @@ if ($transportEvent != null) {
             margin: 15px 0;
             padding: 9px 40px;
             background-color: #e9540d;
+            font-weight: bold;
         }
 
         .title {
-            font-weight: 900;
+            font-weight: bold;
             font-style: normal;
             color: #fff;
             font-size: 9pt;
@@ -376,7 +398,7 @@ if ($transportEvent != null) {
 
         .line p {
             display: inline-block;
-            font-weight: 900;
+            font-weight: bold;
             color: rgb(216, 93, 16);
             margin: 0 5px;
         }
@@ -414,7 +436,7 @@ if ($transportEvent != null) {
                     <tr style="background-color: transparent;">
                         <td class="left" style="width: 200px; vertical-align: top;">
                             <div class="arrow" style="margin: 15px 0; padding: 9px 40px; background-color: #e9540d;">
-                                <div class="title">Proposta n° {{ $event != null ? $event->code : '' }}</div>
+                                <div class="title">PROPOSTA N° {{ $event != null ? $event->code : '' }}</div>
                             </div>
                             <div>
                                 <img style="width: 150px;" src="{{ asset('/storage/logos/logo.png') }}" alt="4BTS">
@@ -452,285 +474,295 @@ if ($transportEvent != null) {
 
             <div>
                 @if($hotelEvent != null && $hotelEvent->eventHotelsOpt != null && count($hotelEvent->eventHotelsOpt) > 0)
-                <table>
-                    <thead style="display: table-header-group;">
-                        <tr>
-                            <th colspan="10" style="padding: 0.3rem; text-align: center;">Hospedagem</th>
-                        </tr>
-                        <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
-                            <th>IN</th>
-                            <th>Out</th>
-                            <th>Qtd</th>
+                <div class="event-section">
+                    <table>
+                        <thead style="display: table-header-group;">
+                            <tr>
+                                <th colspan="10" style="padding: 0.3rem; text-align: center;">Hospedagem</th>
+                            </tr>
+                            <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
+                                <th>IN</th>
+                                <th>Out</th>
+                                <th>Qtd</th>
 
-                            <th>Tipo</th>
-                            <th>Categoria</th>
+                                <th>Tipo</th>
+                                <th>Categoria</th>
 
-                            <th>Diárias</th>
-                            <th>Valor</th>
-                            <th>Taxas</th>
-                            <th>TTL com Taxa</th>
-                            <th>Total Geral</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($hotelEvent->eventHotelsOpt as $key => $item)
-                        <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
-                            <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
-                            <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
-                            <td>{{ $item->count }}</td>
+                                <th>Diárias</th>
+                                <th>Valor</th>
+                                <th>Taxas</th>
+                                <th>TTL com Taxa</th>
+                                <th>Total Geral</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($hotelEvent->eventHotelsOpt as $key => $item)
+                            <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
+                                <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
+                                <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
+                                <td>{{ $item->count }}</td>
 
-                            <td>{{ $item->apto_hotel->name }}</td>
-                            <td>{{ $item->category_hotel->name }}</td>
+                                <td>{{ $item->apto_hotel->name }}</td>
+                                <td>{{ $item->category_hotel->name }}</td>
 
-                            <td>{{ daysBetween($item->in, $item->out) }}</td>
-                            <td>{{ formatCurrency(unitSale($item), $hotelEvent->currency->symbol) }}</td>
-                            <td>
-                                {{ formatCurrency(sumTaxesProvider($hotelEvent, $item), $hotelEvent->currency->symbol) }}
-                            </td>
-                            <td>
-                                {{ formatCurrency(unitSale($item) + sumTaxesProvider($hotelEvent, $item), $hotelEvent->currency->symbol) }}
-                            </td>
-                            <td>{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($hotelEvent, $item), $item->count * daysBetween($item->in, $item->out)), $hotelEvent->currency->symbol) }}
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                    <tfoot class="table-footer">
-                        <tr style="background-color: #ffe0b1">
-                            <td colspan="1"><b>Comentários:</b></td>
-                            <td colspan="7">{{ $hotelEvent->customer_observation }}</td>
-                            <td><b>Prazo</b></td>
-                            <td>{{ $hotelEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($hotelEvent->deadline_date)) }}</td>
-                        </tr>
-                    </tfoot>
+                                <td>{{ daysBetween($item->in, $item->out) }}</td>
+                                <td>{{ formatCurrency(unitSale($item), $hotelEvent->currency->symbol) }}</td>
+                                <td>
+                                    {{ formatCurrency(sumTaxesProvider($hotelEvent, $item), $hotelEvent->currency->symbol) }}
+                                </td>
+                                <td>
+                                    {{ formatCurrency(unitSale($item) + sumTaxesProvider($hotelEvent, $item), $hotelEvent->currency->symbol) }}
+                                </td>
+                                <td>{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($hotelEvent, $item), $item->count * daysBetween($item->in, $item->out)), $hotelEvent->currency->symbol) }}
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot class="table-footer">
+                            <tr style="background-color: #ffe0b1">
+                                <td colspan="1"><b>Comentários:</b></td>
+                                <td colspan="7">{{ $hotelEvent->customer_observation }}</td>
+                                <td><b>Prazo</b></td>
+                                <td>{{ $hotelEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($hotelEvent->deadline_date)) }}</td>
+                            </tr>
+                        </tfoot>
 
-                </table>
+                    </table>
+                </div>
                 @endif
 
 
                 @if($abEvent != null && $abEvent->eventAbOpts != null && count($abEvent->eventAbOpts) > 0)
-                <table>
-                    <thead style="display: table-header-group;">
-                        <tr>
-                            <th colspan="10" style="padding: 0.3rem; text-align: center;">Alimentos & Bebidas</th>
-                        </tr>
-                        <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
-                            <th>Refeição</th>
-                            <th>Local</th>
-                            <th>De</th>
-                            <th>Até</th>
-                            <th>Qtd</th>
-                            <th>Diárias</th>
-                            <th>Valor</th>
-                            <th>Taxas</th>
-                            <th>TTL com Taxa</th>
-                            <th>Total Geral</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($abEvent->eventAbOpts as $key => $item)
-                        <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
-                            <td>{{ $item->service_type->name }}</td>
-                            <td>{{ $item->local->name }}</td>
-                            <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
-                            <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
-                            <td>{{ $item->count }}</td>
-                            <td>{{ daysBetween1($item->in, $item->out) }}</td>
+                <div class="event-section">
+                    <table>
+                        <thead style="display: table-header-group;">
+                            <tr>
+                                <th colspan="10" style="padding: 0.3rem; text-align: center;">Alimentos & Bebidas</th>
+                            </tr>
+                            <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
+                                <th>Refeição</th>
+                                <th>Local</th>
+                                <th>De</th>
+                                <th>Até</th>
+                                <th>Qtd</th>
+                                <th>Diárias</th>
+                                <th>Valor</th>
+                                <th>Taxas</th>
+                                <th>TTL com Taxa</th>
+                                <th>Total Geral</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($abEvent->eventAbOpts as $key => $item)
+                            <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
+                                <td>{{ $item->service_type->name }}</td>
+                                <td>{{ $item->local->name }}</td>
+                                <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
+                                <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
+                                <td>{{ $item->count }}</td>
+                                <td>{{ daysBetween1($item->in, $item->out) }}</td>
 
-                            <td>{{ formatCurrency(unitSale($item), $abEvent->currency->symbol) }}</td>
-                            <td>
-                                {{ formatCurrency(sumTaxesProvider($abEvent, $item), $abEvent->currency->symbol) }}
-                            </td>
-                            <td>
-                                {{ formatCurrency(unitSale($item) + sumTaxesProvider($abEvent, $item), $abEvent->currency->symbol) }}
-                            </td>
-                            <td>{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($abEvent, $item), $item->count * daysBetween1($item->in, $item->out)), $abEvent->currency->symbol) }}
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                    <tfoot class="table-footer">
-                        <tr style="background-color: #ffe0b1">
-                            <td colspan="2"><b>Comentários:</b></td>
-                            <td colspan="6">{{ $abEvent->customer_observation }}</td>
-                            <td><b>Prazo</b></td>
-                            <td>{{ $abEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($abEvent->deadline_date)) }}</td>
-                        </tr>
-                    </tfoot>
+                                <td>{{ formatCurrency(unitSale($item), $abEvent->currency->symbol) }}</td>
+                                <td>
+                                    {{ formatCurrency(sumTaxesProvider($abEvent, $item), $abEvent->currency->symbol) }}
+                                </td>
+                                <td>
+                                    {{ formatCurrency(unitSale($item) + sumTaxesProvider($abEvent, $item), $abEvent->currency->symbol) }}
+                                </td>
+                                <td>{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($abEvent, $item), $item->count * daysBetween1($item->in, $item->out)), $abEvent->currency->symbol) }}
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot class="table-footer">
+                            <tr style="background-color: #ffe0b1">
+                                <td colspan="2"><b>Comentários:</b></td>
+                                <td colspan="6">{{ $abEvent->customer_observation }}</td>
+                                <td><b>Prazo</b></td>
+                                <td>{{ $abEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($abEvent->deadline_date)) }}</td>
+                            </tr>
+                        </tfoot>
 
-                </table>
+                    </table>
+                </div>
                 @endif
 
 
                 @if($hallEvent != null && $hallEvent->eventHallOpts != null && count($hallEvent->eventHallOpts) > 0)
-                <table>
-                    <thead style="display: table-header-group;">
-                        <tr>
-                            <th colspan="11" style="padding: 0.3rem; text-align: center;">Salões & Eventos</th>
-                        </tr>
-                        <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
-                            <th>Nome</th>
-                            <th>Metragem</th>
-                            <th>Finalidade</th>
-                            <th>De</th>
-                            <th>Até</th>
-                            <th>Qtd</th>
-                            <th>Diárias</th>
-                            <th>Valor</th>
-                            <th>Taxas</th>
-                            <th>TTL com Taxa</th>
-                            <th>Total Geral</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($hallEvent->eventHallOpts as $key => $item)
-                        <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
-                            <td>{{ $item->name }}</td>
-                            <td>{{ $item->m2 }}</td>
-                            <td>{{ $item->purpose->name }}</td>
-                            <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
-                            <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
-                            <td>{{ $item->count }}</td>
-                            <td>{{ daysBetween1($item->in, $item->out) }}</td>
+                <div class="event-section">
+                    <table>
+                        <thead style="display: table-header-group;">
+                            <tr>
+                                <th colspan="11" style="padding: 0.3rem; text-align: center;">Salões & Eventos</th>
+                            </tr>
+                            <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
+                                <th>Nome</th>
+                                <th>Metragem</th>
+                                <th>Finalidade</th>
+                                <th>De</th>
+                                <th>Até</th>
+                                <th>Qtd</th>
+                                <th>Diárias</th>
+                                <th>Valor</th>
+                                <th>Taxas</th>
+                                <th>TTL com Taxa</th>
+                                <th>Total Geral</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($hallEvent->eventHallOpts as $key => $item)
+                            <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
+                                <td>{{ $item->name }}</td>
+                                <td>{{ $item->m2 }}</td>
+                                <td>{{ $item->purpose->name }}</td>
+                                <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
+                                <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
+                                <td>{{ $item->count }}</td>
+                                <td>{{ daysBetween1($item->in, $item->out) }}</td>
 
-                            <td>{{ formatCurrency(unitSale($item), $hallEvent->currency->symbol) }}</td>
-                            <td>
-                                {{ formatCurrency(sumTaxesProvider($hallEvent, $item), $hallEvent->currency->symbol) }}
-                            </td>
-                            <td>
-                                {{ formatCurrency(unitSale($item) + sumTaxesProvider($hallEvent, $item), $hallEvent->currency->symbol) }}
-                            </td>
-                            <td>{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($hallEvent, $item), $item->count * daysBetween1($item->in, $item->out)), $hallEvent->currency->symbol) }}
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                    <tfoot class="table-footer">
-                        <tr style="background-color: #ffe0b1">
-                            <td colspan="2"><b>Comentários:</b></td>
-                            <td colspan="7">{{ $hallEvent->customer_observation }}</td>
-                            <td><b>Prazo</b></td>
-                            <td>{{ $hallEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($hallEvent->deadline_date)) }}</td>
-                        </tr>
-                    </tfoot>
+                                <td>{{ formatCurrency(unitSale($item), $hallEvent->currency->symbol) }}</td>
+                                <td>
+                                    {{ formatCurrency(sumTaxesProvider($hallEvent, $item), $hallEvent->currency->symbol) }}
+                                </td>
+                                <td>
+                                    {{ formatCurrency(unitSale($item) + sumTaxesProvider($hallEvent, $item), $hallEvent->currency->symbol) }}
+                                </td>
+                                <td>{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($hallEvent, $item), $item->count * daysBetween1($item->in, $item->out)), $hallEvent->currency->symbol) }}
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot class="table-footer">
+                            <tr style="background-color: #ffe0b1">
+                                <td colspan="2"><b>Comentários:</b></td>
+                                <td colspan="7">{{ $hallEvent->customer_observation }}</td>
+                                <td><b>Prazo</b></td>
+                                <td>{{ $hallEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($hallEvent->deadline_date)) }}</td>
+                            </tr>
+                        </tfoot>
 
-                </table>
+                    </table>
+                </div>
                 @endif
 
 
                 @if($addEvent != null && $addEvent->eventAddOpts != null && count($addEvent->eventAddOpts) > 0)
-                <table>
-                    <thead style="display: table-header-group;">
-                        <tr>
-                            <th colspan="11" style="padding: 0.3rem; text-align: center;">Adicionais</th>
-                        </tr>
-                        <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
-                            <th>Serviço</th>
-                            <th>Frequência</th>
-                            <th>Measure</th>
-                            <th>De</th>
-                            <th>Até</th>
-                            <th>Qtd</th>
-                            <th>Diárias</th>
-                            <th>Valor</th>
-                            <th>Taxas</th>
-                            <th>TTL com Taxa</th>
-                            <th>Total Geral</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($addEvent->eventAddOpts as $key => $item)
-                        <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
-                            <td>{{ $item->service->name }}</td>
-                            <td>{{ $item->frequency->name }}</td>
-                            <td>{{ $item->measure->name }}</td>
-                            <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
-                            <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
-                            <td>{{ $item->count }}</td>
-                            <td>{{ daysBetween1($item->in, $item->out) }}</td>
+                <div class="event-section">
+                    <table>
+                        <thead style="display: table-header-group;">
+                            <tr>
+                                <th colspan="11" style="padding: 0.3rem; text-align: center;">Adicionais</th>
+                            </tr>
+                            <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
+                                <th>Serviço</th>
+                                <th>Frequência</th>
+                                <th>Measure</th>
+                                <th>De</th>
+                                <th>Até</th>
+                                <th>Qtd</th>
+                                <th>Diárias</th>
+                                <th>Valor</th>
+                                <th>Taxas</th>
+                                <th>TTL com Taxa</th>
+                                <th>Total Geral</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($addEvent->eventAddOpts as $key => $item)
+                            <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
+                                <td>{{ $item->service->name }}</td>
+                                <td>{{ $item->frequency->name }}</td>
+                                <td>{{ $item->measure->name }}</td>
+                                <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
+                                <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
+                                <td>{{ $item->count }}</td>
+                                <td>{{ daysBetween1($item->in, $item->out) }}</td>
 
-                            <td>{{ formatCurrency(unitSale($item), $addEvent->currency->symbol) }}</td>
-                            <td>
-                                {{ formatCurrency(sumTaxesProvider($addEvent, $item), $addEvent->currency->symbol) }}
-                            </td>
-                            <td>
-                                {{ formatCurrency(unitSale($item) + sumTaxesProvider($addEvent, $item), $addEvent->currency->symbol) }}
-                            </td>
-                            <td>{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($addEvent, $item), $item->count * daysBetween1($item->in, $item->out)), $addEvent->currency->symbol) }}
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                    <tfoot class="table-footer">
-                        <tr style="background-color: #ffe0b1">
-                            <td colspan="2"><b>Comentários:</b></td>
-                            <td colspan="7">{{ $addEvent->customer_observation }}</td>
-                            <td><b>Prazo</b></td>
-                            <td>{{ $addEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($addEvent->deadline_date)) }}</td>
-                        </tr>
-                    </tfoot>
+                                <td>{{ formatCurrency(unitSale($item), $addEvent->currency->symbol) }}</td>
+                                <td>
+                                    {{ formatCurrency(sumTaxesProvider($addEvent, $item), $addEvent->currency->symbol) }}
+                                </td>
+                                <td>
+                                    {{ formatCurrency(unitSale($item) + sumTaxesProvider($addEvent, $item), $addEvent->currency->symbol) }}
+                                </td>
+                                <td>{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($addEvent, $item), $item->count * daysBetween1($item->in, $item->out)), $addEvent->currency->symbol) }}
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot class="table-footer">
+                            <tr style="background-color: #ffe0b1">
+                                <td colspan="2"><b>Comentários:</b></td>
+                                <td colspan="7">{{ $addEvent->customer_observation }}</td>
+                                <td><b>Prazo</b></td>
+                                <td>{{ $addEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($addEvent->deadline_date)) }}</td>
+                            </tr>
+                        </tfoot>
 
-                </table>
+                    </table>
+                </div>
                 @endif
 
 
                 @if($transportEvent != null && $transportEvent->eventTransportOpts != null && count($transportEvent->eventTransportOpts) > 0)
-                <table>
-                    <thead style="display: table-header-group;">
-                        <tr>
-                            <th colspan="12" style="padding: 0.3rem; text-align: center;">Transporte Terrestre</th>
-                        </tr>
-                        <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
-                            <!-- <th>Marca</th> -->
-                            <th>Veículo</th>
-                            <th>Modelo</th>
-                            <th>Serviço</th>
-                            <th>OBS</th>
-                            <th>De</th>
-                            <th>Até</th>
-                            <th>Qtd</th>
-                            <th>Diárias</th>
-                            <th>Valor</th>
-                            <th>Taxas</th>
-                            <th>TTL com Taxa</th>
-                            <th>Total Geral</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($transportEvent->eventTransportOpts as $key => $item)
-                        <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
-                            <!-- <td>{{ $item->brand->name }}</td> -->
-                            <td>{{ $item->vehicle->name }}</td>
-                            <td>{{ $item->model->name }}</td>
-                            <td>{{ $item->service->name }}</td>
-                            <td>{{ $item->observation }}</td>
-                            <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
-                            <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
-                            <td>{{ $item->count }}</td>
-                            <td>{{ daysBetween1($item->in, $item->out) }}</td>
+                <div class="event-section">
+                    <table>
+                        <thead style="display: table-header-group;">
+                            <tr>
+                                <th colspan="12" style="padding: 0.3rem; text-align: center;">Transporte Terrestre</th>
+                            </tr>
+                            <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
+                                <!-- <th>Marca</th> -->
+                                <th>Veículo</th>
+                                <th>Modelo</th>
+                                <th>Serviço</th>
+                                <th>OBS</th>
+                                <th>De</th>
+                                <th>Até</th>
+                                <th>Qtd</th>
+                                <th>Diárias</th>
+                                <th>Valor</th>
+                                <th>Taxas</th>
+                                <th>TTL com Taxa</th>
+                                <th>Total Geral</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($transportEvent->eventTransportOpts as $key => $item)
+                            <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
+                                <!-- <td>{{ $item->brand->name }}</td> -->
+                                <td>{{ $item->vehicle->name }}</td>
+                                <td>{{ $item->model->name }}</td>
+                                <td>{{ $item->service->name }}</td>
+                                <td>{{ $item->observation }}</td>
+                                <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
+                                <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
+                                <td>{{ $item->count }}</td>
+                                <td>{{ daysBetween1($item->in, $item->out) }}</td>
 
-                            <td>{{ formatCurrency(unitSale($item), $transportEvent->currency->symbol) }}</td>
-                            <td>
-                                {{ formatCurrency(sumTaxesProvider($transportEvent, $item), $transportEvent->currency->symbol) }}
-                            </td>
-                            <td>
-                                {{ formatCurrency(unitSale($item) + sumTaxesProvider($transportEvent, $item), $transportEvent->currency->symbol) }}
-                            </td>
-                            <td>{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($transportEvent, $item), $item->count * daysBetween1($item->in, $item->out)), $transportEvent->currency->symbol) }}
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                    <tfoot class="table-footer">
-                        <tr style="background-color: #ffe0b1">
-                            <td colspan="2"><b>Comentários:</b></td>
-                            <td colspan="8">{{ $transportEvent->customer_observation }}</td>
-                            <td><b>Prazo</b></td>
-                            <td>{{ $transportEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($transportEvent->deadline_date)) }}</td>
-                        </tr>
-                    </tfoot>
+                                <td>{{ formatCurrency(unitSale($item), $transportEvent->currency->symbol) }}</td>
+                                <td>
+                                    {{ formatCurrency(sumTaxesProvider($transportEvent, $item), $transportEvent->currency->symbol) }}
+                                </td>
+                                <td>
+                                    {{ formatCurrency(unitSale($item) + sumTaxesProvider($transportEvent, $item), $transportEvent->currency->symbol) }}
+                                </td>
+                                <td>{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($transportEvent, $item), $item->count * daysBetween1($item->in, $item->out)), $transportEvent->currency->symbol) }}
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot class="table-footer">
+                            <tr style="background-color: #ffe0b1">
+                                <td colspan="2"><b>Comentários:</b></td>
+                                <td colspan="8">{{ $transportEvent->customer_observation }}</td>
+                                <td><b>Prazo</b></td>
+                                <td>{{ $transportEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($transportEvent->deadline_date)) }}</td>
+                            </tr>
+                        </tfoot>
 
-                </table>
+                    </table>
+                </div>
                 @endif
 
                 <?php
@@ -742,7 +774,7 @@ if ($transportEvent != null) {
                     $quebrar = true;
                 }
                 ?>
-                <table style="">
+                <table>
                     <thead>
                         <tr>
                             <th colspan="5" style="padding: 0.3rem; text-align:center;">
@@ -848,21 +880,6 @@ if ($transportEvent != null) {
 
             <footer id="footer" style="width:100%; border-collapse: collapse;">
 
-
-                <div style="margin-top: 70px; display: table; width: 100%;">
-                    <div style="display: table-cell; text-align: center;">
-                        <div style="width: 7cm; margin: 0 auto;">
-                            <hr style="border-top: 1px solid black;">
-                        </div>
-                        <p>Autorizado por</p>
-                    </div>
-                    <div style="display: table-cell; text-align: center;">
-                        <div style="width: 7cm; margin: 0 auto;">
-                            <hr style="border-top: 1px solid black;">
-                        </div>
-                        <p>Data da autorização</p>
-                    </div>
-                </div>
 
                 <div style="color: #6e6e6e; margin-bottom: 0; margin-top: 15px;">
                     <div>
