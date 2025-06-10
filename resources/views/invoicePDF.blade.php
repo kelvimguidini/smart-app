@@ -261,7 +261,6 @@ $strip = false;
             width: calc(100% - 180px);
         }
 
-
         .arrow {
             display: inline-block;
             margin: 15px 0 0 -19px;
@@ -317,8 +316,6 @@ $strip = false;
         }
 
         .right {
-            /* transform: translateY(50%); */
-            /* width: 150px; */
             float: right;
         }
 

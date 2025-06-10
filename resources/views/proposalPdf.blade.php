@@ -348,7 +348,6 @@ if ($transportEvent != null) {
 
         /* Centralização clássica */
         .center {
-            display: inline-block;
             vertical-align: middle;
             text-align: left !important;
             width: calc(100% - 350px);
