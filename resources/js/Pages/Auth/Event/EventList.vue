@@ -272,7 +272,7 @@ watch(
                                 <div class="col">
                                     <div class="form-group">
                                         <label for="consultant">Consultor:</label>
-                                        <select class="form-control" id="client" required="required">
+                                        <select class="form-control" id="client">
                                             <option value="">.::Selecione::.</option>
                                             <option v-for="(option, index) in users"
                                                 :selected="option.id == formFilters.consultant" :value="option.id">
@@ -284,7 +284,7 @@ watch(
                                 <div class="col">
                                     <div class="form-group">
                                         <label for="client">Cliente:</label>
-                                        <select class="form-control" id="customer" :required="required">
+                                        <select class="form-control" id="customer">
                                             <option value="">.::Selecione::.</option>
                                             <option v-for="(option, index) in customers"
                                                 :selected="option.id == formFilters.client" :value="option.id">
@@ -346,7 +346,7 @@ watch(
                                         <!-- Linha do evento principal -->
                                         <tr class="table-active cursor-pointer">
                                             <th @click="showHideEventDetails(event.id, event)" scope="row">{{ event.id
-                                                }}</th>
+                                            }}</th>
                                             <td @click="showHideEventDetails(event.id, event)">{{ event.customer ?
                                                 event.customer.name : '-' }}</td>
                                             <td @click="showHideEventDetails(event.id, event)">{{ event.name }}</td>
