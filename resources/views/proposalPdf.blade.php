@@ -349,7 +349,8 @@ if ($transportEvent != null) {
         /* Centralização clássica */
         .center {
             display: inline-block;
-            vertical-align: top;
+            vertical-align: middle;
+            text-align: left !important;
             width: calc(100% - 350px);
             margin: 0 0 auto 16px;
             height: 150px;
@@ -434,15 +435,15 @@ if ($transportEvent != null) {
             <header class="header">
                 <table class="header-table" width="100%" style="margin-bottom: 10px; height: 150px;">
                     <tr style="background-color: transparent;">
-                        <td class="left" style="width: 200px; vertical-align: top;">
-                            <div class="arrow" style="margin: 15px 0; padding: 9px 40px; background-color: #e9540d;">
+                        <td class="left">
+                            <div class="arrow">
                                 <div class="title">PROPOSTA N° {{ $event != null ? $event->code : '' }}</div>
                             </div>
                             <div>
                                 <img style="width: 150px;" src="{{ asset('/storage/logos/logo.png') }}" alt="4BTS">
                             </div>
                         </td>
-                        <td class="center" style="vertical-align: middle; text-align: left; padding: 0 16px;">
+                        <td class="center">
                             <div class="event-info">
                                 <div class="line">
                                     <p>Evento: <span class="event-data">{{ $event->name }}</span></p>
@@ -465,7 +466,7 @@ if ($transportEvent != null) {
                                 </div>
                             </div>
                         </td>
-                        <td class="right" style="width: 150px; vertical-align: top; text-align: left;">
+                        <td class="right">
                             <img src="{{ asset($event->customer->logo) }}" style="max-width: 100px; max-height: 100px;" alt="{{ $event->customer->name }}">
                         </td>
                     </tr>
