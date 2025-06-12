@@ -344,13 +344,14 @@ if ($transportEvent != null) {
             float: right;
             width: 150px;
             text-align: right;
+            margin-right: 10cm;
         }
 
         /* Centralização clássica */
         .center {
             vertical-align: middle;
             text-align: left !important;
-            width: calc(100% - 350px);
+            width: calc(100% - 350px - 10cm);
             margin: 0 0 auto 16px;
             height: 150px;
         }
@@ -372,13 +373,14 @@ if ($transportEvent != null) {
             padding: 9px 40px;
             background-color: #e9540d;
             font-weight: bold;
+            text-align: start;
         }
 
         .title {
             font-weight: bold;
             font-style: normal;
             color: #fff;
-            font-size: 9pt;
+            font-size: 8pt;
             margin: 0;
         }
 
@@ -389,7 +391,7 @@ if ($transportEvent != null) {
 
         .line {
             white-space: nowrap;
-            font-size: 9pt;
+            font-size: 8pt;
             text-align: start;
             text-transform: uppercase;
             padding: 0 8px;
@@ -409,7 +411,6 @@ if ($transportEvent != null) {
             margin-left: 4px;
         }
 
-
         .row {
             width: 100%;
         }
@@ -420,7 +421,7 @@ if ($transportEvent != null) {
             bottom: 0;
             width: 100%;
             text-align: center;
-            font-size: 14px;
+            font-size: 9px;
             margin-bottom: -10px;
         }
     </style>
@@ -461,7 +462,7 @@ if ($transportEvent != null) {
                             </div>
                             <div class="event-info">
                                 <div class="line">
-                                    <p>Operador: <span class="event-data">{{ $operador }}</span></p>
+                                    <p>CONSULTOR: <span class="event-data">{{ $operador }}</span></p>
                                 </div>
                             </div>
                         </td>
@@ -881,7 +882,7 @@ if ($transportEvent != null) {
             <footer id="footer" style="width:100%; border-collapse: collapse;">
 
 
-                <div style="color: #6e6e6e; margin-bottom: 0; margin-top: 15px;">
+                <div style="color:rgb(187, 187, 187); margin-bottom: 0; margin-top: 15px;">
                     <div>
                         <div style="display: inline-block; padding: 10px;">
                             <p>Telefone: (+55 21) 2025-7900 | Avenida das Americas, 3434 - Bloco 5 - Grupo 520 | www.4bts.com.br</p>
