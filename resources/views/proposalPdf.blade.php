@@ -343,15 +343,15 @@ if ($transportEvent != null) {
         .right {
             float: right;
             width: 150px;
-            text-align: right;
-            margin-right: 10cm;
+            text-align: start;
+            margin-left: 0.1cm;
         }
 
         /* Centralização clássica */
         .center {
             vertical-align: middle;
             text-align: left !important;
-            width: calc(100% - 350px - 10cm);
+            width: calc(100% - 350px);
             margin: 0 0 auto 16px;
             height: 150px;
         }
@@ -421,7 +421,7 @@ if ($transportEvent != null) {
             bottom: 0;
             width: 100%;
             text-align: center;
-            font-size: 9px;
+            font-size: 8px;
             margin-bottom: -10px;
         }
     </style>
