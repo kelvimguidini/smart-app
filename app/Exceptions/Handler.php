@@ -57,7 +57,35 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
-        // Trate todas as exceções e redirecione com mensagem flash
+        if ($request->is('api/*')) {
+            // Erros de validação
+            if ($exception instanceof \Illuminate\Validation\ValidationException) {
+                return response()->json([
+                    'message' => 'Dados inválidos.',
+                    'errors' => $exception->errors(),
+                ], 422);
+            }
+
+            // Erro de rota não encontrada
+            if ($exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
+                return response()->json([
+                    'message' => 'Endpoint não encontrado.'
+                ], 404);
+            }
+
+            // Erro de método não permitido
+            if ($exception instanceof \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException) {
+                return response()->json([
+                    'message' => 'Método não permitido.'
+                ], 405);
+            }
+
+            // Outros erros
+            return response()->json([
+                'message' => 'Erro interno no servidor.'
+            ], 500);
+        }
+
         return redirect()->back()->with('flash', [
             'message' => $exception->getMessage(),
             'type' => 'danger',

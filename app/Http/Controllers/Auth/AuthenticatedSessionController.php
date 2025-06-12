@@ -45,12 +45,23 @@ class AuthenticatedSessionController extends Controller
                 'email' => $request->email
             ]);
         }
+
+        if ($user && $user->is_api_user) {
+            Auth::logout();
+            return Inertia::render('Auth/Login', [
+                'canResetPassword' => Route::has('password.request'),
+                'flash' => ['message' => 'Usuário exclusivo da API não pode acessar o painel web.', 'type' => 'danger'],
+                'email' => $request->email
+            ]);
+        }
+
         if ($user->email_verified_at == null) {
             return Inertia::render(
                 'Auth/VerifyEmail',
                 ['flash' => ['message' => session('status'), 'type' => 'warning'], 'email' => $request->email],
             );
         }
+
 
         $response = $request->authenticate();
         if ($response === true) {
