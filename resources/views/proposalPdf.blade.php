@@ -272,6 +272,7 @@ if ($transportEvent != null) {
 
         thead {
             display: table-header-group;
+            page-break-inside: avoid;
         }
 
         tfoot {
@@ -281,6 +282,16 @@ if ($transportEvent != null) {
         tr {
             page-break-inside: avoid;
             page-break-after: auto;
+        }
+
+        tr.first-row {
+            page-break-inside: auto;
+            page-break-after: auto;
+            page-break-before: avoid;
+        }
+
+        tbody tr {
+            page-break-inside: auto;
         }
 
         th,
@@ -297,16 +308,16 @@ if ($transportEvent != null) {
         }
 
         tbody tr:first-child {
-            page-break-inside: aways !important;
+            page-break-inside: auto !important;
         }
 
-        tbody tr:nth-child(odd) {
+        /* tbody tr:nth-child(odd) {
             background-color: #f7fafc;
         }
 
         tbody tr:nth-child(even) {
             background-color: #ffffff;
-        }
+        } */
 
         tfoot tr {
             background-color: #ebf8ff;
@@ -320,9 +331,6 @@ if ($transportEvent != null) {
             background-color: #ffe0b1;
         }
 
-        .event-section {
-            page-break-inside: avoid;
-        }
 
         .header {
             background: #3e3e3e;
@@ -478,7 +486,7 @@ if ($transportEvent != null) {
                 <div class="event-section">
                     <table>
                         <thead style="display: table-header-group;">
-                            <tr>
+                            <tr style="page-break-after: avoid;">
                                 <th colspan="10" style="padding: 0.3rem; text-align: center;">Hospedagem</th>
                             </tr>
                             <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
@@ -498,7 +506,7 @@ if ($transportEvent != null) {
                         </thead>
                         <tbody>
                             @foreach($hotelEvent->eventHotelsOpt as $key => $item)
-                            <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
+                            <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>" class="<?= $key == 0 ? 'first-row' : '' ?>">
                                 <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
                                 <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
                                 <td>{{ $item->count }}</td>
@@ -537,7 +545,7 @@ if ($transportEvent != null) {
                 <div class="event-section">
                     <table>
                         <thead style="display: table-header-group;">
-                            <tr>
+                            <tr style="page-break-after: avoid;">
                                 <th colspan="10" style="padding: 0.3rem; text-align: center;">Alimentos & Bebidas</th>
                             </tr>
                             <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
@@ -555,7 +563,7 @@ if ($transportEvent != null) {
                         </thead>
                         <tbody>
                             @foreach($abEvent->eventAbOpts as $key => $item)
-                            <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
+                            <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>" class="<?= $key == 0 ? 'first-row' : '' ?>">
                                 <td>{{ $item->service_type->name }}</td>
                                 <td>{{ $item->local->name }}</td>
                                 <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
@@ -593,7 +601,7 @@ if ($transportEvent != null) {
                 <div class="event-section">
                     <table>
                         <thead style="display: table-header-group;">
-                            <tr>
+                            <tr style="page-break-after: avoid;">
                                 <th colspan="11" style="padding: 0.3rem; text-align: center;">Salões & Eventos</th>
                             </tr>
                             <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
@@ -612,7 +620,7 @@ if ($transportEvent != null) {
                         </thead>
                         <tbody>
                             @foreach($hallEvent->eventHallOpts as $key => $item)
-                            <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
+                            <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>" class="<?= $key == 0 ? 'first-row' : '' ?>">
                                 <td>{{ $item->name }}</td>
                                 <td>{{ $item->m2 }}</td>
                                 <td>{{ $item->purpose->name }}</td>
@@ -651,7 +659,7 @@ if ($transportEvent != null) {
                 <div class="event-section">
                     <table>
                         <thead style="display: table-header-group;">
-                            <tr>
+                            <tr style="page-break-after: avoid;">
                                 <th colspan="11" style="padding: 0.3rem; text-align: center;">Adicionais</th>
                             </tr>
                             <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
@@ -670,7 +678,7 @@ if ($transportEvent != null) {
                         </thead>
                         <tbody>
                             @foreach($addEvent->eventAddOpts as $key => $item)
-                            <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
+                            <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>" class="<?= $key == 0 ? 'first-row' : '' ?>">
                                 <td>{{ $item->service->name }}</td>
                                 <td>{{ $item->frequency->name }}</td>
                                 <td>{{ $item->measure->name }}</td>
@@ -709,7 +717,7 @@ if ($transportEvent != null) {
                 <div class="event-section">
                     <table>
                         <thead style="display: table-header-group;">
-                            <tr>
+                            <tr style="page-break-after: avoid;">
                                 <th colspan="12" style="padding: 0.3rem; text-align: center;">Transporte Terrestre</th>
                             </tr>
                             <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
@@ -730,7 +738,7 @@ if ($transportEvent != null) {
                         </thead>
                         <tbody>
                             @foreach($transportEvent->eventTransportOpts as $key => $item)
-                            <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
+                            <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>" class="<?= $key == 0 ? 'first-row' : '' ?>">
                                 <!-- <td>{{ $item->brand->name }}</td> -->
                                 <td>{{ $item->vehicle->name }}</td>
                                 <td>{{ $item->model->name }}</td>
@@ -775,9 +783,9 @@ if ($transportEvent != null) {
                     $quebrar = true;
                 }
                 ?>
-                <table>
+                <table style="page-break-inside: avoid;">
                     <thead>
-                        <tr>
+                        <tr style="page-break-after: avoid;">
                             <th colspan="5" style="padding: 0.3rem; text-align:center;">
                                 Resumo da Proposta
                             </th>
