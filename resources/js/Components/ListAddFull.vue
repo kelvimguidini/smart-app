@@ -236,7 +236,7 @@ const showDetails = ref(false);
                                     <template v-slot:content>
                                         <span class="text-dark">Tem certeza que deseja remover o hotel {{
                                             evAdd.add.name
-                                            }} do evento {{ evAdd.add.name }}</span>
+                                        }} do evento {{ evAdd.add.name }}</span>
                                     </template>
                                 </Modal>
                             </th>
@@ -319,7 +319,7 @@ const showDetails = ref(false);
                             </td>
                             <td class="align-middle bg-success text-white">
                                 {{ formatCurrency(unitSale(opt) * daysBetween(opt.in, opt.out) * opt.count,
-                                evAdd.currency.sigla) }}
+                                    evAdd.currency.sigla) }}
                             </td>
                             <td class="align-middle bg-warning text-dark">
                                 {{ formatCurrency(unitCost(opt), evAdd.currency.sigla) }}
@@ -330,10 +330,10 @@ const showDetails = ref(false);
                             </td>
                             <td class=" align-middle">{{
                                 formatCurrency(opt.received_proposal, evAdd.currency.sigla)
-                                }}</td>
+                            }}</td>
                             <td class="align-middle">{{
                                 opt.received_proposal_percent
-                                }}
+                            }}
                             </td>
                             <template v-if="showDetails">
 
@@ -484,7 +484,7 @@ const showDetails = ref(false);
                                 OBSERVAÇÃO INTERNA:
                             </td>
                             <td class="align-middle text-dark text-left" colspan="9">
-                                <b>{{ evAdd.customer_observation }}</b>
+                                <b>{{ evAdd.internal_observation }}</b>
                             </td>
                             <td class="align-middle" colspan="2">
                                 Venda
