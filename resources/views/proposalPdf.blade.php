@@ -311,14 +311,6 @@ if ($transportEvent != null) {
             page-break-inside: auto !important;
         }
 
-        /* tbody tr:nth-child(odd) {
-            background-color: #f7fafc;
-        }
-
-        tbody tr:nth-child(even) {
-            background-color: #ffffff;
-        } */
-
         tfoot tr {
             background-color: #ebf8ff;
         }
