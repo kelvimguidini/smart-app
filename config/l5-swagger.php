@@ -71,7 +71,7 @@ return [
                 'docs' => [],
                 'oauth2_callback' => [],
             ],
-
+            'api' => 'api/documentation',
             /*
              * Route Group options
              */

@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EventApiController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,10 +17,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login']);
 
-Route::middleware(['auth:sanctum', 'cors'])->get('/user', function (Request $request) {
-    return $request->user();
-});
 
-Route::middleware('auth:api')->group(function () {
+Route::middleware('auth.api')->group(function () {
     Route::get('events', [EventApiController::class, 'index']);
 });

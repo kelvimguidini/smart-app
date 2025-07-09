@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
+use Illuminate\Auth\AuthenticationException;
 
 class Handler extends ExceptionHandler
 {
@@ -48,6 +49,17 @@ class Handler extends ExceptionHandler
         });
     }
 
+    protected function unauthenticated($request, AuthenticationException $exception)
+    {
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Não autenticado.'], 401);
+        }
+
+        // Evita redirecionamento para login em APIs
+        return redirect()->guest(route('login'));
+    }
+
+
     /**
      * Render an exception into an HTTP response.
      *
@@ -80,9 +92,17 @@ class Handler extends ExceptionHandler
                 ], 405);
             }
 
+            if ($exception instanceof \Illuminate\Auth\AuthenticationException) {
+                return response()->json([
+                    'error' => 'Não autenticado.',
+                ], 401);
+            }
+
+            // return parent::render($request, $exception);
+
             // Outros erros
             return response()->json([
-                'message' => 'Erro interno no servidor.'
+                'message' => 'Erro interno no servidor.' . $exception->getMessage(),
             ], 500);
         }
 

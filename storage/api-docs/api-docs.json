@@ -63,10 +63,68 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized"
+                    "400": {
+                        "description": "Bad Request"
                     }
                 }
+            }
+        },
+        "/api/events": {
+            "get": {
+                "tags": [
+                    "Eventos"
+                ],
+                "summary": "Consulta eventos em XML",
+                "description": "Retorna um XML com os eventos cadastrados no sistema, filtrando por data inicial e final.",
+                "operationId": "275cdabe554e8b12845750e37ffca5c2",
+                "parameters": [
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "Data inicial no formato YYYY-MM-DD",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-01-01"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "Data final no formato YYYY-MM-DD",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-01-31"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "XML com os eventos",
+                        "content": {
+                            "application/xml": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "xml"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autorizado"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         }
     },
@@ -74,6 +132,10 @@
         {
             "name": "Auth",
             "description": "Auth"
+        },
+        {
+            "name": "Eventos",
+            "description": "Eventos"
         }
     ]
 }
