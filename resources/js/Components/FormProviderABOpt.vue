@@ -72,7 +72,7 @@ const duplicate = (opt, edit = false) => {
     $('#broker').val(opt.broker_id).trigger('change');
     $('#local').val(opt.local_id).trigger('change');
     $('#service').val(opt.service_id).trigger('change');
-    $('#servece-type').val(opt.service_type_id).trigger('change');
+    $('#service_type').val(opt.service_type_id).trigger('change');
 
     $("#received_proposal").maskMoney('mask', opt.received_proposal);
 
@@ -165,7 +165,7 @@ onMounted(() => {
         out: range.end,
     };
     setRange(opt);
-    
+
     $('.money').maskMoney({ prefix: symbol, allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
 });
 
@@ -226,8 +226,8 @@ const isLoader = ref(false);
                 </div>
 
                 <div class="form-group">
-                    <InputLabel for="service-type" value="Tipo de Serviços:" />
-                    <select class="form-control" id="service-type" required="required">
+                    <InputLabel for="service_type" value="Tipo de Serviços:" />
+                    <select class="form-control" id="service_type" required="required">
                         <option value="">.::Selecione::.</option>
                         <option v-for="(option, index) in servicesType" :value="option.id">
                             {{ option.name }}
