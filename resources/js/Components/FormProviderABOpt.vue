@@ -103,7 +103,7 @@ const submitOpt = () => {
             $('#broker').val('').trigger('change');
             $('#local').val('').trigger('change');
             $('#service').val('').trigger('change');
-            $('#service-type').val('').trigger('change');
+            $('#service_type').val('').trigger('change');
 
             $('#received_proposal').val('');
 
@@ -141,7 +141,7 @@ onMounted(() => {
         formOpt.service_id = e.params.data.id;
     });
 
-    $('#service-type').select2({
+    $('#service_type').select2({
         theme: "bootstrap4", language: "pt-Br"
     }).on('select2:select', (e) => {
         formOpt.service_type_id = e.params.data.id;
