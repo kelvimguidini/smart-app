@@ -779,7 +779,7 @@ if ($transportEvent != null) {
                     <thead>
                         <tr style="page-break-after: avoid;">
                             <th colspan="5" style="padding: 0.3rem; text-align:center;">
-                                Resumo da Proposta
+                                RESUMO DA PROPOSTA
                             </th>
                         </tr>
                         <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
