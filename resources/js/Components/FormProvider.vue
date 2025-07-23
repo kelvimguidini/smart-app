@@ -129,7 +129,7 @@ const newEventProvider = () => {
 defineExpose({
     newEventProvider
 });
-
+const date = ref(new Date());
 
 
 const edit = () => {
@@ -171,6 +171,7 @@ const edit = () => {
         form.iof = props.eventProvider.iof;
         form.service_charge = props.eventProvider.service_charge;
         form.deadline = new Date(props.eventProvider.deadline_date);
+        date.value = new Date(props.eventProvider.deadline_date);
 
         form.internal_observation = props.eventProvider.internal_observation;
         form.customer_observation = props.eventProvider.customer_observation;
@@ -202,22 +203,19 @@ onMounted(() => {
 
 const isLoader = ref(false);
 
-const date = ref(new Date());
+
 
 const updateForm = () => {
-    form.deadline = date.value ? date.value.toISOString().split('T')[0] : '';
+    if (date.value) {
+        const year = date.value.getFullYear();
+        const month = String(date.value.getMonth() + 1).padStart(2, '0');
+        const day = String(date.value.getDate() + 1).padStart(2, '0');
+        form.deadline = `${year}-${month}-${day}`;
+    } else {
+        form.deadline = '';
+    }
 };
 
-watch(
-    () => props.eventProvider,
-    (newEvent) => {
-        if (newEvent) {
-            var dateOld = new Date(newEvent.deadline_date);
-            date.value = dateOld.setDate(dateOld.getDate() + 1);
-        }
-    },
-    { immediate: true }
-);
 </script>
 
 
@@ -333,7 +331,8 @@ watch(
             <div class="col-md-6 col-lg-4 mb-3">
                 <div class="form-group">
 
-                    <VDatePicker v-model="date" @update:modelValue="updateForm">
+                    <VDatePicker v-model="date" @update:modelValue="updateForm"
+                        :model-config="{ type: 'string', mask: 'YYYY-MM-DD', timeAdjust: '00:00:00' }">
                         <template #default="{ inputValue, inputEvents }">
 
                             <InputLabel for="in" value="Prazo:" />

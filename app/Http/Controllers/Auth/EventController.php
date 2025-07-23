@@ -245,7 +245,8 @@ class EventController extends Controller
 
         $crds = CRD::with("customer")->get();
         $customers = Customer::all();
-        $users = User::all();
+        $users = User::where('is_api_user', false)->get();
+
         $providers = Provider::with("city")->get();
         $providersService = ProviderServices::with("city")->get();
         $providersTranport = ProviderTransport::with("city")->get();
@@ -272,8 +273,6 @@ class EventController extends Controller
         $models = CarModel::all();
         $servicesT = TransportService::all();
         $brands = Brand::all();
-
-        $users = User::all();
 
         $eventHotel = $request->tab == 1
             ? EventHotel::with([

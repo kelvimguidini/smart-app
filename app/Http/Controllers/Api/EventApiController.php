@@ -157,7 +157,7 @@ class EventApiController extends BaseApiController
 
         $venda = $xml->addChild('venda');
         $venda->addChild('origem', 'SMART4BTS');
-        $venda->addChild('idvenda', htmlspecialchars($evento->id));
+        $venda->addChild('idvenda', htmlspecialchars($evento->id . '-' . $fornecedor->id . '-' . $fornecedor->table));
         $venda->addChild('idvendapai', htmlspecialchars($evento->code));
         $venda->addChild(
             'tipoproduto',
@@ -230,6 +230,8 @@ class EventApiController extends BaseApiController
         }
         $venda->addChild('entradatotal', number_format($sumTotalHotelSale, 2, ',', '.'));
     }
+
+    private function movimentosXML($fornecedor, $xml) {}
 
     private function fornecedoresXML($fornecedorId, $xml, $modelClass = \App\Models\Provider::class)
     {

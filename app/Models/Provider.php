@@ -30,7 +30,8 @@ class Provider extends Model
         'has_hotel',
         'has_ab',
         'has_hall',
-        'active'
+        'active',
+        'codestur'
     ];
 
     protected $table = 'provider';
@@ -55,6 +56,7 @@ class Provider extends Model
     protected $has_hotel = 'has_hotel';
     protected $has_ab = 'has_ab';
     protected $has_hall = 'has_hall';
+    protected $codestur = 'codestur';
 
     public function event_hotels()
     {
