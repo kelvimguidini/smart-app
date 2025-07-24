@@ -170,8 +170,10 @@ const edit = () => {
 
         form.iof = props.eventProvider.iof;
         form.service_charge = props.eventProvider.service_charge;
-        form.deadline = new Date(props.eventProvider.deadline_date);
-        date.value = new Date(props.eventProvider.deadline_date);
+        const parts = b.eventProvider.deadline_date.split('-');
+        const deadline = new Date(parts[0], parts[1] - 1, parts[2]);
+        form.deadline = deadline;
+        date.value = deadline;
 
         form.internal_observation = props.eventProvider.internal_observation;
         form.customer_observation = props.eventProvider.customer_observation;
@@ -209,7 +211,7 @@ const updateForm = () => {
     if (date.value) {
         const year = date.value.getFullYear();
         const month = String(date.value.getMonth() + 1).padStart(2, '0');
-        const day = String(date.value.getDate() + 1).padStart(2, '0');
+        const day = String(date.value.getDate()).padStart(2, '0');
         form.deadline = `${year}-${month}-${day}`;
     } else {
         form.deadline = '';
