@@ -170,7 +170,7 @@ const edit = () => {
 
         form.iof = props.eventProvider.iof;
         form.service_charge = props.eventProvider.service_charge;
-        const parts = b.eventProvider.deadline_date.split('-');
+        const parts = props.eventProvider.deadline_date.split('-');
         const deadline = new Date(parts[0], parts[1] - 1, parts[2]);
         form.deadline = deadline;
         date.value = deadline;
