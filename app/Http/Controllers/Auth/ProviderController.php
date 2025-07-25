@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Mail;
 
 class ProviderController extends Controller
 {
+    private $providerName = "";
     public function activateM($id)
     {
         if (!Gate::allows('admin_provider')) {
@@ -394,8 +395,9 @@ class ProviderController extends Controller
             $providers = $providers->concat($eventDataBase->event_adds->pluck('add'));
         }
 
-        $providerDataBase = $providers->filter()->unique()->values()->first();
 
+        $providerDataBase = $providers->filter()->unique()->values()->first();
+        $this->providerName = $providerDataBase ? $providerDataBase->name : null;
 
         return array(
             "providerDataBase" => $providerDataBase,
@@ -416,7 +418,7 @@ class ProviderController extends Controller
         $pdf->render();
         // Retorna o PDF como um arquivo de download
         if ($request->download == "true") {
-            return $pdf->stream('Proposta.pdf');
+            return $pdf->stream('ID' . $request->event_id . ' - ' . $this->providerName . ' - Proposta.pdf');
         } else {
 
             $sub = "Proposta para hotel";
@@ -433,7 +435,7 @@ class ProviderController extends Controller
                 $send->cc($user->email);
             }
 
-            $send->send(new PdfEmail($pdf->output(), 'Proposta-hotel.pdf', $data, $sub));
+            $send->send(new PdfEmail($pdf->output(), 'ID' . $request->event_id . ' - ' . $this->providerName . ' - Proposta.pdf', $data, $sub));
 
             DB::table('email_log')->insert(
                 array(
@@ -514,7 +516,7 @@ class ProviderController extends Controller
         $pdf->render();
         // Retorna o PDF como um arquivo de download
         if ($request->download == "true") {
-            return $pdf->stream('Faturamento.pdf');
+            return $pdf->stream('ID' . $request->event_id . ' - ' . $this->providerName . ' - Faturamento.pdf');
         } else {
 
             $sub = "Faturamento evento";
@@ -531,7 +533,7 @@ class ProviderController extends Controller
                 $send->cc($user->email);
             }
 
-            $send->send(new PdfEmail($pdf->output(), 'Faturamento.pdf', $data, $sub));
+            $send->send(new PdfEmail($pdf->output(), 'ID' . $request->event_id . ' - ' . $this->providerName . ' - Faturamento.pdf', $data, $sub));
 
             DB::table('email_log')->insert(
                 array(
