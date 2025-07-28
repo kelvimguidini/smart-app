@@ -2,7 +2,7 @@
 import { Link } from '@inertiajs/inertia-vue3';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import Modal from '@/Components/Modal.vue';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { useForm } from '@inertiajs/inertia-vue3';
 import Loader from '@/Components/Loader.vue';
 
@@ -187,8 +187,68 @@ const deleteEventHotel = (data) => {
 };
 
 const showDetails = ref(false);
+
+onBeforeUnmount(() => {
+    window.removeEventListener('resize', adjustStickyColumns);
+    if (resizeObserver) resizeObserver.disconnect();
+});
+
+let resizeObserver;
+
+const adjustStickyColumns = () => {
+    const tables = document.querySelectorAll('table');
+
+    tables.forEach(table => {
+        const rows = table.querySelectorAll('tr');
+
+        rows.forEach(row => {
+            const stickyCols = row.querySelectorAll('.sticky-col');
+            let leftOffset = 0;
+
+            stickyCols.forEach(col => {
+                col.style.left = `${leftOffset}px`;
+                leftOffset += col.offsetWidth;
+            });
+        });
+    });
+};
+
+onMounted(() => {
+    nextTick(() => {
+        adjustStickyColumns();
+
+        // Atualiza se a janela for redimensionada
+        window.addEventListener('resize', adjustStickyColumns);
+
+        // Observa mudanças no layout (como troca de abas)
+        resizeObserver = new ResizeObserver(adjustStickyColumns);
+        document.querySelectorAll('table').forEach(table => resizeObserver.observe(table));
+    });
+});
+
 </script>
 
+<style scoped>
+.sticky-col {
+    position: sticky;
+    z-index: 2;
+}
+
+.sticky-col::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: inherit;
+    z-index: -1;
+}
+
+.bg-white {
+    background-color: #fff !important;
+}
+</style>
 
 <template>
     <Loader v-bind:show="isLoader"></Loader>
@@ -211,7 +271,7 @@ const showDetails = ref(false);
                     <template v-for="(evho, index) in eventHotels.sort((a, b) => a.order - b.order)" :key="evho.id">
 
                         <tr>
-                            <th class="table-header table-header-c1" colspan="2">Hotel {{ index + 1 }}</th>
+                            <th class="table-header table-header-c1 sticky-col" colspan="2">Hotel {{ index + 1 }}</th>
                             <th class="text-left table-header table-header-c2" :colspan="showDetails ? 23 : 12">
                                 {{ evho.hotel?.name }}
                             </th>
@@ -237,7 +297,7 @@ const showDetails = ref(false);
                                     <template v-slot:content>
                                         <span class="text-dark text-left">Tem certeza que deseja remover o hotel {{
                                             evho.hotel.name
-                                            }} do evento {{ evho.event.name }}</span>
+                                        }} do evento {{ evho.event.name }}</span>
                                     </template>
                                 </Modal>
                             </th>
@@ -260,9 +320,9 @@ const showDetails = ref(false);
                             <th class="align-middle"></th>
                         </tr>
                         <tr class="table-header-c1">
-                            <th class="align-middle">Broker</th>
-                            <th class="align-middle">Regime</th>
-                            <th class="align-middle">Proposito</th>
+                            <th class="align-middle table-header-c1 sticky-col">Broker</th>
+                            <th class="align-middle table-header-c1 sticky-col">Regime</th>
+                            <th class="align-middle table-header-c1 sticky-col">Proposito</th>
                             <th class="align-middle">CAT.</th>
                             <th class="align-middle">APTO</th>
                             <th class="align-middle">IN</th>
@@ -304,18 +364,18 @@ const showDetails = ref(false);
                         </tr>
 
                         <tr v-for="opt in evho.event_hotels_opt">
-                            <td class="align-middle">{{ opt.broker?.name }}</td>
-                            <td class="align-middle">{{ opt.regime?.name }}</td>
-                            <td class="align-middle">{{ opt.purpose?.name }}</td>
+                            <td class="align-middle bg-white sticky-col">{{ opt.broker?.name }}</td>
+                            <td class="align-middle bg-white sticky-col">{{ opt.regime?.name }}</td>
+                            <td class="align-middle bg-white sticky-col">{{ opt.purpose?.name }}</td>
                             <td class="align-middle">{{ opt.category_hotel?.name }}</td>
                             <td class="align-middle">{{ opt.apto_hotel?.name }}</td>
                             <td class="align-middle">{{
                                 new Date(opt.in).toLocaleDateString()
-                                }}
+                            }}
                             </td>
                             <td class="align-middle">{{
                                 new Date(opt.out).toLocaleDateString()
-                                }}
+                            }}
                             </td>
                             <td class="align-middle">{{ opt.count }}</td>
                             <td class="align-middle">
@@ -340,20 +400,20 @@ const showDetails = ref(false);
                             </td>
                             <td class=" align-middle">{{
                                 formatCurrency(opt.received_proposal, evho.currency.sigla)
-                                }}</td>
+                            }}</td>
                             <td class="align-middle">{{
                                 opt.received_proposal_percent
-                                }}
+                            }}
                             </td>
                             <template v-if="showDetails">
 
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((unitSale(opt) * evho.iss_percent) / 100, evho.currency.sigla)
-                                        }}</b>
+                                    }}</b>
                                 </td>
                                 <td class=" align-middle text-success">
                                     <b>{{ formatCurrency((unitCost(opt) * evho.iss_percent) / 100, evho.currency.sigla)
-                                        }}</b>
+                                    }}</b>
                                 </td>
 
                                 <td class="align-middle">
@@ -367,11 +427,11 @@ const showDetails = ref(false);
 
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((unitSale(opt) * evho.iva_percent) / 100, evho.currency.sigla)
-                                        }}</b>
+                                    }}</b>
                                 </td>
                                 <td class=" align-middle text-success">
                                     <b>{{ formatCurrency((unitCost(opt) * evho.iva_percent) / 100, evho.currency.sigla)
-                                        }}</b>
+                                    }}</b>
                                 </td>
 
                                 <td class="align-middle">
@@ -385,11 +445,11 @@ const showDetails = ref(false);
 
                                 <td class="align-middle bg-secondary text-white">{{
                                     formatCurrency(opt.compare_trivago, evho.currency.sigla)
-                                    }}
+                                }}
                                 </td>
                                 <td class="align-middle bg-secondary text-white">{{
                                     formatCurrency(opt.compare_website_htl, evho.currency.sigla)
-                                    }}
+                                }}
                                 </td>
                                 <td class="align-middle bg-secondary text-white">
                                     {{ formatCurrency(opt.compare_omnibess, evho.currency.sigla) }}
@@ -472,7 +532,7 @@ const showDetails = ref(false);
                                 </td>
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((sumCost(evho) * evho.iss_percent) / 100, evho.currency.sigla)
-                                        }}</b>
+                                    }}</b>
                                 </td>
                                 <td class="align-middle">
                                     <b>{{ formatCurrency(sumTaxes(evho, 'serv'), evho.currency.sigla) }}</b>
@@ -486,7 +546,7 @@ const showDetails = ref(false);
                                 </td>
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((sumCost(evho) * evho.iva_percent) / 100, evho.currency.sigla)
-                                        }}</b>
+                                    }}</b>
                                 </td>
                                 <td class="align-middle">
                                     <b>{{ formatCurrency(sumTaxes(evho, 'sc'), evho.currency.sigla) }}</b>
@@ -501,7 +561,7 @@ const showDetails = ref(false);
                         </tr>
 
                         <tr>
-                            <td class="align-middle text-dark text-left" colspan="3">
+                            <td class="align-middle text-dark text-left bg-white sticky-col" colspan="3">
                                 OBSERVAÇÃO INTERNA:
                             </td>
                             <td class="align-middle text-dark text-left" colspan="9">
@@ -522,7 +582,7 @@ const showDetails = ref(false);
                         </tr>
 
                         <tr>
-                            <td class="align-middle text-dark text-left" colspan="3">
+                            <td class="align-middle text-dark text-left bg-white sticky-col" colspan="3">
                                 OBSERVAÇÃO CLIENTE:
                             </td>
                             <td class="align-middle text-dark text-left" colspan="9">

@@ -2,7 +2,7 @@
 import { Link } from '@inertiajs/inertia-vue3';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import Modal from '@/Components/Modal.vue';
-import { ref } from 'vue';
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { useForm } from '@inertiajs/inertia-vue3';
 import Loader from '@/Components/Loader.vue';
 
@@ -185,7 +185,68 @@ const deleteEventHotel = (data) => {
 };
 
 const showDetails = ref(false);
+
+onBeforeUnmount(() => {
+    window.removeEventListener('resize', adjustStickyColumns);
+    if (resizeObserver) resizeObserver.disconnect();
+});
+
+let resizeObserver;
+
+const adjustStickyColumns = () => {
+    const tables = document.querySelectorAll('table');
+
+    tables.forEach(table => {
+        const rows = table.querySelectorAll('tr');
+
+        rows.forEach(row => {
+            const stickyCols = row.querySelectorAll('.sticky-col');
+            let leftOffset = 0;
+
+            stickyCols.forEach(col => {
+                col.style.left = `${leftOffset}px`;
+                leftOffset += col.offsetWidth;
+            });
+        });
+    });
+};
+
+onMounted(() => {
+    nextTick(() => {
+        adjustStickyColumns();
+
+        // Atualiza se a janela for redimensionada
+        window.addEventListener('resize', adjustStickyColumns);
+
+        // Observa mudanças no layout (como troca de abas)
+        resizeObserver = new ResizeObserver(adjustStickyColumns);
+        document.querySelectorAll('table').forEach(table => resizeObserver.observe(table));
+    });
+});
+
 </script>
+
+<style scoped>
+.sticky-col {
+    position: sticky;
+    z-index: 2;
+}
+
+.sticky-col::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: inherit;
+    z-index: -1;
+}
+
+.bg-white {
+    background-color: #fff !important;
+}
+</style>
 
 
 <template>
@@ -209,7 +270,8 @@ const showDetails = ref(false);
                     <template v-for="(evAdd, index) in eventAdds.sort((a, b) => a.order - b.order)" :key="evAdd.id">
 
                         <tr>
-                            <th class="table-header table-header-c1" colspan="2">Hotel {{ index + 1 }}</th>
+                            <th class="table-header table-header-c1 sticky-col" colspan="2">Hotel {{ index + 1
+                                }}</th>
                             <th class="text-left table-header table-header-c2" :colspan="showDetails ? 20 : 12">
                                 {{ evAdd.add.name }}
                             </th>
@@ -260,9 +322,9 @@ const showDetails = ref(false);
                             <th class="align-middle"></th>
                         </tr>
                         <tr class="table-header-c1">
-                            <th class="align-middle">Serviço</th>
-                            <th class="align-middle">Unidade utilizada</th>
-                            <th class="align-middle">Medida</th>
+                            <th class="align-middle table-header-c1 sticky-col">Serviço</th>
+                            <th class="align-middle table-header-c1 sticky-col">Unidade utilizada</th>
+                            <th class="align-middle table-header-c1 sticky-col">Medida</th>
                             <th class="align-middle">#PAX</th>
                             <th class="align-middle">Frequência</th>
                             <th class="align-middle">IN</th>
@@ -300,9 +362,9 @@ const showDetails = ref(false);
                             </td>
                         </tr>
                         <tr v-for="opt in evAdd.event_add_opts">
-                            <td class="align-middle">{{ opt.service.name }}</td>
-                            <td class="align-middle">{{ opt.unit }}</td>
-                            <td class="align-middle">{{ opt.measure.name }}</td>
+                            <td class="align-middle bg-white sticky-col">{{ opt.service.name }}</td>
+                            <td class="align-middle bg-white sticky-col">{{ opt.unit }}</td>
+                            <td class="align-middle bg-white sticky-col">{{ opt.measure.name }}</td>
                             <td class="align-middle">{{ opt.pax }}</td>
                             <td class="align-middle">{{ opt.frequency.name }}</td>
                             <td class="align-middle">{{ new Date(opt.in).toLocaleDateString() }}</td>
@@ -480,7 +542,7 @@ const showDetails = ref(false);
                         </tr>
 
                         <tr>
-                            <td class="align-middle text-dark text-left" colspan="3">
+                            <td class="align-middle text-dark text-left bg-white sticky-col" colspan="3">
                                 OBSERVAÇÃO INTERNA:
                             </td>
                             <td class="align-middle text-dark text-left" colspan="9">
@@ -501,7 +563,7 @@ const showDetails = ref(false);
                         </tr>
 
                         <tr>
-                            <td class="align-middle text-dark text-left" colspan="3">
+                            <td class="align-middle text-dark text-left bg-white sticky-col" colspan="3">
                                 OBSERVAÇÃO CLIENTE:
                             </td>
                             <td class="align-middle text-dark text-left" colspan="9">

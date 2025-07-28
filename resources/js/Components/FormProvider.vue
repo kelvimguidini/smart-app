@@ -204,7 +204,7 @@ onMounted(() => {
 
     edit();
     props.mountCallBack();
-    $('.money').maskMoney({ prefix: symbol, allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
+    $('.money').maskMoney({ prefix: props.eventProvider.currency.symbol, allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
 });
 
 const isLoader = ref(false);

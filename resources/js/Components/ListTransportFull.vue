@@ -2,7 +2,7 @@
 import { Link } from '@inertiajs/inertia-vue3';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import Modal from '@/Components/Modal.vue';
-import { ref } from 'vue';
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { useForm } from '@inertiajs/inertia-vue3';
 import Loader from '@/Components/Loader.vue';
 
@@ -169,7 +169,69 @@ const deleteEventTransport = (data) => {
 };
 
 const showDetails = ref(false);
+
+onBeforeUnmount(() => {
+    window.removeEventListener('resize', adjustStickyColumns);
+    if (resizeObserver) resizeObserver.disconnect();
+});
+
+let resizeObserver;
+
+const adjustStickyColumns = () => {
+    const tables = document.querySelectorAll('table');
+
+    tables.forEach(table => {
+        const rows = table.querySelectorAll('tr');
+
+        rows.forEach(row => {
+            const stickyCols = row.querySelectorAll('.sticky-col');
+            let leftOffset = 0;
+
+            stickyCols.forEach(col => {
+                col.style.left = `${leftOffset}px`;
+                leftOffset += col.offsetWidth;
+            });
+        });
+    });
+};
+
+onMounted(() => {
+    nextTick(() => {
+        adjustStickyColumns();
+
+        // Atualiza se a janela for redimensionada
+        window.addEventListener('resize', adjustStickyColumns);
+
+        // Observa mudanças no layout (como troca de abas)
+        resizeObserver = new ResizeObserver(adjustStickyColumns);
+        document.querySelectorAll('table').forEach(table => resizeObserver.observe(table));
+    });
+});
+
 </script>
+
+<style scoped>
+.sticky-col {
+    position: sticky;
+    z-index: 2;
+}
+
+.sticky-col::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: inherit;
+    z-index: -1;
+}
+
+.bg-white {
+    background-color: #fff !important;
+}
+</style>
+
 
 
 <template>
@@ -195,7 +257,8 @@ const showDetails = ref(false);
                     <template v-for="(evtr, index) in eventTransports.sort((a, b) => a.order - b.order)" :key="evtr.id">
 
                         <tr>
-                            <th class="table-header table-header-c1" colspan="3">Transporte {{ index + 1 }}</th>
+                            <th class="table-header table-header-c1 sticky-col" colspan="3">Transporte {{ index + 1 }}
+                            </th>
                             <th class="text-left table-header table-header-c2" :colspan="showDetails ? 20 : 12">
                                 {{ evtr.transport.name }}
                             </th>
@@ -250,9 +313,9 @@ const showDetails = ref(false);
                             <th class="align-middle"></th>
                         </tr>
                         <tr class="table-header-c1">
-                            <th class="align-middle">Broker</th>
-                            <th class="align-middle">Veículo</th>
-                            <th class="align-middle">Modelo Uso</th>
+                            <th class="align-middle table-header-c1 sticky-col">Broker</th>
+                            <th class="align-middle table-header-c1 sticky-col">Veículo</th>
+                            <th class="align-middle table-header-c1 sticky-col">Modelo Uso</th>
                             <th class="align-middle">Serviços</th>
                             <th class="align-middle">Marcas</th>
                             <th class="align-middle">OBS</th>
@@ -292,19 +355,19 @@ const showDetails = ref(false);
                         </tr>
 
                         <tr v-for="opt in evtr.event_transport_opts">
-                            <td class="align-middle">{{ opt.broker.name }}</td>
-                            <td class="align-middle">{{ opt.vehicle.name }}</td>
-                            <td class="align-middle">{{ opt.model.name }}</td>
+                            <td class="align-middle bg-white sticky-col">{{ opt.broker.name }}</td>
+                            <td class="align-middle bg-white sticky-col">{{ opt.vehicle.name }}</td>
+                            <td class="align-middle bg-white sticky-col">{{ opt.model.name }}</td>
                             <td class="align-middle">{{ opt.service.name }}</td>
                             <td class="align-middle">{{ opt.brand.name }}</td>
                             <td class="align-middle">{{ opt.observation }}</td>
                             <td class="align-middle">{{
                                 new Date(opt.in).toLocaleDateString()
-                            }}
+                                }}
                             </td>
                             <td class="align-middle">{{
                                 new Date(opt.out).toLocaleDateString()
-                            }}
+                                }}
                             </td>
                             <td class="align-middle">{{ opt.count }}</td>
                             <td class="align-middle">
@@ -329,19 +392,19 @@ const showDetails = ref(false);
                             </td>
                             <td class=" align-middle">{{
                                 formatCurrency(opt.received_proposal, evtr.currency.sigla)
-                            }}</td>
+                                }}</td>
                             <td class="align-middle">{{
                                 opt.received_proposal_percent
-                            }}
+                                }}
                             </td>
                             <template v-if="showDetails">
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((unitSale(opt) * evtr.iss_percent) / 100, evtr.currency.sigla)
-                                    }}</b>
+                                        }}</b>
                                 </td>
                                 <td class=" align-middle text-success">
                                     <b>{{ formatCurrency((unitCost(opt) * evtr.iss_percent) / 100, evtr.currency.sigla)
-                                    }}</b>
+                                        }}</b>
                                 </td>
 
                                 <td class="align-middle">
@@ -355,11 +418,11 @@ const showDetails = ref(false);
 
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((unitSale(opt) * evtr.iva_percent) / 100, evtr.currency.sigla)
-                                    }}</b>
+                                        }}</b>
                                 </td>
                                 <td class=" align-middle text-success">
                                     <b>{{ formatCurrency((unitCost(opt) * evtr.iva_percent) / 100, evtr.currency.sigla)
-                                    }}</b>
+                                        }}</b>
                                 </td>
 
                                 <td class="align-middle">
@@ -438,7 +501,7 @@ const showDetails = ref(false);
                                 </td>
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((sumCost(evtr) * evtr.iss_percent) / 100, evtr.currency.sigla)
-                                    }}</b>
+                                        }}</b>
                                 </td>
                                 <td class="align-middle">
                                     <b>{{ formatCurrency(sumTaxes(evtr, 'serv'), evtr.currency.sigla) }}</b>
@@ -452,7 +515,7 @@ const showDetails = ref(false);
                                 </td>
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((sumCost(evtr) * evtr.iva_percent) / 100, evtr.currency.sigla)
-                                    }}</b>
+                                        }}</b>
                                 </td>
                                 <td class="align-middle">
                                     <b>{{ formatCurrency(sumTaxes(evtr, 'sc'), evtr.currency.sigla) }}</b>
@@ -466,7 +529,7 @@ const showDetails = ref(false);
                         </tr>
 
                         <tr>
-                            <td class="align-middle text-dark text-left" colspan="3">
+                            <td class="align-middle text-dark text-left bg-white sticky-col" colspan="3">
                                 <b>OBSERVAÇÃO INTERNA:</b>
                             </td>
                             <td class="align-middle text-dark text-left" colspan="10">
@@ -487,7 +550,7 @@ const showDetails = ref(false);
                         </tr>
 
                         <tr>
-                            <td class="align-middle text-dark text-left" colspan="3">
+                            <td class="align-middle text-dark text-left bg-white sticky-col" colspan="3">
                                 <b>OBSERVAÇÃO CLIENTE:</b>
                             </td>
                             <td class="align-middle text-dark text-left" colspan="10">
