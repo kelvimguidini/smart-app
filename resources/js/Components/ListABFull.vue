@@ -157,7 +157,7 @@ const sumTaxes = (evab, taxType) => {
                 sum += ((unitSale(opt) * evab.iva_percent) / 100) * daysBetween(opt.in, opt.out) * opt.count;
                 break;
             case 'sc':
-                sum += ((unitSale(opt) * evab.service_charge) / 100) * daysBetween(opt.in, opt.out) * opt.count;
+                sum += evab.service_charge * daysBetween(opt.in, opt.out) * opt.count;
                 break;
         }
 
@@ -235,7 +235,7 @@ const showDetails = ref(false);
                                     <template v-slot:content>
                                         <span class="text-dark">Tem certeza que deseja remover o hotel {{
                                             evab.ab.name
-                                            }} do evento {{ evab.ab.name }}</span>
+                                        }} do evento {{ evab.ab.name }}</span>
                                     </template>
                                 </Modal>
                             </th>
@@ -281,8 +281,8 @@ const showDetails = ref(false);
                                 <th class="align-middle">Custo {{ evab.service_percent }}%</th>
                                 <th class="align-middle">Cliente {{ evab.iva_percent }}%</th>
                                 <th class="align-middle">Custo {{ evab.iva_percent }}%</th>
-                                <th class="align-middle">Cliente {{ evab.service_charge }}%</th>
-                                <th class="align-middle">Custo {{ evab.service_charge }}%</th>
+                                <th class="align-middle">Cliente</th>
+                                <th class="align-middle">Custo</th>
                             </template>
                             <th class="align-middle"></th>
                         </tr>
@@ -315,7 +315,7 @@ const showDetails = ref(false);
                             </td>
                             <td class="align-middle bg-success text-white">
                                 {{ formatCurrency(unitSale(opt) * daysBetween(opt.in, opt.out) * opt.count,
-                                evab.currency.sigla) }}
+                                    evab.currency.sigla) }}
                             </td>
                             <td class="align-middle bg-warning text-dark">
                                 {{ formatCurrency(unitCost(opt), evab.currency.sigla) }}
@@ -326,20 +326,20 @@ const showDetails = ref(false);
                             </td>
                             <td class=" align-middle">{{
                                 formatCurrency(opt.received_proposal, evab.currency.sigla)
-                                }}</td>
+                            }}</td>
                             <td class="align-middle">{{
                                 opt.received_proposal_percent
-                                }}
+                            }}
                             </td>
                             <template v-if="showDetails">
 
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((unitSale(opt) * evab.iss_percent) / 100, evab.currency.sigla)
-                                        }}</b>
+                                    }}</b>
                                 </td>
                                 <td class=" align-middle text-success">
                                     <b>{{ formatCurrency((unitCost(opt) * evab.iss_percent) / 100, evab.currency.sigla)
-                                        }}</b>
+                                    }}</b>
                                 </td>
 
                                 <td class="align-middle">
@@ -353,19 +353,19 @@ const showDetails = ref(false);
 
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((unitSale(opt) * evab.iva_percent) / 100, evab.currency.sigla)
-                                        }}</b>
+                                    }}</b>
                                 </td>
                                 <td class=" align-middle text-success">
                                     <b>{{ formatCurrency((unitCost(opt) * evab.iva_percent) / 100, evab.currency.sigla)
-                                        }}</b>
+                                    }}</b>
                                 </td>
 
                                 <td class="align-middle">
-                                    <b>{{ formatCurrency((unitSale(opt) * evab.service_charge) / 100,
+                                    <b>{{ formatCurrency(evab.service_charge,
                                         evab.currency.sigla) }}</b>
                                 </td>
                                 <td class=" align-middle">
-                                    <b>{{ formatCurrency((unitCost(opt) * evab.service_charge) / 100,
+                                    <b>{{ formatCurrency(evab.service_charge,
                                         evab.currency.sigla) }}</b>
                                 </td>
 
@@ -447,7 +447,7 @@ const showDetails = ref(false);
                                 </td>
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((sumCost(evab) * evab.iss_percent) / 100, evab.currency.sigla)
-                                        }}</b>
+                                    }}</b>
                                 </td>
                                 <td class="align-middle">
                                     <b>{{ formatCurrency(sumTaxes(evab, 'serv'), evab.currency.sigla) }}</b>
@@ -461,13 +461,13 @@ const showDetails = ref(false);
                                 </td>
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((sumCost(evab) * evab.iva_percent) / 100, evab.currency.sigla)
-                                        }}</b>
+                                    }}</b>
                                 </td>
                                 <td class="align-middle">
                                     <b>{{ formatCurrency(sumTaxes(evab, 'sc'), evab.currency.sigla) }}</b>
                                 </td>
                                 <td class="align-middle">
-                                    <b>{{ formatCurrency((sumCost(evab) * evab.service_charge) / 100,
+                                    <b>{{ formatCurrency(evab.service_charge,
                                         evab.currency.sigla) }}</b>
                                 </td>
                             </template>

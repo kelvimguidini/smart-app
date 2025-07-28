@@ -63,12 +63,12 @@ function unitSale($opt)
 
 function sumTaxesProvider($eventP, $opt)
 {
-    return ((unitSale($opt) * $eventP['iss_percent']) / 100) + ((unitSale($opt) * $eventP['service_percent']) / 100) + ((unitSale($opt) * $eventP['iva_percent']) / 100) + ((unitSale($opt) * $eventP['service_charge']) / 100);
+    return ((unitSale($opt) * $eventP['iss_percent']) / 100) + ((unitSale($opt) * $eventP['service_percent']) / 100) + ((unitSale($opt) * $eventP['iva_percent']) / 100) + ($eventP['service_charge']);
 }
 
 function sumTaxesProviderCost($eventP, $opt)
 {
-    return (($opt['received_proposal'] * $eventP['iss_percent']) / 100) + (($opt['received_proposal'] * $eventP['service_percent']) / 100) + (($opt['received_proposal'] * $eventP['iva_percent']) / 100) + (($opt['received_proposal'] * $eventP['service_charge']) / 100);
+    return (($opt['received_proposal'] * $eventP['iss_percent']) / 100) + (($opt['received_proposal'] * $eventP['service_percent']) / 100) + (($opt['received_proposal'] * $eventP['iva_percent']) / 100) + ($eventP['service_charge']);
 }
 
 function sumTotal($rate, $taxes, $qtdDayle)
@@ -595,10 +595,10 @@ $strip = false;
                                         </tr>
 
                                         <tr>
-                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO ({{ $hotelEvent->service_charge }}%)</td>
-                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumHotelSale * $hotelEvent->service_charge) / 100, $hotelEvent->currency->symbol) }}</td>
-                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO ({{ $hotelEvent->service_charge }}%)</td>
-                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumHotelCost * $hotelEvent->service_charge) / 100, $hotelEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($hotelEvent->service_charge), $hotelEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($hotelEvent->service_charge), $hotelEvent->currency->symbol) }}</td>
                                             <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Comissão</td>
                                             <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($totalKickback, $hotelEvent->currency->symbol) }}</td>
                                         </tr>
@@ -760,10 +760,10 @@ $strip = false;
                                         </tr>
 
                                         <tr>
-                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO ({{ $abEvent->service_charge }}%)</td>
-                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumAbSale * $abEvent->service_charge) / 100, $abEvent->currency->symbol) }}</td>
-                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO ({{ $abEvent->service_charge }}%)</td>
-                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumAbCost * $abEvent->service_charge) / 100, $abEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($abEvent->service_charge, $abEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($abEvent->service_charge, $abEvent->currency->symbol) }}</td>
                                             <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Comissão</td>
                                             <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($totalKickbackAb, $abEvent->currency->symbol) }}</td>
                                         </tr>
@@ -923,10 +923,10 @@ $strip = false;
                                         </tr>
 
                                         <tr>
-                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO ({{ $hallEvent->service_charge }}%)</td>
-                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumHallSale * $hallEvent->service_charge) / 100, $hallEvent->currency->symbol) }}</td>
-                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO ({{ $hallEvent->service_charge }}%)</td>
-                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumHallCost * $hallEvent->service_charge) / 100, $hallEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($hallEvent->service_charge, $hallEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($hallEvent->service_charge, $hallEvent->currency->symbol) }}</td>
                                             <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Comissão</td>
                                             <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($totalKickbackHall, $hallEvent->currency->symbol) }}</td>
                                         </tr>
@@ -1093,10 +1093,10 @@ $strip = false;
                                         </tr>
 
                                         <tr>
-                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO ({{ $addEvent->service_charge }}%)</td>
-                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumAddSale * $addEvent->service_charge) / 100, $addEvent->currency->symbol) }}</td>
-                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO ({{ $addEvent->service_charge }}%)</td>
-                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumAddCost * $addEvent->service_charge) / 100, $addEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($addEvent->service_charge, $addEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($addEvent->service_charge, $addEvent->currency->symbol) }}</td>
                                             <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Comissão</td>
                                             <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($totalKickbackAdd, $addEvent->currency->symbol) }}</td>
                                         </tr>
@@ -1266,10 +1266,10 @@ $strip = false;
                                         </tr>
 
                                         <tr>
-                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO ({{ $transportEvent->service_charge }}%)</td>
-                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTransportSale * $transportEvent->service_charge) / 100, $transportEvent->currency->symbol) }}</td>
-                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO ({{ $transportEvent->service_charge }}%)</td>
-                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTransportCost * $transportEvent->service_charge) / 100, $transportEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($transportEvent->service_charge, $transportEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($transportEvent->service_charge, $transportEvent->currency->symbol) }}</td>
                                             <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Comissão</td>
                                             <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($totalKickbackTransport, $transportEvent->currency->symbol) }}</td>
                                         </tr>

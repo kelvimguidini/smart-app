@@ -61,6 +61,8 @@ const submit = () => {
     form.type = props.type;
     form.event_id = props.eventId;
 
+    form.service_charge = $('#service_charge').maskMoney('unmasked')[0];
+
     switch (props.type) {
 
         case 'add':
@@ -170,6 +172,7 @@ const edit = () => {
 
         form.iof = props.eventProvider.iof;
         form.service_charge = props.eventProvider.service_charge;
+        $("#service_charge").maskMoney('mask', form.service_charge);
         const parts = props.eventProvider.deadline_date.split('-');
         const deadline = new Date(parts[0], parts[1] - 1, parts[2]);
         form.deadline = deadline;
@@ -201,6 +204,7 @@ onMounted(() => {
 
     edit();
     props.mountCallBack();
+    $('.money').maskMoney({ prefix: symbol, allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
 });
 
 const isLoader = ref(false);
@@ -323,8 +327,8 @@ const updateForm = () => {
                     <div class="col-6">
                         <div class="form-group">
                             <InputLabel for="service_charge" value="Taxa de Turismo:" />
-                            <TextInput type="number" class="form-control form-control-sm percent"
-                                v-model="form.service_charge" required autofocus min="0" step="0.01"
+                            <TextInput type="text" class="form-control form-control-sm percent money"
+                                id="service_charge" v-model="form.service_charge" required autofocus
                                 autocomplete="service_charge" />
                         </div>
                     </div>

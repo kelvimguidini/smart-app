@@ -157,7 +157,7 @@ const sumTaxes = (evAdd, taxType) => {
                 sum += ((unitSale(opt) * evAdd.iva_percent) / 100) * daysBetween(opt.in, opt.out) * opt.count;
                 break;
             case 'sc':
-                sum += ((unitSale(opt) * evAdd.service_charge) / 100) * daysBetween(opt.in, opt.out) * opt.count;
+                sum += evAdd.service_charge * daysBetween(opt.in, opt.out) * opt.count;
                 break;
         }
 
@@ -236,7 +236,7 @@ const showDetails = ref(false);
                                     <template v-slot:content>
                                         <span class="text-dark">Tem certeza que deseja remover o hotel {{
                                             evAdd.add.name
-                                        }} do evento {{ evAdd.add.name }}</span>
+                                            }} do evento {{ evAdd.add.name }}</span>
                                     </template>
                                 </Modal>
                             </th>
@@ -285,8 +285,8 @@ const showDetails = ref(false);
                                 <th class="align-middle">Custo {{ evAdd.service_percent }}%</th>
                                 <th class="align-middle">Cliente {{ evAdd.iva_percent }}%</th>
                                 <th class="align-middle">Custo {{ evAdd.iva_percent }}%</th>
-                                <th class="align-middle">Cliente {{ evAdd.service_charge }}%</th>
-                                <th class="align-middle">Custo {{ evAdd.service_charge }}%</th>
+                                <th class="align-middle">Cliente</th>
+                                <th class="align-middle">Custo</th>
                             </template>
                             <th class="align-middle"></th>
                         </tr>
@@ -330,10 +330,10 @@ const showDetails = ref(false);
                             </td>
                             <td class=" align-middle">{{
                                 formatCurrency(opt.received_proposal, evAdd.currency.sigla)
-                            }}</td>
+                                }}</td>
                             <td class="align-middle">{{
                                 opt.received_proposal_percent
-                            }}
+                                }}
                             </td>
                             <template v-if="showDetails">
 
@@ -365,11 +365,11 @@ const showDetails = ref(false);
                                 </td>
 
                                 <td class="align-middle">
-                                    <b>{{ formatCurrency((unitSale(opt) * evAdd.service_charge) / 100,
+                                    <b>{{ formatCurrency(evAdd.service_charge,
                                         evAdd.currency.sigla) }}</b>
                                 </td>
                                 <td class=" align-middle">
-                                    <b>{{ formatCurrency((unitCost(opt) * evAdd.service_charge) / 100,
+                                    <b>{{ formatCurrency(evAdd.service_charge,
                                         evAdd.currency.sigla) }}</b>
                                 </td>
 
@@ -472,7 +472,7 @@ const showDetails = ref(false);
                                     <b>{{ formatCurrency(sumTaxes(evAdd, 'sc'), evAdd.currency.sigla) }}</b>
                                 </td>
                                 <td class="align-middle">
-                                    <b>{{ formatCurrency((sumCost(evAdd) * evAdd.service_charge) / 100,
+                                    <b>{{ formatCurrency(evAdd.service_charge,
                                         evAdd.currency.sigla) }}</b>
                                 </td>
                             </template>

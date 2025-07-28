@@ -62,7 +62,7 @@ function unitSale($opt)
 
 function sumTaxesProvider($eventP, $opt)
 {
-    return ((unitSale($opt) * $eventP['iss_percent']) / 100) + ((unitSale($opt) * $eventP['service_percent']) / 100) + ((unitSale($opt) * $eventP['iva_percent']) / 100) + ((unitSale($opt) * $eventP['service_charge']) / 100);
+    return ((unitSale($opt) * $eventP['iss_percent']) / 100) + ((unitSale($opt) * $eventP['service_percent']) / 100) + ((unitSale($opt) * $eventP['iva_percent']) / 100) + ($eventP['service_charge']);
 }
 
 function sumTotal($rate, $taxes, $qtdDayle)

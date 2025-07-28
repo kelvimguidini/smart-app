@@ -159,7 +159,7 @@ const sumTaxes = (evho, taxType) => {
                 sum += ((unitSale(opt) * evho.iva_percent) / 100) * daysBetween(opt.in, opt.out) * opt.count;
                 break;
             case 'sc':
-                sum += ((unitSale(opt) * evho.service_charge) / 100) * daysBetween(opt.in, opt.out) * opt.count;
+                sum += evho.service_charge * daysBetween(opt.in, opt.out) * opt.count;
                 break;
         }
 
@@ -284,8 +284,8 @@ const showDetails = ref(false);
                                 <th class="align-middle">Custo {{ evho.service_percent }}%</th>
                                 <th class="align-middle">Cliente {{ evho.iva_percent }}%</th>
                                 <th class="align-middle">Custo {{ evho.iva_percent }}%</th>
-                                <th class="align-middle">Cliente {{ evho.service_charge }}%</th>
-                                <th class="align-middle">Custo {{ evho.service_charge }}%</th>
+                                <th class="align-middle">Cliente</th>
+                                <th class="align-middle">Custo</th>
 
                                 <th class="align-middle">Trivago</th>
                                 <th class="align-middle">Website HTL</th>
@@ -329,7 +329,7 @@ const showDetails = ref(false);
                             </td>
                             <td class="align-middle bg-success text-white">
                                 {{ formatCurrency(unitSale(opt) * daysBetween(opt.in, opt.out) * opt.count,
-                                evho.currency.sigla) }}
+                                    evho.currency.sigla) }}
                             </td>
                             <td class="align-middle bg-warning text-dark">
                                 {{ formatCurrency(unitCost(opt), evho.currency.sigla) }}
@@ -375,11 +375,11 @@ const showDetails = ref(false);
                                 </td>
 
                                 <td class="align-middle">
-                                    <b>{{ formatCurrency((unitSale(opt) * evho.service_charge) / 100,
+                                    <b>{{ formatCurrency(evho.service_charge,
                                         evho.currency.sigla) }}</b>
                                 </td>
                                 <td class=" align-middle">
-                                    <b>{{ formatCurrency((unitCost(opt) * evho.service_charge) / 100,
+                                    <b>{{ formatCurrency(evho.service_charge,
                                         evho.currency.sigla) }}</b>
                                 </td>
 
@@ -492,7 +492,7 @@ const showDetails = ref(false);
                                     <b>{{ formatCurrency(sumTaxes(evho, 'sc'), evho.currency.sigla) }}</b>
                                 </td>
                                 <td class="align-middle">
-                                    <b>{{ formatCurrency((sumCost(evho) * evho.service_charge) / 100,
+                                    <b>{{ formatCurrency(evho.service_charge,
                                         evho.currency.sigla) }}</b>
                                 </td>
                                 <td class="align-middle" colspan="3"></td>
