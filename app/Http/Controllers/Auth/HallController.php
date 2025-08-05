@@ -39,7 +39,7 @@ class HallController extends Controller
             'received_proposal' => 'required|numeric',
             'received_proposal_percent' => 'required|numeric',
             'kickback' => 'required|numeric',
-            'count' => 'required|integer',
+            'count' => 'required|numeric',
         ]);
 
         try {

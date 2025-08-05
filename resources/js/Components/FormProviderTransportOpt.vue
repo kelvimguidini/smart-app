@@ -332,7 +332,7 @@ const isLoader = ref(false);
                         <div class="form-group">
                             <InputLabel for="count" value="QTD:" />
                             <TextInput type="number" class="form-control" v-model="formOpt.count" required autofocus
-                                min="0" autocomplete="count" />
+                                min="0" step="0.01" autocomplete="count" />
                         </div>
                     </div>
 

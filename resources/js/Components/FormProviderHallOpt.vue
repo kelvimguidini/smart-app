@@ -109,7 +109,7 @@ const submitOpt = () => {
             formOpt.id = 0;
 
             $('#tabs-hall').tabs({ active: 0 });
-        },        onError: (errors) => {
+        }, onError: (errors) => {
             console.error('Erro no backend:', errors);
             isLoader.value = false; // Desativa o loader em caso de erro
         },
@@ -223,7 +223,8 @@ const setRange = (opt) => {
 
                 <div class="form-group">
                     <InputLabel for="name" value="Descrição:" />
-                    <TextInput type="text" class="form-control" v-model="formOpt.name" autofocus autocomplete="name" required />
+                    <TextInput type="text" class="form-control" v-model="formOpt.name" autofocus autocomplete="name"
+                        required />
                 </div>
 
                 <div class="form-group">
@@ -254,7 +255,7 @@ const setRange = (opt) => {
                 </div>
 
                 <div class="row">
-                    
+
                     <VDatePicker v-model="range" is-range expanded :columns="2" @update:modelValue="updateForm">
                         <template #default="{ inputValue, inputEvents }">
                             <div class="col">
@@ -290,8 +291,8 @@ const setRange = (opt) => {
 
                         <div class="form-group">
                             <InputLabel for="count" value="QTD:" />
-                            <TextInput type="number" class="form-control" v-model="formOpt.count" required autofocus min="0"
-                                autocomplete="count" />
+                            <TextInput type="number" class="form-control" v-model="formOpt.count" required autofocus
+                                min="0" step="0.01" autocomplete="count" />
                         </div>
                     </div>
 
@@ -311,7 +312,8 @@ const setRange = (opt) => {
                         <div class="form-group">
                             <InputLabel for="received_proposal" value="Proposta Recebida:" />
                             <TextInput type="text" id="received_proposal" class="form-control money"
-                                v-model="formOpt.received_proposal" required autofocus autocomplete="received_proposal" />
+                                v-model="formOpt.received_proposal" required autofocus
+                                autocomplete="received_proposal" />
                         </div>
                     </div>
 
@@ -327,7 +329,8 @@ const setRange = (opt) => {
                     </div>
                 </div>
                 <div class="flex items-center justify-end mt-4 rigth">
-                    <PrimaryButton css-class="btn btn-primary float-right m-1" :class="{ 'opacity-25': formOpt.processing }"
+                    <PrimaryButton css-class="btn btn-primary float-right m-1"
+                        :class="{ 'opacity-25': formOpt.processing }"
                         :disabled="formOpt.processing || eventHall == null || eventHall.id == 0">
                         <i class="fa fa-save" v-if="formOpt.id > 0"></i>
                         <i class="fa fa-plus" v-else></i>

@@ -40,7 +40,7 @@ class ABController extends Controller
             'received_proposal' => 'required|numeric',
             'received_proposal_percent' => 'required|numeric',
             'kickback' => 'required|numeric',
-            'count' => 'required|integer',
+            'count' => 'required|numeric',
         ]);
 
         try {
@@ -58,10 +58,7 @@ class ABController extends Controller
                 }
             }
 
-
             if ($request->id > 0) {
-
-
 
                 $opt = EventABOpt::find($request->id);
 

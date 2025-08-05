@@ -204,7 +204,7 @@ onMounted(() => {
         out: range.end,
     };
     setRange(opt);
-    
+
     $('.money').maskMoney({ prefix: symbol, allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
 
 });
@@ -330,7 +330,7 @@ const isLoader = ref(false);
                         <div class="form-group">
                             <InputLabel for="count" value="QTD:" />
                             <TextInput type="number" class="form-control" v-model="formOpt.count" required autofocus
-                                min="0" autocomplete="count" />
+                                step="0.01" min="0" autocomplete="count" />
                         </div>
                     </div>
                     <div class="col">
