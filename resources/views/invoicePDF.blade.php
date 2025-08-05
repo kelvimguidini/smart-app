@@ -349,10 +349,8 @@ $strip = false;
 
         .event-data {
             font-weight: 700;
-            font-style: normal;
-            color: rgb(216, 93, 16);
-            text-decoration: none;
-            margin: 0;
+            color: #fff;
+            margin-left: 4px;
         }
 
         .row {
