@@ -296,7 +296,7 @@ onMounted(() => {
                                     <template v-slot:content>
                                         <span class="text-dark">Tem certeza que deseja remover o hotel {{
                                             evHall.hall.name
-                                            }} do evento {{ evHall.hall.name }}</span>
+                                        }} do evento {{ evHall.hall.name }}</span>
                                     </template>
                                 </Modal>
                             </th>
@@ -322,13 +322,13 @@ onMounted(() => {
                             <th class="align-middle table-header-c1 sticky-col">Serviço</th>
                             <th class="align-middle table-header-c1 sticky-col">Broker</th>
                             <th class="align-middle table-header-c1 sticky-col">Nome Salão</th>
-                            <th class="align-middle">M2</th>
-                            <th class="align-middle">Proposito</th>
-                            <th class="align-middle">#PAX</th>
-                            <th class="align-middle">IN</th>
-                            <th class="align-middle">OUT</th>
-                            <th class="align-middle">QTD</th>
-                            <th class="align-middle">Dias</th>
+                            <th class="align-middle table-header-c1 sticky-col">M2</th>
+                            <th class="align-middle table-header-c1 sticky-col">Proposito</th>
+                            <th class="align-middle table-header-c1 sticky-col">#PAX</th>
+                            <th class="align-middle table-header-c1 sticky-col">IN</th>
+                            <th class="align-middle table-header-c1 sticky-col">OUT</th>
+                            <th class="align-middle table-header-c1 sticky-col">QTD</th>
+                            <th class="align-middle table-header-c1 sticky-col">Dias</th>
                             <th class="align-middle">Comissão (%)</th>
 
                             <th class="align-middle">Unidade</th>
@@ -365,13 +365,15 @@ onMounted(() => {
                             <td class="align-middle bg-white sticky-col">{{ opt.service.name }}</td>
                             <td class="align-middle bg-white sticky-col">{{ opt.broker.name }}</td>
                             <td class="align-middle bg-white sticky-col">{{ opt.name }}</td>
-                            <td class="align-middle">{{ opt.m2 }}</td>
-                            <td class="align-middle">{{ opt.purpose.name }}</td>
-                            <td class="align-middle">{{ opt.pax }}</td>
-                            <td class="align-middle">{{ new Date(opt.in).toLocaleDateString() }}</td>
-                            <td class="align-middle">{{ new Date(opt.out).toLocaleDateString() }}</td>
-                            <td class="align-middle">{{ opt.count }}</td>
-                            <td class="align-middle">
+                            <td class="align-middle bg-white sticky-col">{{ opt.m2 }}</td>
+                            <td class="align-middle bg-white sticky-col">{{ opt.purpose.name }}</td>
+                            <td class="align-middle bg-white sticky-col">{{ opt.pax }}</td>
+                            <td class="align-middle bg-white sticky-col">{{ new Date(opt.in).toLocaleDateString() }}
+                            </td>
+                            <td class="align-middle bg-white sticky-col">{{ new Date(opt.out).toLocaleDateString() }}
+                            </td>
+                            <td class="align-middle bg-white sticky-col">{{ opt.count }}</td>
+                            <td class="align-middle bg-white sticky-col">
                                 {{ daysBetween(opt.in, opt.out) }}
                             </td>
                             <td class="align-middle bg-success text-white">
@@ -393,10 +395,10 @@ onMounted(() => {
                             </td>
                             <td class=" align-middle">{{
                                 formatCurrency(opt.received_proposal, evHall.currency.sigla)
-                                }}</td>
+                            }}</td>
                             <td class="align-middle">{{
                                 opt.received_proposal_percent
-                                }}
+                            }}
                             </td>
                             <template v-if="showDetails">
 
@@ -468,20 +470,21 @@ onMounted(() => {
                         </tr>
                         <!-- FIM Opt TRs -->
                         <tr class="table-subheader">
-                            <td class="align-middle bg-warning text-dark text-rigth">
+                            <td class="align-middle bg-warning text-dark text-rigth table-subheader sticky-col">
                                 Diária Média:
                             </td>
-                            <td class="align-middle bg-warning text-dark">
+                            <td class="align-middle bg-warning text-dark table-subheader sticky-col">
                                 {{ formatCurrency(average(evHall), evHall.currency.sigla) }}
                             </td>
-                            <td class="align-middle"></td>
-                            <td class="align-middle bg-warning text-dark text-rigth" colspan="3">
+                            <td class="align-middle table-subheader sticky-col"></td>
+                            <td class="align-middle bg-warning text-dark text-rigth table-subheader sticky-col"
+                                colspan="3">
                                 Room Nights:
                             </td>
-                            <td class="align-middle">{{ roomNights(evHall) }}</td>
-                            <td class="align-middle text-rigth"># Aptos:</td>
-                            <td class="align-middle">{{ sumCount(evHall) }}</td>
-                            <td class="align-middle">
+                            <td class="align-middle table-subheader sticky-col">{{ roomNights(evHall) }}</td>
+                            <td class="align-middle text-rigth table-subheader sticky-col"># Aptos:</td>
+                            <td class="align-middle table-subheader sticky-col">{{ sumCount(evHall) }}</td>
+                            <td class="align-middle table-subheader sticky-col">
                                 {{ sumNts(evHall) }}
                             </td>
                             <td class="align-middle bg-success text-white" colspan="2">

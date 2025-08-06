@@ -796,7 +796,7 @@ $strip = false;
                     <table>
                         <thead style="display: table-header-group;">
                             <tr style="page-break-after: avoid;">
-                                <th colspan="11" style="padding: 0.3rem; text-align: center;">Salões & Eventos {{$hallEvent->hall->name }}</th>
+                                <th colspan="11" style="padding: 0.3rem; text-align: center;">Salões & Eventos</th>
                             </tr>
                             <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                                 <th>Nome</th>
@@ -959,7 +959,7 @@ $strip = false;
                     <table>
                         <thead style="display: table-header-group;">
                             <tr style="page-break-after: avoid;">
-                                <th colspan="11" style="padding: 0.3rem; text-align: center;">Adicionais {{$addEvent->add->name }}</th>
+                                <th colspan="11" style="padding: 0.3rem; text-align: center;">Adicionais</th>
                             </tr>
                             <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                                 <th>Serviço</th>
@@ -1129,7 +1129,7 @@ $strip = false;
                     <table>
                         <thead style="display: table-header-group;">
                             <tr style="page-break-after: avoid;">
-                                <th colspan="12" style="padding: 0.3rem; text-align: center;">Transporte Terrestre {{$transportEvent->transport->name }}</th>
+                                <th colspan="12" style="padding: 0.3rem; text-align: center;">Transporte Terrestre</th>
                             </tr>
                             <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                                 <th>Marca</th>

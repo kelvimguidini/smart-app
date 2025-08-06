@@ -270,7 +270,7 @@ onMounted(() => {
                     <template v-for="(evab, index) in eventABs.sort((a, b) => a.order - b.order)" :key="evab.id">
 
                         <tr>
-                            <th class="table-header table-header-c1  sticky-col" colspan="2">Hotel {{ index + 1 }}</th>
+                            <th class="table-header table-header-c1 sticky-col" colspan="2">Hotel {{ index + 1 }}</th>
                             <th class="text-left table-header table-header-c2" :colspan="showDetails ? 19 : 11">
                                 {{ evab.ab.name }}
                             </th>
@@ -296,7 +296,7 @@ onMounted(() => {
                                     <template v-slot:content>
                                         <span class="text-dark">Tem certeza que deseja remover o hotel {{
                                             evab.ab.name
-                                            }} do evento {{ evab.ab.name }}</span>
+                                        }} do evento {{ evab.ab.name }}</span>
                                     </template>
                                 </Modal>
                             </th>
@@ -322,11 +322,11 @@ onMounted(() => {
                             <th class="align-middle table-header-c1 sticky-col">Serviço</th>
                             <th class="align-middle table-header-c1 sticky-col">Broker</th>
                             <th class="align-middle table-header-c1 sticky-col">Tipo Serviço</th>
-                            <th class="align-middle">Local</th>
-                            <th class="align-middle">IN</th>
-                            <th class="align-middle">OUT</th>
-                            <th class="align-middle">QTD</th>
-                            <th class="align-middle">Dias</th>
+                            <th class="align-middle table-header-c1 sticky-col">Local</th>
+                            <th class="align-middle table-header-c1 sticky-col">IN</th>
+                            <th class="align-middle table-header-c1 sticky-col">OUT</th>
+                            <th class="align-middle table-header-c1 sticky-col">QTD</th>
+                            <th class="align-middle table-header-c1 sticky-col">Dias</th>
                             <th class="align-middle">Comissão (%)</th>
 
                             <th class="align-middle">Unidade</th>
@@ -361,11 +361,13 @@ onMounted(() => {
                             <td class="align-middle bg-white sticky-col">{{ opt.service.name }}</td>
                             <td class="align-middle bg-white sticky-col">{{ opt.broker.name }}</td>
                             <td class="align-middle bg-white sticky-col">{{ opt.service_type.name }}</td>
-                            <td class="align-middle">{{ opt.local.name }}</td>
-                            <td class="align-middle">{{ new Date(opt.in).toLocaleDateString() }}</td>
-                            <td class="align-middle">{{ new Date(opt.out).toLocaleDateString() }}</td>
-                            <td class="align-middle">{{ opt.count }}</td>
-                            <td class="align-middle">
+                            <td class="align-middle bg-white sticky-col">{{ opt.local.name }}</td>
+                            <td class="align-middle bg-white sticky-col">{{ new Date(opt.in).toLocaleDateString() }}
+                            </td>
+                            <td class="align-middle bg-white sticky-col">{{ new Date(opt.out).toLocaleDateString() }}
+                            </td>
+                            <td class="align-middle bg-white sticky-col">{{ opt.count }}</td>
+                            <td class="align-middle bg-white sticky-col">
                                 {{ daysBetween(opt.in, opt.out) }}
                             </td>
                             <td class="align-middle bg-success text-white">
@@ -387,20 +389,20 @@ onMounted(() => {
                             </td>
                             <td class=" align-middle">{{
                                 formatCurrency(opt.received_proposal, evab.currency.sigla)
-                                }}</td>
+                            }}</td>
                             <td class="align-middle">{{
                                 opt.received_proposal_percent
-                                }}
+                            }}
                             </td>
                             <template v-if="showDetails">
 
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((unitSale(opt) * evab.iss_percent) / 100, evab.currency.sigla)
-                                        }}</b>
+                                    }}</b>
                                 </td>
                                 <td class=" align-middle text-success">
                                     <b>{{ formatCurrency((unitCost(opt) * evab.iss_percent) / 100, evab.currency.sigla)
-                                        }}</b>
+                                    }}</b>
                                 </td>
 
                                 <td class="align-middle">
@@ -414,11 +416,11 @@ onMounted(() => {
 
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((unitSale(opt) * evab.iva_percent) / 100, evab.currency.sigla)
-                                        }}</b>
+                                    }}</b>
                                 </td>
                                 <td class=" align-middle text-success">
                                     <b>{{ formatCurrency((unitCost(opt) * evab.iva_percent) / 100, evab.currency.sigla)
-                                        }}</b>
+                                    }}</b>
                                 </td>
 
                                 <td class="align-middle">
@@ -463,20 +465,20 @@ onMounted(() => {
                         </tr>
                         <!-- FIM Opt TRs -->
                         <tr class="table-subheader">
-                            <td class="align-middle bg-warning text-dark text-rigth">
+                            <td class="align-middle bg-warning text-dark text-rigth table-subheader sticky-col">
                                 Diária Média:
                             </td>
-                            <td class="align-middle bg-warning text-dark">
+                            <td class="align-middle bg-warning text-dark table-subheader sticky-col">
                                 {{ formatCurrency(average(evab), evab.currency.sigla) }}
                             </td>
-                            <td class="align-middle"></td>
-                            <td class="align-middle bg-warning text-dark text-rigth">
+                            <td class="align-middle table-subheader sticky-col"></td>
+                            <td class="align-middle bg-warning text-dark text-rigth table-subheader sticky-col">
                                 Room Nights:
                             </td>
-                            <td class="align-middle">{{ roomNights(evab) }}</td>
-                            <td class="align-middle text-rigth"># Aptos:</td>
-                            <td class="align-middle">{{ sumCount(evab) }}</td>
-                            <td class="align-middle">
+                            <td class="align-middle sticky-col">{{ roomNights(evab) }}</td>
+                            <td class="align-middle text-rigth table-subheader sticky-col"># Aptos:</td>
+                            <td class="align-middle table-subheader sticky-col">{{ sumCount(evab) }}</td>
+                            <td class="align-middle table-subheader sticky-col">
                                 {{ sumNts(evab) }}
                             </td>
                             <td class="align-middle bg-success text-white" colspan="2">
@@ -508,7 +510,7 @@ onMounted(() => {
                                 </td>
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((sumCost(evab) * evab.iss_percent) / 100, evab.currency.sigla)
-                                        }}</b>
+                                    }}</b>
                                 </td>
                                 <td class="align-middle">
                                     <b>{{ formatCurrency(sumTaxes(evab, 'serv'), evab.currency.sigla) }}</b>
@@ -522,7 +524,7 @@ onMounted(() => {
                                 </td>
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((sumCost(evab) * evab.iva_percent) / 100, evab.currency.sigla)
-                                        }}</b>
+                                    }}</b>
                                 </td>
                                 <td class="align-middle">
                                     <b>{{ formatCurrency(sumTaxes(evab, 'sc'), evab.currency.sigla) }}</b>

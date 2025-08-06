@@ -462,9 +462,22 @@ if ($transportEvent != null) {
                             </div>
                             <div class="event-info">
                                 <div class="line">
+                                    <p>CC: <span class="event-data">{{$event->cost_center }}</span></p>
+                                </div>
+                            </div>
+                            <div class="event-info">
+                                <div class="line">
                                     <p>CONSULTOR: <span class="event-data">{{ $operador }}</span></p>
                                 </div>
                             </div>
+                            @if($event->exchange_rate != null && $event->exchange_rate != 0 && $event->exchange_rate != 1)
+                            <div class="event-info">
+                                <div class="line">
+                                    <p>Câmbio <span class="event-data">{{$event->exchange_rate}}</span></p>
+
+                                </div>
+                            </div>
+                            @endif
                         </td>
                         <td class="right">
                             <img src="{{ asset($event->customer->logo) }}" style="max-width: 100px; max-height: 100px;" alt="{{ $event->customer->name }}">

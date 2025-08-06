@@ -271,7 +271,7 @@ onMounted(() => {
 
                         <tr>
                             <th class="table-header table-header-c1 sticky-col" colspan="2">Hotel {{ index + 1
-                                }}</th>
+                            }}</th>
                             <th class="text-left table-header table-header-c2" :colspan="showDetails ? 20 : 12">
                                 {{ evAdd.add.name }}
                             </th>
@@ -298,7 +298,7 @@ onMounted(() => {
                                     <template v-slot:content>
                                         <span class="text-dark">Tem certeza que deseja remover o hotel {{
                                             evAdd.add.name
-                                            }} do evento {{ evAdd.add.name }}</span>
+                                        }} do evento {{ evAdd.add.name }}</span>
                                     </template>
                                 </Modal>
                             </th>
@@ -325,12 +325,12 @@ onMounted(() => {
                             <th class="align-middle table-header-c1 sticky-col">Serviço</th>
                             <th class="align-middle table-header-c1 sticky-col">Unidade utilizada</th>
                             <th class="align-middle table-header-c1 sticky-col">Medida</th>
-                            <th class="align-middle">#PAX</th>
-                            <th class="align-middle">Frequência</th>
-                            <th class="align-middle">IN</th>
-                            <th class="align-middle">OUT</th>
-                            <th class="align-middle">QTD</th>
-                            <th class="align-middle">Dias</th>
+                            <th class="align-middle table-header-c1 sticky-col">#PAX</th>
+                            <th class="align-middle table-header-c1 sticky-col">Frequência</th>
+                            <th class="align-middle table-header-c1 sticky-col">IN</th>
+                            <th class="align-middle table-header-c1 sticky-col">OUT</th>
+                            <th class="align-middle table-header-c1 sticky-col">QTD</th>
+                            <th class="align-middle table-header-c1 sticky-col">Dias</th>
                             <th class="align-middle">Comissão (%)</th>
 
                             <th class="align-middle">Unidade</th>
@@ -365,12 +365,14 @@ onMounted(() => {
                             <td class="align-middle bg-white sticky-col">{{ opt.service.name }}</td>
                             <td class="align-middle bg-white sticky-col">{{ opt.unit }}</td>
                             <td class="align-middle bg-white sticky-col">{{ opt.measure.name }}</td>
-                            <td class="align-middle">{{ opt.pax }}</td>
-                            <td class="align-middle">{{ opt.frequency.name }}</td>
-                            <td class="align-middle">{{ new Date(opt.in).toLocaleDateString() }}</td>
-                            <td class="align-middle">{{ new Date(opt.out).toLocaleDateString() }}</td>
-                            <td class="align-middle">{{ opt.count }}</td>
-                            <td class="align-middle">
+                            <td class="align-middle bg-white sticky-col">{{ opt.pax }}</td>
+                            <td class="align-middle bg-white sticky-col">{{ opt.frequency.name }}</td>
+                            <td class="align-middle bg-white sticky-col">{{ new Date(opt.in).toLocaleDateString() }}
+                            </td>
+                            <td class="align-middle bg-white sticky-col">{{ new Date(opt.out).toLocaleDateString() }}
+                            </td>
+                            <td class="align-middle bg-white sticky-col">{{ opt.count }}</td>
+                            <td class="align-middle bg-white sticky-col">
                                 {{ daysBetween(opt.in, opt.out) }}
                             </td>
                             <td class="align-middle bg-success text-white">
@@ -392,10 +394,10 @@ onMounted(() => {
                             </td>
                             <td class=" align-middle">{{
                                 formatCurrency(opt.received_proposal, evAdd.currency.sigla)
-                                }}</td>
+                            }}</td>
                             <td class="align-middle">{{
                                 opt.received_proposal_percent
-                                }}
+                            }}
                             </td>
                             <template v-if="showDetails">
 
@@ -468,20 +470,21 @@ onMounted(() => {
                         </tr>
                         <!-- FIM Opt TRs -->
                         <tr class="table-subheader">
-                            <td class="align-middle bg-warning text-dark text-rigth">
+                            <td class="align-middle bg-warning text-dark text-rigth table-subheader sticky-col">
                                 Diária Média:
                             </td>
-                            <td class="align-middle bg-warning text-dark">
+                            <td class="align-middle bg-warning text-dark table-subheader sticky-col">
                                 {{ formatCurrency(average(evAdd), evAdd.currency.sigla) }}
                             </td>
-                            <td class="align-middle"></td>
-                            <td class="align-middle bg-warning text-dark text-rigth" colspan="2">
+                            <td class="align-middle sticky-col table-subheader"></td>
+                            <td class="align-middle bg-warning text-dark text-rigth table-subheader sticky-col"
+                                colspan="2">
                                 Room Nights:
                             </td>
-                            <td class="align-middle">{{ roomNights(evAdd) }}</td>
-                            <td class="align-middle text-rigth"># Aptos:</td>
-                            <td class="align-middle">{{ sumCount(evAdd) }}</td>
-                            <td class="align-middle">
+                            <td class="align-middle table-subheader sticky-col">{{ roomNights(evAdd) }}</td>
+                            <td class="align-middle text-rigth table-subheader sticky-col"># Aptos:</td>
+                            <td class="align-middle table-subheader sticky-col">{{ sumCount(evAdd) }}</td>
+                            <td class="align-middle table-subheader sticky-col">
                                 {{ sumNts(evAdd) }}
                             </td>
                             <td class="align-middle bg-success text-white" colspan="2">
