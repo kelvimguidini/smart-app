@@ -26,7 +26,8 @@ class Event extends Model
         'hotel_operator',
         'air_operator',
         'land_operator',
-        'exchange_rate', // Adicione este campo
+        'exchange_rate',
+        'valor_faturamento'
     ];
     protected $table = 'event';
 

@@ -67,6 +67,7 @@ class EventController extends Controller
         $client = $request->client;
         $status = $request->status;
         $eventCode = $request->eventCode;
+        $valorFaturamento = $request->valorFaturamento;
 
         $query = Event::with([
             'crd',
@@ -173,6 +174,10 @@ class EventController extends Controller
         // Aplicar filtro de cidade, se estiver presente
         if ($eventCode) {
             $query->where('code', $eventCode);
+        }
+
+        if ($valorFaturamento) {
+            $query->where('valor_faturamento', $valorFaturamento);
         }
 
         if ($consultant && $consultant != ".::Selecione::.") {
@@ -651,5 +656,19 @@ class EventController extends Controller
         $event->save();
 
         return redirect()->back()->with('flash', ['message' => 'Câmbio salvo com sucesso!', 'type' => 'success']);
+    }
+
+    public function saveValorFaturamento(Request $request)
+    {
+        $request->validate([
+            'event_id' => 'required|exists:event,id',
+            'vl_faturamento' => 'required|numeric'
+        ]);
+
+        $event = Event::find($request->event_id);
+        $event->valor_faturamento = $request->vl_faturamento;
+        $event->save();
+
+        return redirect()->back()->with('flash', ['message' => 'Valor faturamento salvo com sucesso!', 'type' => 'success']);
     }
 }

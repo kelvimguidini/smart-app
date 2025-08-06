@@ -4,29 +4,25 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class AddValorFaturamentoToEventsTable extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::table('events', function (Blueprint $table) {
-            //
+        Schema::table('event', function (Blueprint $table) {
+            $table->decimal('valor_faturamento', 15, 2)->nullable()->after('exchange_rate');
         });
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::table('events', function (Blueprint $table) {
-            //
+        Schema::table('event', function (Blueprint $table) {
+            $table->dropColumn('valor_faturamento');
         });
     }
-};
+}

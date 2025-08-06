@@ -358,6 +358,10 @@ Route::middleware(['auth', 'cors'])->group(function () {
         ->name('event-save-exchange-rate');
 
 
+    Route::post('event/save-vl-faturamento', [EventController::class, 'saveValorFaturamento'])
+        ->name('event-save-vl-faturamento');
+
+
     //HOTEL
     Route::get('hotel', [ProviderController::class, 'create'])
         ->name('hotel');

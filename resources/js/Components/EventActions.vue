@@ -19,6 +19,23 @@
             </template>
         </Modal>
 
+        <Modal :key="index" modal-title="Valor do Faturamento" :ok-botton-callback="saveFaturamento"
+            :ok-botton-callback-param="event.id" btn-class="btn-sm btn-warning btn-icon-split mr-2">
+            <template v-slot:button>
+                <span class="icon text-white-50">
+                    <i class="fas fa-money-bill-1-wave"></i>
+                </span>
+                <span class="text">Vl. Faturamento</span>
+            </template>
+            <template v-slot:content>
+                <div class="form-group">
+                    <label for="vlFaturamento_">Valor do Faturamento:</label>
+                    <input type="text" class="form-control money" v-model="vlFaturamento"
+                        :id="'vlFaturamento_' + event.id" />
+                </div>
+            </template>
+        </Modal>
+
         <Link v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin')"
             class="btn-sm btn-info btn-icon-split mr-2" :href="route('event-edit', { id: event.id })">
         <span class="icon text-white-50">
@@ -60,6 +77,7 @@ const formDelete = useForm({
 const isLoader = ref(false);
 
 const exchangeRate = ref(0);
+const vlFaturamento = ref(0);
 
 const deleteEvent = (id) => {
     isLoader.value = true;
@@ -71,6 +89,21 @@ const deleteEvent = (id) => {
         },
     });
 };
+
+const saveFaturamento = async (eventId) => {
+    try {
+        isLoader.value = true;
+        await axios.post(route('event-save-vl-faturamento'), {
+            event_id: eventId,
+            vl_faturamento: $('#vlFaturamento_' + eventId).maskMoney('unmasked')[0]
+        });
+    } catch (error) {
+        console.error('Erro ao salvar o Valor do faturamento:', error);
+    } finally {
+        isLoader.value = false;
+    }
+};
+
 
 const saveExchangeRate = async (eventId) => {
     try {
@@ -97,6 +130,10 @@ onMounted(() => {
     if (props.event?.exchange_rate) {
         exchangeRate.value = props.event?.exchange_rate;
         $("#exchangeRate_" + props.event.id).maskMoney('mask', props.event?.exchange_rate);
+    }
+    if (props.event?.valor_faturamento) {
+        vlFaturamento.value = props.event?.valor_faturamento;
+        $("#vlFaturamento_" + props.event.id).maskMoney('mask', props.event?.valor_faturamento);
     }
 });
 </script>

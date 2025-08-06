@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, onMounted, watch, getCurrentInstance } from 'vue';
+import { ref, reactive, onMounted, watch } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Loader from '@/Components/Loader.vue';
 import EventActions from '@/Components/EventActions.vue';
@@ -22,7 +22,8 @@ const formFilters = useForm({
     consultant: '',
     client: '',
     status: '',
-    eventCode: ''
+    eventCode: '',
+    valorFaturamento: '',
 });
 
 const isLoader = ref(false);
@@ -34,6 +35,7 @@ const eventProviders = reactive({}); // Armazena os provedores por evento
 
 const submitForm = () => {
     isLoader.value = true;
+    formFilters.valorFaturamento = $('#valor_faturamento').maskMoney('unmasked')[0]
     formFilters.post(route('event-list.filter'), {
         onFinish: () => {
             isLoader.value = false;
@@ -67,6 +69,8 @@ onMounted(() => {
     }).on('select2:select', (e) => {
         formStatus.status_hotel = e.params.data.id;
     });
+
+    $('.money').maskMoney({ prefix: 'R$ ', allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
 
 });
 
@@ -315,6 +319,14 @@ watch(
                                             class="form-control">
                                     </div>
                                 </div>
+
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <label for="code">Valor Faturamento:</label>
+                                        <input type="text" id="valor_faturamento" v-model="formFilters.valorFaturamento"
+                                            class="form-control money">
+                                    </div>
+                                </div>
                             </div>
                             <button type="submit" class="btn-sm btn-primary">Filtrar</button>
                         </form>
@@ -346,7 +358,7 @@ watch(
                                         <!-- Linha do evento principal -->
                                         <tr class="table-active cursor-pointer">
                                             <th @click="showHideEventDetails(event.id, event)" scope="row">{{ event.id
-                                            }}</th>
+                                                }}</th>
                                             <td @click="showHideEventDetails(event.id, event)">{{ event.customer ?
                                                 event.customer.name : '-' }}</td>
                                             <td @click="showHideEventDetails(event.id, event)">{{ event.name }}</td>
