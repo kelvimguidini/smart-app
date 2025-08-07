@@ -114,9 +114,12 @@ const average = (evab) => {
 const sumCount = (evab) => {
     let sum = 0;
     for (const opt of evab.event_ab_opts) {
-        sum += opt.count;
+        sum += parseFloat(opt.count);
     }
-    return sum;
+    return sum.toLocaleString('pt-BR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+    });
 }
 
 const sumNts = (evab) => {
@@ -366,7 +369,13 @@ onMounted(() => {
                             </td>
                             <td class="align-middle bg-white sticky-col">{{ new Date(opt.out).toLocaleDateString() }}
                             </td>
-                            <td class="align-middle bg-white sticky-col">{{ opt.count }}</td>
+                            <td class="align-middle bg-white sticky-col">
+                                {{ opt.count ? parseFloat(opt.count).toLocaleString('pt-BR', {
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits:
+                                        2
+                                }) : '' }}
+                            </td>
                             <td class="align-middle bg-white sticky-col">
                                 {{ daysBetween(opt.in, opt.out) }}
                             </td>

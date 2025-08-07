@@ -432,7 +432,9 @@ if ($transportEvent != null) {
                             <td>{{ $item->apto_hotel->name }}</td>
                             <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
                             <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
-                            <td>{{ $item->count }}</td>
+                            <td>
+                                {{ rtrim(rtrim(number_format($item->count, 2, ',', '.'), '0'), ',') }}
+                            </td>
                             <td>{{ daysBetween($item->in, $item->out) }}</td>
 
                             <td style="border: 1px solid gray; padding: 10px 3px; "></td>
@@ -496,7 +498,9 @@ if ($transportEvent != null) {
                             <td>{{ $item->local->name }}</td>
                             <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
                             <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
-                            <td>{{ $item->count }}</td>
+                            <td>
+                                {{ rtrim(rtrim(number_format($item->count, 2, ',', '.'), '0'), ',') }}
+                            </td>
                             <td>{{ daysBetween1($item->in, $item->out) }}</td>
 
                             <td style="border: 1px solid gray; padding: 10px 3px; "></td>
@@ -561,7 +565,9 @@ if ($transportEvent != null) {
                             <td>{{ $item->m2 }}</td>
                             <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
                             <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
-                            <td>{{ $item->count }}</td>
+                            <td>
+                                {{ rtrim(rtrim(number_format($item->count, 2, ',', '.'), '0'), ',') }}
+                            </td>
                             <td>{{ daysBetween1($item->in, $item->out) }}</td>
 
                             <td style="border: 1px solid gray; padding: 10px 3px; "></td>
@@ -626,7 +632,9 @@ if ($transportEvent != null) {
                             <td>{{ $item->frequency->name }}</td>
                             <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
                             <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
-                            <td>{{ $item->count }}</td>
+                            <td>
+                                {{ rtrim(rtrim(number_format($item->count, 2, ',', '.'), '0'), ',') }}
+                            </td>
                             <td>{{ daysBetween1($item->in, $item->out) }}</td>
 
                             <td style="border: 1px solid gray; padding: 10px 3px; "></td>
@@ -691,7 +699,9 @@ if ($transportEvent != null) {
                             <td>{{ $item->service->name }}</td>
                             <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
                             <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
-                            <td>{{ $item->count }}</td>
+                            <td>
+                                {{ rtrim(rtrim(number_format($item->count, 2, ',', '.'), '0'), ',') }}
+                            </td>
 
                             <td style="border: 1px solid gray; padding: 10px 3px; "></td>
                             <td style="border: 1px solid gray; padding: 10px 3px; "></td>

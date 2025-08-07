@@ -98,9 +98,12 @@ const unitSale = (opt) => {
 const sumCount = (evtr) => {
     let sum = 0;
     for (const opt of evtr.event_transport_opts) {
-        sum += opt.count;
+        sum += parseFloat(opt.count);
     }
-    return sum;
+    return sum.toLocaleString('pt-BR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+    });
 }
 
 const sumNts = (evtr) => {
@@ -363,13 +366,19 @@ onMounted(() => {
                             <td class="align-middle bg-white sticky-col">{{ opt.observation }}</td>
                             <td class="align-middle bg-white sticky-col">{{
                                 new Date(opt.in).toLocaleDateString()
-                            }}
+                                }}
                             </td>
                             <td class="align-middle bg-white sticky-col">{{
                                 new Date(opt.out).toLocaleDateString()
-                            }}
+                                }}
                             </td>
-                            <td class="align-middle bg-white sticky-col">{{ opt.count }}</td>
+                            <td class="align-middle bg-white sticky-col">
+                                {{ opt.count ? parseFloat(opt.count).toLocaleString('pt-BR', {
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits:
+                                        2
+                                }) : '' }}
+                            </td>
                             <td class="align-middle bg-white sticky-col">
                                 {{ daysBetween(opt.in, opt.out) }}
                             </td>
@@ -392,19 +401,19 @@ onMounted(() => {
                             </td>
                             <td class=" align-middle">{{
                                 formatCurrency(opt.received_proposal, evtr.currency.sigla)
-                            }}</td>
+                                }}</td>
                             <td class="align-middle">{{
                                 opt.received_proposal_percent
-                            }}
+                                }}
                             </td>
                             <template v-if="showDetails">
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((unitSale(opt) * evtr.iss_percent) / 100, evtr.currency.sigla)
-                                    }}</b>
+                                        }}</b>
                                 </td>
                                 <td class=" align-middle text-success">
                                     <b>{{ formatCurrency((unitCost(opt) * evtr.iss_percent) / 100, evtr.currency.sigla)
-                                    }}</b>
+                                        }}</b>
                                 </td>
 
                                 <td class="align-middle">
@@ -418,11 +427,11 @@ onMounted(() => {
 
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((unitSale(opt) * evtr.iva_percent) / 100, evtr.currency.sigla)
-                                    }}</b>
+                                        }}</b>
                                 </td>
                                 <td class=" align-middle text-success">
                                     <b>{{ formatCurrency((unitCost(opt) * evtr.iva_percent) / 100, evtr.currency.sigla)
-                                    }}</b>
+                                        }}</b>
                                 </td>
 
                                 <td class="align-middle">
@@ -501,7 +510,7 @@ onMounted(() => {
                                 </td>
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((sumCost(evtr) * evtr.iss_percent) / 100, evtr.currency.sigla)
-                                    }}</b>
+                                        }}</b>
                                 </td>
                                 <td class="align-middle">
                                     <b>{{ formatCurrency(sumTaxes(evtr, 'serv'), evtr.currency.sigla) }}</b>
@@ -515,7 +524,7 @@ onMounted(() => {
                                 </td>
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((sumCost(evtr) * evtr.iva_percent) / 100, evtr.currency.sigla)
-                                    }}</b>
+                                        }}</b>
                                 </td>
                                 <td class="align-middle">
                                     <b>{{ formatCurrency(sumTaxes(evtr, 'sc'), evtr.currency.sigla) }}</b>

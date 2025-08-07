@@ -114,9 +114,12 @@ const average = (evHall) => {
 const sumCount = (evHall) => {
     let sum = 0;
     for (const opt of evHall.event_hall_opts) {
-        sum += opt.count;
+        sum += parseFloat(opt.count);
     }
-    return sum;
+    return sum.toLocaleString('pt-BR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+    });
 }
 
 const sumNts = (evHall) => {
@@ -296,7 +299,7 @@ onMounted(() => {
                                     <template v-slot:content>
                                         <span class="text-dark">Tem certeza que deseja remover o hotel {{
                                             evHall.hall.name
-                                        }} do evento {{ evHall.hall.name }}</span>
+                                            }} do evento {{ evHall.hall.name }}</span>
                                     </template>
                                 </Modal>
                             </th>
@@ -372,7 +375,13 @@ onMounted(() => {
                             </td>
                             <td class="align-middle bg-white sticky-col">{{ new Date(opt.out).toLocaleDateString() }}
                             </td>
-                            <td class="align-middle bg-white sticky-col">{{ opt.count }}</td>
+                            <td class="align-middle bg-white sticky-col">
+                                {{ opt.count ? parseFloat(opt.count).toLocaleString('pt-BR', {
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits:
+                                        2
+                                }) : '' }}
+                            </td>
                             <td class="align-middle bg-white sticky-col">
                                 {{ daysBetween(opt.in, opt.out) }}
                             </td>
@@ -395,10 +404,10 @@ onMounted(() => {
                             </td>
                             <td class=" align-middle">{{
                                 formatCurrency(opt.received_proposal, evHall.currency.sigla)
-                            }}</td>
+                                }}</td>
                             <td class="align-middle">{{
                                 opt.received_proposal_percent
-                            }}
+                                }}
                             </td>
                             <template v-if="showDetails">
 

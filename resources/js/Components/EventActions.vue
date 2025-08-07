@@ -23,7 +23,7 @@
             :ok-botton-callback-param="event.id" btn-class="btn-sm btn-warning btn-icon-split mr-2">
             <template v-slot:button>
                 <span class="icon text-white-50">
-                    <i class="fas fa-money-bill-1-wave"></i>
+                    <i class="fas fa-money"></i>
                 </span>
                 <span class="text">Vl. Faturamento</span>
             </template>

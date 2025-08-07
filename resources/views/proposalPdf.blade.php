@@ -514,7 +514,9 @@ if ($transportEvent != null) {
                             <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>" class="<?= $key == 0 ? 'first-row' : '' ?>">
                                 <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
                                 <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
-                                <td>{{ $item->count }}</td>
+                                <td>
+                                    {{ rtrim(rtrim(number_format($item->count, 2, ',', '.'), '0'), ',') }}
+                                </td>
 
                                 <td>{{ $item->apto_hotel->name }}</td>
                                 <td>{{ $item->category_hotel->name }}</td>
@@ -573,7 +575,9 @@ if ($transportEvent != null) {
                                 <td>{{ $item->local->name }}</td>
                                 <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
                                 <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
-                                <td>{{ $item->count }}</td>
+                                <td>
+                                    {{ rtrim(rtrim(number_format($item->count, 2, ',', '.'), '0'), ',') }}
+                                </td>
                                 <td>{{ daysBetween1($item->in, $item->out) }}</td>
 
                                 <td>{{ formatCurrency(unitSale($item), $abEvent->currency->symbol) }}</td>
@@ -631,7 +635,9 @@ if ($transportEvent != null) {
                                 <td>{{ $item->purpose->name }}</td>
                                 <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
                                 <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
-                                <td>{{ $item->count }}</td>
+                                <td>
+                                    {{ rtrim(rtrim(number_format($item->count, 2, ',', '.'), '0'), ',') }}
+                                </td>
                                 <td>{{ daysBetween1($item->in, $item->out) }}</td>
 
                                 <td>{{ formatCurrency(unitSale($item), $hallEvent->currency->symbol) }}</td>
@@ -689,7 +695,9 @@ if ($transportEvent != null) {
                                 <td>{{ $item->measure->name }}</td>
                                 <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
                                 <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
-                                <td>{{ $item->count }}</td>
+                                <td>
+                                    {{ rtrim(rtrim(number_format($item->count, 2, ',', '.'), '0'), ',') }}
+                                </td>
                                 <td>{{ daysBetween1($item->in, $item->out) }}</td>
 
                                 <td>{{ formatCurrency(unitSale($item), $addEvent->currency->symbol) }}</td>
@@ -751,7 +759,9 @@ if ($transportEvent != null) {
                                 <td>{{ $item->observation }}</td>
                                 <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
                                 <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
-                                <td>{{ $item->count }}</td>
+                                <td>
+                                    {{ rtrim(rtrim(number_format($item->count, 2, ',', '.'), '0'), ',') }}
+                                </td>
                                 <td>{{ daysBetween1($item->in, $item->out) }}</td>
 
                                 <td>{{ formatCurrency(unitSale($item), $transportEvent->currency->symbol) }}</td>
