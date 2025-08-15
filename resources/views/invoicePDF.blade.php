@@ -284,7 +284,7 @@ $strip = false;
         }
 
         .right {
-            float: right;
+            /* float: right; */
             width: 150px;
             text-align: start;
             margin-right: 0.2cm;
@@ -294,7 +294,7 @@ $strip = false;
         .center {
             vertical-align: middle;
             text-align: left !important;
-            width: calc(100% - 350px - 0.2cm);
+            max-width: calc(19cm - 350px - 0.2cm);
             margin: 0 0 auto 16px;
             height: 180px;
         }
@@ -466,7 +466,7 @@ $strip = false;
                     <table>
                         <thead style="display: table-header-group;">
                             <tr style="page-break-after: avoid;">
-                                <th colspan="11" style="padding: 0.3rem; text-align: center;">Hospedagem</th>
+                                <th colspan="11" style="padding: 0.3rem; text-align: center;">HOSPEDAGEM</th>
                             </tr>
                             <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                                 <th>Cat. Apto</th>
@@ -631,7 +631,7 @@ $strip = false;
                     <table>
                         <thead style="display: table-header-group;">
                             <tr style="page-break-after: avoid;">
-                                <th colspan="10" style="padding: 0.3rem; text-align: center;">Alimentos & Bebidas</th>
+                                <th colspan="10" style="padding: 0.3rem; text-align: center;">ALIMENTOS & BEBIDAS</th>
                             </tr>
                             <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                                 <th>Refeição</th>
@@ -800,7 +800,7 @@ $strip = false;
                     <table>
                         <thead style="display: table-header-group;">
                             <tr style="page-break-after: avoid;">
-                                <th colspan="11" style="padding: 0.3rem; text-align: center;">Salões & Eventos</th>
+                                <th colspan="11" style="padding: 0.3rem; text-align: center;">SALÕES & EVENTOS</th>
                             </tr>
                             <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                                 <th>Nome</th>
@@ -965,7 +965,7 @@ $strip = false;
                     <table>
                         <thead style="display: table-header-group;">
                             <tr style="page-break-after: avoid;">
-                                <th colspan="11" style="padding: 0.3rem; text-align: center;">Adicionais</th>
+                                <th colspan="11" style="padding: 0.3rem; text-align: center;">ADICIONAIS</th>
                             </tr>
                             <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                                 <th>Serviço</th>
@@ -1137,7 +1137,7 @@ $strip = false;
                     <table>
                         <thead style="display: table-header-group;">
                             <tr style="page-break-after: avoid;">
-                                <th colspan="12" style="padding: 0.3rem; text-align: center;">Transporte Terrestre</th>
+                                <th colspan="12" style="padding: 0.3rem; text-align: center;">TRANSPORTE TERRESTRE</th>
                             </tr>
                             <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                                 <th>Marca</th>
@@ -1314,7 +1314,7 @@ $strip = false;
                     <thead>
                         <tr>
                             <th colspan="7" style="padding: 0.3rem; text-align:center;">
-                                Resumo da Proposta
+                                RESUMO DA PROPOSTA
                             </th>
                         </tr>
 

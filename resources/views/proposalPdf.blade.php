@@ -463,21 +463,19 @@ if ($transportEvent != null) {
                             <div class="event-info">
                                 <div class="line">
                                     <p>CC: <span class="event-data">{{$event->cost_center }}</span></p>
+
+                                    @if($event->exchange_rate != null && $event->exchange_rate != 0 && $event->exchange_rate != 1)
+                                    <p>Câmbio <span class="event-data">{{$event->exchange_rate}}</span></p>
+                                    @endif
                                 </div>
                             </div>
+
                             <div class="event-info">
                                 <div class="line">
                                     <p>CONSULTOR: <span class="event-data">{{ $operador }}</span></p>
                                 </div>
                             </div>
-                            @if($event->exchange_rate != null && $event->exchange_rate != 0 && $event->exchange_rate != 1)
-                            <div class="event-info">
-                                <div class="line">
-                                    <p>Câmbio <span class="event-data">{{$event->exchange_rate}}</span></p>
 
-                                </div>
-                            </div>
-                            @endif
                         </td>
                         <td class="right">
                             <img src="{{ asset($event->customer->logo) }}" style="max-width: 100px; max-height: 100px;" alt="{{ $event->customer->name }}">
@@ -492,7 +490,7 @@ if ($transportEvent != null) {
                     <table>
                         <thead style="display: table-header-group;">
                             <tr style="page-break-after: avoid;">
-                                <th colspan="10" style="padding: 0.3rem; text-align: center;">Hospedagem</th>
+                                <th colspan="10" style="padding: 0.3rem; text-align: center;">HOSPEDAGEM</th>
                             </tr>
                             <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                                 <th>IN</th>
@@ -553,7 +551,7 @@ if ($transportEvent != null) {
                     <table>
                         <thead style="display: table-header-group;">
                             <tr style="page-break-after: avoid;">
-                                <th colspan="10" style="padding: 0.3rem; text-align: center;">Alimentos & Bebidas</th>
+                                <th colspan="10" style="padding: 0.3rem; text-align: center;">ALIMENTOS & BEBIDAS</th>
                             </tr>
                             <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                                 <th>Refeição</th>
@@ -611,7 +609,7 @@ if ($transportEvent != null) {
                     <table>
                         <thead style="display: table-header-group;">
                             <tr style="page-break-after: avoid;">
-                                <th colspan="11" style="padding: 0.3rem; text-align: center;">Salões & Eventos</th>
+                                <th colspan="11" style="padding: 0.3rem; text-align: center;">SALÕES & EVENTOS</th>
                             </tr>
                             <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                                 <th>Nome</th>
@@ -671,7 +669,7 @@ if ($transportEvent != null) {
                     <table>
                         <thead style="display: table-header-group;">
                             <tr style="page-break-after: avoid;">
-                                <th colspan="11" style="padding: 0.3rem; text-align: center;">Adicionais</th>
+                                <th colspan="11" style="padding: 0.3rem; text-align: center;">ADICIONAIS</th>
                             </tr>
                             <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                                 <th>Serviço</th>
@@ -731,7 +729,7 @@ if ($transportEvent != null) {
                     <table>
                         <thead style="display: table-header-group;">
                             <tr style="page-break-after: avoid;">
-                                <th colspan="12" style="padding: 0.3rem; text-align: center;">Transporte Terrestre</th>
+                                <th colspan="12" style="padding: 0.3rem; text-align: center;">TRANSPORTE TERRESTRE</th>
                             </tr>
                             <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                                 <!-- <th>Marca</th> -->
