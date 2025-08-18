@@ -151,11 +151,11 @@
                                 <tr v-for="(historyItem, index) in history" :key="index">
                                     <td>{{ new
                                         Date(historyItem.created_at).toLocaleDateString()
-                                    }}</td>
+                                        }}</td>
                                     <td>{{
                                         getStatusLabel(historyItem.status)
-                                    }}</td>
-                                    <td>{{ historyItem.user.name }}</td>
+                                        }}</td>
+                                    <td>{{ historyItem.user?.name }}</td>
                                     <td>{{ historyItem.observation }}</td>
                                 </tr>
                             </tbody>
@@ -331,10 +331,10 @@
                         </span>
                     </p>
                     <p><strong>Usuário: </strong> {{
-                        prov.providerBudget[0].user.name }}</p>
+                        prov.providerBudget[0].user?.name }}</p>
                     <p><strong>Data: </strong> {{ new
                         Date(prov.providerBudget[0].approval_date).toLocaleDateString()
-                    }}
+                        }}
                     </p>
                 </div>
             </div>
