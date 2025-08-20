@@ -71,6 +71,7 @@ onMounted(() => {
     });
 
     $('.money').maskMoney({ prefix: 'R$ ', allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
+    $('.moneyx').maskMoney({ prefix: '', allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
 
 });
 
@@ -324,7 +325,7 @@ watch(
                                     <div class="form-group">
                                         <label for="code">Valor Faturamento:</label>
                                         <input type="text" id="valor_faturamento" v-model="formFilters.valorFaturamento"
-                                            class="form-control money">
+                                            class="form-control moneyx">
                                     </div>
                                 </div>
                             </div>
@@ -358,7 +359,7 @@ watch(
                                         <!-- Linha do evento principal -->
                                         <tr class="table-active cursor-pointer">
                                             <th @click="showHideEventDetails(event.id, event)" scope="row">{{ event.id
-                                            }}</th>
+                                                }}</th>
                                             <td @click="showHideEventDetails(event.id, event)">{{ event.customer ?
                                                 event.customer.name : '-' }}</td>
                                             <td @click="showHideEventDetails(event.id, event)">{{ event.name }}</td>
