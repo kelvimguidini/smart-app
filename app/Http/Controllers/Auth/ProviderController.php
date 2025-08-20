@@ -322,7 +322,7 @@ class ProviderController extends Controller
         if ($table == 'event_hotels' || $table == 'event_abs' || $table == 'event_halls') {
             $withRelations = array_merge($withRelations, [
                 'event_hotels.hotel' => fn($q) => $q->where('id', $provider),
-                'event_hotels.eventHotelsOpt' => fn($q) => $q->whereHas('event_hotel', fn($q) => $q->where('hotel_id', $provider))->orderBy('in'),
+                'event_hotels.eventHotelsOpt' => fn($q) => $q->whereHas('event_hotel', fn($q) => $q->where('hotel_id', $provider))->orderBy('order', 'asc')->orderby('in'),
                 'event_hotels.eventHotelsOpt.regime',
                 'event_hotels.eventHotelsOpt.apto_hotel',
                 'event_hotels.eventHotelsOpt.category_hotel',
@@ -333,7 +333,7 @@ class ProviderController extends Controller
         if ($table == 'event_hotels' || $table == 'event_abs' || $table == 'event_halls') {
             $withRelations = array_merge($withRelations, [
                 'event_abs.ab' => fn($q) => $q->where('id', $provider),
-                'event_abs.eventAbOpts' => fn($q) => $q->whereHas('event_ab', fn($q) => $q->where('ab_id', $provider))->orderBy('in'),
+                'event_abs.eventAbOpts' => fn($q) => $q->whereHas('event_ab', fn($q) => $q->where('ab_id', $provider))->orderBy('order', 'asc')->orderby('in'),
                 'event_abs.eventAbOpts.Local',
                 'event_abs.eventAbOpts.service_type',
                 'event_abs.currency',
@@ -343,7 +343,7 @@ class ProviderController extends Controller
         if ($table == 'event_hotels' || $table == 'event_abs' || $table == 'event_halls') {
             $withRelations = array_merge($withRelations, [
                 'event_halls.hall' => fn($q) => $q->where('id', $provider),
-                'event_halls.eventHallOpts' => fn($q) => $q->whereHas('event_hall', fn($q) => $q->where('hall_id', $provider))->orderBy('in'),
+                'event_halls.eventHallOpts' => fn($q) => $q->whereHas('event_hall', fn($q) => $q->where('hall_id', $provider))->orderBy('order', 'asc')->orderby('in'),
                 'event_halls.eventHallOpts.purpose',
                 'event_halls.currency',
             ]);
@@ -352,7 +352,7 @@ class ProviderController extends Controller
         if ($table == 'event_adds') {
             $withRelations = array_merge($withRelations, [
                 'event_adds.add' => fn($q) => $q->where('id', $provider),
-                'event_adds.eventAddOpts' => fn($q) => $q->whereHas('event_add', fn($q) => $q->where('add_id', $provider))->orderBy('in'),
+                'event_adds.eventAddOpts' => fn($q) => $q->whereHas('event_add', fn($q) => $q->where('add_id', $provider))->orderBy('order', 'asc')->orderby('in'),
                 'event_adds.eventAddOpts.measure',
                 'event_adds.eventAddOpts.service',
                 'event_adds.currency',
@@ -362,7 +362,7 @@ class ProviderController extends Controller
         if ($table == 'event_transports') {
             $withRelations = array_merge($withRelations, [
                 'event_transports.transport' => fn($q) => $q->where('id', $provider),
-                'event_transports.eventTransportOpts' => fn($q) => $q->whereHas('event_transport', fn($q) => $q->where('transport_id', $provider))->orderBy('in'),
+                'event_transports.eventTransportOpts' => fn($q) => $q->whereHas('event_transport', fn($q) => $q->where('transport_id', $provider))->orderBy('order', 'asc')->orderby('in'),
                 'event_transports.eventTransportOpts.brand',
                 'event_transports.eventTransportOpts.vehicle',
                 'event_transports.eventTransportOpts.model',
@@ -413,7 +413,7 @@ class ProviderController extends Controller
         }
 
         $pdf = $this->createPDF($this->getEventDataBase($request->provider_id, $request->event_id, $request->type), 1);
-        //return $pdf;
+        return $pdf;
         // Renderize o HTML como PDF
         $pdf->render();
         // Retorna o PDF como um arquivo de download
@@ -510,8 +510,8 @@ class ProviderController extends Controller
         }
 
         $pdf = $this->createPDF($this->getEventDataBase($request->provider_id, $request->event_id, $request->type), 2);
+        return $pdf;
 
-        //return $pdf;
         // Renderize o HTML como PDF
         $pdf->render();
         // Retorna o PDF como um arquivo de download
@@ -584,7 +584,7 @@ class ProviderController extends Controller
                 $html = "<div class=\"text-truncate\">Sem Conteudo a ser apresentado</div>";
                 break;
         }
-        //return $html;
+        return $html;
         // Carregue o HTML no Dompdf
         $pdf->loadHtml($html);
 

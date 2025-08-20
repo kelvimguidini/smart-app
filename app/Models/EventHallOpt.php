@@ -22,7 +22,8 @@ class EventHallOpt extends Model
         'received_proposal_percent',
         'name',
         'm2',
-        'pax'
+        'pax',
+        'order',
     ];
 
     protected $table = 'event_hall_opt';

@@ -93,6 +93,7 @@ class HotelController extends Controller
                 $opt->compare_website_htl = $request->compare_website_htl;
                 $opt->compare_omnibess = $request->compare_omnibess;
                 $opt->count = $request->count;
+                $opt->order = $request->order;
 
                 $opt->save();
             } else {
@@ -113,6 +114,7 @@ class HotelController extends Controller
                     'compare_website_htl' => $request->compare_website_htl,
                     'compare_omnibess' => $request->compare_omnibess,
                     'count' => $request->count,
+                    'order' => $request->order,
                 ]);
             }
         } catch (Exception $e) {

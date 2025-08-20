@@ -9,7 +9,24 @@ class EventHotelOpt extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['event_hotel_id', 'apto_hotel_id', 'category_hotel_id', 'broker_id', 'regime_id', 'purpose_id', 'in', 'out', 'count', 'kickback', 'received_proposal', 'received_proposal_percent', 'compare_trivago', 'compare_website_htl', 'compare_omnibess'];
+    protected $fillable = [
+        'event_hotel_id',
+        'apto_hotel_id',
+        'category_hotel_id',
+        'broker_id',
+        'regime_id',
+        'purpose_id',
+        'in',
+        'out',
+        'count',
+        'kickback',
+        'received_proposal',
+        'received_proposal_percent',
+        'compare_trivago',
+        'compare_website_htl',
+        'compare_omnibess',
+        'order',
+    ];
     protected $table = 'event_hotel_opt';
 
     /**

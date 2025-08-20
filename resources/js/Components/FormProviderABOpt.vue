@@ -43,6 +43,7 @@ const formOpt = useForm({
     received_proposal_percent: 0.8,
     kickback: null,
     count: null,
+    order: 0,
 });
 
 const editOpt = (opt) => {
@@ -67,6 +68,8 @@ const duplicate = (opt, edit = false) => {
     formOpt.received_proposal_percent = opt.received_proposal_percent;
     formOpt.kickback = opt.kickback;
     formOpt.count = opt.count;
+    formOpt.order = opt.order;
+
     setRange(opt);
 
     $('#broker').val(opt.broker_id).trigger('change');
@@ -273,6 +276,14 @@ const isLoader = ref(false);
                         </template>
                     </VDatePicker>
 
+                </div>
+
+                <div class="row">
+                    <div class="form-group col-lg-6">
+                        <InputLabel for="order" value="Ordem" />
+                        <TextInput type="number" class="form-control percent" v-model="formOpt.order" autofocus min="0"
+                            step="1" autocomplete="order" />
+                    </div>
                 </div>
 
             </div>

@@ -282,7 +282,7 @@ class EventController extends Controller
         $eventHotel = $request->tab == 1
             ? EventHotel::with([
                 'eventHotelsOpt' => function ($q) {
-                    $q->orderBy('in');
+                    $q->orderBy('order', 'asc')->orderBy('order', 'asc')->orderby('in');
                 },
                 'hotel.city',
                 'currency',
@@ -293,7 +293,7 @@ class EventController extends Controller
 
         $eventHotels = EventHotel::with([
             'eventHotelsOpt' => function ($q) {
-                $q->orderBy('in');
+                $q->orderBy('order', 'asc')->orderby('in');
             },
             'eventHotelsOpt.broker',
             'eventHotelsOpt.regime',
@@ -309,7 +309,7 @@ class EventController extends Controller
         $eventAB = $request->tab == 2
             ? EventAB::with([
                 'eventAbOpts' => function ($q) {
-                    $q->orderBy('in');
+                    $q->orderBy('order', 'asc')->orderby('in');
                 },
                 'ab.city',
                 'currency',
@@ -320,7 +320,7 @@ class EventController extends Controller
 
         $eventABs = EventAB::with([
             'eventAbOpts' => function ($q) {
-                $q->orderBy('in');
+                $q->orderBy('order', 'asc')->orderby('in');
             },
             'eventAbOpts.broker',
             'eventAbOpts.service',
@@ -335,7 +335,7 @@ class EventController extends Controller
         $eventHall = $request->tab == 3
             ? EventHall::with([
                 'eventHallOpts' => function ($q) {
-                    $q->orderBy('in');
+                    $q->orderBy('order', 'asc')->orderby('in');
                 },
                 'hall.city',
                 'currency',
@@ -346,7 +346,7 @@ class EventController extends Controller
 
         $eventHalls = EventHall::with([
             'eventHallOpts' => function ($q) {
-                $q->orderBy('in');
+                $q->orderBy('order', 'asc')->orderby('in');
             },
             'eventHallOpts.broker',
             'eventHallOpts.service',
@@ -360,7 +360,7 @@ class EventController extends Controller
         $eventAdd = $request->tab == 4
             ? EventAdd::with([
                 'eventAddOpts' => function ($q) {
-                    $q->orderBy('in');
+                    $q->orderBy('order', 'asc')->orderby('in');
                 },
                 'add.city',
                 'currency',
@@ -371,7 +371,7 @@ class EventController extends Controller
 
         $eventAdds = EventAdd::with([
             'eventAddOpts' => function ($q) {
-                $q->orderBy('in');
+                $q->orderBy('order', 'asc')->orderby('in');
             },
             'eventAddOpts.frequency',
             'eventAddOpts.measure',
@@ -385,7 +385,7 @@ class EventController extends Controller
         $eventTransport = $request->tab == 5
             ? EventTransport::with([
                 'eventTransportOpts' => function ($q) {
-                    $q->orderBy('in');
+                    $q->orderBy('order', 'asc')->orderby('in');
                 },
                 'transport.city',
                 'currency',
@@ -396,7 +396,7 @@ class EventController extends Controller
 
         $eventTransports = EventTransport::with([
             'eventTransportOpts' => function ($q) {
-                $q->orderBy('in');
+                $q->orderBy('order', 'asc')->orderby('in');
             },
             'eventTransportOpts.broker',
             'eventTransportOpts.vehicle',

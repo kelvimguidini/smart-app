@@ -22,6 +22,7 @@ class EventAddOpt extends Model
         'kickback',
         'received_proposal',
         'received_proposal_percent',
+        'order',
     ];
 
     protected $table = 'event_add_opt';

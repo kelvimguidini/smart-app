@@ -73,6 +73,7 @@ class AddController extends Controller
                 $opt->received_proposal = $request->received_proposal;
                 $opt->kickback = $request->kickback;
                 $opt->count = $request->count;
+                $opt->order = $request->order;
 
                 $opt->save();
             } else {
@@ -90,6 +91,7 @@ class AddController extends Controller
                     'received_proposal' => $request->received_proposal,
                     'kickback' => $request->kickback,
                     'count' => $request->count,
+                    'order' => $request->order,
                 ]);
             }
         } catch (Exception $e) {

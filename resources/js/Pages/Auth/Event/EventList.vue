@@ -70,7 +70,6 @@ onMounted(() => {
         formStatus.status_hotel = e.params.data.id;
     });
 
-    $('.money').maskMoney({ prefix: 'R$ ', allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
     $('.moneyx').maskMoney({ prefix: '', allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
 
 });

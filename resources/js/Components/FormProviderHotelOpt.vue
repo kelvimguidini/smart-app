@@ -60,7 +60,7 @@ const formOpt = useForm({
     compare_trivago: null,
     compare_website_htl: null,
     compare_omnibess: null,
-
+    order: 0,
 });
 
 const editOpt = (opt) => {
@@ -90,6 +90,8 @@ const duplicate = (opt, edit = false) => {
     formOpt.compare_trivago = opt.compare_trivago;
     formOpt.compare_website_htl = opt.compare_website_htl;
     formOpt.compare_omnibess = opt.compare_omnibess;
+    formOpt.order = opt.order;
+
     setRange(opt);
 
     $('#broker').val(opt.broker_id).trigger('change');
@@ -384,6 +386,15 @@ const isLoader = ref(false);
                     <TextInput id="compare_omnibess" type="text" class="form-control money"
                         v-model="formOpt.compare_omnibess" required autofocus autocomplete="compare_omnibess" />
                 </div>
+
+                <div class="row">
+                    <div class="form-group col-lg-4">
+                        <InputLabel for="order" value="Ordem" />
+                        <TextInput type="number" class="form-control percent" v-model="formOpt.order" autofocus min="0"
+                            step="1" autocomplete="order" />
+                    </div>
+                </div>
+
 
                 <div class="flex items-center justify-end mt-4 rigth">
                     <PrimaryButton css-class="btn btn-primary float-right m-1"
