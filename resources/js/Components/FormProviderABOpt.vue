@@ -279,7 +279,7 @@ const isLoader = ref(false);
                 </div>
 
                 <div class="row">
-                    <div class="form-group col-lg-6">
+                    <div class="form-group col-lg-4">
                         <InputLabel for="order" value="Ordem" />
                         <TextInput type="number" class="form-control percent" v-model="formOpt.order" autofocus min="0"
                             step="1" autocomplete="order" />

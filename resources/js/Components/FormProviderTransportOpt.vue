@@ -267,7 +267,7 @@ const isLoader = ref(false);
                         </option>
                     </select>
                 </div>
-                <div class="row col-lg-6">
+                <div class="row col-lg-4">
                     <div class="form-group">
                         <InputLabel for="order" value="Ordem" />
                         <TextInput type="number" class="form-control percent" v-model="formOpt.order" autofocus min="0"
