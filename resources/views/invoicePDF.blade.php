@@ -204,6 +204,25 @@ if (count($iofs) > 0) {
 
 $strip = false;
 
+function quebraTexto($texto, $limite = 40)
+{
+    $palavras = explode(' ', $texto);
+    $linhaAtual = '';
+    $resultado = '';
+
+    foreach ($palavras as $palavra) {
+        if (strlen($linhaAtual . ' ' . $palavra) > $limite) {
+            $resultado .= trim($linhaAtual) . "<br>";
+            $linhaAtual = $palavra;
+        } else {
+            $linhaAtual .= ' ' . $palavra;
+        }
+    }
+
+    $resultado .= trim($linhaAtual);
+    return $resultado;
+}
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -350,7 +369,6 @@ $strip = false;
             text-align: start;
             text-transform: uppercase;
             padding: 0 8px;
-            height: 23px;
         }
 
         .line p {
@@ -364,6 +382,7 @@ $strip = false;
             font-weight: 700;
             color: #fff;
             margin-left: 4px;
+            display: inline-table;
         }
 
         .row {
@@ -406,7 +425,7 @@ $strip = false;
                         <td class="center">
                             <div class="event-info">
                                 <div class="line">
-                                    <p>Evento: <span class="event-data">{{ $event->name }}</span></p>
+                                    <p>Evento: <span class="event-data">{!! quebraTexto($event->name, 50) !!}</span></p>
                                 </div>
                             </div>
                             <div class="event-info">

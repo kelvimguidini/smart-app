@@ -148,7 +148,7 @@ $qtdLinhas = 0;
 $rodapeSize = 13;
 
 if ($hotelEvent != null) {
-    if ($hotelEvent->iof > 0) {
+    if ($hotelEvent->iof > 0 && $hotelEvent->iof > $percIOF) {
         $percIOF = $hotelEvent->iof;
     }
     $rodapeSize++;
@@ -166,7 +166,7 @@ if ($hotelEvent != null) {
     }
 }
 if ($abEvent != null) {
-    if ($abEvent->iof > 0) {
+    if ($abEvent->iof > 0 && $abEvent->iof > $percIOF) {
         $percIOF = $abEvent->iof;
     }
     $rodapeSize++;
@@ -184,7 +184,7 @@ if ($abEvent != null) {
     }
 }
 if ($hallEvent != null) {
-    if ($hallEvent->iof > 0) {
+    if ($hallEvent->iof > 0 && $hallEvent->iof > $percIOF) {
         $percIOF = $hallEvent->iof;
     }
     $rodapeSize++;
@@ -202,7 +202,7 @@ if ($hallEvent != null) {
     }
 }
 if ($addEvent != null) {
-    if ($addEvent->iof > 0) {
+    if ($addEvent->iof > 0 && $addEvent->iof > $percIOF) {
         $percIOF = $addEvent->iof;
     }
     $rodapeSize++;
@@ -220,7 +220,7 @@ if ($addEvent != null) {
     }
 }
 if ($transportEvent != null) {
-    if ($transportEvent->iof > 0) {
+    if ($transportEvent->iof > 0 && $transportEvent->iof > $percIOF) {
         $percIOF = $transportEvent->iof;
     }
 
@@ -246,6 +246,25 @@ if ($transportEvent != null) {
     $operador = $event->hotelOperator->name ?? 'Sem operador';
 } else {
     $operador = "Sem operador";
+}
+
+function quebraTexto($texto, $limite = 40)
+{
+    $palavras = explode(' ', $texto);
+    $linhaAtual = '';
+    $resultado = '';
+
+    foreach ($palavras as $palavra) {
+        if (strlen($linhaAtual . ' ' . $palavra) > $limite) {
+            $resultado .= trim($linhaAtual) . "<br>";
+            $linhaAtual = $palavra;
+        } else {
+            $linhaAtual .= ' ' . $palavra;
+        }
+    }
+
+    $resultado .= trim($linhaAtual);
+    return $resultado;
 }
 ?>
 <!DOCTYPE html>
@@ -395,7 +414,6 @@ if ($transportEvent != null) {
             text-align: start;
             text-transform: uppercase;
             padding: 0 8px;
-            height: 23px;
         }
 
         .line p {
@@ -405,10 +423,12 @@ if ($transportEvent != null) {
             margin: 0 5px;
         }
 
+
         .event-data {
             font-weight: 700;
             color: #fff;
             margin-left: 4px;
+            display: inline-table;
         }
 
         .row {
@@ -446,7 +466,8 @@ if ($transportEvent != null) {
                         <td class="center">
                             <div class="event-info">
                                 <div class="line">
-                                    <p>Evento: <span class="event-data">{{ $event->name }}</span></p>
+                                    <p>Evento:</p>
+                                    <span class="event-data">{!! quebraTexto($event->name, 50) !!}</span>
                                 </div>
                             </div>
                             <div class="event-info">
