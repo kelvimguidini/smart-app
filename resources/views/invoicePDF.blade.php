@@ -189,6 +189,19 @@ if ($provider != null) {
     }
 }
 
+$percIOF = 0;
+$iofs = [];
+
+if ($hotelEvent && $hotelEvent->iof > 0) $iofs[] = $hotelEvent->iof;
+if ($abEvent && $abEvent->iof > 0) $iofs[] = $abEvent->iof;
+if ($hallEvent && $hallEvent->iof > 0) $iofs[] = $hallEvent->iof;
+if ($addEvent && $addEvent->iof > 0) $iofs[] = $addEvent->iof;
+if ($transportEvent && $transportEvent->iof > 0) $iofs[] = $transportEvent->iof;
+
+if (count($iofs) > 0) {
+    $percIOF = max($iofs);
+}
+
 $strip = false;
 
 ?>
@@ -521,12 +534,12 @@ $strip = false;
                             @endforeach
                         </tbody>
                         <?php
-                        $sumTotalHotelSaleTaxa = ((($sumTotalHotelSale * $hotelEvent->iof) / 100) + $sumTotalHotelSale) *  (1 + ($hotelEvent->taxa_4bts / 100));
-                        $sumTotalHotelCostTaxa = ((($sumTotalHotelCost * $hotelEvent->iof) / 100) + $sumTotalHotelCost);
+                        $sumTotalHotelSaleTaxa = ((($sumTotalHotelSale * $percIOF) / 100) + $sumTotalHotelSale) *  (1 + ($hotelEvent->taxa_4bts / 100));
+                        $sumTotalHotelCostTaxa = ((($sumTotalHotelCost * $percIOF) / 100) + $sumTotalHotelCost);
 
-                        $hotelTaxa4BTS = ((($sumTotalHotelSale * $hotelEvent->iof) / 100) + $sumTotalHotelSale) * ($hotelEvent->taxa_4bts / 100);
-                        $sumTaxeHotelCost += (($sumTotalHotelCost * $hotelEvent->iof) / 100);
-                        $sumTaxeHotelSale += (($sumTotalHotelSale * $hotelEvent->iof) / 100);
+                        $hotelTaxa4BTS = ((($sumTotalHotelSale * $percIOF) / 100) + $sumTotalHotelSale) * ($hotelEvent->taxa_4bts / 100);
+                        $sumTaxeHotelCost += (($sumTotalHotelCost * $percIOF) / 100);
+                        $sumTaxeHotelSale += (($sumTotalHotelSale * $percIOF) / 100);
                         ?>
                         <tfoot class="table-footer">
                             <tr>
@@ -604,10 +617,10 @@ $strip = false;
                                         </tr>
 
                                         <tr>
-                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $hotelEvent->iof }}%)</td>
-                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumHotelSale * $hotelEvent->iof) / 100, $hotelEvent->currency->symbol) }}</td>
-                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $hotelEvent->iof }}%)</td>
-                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalHotelCost * $hotelEvent->iof) / 100, $hotelEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $percIOF }}%)</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumHotelSale * $percIOF) / 100, $hotelEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $percIOF }}%)</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalHotelCost * $percIOF) / 100, $hotelEvent->currency->symbol) }}</td>
                                             <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;" colspan="2"></td>
                                         </tr>
 
@@ -686,12 +699,12 @@ $strip = false;
                             @endforeach
                         </tbody>
                         <?php
-                        $sumTotalAbSaleTaxa = ((($sumTotalAbSale * $abEvent->iof) / 100) + $sumTotalAbSale) *  (1 + ($abEvent->taxa_4bts / 100));
-                        $sumTotalAbCostTaxa = ((($sumTotalAbCost * $abEvent->iof) / 100) + $sumTotalAbCost);
+                        $sumTotalAbSaleTaxa = ((($sumTotalAbSale * $percIOF) / 100) + $sumTotalAbSale) *  (1 + ($abEvent->taxa_4bts / 100));
+                        $sumTotalAbCostTaxa = ((($sumTotalAbCost * $percIOF) / 100) + $sumTotalAbCost);
 
-                        $abTaxa4BTS = ((($sumTotalAbSale * $abEvent->iof) / 100) + $sumTotalAbSale) * ($abEvent->taxa_4bts / 100);
-                        $sumTaxeAbCost += (($sumTotalAbCost * $abEvent->iof) / 100);
-                        $sumTaxeAbSale += (($sumTotalAbSale * $abEvent->iof) / 100);
+                        $abTaxa4BTS = ((($sumTotalAbSale * $percIOF) / 100) + $sumTotalAbSale) * ($abEvent->taxa_4bts / 100);
+                        $sumTaxeAbCost += (($sumTotalAbCost * $percIOF) / 100);
+                        $sumTaxeAbSale += (($sumTotalAbSale * $percIOF) / 100);
                         ?>
                         <tfoot class="table-footer">
                             <tr>
@@ -771,10 +784,10 @@ $strip = false;
                                         </tr>
 
                                         <tr>
-                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $abEvent->iof }}%)</td>
-                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumAbSale * $abEvent->iof) / 100, $abEvent->currency->symbol) }}</td>
-                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $abEvent->iof }}%)</td>
-                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalAbCost * $abEvent->iof) / 100, $abEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $percIOF }}%)</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumAbSale * $percIOF) / 100, $abEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $percIOF }}%)</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalAbCost * $percIOF) / 100, $abEvent->currency->symbol) }}</td>
                                             <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;" colspan="2"></td>
                                         </tr>
 
@@ -857,12 +870,12 @@ $strip = false;
                             @endforeach
                         </tbody>
                         <?php
-                        $sumTotalHallSaleTaxa = ((($sumTotalHallSale * $hallEvent->iof) / 100) + $sumTotalHallSale) *  (1 + ($hallEvent->taxa_4bts / 100));
-                        $sumTotalHallCostTaxa = ((($sumTotalHallCost * $hallEvent->iof) / 100) + $sumTotalHallCost);
+                        $sumTotalHallSaleTaxa = ((($sumTotalHallSale * $percIOF) / 100) + $sumTotalHallSale) *  (1 + ($hallEvent->taxa_4bts / 100));
+                        $sumTotalHallCostTaxa = ((($sumTotalHallCost * $percIOF) / 100) + $sumTotalHallCost);
 
-                        $hallTaxa4BTS = ((($sumTotalHallSale * $hallEvent->iof) / 100) + $sumTotalHallSale) * ($hallEvent->taxa_4bts / 100);
-                        $sumTaxeHallCost += (($sumTotalHallCost * $hallEvent->iof) / 100);
-                        $sumTaxeHallSale += (($sumTotalHallSale * $hallEvent->iof) / 100);
+                        $hallTaxa4BTS = ((($sumTotalHallSale * $percIOF) / 100) + $sumTotalHallSale) * ($hallEvent->taxa_4bts / 100);
+                        $sumTaxeHallCost += (($sumTotalHallCost * $percIOF) / 100);
+                        $sumTaxeHallSale += (($sumTotalHallSale * $percIOF) / 100);
                         ?>
                         <tfoot class="table-footer">
                             <tr class="table-subheader" style="background-color: #ffe0b1">
@@ -936,10 +949,10 @@ $strip = false;
                                         </tr>
 
                                         <tr>
-                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $hallEvent->iof }}%)</td>
-                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumHallSale * $hallEvent->iof) / 100, $hallEvent->currency->symbol) }}</td>
-                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $hallEvent->iof }}%)</td>
-                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalHallCost * $hallEvent->iof) / 100, $hallEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $percIOF }}%)</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumHallSale * $percIOF) / 100, $hallEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $percIOF }}%)</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalHallCost * $percIOF) / 100, $hallEvent->currency->symbol) }}</td>
                                             <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;" colspan="2"></td>
                                         </tr>
 
@@ -1023,12 +1036,12 @@ $strip = false;
                         </tbody>
 
                         <?php
-                        $sumTotalAddSaleTaxa = ((($sumTotalAddSale * $addEvent->iof) / 100) + $sumTotalAddSale) *  (1 + ($addEvent->taxa_4bts / 100));
-                        $sumTotalAddCostTaxa = ((($sumTotalAddCost * $addEvent->iof) / 100) + $sumTotalAddCost);
+                        $sumTotalAddSaleTaxa = ((($sumTotalAddSale * $percIOF) / 100) + $sumTotalAddSale) *  (1 + ($addEvent->taxa_4bts / 100));
+                        $sumTotalAddCostTaxa = ((($sumTotalAddCost * $percIOF) / 100) + $sumTotalAddCost);
 
-                        $addTaxa4BTS = ((($sumTotalAddSale * $addEvent->iof) / 100) + $sumTotalAddSale) * ($addEvent->taxa_4bts / 100);
-                        $sumTaxeAddCost += (($sumTotalAddCost * $addEvent->iof) / 100);
-                        $sumTaxeAddSale += (($sumTotalAddSale * $addEvent->iof) / 100);
+                        $addTaxa4BTS = ((($sumTotalAddSale * $percIOF) / 100) + $sumTotalAddSale) * ($addEvent->taxa_4bts / 100);
+                        $sumTaxeAddCost += (($sumTotalAddCost * $percIOF) / 100);
+                        $sumTaxeAddSale += (($sumTotalAddSale * $percIOF) / 100);
                         ?>
                         <tfoot class="table-footer">
                             <tr>
@@ -1108,10 +1121,10 @@ $strip = false;
                                         </tr>
 
                                         <tr>
-                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $addEvent->iof }}%)</td>
-                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumAddSale * $addEvent->iof) / 100, $addEvent->currency->symbol) }}</td>
-                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $addEvent->iof }}%)</td>
-                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalAddCost * $addEvent->iof) / 100, $addEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $percIOF }}%)</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumAddSale * $percIOF) / 100, $addEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $percIOF }}%)</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalAddCost * $percIOF) / 100, $addEvent->currency->symbol) }}</td>
                                             <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;" colspan="2"></td>
                                         </tr>
 
@@ -1198,12 +1211,12 @@ $strip = false;
                         </tbody>
 
                         <?php
-                        $sumTotalTransportSaleTaxa = ((($sumTotalTransportSale * $transportEvent->iof) / 100) + $sumTotalTransportSale) *  (1 + ($transportEvent->taxa_4bts / 100));
-                        $sumTotalTransportCostTaxa = ((($sumTotalTransportCost * $transportEvent->iof) / 100) + $sumTotalTransportCost);
+                        $sumTotalTransportSaleTaxa = ((($sumTotalTransportSale * $percIOF) / 100) + $sumTotalTransportSale) *  (1 + ($transportEvent->taxa_4bts / 100));
+                        $sumTotalTransportCostTaxa = ((($sumTotalTransportCost * $percIOF) / 100) + $sumTotalTransportCost);
 
-                        $transportTaxa4BTS = ((($sumTotalTransportSale * $transportEvent->iof) / 100) + $sumTotalTransportSale) * ($transportEvent->taxa_4bts / 100);
-                        $sumTaxeTransportCost += (($sumTotalTransportCost * $transportEvent->iof) / 100);
-                        $sumTaxeTransportSale += (($sumTotalTransportSale * $transportEvent->iof) / 100);
+                        $transportTaxa4BTS = ((($sumTotalTransportSale * $percIOF) / 100) + $sumTotalTransportSale) * ($transportEvent->taxa_4bts / 100);
+                        $sumTaxeTransportCost += (($sumTotalTransportCost * $percIOF) / 100);
+                        $sumTaxeTransportSale += (($sumTotalTransportSale * $percIOF) / 100);
                         ?>
                         <tfoot class="table-footer">
                             <tr>
@@ -1283,10 +1296,10 @@ $strip = false;
                                         </tr>
 
                                         <tr>
-                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $transportEvent->iof }}%)</td>
-                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTransportSale * $transportEvent->iof) / 100, $transportEvent->currency->symbol) }}</td>
-                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $transportEvent->iof }}%)</td>
-                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalTransportCost * $transportEvent->iof) / 100, $transportEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $percIOF }}%)</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTransportSale * $percIOF) / 100, $transportEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $percIOF }}%)</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalTransportCost * $percIOF) / 100, $transportEvent->currency->symbol) }}</td>
                                             <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;" colspan="2"></td>
                                         </tr>
 
