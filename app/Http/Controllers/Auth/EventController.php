@@ -219,7 +219,7 @@ class EventController extends Controller
         }
 
         $events = $query->orderBy('created_at', 'desc')->paginate($perPage, ['*'], 'page', $page);
-
+        $user = User::where('is_api_user', false)->get();
         return Inertia::render('Auth/Event/EventList', [
             'events' => $events,
             'filters' => (object)[
@@ -230,7 +230,7 @@ class EventController extends Controller
                 'client' => $client,
             ],
             'customers' => Customer::all(),
-            'users' => User::all(),
+            'users' => $user,
             'allStatus' => Constants::STATUS
         ]);
     }

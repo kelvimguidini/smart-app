@@ -13,7 +13,7 @@
             <template v-slot:content>
                 <div class="form-group">
                     <label for="exchangeRate">Valor do Câmbio:</label>
-                    <input type="text" class="form-control money" v-model="exchangeRate"
+                    <input type="text" class="form-control moneyx" v-model="exchangeRate"
                         :id="'exchangeRate_' + event.id" />
                 </div>
             </template>
@@ -30,7 +30,7 @@
             <template v-slot:content>
                 <div class="form-group">
                     <label for="vlFaturamento_">Valor do Faturamento:</label>
-                    <input type="text" class="form-control money" v-model="vlFaturamento"
+                    <input type="text" class="form-control moneyx" v-model="vlFaturamento"
                         :id="'vlFaturamento_' + event.id" />
                 </div>
             </template>
@@ -126,7 +126,7 @@ const props = defineProps({
 
 
 onMounted(() => {
-    $('.money').maskMoney({ allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
+    $('.moneyx').maskMoney({ prefix: '', allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
     if (props.event?.exchange_rate) {
         exchangeRate.value = props.event?.exchange_rate;
         $("#exchangeRate_" + props.event.id).maskMoney('mask', props.event?.exchange_rate);
