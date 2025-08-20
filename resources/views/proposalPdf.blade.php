@@ -414,6 +414,7 @@ function quebraTexto($texto, $limite = 40)
             text-align: start;
             text-transform: uppercase;
             padding: 0 8px;
+            min-height: 15px;
         }
 
         .line p {

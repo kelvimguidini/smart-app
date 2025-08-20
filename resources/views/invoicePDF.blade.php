@@ -360,7 +360,7 @@ function quebraTexto($texto, $limite = 40)
         }
 
         .event-info {
-            margin-left: 20px;
+            margin-top: 5px;
         }
 
         .line {
@@ -369,6 +369,7 @@ function quebraTexto($texto, $limite = 40)
             text-align: start;
             text-transform: uppercase;
             padding: 0 8px;
+            min-height: 15px;
         }
 
         .line p {
