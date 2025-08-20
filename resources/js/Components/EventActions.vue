@@ -126,7 +126,7 @@ const props = defineProps({
 
 
 onMounted(() => {
-    $('.money').maskMoney({ prefix: 'R$ ', allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
+    $('.money').maskMoney({ allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
     if (props.event?.exchange_rate) {
         exchangeRate.value = props.event?.exchange_rate;
         $("#exchangeRate_" + props.event.id).maskMoney('mask', props.event?.exchange_rate);

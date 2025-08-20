@@ -276,7 +276,7 @@ watch(
                                 <div class="col">
                                     <div class="form-group">
                                         <label for="consultant">Consultor:</label>
-                                        <select class="form-control" id="client">
+                                        <select class="form-control" id="consultant">
                                             <option value="">.::Selecione::.</option>
                                             <option v-for="(option, index) in users"
                                                 :selected="option.id == formFilters.consultant" :value="option.id">
@@ -358,7 +358,7 @@ watch(
                                         <!-- Linha do evento principal -->
                                         <tr class="table-active cursor-pointer">
                                             <th @click="showHideEventDetails(event.id, event)" scope="row">{{ event.id
-                                                }}</th>
+                                            }}</th>
                                             <td @click="showHideEventDetails(event.id, event)">{{ event.customer ?
                                                 event.customer.name : '-' }}</td>
                                             <td @click="showHideEventDetails(event.id, event)">{{ event.name }}</td>
