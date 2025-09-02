@@ -203,7 +203,7 @@ class EventApiController extends BaseApiController
         $venda->addChild('dtemissao', htmlspecialchars(Carbon::parse($evento->date)->format('d/m/Y')));
         $venda->addChild('idcliente', htmlspecialchars($evento->customer?->codestur ?? $evento->customer?->id ?? ''));
         // $venda->addChild('idoperador', htmlspecialchars($fornecedor->id ?? ''));
-        $venda->addChild('idfornecedor', htmlspecialchars($fornecedor->codestur ?? $fornecedor->id ?? ''));
+        $venda->addChild('idfornecedor', htmlspecialchars($tipo['fornecedor']($fornecedor)->codestur ?? $tipo['fornecedor']($fornecedor)->id ?? ''));
         $venda->addChild('formrec', '1');
 
         $venda->addChild('vencrec', htmlspecialchars(Carbon::parse($fornecedor->deadline_date)->format('d/m/Y')));
@@ -459,7 +459,7 @@ class EventApiController extends BaseApiController
 
     private function exportarXmlModeloOficial($start_date, $end_date)
     {
-        return Event::with([
+        $eventos = Event::with([
             'customer',
             'crd',
 
@@ -553,6 +553,60 @@ class EventApiController extends BaseApiController
                 });
             })
             ->get();
+
+        // Filtrar os itens de cada evento conforme a data
+        foreach ($eventos as $evento) {
+            // Filtra event_hotels
+            if (isset($evento->event_hotels)) {
+                $evento->event_hotels = $evento->event_hotels->filter(function ($item) use ($start_date, $end_date) {
+                    return $item->status_his->contains(function ($status) use ($start_date, $end_date) {
+                        return $status->status === 'dating_with_customer'
+                            && $status->created_at >= $start_date
+                            && $status->created_at <= $end_date;
+                    });
+                })->values();
+            }
+            // Filtra event_abs
+            if (isset($evento->event_abs)) {
+                $evento->event_abs = collect($evento->event_abs)->filter(function ($item) use ($start_date, $end_date) {
+                    return isset($item->status_his) && collect($item->status_his)->contains(function ($status) use ($start_date, $end_date) {
+                        return $status->status === 'dating_with_customer'
+                            && $status->created_at >= $start_date
+                            && $status->created_at <= $end_date;
+                    });
+                })->values();
+            }
+            // Repita para event_halls, event_adds, event_transports...
+            if (isset($evento->event_halls)) {
+                $evento->event_halls = $evento->event_halls->filter(function ($item) use ($start_date, $end_date) {
+                    return $item->status_his->contains(function ($status) use ($start_date, $end_date) {
+                        return $status->status === 'dating_with_customer'
+                            && $status->created_at >= $start_date
+                            && $status->created_at <= $end_date;
+                    });
+                })->values();
+            }
+            if (isset($evento->event_adds)) {
+                $evento->event_adds = $evento->event_adds->filter(function ($item) use ($start_date, $end_date) {
+                    return $item->status_his->contains(function ($status) use ($start_date, $end_date) {
+                        return $status->status === 'dating_with_customer'
+                            && $status->created_at >= $start_date
+                            && $status->created_at <= $end_date;
+                    });
+                })->values();
+            }
+            if (isset($evento->event_transports)) {
+                $evento->event_transports = $evento->event_transports->filter(function ($item) use ($start_date, $end_date) {
+                    return $item->status_his->contains(function ($status) use ($start_date, $end_date) {
+                        return $status->status === 'dating_with_customer'
+                            && $status->created_at >= $start_date
+                            && $status->created_at <= $end_date;
+                    });
+                })->values();
+            }
+        }
+
+        return $eventos;
     }
 
     private function unitSale($opt)
