@@ -13,8 +13,7 @@
             <template v-slot:content>
                 <div class="form-group">
                     <label for="exchangeRate">Valor do Câmbio:</label>
-                    <input type="text" class="form-control moneyx" v-model="exchangeRate"
-                        :id="'exchangeRate_' + event.id" />
+                    <input type="text" class="form-control" v-model="exchangeRate" :id="'exchangeRate_' + event.id" />
                 </div>
             </template>
         </Modal>
@@ -30,8 +29,7 @@
             <template v-slot:content>
                 <div class="form-group">
                     <label for="vlFaturamento_">Valor do Faturamento:</label>
-                    <input type="text" class="form-control moneyx" v-model="vlFaturamento"
-                        :id="'vlFaturamento_' + event.id" />
+                    <input type="text" class="form-control" v-model="vlFaturamento" :id="'vlFaturamento_' + event.id" />
                 </div>
             </template>
         </Modal>
@@ -95,7 +93,7 @@ const saveFaturamento = async (eventId) => {
         isLoader.value = true;
         await axios.post(route('event-save-vl-faturamento'), {
             event_id: eventId,
-            vl_faturamento: $('#vlFaturamento_' + eventId).maskMoney('unmasked')[0]
+            vl_faturamento: $('#vlFaturamento_' + eventId).value()
         });
     } catch (error) {
         console.error('Erro ao salvar o Valor do faturamento:', error);
@@ -126,14 +124,13 @@ const props = defineProps({
 
 
 onMounted(() => {
-    $('.moneyx').maskMoney({ prefix: '', allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
+
     if (props.event?.exchange_rate) {
         exchangeRate.value = props.event?.exchange_rate;
         $("#exchangeRate_" + props.event.id).maskMoney('mask', props.event?.exchange_rate);
     }
     if (props.event?.valor_faturamento) {
         vlFaturamento.value = props.event?.valor_faturamento;
-        $("#vlFaturamento_" + props.event.id).maskMoney('mask', props.event?.valor_faturamento);
     }
 });
 </script>

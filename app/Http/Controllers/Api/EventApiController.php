@@ -83,40 +83,35 @@ class EventApiController extends BaseApiController
                     'id' => 'hotel',
                     'fornecedor' => fn($item) => $item->hotel,
                     'model' => \App\Models\Provider::class,
-                    'tipoctarec' => '01/0022',
-                    'tipoctapag' => '01/0005',
+                    'tipoctarec' => '01/0002',
                 ],
                 [
                     'rel' => 'event_abs',
                     'id' => 'ab',
                     'fornecedor' => fn($item) => $item->ab,
                     'model' => \App\Models\Provider::class,
-                    'tipoctarec' => '01/0022',
-                    'tipoctapag' => '01/0005',
+                    'tipoctarec' => '01/0005',
                 ],
                 [
                     'rel' => 'event_halls',
                     'id' => 'salao',
                     'fornecedor' => fn($item) => $item->hall,
                     'model' => \App\Models\Provider::class,
-                    'tipoctarec' => '01/0022',
-                    'tipoctapag' => '01/0005',
+                    'tipoctarec' => '01/0003',
                 ],
                 [
                     'rel' => 'event_transports',
                     'id' => 'loc',
                     'fornecedor' => fn($item) => $item->transport,
                     'model' => \App\Models\ProviderTransport::class,
-                    'tipoctarec' => '01/0022',
-                    'tipoctapag' => '01/0005',
+                    'tipoctarec' => '01/0006',
                 ],
                 [
                     'rel' => 'event_adds',
                     'id' => 'servicos',
                     'fornecedor' => fn($item) => $item->add,
                     'model' => \App\Models\ProviderServices::class,
-                    'tipoctarec' => '01/0022',
-                    'tipoctapag' => '01/0005',
+                    'tipoctarec' => '01/0005',
                 ],
             ];
 
@@ -150,7 +145,7 @@ class EventApiController extends BaseApiController
                 // Adiciona cliente no XML
                 $clienteXml = $xml->addChild('cliente');
 
-                $clienteXml->addChild('idcliente', htmlspecialchars($cliente->id));
+                $clienteXml->addChild('idcliente', htmlspecialchars($cliente->codestur ?? $cliente->id));
                 $clienteXml->addChild('cnpjcpf', htmlspecialchars($cliente->document));
                 $clienteXml->addChild('razaonome', htmlspecialchars($cliente->name));
                 $clienteXml->addChild('nomefantasia', htmlspecialchars($cliente->name));
@@ -206,9 +201,9 @@ class EventApiController extends BaseApiController
             )
         );
         $venda->addChild('dtemissao', htmlspecialchars(Carbon::parse($evento->date)->format('d/m/Y')));
-        $venda->addChild('idcliente', htmlspecialchars($evento->customer?->id ?? ''));
-        $venda->addChild('idoperador', htmlspecialchars($fornecedor->id ?? ''));
-        $venda->addChild('idfornecedor', htmlspecialchars($fornecedor->id ?? ''));
+        $venda->addChild('idcliente', htmlspecialchars($evento->customer?->codestur ?? $evento->customer?->id ?? ''));
+        // $venda->addChild('idoperador', htmlspecialchars($fornecedor->id ?? ''));
+        $venda->addChild('idfornecedor', htmlspecialchars($fornecedor->codestur ?? $fornecedor->id ?? ''));
         $venda->addChild('formrec', '1');
 
         $venda->addChild('vencrec', htmlspecialchars(Carbon::parse($fornecedor->deadline_date)->format('d/m/Y')));
@@ -241,7 +236,7 @@ class EventApiController extends BaseApiController
         $venda->addChild('projetonome', htmlspecialchars($evento->name ?? ''));
 
         $venda->addChild('tipoctarec', htmlspecialchars($tipo['tipoctarec'] ?? ''));
-        $venda->addChild('tipoctapag', htmlspecialchars($tipo['tipoctapag'] ?? ''));
+        $venda->addChild('tipoctapag', htmlspecialchars($tipo['tipoctarec'] ?? ''));
 
         $sumTotalHotelSale = 0;
         $movimentosXml = $venda->addChild('movimentos');
@@ -303,8 +298,8 @@ class EventApiController extends BaseApiController
                 return $item->status === 'approved_by_manager';
             });
 
-            $movimento->addChild('confirmadopor', htmlspecialchars($aprovado->user->name  ?? ''));
-            $movimento->addChild('dataconfirmacao', htmlspecialchars($aprovado->created_at  ?? ''));
+            $movimento->addChild('confirmadopor', '');
+            $movimento->addChild('dataconfirmacao', '');
             $movimento->addChild('numconfirmacao', '');
         }
     }
@@ -355,8 +350,8 @@ class EventApiController extends BaseApiController
                 return $item->status === 'approved_by_manager';
             });
 
-            $movimento->addChild('confirmadopor', htmlspecialchars($aprovado->user->name  ?? ''));
-            $movimento->addChild('dataconfirmacao', htmlspecialchars($aprovado->created_at  ?? ''));
+            $movimento->addChild('confirmadopor', '');
+            $movimento->addChild('dataconfirmacao', '');
             $movimento->addChild('numconfirmacao', '');
         }
     }
@@ -397,8 +392,8 @@ class EventApiController extends BaseApiController
                 return $item->status === 'approved_by_manager';
             });
 
-            $movimento->addChild('confirmadopor', htmlspecialchars($aprovado->user->name  ?? ''));
-            $movimento->addChild('dataconfirmacao', htmlspecialchars($aprovado->created_at  ?? ''));
+            $movimento->addChild('confirmadopor', '');
+            $movimento->addChild('dataconfirmacao', '');
             $movimento->addChild('numconfirmacao', '');
         }
     }
@@ -415,7 +410,7 @@ class EventApiController extends BaseApiController
 
             if ($fornecedor) {
                 $fornecedorXml = $xml->addChild('fornecedor');
-                $fornecedorXml->addChild('idfornecedor', htmlspecialchars($fornecedor->id));
+                $fornecedorXml->addChild('idfornecedor', htmlspecialchars($fornecedor->codestur ?? $fornecedor->id));
                 $fornecedorXml->addChild('razaonome', htmlspecialchars($fornecedor->name ?? ''));
                 $fornecedorXml->addChild('nomefantasia', htmlspecialchars($fornecedor->fantasy_name ?? $fornecedor->name ?? ''));
 

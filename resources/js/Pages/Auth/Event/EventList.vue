@@ -70,8 +70,6 @@ onMounted(() => {
         formStatus.status_hotel = e.params.data.id;
     });
 
-    $('.moneyx').maskMoney({ prefix: '', allowNegative: false, allowZero: true, thousands: '.', decimal: ',', affixesStay: true });
-
 });
 
 const providersByEvent = (event) => {
@@ -323,8 +321,8 @@ watch(
                                 <div class="col-3">
                                     <div class="form-group">
                                         <label for="code">Valor Faturamento:</label>
-                                        <input type="text" id="valor_faturamento" v-model="formFilters.valorFaturamento"
-                                            class="form-control moneyx">
+                                        <input type="number" id="valor_faturamento"
+                                            v-model="formFilters.valorFaturamento" class="form-control">
                                     </div>
                                 </div>
                             </div>
@@ -358,7 +356,7 @@ watch(
                                         <!-- Linha do evento principal -->
                                         <tr class="table-active cursor-pointer">
                                             <th @click="showHideEventDetails(event.id, event)" scope="row">{{ event.id
-                                                }}</th>
+                                            }}</th>
                                             <td @click="showHideEventDetails(event.id, event)">{{ event.customer ?
                                                 event.customer.name : '-' }}</td>
                                             <td @click="showHideEventDetails(event.id, event)">{{ event.name }}</td>
