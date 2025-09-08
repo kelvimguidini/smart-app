@@ -71,11 +71,13 @@ class EventController extends Controller
 
         $query = Event::with([
             'crd',
+            "eventLocals",
             'customer',
             'event_hotels' => function ($q) {
                 $q->with([
                     'hotel',
                     'status_his',
+                    'currency',
                     'eventHotelsOpt' => function ($q2) {
                         $q2->orderBy('in', 'asc');
                     }
@@ -85,6 +87,11 @@ class EventController extends Controller
                 $q->with([
                     'ab',
                     'status_his',
+                    'currency',
+                    'eventAbOpts.broker',
+                    'eventAbOpts.service',
+                    'eventAbOpts.service_type',
+                    'eventAbOpts.local',
                     'eventAbOpts' => function ($q2) {
                         $q2->orderBy('in', 'asc');
                     }
@@ -94,6 +101,10 @@ class EventController extends Controller
                 $q->with([
                     'hall',
                     'status_his',
+                    'currency',
+                    'eventHallOpts.broker',
+                    'eventHallOpts.service',
+                    'eventHallOpts.purpose',
                     'eventHallOpts' => function ($q2) {
                         $q2->orderBy('in', 'asc');
                     }
@@ -103,6 +114,10 @@ class EventController extends Controller
                 $q->with([
                     'add',
                     'status_his',
+                    'currency',
+                    'eventAddOpts.service',
+                    'eventAddOpts.measure',
+                    'eventAddOpts.frequency',
                     'eventAddOpts' => function ($q2) {
                         $q2->orderBy('in', 'asc');
                     }
@@ -110,9 +125,16 @@ class EventController extends Controller
             },
             'event_transports' => function ($q) {
                 $q->with([
-                    'transport',
+                    'transport.city',
                     'status_his',
                     'providerBudget.user',
+                    'currency',
+                    'eventTransportOpts.broker',
+                    'eventTransportOpts.vehicle',
+                    'eventTransportOpts.model',
+                    'eventTransportOpts.service',
+                    'eventTransportOpts.brand',
+
                     'eventTransportOpts' => function ($q2) {
                         $q2->orderBy('in', 'asc');
                     }
@@ -124,8 +146,6 @@ class EventController extends Controller
             'event_adds.providerBudget.user',
             'event_transports.providerBudget.user',
         ]);
-
-
 
         if (Gate::allows('event_admin')) {
             $query

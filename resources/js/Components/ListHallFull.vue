@@ -37,6 +37,10 @@ const props = defineProps({
         type: Function,
         default: null,
     },
+    isViewMode: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 
@@ -278,7 +282,7 @@ onMounted(() => {
                                 {{ evHall.hall.name }}
                             </th>
                             <th class="align-middle text-right table-header-c1 table-header" colspan="3">
-                                <Link class="btn btn-info btn-sm btn-icon-split"
+                                <Link v-if="!isViewMode" class="btn btn-info btn-sm btn-icon-split"
                                     :href="route('event-edit', { 'id': evHall.event_id, 'tab': 3, 'ehotel': evHall.id })">
                                 <span class="icon text-white-50">
                                     <i class="fas fa-edit"></i>
@@ -286,7 +290,8 @@ onMounted(() => {
                                 <span class="text">Editar</span>
                                 </Link>
 
-                                <Modal modal-title="Confirmar Remoção" :ok-botton-callback="deleteEventHotel"
+                                <Modal v-if="!isViewMode" modal-title="Confirmar Remoção"
+                                    :ok-botton-callback="deleteEventHotel"
                                     :ok-botton-callback-param="{ 'id': evHall.id, 'event_id': evHall.event_id }"
                                     btn-class="btn btn-sm btn-danger btn-icon-split m-1"
                                     :btnDisabled="statusBlockEdit()">
@@ -299,7 +304,7 @@ onMounted(() => {
                                     <template v-slot:content>
                                         <span class="text-dark">Tem certeza que deseja remover o hotel {{
                                             evHall.hall.name
-                                            }} do evento {{ evHall.hall.name }}</span>
+                                        }} do evento {{ evHall.hall.name }}</span>
                                     </template>
                                 </Modal>
                             </th>
@@ -404,10 +409,10 @@ onMounted(() => {
                             </td>
                             <td class=" align-middle">{{
                                 formatCurrency(opt.received_proposal, evHall.currency.sigla)
-                                }}</td>
+                            }}</td>
                             <td class="align-middle">{{
                                 opt.received_proposal_percent
-                                }}
+                            }}
                             </td>
                             <template v-if="showDetails">
 
@@ -448,7 +453,7 @@ onMounted(() => {
                                 </td>
                             </template>
                             <td class="align-middle">
-                                <div class="d-flex">
+                                <div class="d-flex" v-if="!isViewMode">
                                     <PrimaryButton
                                         :disabled="!(eventHall != null && eventHall.id > 0 && eventHall.id == opt.event_hall_id) || statusBlockEdit()"
                                         type="button" css-class="btn btn-info btn-circle btn-sm text-white"

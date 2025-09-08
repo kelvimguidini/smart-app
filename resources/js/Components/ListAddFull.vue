@@ -37,6 +37,10 @@ const props = defineProps({
         type: Function,
         default: null,
     },
+    isViewMode: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 
@@ -274,13 +278,14 @@ onMounted(() => {
 
                         <tr>
                             <th class="table-header table-header-c1 sticky-col" colspan="2">Hotel {{ index + 1
-                            }}</th>
+                                }}</th>
                             <th class="text-left table-header table-header-c2" :colspan="showDetails ? 20 : 12">
                                 {{ evAdd.add.name }}
                             </th>
 
                             <th class="align-middle text-right table-header-c1 table-header" colspan="3">
-                                <Link class="btn btn-info btn-sm btn-icon-split" :disabled="statusBlockEdit()"
+                                <Link v-if="!isViewMode" class="btn btn-info btn-sm btn-icon-split"
+                                    :disabled="statusBlockEdit()"
                                     :href="route('event-edit', { 'id': evAdd.event_id, 'tab': 4, 'ehotel': evAdd.id })">
                                 <span class="icon text-white-50">
                                     <i class="fas fa-edit"></i>
@@ -288,7 +293,8 @@ onMounted(() => {
                                 <span class="text">Editar</span>
                                 </Link>
 
-                                <Modal modal-title="Confirmar Remoção" :ok-botton-callback="deleteEventHotel"
+                                <Modal v-if="!isViewMode" modal-title="Confirmar Remoção"
+                                    :ok-botton-callback="deleteEventHotel"
                                     :ok-botton-callback-param="{ 'id': evAdd.id, 'event_id': evAdd.event_id }"
                                     btn-class="btn btn-sm btn-danger btn-icon-split m-1"
                                     :btnDisabled="statusBlockEdit()">
@@ -301,7 +307,7 @@ onMounted(() => {
                                     <template v-slot:content>
                                         <span class="text-dark">Tem certeza que deseja remover o hotel {{
                                             evAdd.add.name
-                                        }} do evento {{ evAdd.add.name }}</span>
+                                            }} do evento {{ evAdd.add.name }}</span>
                                     </template>
                                 </Modal>
                             </th>
@@ -403,10 +409,10 @@ onMounted(() => {
                             </td>
                             <td class=" align-middle">{{
                                 formatCurrency(opt.received_proposal, evAdd.currency.sigla)
-                            }}</td>
+                                }}</td>
                             <td class="align-middle">{{
                                 opt.received_proposal_percent
-                            }}
+                                }}
                             </td>
                             <template v-if="showDetails">
 
@@ -448,7 +454,7 @@ onMounted(() => {
 
                             </template>
                             <td class="align-middle">
-                                <div class="d-flex">
+                                <div class="d-flex" v-if="!isViewMode">
                                     <PrimaryButton
                                         :disabled="!(eventAdd != null && eventAdd.id > 0 && eventAdd.id == opt.event_add_id) || statusBlockEdit()"
                                         type="button" css-class="btn btn-info btn-circle btn-sm text-white"

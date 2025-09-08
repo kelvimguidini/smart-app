@@ -51,8 +51,8 @@ const id = 'modal-' + Math.floor(Date.now() * Math.random()).toString(36)
 
 <style>
 .modal-content-big {
-    width: fit-content !important;
-    max-width: 1100px !important;
+    width: auto !important;
+    max-width: 1500px !important;
 }
 </style>
 
@@ -81,8 +81,8 @@ const id = 'modal-' + Math.floor(Date.now() * Math.random()).toString(36)
                         v-on:click="okBottonCallback(okBottonCallbackParam)" data-dismiss="modal">
                         {{ okBottonLabel }}
                     </button>
-                    <Link data-dismiss="modal" v-if="btnIsLink" class="btn btn-primary" :target="btnBlank ? '_blank' : ''"
-                        :href="url">{{ okBottonLabel }}
+                    <Link data-dismiss="modal" v-if="btnIsLink" class="btn btn-primary"
+                        :target="btnBlank ? '_blank' : ''" :href="url">{{ okBottonLabel }}
                     </Link>
                 </div>
             </div>

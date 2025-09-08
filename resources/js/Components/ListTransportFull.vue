@@ -37,6 +37,10 @@ const props = defineProps({
         type: Function,
         default: null,
     },
+    isViewMode: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 
@@ -267,7 +271,8 @@ onMounted(() => {
                             </th>
                             <th class="align-middle text-right table-header-c1 table-header" colspan="3">
 
-                                <Link class="btn btn-info btn-sm btn-icon-split" :disabled="statusBlockEdit()"
+                                <Link v-if="!isViewMode" class="btn btn-info btn-sm btn-icon-split"
+                                    :disabled="statusBlockEdit()"
                                     :href="route('event-edit', { 'id': evtr.event_id, 'tab': 5, 'ehotel': evtr.id })">
                                 <span class="icon text-white-50">
                                     <i class="fas fa-edit"></i>
@@ -275,7 +280,8 @@ onMounted(() => {
                                 <span class="text">Editar</span>
                                 </Link>
 
-                                <Modal modal-title="Confirmar Remoção" :ok-botton-callback="deleteEventTransport"
+                                <Modal v-if="!isViewMode" modal-title="Confirmar Remoção"
+                                    :ok-botton-callback="deleteEventTransport"
                                     :ok-botton-callback-param="{ 'id': evtr.id, 'event_id': evtr.event_id }"
                                     btn-class="btn btn-sm btn-danger btn-icon-split m-1"
                                     :btnDisabled="statusBlockEdit()">
@@ -444,7 +450,7 @@ onMounted(() => {
                                 </td>
                             </template>
                             <td class="align-middle">
-                                <div class="d-flex">
+                                <div class="d-flex" v-if="!isViewMode">
                                     <PrimaryButton
                                         :disabled="!(eventTransport != null && eventTransport.id > 0 && eventTransport.id == opt.event_transport_id) || statusBlockEdit()"
                                         type="button" css-class="btn btn-info btn-circle btn-sm text-white"

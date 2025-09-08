@@ -37,6 +37,10 @@ const props = defineProps({
         type: Function,
         default: null,
     },
+    isViewMode: {
+        type: Boolean,
+        default: false,
+    }
 });
 
 
@@ -217,6 +221,7 @@ const adjustStickyColumns = () => {
 };
 
 onMounted(() => {
+    console.log('ListHotelFull mounted', props.eventHotels);
     nextTick(() => {
         adjustStickyColumns();
 
@@ -280,6 +285,7 @@ onMounted(() => {
                             </th>
                             <th class="align-middle text-right table-header-c1 table-header" colspan="3">
                                 <Link class="btn btn-info btn-sm btn-icon-split" :disabled="statusBlockEdit()"
+                                    v-if="!isViewMode"
                                     :href="route('event-edit', { 'id': evho.event_id, 'tab': 1, 'ehotel': evho.id })">
                                 <span class="icon text-white-50">
                                     <i class="fas fa-edit"></i>
@@ -287,7 +293,8 @@ onMounted(() => {
                                 <span class="text">Editar</span>
                                 </Link>
 
-                                <Modal modal-title="Confirmar Remoção" :ok-botton-callback="deleteEventHotel"
+                                <Modal v-if="!isViewMode" modal-title="Confirmar Remoção"
+                                    :ok-botton-callback="deleteEventHotel"
                                     :ok-botton-callback-param="{ 'id': evho.id, 'event_id': evho.event_id }"
                                     btn-class="btn btn-sm btn-danger btn-icon-split m-1"
                                     :btnDisabled="statusBlockEdit()">
@@ -465,7 +472,7 @@ onMounted(() => {
                                 </td>
                             </template>
                             <td class="align-middle">
-                                <div class="d-flex">
+                                <div class="d-flex" v-if="!isViewMode">
                                     <PrimaryButton
                                         :disabled="!(eventHotel != null && eventHotel.id > 0 && eventHotel.id == opt.event_hotel_id) || statusBlockEdit()"
                                         type="button" css-class="btn btn-info btn-circle btn-sm text-white"

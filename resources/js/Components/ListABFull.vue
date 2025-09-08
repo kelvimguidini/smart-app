@@ -37,6 +37,10 @@ const props = defineProps({
         type: Function,
         default: null,
     },
+    isViewMode: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 
@@ -278,7 +282,8 @@ onMounted(() => {
                                 {{ evab.ab.name }}
                             </th>
                             <th class="align-middle text-right table-header-c1 table-header" colspan="3">
-                                <Link class="btn btn-info btn-sm btn-icon-split" :disabled="statusBlockEdit()"
+                                <Link class="btn btn-info btn-sm btn-icon-split" v-if="!isViewMode"
+                                    :disabled="statusBlockEdit()"
                                     :href="route('event-edit', { 'id': evab.event_id, 'tab': 2, 'ehotel': evab.id })">
                                 <span class="icon text-white-50">
                                     <i class="fas fa-edit"></i>
@@ -286,7 +291,8 @@ onMounted(() => {
                                 <span class="text">Editar</span>
                                 </Link>
 
-                                <Modal modal-title="Confirmar Remoção" :ok-botton-callback="deleteEventHotel"
+                                <Modal v-if="!isViewMode" modal-title="Confirmar Remoção"
+                                    :ok-botton-callback="deleteEventHotel"
                                     :ok-botton-callback-param="{ 'id': evab.id, 'event_id': evab.event_id }"
                                     btn-class="btn btn-sm btn-danger btn-icon-split m-1"
                                     :btnDisabled="statusBlockEdit()">
@@ -443,7 +449,7 @@ onMounted(() => {
 
                             </template>
                             <td class="align-middle">
-                                <div class="d-flex">
+                                <div class="d-flex" v-if="!isViewMode">
                                     <PrimaryButton
                                         :disabled="!(eventAB != null && eventAB.id > 0 && eventAB.id == opt.event_ab_id) || statusBlockEdit()"
                                         type="button" css-class="btn btn-info btn-circle btn-sm text-white"

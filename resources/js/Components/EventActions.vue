@@ -18,18 +18,19 @@
             </template>
         </Modal>
 
-        <Modal :key="index" modal-title="Valor do Faturamento" :ok-botton-callback="saveFaturamento"
+        <Modal :key="index" modal-title="Número da Venda" :ok-botton-callback="saveFaturamento"
             :ok-botton-callback-param="event.id" btn-class="btn-sm btn-warning btn-icon-split mr-2">
             <template v-slot:button>
                 <span class="icon text-white-50">
-                    <i class="fas fa-money"></i>
+                    <i class="fas fa-tag"></i>
                 </span>
-                <span class="text">Vl. Faturamento</span>
+                <span class="text">Número da Venda</span>
             </template>
             <template v-slot:content>
                 <div class="form-group">
-                    <label for="vlFaturamento_">Valor do Faturamento:</label>
-                    <input type="text" class="form-control" v-model="vlFaturamento" :id="'vlFaturamento_' + event.id" />
+                    <label for="vlFaturamento_">Número da Venda:</label>
+                    <input type="number" class="form-control" v-model="vlFaturamento"
+                        :id="'vlFaturamento_' + event.id" />
                 </div>
             </template>
         </Modal>
@@ -56,6 +57,18 @@
             </template>
         </Modal>
 
+        <Modal :modal-title="'Visualizar Evento: ' + event.name" btn-class="btn-sm btn-secondary btn-icon-split mr-2"
+            :contentBig="true">
+            <template v-slot:button>
+                <span class="icon text-white-50">
+                    <i class="fas fa-eye"></i>
+                </span>
+                <span class="text">Visualizar</span>
+            </template>
+            <template v-slot:content>
+                <EventView :event="event" />
+            </template>
+        </Modal>
 
     </div>
     <Loader v-bind:show="isLoader" />
@@ -68,6 +81,7 @@ import { useForm } from '@inertiajs/inertia-vue3';
 import Loader from './Loader.vue';
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import EventView from '@/Components/EventView.vue';
 
 const formDelete = useForm({
     id: 0
