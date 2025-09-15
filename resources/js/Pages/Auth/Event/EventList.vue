@@ -23,7 +23,7 @@ const formFilters = useForm({
     client: '',
     status: '',
     eventCode: '',
-    valorFaturamento: '',
+    R: '',
 });
 
 const isLoader = ref(false);
@@ -35,7 +35,7 @@ const eventProviders = reactive({}); // Armazena os provedores por evento
 
 const submitForm = () => {
     isLoader.value = true;
-    formFilters.valorFaturamento = $('#valor_faturamento').maskMoney('unmasked')[0]
+    // formFilters.valorFaturamento = $('#valor_faturamento').maskMoney('unmasked')[0]
     formFilters.post(route('event-list.filter'), {
         onFinish: () => {
             isLoader.value = false;
@@ -320,7 +320,7 @@ watch(
 
                                 <div class="col-3">
                                     <div class="form-group">
-                                        <label for="code">Valor Faturamento:</label>
+                                        <label for="code">N° Venda:</label>
                                         <input type="number" id="valor_faturamento"
                                             v-model="formFilters.valorFaturamento" class="form-control">
                                     </div>
@@ -356,7 +356,7 @@ watch(
                                         <!-- Linha do evento principal -->
                                         <tr class="table-active cursor-pointer">
                                             <th @click="showHideEventDetails(event.id, event)" scope="row">{{ event.id
-                                            }}</th>
+                                                }}</th>
                                             <td @click="showHideEventDetails(event.id, event)">{{ event.customer ?
                                                 event.customer.name : '-' }}</td>
                                             <td @click="showHideEventDetails(event.id, event)">{{ event.name }}</td>
