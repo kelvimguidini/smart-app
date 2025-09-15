@@ -24,6 +24,7 @@ const formFilters = useForm({
     status: '',
     eventCode: '',
     R: '',
+    valorFaturamento: '',
 });
 
 const isLoader = ref(false);
@@ -356,7 +357,7 @@ watch(
                                         <!-- Linha do evento principal -->
                                         <tr class="table-active cursor-pointer">
                                             <th @click="showHideEventDetails(event.id, event)" scope="row">{{ event.id
-                                                }}</th>
+                                            }}</th>
                                             <td @click="showHideEventDetails(event.id, event)">{{ event.customer ?
                                                 event.customer.name : '-' }}</td>
                                             <td @click="showHideEventDetails(event.id, event)">{{ event.name }}</td>
