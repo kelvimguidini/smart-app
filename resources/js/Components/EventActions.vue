@@ -107,7 +107,7 @@ const saveFaturamento = async (eventId) => {
         isLoader.value = true;
         await axios.post(route('event-save-vl-faturamento'), {
             event_id: eventId,
-            vl_faturamento: $('#vlFaturamento_' + eventId).value()
+            vl_faturamento: $('#vlFaturamento_' + eventId).val()
         });
     } catch (error) {
         console.error('Erro ao salvar o Valor do faturamento:', error);
