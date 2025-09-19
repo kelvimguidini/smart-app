@@ -90,7 +90,7 @@ const deactivate = (id) => {
 
         <Head title="Categorias" />
         <template #header>
-            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div class="d-sm-flex align-items-center justify-content-between">
                 <h1 class="h3 mb-0 text-gray-800">Categorias</h1>
             </div>
         </template>
@@ -178,7 +178,8 @@ const deactivate = (id) => {
                                                     </Modal>
 
 
-                                                    <button v-if="!category.active" class="btn btn-sm btn-success btn-icon-split mr-2"
+                                                    <button v-if="!category.active"
+                                                        class="btn btn-sm btn-success btn-icon-split mr-2"
                                                         v-on:click="activate(category.id)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-check"></i>
@@ -186,7 +187,8 @@ const deactivate = (id) => {
                                                         <span class="text">Ativar</span>
                                                     </button>
 
-                                                    <button v-if="category.active" class="btn btn-sm btn-warning btn-icon-split mr-2"
+                                                    <button v-if="category.active"
+                                                        class="btn btn-sm btn-warning btn-icon-split mr-2"
                                                         v-on:click="deactivate(category.id)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-ban"></i>

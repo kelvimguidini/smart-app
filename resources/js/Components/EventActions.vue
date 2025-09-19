@@ -79,7 +79,7 @@ import { Link } from '@inertiajs/inertia-vue3';
 import Modal from '@/Components/Modal.vue';
 import { useForm } from '@inertiajs/inertia-vue3';
 import Loader from './Loader.vue';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
 import EventView from '@/Components/EventView.vue';
 
@@ -136,15 +136,20 @@ const props = defineProps({
     index: Number
 });
 
-
-onMounted(() => {
-
+// Função para atualizar os campos
+const updateFields = () => {
     if (props.event?.exchange_rate) {
-        exchangeRate.value = props.event?.exchange_rate;
-        $("#exchangeRate_" + props.event.id).maskMoney('mask', props.event?.exchange_rate);
+        exchangeRate.value = props.event.exchange_rate;
+        $("#exchangeRate_" + props.event.id).maskMoney('mask', props.event.exchange_rate);
     }
     if (props.event?.valor_faturamento) {
-        vlFaturamento.value = props.event?.valor_faturamento;
+        vlFaturamento.value = props.event.valor_faturamento;
     }
-});
+};
+
+// Chama na montagem inicial
+onMounted(updateFields);
+
+// Chama sempre que o evento mudar
+watch(() => props.event, updateFields, { deep: true });
 </script>

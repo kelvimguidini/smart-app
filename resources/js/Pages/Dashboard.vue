@@ -104,7 +104,7 @@ const fetchDashboardData = async () => {
             groups.value.error = true;
             console.error("Erro ao processar userGroups:", error);
         }
-  
+
     } catch (error) {
         console.error(error);
         waitApproval.value.loading = false;
@@ -194,122 +194,122 @@ const renderEventStatus = (response) => {
 };
 
 const renderEventMonth = (response) => {
-    
-            events.value.data = response.original;
-            // Area Chart Example
-            var ctx = document.getElementById("area-event");
-            var myLineChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: response.original.map(function (item) {
-                        return item.month;
+
+    events.value.data = response.original;
+    // Area Chart Example
+    var ctx = document.getElementById("area-event");
+    var myLineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: response.original.map(function (item) {
+                return item.month;
+            }),
+            datasets: [
+                {
+                    label: "Data Do Evento",
+                    lineTension: 0.3,
+                    backgroundColor: "rgba(78, 115, 223, 0.05)",
+                    borderColor: "rgba(78, 115, 223, 1)",
+                    pointRadius: 3,
+                    pointBackgroundColor: "rgba(78, 115, 223, 1)",
+                    pointBorderColor: "rgba(78, 115, 223, 1)",
+                    pointHoverRadius: 3,
+                    pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+                    pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+                    pointHitRadius: 10,
+                    pointBorderWidth: 2,
+                    data: response.original.map(function (item) {
+                        return item.event_count;
                     }),
-                    datasets: [
-                        {
-                            label: "Data Do Evento",
-                            lineTension: 0.3,
-                            backgroundColor: "rgba(78, 115, 223, 0.05)",
-                            borderColor: "rgba(78, 115, 223, 1)",
-                            pointRadius: 3,
-                            pointBackgroundColor: "rgba(78, 115, 223, 1)",
-                            pointBorderColor: "rgba(78, 115, 223, 1)",
-                            pointHoverRadius: 3,
-                            pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
-                            pointHoverBorderColor: "rgba(78, 115, 223, 1)",
-                            pointHitRadius: 10,
-                            pointBorderWidth: 2,
-                            data: response.original.map(function (item) {
-                                return item.event_count;
-                            }),
-                        },
-                        {
-                            label: "Data do Registro",
-                            lineTension: 0.3,
-                            backgroundColor: "rgba(115, 223, 78, 0.05)",
-                            borderColor: "rgba(115, 223, 78, 1)",
-                            pointRadius: 3,
-                            pointBackgroundColor: "rgba(115, 223, 78, 1)",
-                            pointBorderColor: "rgba(115, 223, 78, 1)",
-                            pointHoverRadius: 3,
-                            pointHoverBackgroundColor: "rgba(115, 223, 78, 1)",
-                            pointHoverBorderColor: "rgba(115, 223, 78, 1)",
-                            pointHitRadius: 10,
-                            pointBorderWidth: 2,
-                            data: response.original.map(function (item) {
-                                return item.register_count;
-                            }),
-                        }
-                    ],
                 },
-                options: {
-                    maintainAspectRatio: false,
-                    layout: {
-                        padding: {
-                            left: 10,
-                            right: 25,
-                            top: 25,
-                            bottom: 0
+                {
+                    label: "Data do Registro",
+                    lineTension: 0.3,
+                    backgroundColor: "rgba(115, 223, 78, 0.05)",
+                    borderColor: "rgba(115, 223, 78, 1)",
+                    pointRadius: 3,
+                    pointBackgroundColor: "rgba(115, 223, 78, 1)",
+                    pointBorderColor: "rgba(115, 223, 78, 1)",
+                    pointHoverRadius: 3,
+                    pointHoverBackgroundColor: "rgba(115, 223, 78, 1)",
+                    pointHoverBorderColor: "rgba(115, 223, 78, 1)",
+                    pointHitRadius: 10,
+                    pointBorderWidth: 2,
+                    data: response.original.map(function (item) {
+                        return item.register_count;
+                    }),
+                }
+            ],
+        },
+        options: {
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    left: 10,
+                    right: 25,
+                    top: 25,
+                    bottom: 0
+                }
+            },
+            scales: {
+                xAxes: [{
+                    time: {
+                        unit: 'date'
+                    },
+                    gridLines: {
+                        display: false,
+                        drawBorder: false
+                    },
+                    ticks: {
+                        maxTicksLimit: 7
+                    }
+                }],
+                yAxes: [{
+                    ticks: {
+                        maxTicksLimit: 5,
+                        padding: 10,
+                        // Include a dollar sign in the ticks
+                        callback: function (value, index, values) {
+                            return number_format(value);
                         }
                     },
-                    scales: {
-                        xAxes: [{
-                            time: {
-                                unit: 'date'
-                            },
-                            gridLines: {
-                                display: false,
-                                drawBorder: false
-                            },
-                            ticks: {
-                                maxTicksLimit: 7
-                            }
-                        }],
-                        yAxes: [{
-                            ticks: {
-                                maxTicksLimit: 5,
-                                padding: 10,
-                                // Include a dollar sign in the ticks
-                                callback: function (value, index, values) {
-                                    return number_format(value);
-                                }
-                            },
-                            gridLines: {
-                                color: "rgb(234, 236, 244)",
-                                zeroLineColor: "rgb(234, 236, 244)",
-                                drawBorder: false,
-                                borderDash: [2],
-                                zeroLineBorderDash: [2]
-                            }
-                        }],
-                    },
-                    legend: {
-                        display: true
-                    },
-                    tooltipse4re4: {
-                        backgroundColor: "rgb(255,255,255)",
-                        bodyFontColor: "#858796",
-                        titleMarginBottom: 10,
-                        titleFontColor: '#6e707e',
-                        titleFontSize: 14,
-                        borderColor: '#dddfeb',
-                        borderWidth: 1,
-                        xPadding: 15,
-                        yPadding: 15,
-                        displayColors: false,
-                        intersect: false,
-                        mode: 'index',
-                        caretPadding: 10,
-                        callbacks: {
-                            label: function (tooltipItem, chart) {
-                                var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
-                                return datasetLabel + ': $' + number_format(tooltipItem.yLabel);
-                            }
-                        }
+                    gridLines: {
+                        color: "rgb(234, 236, 244)",
+                        zeroLineColor: "rgb(234, 236, 244)",
+                        drawBorder: false,
+                        borderDash: [2],
+                        zeroLineBorderDash: [2]
+                    }
+                }],
+            },
+            legend: {
+                display: true
+            },
+            tooltipse4re4: {
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                titleMarginBottom: 10,
+                titleFontColor: '#6e707e',
+                titleFontSize: 14,
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                intersect: false,
+                mode: 'index',
+                caretPadding: 10,
+                callbacks: {
+                    label: function (tooltipItem, chart) {
+                        var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
+                        return datasetLabel + ': $' + number_format(tooltipItem.yLabel);
                     }
                 }
-            });
+            }
+        }
+    });
 
-            events.value.loading = false;
+    events.value.loading = false;
 };
 
 const renderWaitApproval = (response) => {
@@ -363,12 +363,13 @@ const number_format = (number, decimals, dec_point, thousands_sep) => {
 </script>
 
 <template>
+
     <Head title="Dashboard" />
 
     <AuthenticatedLayout>
         <template #header>
             <!-- Page Heading -->
-            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div class="d-sm-flex align-items-center justify-content-between">
                 <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
             </div>
         </template>
@@ -540,7 +541,8 @@ const number_format = (number, decimals, dec_point, thousands_sep) => {
                             </div>
                             <div v-else class="mt-4 text-center small">
                                 <span v-for="(data, index) in eventStatus.data.hotel" class="mr-2">
-                                    <i class="fas fa-circle" :style="{ color: data.backgroundColor }"></i> {{ data.label }}
+                                    <i class="fas fa-circle" :style="{ color: data.backgroundColor }"></i> {{ data.label
+                                    }}
                                 </span>
                             </div>
                         </div>
@@ -569,7 +571,7 @@ const number_format = (number, decimals, dec_point, thousands_sep) => {
                             <template v-else v-for="group in groups.data">
                                 <h4 class="small font-weight-bold">{{ group.Name }} <span class="float-right">{{
                                     group.CountUsers
-                                }}</span>
+                                        }}</span>
                                 </h4>
                                 <div class="progress mb-4">
                                     <div class="progress-bar" role="progressbar"

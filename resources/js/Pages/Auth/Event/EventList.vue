@@ -23,7 +23,6 @@ const formFilters = useForm({
     client: '',
     status: '',
     eventCode: '',
-    R: '',
     valorFaturamento: '',
 });
 
@@ -36,7 +35,6 @@ const eventProviders = reactive({}); // Armazena os provedores por evento
 
 const submitForm = () => {
     isLoader.value = true;
-    // formFilters.valorFaturamento = $('#valor_faturamento').maskMoney('unmasked')[0]
     formFilters.post(route('event-list.filter'), {
         onFinish: () => {
             isLoader.value = false;
@@ -225,7 +223,7 @@ watch(
 
         <Head title="Eventos" />
         <template #header>
-            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div class="d-sm-flex align-items-center justify-content-between">
                 <h1 class="h3 mb-0 text-gray-800">Eventos</h1>
             </div>
         </template>
@@ -357,7 +355,7 @@ watch(
                                         <!-- Linha do evento principal -->
                                         <tr class="table-active cursor-pointer">
                                             <th @click="showHideEventDetails(event.id, event)" scope="row">{{ event.id
-                                            }}</th>
+                                                }}</th>
                                             <td @click="showHideEventDetails(event.id, event)">{{ event.customer ?
                                                 event.customer.name : '-' }}</td>
                                             <td @click="showHideEventDetails(event.id, event)">{{ event.name }}</td>

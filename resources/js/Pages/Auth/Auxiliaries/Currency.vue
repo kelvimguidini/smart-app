@@ -92,7 +92,7 @@ const deactivate = (id) => {
 
         <Head title="Moeda" />
         <template #header>
-            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div class="d-sm-flex align-items-center justify-content-between">
                 <h1 class="h3 mb-0 text-gray-800">Moeda</h1>
             </div>
         </template>
@@ -118,8 +118,8 @@ const deactivate = (id) => {
                                         <div class="col">
                                             <div class="form-group">
                                                 <InputLabel for="sigla" value="Sigla:" />
-                                                <TextInput type="text" class="form-control" v-model="form.sigla" required
-                                                    autofocus autocomplete="symsiglabol" />
+                                                <TextInput type="text" class="form-control" v-model="form.sigla"
+                                                    required autofocus autocomplete="symsiglabol" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.sigla" />
                                             </div>
                                         </div>
@@ -127,8 +127,8 @@ const deactivate = (id) => {
                                         <div class="col">
                                             <div class="form-group">
                                                 <InputLabel for="symbol" value="Símbolo:" />
-                                                <TextInput type="text" class="form-control" v-model="form.symbol" required
-                                                    autofocus autocomplete="symbol" />
+                                                <TextInput type="text" class="form-control" v-model="form.symbol"
+                                                    required autofocus autocomplete="symbol" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.symbol" />
                                             </div>
                                         </div>
@@ -202,7 +202,8 @@ const deactivate = (id) => {
                                                     </Modal>
 
 
-                                                    <button v-if="!currency.active" class="btn btn-sm btn-success btn-icon-split mr-2"
+                                                    <button v-if="!currency.active"
+                                                        class="btn btn-sm btn-success btn-icon-split mr-2"
                                                         v-on:click="activate(currency.id)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-check"></i>
@@ -210,7 +211,8 @@ const deactivate = (id) => {
                                                         <span class="text">Ativar</span>
                                                     </button>
 
-                                                    <button v-if="currency.active" class="btn btn-sm btn-warning btn-icon-split mr-2"
+                                                    <button v-if="currency.active"
+                                                        class="btn btn-sm btn-warning btn-icon-split mr-2"
                                                         v-on:click="deactivate(currency.id)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-ban"></i>

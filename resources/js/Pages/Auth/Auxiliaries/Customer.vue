@@ -131,7 +131,7 @@ const deactivate = (id) => {
 
         <Head title="Clientes" />
         <template #header>
-            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div class="d-sm-flex align-items-center justify-content-between">
                 <h1 class="h3 mb-0 text-gray-800">Clientes</h1>
             </div>
         </template>
@@ -157,8 +157,9 @@ const deactivate = (id) => {
                                         <div class="col">
                                             <div class="form-group">
                                                 <InputLabel for="document" value="CPF/CNPJ:" />
-                                                <TextInput type="text" class="form-control document" v-model="form.document"
-                                                    required autofocus autocomplete="document" />
+                                                <TextInput type="text" class="form-control document"
+                                                    v-model="form.document" required autofocus
+                                                    autocomplete="document" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.document" />
                                             </div>
                                         </div>
@@ -177,8 +178,8 @@ const deactivate = (id) => {
                                         <div class="col">
                                             <div class="form-group">
                                                 <InputLabel for="email" value="E-mail:" />
-                                                <TextInput type="text" class="form-control" v-model="form.email" required
-                                                    autofocus autocomplete="email" />
+                                                <TextInput type="text" class="form-control" v-model="form.email"
+                                                    required autofocus autocomplete="email" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.email" />
                                             </div>
                                         </div>
@@ -236,7 +237,8 @@ const deactivate = (id) => {
                                                     class="alert-heading text-xs font-weight-bold text-primary text-uppercase mb-1">
                                                     Seleção da cor!
                                                 </h4>
-                                                <p>Selecione a cor predominante na marca desse cliente, essa cor será usada
+                                                <p>Selecione a cor predominante na marca desse cliente, essa cor será
+                                                    usada
                                                     na impressão da proposta!</p>
                                             </div>
 
@@ -249,7 +251,8 @@ const deactivate = (id) => {
                                                 role="status" aria-hidden="true"></span>
                                             Salvar
                                         </PrimaryButton>
-                                        <PrimaryButton v-if="customerInEdition > 0" css-class="btn btn-info float-right m-1"
+                                        <PrimaryButton v-if="customerInEdition > 0"
+                                            css-class="btn btn-info float-right m-1"
                                             v-on:click="form.reset(); customerInEdition = 0; previewImage = null"
                                             :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                                             Novo
@@ -316,7 +319,8 @@ const deactivate = (id) => {
                                                     </Modal>
 
 
-                                                    <button v-if="!customer.active" class="btn btn-sm btn-success btn-icon-split mr-2"
+                                                    <button v-if="!customer.active"
+                                                        class="btn btn-sm btn-success btn-icon-split mr-2"
                                                         v-on:click="activate(customer.id)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-check"></i>
@@ -324,7 +328,8 @@ const deactivate = (id) => {
                                                         <span class="text">Ativar</span>
                                                     </button>
 
-                                                    <button v-if="customer.active" class="btn btn-sm btn-warning btn-icon-split mr-2"
+                                                    <button v-if="customer.active"
+                                                        class="btn btn-sm btn-warning btn-icon-split mr-2"
                                                         v-on:click="deactivate(customer.id)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-ban"></i>

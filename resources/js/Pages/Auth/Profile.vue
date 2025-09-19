@@ -47,7 +47,7 @@ onMounted(() => {
         <Head title="Editar Perfil" />
 
         <template #header>
-            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div class="d-sm-flex align-items-center justify-content-between">
                 <h1 class="h3 mb-0 text-gray-800">Meus Dados</h1>
             </div>
         </template>
@@ -64,14 +64,14 @@ onMounted(() => {
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <InputLabel for="name" value="Name" />
-                                                <TextInput id="name" type="text" class="form-control" v-model="form.name"
-                                                    required autofocus autocomplete="name" />
+                                                <TextInput id="name" type="text" class="form-control"
+                                                    v-model="form.name" required autofocus autocomplete="name" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.name" />
                                             </div>
                                             <div class="form-group">
                                                 <InputLabel for="Phone" value="Telefone" />
-                                                <TextInput id="phone" type="text" class="form-control" v-model="form.phone"
-                                                    required autofocus autocomplete="phone" />
+                                                <TextInput id="phone" type="text" class="form-control"
+                                                    v-model="form.phone" required autofocus autocomplete="phone" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.phone" />
                                             </div>
                                         </div>
@@ -79,8 +79,8 @@ onMounted(() => {
                                             <div class="form-group">
 
                                                 <InputLabel for="email" value="Email" />
-                                                <TextInput id="email" type="email" class="form-control" v-model="form.email"
-                                                    required autocomplete="username" />
+                                                <TextInput id="email" type="email" class="form-control"
+                                                    v-model="form.email" required autocomplete="username" />
                                                 <InputError class="mt-2 text-danger" :message="form.errors.email" />
                                             </div>
 

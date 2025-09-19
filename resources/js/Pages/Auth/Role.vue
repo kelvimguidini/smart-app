@@ -95,7 +95,7 @@ const submit = () => {
 
         <Head title="Grupo" />
         <template #header>
-            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div class="d-sm-flex align-items-center justify-content-between">
                 <h1 class="h3 mb-0 text-gray-800">Grupo de acesso</h1>
             </div>
         </template>
@@ -125,7 +125,7 @@ const submit = () => {
                                                 <div class="card">
                                                     <div class="card-body">
                                                         <div class="form-check"
-                                                            v-for="(option, index) in  $page.props.permissionList">
+                                                            v-for="(option, index) in $page.props.permissionList">
                                                             <input v-model="form.permissions" class="form-check-input"
                                                                 type="checkbox" :value="option.name" :id="option.name">
                                                             <label class="form-check-label" :for="option.name">
@@ -134,7 +134,8 @@ const submit = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <InputError class="mt-2 text-danger" :message="form.errors.permissions" />
+                                                <InputError class="mt-2 text-danger"
+                                                    :message="form.errors.permissions" />
                                             </div>
 
                                         </div>
@@ -216,8 +217,10 @@ const submit = () => {
                                                     </Modal>
 
 
-                                                    <Modal :key="index" :modal-title="'Confirmar Exclusão de ' + role.name"
-                                                        :ok-botton-callback="deleteRole" :ok-botton-callback-param="role.id"
+                                                    <Modal :key="index"
+                                                        :modal-title="'Confirmar Exclusão de ' + role.name"
+                                                        :ok-botton-callback="deleteRole"
+                                                        :ok-botton-callback-param="role.id"
                                                         btn-class="btn  btn-sm btn-danger btn-icon-split mr-2">
                                                         <template v-slot:button>
                                                             <span class="icon text-white-50">

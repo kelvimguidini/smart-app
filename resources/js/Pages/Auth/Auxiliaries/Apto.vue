@@ -88,7 +88,7 @@ const deactivate = (id) => {
 
         <Head title="Apartamento" />
         <template #header>
-            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div class="d-sm-flex align-items-center justify-content-between">
                 <h1 class="h3 mb-0 text-gray-800">Apartamento</h1>
             </div>
         </template>
@@ -158,8 +158,10 @@ const deactivate = (id) => {
                                                         <span class="text">Editar</span>
                                                     </button>
 
-                                                    <Modal :key="index" :modal-title="'Confirmar Exclusão de ' + apto.name"
-                                                        :ok-botton-callback="deleteApto" :ok-botton-callback-param="apto.id"
+                                                    <Modal :key="index"
+                                                        :modal-title="'Confirmar Exclusão de ' + apto.name"
+                                                        :ok-botton-callback="deleteApto"
+                                                        :ok-botton-callback-param="apto.id"
                                                         btn-class="btn btn-sm btn-danger btn-icon-split mr-2">
                                                         <template v-slot:button>
                                                             <span class="icon text-white-50">
@@ -172,7 +174,8 @@ const deactivate = (id) => {
                                                         </template>
                                                     </Modal>
 
-                                                    <button v-if="!apto.active" class="btn btn-sm btn-success btn-icon-split mr-2"
+                                                    <button v-if="!apto.active"
+                                                        class="btn btn-sm btn-success btn-icon-split mr-2"
                                                         v-on:click="activate(apto.id)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-check"></i>
@@ -180,7 +183,8 @@ const deactivate = (id) => {
                                                         <span class="text">Ativar</span>
                                                     </button>
 
-                                                    <button v-if="apto.active" class="btn btn-sm btn-warning btn-icon-split mr-2"
+                                                    <button v-if="apto.active"
+                                                        class="btn btn-sm btn-warning btn-icon-split mr-2"
                                                         v-on:click="deactivate(apto.id)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-ban"></i>

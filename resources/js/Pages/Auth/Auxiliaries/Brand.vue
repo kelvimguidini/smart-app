@@ -85,7 +85,7 @@ const deactivate = (id) => {
 
         <Head title="Marca" />
         <template #header>
-            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div class="d-sm-flex align-items-center justify-content-between">
                 <h1 class="h3 mb-0 text-gray-800">Marca</h1>
             </div>
         </template>
@@ -155,7 +155,8 @@ const deactivate = (id) => {
                                                         <span class="text">Editar</span>
                                                     </button>
 
-                                                    <Modal :key="index" :modal-title="'Confirmar Exclusão de ' + brand.name"
+                                                    <Modal :key="index"
+                                                        :modal-title="'Confirmar Exclusão de ' + brand.name"
                                                         :ok-botton-callback="deleteBrand"
                                                         :ok-botton-callback-param="brand.id"
                                                         btn-class="btn  btn-sm btn-danger btn-icon-split mr-2">
@@ -170,7 +171,8 @@ const deactivate = (id) => {
                                                         </template>
                                                     </Modal>
 
-                                                    <button v-if="!brand.active" class="btn btn-sm btn-success btn-icon-split mr-2"
+                                                    <button v-if="!brand.active"
+                                                        class="btn btn-sm btn-success btn-icon-split mr-2"
                                                         v-on:click="activate(brand.id)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-check"></i>
@@ -178,7 +180,8 @@ const deactivate = (id) => {
                                                         <span class="text">Ativar</span>
                                                     </button>
 
-                                                    <button v-if="brand.active" class="btn btn-sm btn-warning btn-icon-split mr-2"
+                                                    <button v-if="brand.active"
+                                                        class="btn btn-sm btn-warning btn-icon-split mr-2"
                                                         v-on:click="deactivate(brand.id)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-ban"></i>

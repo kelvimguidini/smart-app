@@ -112,7 +112,7 @@ const deactivate = (id) => {
 
         <Head title="CRD's" />
         <template #header>
-            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div class="d-sm-flex align-items-center justify-content-between">
                 <h1 class="h3 mb-0 text-gray-800">CRD's</h1>
             </div>
         </template>
@@ -203,15 +203,18 @@ const deactivate = (id) => {
                                                 <td>{{ crd.number }}</td>
                                                 <td>{{ crd.customer != null ? crd.customer.name : ' - ' }}</td>
                                                 <td>
-                                                    <button class="btn btn-sm btn-info btn-icon-split mr-2" v-on:click="edit(crd)">
+                                                    <button class="btn btn-sm btn-info btn-icon-split mr-2"
+                                                        v-on:click="edit(crd)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-edit"></i>
                                                         </span>
                                                         <span class="text">Editar</span>
                                                     </button>
 
-                                                    <Modal :key="index" :modal-title="'Confirmar Exclusão de ' + crd.name"
-                                                        :ok-botton-callback="deleteCRD" :ok-botton-callback-param="crd.id"
+                                                    <Modal :key="index"
+                                                        :modal-title="'Confirmar Exclusão de ' + crd.name"
+                                                        :ok-botton-callback="deleteCRD"
+                                                        :ok-botton-callback-param="crd.id"
                                                         btn-class="btn  btn-sm btn-danger btn-icon-split mr-2">
                                                         <template v-slot:button>
                                                             <span class="icon text-white-50">
@@ -225,7 +228,8 @@ const deactivate = (id) => {
                                                     </Modal>
 
 
-                                                    <button v-if="!crd.active" class="btn btn-sm btn-success btn-icon-split mr-2"
+                                                    <button v-if="!crd.active"
+                                                        class="btn btn-sm btn-success btn-icon-split mr-2"
                                                         v-on:click="activate(crd.id)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-check"></i>
@@ -233,7 +237,8 @@ const deactivate = (id) => {
                                                         <span class="text">Ativar</span>
                                                     </button>
 
-                                                    <button v-if="crd.active" class="btn btn-sm btn-warning btn-icon-split mr-2"
+                                                    <button v-if="crd.active"
+                                                        class="btn btn-sm btn-warning btn-icon-split mr-2"
                                                         v-on:click="deactivate(crd.id)">
                                                         <span class="icon text-white-50">
                                                             <i class="fas fa-ban"></i>
