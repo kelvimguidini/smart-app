@@ -100,6 +100,18 @@ $sumHallQtdDayles = 0;
 $sumHallValueRate = 0;
 $sumTotalHallValueRate = 0;
 
+$sumTotalHotelSale = 0;
+$sumTotalAddSale = 0;
+$sumTotalABSale = 0;
+$sumTotalHallSale = 0;
+$sumTotalTransportSale = 0;
+
+$hotelTaxa4BTS = 0;
+$addTaxa4BTS = 0;
+$abTaxa4BTS = 0;
+$hallTaxa4BTS = 0;
+$transportTaxa4BTS = 0;
+
 $sumTotalAddValue = 0;
 $sumAddQtdDayles = 0;
 $sumAddValueRate = 0;
@@ -111,7 +123,7 @@ $sumTotalTransportValue = 0;
 $sumTotalTransportValueRate = 0;
 
 $percIOF = 0;
-$percService = 10;
+// $percService = 10;
 
 $hotelEvent  = null;
 $abEvent = null;
@@ -531,6 +543,7 @@ function quebraTexto($texto, $limite = 40)
                         </thead>
                         <tbody>
                             @foreach($hotelEvent->eventHotelsOpt as $key => $item)
+                            <?php $sumTotalHotelSale += sumTotal(unitSale($item), sumTaxesProvider($hotelEvent, $item), $item->count * daysBetween($item->in, $item->out)); ?>
                             <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>" class="<?= $key == 0 ? 'first-row' : '' ?>">
                                 <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
                                 <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
@@ -555,9 +568,12 @@ function quebraTexto($texto, $limite = 40)
                             @endforeach
                         </tbody>
                         <tfoot class="table-footer">
+                            <?php $hotelTaxa4BTS = ((($sumTotalHotelSale * $percIOF) / 100) + $sumTotalHotelSale) * ($hotelEvent->taxa_4bts / 100); ?>
                             <tr style="background-color: #ffe0b1">
                                 <td colspan="1"><b>Comentários:</b></td>
-                                <td colspan="7">{{ $hotelEvent->customer_observation }}</td>
+                                <td colspan="5">{{ $hotelEvent->customer_observation }}</td>
+                                <td><b>Serviço 4BTS ({{ number_format($hotelEvent->taxa_4bts, 2) }}%)</b></td>
+                                <td>{{ formatCurrency($hotelTaxa4BTS, $hotelEvent->currency->symbol) }}</td>
                                 <td><b>Prazo</b></td>
                                 <td>{{ $hotelEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($hotelEvent->deadline_date)) }}</td>
                             </tr>
@@ -590,6 +606,7 @@ function quebraTexto($texto, $limite = 40)
                         </thead>
                         <tbody>
                             @foreach($abEvent->eventAbOpts as $key => $item)
+                            <?php $sumTotalABSale += sumTotal(unitSale($item), sumTaxesProvider($abEvent, $item), $item->count * daysBetween1($item->in, $item->out)); ?>
                             <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>" class="<?= $key == 0 ? 'first-row' : '' ?>">
                                 <td>{{ $item->service_type->name }}</td>
                                 <td>{{ $item->local->name }}</td>
@@ -613,9 +630,12 @@ function quebraTexto($texto, $limite = 40)
                             @endforeach
                         </tbody>
                         <tfoot class="table-footer">
+                            <?php $abTaxa4BTS = ((($sumTotalABSale * $percIOF) / 100) + $sumTotalABSale) * ($abEvent->taxa_4bts / 100); ?>
                             <tr style="background-color: #ffe0b1">
                                 <td colspan="2"><b>Comentários:</b></td>
-                                <td colspan="6">{{ $abEvent->customer_observation }}</td>
+                                <td colspan="4">{{ $abEvent->customer_observation }}</td>
+                                <td><b>Serviço 4BTS ({{ number_format($abEvent->taxa_4bts, 2) }}%)</b></td>
+                                <td>{{ formatCurrency($abTaxa4BTS, $abEvent->currency->symbol) }}</td>
                                 <td><b>Prazo</b></td>
                                 <td>{{ $abEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($abEvent->deadline_date)) }}</td>
                             </tr>
@@ -649,6 +669,7 @@ function quebraTexto($texto, $limite = 40)
                         </thead>
                         <tbody>
                             @foreach($hallEvent->eventHallOpts as $key => $item)
+                            <?php $sumTotalHallSale += sumTotal(unitSale($item), sumTaxesProvider($hallEvent, $item), $item->count * daysBetween1($item->in, $item->out)); ?>
                             <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>" class="<?= $key == 0 ? 'first-row' : '' ?>">
                                 <td>{{ $item->name }}</td>
                                 <td>{{ $item->m2 }}</td>
@@ -673,9 +694,12 @@ function quebraTexto($texto, $limite = 40)
                             @endforeach
                         </tbody>
                         <tfoot class="table-footer">
+                            <?php $hallTaxa4BTS = ((($sumTotalHallSale * $percIOF) / 100) + $sumTotalHallSale) * ($hallEvent->taxa_4bts / 100); ?>
                             <tr style="background-color: #ffe0b1">
                                 <td colspan="2"><b>Comentários:</b></td>
-                                <td colspan="7">{{ $hallEvent->customer_observation }}</td>
+                                <td colspan="5">{{ $hallEvent->customer_observation }}</td>
+                                <td><b>Serviço 4BTS ({{ number_format($hallEvent->taxa_4bts, 2) }}%)</b></td>
+                                <td>{{ formatCurrency($hallTaxa4BTS, $hallEvent->currency->symbol) }}</td>
                                 <td><b>Prazo</b></td>
                                 <td>{{ $hallEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($hallEvent->deadline_date)) }}</td>
                             </tr>
@@ -709,6 +733,7 @@ function quebraTexto($texto, $limite = 40)
                         </thead>
                         <tbody>
                             @foreach($addEvent->eventAddOpts as $key => $item)
+                            <?php $sumTotalAddSale += sumTotal(unitSale($item), sumTaxesProvider($addEvent, $item), $item->count * daysBetween1($item->in, $item->out)); ?>
                             <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>" class="<?= $key == 0 ? 'first-row' : '' ?>">
                                 <td>{{ $item->service->name }}</td>
                                 <td>{{ $item->frequency->name }}</td>
@@ -733,9 +758,12 @@ function quebraTexto($texto, $limite = 40)
                             @endforeach
                         </tbody>
                         <tfoot class="table-footer">
+                            <?php $addTaxa4BTS = ((($sumTotalAddSale * $percIOF) / 100) + $sumTotalAddSale) * ($addEvent->taxa_4bts / 100); ?>
                             <tr style="background-color: #ffe0b1">
                                 <td colspan="2"><b>Comentários:</b></td>
-                                <td colspan="7">{{ $addEvent->customer_observation }}</td>
+                                <td colspan="5">{{ $addEvent->customer_observation }}</td>
+                                <td><b>Serviço 4BTS ({{ number_format($addEvent->taxa_4bts, 2) }}%)</b></td>
+                                <td>{{ formatCurrency($addTaxa4BTS, $addEvent->currency->symbol) }}</td>
                                 <td><b>Prazo</b></td>
                                 <td>{{ $addEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($addEvent->deadline_date)) }}</td>
                             </tr>
@@ -771,6 +799,7 @@ function quebraTexto($texto, $limite = 40)
                         </thead>
                         <tbody>
                             @foreach($transportEvent->eventTransportOpts as $key => $item)
+                            <?php $transportTaxa4BTS += sumTotal(unitSale($item), sumTaxesProvider($transportEvent, $item), $item->count * daysBetween1($item->in, $item->out)); ?>
                             <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>" class="<?= $key == 0 ? 'first-row' : '' ?>">
                                 <!-- <td>{{ $item->brand->name }}</td> -->
                                 <td>{{ $item->vehicle->name }}</td>
@@ -797,9 +826,12 @@ function quebraTexto($texto, $limite = 40)
                             @endforeach
                         </tbody>
                         <tfoot class="table-footer">
+                            <?php $transportTaxa4BTS = ((($sumTotalTransportSale * $percIOF) / 100) + $sumTotalTransportSale) * ($transportEvent->taxa_4bts / 100); ?>
                             <tr style="background-color: #ffe0b1">
                                 <td colspan="2"><b>Comentários:</b></td>
-                                <td colspan="8">{{ $transportEvent->customer_observation }}</td>
+                                <td colspan="6">{{ $transportEvent->customer_observation }}</td>
+                                <td><b>Serviço 4BTS ({{ number_format($transportEvent->taxa_4bts, 2) }}%)</b></td>
+                                <td>{{ formatCurrency($transportTaxa4BTS, $transportEvent->currency->symbol) }}</td>
                                 <td><b>Prazo</b></td>
                                 <td>{{ $transportEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($transportEvent->deadline_date)) }}</td>
                             </tr>
@@ -900,12 +932,14 @@ function quebraTexto($texto, $limite = 40)
                                         $total = $sumTotalHotelValue + $sumTotalABValue + $sumTotalHallValue + $sumTotalAddValue + $sumTotalTransportValue;
 
                                         $totalIOF = ($total * $percIOF) / 100;
-                                        $totalServico = ((($total * $percIOF) / 100) + $total) * ($percService / 100);
+                                        // $totalServico = ($totalIOF + $total) * ($percService / 100);
+                                        $totalServico = $hotelTaxa4BTS + $addTaxa4BTS + $abTaxa4BTS + $hallTaxa4BTS + $transportTaxa4BTS;
+
                                         ?>
                                         <td style="height: 18px; width: 15%; float: left; background-color: #ffd18c; padding: 0.3rem;">IOF: </td>
                                         <td style="height: 18px; width: 15%; float: left; background-color: #ffe3b9; padding: 0.3rem;">{{ $percIOF }}% ({{formatCurrency($totalIOF)}})</td>
                                         <td style="height: 18px; width: 15%; float: left; background-color: #ffd18c; padding: 0.3rem;">Taxa de Serviço: </td>
-                                        <td style="height: 18px; width: 15%; float: left; background-color: #ffe3b9; padding: 0.3rem;">{{ $percService }}% ({{formatCurrency($totalServico)}})</td>
+                                        <td style="height: 18px; width: 15%; float: left; background-color: #ffe3b9; padding: 0.3rem;">{{formatCurrency($totalServico)}}</td>
                                         <td style="height: 18px; width: 15%; float: left; background-color: #ffd18c; padding: 0.3rem;">Valor Total: </td>
                                         <td style="height: 18px; width: 15%; float: left; background-color: #ffe3b9; padding: 0.3rem;">
                                             {{ formatCurrency($total + $totalIOF + $totalServico) }}
@@ -918,8 +952,7 @@ function quebraTexto($texto, $limite = 40)
                 </table>
             </div>
 
-            <hr style="border-top: 1px solid black;">
-
+            <hr style="border-top: 1px solid black; page-break-before: avoid;">
 
 
             <footer id="footer" style="width:100%; border-collapse: collapse;">

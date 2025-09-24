@@ -189,7 +189,7 @@ class EventApiController extends BaseApiController
                 ? 'loca'
                 : ($tipo['rel'] == 'event_hotels' ? 'HTLI' : 'DIVN')
         );
-        $venda->addChild('clasproduto', htmlspecialchars($fornecedor->national ? 'Internacional' : 'Nacional'));
+        $venda->addChild('clasproduto', htmlspecialchars($fornecedor->national ? 'Nacional' : 'Internacional'));
 
         $venda->addChild('idemissor', htmlspecialchars($evento->user_created ?? ''));
         $venda->addChild(
@@ -202,7 +202,7 @@ class EventApiController extends BaseApiController
         );
         $venda->addChild('dtemissao', htmlspecialchars(Carbon::parse($evento->date)->format('d/m/Y')));
         $venda->addChild('idcliente', htmlspecialchars($evento->customer?->codestur ?? $evento->customer?->id ?? ''));
-        // $venda->addChild('idoperador', htmlspecialchars($fornecedor->id ?? ''));
+        $venda->addChild('idoperador', htmlspecialchars($fornecedor?->broker?->name ?? ''));
         $venda->addChild('idfornecedor', htmlspecialchars($tipo['fornecedor']($fornecedor)->codestur ?? $tipo['fornecedor']($fornecedor)->id ?? ''));
         $venda->addChild('formrec', '1');
 
@@ -226,14 +226,14 @@ class EventApiController extends BaseApiController
             if (!empty($aprovado?->created_at)) {
                 $carbon = Carbon::parse($aprovado->created_at);
                 $dataAutorizacao = $carbon->format('d/m/Y');
-                $horaAutorizacao = $carbon->format('H:i:s');
+                $horaAutorizacao = $carbon->format('H:i');
             }
             $venda->addChild('dataautorizacao', htmlspecialchars($dataAutorizacao));
             $venda->addChild('horaautorizacao', htmlspecialchars($horaAutorizacao));
         }
 
         $venda->addChild('projetocodigo', htmlspecialchars($evento->code ?? ''));
-        $venda->addChild('projetonome', htmlspecialchars($evento->name ?? ''));
+        $venda->addChild('projetonome', htmlspecialchars(mb_substr($evento->name ?? '', 0, 30)));
 
         $venda->addChild('tipoctarec', htmlspecialchars($tipo['tipoctarec'] ?? ''));
         $venda->addChild('tipoctapag', htmlspecialchars($tipo['tipoctarec'] ?? ''));
@@ -277,8 +277,8 @@ class EventApiController extends BaseApiController
         $movimento->addChild('moeda', htmlspecialchars($fornecedor->currency?->sigla ?? ''));
         $movimento->addChild('cambio', htmlspecialchars($evento->exchange_rate ?? '1'));
         $movimento->addChild('cambiofornecedor', htmlspecialchars($opt->cambiofornecedor ?? ''));
-        $movimento->addChild('checkin', htmlspecialchars($opt->in ?? ''));
-        $movimento->addChild('checkout', htmlspecialchars($opt->out ?? ''));
+        $movimento->addChild('checkin', htmlspecialchars($opt->in ? Carbon::parse($opt->in)->format('d/m/Y') : ''));
+        $movimento->addChild('checkout', htmlspecialchars($opt->out ? Carbon::parse($opt->out)->format('d/m/Y') : ''));
         $movimento->addChild('taxaservico', htmlspecialchars(($opt->received_proposal * $fornecedor->service_percent) / 100 ?? ''));
         $movimento->addChild('taxaservicofor', htmlspecialchars(($this->unitSale($opt) * $fornecedor->service_percent) ?? ''));
 
@@ -288,10 +288,10 @@ class EventApiController extends BaseApiController
         $movimento->addChild('observacao', htmlspecialchars($fornecedor->internal_observation  ?? ''));
 
 
-
+        $movimento->addChild('veiculo', htmlspecialchars($opt->vehicle?->name ?? ''));
         $movimento->addChild('valordiaria', htmlspecialchars($opt->received_proposal ?? ''));
         $movimento->addChild('valordiariafornecedor', htmlspecialchars($this->unitSale($opt) ?? ''));
-        $movimento->addChild('qtdservico', htmlspecialchars($qtdDayle ?? ''));
+        $movimento->addChild('qtddiaria', htmlspecialchars($qtdDayle ?? ''));
 
         if (isset($fornecedor->status_his)) {
             $aprovado = collect($fornecedor->status_his)->last(function ($item) {
@@ -343,7 +343,7 @@ class EventApiController extends BaseApiController
 
         $movimento->addChild('valordiaria', htmlspecialchars($opt->received_proposal ?? ''));
         $movimento->addChild('valordiariafornecedor', htmlspecialchars($this->unitSale($opt) ?? ''));
-        $movimento->addChild('qtdservico', htmlspecialchars($qtdDayle ?? ''));
+        $movimento->addChild('qtdservico', htmlspecialchars($qtdDayle ?? '1'));
 
         if (isset($fornecedor->status_his)) {
             $aprovado = collect($fornecedor->status_his)->last(function ($item) {
