@@ -19,7 +19,6 @@ use App\Models\EventAdd;
 use App\Models\EventHall;
 use App\Models\EventHotel;
 use App\Models\EventLocal;
-use App\Models\EventStatus;
 use App\Models\EventTransport;
 use App\Models\Frequency;
 use App\Models\Local;

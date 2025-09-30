@@ -101,7 +101,7 @@ class EventApiController extends BaseApiController
                 ],
                 [
                     'rel' => 'event_transports',
-                    'id' => 'loc',
+                    'id' => 'transp',
                     'fornecedor' => fn($item) => $item->transport,
                     'model' => \App\Models\ProviderTransport::class,
                     'tipoctarec' => '01/0006',
@@ -177,18 +177,8 @@ class EventApiController extends BaseApiController
         $venda->addChild('origem', 'SMART4BTS');
         $venda->addChild('idvenda', htmlspecialchars($evento->id . '-' . $fornecedor->id . '-' . $tipo['id']));
         $venda->addChild('idvendapai', htmlspecialchars($evento->code));
-        $venda->addChild(
-            'tipoproduto',
-            $tipo['rel'] == 'event_transports'
-                ? 'LOCACAO'
-                : ($tipo['rel'] == 'event_hotels' ? 'HOTEL' : 'DIVERSOS')
-        );
-        $venda->addChild(
-            'idproduto',
-            $tipo['rel'] == 'event_transports'
-                ? 'loca'
-                : ($tipo['rel'] == 'event_hotels' ? 'HTLI' : 'DIVN')
-        );
+        $venda->addChild('tipoproduto', $tipo['rel'] == 'event_hotels' ? 'HOTEL' : 'DIVERSOS');
+        $venda->addChild('idproduto', $tipo['rel'] == 'event_hotels' ? 'HTLI' : 'DIVN');
         $venda->addChild('clasproduto', htmlspecialchars($fornecedor->national ? 'Nacional' : 'Internacional'));
 
         $venda->addChild('idemissor', htmlspecialchars($evento->user_created ?? ''));
@@ -238,15 +228,15 @@ class EventApiController extends BaseApiController
         $venda->addChild('tipoctarec', htmlspecialchars($tipo['tipoctarec'] ?? ''));
         $venda->addChild('tipoctapag', htmlspecialchars($tipo['tipoctarec'] ?? ''));
 
+        $venda->addChild('formpagto', 2); //FATURADO
+
+
         $sumTotalHotelSale = 0;
         $movimentosXml = $venda->addChild('movimentos');
 
         foreach ($fornecedor->eventHotelsOpt ?? $fornecedor->eventAbOpts ?? $fornecedor->eventHallOpts ?? $fornecedor->eventAddOpts ?? $fornecedor->eventTransportOpts ?? [] as $opt) {
 
             switch ($tipo['rel']) {
-                case 'event_transports':
-                    $this->movimentoLocacaoXML($opt, $fornecedor, $evento, $movimentosXml);
-                    break;
                 case 'event_hotels':
                     $this->movimentoHotelariaXML($opt, $fornecedor, $evento, $movimentosXml);
                     break;
@@ -266,48 +256,33 @@ class EventApiController extends BaseApiController
         $venda->addChild('entradatotal', $sumTotalHotelSale);
     }
 
-
-    private function movimentoLocacaoXML($opt, $fornecedor, $evento, $movimentoXml,)
-    {
-        $movimento = $movimentoXml->addChild('locacao');
-
-        $movimento->addChild('pax', htmlspecialchars($evento->name ?? '' . ' - TRANSPORTE'));
-        $movimento->addChild('tipo', 'ADT');
-        $movimento->addChild('matricula', '');
-        $movimento->addChild('moeda', htmlspecialchars($fornecedor->currency?->sigla ?? ''));
-        $movimento->addChild('cambio', htmlspecialchars($evento->exchange_rate ?? '1'));
-        $movimento->addChild('cambiofornecedor', htmlspecialchars($opt->cambiofornecedor ?? ''));
-        $movimento->addChild('checkin', htmlspecialchars($opt->in ? Carbon::parse($opt->in)->format('d/m/Y') : ''));
-        $movimento->addChild('checkout', htmlspecialchars($opt->out ? Carbon::parse($opt->out)->format('d/m/Y') : ''));
-        $movimento->addChild('taxaservico', htmlspecialchars(($opt->received_proposal * $fornecedor->service_percent) / 100 ?? ''));
-        $movimento->addChild('taxaservicofor', htmlspecialchars(($this->unitSale($opt) * $fornecedor->service_percent) ?? ''));
-
-        $qtdDayle = $opt->count * $this->daysBetween($opt->in, $opt->out);
-
-        $movimento->addChild('comisrecforvalor', htmlspecialchars(($opt->received_proposal * $qtdDayle * $opt->kickback) / 100 ?? ''));
-        $movimento->addChild('observacao', htmlspecialchars($fornecedor->internal_observation  ?? ''));
-
-
-        $movimento->addChild('veiculo', htmlspecialchars($opt->vehicle?->name ?? ''));
-        $movimento->addChild('valordiaria', htmlspecialchars($opt->received_proposal ?? ''));
-        $movimento->addChild('valordiariafornecedor', htmlspecialchars($this->unitSale($opt) ?? ''));
-        $movimento->addChild('qtddiaria', htmlspecialchars($qtdDayle ?? ''));
-
-        if (isset($fornecedor->status_his)) {
-            $aprovado = collect($fornecedor->status_his)->last(function ($item) {
-                return $item->status === 'approved_by_manager';
-            });
-
-            $movimento->addChild('confirmadopor', '');
-            $movimento->addChild('dataconfirmacao', '');
-            $movimento->addChild('numconfirmacao', '');
-        }
-    }
-
     private function movimentoDiversosXML($opt, $fornecedor, $evento, $movimentoXml, $tipo)
     {
         $movimento = $movimentoXml->addChild('diversos');
-        $movimento->addChild('pax', htmlspecialchars($evento->name ?? ''));
+        $stringNome = '';
+        switch ($tipo) {
+            case 'event_transports':
+                $movimento->addChild('descricao', 'TRANSPORTES');
+                $stringNome = 'TRANSPORTES';
+                break;
+            case 'event_adds':
+                $movimento->addChild('descricao', 'ADICIONAIS');
+                $stringNome = 'ADICIONAIS';
+                break;
+            case 'event_abs':
+                $movimento->addChild('descricao', 'ALIMENTOS E BEBIDAS');
+                $stringNome = 'ALIMENTOS E BEBIDAS';
+                break;
+            case 'event_halls':
+                $movimento->addChild('descricao', 'SALOES E EVENTOS');
+                $stringNome = 'SALOES E EVENTOS';
+                break;
+            default:
+                $movimento->addChild('descricao', htmlspecialchars($fornecedor->customer_observation  ?? ''));
+                break;
+        }
+
+        $movimento->addChild('pax', htmlspecialchars($evento->name ?? '') . ' - ' . $stringNome);
         $movimento->addChild('tipo', 'ADT');
         $movimento->addChild('matricula', '');
         $movimento->addChild('moeda', htmlspecialchars($fornecedor->currency?->sigla ?? ''));
@@ -325,30 +300,14 @@ class EventApiController extends BaseApiController
         $movimento->addChild('descpagclivalor', htmlspecialchars($opt->received_proposal * $qtdDayle ?? ''));
         $movimento->addChild('observacao', htmlspecialchars($fornecedor->internal_observation  ?? ''));
 
-        switch ($tipo) {
-            case 'event_adds':
-                $movimento->addChild('descricao', 'ADICIONAIS');
-                break;
-            case 'event_abs':
-                $movimento->addChild('descricao', 'ALIMENTOS E BEBIDAS');
-                break;
-            case 'event_halls':
-                $movimento->addChild('descricao', 'SALOES E EVENTOS');
-                break;
-            default:
-                $movimento->addChild('descricao', htmlspecialchars($fornecedor->customer_observation  ?? ''));
-                break;
-        }
-
-
         $movimento->addChild('valordiaria', htmlspecialchars($opt->received_proposal ?? ''));
         $movimento->addChild('valordiariafornecedor', htmlspecialchars($this->unitSale($opt) ?? ''));
         $movimento->addChild('qtdservico', htmlspecialchars($qtdDayle ?? '1'));
 
         if (isset($fornecedor->status_his)) {
-            $aprovado = collect($fornecedor->status_his)->last(function ($item) {
-                return $item->status === 'approved_by_manager';
-            });
+            // $aprovado = collect($fornecedor->status_his)->last(function ($item) {
+            //     return $item->status === 'approved_by_manager';
+            // });
 
             $movimento->addChild('confirmadopor', '');
             $movimento->addChild('dataconfirmacao', '');
@@ -382,15 +341,26 @@ class EventApiController extends BaseApiController
         $aptos = $movimento->addChild('aptos');
 
         $aptoXml = $aptos->addChild('apto');
-        $aptoXml->addChild('tipoapto', htmlspecialchars($opt->apto_hotel?->name ?? ''));
+
+        $tipoApto = strtoupper($opt->apto_hotel?->name ?? '');
+        $tiposReconhecidos = ['SGL', 'DBL', 'TPL', 'QPL'];
+
+        if ($tipoApto === 'TWIN') {
+            $tipoApto = 'DBL';
+        } elseif (!in_array($tipoApto, $tiposReconhecidos)) {
+            $tipoApto = 'DBL'; // ou escolha um padrão, se preferir
+        }
+
+        $aptoXml->addChild('tipoapto', htmlspecialchars($tipoApto));
+
         $aptoXml->addChild('valordiaria', htmlspecialchars($opt->received_proposal ?? ''));
         $aptoXml->addChild('valordiariafornecedor', htmlspecialchars($this->unitSale($opt) ?? ''));
         $aptoXml->addChild('qtddiaria', htmlspecialchars($qtdDayle ?? ''));
 
         if (isset($fornecedor->status_his)) {
-            $aprovado = collect($fornecedor->status_his)->last(function ($item) {
-                return $item->status === 'approved_by_manager';
-            });
+            // $aprovado = collect($fornecedor->status_his)->last(function ($item) {
+            //     return $item->status === 'approved_by_manager';
+            // });
 
             $movimento->addChild('confirmadopor', '');
             $movimento->addChild('dataconfirmacao', '');
@@ -416,7 +386,7 @@ class EventApiController extends BaseApiController
 
                 $fornecedorXml->addChild('tipopessoa', 'PJ');
                 if ($modelClass === \App\Models\ProviderTransport::class) {
-                    $tipoFornec = 'LOC';
+                    $tipoFornec = 'TRANSP';
                 } elseif ($modelClass === \App\Models\ProviderServices::class) {
                     $tipoFornec = 'DIV';
                 } else {
