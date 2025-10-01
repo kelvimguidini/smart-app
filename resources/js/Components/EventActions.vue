@@ -24,7 +24,7 @@
                 <span class="icon text-white-50">
                     <i class="fas fa-tag"></i>
                 </span>
-                <span class="text">Número da Venda</span>
+                <span class="text">N° Venda</span>
             </template>
             <template v-slot:content>
                 <div class="form-group">
@@ -63,7 +63,7 @@
                 <span class="icon text-white-50">
                     <i class="fas fa-eye"></i>
                 </span>
-                <span class="text">Visualizar</span>
+                <span class="text">Ver</span>
             </template>
             <template v-slot:content>
                 <EventView :event="event" />

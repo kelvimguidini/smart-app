@@ -288,8 +288,10 @@ class EventApiController extends BaseApiController
         $movimento->addChild('moeda', htmlspecialchars($fornecedor->currency?->sigla ?? ''));
         $movimento->addChild('cambio', htmlspecialchars($evento->exchange_rate ?? '1'));
         $movimento->addChild('cambiofornecedor', htmlspecialchars($opt->cambiofornecedor ?? ''));
-        $movimento->addChild('checkin', htmlspecialchars($opt->in ?? ''));
-        $movimento->addChild('checkout', htmlspecialchars($opt->out ?? ''));
+        $in = Carbon::parse($opt->in);
+        $out = Carbon::parse($opt->out);
+        $movimento->addChild('checkin', htmlspecialchars($in->format('d/m/Y') ?? ''));
+        $movimento->addChild('checkout', htmlspecialchars($out->format('d/m/Y') ?? ''));
         $movimento->addChild('taxaservico', htmlspecialchars(($opt->received_proposal * $fornecedor->service_percent) / 100 ?? ''));
         $movimento->addChild('taxaservicofor', htmlspecialchars(($this->unitSale($opt) * $fornecedor->service_percent) ?? ''));
 
@@ -323,8 +325,10 @@ class EventApiController extends BaseApiController
         $movimento->addChild('motivoviagem', '');
         $movimento->addChild('moeda', htmlspecialchars($fornecedor->currency?->sigla ?? ''));
         $movimento->addChild('cambio', htmlspecialchars($evento->exchange_rate ?? '1'));
-        $movimento->addChild('checkin', htmlspecialchars($opt->in ?? ''));
-        $movimento->addChild('checkout', htmlspecialchars($opt->out ?? ''));
+        $in = Carbon::parse($opt->in);
+        $out = Carbon::parse($opt->out);
+        $movimento->addChild('checkin', htmlspecialchars($in->format('d/m/Y') ?? ''));
+        $movimento->addChild('checkout', htmlspecialchars($out->format('d/m/Y') ?? ''));
 
         $movimento->addChild('taxaservico', htmlspecialchars(($opt->received_proposal * $fornecedor->service_percent) / 100 ?? ''));
 
