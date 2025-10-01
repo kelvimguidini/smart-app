@@ -304,7 +304,7 @@ class EventApiController extends BaseApiController
 
         $movimento->addChild('valordiaria', htmlspecialchars($opt->received_proposal ?? ''));
         $movimento->addChild('valordiariafornecedor', htmlspecialchars($this->unitSale($opt) ?? ''));
-        $movimento->addChild('qtdservico', htmlspecialchars($qtdDayle ?? '1'));
+        $movimento->addChild('qtdservico', htmlspecialchars($qtdDayle > 0 ? $qtdDayle : '1'));
 
         if (isset($fornecedor->status_his)) {
             // $aprovado = collect($fornecedor->status_his)->last(function ($item) {
