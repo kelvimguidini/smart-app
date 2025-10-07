@@ -81,6 +81,7 @@ class EventApiController extends BaseApiController
                 [
                     'rel' => 'event_hotels',
                     'id' => 'hotel',
+                    'tipoProvider' => 'hotel',
                     'fornecedor' => fn($item) => $item->hotel,
                     'model' => \App\Models\Provider::class,
                     'tipoctarec' => '01/0002',
@@ -88,6 +89,7 @@ class EventApiController extends BaseApiController
                 [
                     'rel' => 'event_abs',
                     'id' => 'ab',
+                    'tipoProvider' => 'ab',
                     'fornecedor' => fn($item) => $item->ab,
                     'model' => \App\Models\Provider::class,
                     'tipoctarec' => '01/0005',
@@ -95,6 +97,7 @@ class EventApiController extends BaseApiController
                 [
                     'rel' => 'event_halls',
                     'id' => 'salao',
+                    'tipoProvider' => 'hall',
                     'fornecedor' => fn($item) => $item->hall,
                     'model' => \App\Models\Provider::class,
                     'tipoctarec' => '01/0003',
@@ -102,6 +105,7 @@ class EventApiController extends BaseApiController
                 [
                     'rel' => 'event_transports',
                     'id' => 'transp',
+                    'tipoProvider' => 'transport',
                     'fornecedor' => fn($item) => $item->transport,
                     'model' => \App\Models\ProviderTransport::class,
                     'tipoctarec' => '01/0006',
@@ -109,6 +113,7 @@ class EventApiController extends BaseApiController
                 [
                     'rel' => 'event_adds',
                     'id' => 'servicos',
+                    'tipoProvider' => 'add',
                     'fornecedor' => fn($item) => $item->add,
                     'model' => \App\Models\ProviderServices::class,
                     'tipoctarec' => '01/0005',
@@ -179,7 +184,8 @@ class EventApiController extends BaseApiController
         $venda->addChild('idvendapai', htmlspecialchars($evento->code));
         $venda->addChild('tipoproduto', $tipo['rel'] == 'event_hotels' ? 'HOTEL' : 'DIVERSOS');
         $venda->addChild('idproduto', $tipo['rel'] == 'event_hotels' ? 'HTLI' : 'DIVN');
-        $venda->addChild('clasproduto', htmlspecialchars($fornecedor->national ? 'Nacional' : 'Internacional'));
+
+        $venda->addChild('clasproduto', htmlspecialchars($fornecedor->{$tipo['tipoProvider']}->national ? 'Nacional' : 'Internacional'));
 
         $venda->addChild('idemissor', htmlspecialchars($evento->user_created ?? ''));
         $venda->addChild(
@@ -245,15 +251,15 @@ class EventApiController extends BaseApiController
                     break;
             }
 
-            $taxes = $this->sumTaxesProvider($fornecedor, $opt);
-            if ($tipo['rel'] == 'event_hotels') {
-                $qtdDayle = $opt->count * $this->daysBetween($opt->in, $opt->out);
-            } else {
-                $qtdDayle = $opt->count * $this->daysBetween1($opt->in, $opt->out);
-            }
-            $sumTotalHotelSale += $this->sumTotal($this->unitSale($opt), $taxes, $qtdDayle);
+            // $taxes = $this->sumTaxesProvider($fornecedor, $opt);
+            // if ($tipo['rel'] == 'event_hotels') {
+            //     $qtdDayle = $opt->count * $this->daysBetween($opt->in, $opt->out);
+            // } else {
+            //     $qtdDayle = $opt->count * $this->daysBetween1($opt->in, $opt->out);
+            // }
+            // $sumTotalHotelSale += $this->sumTotal($this->unitSale($opt), $taxes, $qtdDayle);
         }
-        $venda->addChild('entradatotal', $sumTotalHotelSale);
+        // $venda->addChild('entradatotal', $sumTotalHotelSale);
     }
 
     private function movimentoDiversosXML($opt, $fornecedor, $evento, $movimentoXml, $tipo)
@@ -282,7 +288,8 @@ class EventApiController extends BaseApiController
                 break;
         }
 
-        $movimento->addChild('pax', htmlspecialchars($evento->name ?? '') . ' - ' . $stringNome);
+        $nomeCortado = mb_substr($evento->name ?? '', 0, 40 - mb_strlen($stringNome));
+        $movimento->addChild('pax', htmlspecialchars($nomeCortado) . ' - ' . $stringNome);
         $movimento->addChild('tipo', 'ADT');
         $movimento->addChild('matricula', '');
         $movimento->addChild('moeda', htmlspecialchars($fornecedor->currency?->sigla ?? ''));
@@ -299,7 +306,7 @@ class EventApiController extends BaseApiController
 
         $movimento->addChild('comisrecforvalor', htmlspecialchars(($opt->received_proposal * $qtdDayle * $opt->kickback) / 100 ?? ''));
 
-        $movimento->addChild('descpagclivalor', htmlspecialchars($opt->received_proposal * $qtdDayle ?? ''));
+        // $movimento->addChild('descpagclivalor', htmlspecialchars($opt->received_proposal * $qtdDayle ?? ''));
         $movimento->addChild('observacao', htmlspecialchars($fornecedor->internal_observation  ?? ''));
 
         $movimento->addChild('valordiaria', htmlspecialchars($opt->received_proposal ?? ''));
@@ -320,7 +327,7 @@ class EventApiController extends BaseApiController
     private function movimentoHotelariaXML($opt, $fornecedor, $evento, $movimentoXml)
     {
         $movimento = $movimentoXml->addChild('hotelaria');
-        $movimento->addChild('pax', htmlspecialchars($evento->name ?? ''));
+        $movimento->addChild('pax', htmlspecialchars(mb_substr($evento->name ?? '', 0, 40)));
         $movimento->addChild('tipo', 'ADT');
         $movimento->addChild('motivoviagem', '');
         $movimento->addChild('moeda', htmlspecialchars($fornecedor->currency?->sigla ?? ''));
