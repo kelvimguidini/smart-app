@@ -799,7 +799,7 @@ function quebraTexto($texto, $limite = 40)
                         </thead>
                         <tbody>
                             @foreach($transportEvent->eventTransportOpts as $key => $item)
-                            <?php $transportTaxa4BTS += sumTotal(unitSale($item), sumTaxesProvider($transportEvent, $item), $item->count * daysBetween1($item->in, $item->out)); ?>
+                            <?php $sumTotalTransportSale += sumTotal(unitSale($item), sumTaxesProvider($transportEvent, $item), $item->count * daysBetween1($item->in, $item->out)); ?>
                             <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>" class="<?= $key == 0 ? 'first-row' : '' ?>">
                                 <!-- <td>{{ $item->brand->name }}</td> -->
                                 <td>{{ $item->vehicle->name }}</td>
