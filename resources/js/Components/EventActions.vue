@@ -70,6 +70,9 @@
             </template>
         </Modal>
 
+        <ModalHistory v-if="$page.props.auth.permissions.some((p) => p.name === 'show_history')" :event-id="event.id"
+            :key="'history-' + event.id" />
+
     </div>
     <Loader v-bind:show="isLoader" />
 </template>
@@ -82,6 +85,7 @@ import Loader from './Loader.vue';
 import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
 import EventView from '@/Components/EventView.vue';
+import ModalHistory from './ModalHistory.vue';
 
 const formDelete = useForm({
     id: 0

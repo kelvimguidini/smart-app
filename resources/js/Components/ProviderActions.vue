@@ -1,6 +1,5 @@
 <template>
 
-
     <Modal v-if="$page.props.auth.permissions.some((p) => p.name === 'status_level_1' || p.name === 'status_level_2')"
         :key="index" modal-title="Follow UP" :content-big="true" btn-class="btn-sm btn-success btn-icon-split mr-2">
         <template v-slot:button>
@@ -151,10 +150,10 @@
                                 <tr v-for="(historyItem, index) in history" :key="index">
                                     <td>{{ new
                                         Date(historyItem.created_at).toLocaleDateString()
-                                        }}</td>
+                                    }}</td>
                                     <td>{{
                                         getStatusLabel(historyItem.status)
-                                        }}</td>
+                                    }}</td>
                                     <td>{{ historyItem.user?.name }}</td>
                                     <td>{{ historyItem.observation }}</td>
                                 </tr>
@@ -334,7 +333,7 @@
                         prov.providerBudget[0].user?.name }}</p>
                     <p><strong>Data: </strong> {{ new
                         Date(prov.providerBudget[0].approval_date).toLocaleDateString()
-                        }}
+                    }}
                     </p>
                 </div>
             </div>
@@ -426,7 +425,7 @@
         :ok-botton-callback="sendInvoice"
         :ok-botton-callback-param="{ event_id: event.id, emails: emailsInvoice, download: !sendEmailInvoice, provider_id: prov.id, message: messageInvoice, copyMe: copyMeInvoice, type: prov.table }"
         :ok-botton-label="!sendEmailInvoice ? 'Baixar PDF' : 'Enviar Faturamento'"
-        btn-class="btn-sm btn-secondary btn-icon-split ">
+        btn-class="btn-sm btn-secondary btn-icon-split  mr-2">
         <template v-slot:button>
             <div @click="{
                 emailsInvoice = '';

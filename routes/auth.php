@@ -39,6 +39,7 @@ use App\Http\Controllers\Auth\TransportServiceController;
 use App\Http\Controllers\Auth\VehicleController;
 use App\Http\Controllers\Auth\StatusHistoryController;
 use App\Http\Controllers\Auth\CityController;
+use App\Http\Controllers\Auth\ProposalHistoryController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -590,4 +591,12 @@ Route::middleware(['auth', 'cors'])->group(function () {
     //FIM ativar - desativar
 
     Route::post('/update-provider-order', [ProviderController::class, 'updateOrder'])->name('update-provider-order');
+
+    // routes/web.php
+    Route::get('history/{event_id}', [ProposalHistoryController::class, 'getHistory'])
+        ->name('history-get');
+
+
+    Route::post('history/restore', [ProposalHistoryController::class, 'restore'])
+        ->name('history-restore');
 });

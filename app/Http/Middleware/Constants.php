@@ -46,7 +46,8 @@ class Constants extends Middleware
         ['name' => "admin_provider_transport", "title" => "Administrar Fornecedor Transporte"],
         ['name' => "status_level_1", "title" => "Status Nível 1"],
         ['name' => "status_level_2", "title" => "Status Nível 2"],
-        ['name' => "status_historico", "title" => "Visualizar Historico Status"]
+        ['name' => "status_historico", "title" => "Visualizar Historico Status"],
+        ['name' => "show_history", "title" => "Visualizar Histórico de Alterações"]
     ];
 
 
