@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->string('table_name'); // Ex: event_transport_opt
             $table->unsignedBigInteger('record_id'); // ID do registro alterado
-            $table->json('old_data')->nullable(); // Dados antes da mudança
-            $table->json('new_data')->nullable(); // Dados após a mudança
+            $table->text('old_data')->nullable(); // Dados antes da mudança
+            $table->text('new_data')->nullable(); // Dados após a mudança
             $table->string('action'); // created, updated, deleted
             $table->unsignedBigInteger('user_id')->nullable(); // quem fez
             $table->timestamps();
