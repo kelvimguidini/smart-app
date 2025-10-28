@@ -165,8 +165,11 @@ const edit = () => {
         form.event_id = props.eventProvider.event_id;
 
         form.currency = props.eventProvider.currency_id;
-        alert(form.currency);
+        $('#currency' + props.type).val(form.currency).trigger('change');
+
         form.invoice = props.eventProvider.invoice == true;
+        $('#invoice' + props.type).val(form.invoice).trigger('change');
+
         form.iss_percent = props.eventProvider.iss_percent;
         form.service_percent = props.eventProvider.service_percent;
         form.iva_percent = props.eventProvider.iva_percent;
@@ -296,7 +299,7 @@ const updateForm = () => {
                     <div class="col-6">
                         <div class="form-group">
                             <InputLabel for="invoice" value="Nota Fiscal" />
-                            <select class="form-control form-control-sm" v-model="form.invoice">
+                            <select class="form-control form-control-sm" :id="'invoice' + type" v-model="form.invoice">
                                 <option :value="false">Não</option>
                                 <option :value="true">Sim</option>
                             </select>
