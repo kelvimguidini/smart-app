@@ -165,6 +165,7 @@ const edit = () => {
         form.event_id = props.eventProvider.event_id;
 
         form.currency = props.eventProvider.currency_id;
+        alert(form.currency);
         form.invoice = props.eventProvider.invoice == true;
         form.iss_percent = props.eventProvider.iss_percent;
         form.service_percent = props.eventProvider.service_percent;
