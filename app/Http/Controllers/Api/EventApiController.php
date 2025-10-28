@@ -192,7 +192,6 @@ class EventApiController extends BaseApiController
 
         $venda->addChild('clasproduto', htmlspecialchars($fornecedor->{$tipo['tipoProvider']}->national ? 'Nacional' : 'Internacional'));
 
-        $venda->addChild('idemissor', htmlspecialchars($evento->user_created ?? ''));
         $venda->addChild(
             'idpromotor',
             htmlspecialchars(
@@ -219,7 +218,7 @@ class EventApiController extends BaseApiController
             $aprovado = collect($fornecedor->status_his)->last(function ($item) {
                 return $item->status === 'approved_by_manager';
             });
-
+            $venda->addChild('idemissor', htmlspecialchars($aprovado->user->codigo_stur ?? ''));
             $venda->addChild('autorizadopor', htmlspecialchars($aprovado->user->name ?? ''));
             $venda->addChild('matriculaautorizador', htmlspecialchars($aprovado->id ?? ''));
             $dataAutorizacao = '';
