@@ -200,6 +200,11 @@ class EventApiController extends BaseApiController
                     : ($evento->hotel_operator ?? '')
             )
         );
+        $venda->addChild('idemissor', htmlspecialchars($fornecedor->table == 'event_transport'
+            ? $evento->landOperator?->codigo_stur
+            : ($evento->hotelOperator?->codigo_stur ?? '')));
+
+
         $venda->addChild('dtemissao', htmlspecialchars(Carbon::parse($evento->date)->format('d/m/Y')));
         $venda->addChild('idcliente', htmlspecialchars($evento->customer?->codestur ?? $evento->customer?->id ?? ''));
         $venda->addChild('idoperador', htmlspecialchars($fornecedor?->broker?->name ?? ''));
@@ -218,7 +223,7 @@ class EventApiController extends BaseApiController
             $aprovado = collect($fornecedor->status_his)->last(function ($item) {
                 return $item->status === 'approved_by_manager';
             });
-            $venda->addChild('idemissor', htmlspecialchars($aprovado->user->codigo_stur ?? ''));
+
             $venda->addChild('autorizadopor', htmlspecialchars($aprovado->user->name ?? ''));
             $venda->addChild('matriculaautorizador', htmlspecialchars($aprovado->id ?? ''));
             $dataAutorizacao = '';
@@ -447,7 +452,8 @@ class EventApiController extends BaseApiController
         $eventos = Event::with([
             'customer',
             'crd',
-
+            'hotelOperator',
+            'landOperator',
             // Hotéis
             'event_hotels.hotel',
             'event_hotels.eventHotelsOpt' => fn($q) => $q->orderBy('order', 'asc')->orderby('in'),
