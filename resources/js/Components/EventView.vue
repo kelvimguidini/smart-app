@@ -70,7 +70,7 @@ label {
                                 <InputLabel for="code" value="Código do Zendesk:" />
                                 <div class="form-control-plaintext">{{ event?.code }}</div>
                             </div>
-                            {{ event?.event_locals?.length }}
+
                             <div class="border rounded p-3" v-if="event?.event_locals?.length > 0">
                                 <template v-for="(country, index) in event?.event_locals" :key="index">
                                     <div class="form-group">
