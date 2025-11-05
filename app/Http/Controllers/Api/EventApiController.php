@@ -240,13 +240,25 @@ class EventApiController extends BaseApiController
         $venda->addChild('projetocodigo', htmlspecialchars($evento->code ?? ''));
         $venda->addChild('projetonome', htmlspecialchars(mb_substr($evento->name ?? '', 0, 30)));
 
-        $venda->addChild('tipoctarec', htmlspecialchars($tipo['tipoctarec'] ?? ''));
-        $venda->addChild('tipoctapag', htmlspecialchars($tipo['tipoctapag'] ?? ''));
+        $tipoCtarec = $tipo['tipoctarec'];
+        $tipoCtapag = $tipo['tipoctapag'];
+
+        // Se for uma função, executa. Se já for string, usa direto.
+        if (is_callable($tipoCtarec)) {
+            $tipoCtarec = $tipoCtarec($fornecedor);
+        }
+        if (is_callable($tipoCtapag)) {
+            $tipoCtapag = $tipoCtapag($fornecedor);
+        }
+
+        // Garante que são strings antes de adicionar ao XML
+        $venda->addChild('tipoctarec', (string) ($tipoCtarec ?? ''));
+        $venda->addChild('tipoctapag', (string) ($tipoCtapag ?? ''));
 
         $venda->addChild('formpagto', 2); //FATURADO
 
 
-        $sumTotalHotelSale = 0;
+
         $movimentosXml = $venda->addChild('movimentos');
 
         foreach ($fornecedor->eventHotelsOpt ?? $fornecedor->eventAbOpts ?? $fornecedor->eventHallOpts ?? $fornecedor->eventAddOpts ?? $fornecedor->eventTransportOpts ?? [] as $opt) {
@@ -558,7 +570,7 @@ class EventApiController extends BaseApiController
                 })->values();
             }
             // Filtra event_abs
-            if (isset($evento->event_abs)) {
+            if (isset($evento->event_abs) && !isset($evento->event_hotels)) {
                 $evento->event_abs = collect($evento->event_abs)->filter(function ($item) use ($start_date, $end_date) {
                     return isset($item->status_his) && collect($item->status_his)->contains(function ($status) use ($start_date, $end_date) {
                         return $status->status === 'dating_with_customer'
@@ -568,7 +580,7 @@ class EventApiController extends BaseApiController
                 })->values();
             }
             // Repita para event_halls, event_adds, event_transports...
-            if (isset($evento->event_halls)) {
+            if (isset($evento->event_halls) && !isset($evento->event_hotels)) {
                 $evento->event_halls = $evento->event_halls->filter(function ($item) use ($start_date, $end_date) {
                     return $item->status_his->contains(function ($status) use ($start_date, $end_date) {
                         return $status->status === 'dating_with_customer'
