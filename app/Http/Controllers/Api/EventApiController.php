@@ -330,8 +330,11 @@ class EventApiController extends BaseApiController
         // $movimento->addChild('descpagclivalor', htmlspecialchars($opt->received_proposal * $qtdDayle ?? ''));
         $movimento->addChild('observacao', htmlspecialchars($fornecedor->internal_observation  ?? ''));
 
-        $movimento->addChild('valordiaria', htmlspecialchars($opt->received_proposal ?? ''));
-        $movimento->addChild('valordiariafornecedor', htmlspecialchars($this->unitSale($opt) ?? ''));
+        $totais = $this->computeTotalsForFornecedor($evento, $fornecedor);
+
+        $movimento->addChild('valordiaria', htmlspecialchars($totais['total_sale'] ?? ''));
+        $movimento->addChild('valordiariabalcao', htmlspecialchars($totais['base_sale'] ?? ''));
+        $movimento->addChild('valordiariafornecedor', htmlspecialchars($totais['total_cost'] ?? ''));
         $movimento->addChild('qtdservico', htmlspecialchars($qtdDayle > 0 ? $qtdDayle : '1'));
 
         if (isset($fornecedor->status_his)) {
@@ -385,8 +388,11 @@ class EventApiController extends BaseApiController
 
         $aptoXml->addChild('tipoapto', htmlspecialchars($tipoApto));
 
-        $aptoXml->addChild('valordiaria', htmlspecialchars($opt->received_proposal ?? ''));
-        $aptoXml->addChild('valordiariafornecedor', htmlspecialchars($this->unitSale($opt) ?? ''));
+        $totais = $this->computeTotalsForFornecedor($evento, $fornecedor);
+
+        $aptoXml->addChild('valordiaria', htmlspecialchars($totais['total_sale'] ?? ''));
+        $aptoXml->addChild('valordiariabalcao', htmlspecialchars($totais['base_sale'] ?? ''));
+        $aptoXml->addChild('valordiariafornecedor', htmlspecialchars($totais['total_cost'] ?? ''));
         $aptoXml->addChild('qtddiaria', htmlspecialchars($qtdDayle ?? ''));
 
         if (isset($fornecedor->status_his)) {
@@ -665,5 +671,98 @@ class EventApiController extends BaseApiController
 
         // Return the absolute value of the difference in days
         return ceil($interval->days) + 1;
+    }
+
+    /**
+     * Calcula totais (custo/venda) para um fornecedor em um evento.
+     *
+     * Retorna array com chaves:
+     *  - total_cost: soma dos custos (sem IOF)
+     *  - total_sale: soma das vendas (sem IOF / sem taxa 4bts)
+     *  - total_kickback: soma dos kickbacks
+     *  - total_tax_cost: soma das taxas aplicadas ao custo (sem IOF)
+     *  - total_tax_sale: soma das taxas aplicadas à venda (sem IOF)
+     *  - percIOF: percentual IOF aplicado (máximo encontrado)
+     *  - total_cost_with_iof: total_cost + IOF
+     *  - total_sale_with_iof_and_taxa4bts: total_sale + IOF e aplicado taxa_4bts do evento/fornecedor
+     */
+    private function computeTotalsForFornecedor($evento, $fornecedor): array
+    {
+        $sumQtdDayles = 0;
+        $totalKickback = 0;
+        $sumHotelCost = 0; // soma dos custos (base)
+        $sumHotelSale = 0; // soma das vendas (base)
+        $sumTotalHotelCost = 0; // custo + taxas (por item)
+        $sumTotalHotelSale = 0; // venda + taxas (por item)
+        $sumTaxeHotelCost = 0; // soma das taxas sobre custo (por dia)
+        $sumTaxeHotelSale = 0; // soma das taxas sobre venda (por dia)
+
+        // coleta possíveis coleções de opts (inclui opt 0)
+        $optCollections = [
+            $fornecedor->eventHotelsOpt ?? null,
+            $fornecedor->eventAbOpts ?? null,
+            $fornecedor->eventHallOpts ?? null,
+            $fornecedor->eventAddOpts ?? null,
+            $fornecedor->eventTransportOpts ?? null,
+        ];
+
+        // percorre cada coleção (se existir)
+        foreach ($optCollections as $coll) {
+            if (empty($coll)) continue;
+            foreach ($coll as $item) {
+                // qtd diárias / unidades
+                $qtdDayle = ($item->count ?? 1);
+                $sumQtdDayles += $qtdDayle;
+
+                // taxes sobre venda (usa unidade de venda)
+                $taxes = $this->sumTaxesProvider($fornecedor, $item);
+
+                // taxes sobre custo (usa valor recebido/fornecedor)
+                $taxesCost = $this->sumTaxesProviderCost($fornecedor, $item);
+
+                // kickback total
+                $totalKickback += (($item->received_proposal ?? 0) * $qtdDayle * ($item->kickback ?? 0)) / 100;
+
+                // acumula bases
+                $sumHotelCost += ($item->received_proposal ?? 0) * $qtdDayle;
+                $sumHotelSale += $this->unitSale($item) * $qtdDayle;
+
+                // soma total por item (base + taxas)
+                $sumTotalHotelCost += $this->sumTotal($item->received_proposal ?? 0, $taxesCost, $qtdDayle);
+                $sumTotalHotelSale += $this->sumTotal($this->unitSale($item), $taxes, $qtdDayle);
+
+                // soma taxas separadas
+                $sumTaxeHotelCost += ($taxesCost * $qtdDayle);
+                $sumTaxeHotelSale += ($taxes * $qtdDayle);
+            }
+        }
+
+        // determina IOF: pega o maior IOF disponível entre fornecedor e evento (se existirem)
+        $iofs = [];
+        if (isset($fornecedor->iof) && $fornecedor->iof > 0) $iofs[] = $fornecedor->iof;
+        if (isset($evento->iof) && $evento->iof > 0) $iofs[] = $evento->iof;
+        $percIOF = count($iofs) ? max($iofs) : 0;
+
+        // aplica IOF e taxa 4bts (taxa 4bts aparentemente só para venda)
+        $sumTotalHotelSaleTaxa = ((($sumTotalHotelSale * $percIOF) / 100) + $sumTotalHotelSale) * (1 + (($fornecedor->taxa_4bts ?? $evento->taxa_4bts ?? 0) / 100));
+        $sumTotalHotelCostTaxa = ((($sumTotalHotelCost * $percIOF) / 100) + $sumTotalHotelCost);
+
+        return [
+            'total_cost' => round($sumTotalHotelCostTaxa, 2),
+            'total_sale' => round($sumTotalHotelSaleTaxa, 2),
+            'base_cost' => round($sumHotelCost, 2),
+            'base_sale' => round($sumHotelSale, 2),
+        ];
+    }
+
+    /**
+     * Taxes calculadas sobre custos (usa received_proposal como base)
+     */
+    private function sumTaxesProviderCost($eventP, $opt)
+    {
+        return (($opt->received_proposal ?? 0) * ($eventP->iss_percent ?? 0) / 100)
+            + (($opt->received_proposal ?? 0) * ($eventP->service_percent ?? 0) / 100)
+            + (($opt->received_proposal ?? 0) * ($eventP->iva_percent ?? 0) / 100)
+            + (($opt->received_proposal ?? 0) * ($eventP->service_charge ?? 0) / 100);
     }
 }
