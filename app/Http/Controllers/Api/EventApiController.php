@@ -320,8 +320,9 @@ class EventApiController extends BaseApiController
         $out = Carbon::parse($opt->out);
         $movimento->addChild('checkin', htmlspecialchars($in->format('d/m/Y') ?? ''));
         $movimento->addChild('checkout', htmlspecialchars($out->format('d/m/Y') ?? ''));
-        $movimento->addChild('taxaservico', htmlspecialchars(($opt->received_proposal * $fornecedor->service_percent) / 100 ?? ''));
-        $movimento->addChild('taxaservicofor', htmlspecialchars(($this->unitSale($opt) * $fornecedor->service_percent) ?? ''));
+
+        $movimento->addChild('taxaservico',  htmlspecialchars(sumTaxesProviderCost($fornecedor, $opt) ?? ''));
+        $movimento->addChild('taxaservicofor', htmlspecialchars(sumTaxesProvider($fornecedor, $opt) ?? ''));
 
         $qtdDayle = $opt->count * $this->daysBetween($opt->in, $opt->out);
 
@@ -361,7 +362,8 @@ class EventApiController extends BaseApiController
         $movimento->addChild('checkin', htmlspecialchars($in->format('d/m/Y') ?? ''));
         $movimento->addChild('checkout', htmlspecialchars($out->format('d/m/Y') ?? ''));
 
-        $movimento->addChild('taxaservico', htmlspecialchars(($opt->received_proposal * $fornecedor->service_percent) / 100 ?? ''));
+        $movimento->addChild('taxaservico',  htmlspecialchars(sumTaxesProviderCost($fornecedor, $opt) ?? ''));
+        $movimento->addChild('taxaservicofor', htmlspecialchars(sumTaxesProvider($fornecedor, $opt) ?? ''));
 
         $qtdDayle = $opt->count * $this->daysBetween($opt->in, $opt->out);
         $movimento->addChild('comisrecforvalor', htmlspecialchars(($opt->received_proposal * $qtdDayle * $opt->kickback) / 100 ?? ''));
