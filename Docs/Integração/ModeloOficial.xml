@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="iso-8859-15"?>
+<intagi>
+    <versaolayout>V4.4</versaolayout>
+    <vendas>
+        <venda>
+            <origem>SISTEMA_MODELO</origem>
+            <idvenda>305210</idvenda>
+            <file />
+            <tipoproduto>Aereo</tipoproduto>
+            <idproduto>Etkt</idproduto>
+            <clasproduto>Nacional</clasproduto>
+            <idemissor>ANA3243</idemissor>
+            <idpromotor />
+            <dtemissao>22/02/2012</dtemissao>
+            <idcliente>12545878</idcliente>
+            <idoperador>TYLLER</idoperador>
+            <idfornecedor>G3</idfornecedor>
+            <formrec>2</formrec>
+            <vencrec>23/02/2013</vencrec>
+            <formpagto>2</formpagto>
+            <vencpagto>23/02/2013</vencpagto>
+            <cartaocia />
+            <cartaonumero />
+            <numautorizcartao />
+            <cartaovalidade />
+            <cartaocodseguranca/>
+	        <cartaotitular/>
+            <centrocustocli>Adm</centrocustocli>
+            <setorcli>Financeiro</setorcli>
+            <filialagencia />
+            <centrocusto>vendas por site</centrocusto>
+            <solicitante>Maria dos Santos</solicitante>
+            <autorizadopor>Jonas Silva</autorizadopor>
+            <matriculaautorizador>123.456</matriculaautorizador>
+            <dataautorizacao>24/01/2013</dataautorizacao>
+            <horaautorizacao>15:00</horaautorizacao>
+            <projetocodigo>5.776</projetocodigo>
+            <projetonome>ALERE - Internal audit - PMO</projetonome>
+            <entradatotal>0.00</entradatotal>
+            <movimentos>
+                <aereo>
+                    <pax>ROCHA/KARINA</pax>
+                    <tipo>ADT</tipo>
+                    <matricula />
+                    <reqviagem>12345</reqviagem>
+                    <motivoviagem>Passeio</motivoviagem>
+                    <tourcode>ACORDO_Y</tourcode>
+                    <basetarifaria>EZ0B13G</basetarifaria>
+                    <tarifa>220.90</tarifa>
+                    <tarifaCheia>280.90</tarifaCheia>
+                    <tarifafornecedor>190.00</tarifafornecedor>
+                    <tarifaCheiaFornec>280.90</tarifaCheiaFornec>
+                    <moeda>R$</moeda>
+                    <cambio>1.00</cambio>
+                    <cambiofornecedor>1.00</cambiofornecedor>
+                    <datacambio>22/02/2012</datacambio>
+                    <taxaembarque>20.66</taxaembarque>
+                    <taxaextra>15.00</taxaextra>
+                    <taxaservico>0.00</taxaservico>
+                    <repassedu>30.00</repassedu>
+                    <repassecartaodu>0.80</repassecartaodu>
+                    <voosugerido>
+                        <tarifasugerida>180.00</tarifasugerida>
+                        <numvoosugerido>234JJ</numvoosugerido>
+                        <motivosugerido>Horario do voo</motivosugerido>
+                        <siglaciasugerida>OC</siglaciasugerida>
+                    </voosugerido>
+                    <comisrecforvalor>0.00</comisrecforvalor>
+                    <descpagclivalor>0.00</descpagclivalor>
+                    <observacao />
+                    <numautorizacao>1287</numautorizacao>
+                    <localizador>xyz</localizador>
+                    <valordescsub>22.00</valordescsub>
+                    <vlrentrada>0.00</vlrentrada>
+                    <emailpax>maria@gmail.com</emailpax>
+                    <fonepax>11-99999-9999</fonepax>
+                    <docpax>RG 2541212-0</docpax>
+                    <multa>10.20</multa>
+                    <bilhetes>
+                        <bilhete>
+                            <numero>0001124245</numero>
+                        </bilhete>
+                    </bilhetes>
+                    <trechos>
+                        <segmento>
+                            <de>POA</de>
+                            <para>CGH</para>
+                            <datasaida>02/03/2012</datasaida>
+                            <datachegada>02/03/2012</datachegada>
+                            <horasaida>18:31</horasaida>
+                            <horachegada>19:52</horachegada>
+                            <voo>1287</voo>
+                            <classe>E</classe>
+                            <localizador>QD5NFT</localizador>
+                            <status>NOK</status>
+                            <conexao>N</conexao>
+                            <ciaaerea>G3</ciaaerea>
+                        </segmento>
+                        <segmento>
+                            <de>CGH</de>
+                            <para>MCZ</para>
+                            <datasaida>04/03/2012</datasaida>
+                            <datachegada>04/03/2012</datachegada>
+                            <horasaida>16:00</horasaida>
+                            <horachegada>18:50</horachegada>
+                            <voo>12FF</voo>
+                            <classe>E</classe>
+                            <localizador>RGTSAS</localizador>
+                            <status>NOK</status>
+                            <conexao>N</conexao>
+                            <ciaaerea>JJ</ciaaerea>
+                        </segmento>
+                    </trechos>
+                </aereo>
+            </movimentos>
+        </venda>
+        <venda>
+            <origem>SISTEMA_MODELO</origem>
+            <idvenda>543210</idvenda>
+            <file>646464</file>
+            <tipoproduto>Hotel</tipoproduto>
+            <idproduto>HTLI</idproduto>
+            <clasproduto>Internacional</clasproduto>
+            <idemissor>maria3432</idemissor>
+            <idpromotor>juca008 </idpromotor>
+            <dtemissao>22/02/2012</dtemissao>
+            <idcliente>12545878</idcliente>
+            <idoperador>145155</idoperador>
+            <idfornecedor>145155</idfornecedor>
+            <formrec>2</formrec>
+            <vencrec>18/06/2013</vencrec>
+            <formpagto>2</formpagto>
+            <vencpagto>28/06/2013</vencpagto>
+            <cartaocia />
+            <cartaonumero />
+            <numautorizcartao />
+            <cartaovalidade />
+            <cartaocodseguranca/>		
+	        <cartaotitular/>
+            <centrocustocli />
+            <setorcli />
+            <filialagencia />
+            <centrocusto />
+            <solicitante />
+            <autorizadopor>Alfredo</autorizadopor>
+            <matriculaautorizador>444.456</matriculaautorizador>
+            <dataautorizacao>24/01/2013</dataautorizacao>
+            <horaautorizacao>15:00</horaautorizacao>
+            <entradatotal>0</entradatotal>
+            <movimentos>
+                <hotelaria>
+                    <pax>SUE REGINIS MOREIRA E SILVA</pax>
+                    <tipo>ADT</tipo>
+                    <matricula />
+                    <motivoviagem>Passeio</motivoviagem>
+                    <moeda>US$</moeda>
+                    <moedafornecedor>US$</moedafornecedor>
+                    <cambio>2.94</cambio>
+                    <cambiofornecedor>2.50</cambiofornecedor>
+                    <datacambio>12/04/2012</datacambio>
+                    <datacambiofornecedor>12/04/2012</datacambiofornecedor>
+                    <checkin>12/05/2012</checkin>
+                    <checkout>16/05/2012</checkout>
+                    <taxaservico>50.00</taxaservico>
+                    <comisrecforvalor>300.31</comisrecforvalor>
+                    <descpagclivalor>0.00</descpagclivalor>
+                    <observacao />
+                    <categapto>Superior</categapto>
+                    <regime>CAFE DA MANHA </regime>
+                    <taxaextra>20.00</taxaextra>
+                    <aptos>
+                        <apto>
+                            <tipoapto>SGL</tipoapto>
+                            <valordiaria>85.00</valordiaria>
+                            <valordiariabalcao>70.00</valordiariabalcao>
+                            <valordiariafornecedor>80.00</valordiariafornecedor>
+                            <qtddiaria>4</qtddiaria>
+                        </apto>
+                    </aptos>
+                    <confirmadopor>Maria C.Costa</confirmadopor>
+                    <dataconfirmacao>22/04/2013</dataconfirmacao>
+                    <numconfirmacao>49985/54</numconfirmacao>
+                    <emailpax>jojo@gmail.com</emailpax>
+                    <fonepax>11-99999-9999</fonepax>
+                    <docpax>RG 2541212-0</docpax>
+                </hotelaria>
+            </movimentos>
+        </venda>
+        <venda>
+            <origem>SISTEMA_MODELO</origem>
+            <idvenda>T45454</idvenda>
+            <file>5553033</file>
+            <tipoproduto>Locacao</tipoproduto>
+            <idproduto>LOCN</idproduto>
+            <clasproduto>Nacional</clasproduto>
+            <idemissor>JoseM</idemissor>
+            <idpromotor>Maria Bonita</idpromotor>
+            <dtemissao>25/02/2012</dtemissao>
+            <idcliente>99981</idcliente>
+            <idoperador>Hertz </idoperador>
+            <idfornecedor>Hesrtz Curitiba</idfornecedor>
+            <formrec>2</formrec>
+            <vencrec />
+            <formpagto />
+            <vencpagto />
+            <cartaocia />
+            <cartaonumero />
+            <numautorizcartao />
+            <cartaovalidade />
+            <cartaocodseguranca/>
+	        <cartaotitular/>			
+            <centrocustocli />
+            <setorcli />
+            <filialagencia />
+            <centrocusto />
+            <solicitante>Aparecida</solicitante>
+            <autorizadopor>Jonas Silva</autorizadopor>
+            <matriculaautorizador>5666</matriculaautorizador>
+            <dataautorizacao>24/01/2013</dataautorizacao>
+            <horaautorizacao>15:00</horaautorizacao>
+            <entradatotal>0.00</entradatotal>
+            <movimentos>
+                <locacao>
+                    <pax>Maria Aparecida</pax>
+                    <tipo>ADT</tipo>
+                    <matricula />
+                    <motivoviagem>Passeio</motivoviagem>
+                    <moeda>R$</moeda>
+                    <moedafornecedor>R$</moedafornecedor>
+                    <cambio>1.00</cambio>
+                    <cambiofornecedor>1.00</cambiofornecedor>
+                    <datacambio>11/04/2012</datacambio>
+                    <datacambiofornecedor>11/04/2012</datacambiofornecedor>
+                    <checkin>16/04/2012</checkin>
+                    <checkout>20/04/2012</checkout>
+                    <taxaservico>0.00</taxaservico>
+                    <comisrecforvalor>55.12</comisrecforvalor>
+                    <descpagclivalor>0</descpagclivalor>
+                    <observacao>Veiculo sedan se possivel com cambio automatico</observacao>
+                    <localcheckin>Loja aeroporto-CWB</localcheckin>
+                    <localcheckout>Loja Aeroporto-POA</localcheckout>
+                    <veiculo>Categoria J</veiculo>
+                    <valordiaria>100.00</valordiaria>
+                    <valordiariabalcao>120.00</valordiariabalcao>
+                    <valordiariafornecedor>90.00</valordiariafornecedor>
+                    <qtddiaria>4</qtddiaria>
+                    <confirmadopor>João da Silva</confirmadopor>
+                    <dataconfirmacao>01/03/2013</dataconfirmacao>
+                    <numconfirmacao>1254554</numconfirmacao>
+                    <taxaextra>150.00</taxaextra>
+                    <emailpax>jojo@gmail.com</emailpax>
+                    <fonepax>11-99999-9999</fonepax>
+                    <docpax>RG 2541212-0</docpax>
+                </locacao>
+            </movimentos>
+        </venda>
+        <venda>
+            <origem>SISTEMA_MODELO</origem>
+            <idvenda>T379379</idvenda>
+            <file>2323232</file>
+            <tipoproduto>Diversos</tipoproduto>
+            <idproduto>DIVN</idproduto>
+            <clasproduto>Nacional</clasproduto>
+            <idemissor>Maria2154</idemissor>
+            <idpromotor>Jose da silva</idpromotor>
+            <dtemissao>25/02/2012</dtemissao>
+            <idcliente>99981</idcliente>
+            <idoperador>Despachante </idoperador>
+            <idfornecedor>Despachante</idfornecedor>
+            <formrec>1</formrec>
+            <vencrec>25/02/2012</vencrec>
+            <formpagto>2</formpagto>
+            <vencpagto>10/03/2013</vencpagto>
+            <cartaocia />
+            <cartaonumero />
+            <numautorizcartao />
+            <cartaovalidade />
+            <cartaocodseguranca/>
+	        <cartaotitular/>			
+            <centrocustocli />
+            <setorcli />
+            <filialagencia />
+            <centrocusto />
+            <solicitante>Pedro Paulo</solicitante>
+            <autorizadopor>gabriela</autorizadopor>
+            <matriculaautorizador>1454.999</matriculaautorizador>
+            <dataautorizacao>24/01/2013</dataautorizacao>
+            <horaautorizacao>15:00</horaautorizacao>
+            <entradatotal>0.00</entradatotal>
+            <movimentos>
+                <diversos>
+                    <pax>Pedro Paulo</pax>
+                    <tipo>ADT</tipo>
+                    <matricula />
+                    <motivoviagem>Passeio</motivoviagem>
+                    <moeda>R$</moeda>
+                    <cambio>1.00</cambio>
+                    <cambiofornecedor>1.00</cambiofornecedor>
+                    <datacambio>11/04/2012</datacambio>
+                    <checkin>16/04/2012</checkin>
+                    <checkout>20/04/2012</checkout>
+                    <taxaservico>0.00</taxaservico>
+                    <comisrecforvalor>50.00</comisrecforvalor>
+                    <descpagclivalor>0</descpagclivalor>
+                    <observacao />
+                    <descricao>visto consular USA</descricao>
+                    <valordiaria>200.00</valordiaria>
+                    <valordiariabalcao>200.00</valordiariabalcao>
+                    <valordiariafornecedor>200.00</valordiariafornecedor>
+                    <qtdservico>1</qtdservico>
+                    <confirmadopor />
+                    <dataconfirmacao />
+                    <numconfirmacao />
+                    <taxaextra>150.00</taxaextra>
+                    <emailpax>jojo@gmail.com</emailpax>
+                    <fonepax>11-99999-9999</fonepax>
+                    <docpax>RG 2541212-0</docpax>
+                </diversos>
+            </movimentos>
+        </venda>
+        <venda>
+            <origem>SISTEMA_MODELO</origem>
+            <idvenda>7777</idvenda>
+            <file />
+            <tipoproduto>Rodoviario</tipoproduto>
+            <idproduto>Rodov</idproduto>
+            <clasproduto>Nacional</clasproduto>
+            <idemissor>ANA3243</idemissor>
+            <idpromotor />
+            <dtemissao>22/02/2012</dtemissao>
+            <idcliente>12545878</idcliente>
+            <idoperador />
+            <idfornecedor>cometa</idfornecedor>
+            <formrec>2</formrec>
+            <vencrec>23/02/2013</vencrec>
+            <formpagto>2</formpagto>
+            <vencpagto>23/02/2013</vencpagto>
+            <cartaocia />
+            <cartaonumero />
+            <numautorizcartao />
+            <cartaovalidade />
+            <cartaocodseguranca/>
+	        <cartaotitular/>			
+            <centrocustocli>Adm</centrocustocli>
+            <setorcli>Financeiro</setorcli>
+            <filialagencia />
+            <centrocusto>vendas por site</centrocusto>
+            <solicitante>Maria dos Santos</solicitante>
+            <autorizadopor>Jonas Silva</autorizadopor>
+            <entradatotal>0.00</entradatotal>
+            <movimentos>
+                <rodoviario>
+                    <pax>ROCHA/KARINA</pax>
+                    <tipo>ADT</tipo>
+                    <matricula />
+                    <reqviagem>12345</reqviagem>
+                    <motivoviagem>Passeio</motivoviagem>
+                    <tourcode>ACORDO_Y</tourcode>
+                    <basetarifaria>EZ0B13G</basetarifaria>
+                    <tarifa>220.90</tarifa>
+                    <tarifaCheia>280.90</tarifaCheia>
+                    <tarifafornecedor>190.00</tarifafornecedor>
+                    <moeda>R$</moeda>
+                    <cambio>1.00</cambio>
+                    <cambiofornecedor>1.00</cambiofornecedor>
+                    <datacambio>22/02/2012</datacambio>
+                    <taxaembarque>20.66</taxaembarque>
+                    <taxaextra>15.00</taxaextra>
+                    <taxaservico>0.00</taxaservico>
+                    <repassedu>30.00</repassedu>
+                    <repassecartaodu>0.80</repassecartaodu>
+                    <comisrecforvalor>0.00</comisrecforvalor>
+                    <descpagclivalor>0.00</descpagclivalor>
+                    <observacao />
+                    <numautorizacao>1287</numautorizacao>
+                    <localizador>xyz</localizador>
+                    <valordescsub>22.00</valordescsub>
+                    <emailpax>jojo@gmail.com</emailpax>
+                    <fonepax>11-99999-9999</fonepax>
+                    <docpax>RG 2541212-0</docpax>
+                    <multa>0.0</multa>
+                    <bilhetes>
+                        <bilhete>
+                            <numero>0001124245</numero>
+                        </bilhete>
+                    </bilhetes>
+                    <trechos>
+                        <segmento>
+                            <de>SAO</de>
+                            <para>LIN</para>
+                            <datasaida>02/03/2012</datasaida>
+                            <datachegada>02/03/2012</datachegada>
+                            <horasaida>18:31</horasaida>
+                            <horachegada>19:52</horachegada>
+                            <numlinha>1287</numlinha>
+                            <classe>EX</classe>
+                            <localizador>XYZ</localizador>
+                            <status>OK</status>
+                            <ciarod>SG</ciarod>
+                            <rodoviariasinfo>
+                                <rodoviariaorigem>PARADA RODOVIARIA</rodoviariaorigem>
+                                <cidadeorigem>SAO JOAO BAPTISTA</cidadeorigem>
+                                <estadoorigem>FORTALEZA</estadoorigem>
+                                <paisorigem>BRASIL</paisorigem>
+                                <rodoviariadestino>MARILIA TERMINAL</rodoviariadestino>
+                                <cidadedestino>MARILIA</cidadedestino>
+                                <estadoodestino>SAO PAULO</estadoodestino>
+                                <paisdestino>BRASIL</paisdestino>
+                            </rodoviariasinfo>
+                        </segmento>
+                    </trechos>
+                </rodoviario>
+            </movimentos>
+        </venda>
+    </vendas>
+</intagi>

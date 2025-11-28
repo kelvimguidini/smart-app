@@ -365,7 +365,7 @@ class EventApiController extends BaseApiController
 
         $qtdDayle = $opt->count * $this->daysBetween($opt->in, $opt->out);
         $movimento->addChild('comisrecforvalor', htmlspecialchars(($opt->received_proposal * $qtdDayle * $opt->kickback) / 100 ?? ''));
-        $movimento->addChild('descpagclivalor', htmlspecialchars($opt->received_proposal * $qtdDayle ?? ''));
+        // $movimento->addChild('descpagclivalor', htmlspecialchars($opt->received_proposal * $qtdDayle ?? ''));
         $movimento->addChild('observacao', htmlspecialchars($fornecedor->internal_observation  ?? ''));
         $movimento->addChild('observacao2', htmlspecialchars($fornecedor->customer_observation  ?? ''));
         $movimento->addChild('categapto', htmlspecialchars($opt->category_hotel?->name ?? ''));

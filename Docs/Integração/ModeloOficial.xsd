@@ -1,0 +1,1998 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--Created with Liquid XML Studio Designer Edition 9.1.11.3570 (http://www.liquid-technologies.com)-->
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="intagi">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="versaolayout" minOccurs="1" maxOccurs="1">
+                    <xs:annotation>
+                        <xs:documentation>versao do lay out utilizado.
+                            Valor fixo.
+                        </xs:documentation>
+                    </xs:annotation>
+                    <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                            <xs:enumeration value="V3.0" />
+                            <xs:enumeration value="V4.0" />
+                            <xs:enumeration value="V4.1" />
+                            <xs:enumeration value="V4.2" />
+                            <xs:enumeration value="V4.3" />
+                            <xs:enumeration value="V4.4" />
+                            <xs:enumeration value="V4.5" />
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:element>
+                <xs:element name="clientes" minOccurs="0" maxOccurs="1">
+                    <xs:annotation>
+                        <xs:appinfo>Dados dos clientes
+                        </xs:appinfo>
+                    </xs:annotation>
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="cliente" minOccurs="1" maxOccurs="unbounded">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="idcliente" minOccurs="1" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>Indicar o c?digo de indentifica??o do cliente, no sistema que esteja exportando os dados.
+                                                    Deve ser valor unico e exclusivo para o cliente (chave primaria)</xs:documentation>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:minLength value="1" />
+                                                    <xs:maxLength value="50" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="cnpjcpf" minOccurs="1" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="TCnpjCpf">
+                                                    <xs:whiteSpace value="collapse" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="razaonome" minOccurs="1" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="50" />
+                                                    <xs:minLength value="1" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="nomefantasia" minOccurs="1" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="40" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="tipopessoa" minOccurs="1" maxOccurs="1" default="PJ">
+                                            <xs:annotation>
+                                                <xs:appinfo>PJ = Pessoa Juridica
+                                                    PF = Pesoa Fisica</xs:appinfo>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:enumeration value="PF" />
+                                                    <xs:enumeration value="PJ" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="tipodescricao" minOccurs="1" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:appinfo>Descri??o do tipo de classifica??o do cliente.
+                                                    Exemplo: Advogado, cliente VIP , conta corrente, etc.
+                                                </xs:appinfo>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="15" />
+                                                    <xs:minLength value="1" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="email" type="TEmail" minOccurs="0" maxOccurs="1" />
+                                        <xs:element name="inscrrg" minOccurs="0" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:appinfo>Inscri??o estadual do cliente , quando pessoa juridica
+                                                    RG quando pessoa fis?ca
+                                                </xs:appinfo>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="15" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="dtnascimento" type="TData" minOccurs="0" maxOccurs="1" />
+                                        <xs:element name="homepage" minOccurs="0" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:appinfo>Site do cliente </xs:appinfo>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="50" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="endereco" minOccurs="1" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:appinfo>Endere?o completo.
+                                                    Rua , numero e complemento, caso necess?rio.</xs:appinfo>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="50" />
+                                                    <xs:minLength value="1" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="cidade" minOccurs="1" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="20" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="pais" minOccurs="1" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="20" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="estadosigla" minOccurs="1" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="2" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="estadonome" minOccurs="1" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="20" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="bairro" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="30" />
+                                                    <xs:minLength value="1" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="cep" type="TCep" minOccurs="0" maxOccurs="1" />
+                                        <xs:element name="telefone" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="20" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="celular" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="15" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="fax" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="20" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="fornecedores" minOccurs="0" maxOccurs="1">
+                    <xs:annotation>
+                        <xs:appinfo>Dados dos clientes
+                        </xs:appinfo>
+                    </xs:annotation>
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="fornecedor" minOccurs="1" maxOccurs="unbounded">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="idfornecedor" minOccurs="1" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>Indicar o c?digo de indentifica??o do Fornecedor, no sistema que esteja exportando os dados.
+                                                    Deve ser valor unico e exclusivo para o fornecedor (chave primaria)</xs:documentation>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:minLength value="1" />
+                                                    <xs:maxLength value="50" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="cnpjcpf" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="TCnpjCpf">
+                                                    <xs:whiteSpace value="collapse" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="razaonome" minOccurs="1" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="50" />
+                                                    <xs:minLength value="1" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="nomefantasia" minOccurs="1" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="40" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="tipopessoa" minOccurs="1" maxOccurs="1" default="PJ">
+                                            <xs:annotation>
+                                                <xs:appinfo>PJ = Pessoa Juridica
+                                                    PF = Pesoa Fisica</xs:appinfo>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:enumeration value="PF" />
+                                                    <xs:enumeration value="PJ" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="tipofornec" minOccurs="1" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:appinfo>Informa qual o tipo do fornecedor:
+                                                    Cia - Compabhia Aere
+                                                    Hot - Hotelatia
+                                                    Loc - Loca??o
+                                                    Ope - Operadora
+                                                    Div - Diversos
+                                                    Bsp - Bsp
+                                                    Gsa - Consolidadora
+                                                </xs:appinfo>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="15" />
+                                                    <xs:minLength value="1" />
+                                                    <xs:enumeration value="CIA" />
+                                                    <xs:enumeration value="cia" />
+                                                    <xs:enumeration value="Cia" />
+                                                    <xs:enumeration value="BSP" />
+                                                    <xs:enumeration value="bsp" />
+                                                    <xs:enumeration value="Bsp" />
+                                                    <xs:enumeration value="GSA" />
+                                                    <xs:enumeration value="Gsa" />
+                                                    <xs:enumeration value="gsa" />
+                                                    <xs:enumeration value="HOT" />
+                                                    <xs:enumeration value="Hot" />
+                                                    <xs:enumeration value="hot" />
+                                                    <xs:enumeration value="LOC" />
+                                                    <xs:enumeration value="loc" />
+                                                    <xs:enumeration value="Loc" />
+                                                    <xs:enumeration value="OPE" />
+                                                    <xs:enumeration value="Ope" />
+                                                    <xs:enumeration value="ope" />
+                                                    <xs:enumeration value="DIV" />
+                                                    <xs:enumeration value="Div" />
+                                                    <xs:enumeration value="div" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="siglacia" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="2" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="email" type="TEmail" minOccurs="0" maxOccurs="1" />
+                                        <xs:element name="inscrrg" minOccurs="0" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:appinfo>Inscri??o estadual do cliente , quando pessoa juridica
+                                                    RG quando pessoa fis?ca
+                                                </xs:appinfo>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="15" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="homepage" minOccurs="0" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:appinfo>Site do cliente </xs:appinfo>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="50" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="endereco" minOccurs="1" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:appinfo>Endere?o completo.
+                                                    Rua , numero e complemento, caso necess?rio.</xs:appinfo>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="50" />
+                                                    <xs:minLength value="1" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="cidade" minOccurs="1" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="20" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="pais" minOccurs="1" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="20" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="estadosigla" minOccurs="1" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="2" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="estadonome" minOccurs="1" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="20" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="bairro" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="30" />
+                                                    <xs:minLength value="1" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="cep" type="TCep" minOccurs="0" maxOccurs="1" />
+                                        <xs:element name="telefone" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="20" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="celular" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="15" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="fax" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="20" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="vendas" minOccurs="1" maxOccurs="1">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="venda" minOccurs="0" maxOccurs="unbounded">
+                                <xs:annotation>
+                                    <xs:documentation>Esta Tag marca o inicio de uma nova venda.
+                                        Abaixo dela ha uma cole??o de tags </xs:documentation>
+                                </xs:annotation>
+                                <xs:complexType>
+                                    <xs:all>
+                                        <xs:element name="origem" minOccurs="1" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>Nome do sistema que esta originando as informa??es</xs:documentation>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:minLength value="1" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="reservaorigem" minOccurs="0" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>Nome do sistema que originou efetivamente a reserva.</xs:documentation>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="15" />
+                                                    <xs:minLength value="1" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="idvenda" minOccurs="1" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>C?digo que identifica de forma UNICA a vanda no sistema que esta provendo os dados.
+                                                    Este c?digo n?o pode se repetir para outras vendas e deve ser de preenchimento obrigatorio.
+                                                </xs:documentation>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:minLength value="1" />
+                                                    <xs:maxLength value="30" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="interno" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string" />
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="idvendapai" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="30" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="file" minOccurs="0" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>numero/c?digo do file da venda </xs:documentation>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="50" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="tipoproduto" minOccurs="1" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:enumeration value="Aereo" />
+                                                    <xs:enumeration value="aereo" />
+                                                    <xs:enumeration value="AEREO" />
+                                                    <xs:enumeration value="Hotel" />
+                                                    <xs:enumeration value="hotel" />
+                                                    <xs:enumeration value="HOTEL" />
+                                                    <xs:enumeration value="Locacao" />
+                                                    <xs:enumeration value="locacao" />
+                                                    <xs:enumeration value="LOCACAO" />
+                                                    <xs:enumeration value="Diversos" />
+                                                    <xs:enumeration value="diversos" />
+                                                    <xs:enumeration value="DIVERSOS" />
+                                                    <xs:enumeration value="Rodoviario" />
+                                                    <xs:enumeration value="rodoviario" />
+                                                    <xs:enumeration value="RODOVIARIO" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="idproduto" minOccurs="1" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="30" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="clasproduto" minOccurs="1" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:enumeration value="Nacional" />
+                                                    <xs:enumeration value="nacional" />
+                                                    <xs:enumeration value="NACIONAL" />
+                                                    <xs:enumeration value="Internacional" />
+                                                    <xs:enumeration value="internacional" />
+                                                    <xs:enumeration value="INTERNACIONAL" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="idemissor" minOccurs="1" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>Emissor da agencia responsavel pela venda.</xs:documentation>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="25" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="idpromotor" minOccurs="0" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>Promotor da agencia responsavel pela venda/cliente</xs:documentation>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="25" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="dtemissao" type="TData" minOccurs="1" maxOccurs="1" />
+                                        <xs:element name="idcliente" minOccurs="0" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>Informa a identifica??o do cliente da agencia que esta adquirendo o servi?o
+                                                    Caso esteja eniado os dados dos clientes no node clientes, este valor deve ser o mesmo usado na tag idcliente </xs:documentation>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="50" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="idoperador" minOccurs="1" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>Informa a identifica??o do operador intermediaria de que a agencia esta adquirindo o servi?o:Exemplo Consolidadora, BSp, Operadora
+                                                    Caso esteja eniado os dados dos fornecedores no node fornecedores , este valor deve ser o mesmo usado na tag idfornecedor.</xs:documentation>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="50" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="idfornecedor" minOccurs="1" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>Informa a identifica??o do fornecedor fornecera o servi?o :Exemplo Cia Aerea, Locadora, hotel
+                                                    Caso esteja eniado os dados dos fornecedores no node fornecedores , este valor deve ser o mesmo usado na tag idfornecedor.</xs:documentation>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="50" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="formrec" minOccurs="1" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>? a forma de como a agencia vai receber do cliente
+                                                    Cliente = Quam esta recebendo servi?o
+                                                    0 OU BRANCO-INDEFINIDO -   N?o informado / indefinido
+                                                    1-CASH  - quando o cliente pagou a vista
+                                                    2-FATURADO -  venda faturada
+                                                    3-CARTAO - cart?o de cr?dito
+                                                    9-FORNECEDOR - cliente paga diretamente ao fornecedor ( vendas terrestres )
+                                                    8-Venda parcelada. (Com ou sem cheque pr?-datado)
+                                                    D-CARTAO DIRETO -  Recebimento direto do cartao de cr?dito - Maquineta pr?rpria</xs:documentation>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:pattern value="^([ ]|[0]|[1]|[2]|[3]|[6]|[8]|[9]|[D]|[d]){0,1}$" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="vencrec" type="TData" minOccurs="1" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>Data de vencimento do recebimento do cliente</xs:documentation>
+                                            </xs:annotation>
+                                        </xs:element>
+                                        <xs:element name="formpagto" minOccurs="1" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>Indica como a agencia vai pagar o fornecedor.
+                                                    Agencia = receptora dos dados integrados e n?o quem gera as informa??es.
+                                                    Valores aceitos:
+                                                    0- INDEFINIDO -   N?o informado / indefinido
+                                                    1- CASH  - quando a agencia paga a vista
+                                                    2- FATURADO - 	Quando a agencia paga faturado
+                                                    3- CARTAO - quando a agencia paga com o proprio cartao de credito.</xs:documentation>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:pattern value="^([ ]|[0]|[1]|[2]|[3]){0,1}$" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="vencpagto" type="TData" minOccurs="0" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>Data do vencimento para pagamento ao fornecedor</xs:documentation>
+                                            </xs:annotation>
+                                        </xs:element>
+                                        <xs:element name="cartaocia" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:enumeration value="" />
+                                                    <xs:enumeration value="AM" />
+                                                    <xs:enumeration value="AX" />
+                                                    <xs:enumeration value="Amex" />
+                                                    <xs:enumeration value="AMEX" />
+                                                    <xs:enumeration value="amex" />
+                                                    <xs:enumeration value="AU" />
+                                                    <xs:enumeration value="Aura" />
+                                                    <xs:enumeration value="AURA" />
+                                                    <xs:enumeration value="aura" />
+                                                    <xs:enumeration value="Credcard" />
+                                                    <xs:enumeration value="Credicard" />
+                                                    <xs:enumeration value="CREDCARD" />
+                                                    <xs:enumeration value="CREDICARD" />
+                                                    <xs:enumeration value="credcard" />
+                                                    <xs:enumeration value="credicard" />
+                                                    <xs:enumeration value="DC" />
+                                                    <xs:enumeration value="Diners" />
+                                                    <xs:enumeration value="DINERS" />
+                                                    <xs:enumeration value="diners" />
+                                                    <xs:enumeration value="DISCOVER" />
+                                                    <xs:enumeration value="discover" />
+                                                    <xs:enumeration value="Discover" />
+                                                    <xs:enumeration value="EL" />
+                                                    <xs:enumeration value="Elo" />
+                                                    <xs:enumeration value="ELO" />
+                                                    <xs:enumeration value="elo" />
+                                                    <xs:enumeration value="Finivest" />
+                                                    <xs:enumeration value="FINIVEST" />
+                                                    <xs:enumeration value="finivest" />
+                                                    <xs:enumeration value="GC" />
+                                                    <xs:enumeration value="Goodcard" />
+                                                    <xs:enumeration value="GOODCARD" />
+                                                    <xs:enumeration value="goodcard" />
+                                                    <xs:enumeration value="HC" />
+                                                    <xs:enumeration value="Hipercard" />
+                                                    <xs:enumeration value="HIPERCARD" />
+                                                    <xs:enumeration value="hipercard" />
+                                                    <xs:enumeration value="MC" />
+                                                    <xs:enumeration value="Mastercard" />
+                                                    <xs:enumeration value="MASTERCARD" />
+                                                    <xs:enumeration value="mastercard" />
+                                                    <xs:enumeration value="MasterCard" />
+                                                    <xs:enumeration value="Sorocred" />
+                                                    <xs:enumeration value="SOROCRED" />
+                                                    <xs:enumeration value="sorocred" />
+                                                    <xs:enumeration value="VI" />
+                                                    <xs:enumeration value="Visa" />
+                                                    <xs:enumeration value="VISA" />
+                                                    <xs:enumeration value="visa" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="cartaonumero" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                        <xs:element name="numautorizcartao" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                        <xs:element name="cartaovalidade" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:pattern value="(^(((0?[1-9])|(1[0-2]))\/[1-2][0-9][0-9][0-9])$)|^$" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="cartaocodseguranca" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:pattern value="^(([0-9]{1,4})$)|^$" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="cartaotitular" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                        <xs:element name="idcartao" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="30" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="cartaoadm" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                        <xs:element name="cartaofinanciamento" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:enumeration value="" />
+                                                    <xs:enumeration value="Vista" />
+                                                    <xs:enumeration value="VISTA" />
+                                                    <xs:enumeration value="vista" />
+                                                    <xs:enumeration value="Parcelado" />
+                                                    <xs:enumeration value="PARCELADO" />
+                                                    <xs:enumeration value="parcelado" />
+                                                    <xs:enumeration value="Debito" />
+                                                    <xs:enumeration value="DEBITO" />
+                                                    <xs:enumeration value="debito" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="cartaoqtdparcelas" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:pattern value="^(([0-9]{0,2}$))" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="centrocustocli" minOccurs="0" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>Centro de custos / nome do projeto  do CLIENTE. ( pessoa juridica )
+                                                    a qual a venda est? vinculada
+                                                </xs:documentation>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="50" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="setorcli" minOccurs="0" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>Nome do setor / nome do projeto do cliente (pessoa juridica)
+                                                    a qual a venda/emiss?o est? vinculada</xs:documentation>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="30" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="filialagencia" minOccurs="0" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>Filial da AGENCIA, para a qual a venda ser? lan?ada. </xs:documentation>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="50" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="centrocusto" minOccurs="0" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>Centro de custos da AGENCIA, para a qual a venda ser? lan?ada.
+                                                </xs:documentation>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="50" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="tipoctarec" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="50" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="tipoctapag" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="50" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="solicitante" minOccurs="0" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>Nome do contato e/ou solicitante da venda / reserva</xs:documentation>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="30" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="autorizadopor" minOccurs="0" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>Nome de quem autorizou a reserva ou a solicitação da reserva
+                                                    Geralmente associado a um cargo de gerencia / administração </xs:documentation>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="20" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="matriculaautorizador" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="20" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="dataautorizacao" type="TData" minOccurs="0" maxOccurs="1" />
+                                        <xs:element name="horaautorizacao" type="THora" minOccurs="0" maxOccurs="1" />
+                                        <xs:element name="projetocodigo" minOccurs="0" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>Código do projeto / divisão dentro da organização do cliente (empresa) - Corporativo</xs:documentation>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="50" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="projetonome" minOccurs="0" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>Nome do projeto / divisão dentro da organização do cliente (empresa) - Corporativo</xs:documentation>
+                                            </xs:annotation>
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="50" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="atividade" minOccurs="0" maxOccurs="1">
+                                            <xs:simpleType>
+                                                <xs:restriction base="xs:string">
+                                                    <xs:maxLength value="30" />
+                                                </xs:restriction>
+                                            </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element ref="contacontabil" minOccurs="0" maxOccurs="1" />
+                                        <xs:element name="destino" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                        <xs:element name="entradatotal" type="TValorDecimal" minOccurs="0" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>Valor da entrada total dos pax.
+                                                    Tag n?o obrigatoria com preenchimento opcional, usando apenas para informar o valor que foi/ser? pago  </xs:documentation>
+                                            </xs:annotation>
+                                        </xs:element>
+                                        <xs:element name="parcelamento" minOccurs="0">
+                                            <xs:annotation>
+                                                <xs:documentation>Usado para informar as parcelas das vendas, cujo a forma de recebimento seja:
+                                                    D- Maquineta pr?pria.
+                                                    8- Parcelado ( com ou sem cheque pr?-datado)
+                                                    N?o possui valor. Apenas um conjuto de tags onde s?o informardos as parcelas da venda.
+                                                    Seu uso ? opcional. </xs:documentation>
+                                            </xs:annotation>
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                    <xs:element name="parcela" minOccurs="1" maxOccurs="unbounded">
+                                                        <xs:annotation>
+                                                            <xs:documentation>Possui um conjuto de tags com propriedades de cada parcela da venda. </xs:documentation>
+                                                        </xs:annotation>
+                                                        <xs:complexType>
+                                                            <xs:sequence>
+                                                                <xs:element name="valor" type="TValorDecimal" minOccurs="1" maxOccurs="1">
+                                                                    <xs:annotation>
+                                                                        <xs:documentation>Indica o valor da parcela.
+                                                                            Valor em moeda ofical ( R$ - Reais ) </xs:documentation>
+                                                                    </xs:annotation>
+                                                                </xs:element>
+                                                                <xs:element name="vencimento" type="TData" minOccurs="1" maxOccurs="1">
+                                                                    <xs:annotation>
+                                                                        <xs:documentation>Data de Vencimento da parcela.</xs:documentation>
+                                                                    </xs:annotation>
+                                                                </xs:element>
+                                                                <xs:element name="chequebanco" minOccurs="0" maxOccurs="1">
+                                                                    <xs:annotation>
+                                                                        <xs:documentation>Caso seja parcelamento seja feito com cheques pr? datados,
+                                                                            as tags chequebanco, chequeserie, chequenumero, chequeagencia devem estar preenchidos.
+                                                                            chequebanco -  numero do banco do cheque
+                                                                            chequeserie - numero de serie do cheque
+                                                                            chequeagencia - nomero da agencia do cheque
+                                                                        </xs:documentation>
+                                                                    </xs:annotation>
+                                                                    <xs:simpleType>
+                                                                        <xs:restriction base="xs:string">
+                                                                            <xs:pattern value="^[0-9]{3}|^$" />
+                                                                        </xs:restriction>
+                                                                    </xs:simpleType>
+                                                                </xs:element>
+                                                                <xs:element name="chequeserie" minOccurs="0" maxOccurs="1">
+                                                                    <xs:simpleType>
+                                                                        <xs:restriction base="xs:string">
+                                                                            <xs:pattern value="^([0-9]{0,6})$" />
+                                                                        </xs:restriction>
+                                                                    </xs:simpleType>
+                                                                </xs:element>
+                                                                <xs:element name="chequenumero" minOccurs="0" maxOccurs="1">
+                                                                    <xs:simpleType>
+                                                                        <xs:restriction base="xs:string">
+                                                                            <xs:pattern value="^([0-9]{0,6})$" />
+                                                                        </xs:restriction>
+                                                                    </xs:simpleType>
+                                                                </xs:element>
+                                                                <xs:element name="chequeagencia" minOccurs="0" maxOccurs="1">
+                                                                    <xs:simpleType>
+                                                                        <xs:restriction base="xs:string">
+                                                                            <xs:pattern value="^([0-9]){0,10}$" />
+                                                                        </xs:restriction>
+                                                                    </xs:simpleType>
+                                                                </xs:element>
+                                                                <xs:element name="chequeconta" minOccurs="0" maxOccurs="1">
+                                                                    <xs:simpleType>
+                                                                        <xs:restriction base="xs:string">
+                                                                            <xs:pattern value="^([0-9]){0,10}$" />
+                                                                        </xs:restriction>
+                                                                    </xs:simpleType>
+                                                                </xs:element>
+                                                            </xs:sequence>
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                </xs:sequence>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element name="subsidio" minOccurs="0" maxOccurs="1">
+                                            <xs:complexType>
+                                                <xs:all>
+                                                    <xs:element name="vencrecsub" type="TData" minOccurs="1" maxOccurs="1" />
+                                                    <xs:element name="idclientesub" minOccurs="1" maxOccurs="1">
+                                                        <xs:simpleType>
+                                                            <xs:restriction base="xs:string">
+                                                                <xs:maxLength value="50" />
+                                                            </xs:restriction>
+                                                        </xs:simpleType>
+                                                    </xs:element>
+                                                    <xs:element name="formrecsub" minOccurs="1" maxOccurs="1">
+                                                        <xs:annotation>
+                                                            <xs:documentation>? a forma de como o valor subsidiado ser? pago para a agencia
+                                                                0-INDEFINIDO -   N?o informado / indefinido
+                                                                1-CASH  - quando o cliente pagou a vista
+                                                                2-FATURADO -  venda faturada
+                                                            </xs:documentation>
+                                                        </xs:annotation>
+                                                        <xs:simpleType>
+                                                            <xs:restriction base="xs:string">
+                                                                <xs:enumeration value="0" />
+                                                                <xs:enumeration value="1" />
+                                                                <xs:enumeration value="2" />
+                                                            </xs:restriction>
+                                                        </xs:simpleType>
+                                                    </xs:element>
+                                                    <xs:element name="idprodutosub" minOccurs="1" maxOccurs="1">
+                                                        <xs:annotation>
+                                                            <xs:documentation>identifica��o do produto de subsidio, no sistema Stur</xs:documentation>
+                                                        </xs:annotation>
+                                                        <xs:simpleType>
+                                                            <xs:restriction base="xs:string">
+                                                                <xs:maxLength value="30" />
+                                                            </xs:restriction>
+                                                        </xs:simpleType>
+                                                    </xs:element>
+                                                </xs:all>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element name="movimentos" minOccurs="1">
+                                            <xs:complexType>
+                                                <xs:choice>
+                                                    <xs:element name="aereo" minOccurs="1" maxOccurs="unbounded">
+                                                        <xs:complexType>
+                                                            <xs:all>
+                                                                <xs:element ref="pax" minOccurs="1" />
+                                                                <xs:element ref="tipo" minOccurs="1" />
+                                                                <xs:element ref="matricula" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="sucursal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="reqviagem" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="motivoviagem" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="tourcode" minOccurs="0" maxOccurs="1">
+                                                                    <xs:annotation>
+                                                                        <xs:documentation>C?digo tourcode.
+                                                                            Referente a acordos firmados entre a companhia a?rea e agencia.</xs:documentation>
+                                                                    </xs:annotation>
+                                                                    <xs:simpleType>
+                                                                        <xs:restriction base="xs:string">
+                                                                            <xs:maxLength value="15" />
+                                                                        </xs:restriction>
+                                                                    </xs:simpleType>
+                                                                </xs:element>
+                                                                <xs:element name="acordo" minOccurs="0" maxOccurs="1">
+                                                                    <xs:annotation>
+                                                                        <xs:documentation>Igual a tag tourcode, porém é apenas para o sistema TMS / Argo
+                                                                            Referente a acordos firmados entre a companhia a?rea e agencia.</xs:documentation>
+                                                                    </xs:annotation>
+                                                                    <xs:simpleType>
+                                                                        <xs:restriction base="xs:string">
+                                                                            <xs:maxLength value="15" />
+                                                                        </xs:restriction>
+                                                                    </xs:simpleType>
+                                                                </xs:element>
+                                                                <xs:element name="basetarifaria" minOccurs="0" maxOccurs="1">
+                                                                    <xs:simpleType>
+                                                                        <xs:restriction base="xs:string">
+                                                                            <xs:maxLength value="8" />
+                                                                        </xs:restriction>
+                                                                    </xs:simpleType>
+                                                                </xs:element>
+                                                                <xs:element name="tarifa" type="TValorDecimal" minOccurs="1" maxOccurs="1" />
+                                                                <xs:element name="tarifaCheia" type="TValorDecimal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="tarifafornecedor" type="TValorDecimal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="tarifaCheiaFornec" type="TValorDecimal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="menortarifa" type="TValorDecimal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="moeda" minOccurs="1" maxOccurs="1" />
+                                                                <xs:element ref="moedafornecedor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="cambio" minOccurs="1" maxOccurs="1" />
+                                                                <xs:element ref="cambiofornecedor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="datacambio" minOccurs="1" maxOccurs="1" />
+                                                                <xs:element ref="datacambiofornecedor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="taxaembarque" type="TValorDecimal" minOccurs="1" maxOccurs="1" />
+                                                                <xs:element name="taxaextra" type="TValorDecimal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="taxaextrafor" type="TValorDecimal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="taxaservico" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="taxaservicofor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="repassedu" type="TValorDecimal" minOccurs="0" maxOccurs="1">
+                                                                    <xs:annotation>
+                                                                        <xs:documentation>Informa o valor da taxa DU /Rave cobrada do cliente, refernte ao pax </xs:documentation>
+                                                                    </xs:annotation>
+                                                                </xs:element>
+                                                                <xs:element name="repassecartaodu" type="TValorDecimal" minOccurs="0" maxOccurs="1">
+                                                                    <xs:annotation>
+                                                                        <xs:documentation>Informa o valor da taxa administrativa do cart?o sobre o valor da taxa DU / Rave
+                                                                            Apenas quando a DU/Rave foi paga no cart?o de credito</xs:documentation>
+                                                                    </xs:annotation>
+                                                                </xs:element>
+                                                                <xs:element name="voosugerido" minOccurs="0" maxOccurs="1">
+                                                                    <xs:complexType>
+                                                                        <xs:sequence>
+                                                                            <xs:element name="tarifasugerida" type="TValorDecimal" minOccurs="1" maxOccurs="1" />
+                                                                            <xs:element name="numvoosugerido" minOccurs="1" maxOccurs="1">
+                                                                                <xs:simpleType>
+                                                                                    <xs:restriction base="xs:string">
+                                                                                        <xs:maxLength value="5" />
+                                                                                    </xs:restriction>
+                                                                                </xs:simpleType>
+                                                                            </xs:element>
+                                                                            <xs:element name="motivosugerido" minOccurs="1" maxOccurs="1">
+                                                                                <xs:simpleType>
+                                                                                    <xs:restriction base="xs:string">
+                                                                                        <xs:maxLength value="30" />
+                                                                                    </xs:restriction>
+                                                                                </xs:simpleType>
+                                                                            </xs:element>
+                                                                            <xs:element name="siglaciasugerida" minOccurs="1" maxOccurs="1">
+                                                                                <xs:simpleType>
+                                                                                    <xs:restriction base="xs:string">
+                                                                                        <xs:maxLength value="3" />
+                                                                                    </xs:restriction>
+                                                                                </xs:simpleType>
+                                                                            </xs:element>
+                                                                        </xs:sequence>
+                                                                    </xs:complexType>
+                                                                </xs:element>
+                                                                <xs:element ref="comisrecforvalor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="comisrecforpercentual" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="overrecforvalor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="overrecforpercentual" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="comisrepclivalor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="comisrepclipercentual" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="overrepclivalor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="overrepclipercentual" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="descpagclivalor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="observacao" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="observacao2" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="numautorizacao" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="localizador" minOccurs="1" maxOccurs="1">
+                                                                    <xs:simpleType>
+                                                                        <xs:restriction base="xs:string">
+                                                                            <xs:maxLength value="10" />
+                                                                        </xs:restriction>
+                                                                    </xs:simpleType>
+                                                                </xs:element>
+                                                                <xs:element ref="valordescsub" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="vlrentrada" type="TValorDecimal" minOccurs="0" maxOccurs="1">
+                                                                    <xs:annotation>
+                                                                        <xs:documentation>Informa o valor individual por pax. Caso seja informado, o sistema assume este valor e não o rateio dat tag entradatotal</xs:documentation>
+                                                                    </xs:annotation>
+                                                                </xs:element>
+                                                                <xs:element ref="emailpax" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="fonepax" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="docpax" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="multa" type="TValorDecimal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="vlrtaxaracrecebido" type="TValorDecimal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="vlrtaxaracpago" type="TValorDecimal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="pccagencia" minOccurs="0" maxOccurs="1">
+                                                                    <xs:simpleType>
+                                                                        <xs:restriction base="xs:string">
+                                                                            <xs:maxLength value="15" />
+                                                                        </xs:restriction>
+                                                                    </xs:simpleType>
+                                                                </xs:element>
+                                                                <xs:element name="iataagencia" minOccurs="0" maxOccurs="1">
+                                                                    <xs:simpleType>
+                                                                        <xs:restriction base="xs:string">
+                                                                            <xs:maxLength value="15" />
+                                                                        </xs:restriction>
+                                                                    </xs:simpleType>
+                                                                </xs:element>
+                                                                <xs:element name="uniqueId" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="bilhetes" minOccurs="0" maxOccurs="1">
+                                                                    <xs:complexType>
+                                                                        <xs:sequence>
+                                                                            <xs:element name="bilhete" minOccurs="0" maxOccurs="unbounded">
+                                                                                <xs:complexType>
+                                                                                    <xs:sequence>
+                                                                                        <xs:element name="numero" minOccurs="1" maxOccurs="1" nillable="true">
+                                                                                            <xs:simpleType>
+                                                                                                <xs:restriction base="xs:string">
+                                                                                                    <xs:whiteSpace value="collapse" />
+                                                                                                </xs:restriction>
+                                                                                            </xs:simpleType>
+                                                                                        </xs:element>
+                                                                                    </xs:sequence>
+                                                                                </xs:complexType>
+                                                                            </xs:element>
+                                                                        </xs:sequence>
+                                                                    </xs:complexType>
+                                                                </xs:element>
+                                                                <xs:element name="trechos" minOccurs="1">
+                                                                    <xs:complexType>
+                                                                        <xs:sequence>
+                                                                            <xs:element name="segmento" minOccurs="1" maxOccurs="15">
+                                                                                <xs:complexType>
+                                                                                    <xs:sequence>
+                                                                                        <xs:element name="de" minOccurs="0">
+                                                                                            <xs:simpleType>
+                                                                                                <xs:restriction base="xs:string">
+                                                                                                    <xs:length value="3" />
+                                                                                                </xs:restriction>
+                                                                                            </xs:simpleType>
+                                                                                        </xs:element>
+                                                                                        <xs:element name="para" minOccurs="0">
+                                                                                            <xs:simpleType>
+                                                                                                <xs:restriction base="xs:string">
+                                                                                                    <xs:length value="3" />
+                                                                                                </xs:restriction>
+                                                                                            </xs:simpleType>
+                                                                                        </xs:element>
+                                                                                        <xs:element name="datasaida" type="TData" minOccurs="0" />
+                                                                                        <xs:element name="datachegada" type="TData" minOccurs="0" />
+                                                                                        <xs:element name="horasaida" type="THora" minOccurs="0" />
+                                                                                        <xs:element name="horachegada" type="THora" minOccurs="0" />
+                                                                                        <xs:element name="voo" minOccurs="0">
+                                                                                            <xs:simpleType>
+                                                                                                <xs:restriction base="xs:string">
+                                                                                                    <xs:maxLength value="7" />
+                                                                                                </xs:restriction>
+                                                                                            </xs:simpleType>
+                                                                                        </xs:element>
+                                                                                        <xs:element name="classe" minOccurs="0">
+                                                                                            <xs:simpleType>
+                                                                                                <xs:restriction base="xs:string">
+                                                                                                    <xs:maxLength value="5" />
+                                                                                                </xs:restriction>
+                                                                                            </xs:simpleType>
+                                                                                        </xs:element>
+                                                                                        <xs:element name="localizador" minOccurs="0">
+                                                                                            <xs:simpleType>
+                                                                                                <xs:restriction base="xs:string">
+                                                                                                    <xs:maxLength value="9" />
+                                                                                                </xs:restriction>
+                                                                                            </xs:simpleType>
+                                                                                        </xs:element>
+                                                                                        <xs:element name="uniqueId" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                                                                        <xs:element name="status" minOccurs="0">
+                                                                                            <xs:simpleType>
+                                                                                                <xs:restriction base="xs:string" />
+                                                                                            </xs:simpleType>
+                                                                                        </xs:element>
+                                                                                        <xs:element name="conexao" minOccurs="0">
+                                                                                            <xs:simpleType>
+                                                                                                <xs:restriction base="xs:string">
+                                                                                                    <xs:enumeration value="S" />
+                                                                                                    <xs:enumeration value="s" />
+                                                                                                    <xs:enumeration value="Y" />
+                                                                                                    <xs:enumeration value="y" />
+                                                                                                    <xs:enumeration value="N" />
+                                                                                                    <xs:enumeration value="n" />
+                                                                                                </xs:restriction>
+                                                                                            </xs:simpleType>
+                                                                                        </xs:element>
+                                                                                        <xs:element name="ciaaerea" minOccurs="0">
+                                                                                            <xs:simpleType>
+                                                                                                <xs:restriction base="xs:string">
+                                                                                                    <xs:maxLength value="2" />
+                                                                                                </xs:restriction>
+                                                                                            </xs:simpleType>
+                                                                                        </xs:element>
+                                                                                        <xs:element name="farebase" minOccurs="0" maxOccurs="1">
+                                                                                            <xs:simpleType>
+                                                                                                <xs:restriction base="xs:string">
+                                                                                                    <xs:maxLength value="31" />
+                                                                                                </xs:restriction>
+                                                                                            </xs:simpleType>
+                                                                                        </xs:element>
+                                                                                    </xs:sequence>
+                                                                                </xs:complexType>
+                                                                            </xs:element>
+                                                                        </xs:sequence>
+                                                                    </xs:complexType>
+                                                                </xs:element>
+                                                                <xs:element ref="rateios" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="taxasadicionais" minOccurs="0" maxOccurs="1" />
+                                                            </xs:all>
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                    <xs:element name="hotelaria" minOccurs="1" maxOccurs="unbounded">
+                                                        <xs:complexType>
+                                                            <xs:all>
+                                                                <xs:element ref="pax" minOccurs="1" />
+                                                                <xs:element ref="tipo" minOccurs="1" />
+                                                                <xs:element ref="matricula" minOccurs="0" />
+                                                                <xs:element ref="sucursal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="contacontabil" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="reqviagem" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="motivoviagem" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="moeda" minOccurs="1" />
+                                                                <xs:element ref="moedafornecedor" minOccurs="0" />
+                                                                <xs:element ref="cambio" minOccurs="1" />
+                                                                <xs:element ref="cambiofornecedor" minOccurs="0" />
+                                                                <xs:element ref="datacambio" minOccurs="1" />
+                                                                <xs:element ref="datacambiofornecedor" minOccurs="0" />
+                                                                <xs:element ref="checkin" minOccurs="1" />
+                                                                <xs:element ref="checkout" minOccurs="1" />
+                                                                <xs:element ref="taxaservico" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="taxaservicofor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="comisrecforvalor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="descpagclivalor" minOccurs="0" />
+                                                                <xs:element ref="observacao" minOccurs="0" />
+                                                                <xs:element ref="observacao2" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="numautorizacao" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="categapto" minOccurs="0" maxOccurs="1"/>
+                                                                <xs:element name="regime" minOccurs="0" maxOccurs="1"/>
+                                                                <xs:element name="taxaextra" type="TValorDecimal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="taxaextrafor" type="TValorDecimal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="tipopag" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="aptos" minOccurs="1">
+                                                                    <xs:complexType>
+                                                                        <xs:sequence>
+                                                                            <xs:element name="apto" minOccurs="1" maxOccurs="5">
+                                                                                <xs:complexType>
+                                                                                    <xs:sequence>
+                                                                                        <xs:element name="tipoapto" minOccurs="1">
+                                                                                            <xs:simpleType>
+                                                                                                <xs:restriction base="xs:string">
+                                                                                                    <xs:minLength value="1" />
+                                                                                                    <xs:maxLength value="50" />
+                                                                                                </xs:restriction>
+                                                                                            </xs:simpleType>
+                                                                                        </xs:element>
+                                                                                        <xs:element ref="valordiaria" minOccurs="1" />
+                                                                                        <xs:element ref="valordiariabalcao" minOccurs="0" maxOccurs="1" />
+                                                                                        <xs:element ref="valordiariafornecedor" minOccurs="0" maxOccurs="1" />
+                                                                                        <xs:element ref="qtddiaria" minOccurs="1" />
+                                                                                        <xs:element name="outroshospedes" minOccurs="0" maxOccurs="1">
+                                                                                            <xs:complexType>
+                                                                                                <xs:sequence>
+                                                                                                    <xs:element name="hospede" maxOccurs="unbounded">
+                                                                                                        <xs:complexType>
+                                                                                                            <xs:all>
+                                                                                                                <xs:element name="nome" minOccurs="1" maxOccurs="1" />
+                                                                                                                <xs:element name="nomecompleto" minOccurs="0" maxOccurs="1" />
+                                                                                                                <xs:element name="dtnascimento" type="TData" minOccurs="0" maxOccurs="1" />
+                                                                                                                <xs:element name="email" type="TEmail" minOccurs="0" />
+                                                                                                                <xs:element name="docto" type="xs:string" minOccurs="0" />
+                                                                                                                <xs:element name="cpf" type="TCnpjCpf" minOccurs="0" />
+                                                                                                                <xs:element name="celular" type="xs:string" minOccurs="0" />
+                                                                                                                <xs:element name="complemento" type="xs:string" minOccurs="0" />
+                                                                                                            </xs:all>
+                                                                                                        </xs:complexType>
+                                                                                                    </xs:element>
+                                                                                                </xs:sequence>
+                                                                                            </xs:complexType>
+                                                                                        </xs:element>
+                                                                                        <xs:element name="uniqueId" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                                                                    </xs:sequence>
+                                                                                </xs:complexType>
+                                                                            </xs:element>
+                                                                        </xs:sequence>
+                                                                    </xs:complexType>
+                                                                </xs:element>
+                                                                <xs:element ref="confirmadopor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="dataconfirmacao" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="numconfirmacao" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="valordescsub" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="emailpax" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="fonepax" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="docpax" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="rateios" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="taxasadicionais" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="uniqueId" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                                            </xs:all>
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                    <xs:element name="locacao" minOccurs="1" maxOccurs="unbounded">
+                                                        <xs:complexType>
+                                                            <xs:all>
+                                                                <xs:element ref="pax" minOccurs="1" />
+                                                                <xs:element ref="tipo" minOccurs="1" />
+                                                                <xs:element ref="matricula" minOccurs="0" />
+                                                                <xs:element ref="sucursal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="contacontabil" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="reqviagem" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="motivoviagem" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="moeda" minOccurs="1" />
+                                                                <xs:element ref="moedafornecedor" minOccurs="0" />
+                                                                <xs:element ref="cambio" minOccurs="1" />
+                                                                <xs:element ref="cambiofornecedor" minOccurs="0" />
+                                                                <xs:element ref="datacambio" minOccurs="1" />
+                                                                <xs:element ref="datacambiofornecedor" minOccurs="0" />
+                                                                <xs:element ref="checkin" minOccurs="1" />
+                                                                <xs:element name="horacheckin" type="THora" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="checkout" minOccurs="1" />
+                                                                <xs:element name="horacheckout" type="THora" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="taxaservico" minOccurs="0" />
+                                                                <xs:element ref="taxaservicofor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="comisrecforvalor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="descpagclivalor" minOccurs="0" />
+                                                                <xs:element ref="observacao" minOccurs="0" />
+                                                                <xs:element ref="observacao2" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="numautorizacao" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="localcheckin" minOccurs="1">
+                                                                    <xs:simpleType>
+                                                                        <xs:restriction base="xs:string">
+                                                                            <xs:maxLength value="20" />
+                                                                        </xs:restriction>
+                                                                    </xs:simpleType>
+                                                                </xs:element>
+                                                                <xs:element name="localcheckout" minOccurs="1">
+                                                                    <xs:simpleType>
+                                                                        <xs:restriction base="xs:string">
+                                                                            <xs:maxLength value="20" />
+                                                                        </xs:restriction>
+                                                                    </xs:simpleType>
+                                                                </xs:element>
+                                                                <xs:element name="veiculo" minOccurs="1">
+                                                                    <xs:annotation>
+                                                                        <xs:documentation>descri??o do veiculo a ser locado</xs:documentation>
+                                                                    </xs:annotation>
+                                                                    <xs:simpleType>
+                                                                        <xs:restriction base="xs:string">
+                                                                            <xs:maxLength value="15" />
+                                                                        </xs:restriction>
+                                                                    </xs:simpleType>
+                                                                </xs:element>
+                                                                <xs:element ref="valordiaria" minOccurs="1" />
+                                                                <xs:element ref="valordiariabalcao" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="valordiariafornecedor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="qtddiaria" minOccurs="1" />
+                                                                <xs:element name="confirmadopor" minOccurs="0" maxOccurs="1">
+                                                                    <xs:annotation>
+                                                                        <xs:documentation>Nome da pessoa que confirmou a reserva no hotel / loca??o /diversos
+                                                                        </xs:documentation>
+                                                                    </xs:annotation>
+                                                                    <xs:simpleType>
+                                                                        <xs:restriction base="xs:string">
+                                                                            <xs:maxLength value="15" />
+                                                                        </xs:restriction>
+                                                                    </xs:simpleType>
+                                                                </xs:element>
+                                                                <xs:element name="dataconfirmacao" type="TData" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="numconfirmacao" minOccurs="0" maxOccurs="1">
+                                                                    <xs:annotation>
+                                                                        <xs:documentation>Numero da confirma??o da reserva no hotel / loca??o /diversos
+                                                                        </xs:documentation>
+                                                                    </xs:annotation>
+                                                                    <xs:simpleType>
+                                                                        <xs:restriction base="xs:string">
+                                                                            <xs:maxLength value="15" />
+                                                                        </xs:restriction>
+                                                                    </xs:simpleType>
+                                                                </xs:element>
+                                                                <xs:element name="taxaextra" type="TValorDecimal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="taxaextrafor" type="TValorDecimal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="tipopag" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="emailpax" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="fonepax" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="docpax" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="valordescsub" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="rateios" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="taxasadicionais" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="uniqueId" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                                            </xs:all>
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                    <xs:element name="diversos" minOccurs="1" maxOccurs="unbounded">
+                                                        <xs:complexType>
+                                                            <xs:all>
+                                                                <xs:element ref="pax" minOccurs="1" />
+                                                                <xs:element ref="tipo" minOccurs="1" />
+                                                                <xs:element ref="matricula" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="sucursal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="contacontabil" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="reqviagem" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="motivoviagem" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="moeda" minOccurs="1" />
+                                                                <xs:element ref="moedafornecedor" minOccurs="0" />
+                                                                <xs:element ref="cambio" minOccurs="1" />
+                                                                <xs:element ref="cambiofornecedor" minOccurs="0" />
+                                                                <xs:element ref="datacambio" minOccurs="1" />
+                                                                <xs:element ref="datacambiofornecedor" minOccurs="0" />
+                                                                <xs:element ref="checkin" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="checkout" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="taxaservico" minOccurs="0" maxOccurs="1">
+                                                                    <xs:annotation>
+                                                                        <xs:documentation />
+                                                                    </xs:annotation>
+                                                                </xs:element>
+                                                                <xs:element ref="taxaservicofor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="comisrecforvalor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="descpagclivalor" minOccurs="0" />
+                                                                <xs:element ref="observacao" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="observacao2" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="numautorizacao" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="descricao" minOccurs="1">
+                                                                    <xs:annotation>
+                                                                        <xs:documentation>descri??o do servi?o comprado/prestado ao cliente.</xs:documentation>
+                                                                    </xs:annotation>
+                                                                    <xs:simpleType>
+                                                                        <xs:restriction base="xs:string">
+                                                                            <xs:maxLength value="20" />
+                                                                        </xs:restriction>
+                                                                    </xs:simpleType>
+                                                                </xs:element>
+                                                                <xs:element ref="valordiaria" minOccurs="1" />
+                                                                <xs:element ref="valordiariabalcao" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="valordiariafornecedor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="qtdservico" type="xs:positiveInteger" minOccurs="1" maxOccurs="1">
+                                                                    <xs:annotation>
+                                                                        <xs:documentation>Quantidade do servi?o prestado.</xs:documentation>
+                                                                    </xs:annotation>
+                                                                </xs:element>
+                                                                <xs:element ref="confirmadopor" minOccurs="0" maxOccurs="1">
+                                                                    <xs:annotation>
+                                                                        <xs:documentation>Nome da pessoa que confirmou a reserva no hotel / loca??o /diversos
+                                                                        </xs:documentation>
+                                                                    </xs:annotation>
+                                                                </xs:element>
+                                                                <xs:element ref="dataconfirmacao" minOccurs="0" maxOccurs="1">
+                                                                    <xs:annotation>
+                                                                        <xs:documentation>Data da confirma??o da reserva junto ao ao forneecedor</xs:documentation>
+                                                                    </xs:annotation>
+                                                                </xs:element>
+                                                                <xs:element ref="numconfirmacao" minOccurs="0" maxOccurs="1">
+                                                                    <xs:annotation>
+                                                                        <xs:documentation>Numero da confirma??o da reserva no hotel / loca??o /diversos
+                                                                        </xs:documentation>
+                                                                    </xs:annotation>
+                                                                </xs:element>
+                                                                <xs:element name="taxaextra" type="TValorDecimal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="taxaextrafor" type="TValorDecimal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="tipopag" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="emailpax" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="fonepax" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="docpax" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="valordescsub" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="rateios" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="taxasadicionais" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="uniqueId" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                                            </xs:all>
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                    <xs:element name="rodoviario" minOccurs="1" maxOccurs="unbounded">
+                                                        <xs:complexType>
+                                                            <xs:all>
+                                                                <xs:element ref="pax" minOccurs="1" />
+                                                                <xs:element ref="tipo" minOccurs="1" />
+                                                                <xs:element ref="matricula" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="sucursal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="contacontabil" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="reqviagem" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="motivoviagem" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="tourcode" minOccurs="0" maxOccurs="1">
+                                                                    <xs:annotation>
+                                                                        <xs:documentation>C?digo tourcode.
+                                                                            Referente a acordos firmados entre a companhia a?rea e agencia.</xs:documentation>
+                                                                    </xs:annotation>
+                                                                    <xs:simpleType>
+                                                                        <xs:restriction base="xs:string">
+                                                                            <xs:maxLength value="15" />
+                                                                        </xs:restriction>
+                                                                    </xs:simpleType>
+                                                                </xs:element>
+                                                                <xs:element name="basetarifaria" minOccurs="0" maxOccurs="1">
+                                                                    <xs:simpleType>
+                                                                        <xs:restriction base="xs:string">
+                                                                            <xs:maxLength value="8" />
+                                                                        </xs:restriction>
+                                                                    </xs:simpleType>
+                                                                </xs:element>
+                                                                <xs:element name="tarifa" type="TValorDecimal" minOccurs="1" maxOccurs="1" />
+                                                                <xs:element name="tarifaCheia" type="TValorDecimal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="tarifafornecedor" type="TValorDecimal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="tarifaCheiaFornec" type="TValorDecimal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="moeda" minOccurs="1" maxOccurs="1" />
+                                                                <xs:element ref="moedafornecedor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="cambio" minOccurs="1" maxOccurs="1" />
+                                                                <xs:element ref="cambiofornecedor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="datacambio" minOccurs="1" maxOccurs="1" />
+                                                                <xs:element ref="datacambiofornecedor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="taxaembarque" type="TValorDecimal" minOccurs="1" maxOccurs="1" />
+                                                                <xs:element name="taxaextra" type="TValorDecimal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="taxaextrafor" type="TValorDecimal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="taxaservico" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="taxaservicofor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="repassedu" type="TValorDecimal" minOccurs="0" maxOccurs="1">
+                                                                    <xs:annotation>
+                                                                        <xs:documentation>Informa o valor da taxa DU /Rave cobrada do cliente, refernte ao pax </xs:documentation>
+                                                                    </xs:annotation>
+                                                                </xs:element>
+                                                                <xs:element name="repassecartaodu" type="TValorDecimal" minOccurs="0" maxOccurs="1">
+                                                                    <xs:annotation>
+                                                                        <xs:documentation>Informa o valor da taxa administrativa do cart?o sobre o valor da taxa DU / Rave
+                                                                            Apenas quando a DU/Rave foi paga no cart?o de credito</xs:documentation>
+                                                                    </xs:annotation>
+                                                                </xs:element>
+                                                                <xs:element ref="comisrecforvalor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="descpagclivalor" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="observacao" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="observacao2" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="numautorizacao" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="localizador" minOccurs="1" maxOccurs="1">
+                                                                    <xs:simpleType>
+                                                                        <xs:restriction base="xs:string">
+                                                                            <xs:maxLength value="10" />
+                                                                        </xs:restriction>
+                                                                    </xs:simpleType>
+                                                                </xs:element>
+                                                                <xs:element ref="valordescsub" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="emailpax" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="fonepax" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="docpax" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="multa" type="TValorDecimal" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="bilhetes" minOccurs="0" maxOccurs="1">
+                                                                    <xs:complexType>
+                                                                        <xs:sequence>
+                                                                            <xs:element name="bilhete" minOccurs="0" maxOccurs="unbounded">
+                                                                                <xs:complexType>
+                                                                                    <xs:sequence>
+                                                                                        <xs:element name="numero" minOccurs="1" maxOccurs="1" nillable="true">
+                                                                                            <xs:simpleType>
+                                                                                                <xs:restriction base="xs:string">
+                                                                                                    <xs:whiteSpace value="collapse" />
+                                                                                                </xs:restriction>
+                                                                                            </xs:simpleType>
+                                                                                        </xs:element>
+                                                                                    </xs:sequence>
+                                                                                </xs:complexType>
+                                                                            </xs:element>
+                                                                        </xs:sequence>
+                                                                    </xs:complexType>
+                                                                </xs:element>
+                                                                <xs:element name="trechos" minOccurs="1">
+                                                                    <xs:complexType>
+                                                                        <xs:sequence>
+                                                                            <xs:element name="segmento" minOccurs="1" maxOccurs="15">
+                                                                                <xs:complexType>
+                                                                                    <xs:sequence>
+                                                                                        <xs:element name="de" minOccurs="1">
+                                                                                            <xs:simpleType>
+                                                                                                <xs:restriction base="xs:string">
+                                                                                                    <xs:maxLength value="5" />
+                                                                                                    <xs:minLength value="0" />
+                                                                                                </xs:restriction>
+                                                                                            </xs:simpleType>
+                                                                                        </xs:element>
+                                                                                        <xs:element name="para" minOccurs="1">
+                                                                                            <xs:simpleType>
+                                                                                                <xs:restriction base="xs:string">
+                                                                                                    <xs:maxLength value="5" />
+                                                                                                    <xs:minLength value="0" />
+                                                                                                </xs:restriction>
+                                                                                            </xs:simpleType>
+                                                                                        </xs:element>
+                                                                                        <xs:element name="datasaida" type="TData" minOccurs="0" />
+                                                                                        <xs:element name="datachegada" type="TData" minOccurs="0" />
+                                                                                        <xs:element name="horasaida" type="THora" minOccurs="0" />
+                                                                                        <xs:element name="horachegada" type="THora" minOccurs="0" />
+                                                                                        <xs:element name="numlinha" minOccurs="0">
+                                                                                            <xs:simpleType>
+                                                                                                <xs:restriction base="xs:string">
+                                                                                                    <xs:maxLength value="7" />
+                                                                                                </xs:restriction>
+                                                                                            </xs:simpleType>
+                                                                                        </xs:element>
+                                                                                        <xs:element name="classe" minOccurs="0">
+                                                                                            <xs:simpleType>
+                                                                                                <xs:restriction base="xs:string">
+                                                                                                    <xs:maxLength value="2" />
+                                                                                                </xs:restriction>
+                                                                                            </xs:simpleType>
+                                                                                        </xs:element>
+                                                                                        <xs:element name="localizador" minOccurs="0">
+                                                                                            <xs:simpleType>
+                                                                                                <xs:restriction base="xs:string">
+                                                                                                    <xs:maxLength value="9" />
+                                                                                                </xs:restriction>
+                                                                                            </xs:simpleType>
+                                                                                        </xs:element>
+                                                                                        <xs:element name="uniqueId" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                                                                        <xs:element name="status" type="xs:string" minOccurs="0" />
+                                                                                        <xs:element name="conexao" minOccurs="0">
+                                                                                            <xs:simpleType>
+                                                                                                <xs:restriction base="xs:string">
+                                                                                                    <xs:enumeration value="S" />
+                                                                                                    <xs:enumeration value="s" />
+                                                                                                    <xs:enumeration value="Y" />
+                                                                                                    <xs:enumeration value="y" />
+                                                                                                    <xs:enumeration value="N" />
+                                                                                                    <xs:enumeration value="n" />
+                                                                                                </xs:restriction>
+                                                                                            </xs:simpleType>
+                                                                                        </xs:element>
+                                                                                        <xs:element name="ciarod" minOccurs="0">
+                                                                                            <xs:simpleType>
+                                                                                                <xs:restriction base="xs:string">
+                                                                                                    <xs:maxLength value="2" />
+                                                                                                </xs:restriction>
+                                                                                            </xs:simpleType>
+                                                                                        </xs:element>
+                                                                                        <xs:element name="rodoviariasinfo" minOccurs="0" maxOccurs="1">
+                                                                                            <xs:complexType>
+                                                                                                <xs:sequence>
+                                                                                                    <xs:element name="rodoviariaorigem" type="xs:string" minOccurs="1" maxOccurs="1" />
+                                                                                                    <xs:element name="cidadeorigem" type="xs:string" minOccurs="1" maxOccurs="1" />
+                                                                                                    <xs:element name="estadoorigem" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                                                                                    <xs:element name="paisorigem" type="xs:string" minOccurs="1" maxOccurs="1" />
+                                                                                                    <xs:element name="rodoviariadestino" type="xs:string" minOccurs="1" maxOccurs="1" />
+                                                                                                    <xs:element name="cidadedestino" type="xs:string" minOccurs="1" maxOccurs="1" />
+                                                                                                    <xs:element name="estadodestino" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                                                                                    <xs:element name="estadoodestino" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                                                                                    <xs:element name="paisdestino" type="xs:string" minOccurs="1" maxOccurs="1" />
+                                                                                                </xs:sequence>
+                                                                                            </xs:complexType>
+                                                                                        </xs:element>
+                                                                                    </xs:sequence>
+                                                                                </xs:complexType>
+                                                                            </xs:element>
+                                                                        </xs:sequence>
+                                                                    </xs:complexType>
+                                                                </xs:element>
+                                                                <xs:element ref="rateios" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element ref="taxasadicionais" minOccurs="0" maxOccurs="1" />
+                                                                <xs:element name="uniqueId" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                                            </xs:all>
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                </xs:choice>
+                                            </xs:complexType>
+                                        </xs:element>
+                                    </xs:all>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:simpleType name="TData">
+        <xs:restriction base="xs:normalizedString">
+            <xs:pattern value="^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|[1][0-2])/([0-9]{4})$|^$" />
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="THora">
+        <xs:restriction base="xs:normalizedString">
+            <xs:pattern value="^([0-1][0-9]|[2][0-3]):[0-5][0-9]$|^$" />
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="TCnpjCpf">
+        <xs:annotation>
+            <xs:documentation>Se pessoa juridica informar CNPJ, caso tenha e fisica o CPF, caso tenha
+                Formato
+                CNPJ XX.XXX.XXX/XXXX-XX
+                CPF XXX.XXX.XXX-XX
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:whiteSpace value="collapse" />
+            <xs:pattern value="^(((\d{3})\.){2}(\d{3})-(\d{2}))$|^$|^(\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2})$" />
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="TValorDecimal">
+        <xs:restriction base="xs:string">
+            <xs:whiteSpace value="collapse" />
+            <xs:pattern value="^([-+]?([0-9]*\,[0-9]+|[0-9]+)$)|([-+]?([0-9]*\.[0-9]+|[0-9]+)$)|^$" />
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="TtipoPax">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="ADT" />
+            <xs:enumeration value="INF" />
+            <xs:enumeration value="CHD" />
+            <xs:enumeration value="adt" />
+            <xs:enumeration value="inf" />
+            <xs:enumeration value="chd" />
+            <xs:enumeration value="Adt" />
+            <xs:enumeration value="Inf" />
+            <xs:enumeration value="Chd" />
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="Tpax">
+        <xs:restriction base="xs:string">
+            <xs:maxLength value="40" />
+            <xs:minLength value="1" />
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:element name="pax" type="Tpax">
+        <xs:annotation>
+            <xs:documentation>Nome do passageiro / hospede / tomador do servi?o</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="tipo" type="TtipoPax">
+        <xs:annotation>
+            <xs:documentation>Tipo de passageiro
+                ADT - Adulto
+                CHD - Crian?a
+                INF - Infant - beb? de colo.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="matricula" type="xs:string">
+        <xs:annotation>
+            <xs:documentation>Numero da matricula / c?d funcional do passageiro.
+                Quando funcionario de uma empresa cliente. </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="sucursal">
+        <xs:annotation>
+            <xs:documentation>Sucursal da empresa ( cliente da agencia )</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+            <xs:restriction base="xs:string">
+                <xs:maxLength value="15" />
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:element>
+    <xs:element name="contacontabil">
+        <xs:annotation>
+            <xs:documentation>Conta contabil da empresa ( cliente da agencia )</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+            <xs:restriction base="xs:string">
+                <xs:maxLength value="50" />
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:element>
+    <xs:element name="cambio" type="TValorDecimal">
+        <xs:annotation>
+            <xs:documentation>Valor do cambio aplicado para venda ao cliente.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="cambiofornecedor" type="TValorDecimal">
+        <xs:annotation>
+            <xs:documentation>Valor do cambio usado pelo fornecedor para vender para a agencia.
+                Usando somente quando h? diferen?a de cambio entre o cobrado do cliente com o cobrado do fornecedor
+                Tag n?o obrigat?ria.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="datacambiofornecedor" type="TData">
+        <xs:annotation>
+            <xs:documentation>Data do cambio aplicado a venda pelo fornecedor.
+                Tag N?o obrigat?ria.
+                Usando somente quando h? diferen?a de cambio entre o cobrado do cliente com o cobrado do fornecedor</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="moeda" type="xs:string">
+        <xs:annotation>
+            <xs:documentation>Moeda utilizada para vanda (R$, BRL, US$, USD, EUR, Etc )
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="moedafornecedor" type="xs:string">
+        <xs:annotation>
+            <xs:documentation>Moeda utilizada pelo fornecedor para vanda (R$, BRL, US$, USD, EUR, Etc )
+                Usando somente quando h? diferen?a de moeda entre o cobrado do cliente com o cobrado do fornecedor
+                Tag n?o obrigatoria
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="taxaservico" type="TValorDecimal">
+        <xs:annotation>
+            <xs:documentation>Valor da taxa de servi?o corado do cliente pelo servi?o prestado. (FEE)
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="taxaservicofor" type="TValorDecimal">
+        <xs:annotation>
+            <xs:documentation>Valor da taxa de servi?o corado do cliente pelo servi?o prestado. (FEE)
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="comisrecforvalor" type="TValorDecimal">
+        <xs:annotation>
+            <xs:documentation>Valor da comissao que a agencia recebeu/vai receber do fornecedor.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="descpagclivalor" type="TValorDecimal">
+        <xs:annotation>
+            <xs:documentation>Valor de desconto, abatimento, bonus, concedido ao cliente tomador do servi?o.
+                Desconto concedido pela agencia.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="observacao">
+        <xs:annotation>
+            <xs:documentation>Observa??o de texto livre pertinente a venda.
+                Esta observa??o poder? sair no vocher.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+            <xs:restriction base="xs:string">
+                <xs:maxLength value="350" />
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:element>
+    <xs:element name="observacao2">
+        <xs:annotation>
+            <xs:documentation>Observa??o de texto livre pertinente a venda. </xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+            <xs:restriction base="xs:string">
+                <xs:maxLength value="150" />
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:element>
+    <xs:element name="numautorizacao" type="xs:string">
+        <xs:annotation>
+            <xs:documentation>Numero de controle interno do cliente ( pessoa fisica ) para determinar uma autoriza??o de viagem concedido ao funcion?rio/passageiro.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="valordiaria" type="TValorDecimal">
+        <xs:annotation>
+            <xs:documentation>Valor da diaria do hotel, loca??o ou valor unit?rio do servi?o prestado quando produto for diversos. </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="valordiariabalcao" type="TValorDecimal">
+        <xs:annotation>
+            <xs:documentation>Valor da Tarifa Balc?o, praticado pelo fornecedor.(hotel, loca??o)
+                Valor Unitario para produtos diversos.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="valordiariafornecedor" type="TValorDecimal">
+        <xs:annotation>
+            <xs:documentation>Valor cobrado pelo fornecedor ( hotel, loca??o ) pela diaria de uma hospedagem ou loca??o de carro.
+                Para produtos diversos este valor ? unit?rio.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="qtddiaria" type="xs:positiveInteger">
+        <xs:annotation>
+            <xs:documentation>Quantidade de diarias cobradas pela hospedagem ou loca??o de veiculo.
+                Para produtos diversos ? quantidade de servi?os/pax cobrado.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="motivoviagem" type="xs:string">
+        <xs:annotation>
+            <xs:documentation>Especifica o motivo da viagem do passageiro.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="checkin" type="TData">
+        <xs:annotation>
+            <xs:documentation>Data do inicio da hospedagem, loca??o ou servi?o prestado ( diversos )</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="checkout" type="TData">
+        <xs:annotation>
+            <xs:documentation>Data do fim da hospedagem, loca??o ou servi?o prestado ( diversos )</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="datacambio" type="TData">
+        <xs:annotation>
+            <xs:documentation>Data do cambio aplicado a venda.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:simpleType name="TEmail">
+        <xs:restriction base="xs:string">
+            <xs:maxLength value="50" />
+            <xs:pattern value="^([a-zA-Z0-9_\.-]{2,}@([A-Za-z0-9_-]{2,}\.)+[A-Za-z]{2,4})$|^$" />
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="TCep">
+        <xs:annotation>
+            <xs:documentation>Cep - C?digo de endere?amento postal, do cliente / fornecedor
+                Pode-se usar numeros [0-9], tra?os e espa?os [-] e/ou [ ]
+                Por?m, o sistema ao integrar considerar? apenas os numeros.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:whiteSpace value="collapse" />
+            <xs:pattern value="^([0-9]{5}-[0-9]{3}$)|([0-9]{8})|^$" />
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:element name="confirmadopor">
+        <xs:annotation>
+            <xs:documentation>Nome da pessoa que confirmou a reserva no hotel / loca??o /diversos
+            </xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+            <xs:restriction base="xs:string">
+                <xs:maxLength value="15" />
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:element>
+    <xs:element name="dataconfirmacao" type="TData">
+        <xs:annotation>
+            <xs:documentation>Data da confirma??o da reserva junto ao forneecedor</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="numconfirmacao">
+        <xs:annotation>
+            <xs:documentation>Numero da confirma??o da reserva no hotel / loca??o /diversos
+            </xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+            <xs:restriction base="xs:string">
+                <xs:maxLength value="20" />
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:element>
+    <xs:element name="reqviagem">
+        <xs:annotation>
+            <xs:documentation>C?digo da requisi??o de viagem. Geralmente informado pelos clientes PJ, com um numero de controle interno.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+            <xs:restriction base="xs:string">
+                <xs:maxLength value="18" />
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:element>
+    <xs:element name="valordescsub" type="TValorDecimal">
+        <xs:annotation>
+            <xs:documentation>Desconto subsidiado.
+                Valor subsidiado por uma institui??o financeira ( cart?o fidelidade)
+                Nota: para uma correta integra??o, o conjunto de tags subsidio dever? estar preenchida.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="comisrecforpercentual" type="TValorDecimal" />
+    <xs:element name="comisrepclipercentual" type="TValorDecimal" />
+    <xs:element name="comisrepclivalor" type="TValorDecimal" />
+    <xs:element name="overrepclivalor" type="TValorDecimal" />
+    <xs:element name="overrepclipercentual" type="TValorDecimal" />
+    <xs:element name="overrecforvalor" type="TValorDecimal" />
+    <xs:element name="overrecforpercentual" type="TValorDecimal" />
+    <xs:element name="emailpax" type="TEmail" />
+    <xs:element name="docpax">
+        <xs:simpleType>
+            <xs:restriction base="xs:string">
+                <xs:maxLength value="15" />
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:element>
+    <xs:element name="tipopag">
+        <xs:simpleType>
+            <xs:restriction base="xs:string">
+                <xs:maxLength value="50" />
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:element>
+    <xs:element name="fonepax">
+        <xs:simpleType>
+            <xs:restriction base="xs:string">
+                <xs:maxLength value="15" />
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:element>
+    <xs:element name="rateios">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="rateio" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="centrocustocli" minOccurs="1" maxOccurs="1">
+                                <xs:annotation>
+                                    <xs:documentation>Centro de custos / nome do projeto  do CLIENTE. ( pessoa juridica )
+                                        a qual a venda est? vinculada
+                                    </xs:documentation>
+                                </xs:annotation>
+                                <xs:simpleType>
+                                    <xs:restriction base="xs:string">
+                                        <xs:maxLength value="50" />
+                                    </xs:restriction>
+                                </xs:simpleType>
+                            </xs:element>
+                            <xs:element name="percentual" type="TValorDecimal" minOccurs="1" maxOccurs="1" />
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="taxasadicionais">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="taxa" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="descricao" minOccurs="1" maxOccurs="1">
+                                <xs:simpleType>
+                                    <xs:restriction base="xs:string">
+                                        <xs:maxLength value="20" />
+                                        <xs:minLength value="1" />
+                                    </xs:restriction>
+                                </xs:simpleType>
+                            </xs:element>
+                            <xs:element name="valor" type="TValorDecimal" minOccurs="1" maxOccurs="1" />
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>
