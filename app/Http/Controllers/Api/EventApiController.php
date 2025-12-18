@@ -84,8 +84,8 @@ class EventApiController extends BaseApiController
                     'tipoProvider' => 'hotel',
                     'fornecedor' => fn($item) => $item->hotel,
                     'model' => \App\Models\Provider::class,
-                    'tipoctarec' => '0000081',
-                    'tipoctapag' => '0000146',
+                    'tipoctarec' => '0000146',
+                    'tipoctapag' => '0000081',
                 ],
                 [
                     'rel' => 'event_abs',
@@ -102,8 +102,8 @@ class EventApiController extends BaseApiController
                     'tipoProvider' => 'hall',
                     'fornecedor' => fn($item) => $item->hall,
                     'model' => \App\Models\Provider::class,
-                    'tipoctarec' => '01/0003',
-                    'tipoctapag' => '01/0005',
+                    'tipoctarec' => '0000146',
+                    'tipoctapag' => '0000081',
                 ],
                 [
                     'rel' => 'event_transports',
@@ -111,8 +111,8 @@ class EventApiController extends BaseApiController
                     'tipoProvider' => 'transport',
                     'fornecedor' => fn($item) => $item->transport,
                     'model' => \App\Models\ProviderTransport::class,
-                    'tipoctarec' => '0000121',
-                    'tipoctapag' => '0000088',
+                    'tipoctarec' => '0000088',
+                    'tipoctapag' => '0000121',
                 ],
                 [
                     'rel' => 'event_adds',
@@ -120,8 +120,8 @@ class EventApiController extends BaseApiController
                     'tipoProvider' => 'add',
                     'fornecedor' => fn($item) => $item->add,
                     'model' => \App\Models\ProviderServices::class,
-                    'tipoctarec' => '01/0005',
-                    'tipoctapag' => '01/0005',
+                    'tipoctarec' => '0000146',
+                    'tipoctapag' => '0000081',
                 ],
             ];
 
@@ -209,7 +209,7 @@ class EventApiController extends BaseApiController
         $venda->addChild('idcliente', htmlspecialchars($evento->customer?->codestur ?? $evento->customer?->id ?? ''));
         $venda->addChild('idoperador', htmlspecialchars($fornecedor?->broker?->name ?? ''));
         $venda->addChild('idfornecedor', htmlspecialchars($tipo['fornecedor']($fornecedor)->codestur ?? $tipo['fornecedor']($fornecedor)->id ?? ''));
-        $venda->addChild('formrec', '1');
+        $venda->addChild('formrec', '2');
 
         $venda->addChild('vencrec', htmlspecialchars(Carbon::parse($fornecedor->deadline_date)->format('d/m/Y')));
         $venda->addChild('centrocustocli', htmlspecialchars($evento->cost_center ?? ''));
@@ -321,21 +321,21 @@ class EventApiController extends BaseApiController
         $movimento->addChild('checkin', htmlspecialchars($in->format('d/m/Y') ?? ''));
         $movimento->addChild('checkout', htmlspecialchars($out->format('d/m/Y') ?? ''));
 
-        $movimento->addChild('taxaservico',  htmlspecialchars($this->sumTaxesProviderCost($fornecedor, $opt) ?? ''));
-        $movimento->addChild('taxaservicofor', htmlspecialchars($this->sumTaxesProvider($fornecedor, $opt) ?? ''));
-
-        $qtdDayle = $opt->count * $this->daysBetween($opt->in, $opt->out);
+        $qtdDayle = $opt->count * $this->daysBetween1($opt->in, $opt->out);
 
         $movimento->addChild('comisrecforvalor', htmlspecialchars(($opt->received_proposal * $qtdDayle * $opt->kickback) / 100 ?? ''));
 
         // $movimento->addChild('descpagclivalor', htmlspecialchars($opt->received_proposal * $qtdDayle ?? ''));
         $movimento->addChild('observacao', htmlspecialchars($fornecedor->internal_observation  ?? ''));
 
-        $totais = $this->computeTotalsForFornecedor($evento, $fornecedor);
+        $totais = $this->computeTotals($evento, $fornecedor);
 
-        $movimento->addChild('valordiaria', htmlspecialchars($totais['total_sale'] ?? ''));
-        $movimento->addChild('valordiariabalcao', htmlspecialchars($totais['base_sale'] ?? ''));
-        $movimento->addChild('valordiariafornecedor', htmlspecialchars($totais['total_cost'] ?? ''));
+        $movimento->addChild('taxaservico',  htmlspecialchars($totais['taxas'] ?? ''));
+        $movimento->addChild('taxaservicofor', htmlspecialchars($totais['taxas'] ?? ''));
+
+        $movimento->addChild('valordiaria', htmlspecialchars($totais['diaria'] ?? ''));
+        $movimento->addChild('valordiariabalcao', htmlspecialchars($totais['diaria'] ?? ''));
+        $movimento->addChild('valordiariafornecedor', htmlspecialchars($totais['diaria_fornecedor'] ?? ''));
         $movimento->addChild('qtdservico', htmlspecialchars($qtdDayle > 0 ? $qtdDayle : '1'));
 
         if (isset($fornecedor->status_his)) {
@@ -362,9 +362,6 @@ class EventApiController extends BaseApiController
         $movimento->addChild('checkin', htmlspecialchars($in->format('d/m/Y') ?? ''));
         $movimento->addChild('checkout', htmlspecialchars($out->format('d/m/Y') ?? ''));
 
-        $movimento->addChild('taxaservico', htmlspecialchars($this->sumTaxesProvider($fornecedor, $opt) ?? ''));
-        $movimento->addChild('taxaservicofor', htmlspecialchars($this->sumTaxesProviderCost($fornecedor, $opt) ?? ''));
-
         $qtdDayle = $opt->count * $this->daysBetween($opt->in, $opt->out);
         $movimento->addChild('comisrecforvalor', htmlspecialchars(($opt->received_proposal * $qtdDayle * $opt->kickback) / 100 ?? ''));
         // $movimento->addChild('descpagclivalor', htmlspecialchars($opt->received_proposal * $qtdDayle ?? ''));
@@ -390,11 +387,14 @@ class EventApiController extends BaseApiController
 
         $aptoXml->addChild('tipoapto', htmlspecialchars($tipoApto));
 
-        $totais = $this->computeTotalsForFornecedor($evento, $fornecedor);
+        $totais = $this->computeTotals($evento, $fornecedor);
+
+        $movimento->addChild('taxaservico', htmlspecialchars($totais['taxas'] ?? ''));
+        $movimento->addChild('taxaservicofor', htmlspecialchars($totais['taxas'] ?? ''));
 
         $aptoXml->addChild('valordiaria', htmlspecialchars($totais['total_sale'] ?? ''));
         $aptoXml->addChild('valordiariabalcao', htmlspecialchars($totais['total_sale'] ?? ''));
-        $aptoXml->addChild('valordiariafornecedor', htmlspecialchars($totais['total_cost'] ?? ''));
+        $aptoXml->addChild('valordiariafornecedor', htmlspecialchars($totais['diaria_fornecedor'] ?? ''));
         $aptoXml->addChild('qtddiaria', htmlspecialchars($qtdDayle ?? ''));
 
         if (isset($fornecedor->status_his)) {
@@ -678,26 +678,12 @@ class EventApiController extends BaseApiController
     /**
      * Calcula totais (custo/venda) para um fornecedor em um evento.
      *
-     * Retorna array com chaves:
-     *  - total_cost: soma dos custos (sem IOF)
-     *  - total_sale: soma das vendas (sem IOF / sem taxa 4bts)
-     *  - total_kickback: soma dos kickbacks
-     *  - total_tax_cost: soma das taxas aplicadas ao custo (sem IOF)
-     *  - total_tax_sale: soma das taxas aplicadas à venda (sem IOF)
-     *  - percIOF: percentual IOF aplicado (máximo encontrado)
-     *  - total_cost_with_iof: total_cost + IOF
-     *  - total_sale_with_iof_and_taxa4bts: total_sale + IOF e aplicado taxa_4bts do evento/fornecedor
      */
-    private function computeTotalsForFornecedor($evento, $fornecedor): array
+    private function computeTotals($evento, $fornecedor): array
     {
-        $sumQtdDayles = 0;
-        $totalKickback = 0;
-        $sumHotelCost = 0; // soma dos custos (base)
         $sumHotelSale = 0; // soma das vendas (base)
         $sumTotalHotelCost = 0; // custo + taxas (por item)
         $sumTotalHotelSale = 0; // venda + taxas (por item)
-        $sumTaxeHotelCost = 0; // soma das taxas sobre custo (por dia)
-        $sumTaxeHotelSale = 0; // soma das taxas sobre venda (por dia)
 
         // coleta possíveis coleções de opts (inclui opt 0)
         $optCollections = [
@@ -719,20 +705,11 @@ class EventApiController extends BaseApiController
                 // taxes sobre custo (usa valor recebido/fornecedor)
                 $taxesCost = $this->sumTaxesProviderCost($fornecedor, $item);
 
-                // kickback total
-                $totalKickback += ($item->received_proposal * $item->kickback) / 100;
-
-                // acumula bases
-                $sumHotelCost += ($item->received_proposal ?? 0);
                 $sumHotelSale += $this->unitSale($item);
 
                 // soma total por item (base + taxas)
                 $sumTotalHotelCost += $this->sumTotal($item->received_proposal ?? 0, $taxesCost, 1);
                 $sumTotalHotelSale += $this->sumTotal($this->unitSale($item), $taxes, 1);
-
-                // soma taxas separadas
-                $sumTaxeHotelCost += ($taxesCost);
-                $sumTaxeHotelSale += ($taxes);
             }
         }
 
@@ -747,10 +724,9 @@ class EventApiController extends BaseApiController
         $sumTotalHotelCostTaxa = ((($sumTotalHotelCost * $percIOF) / 100) + $sumTotalHotelCost);
 
         return [
-            'total_cost' => round($sumTotalHotelCostTaxa, 2),
-            'total_sale' => round($sumTotalHotelSaleTaxa, 2),
-            'base_cost' => round($sumHotelCost, 2),
-            'base_sale' => round($sumHotelSale, 2),
+            'diaria_fornecedor' => round($sumTotalHotelCostTaxa, 2),
+            'diaria' => round($sumHotelSale, 2),
+            'taxas' => round($sumTotalHotelSaleTaxa - $sumHotelSale, 2),
         ];
     }
 
