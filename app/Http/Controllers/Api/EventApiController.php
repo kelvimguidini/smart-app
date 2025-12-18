@@ -384,8 +384,8 @@ class EventApiController extends BaseApiController
         $movimento->addChild('taxaservico', htmlspecialchars($totais['diaria_taxas'] * $qtdDayle ?? ''));
         $movimento->addChild('taxaservicofor', htmlspecialchars($totais['diaria_taxas'] * $qtdDayle ?? ''));
 
-        $aptoXml->addChild('valordiaria', htmlspecialchars($totais['total_sale'] ?? ''));
-        $aptoXml->addChild('valordiariabalcao', htmlspecialchars($totais['total_sale'] ?? ''));
+        $aptoXml->addChild('valordiaria', htmlspecialchars($totais['diaria'] ?? ''));
+        $aptoXml->addChild('valordiariabalcao', htmlspecialchars($totais['diaria'] ?? ''));
         $aptoXml->addChild('valordiariafornecedor', htmlspecialchars($totais['diaria_fornecedor'] ?? ''));
         $aptoXml->addChild('qtddiaria', htmlspecialchars($qtdDayle ?? ''));
 
