@@ -271,16 +271,7 @@ class EventApiController extends BaseApiController
                     $this->movimentoDiversosXML($opt, $fornecedor, $evento, $movimentosXml, $tipo['rel']);
                     break;
             }
-
-            // $taxes = $this->sumTaxesProvider($fornecedor, $opt);
-            // if ($tipo['rel'] == 'event_hotels') {
-            //     $qtdDayle = $opt->count * $this->daysBetween($opt->in, $opt->out);
-            // } else {
-            //     $qtdDayle = $opt->count * $this->daysBetween1($opt->in, $opt->out);
-            // }
-            // $sumTotalHotelSale += $this->sumTotal($this->unitSale($opt), $taxes, $qtdDayle);
         }
-        // $venda->addChild('entradatotal', $sumTotalHotelSale);
     }
 
     private function movimentoDiversosXML($opt, $fornecedor, $evento, $movimentoXml, $tipo)
@@ -330,8 +321,8 @@ class EventApiController extends BaseApiController
 
         $totais = $this->computeTotals($evento, $fornecedor);
 
-        $movimento->addChild('taxaservico',  htmlspecialchars($totais['taxas'] ?? ''));
-        $movimento->addChild('taxaservicofor', htmlspecialchars($totais['taxas'] ?? ''));
+        $movimento->addChild('taxaservico',  htmlspecialchars($totais['diaria_taxas'] * $qtdDayle ?? ''));
+        $movimento->addChild('taxaservicofor', htmlspecialchars($totais['diaria_taxas'] * $qtdDayle ?? ''));
 
         $movimento->addChild('valordiaria', htmlspecialchars($totais['diaria'] ?? ''));
         $movimento->addChild('valordiariabalcao', htmlspecialchars($totais['diaria'] ?? ''));
@@ -389,8 +380,9 @@ class EventApiController extends BaseApiController
 
         $totais = $this->computeTotals($evento, $fornecedor);
 
-        $movimento->addChild('taxaservico', htmlspecialchars($totais['taxas'] ?? ''));
-        $movimento->addChild('taxaservicofor', htmlspecialchars($totais['taxas'] ?? ''));
+
+        $movimento->addChild('taxaservico', htmlspecialchars($totais['diaria_taxas'] * $qtdDayle ?? ''));
+        $movimento->addChild('taxaservicofor', htmlspecialchars($totais['diaria_taxas'] * $qtdDayle ?? ''));
 
         $aptoXml->addChild('valordiaria', htmlspecialchars($totais['total_sale'] ?? ''));
         $aptoXml->addChild('valordiariabalcao', htmlspecialchars($totais['total_sale'] ?? ''));
@@ -398,9 +390,6 @@ class EventApiController extends BaseApiController
         $aptoXml->addChild('qtddiaria', htmlspecialchars($qtdDayle ?? ''));
 
         if (isset($fornecedor->status_his)) {
-            // $aprovado = collect($fornecedor->status_his)->last(function ($item) {
-            //     return $item->status === 'approved_by_manager';
-            // });
 
             $movimento->addChild('confirmadopor', '');
             $movimento->addChild('dataconfirmacao', '');
@@ -726,7 +715,7 @@ class EventApiController extends BaseApiController
         return [
             'diaria_fornecedor' => round($sumTotalHotelCostTaxa, 2),
             'diaria' => round($sumHotelSale, 2),
-            'taxas' => round($sumTotalHotelSaleTaxa - $sumHotelSale, 2),
+            'diaria_taxas' => round($sumTotalHotelSaleTaxa - $sumHotelSale, 2),
         ];
     }
 
