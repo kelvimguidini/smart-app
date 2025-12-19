@@ -75,7 +75,7 @@ class EventApiController extends BaseApiController
         $vendas = $xml->addChild('vendas');
 
         foreach ($eventos as $evento) {
-            $this->clientesXML($evento->customer?->id, $clientes);
+            // $this->clientesXML($evento->customer?->id, $clientes);
 
             $tipos = [
                 [
@@ -127,8 +127,8 @@ class EventApiController extends BaseApiController
 
             foreach ($tipos as $tipo) {
                 foreach ($evento->{$tipo['rel']} as $item) {
-                    $fornecedor = $tipo['fornecedor']($item);
-                    $this->fornecedoresXML($fornecedor->id, $fornecedores, $tipo['model']);
+                    // $fornecedor = $tipo['fornecedor']($item);
+                    // $this->fornecedoresXML($fornecedor->id, $fornecedores, $tipo['model']);
                     $this->vendasXML($evento, $item, $vendas, $tipo);
                 }
             }
