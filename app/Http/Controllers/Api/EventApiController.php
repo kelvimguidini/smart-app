@@ -84,8 +84,8 @@ class EventApiController extends BaseApiController
                     'tipoProvider' => 'hotel',
                     'fornecedor' => fn($item) => $item->hotel,
                     'model' => \App\Models\Provider::class,
-                    'tipoctarec' => '0000146',
-                    'tipoctapag' => '0000081',
+                    'tipoctarec' => '01/0019',
+                    'tipoctapag' => '01/0002',
                 ],
                 [
                     'rel' => 'event_abs',
@@ -93,8 +93,8 @@ class EventApiController extends BaseApiController
                     'tipoProvider' => 'ab',
                     'fornecedor' => fn($item) => $item->ab,
                     'model' => \App\Models\Provider::class,
-                    'tipoctarec' => fn($item) => $item->ab->nacional ? '0000410' : '0000408',
-                    'tipoctapag' => fn($item) => $item->ab->nacional ? '0000409' : '0000407',
+                    'tipoctarec' => fn($item) => $item->ab->nacional ? '04/0002' : '24/0002',
+                    'tipoctapag' => fn($item) => $item->ab->nacional ? '0000409' : '24/0001',
                 ],
                 [
                     'rel' => 'event_halls',
@@ -102,8 +102,8 @@ class EventApiController extends BaseApiController
                     'tipoProvider' => 'hall',
                     'fornecedor' => fn($item) => $item->hall,
                     'model' => \App\Models\Provider::class,
-                    'tipoctarec' => '0000146',
-                    'tipoctapag' => '0000081',
+                    'tipoctarec' => '01/0019',
+                    'tipoctapag' => '01/0002',
                 ],
                 [
                     'rel' => 'event_transports',
@@ -111,8 +111,8 @@ class EventApiController extends BaseApiController
                     'tipoProvider' => 'transport',
                     'fornecedor' => fn($item) => $item->transport,
                     'model' => \App\Models\ProviderTransport::class,
-                    'tipoctarec' => '0000088',
-                    'tipoctapag' => '0000121',
+                    'tipoctarec' => '02/0013',
+                    'tipoctapag' => '02/0016',
                 ],
                 [
                     'rel' => 'event_adds',
@@ -120,8 +120,8 @@ class EventApiController extends BaseApiController
                     'tipoProvider' => 'add',
                     'fornecedor' => fn($item) => $item->add,
                     'model' => \App\Models\ProviderServices::class,
-                    'tipoctarec' => '0000146',
-                    'tipoctapag' => '0000081',
+                    'tipoctarec' => '01/0019',
+                    'tipoctapag' => '01/0002',
                 ],
             ];
 
@@ -188,9 +188,10 @@ class EventApiController extends BaseApiController
         $venda->addChild('idvenda', htmlspecialchars($evento->id . '-' . $fornecedor->id . '-' . $tipo['id']));
         $venda->addChild('idvendapai', htmlspecialchars($evento->code));
         $venda->addChild('tipoproduto', $tipo['rel'] == 'event_hotels' ? 'HOTEL' : 'DIVERSOS');
-        $venda->addChild('idproduto', $tipo['rel'] == 'event_hotels' ? 'HTLI' : 'DIVN');
+        $national = $fornecedor->{$tipo['tipoProvider']}->national;
+        $venda->addChild('idproduto', $tipo['rel'] == 'event_hotels' ? ($national ? 'HOTN' : 'HOTI') : ($national ? 'DIVN' : 'DIVI'));
 
-        $venda->addChild('clasproduto', htmlspecialchars($fornecedor->{$tipo['tipoProvider']}->national ? 'Nacional' : 'Internacional'));
+        $venda->addChild('clasproduto', htmlspecialchars($national ? 'NACIONAL' : 'INTERNACIONAL'));
 
         $venda->addChild(
             'idpromotor',
