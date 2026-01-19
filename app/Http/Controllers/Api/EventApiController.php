@@ -93,7 +93,7 @@ class EventApiController extends BaseApiController
                     'tipoProvider' => 'ab',
                     'fornecedor' => fn($item) => $item->ab,
                     'model' => \App\Models\Provider::class,
-                    'tipoctarec' => fn($item) => $item->ab->nacional ? '04/0002' : '24/0002',
+                    'tipoctarec' => fn($item) => $item->ab->nacional ? '04/0002' : '04/0001',
                     'tipoctapag' => fn($item) => $item->ab->nacional ? '24/0002' : '24/0001',
                 ],
                 [
@@ -111,8 +111,8 @@ class EventApiController extends BaseApiController
                     'tipoProvider' => 'transport',
                     'fornecedor' => fn($item) => $item->transport,
                     'model' => \App\Models\ProviderTransport::class,
-                    'tipoctarec' => '02/0013',
-                    'tipoctapag' => '02/0016',
+                    'tipoctarec' => '02/0016',
+                    'tipoctapag' => '02/0013',
                 ],
                 [
                     'rel' => 'event_adds',
