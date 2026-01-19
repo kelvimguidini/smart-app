@@ -383,7 +383,6 @@ class EventApiController extends BaseApiController
 
 
         $movimento->addChild('taxaservico', htmlspecialchars($totais['diaria_taxas'] * $qtdDayle ?? ''));
-        $movimento->addChild('taxaservicofor', htmlspecialchars($totais['diaria_taxas'] * $qtdDayle ?? ''));
 
         $aptoXml->addChild('valordiaria', htmlspecialchars($totais['diaria'] ?? ''));
         $aptoXml->addChild('valordiariabalcao', htmlspecialchars($totais['diaria'] ?? ''));
@@ -709,14 +708,15 @@ class EventApiController extends BaseApiController
         if (isset($evento->iof) && $evento->iof > 0) $iofs[] = $evento->iof;
         $percIOF = count($iofs) ? max($iofs) : 0;
 
-        // aplica IOF e taxa 4bts (taxa 4bts aparentemente só para venda)
-        $sumTotalHotelSaleTaxa = ((($sumTotalHotelSale * $percIOF) / 100) + $sumTotalHotelSale) * (1 + ($fornecedor->taxa_4bts / 100));
+        // aplica IOF e taxa 4bts (taxa 4bts só para venda)
+        $sumTotalHotelSaleTaxasSemTaxa4bts = ((($sumTotalHotelSale * $percIOF) / 100) + $sumTotalHotelSale);
+        $sumTotalHotelSaleTaxa4bts = $sumTotalHotelSaleTaxasSemTaxa4bts * ($fornecedor->taxa_4bts / 100);
         $sumTotalHotelCostTaxa = ((($sumTotalHotelCost * $percIOF) / 100) + $sumTotalHotelCost);
 
         return [
             'diaria_fornecedor' => round($sumTotalHotelCostTaxa, 2),
-            'diaria' => round($sumHotelSale, 2),
-            'diaria_taxas' => round($sumTotalHotelSaleTaxa - $sumHotelSale, 2),
+            'diaria' => round($sumTotalHotelSaleTaxasSemTaxa4bts, 2),
+            'diaria_taxas' => round($sumTotalHotelSaleTaxa4bts, 2),
         ];
     }
 
