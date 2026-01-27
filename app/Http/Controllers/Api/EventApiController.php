@@ -189,7 +189,21 @@ class EventApiController extends BaseApiController
         $venda->addChild('idvendapai', htmlspecialchars($evento->code));
         $venda->addChild('tipoproduto', $tipo['rel'] == 'event_hotels' ? 'HOTEL' : 'DIVERSOS');
         $national = $fornecedor->{$tipo['tipoProvider']}->national;
-        $venda->addChild('idproduto', $tipo['rel'] == 'event_hotels' ? ($national ? 'HOTN' : 'HOTI') : ($national ? 'DIVN' : 'DIVI'));
+
+        switch ($tipo['rel']) {
+            case 'event_hotels':
+                $idProduto = $national ? 'HOTN' : 'HOTI';
+                break;
+            case 'event_abs':
+                $idProduto = $national ? 'A&BN' : 'A&BI';
+                break;
+            case 'event_halls':
+                $idProduto = $national ? 'SL' : 'LOC';
+            default:
+                $idProduto = $national ? 'DIVN' : 'DIVI';
+                break;
+        }
+        $venda->addChild('idproduto', $idProduto);
 
         $venda->addChild('clasproduto', htmlspecialchars($national ? 'NACIONAL' : 'INTERNACIONAL'));
 
