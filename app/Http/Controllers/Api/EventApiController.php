@@ -199,6 +199,7 @@ class EventApiController extends BaseApiController
                 break;
             case 'event_halls':
                 $idProduto = $national ? 'SL' : 'LOC';
+                break;
             default:
                 $idProduto = $national ? 'DIVN' : 'DIVI';
                 break;
