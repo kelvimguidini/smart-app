@@ -195,7 +195,7 @@ class EventApiController extends BaseApiController
                 $idProduto = $national ? 'HOTN' : 'HOTI';
                 break;
             case 'event_abs':
-                $idProduto = $national ? 'A&BN' : 'A&BI';
+                $idProduto = $national ? 'A&amp;BN' : 'A&amp;BI';
                 break;
             case 'event_halls':
                 $idProduto = $national ? 'SL' : 'LOC';
@@ -204,7 +204,7 @@ class EventApiController extends BaseApiController
                 $idProduto = $national ? 'DIVN' : 'DIVI';
                 break;
         }
-        $venda->addChild('idproduto', $idProduto);
+        $venda->addChild('idproduto', htmlspecialchars($idProduto));
 
         $venda->addChild('clasproduto', htmlspecialchars($national ? 'NACIONAL' : 'INTERNACIONAL'));
 
