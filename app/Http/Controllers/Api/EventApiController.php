@@ -162,7 +162,7 @@ class EventApiController extends BaseApiController
 
                 $documento = preg_replace('/\D/', '', $cliente->document);
                 $tipoPessoa = strlen($documento) === 14 ? 'PJ' : 'PF';
-                $clienteXml->addChild('tipopessoa', $tipoPessoa);
+                $clienteXml->addChild('tipopessoa', htmlspecialchars($tipoPessoa));
 
 
                 if (!empty($cliente->email)) {
@@ -230,7 +230,7 @@ class EventApiController extends BaseApiController
         $venda->addChild('vencrec', htmlspecialchars(Carbon::parse($fornecedor->deadline_date)->format('d/m/Y')));
         $venda->addChild('centrocustocli', htmlspecialchars($evento->cost_center ?? ''));
         $venda->addChild('setorcli', htmlspecialchars($evento->sector ?? ''));
-        $venda->addChild('filialagencia', $evento->crd?->number ?? '');
+        $venda->addChild('filialagencia', htmlspecialchars($evento->crd?->number ?? ''));
         $venda->addChild('centrocusto', htmlspecialchars($evento->crd?->number ?? ''));
 
         $venda->addChild('solicitante', htmlspecialchars($evento->requester ?? ''));
@@ -268,8 +268,8 @@ class EventApiController extends BaseApiController
         }
 
         // Garante que são strings antes de adicionar ao XML
-        $venda->addChild('tipoctarec', (string) ($tipoCtarec ?? ''));
-        $venda->addChild('tipoctapag', (string) ($tipoCtapag ?? ''));
+        $venda->addChild('tipoctarec', htmlspecialchars((string) ($tipoCtarec ?? '')));
+        $venda->addChild('tipoctapag', htmlspecialchars((string) ($tipoCtapag ?? '')));
 
         $venda->addChild('formpagto', 2); //FATURADO
 
@@ -317,7 +317,7 @@ class EventApiController extends BaseApiController
         }
 
         $nomeCortado = mb_substr($evento->name ?? '', 0, 40 - mb_strlen($stringNome));
-        $movimento->addChild('pax', htmlspecialchars($nomeCortado) . ' - ' . $stringNome);
+        $movimento->addChild('pax', htmlspecialchars($nomeCortado . ' - ' . $stringNome));
         $movimento->addChild('tipo', 'ADT');
         $movimento->addChild('matricula', '');
         $movimento->addChild('moeda', htmlspecialchars($fornecedor->currency?->sigla ?? ''));
@@ -436,7 +436,7 @@ class EventApiController extends BaseApiController
                 } else {
                     $tipoFornec = 'HOT';
                 }
-                $fornecedorXml->addChild('tipofornec', $tipoFornec);
+                $fornecedorXml->addChild('tipofornec', htmlspecialchars($tipoFornec));
 
 
                 if (!empty($fornecedor->email)) {
