@@ -93,8 +93,8 @@ class EventApiController extends BaseApiController
                     'tipoProvider' => 'ab',
                     'fornecedor' => fn($item) => $item->ab,
                     'model' => \App\Models\Provider::class,
-                    'tipoctarec' => fn($item) => $item->ab->nacional ? '04/0002' : '04/0001',
-                    'tipoctapag' => fn($item) => $item->ab->nacional ? '24/0002' : '24/0001',
+                    'tipoctarec' => fn($item) => $item->ab->national ? '04/0002' : '04/0001',
+                    'tipoctapag' => fn($item) => $item->ab->national ? '24/0002' : '24/0001',
                 ],
                 [
                     'rel' => 'event_halls',
