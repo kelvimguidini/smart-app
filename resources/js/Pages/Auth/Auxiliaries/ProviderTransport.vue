@@ -32,6 +32,7 @@ const form = useForm({
     service_percent: null,
     iva_percent: null,
     iss_percent: null,
+    payment_method: '',
 });
 
 
@@ -75,6 +76,7 @@ const edit = (hotel) => {
         form.iss_percent = hotel.iss_percent;
         form.service_percent = hotel.service_percent;
         form.iva_percent = hotel.iva_percent;
+        form.payment_method = hotel.payment_method || '';
 
         $('#city').val(hotel.city_id).trigger('change');
         $('.phone').val(form.phone).trigger('keyup');
@@ -148,27 +150,22 @@ const deactivate = (id) => {
 
                             <div class="row">
                                 <div class="col">
-
                                     <div class="form-group">
                                         <InputLabel for="name" value="Nome:" />
                                         <TextInput type="text" class="form-control" v-model="form.name" required
                                             autofocus autocomplete="name" />
                                         <InputError class="mt-2 text-danger" :message="form.errors.name" />
                                     </div>
-
                                 </div>
                                 <div class="col">
                                     <div class="form-group">
                                         <InputLabel for="city" value="Cidade:" />
-
                                         <select class="form-control" id="city" :required="required">
                                             <option value="">.::Selecione::.</option>
                                             <option v-for="(option, index) in cities" :value="option.id">
-                                                {{ option.name }} - {{ option.states ? option.states :
-                                                    option.country }}
+                                                {{ option.name }} - {{ option.states ? option.states : option.country }}
                                             </option>
                                         </select>
-
                                         <InputError class="mt-2 text-danger" :message="form.errors.city" />
                                     </div>
                                 </div>
@@ -178,6 +175,17 @@ const deactivate = (id) => {
                                         <TextInput type="text" class="form-control" v-model="form.contact" autofocus
                                             autocomplete="contact" required />
                                         <InputError class="mt-2 text-danger" :message="form.errors.contact" />
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-group">
+                                        <InputLabel for="payment_method" value="Forma de Pagamento:" />
+                                        <select class="form-control" v-model="form.payment_method" required>
+                                            <option value="INDEFINIDO">Indefinido</option>
+                                            <option value="CASH">Dinheiro</option>
+                                            <option value="CARTAO">Cartão</option>
+                                        </select>
+                                        <InputError class="mt-2 text-danger" :message="form.errors.payment_method" />
                                     </div>
 
                                 </div>

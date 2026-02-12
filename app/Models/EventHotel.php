@@ -25,7 +25,8 @@ class EventHotel extends Model
         'taxa_4bts',
         'service_charge',
         'deadline_date',
-        'order'
+        'order',
+        'payment_method'
     ];
     protected $table = 'event_hotel';
 

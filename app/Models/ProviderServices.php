@@ -27,7 +27,8 @@ class ProviderServices extends Model
         'iva_percent',
         'has_additional',
         'active',
-        'codestur'
+        'codestur',
+        'payment_method'
     ];
 
     protected $table = 'provider_services';
@@ -48,6 +49,7 @@ class ProviderServices extends Model
     protected $service_percent = 'service_percent';
     protected $iva_percent = 'iva_percent';
     protected $codestur = 'codestur';
+    protected $payment_method = 'payment_method';
 
     public function event_hotels()
     {

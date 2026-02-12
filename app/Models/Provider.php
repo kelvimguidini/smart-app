@@ -31,7 +31,8 @@ class Provider extends Model
         'has_ab',
         'has_hall',
         'active',
-        'codestur'
+        'codestur',
+        'payment_method'
     ];
 
     protected $table = 'provider';

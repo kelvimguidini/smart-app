@@ -72,7 +72,8 @@ class ProviderTransportController extends Controller
         }
 
         $request->validate([
-            'name' => 'required|string|max:255'
+            'name' => 'required|string|max:255',
+            'payment_method' => 'nullable|string|max:255'
         ]);
 
         try {
@@ -89,6 +90,7 @@ class ProviderTransportController extends Controller
                 $hotel->iss_percent = $request->iss_percent;
                 $hotel->service_percent = $request->service_percent;
                 $hotel->iva_percent = $request->iva_percent;
+                $hotel->payment_method = $request->payment_method;
 
                 $hotel->save();
             } else {
@@ -102,7 +104,8 @@ class ProviderTransportController extends Controller
                     'national' => $request->national,
                     'iss_percent' => $request->iss_percent,
                     'service_percent' => $request->service_percent,
-                    'iva_percent' => $request->iva_percent
+                    'iva_percent' => $request->iva_percent,
+                    'payment_method' => $request->payment_method
                 ]);
             }
         } catch (Exception $e) {

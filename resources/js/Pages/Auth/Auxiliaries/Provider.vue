@@ -29,7 +29,8 @@ const form = useForm({
     national: false,
     service_percent: null,
     iva_percent: null,
-    iss_percent: null
+    iss_percent: null,
+    payment_method: 'INDEFINIDO'
 });
 
 const formDelete = useForm({
@@ -74,6 +75,7 @@ const edit = (hotel) => {
         form.iss_percent = hotel.iss_percent;
         form.service_percent = hotel.service_percent;
         form.iva_percent = hotel.iva_percent;
+        form.payment_method = hotel.payment_method || 'INDEFINIDO';
 
         $('#city').val(hotel.city_id).trigger('change');
         $('.phone').val(form.phone).trigger('keyup');
@@ -205,6 +207,18 @@ const deactivate = (id) => {
 
                                 <div class="col-2">
                                     <div class="form-group">
+                                        <InputLabel for="payment_method" value="Forma de Pagamento:" />
+                                        <select class="form-control" v-model="form.payment_method" required>
+                                            <option value="INDEFINIDO">Indefinido</option>
+                                            <option value="CASH">Dinheiro</option>
+                                            <option value="CARTAO">Cartão</option>
+                                        </select>
+                                        <InputError class="mt-2 text-danger" :message="form.errors.payment_method" />
+                                    </div>
+                                </div>
+
+                                <div class="col-2">
+                                    <div class="form-group">
                                         <InputLabel for="iss_percent" value="ISS:" />
                                         <TextInput type="number" class="form-control percent" v-model="form.iss_percent"
                                             required autofocus min="0" step="0.01" autocomplete="iss_percent" />
@@ -310,6 +324,7 @@ const deactivate = (id) => {
                                         <th scope="col">Contato</th>
                                         <th scope="col">Telefone</th>
                                         <th scope="col">E-mail</th>
+                                        <th scope="col">Forma de Pagamento</th>
                                         <th scope="col">Tipo</th>
                                         <th scope="col">Ações</th>
                                     </tr>
@@ -325,6 +340,11 @@ const deactivate = (id) => {
                                         <td>{{ hotel.contact }}</td>
                                         <td class="phone">{{ hotel.phone }}</td>
                                         <td>{{ hotel.email }}</td>
+                                        <td>
+                                            <span v-if="hotel.payment_method === 'CASH'" class="badge badge-success">Dinheiro</span>
+                                            <span v-else-if="hotel.payment_method === 'CARTAO'" class="badge badge-info">Cartão</span>
+                                            <span v-else class="badge badge-secondary">Indefinido</span>
+                                        </td>
                                         <td>{{ hotel.national ? "Nacional" : "Internacional" }}</td>
                                         <td>
                                             <button class="btn btn-sm btn-info btn-icon-split mr-2"

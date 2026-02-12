@@ -67,7 +67,8 @@ class ProviderServicesController extends Controller // Atualize a herança
         }
 
         $request->validate([
-            'name' => 'required|string|max:255'
+            'name' => 'required|string|max:255',
+            'payment_method' => 'nullable|string|max:255'
         ]);
 
         try {
@@ -84,6 +85,7 @@ class ProviderServicesController extends Controller // Atualize a herança
                 $hotel->iss_percent = $request->iss_percent;
                 $hotel->service_percent = $request->service_percent;
                 $hotel->iva_percent = $request->iva_percent;
+                $hotel->payment_method = $request->payment_method;
 
                 $hotel->save();
             } else {
@@ -97,7 +99,8 @@ class ProviderServicesController extends Controller // Atualize a herança
                     'national' => $request->national,
                     'iss_percent' => $request->iss_percent,
                     'service_percent' => $request->service_percent,
-                    'iva_percent' => $request->iva_percent
+                    'iva_percent' => $request->iva_percent,
+                    'payment_method' => $request->payment_method
                 ]);
             }
         } catch (Exception $e) {

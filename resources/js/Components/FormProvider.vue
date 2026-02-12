@@ -113,6 +113,7 @@ const selectProvider = (id) => {
         form.iva_percent = prov.iva_percent;
         form.service_percent = prov.service_percent;
 
+        form.payment_method = prov.payment_method || 'INDEFINIDO';
 
         if (props.selectCallBack && typeof props.selectCallBack === 'function') {
             props.selectCallBack(id);
@@ -186,6 +187,7 @@ const edit = () => {
         form.customer_observation = props.eventProvider.customer_observation;
 
         form.taxa_4bts = props.eventProvider.taxa_4bts;
+        form.payment_method = props.eventProvider.payment_method || 'INDEFINIDO';
 
         $('#currency' + props.type).val(props.eventProvider.currency_id).trigger('change');
     }
@@ -339,21 +341,37 @@ const updateForm = () => {
                 </div>
             </div>
             <div class="col-md-6 col-lg-4 mb-3">
-                <div class="form-group">
+                <div class="row">
+                    <div class="col-6">
 
-                    <VDatePicker v-model="date" @update:modelValue="updateForm"
-                        :model-config="{ type: 'string', mask: 'YYYY-MM-DD', timeAdjust: '00:00:00' }">
-                        <template #default="{ inputValue, inputEvents }">
-
-                            <InputLabel for="in" value="Prazo:" />
-                            <TextInput readonly class="form-control custom-datepicker" :value="inputValue"
-                                v-on="inputEvents" />
-                            <InputError class="mt-2 text-danger" :message="form.errors.date" />
-
-                        </template>
-                    </VDatePicker>
-
+                        <div class="form-group">
+                            <InputLabel for="payment_method" value="Forma de Pagamento:" />
+                            <select class="form-control" v-model="form.payment_method" required>
+                                <option value="INDEFINIDO">Indefinido</option>
+                                <option value="CASH">Dinheiro</option>
+                                <option value="CARTAO">Cartão</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
+
+                <div class="col-6">
+                    <div class="form-group">
+                        <VDatePicker v-model="date" @update:modelValue="updateForm"
+                            :model-config="{ type: 'string', mask: 'YYYY-MM-DD', timeAdjust: '00:00:00' }">
+                            <template #default="{ inputValue, inputEvents }">
+
+                                <InputLabel for="in" value="Prazo:" />
+                                <TextInput readonly class="form-control custom-datepicker" :value="inputValue"
+                                    v-on="inputEvents" />
+                                <InputError class="mt-2 text-danger" :message="form.errors.date" />
+
+                            </template>
+                        </VDatePicker>
+                    </div>
+                </div>
+
+
             </div>
             <div class="col-md-6 col-lg-4 mb-3">
                 <div class="form-group">
