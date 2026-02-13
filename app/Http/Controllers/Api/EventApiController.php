@@ -335,7 +335,8 @@ class EventApiController extends BaseApiController
         // $movimento->addChild('descpagclivalor', htmlspecialchars($opt->received_proposal * $qtdDayle ?? ''));
         $movimento->addChild('observacao', htmlspecialchars($fornecedor->internal_observation  ?? ''));
 
-        $totais = $this->computeTotals($evento, $fornecedor);
+        $totais = $this->computeTotals($evento, $fornecedor, $opt);
+
 
         $movimento->addChild('taxaservico',  htmlspecialchars($totais['diaria_taxas'] * $qtdDayle ?? ''));
         $movimento->addChild('taxaservicofor', htmlspecialchars($totais['diaria_taxas'] * $qtdDayle ?? ''));
@@ -683,7 +684,7 @@ class EventApiController extends BaseApiController
      * Calcula totais (custo/venda) para um fornecedor em um evento.
      *
      */
-    private function computeTotals($evento, $fornecedor, $item = null): array
+    private function computeTotals($evento, $fornecedor, $item): array
     {
         $sumHotelSale = 0; // soma das vendas (base)
         $sumTotalHotelCost = 0; // custo + taxas (por item)
