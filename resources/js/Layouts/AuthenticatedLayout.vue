@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue';
+import { onMounted } from 'vue';
 // Bootstrap core JavaScript
 import '@/vendor/jquery/jquery.min.js';
 import '@/vendor/bootstrap/js/bootstrap.bundle.min.js';
@@ -33,7 +33,6 @@ import '@/vendor/datatables/dataTables.bootstrap4.min.js';
 
 import '../vendor/datatables/dataTables.bootstrap4.min.css';
 
-import '@/vendor/crypto-js.min.js';
 
 import Menu from '@/Components/Menu.vue';
 import NavBarFake from '@/Components/NavBarFake.vue';
@@ -365,7 +364,7 @@ onMounted(() => {
 
     <!-- Scroll to Top Button-->
     <Link class="scroll-to-top rounded" href="#page-top">
-    <i class="fa fa-angle-up"></i>
+        <i class="fa fa-angle-up"></i>
 
     </Link>
 </template>

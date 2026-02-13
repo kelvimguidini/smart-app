@@ -394,7 +394,7 @@ class EventApiController extends BaseApiController
 
         $aptoXml->addChild('tipoapto', htmlspecialchars($tipoApto));
 
-        $totais = $this->computeTotals($evento, $fornecedor);
+        $totais = $this->computeTotals($evento, $fornecedor, $opt);
 
 
         $movimento->addChild('taxaservico', htmlspecialchars($totais['diaria_taxas'] * $qtdDayle ?? ''));
@@ -683,39 +683,39 @@ class EventApiController extends BaseApiController
      * Calcula totais (custo/venda) para um fornecedor em um evento.
      *
      */
-    private function computeTotals($evento, $fornecedor): array
+    private function computeTotals($evento, $fornecedor, $item = null): array
     {
         $sumHotelSale = 0; // soma das vendas (base)
         $sumTotalHotelCost = 0; // custo + taxas (por item)
         $sumTotalHotelSale = 0; // venda + taxas (por item)
 
         // coleta possíveis coleções de opts (inclui opt 0)
-        $optCollections = [
-            $fornecedor->eventHotelsOpt ?? null,
-            $fornecedor->eventAbOpts ?? null,
-            $fornecedor->eventHallOpts ?? null,
-            $fornecedor->eventAddOpts ?? null,
-            $fornecedor->eventTransportOpts ?? null,
-        ];
+        // $optCollections = [
+        //     $fornecedor->eventHotelsOpt ?? null,
+        //     $fornecedor->eventAbOpts ?? null,
+        //     $fornecedor->eventHallOpts ?? null,
+        //     $fornecedor->eventAddOpts ?? null,
+        //     $fornecedor->eventTransportOpts ?? null,
+        // ];
 
         // percorre cada coleção (se existir)
-        foreach ($optCollections as $coll) {
-            if (empty($coll)) continue;
-            foreach ($coll as $item) {
+        // foreach ($optCollections as $coll) {
+        //     if (empty($coll)) continue;
+        //     foreach ($coll as $item) {
 
-                // taxes sobre venda (usa unidade de venda)
-                $taxes = $this->sumTaxesProvider($fornecedor, $item);
+        // taxes sobre venda (usa unidade de venda)
+        $taxes = $this->sumTaxesProvider($fornecedor, $item);
 
-                // taxes sobre custo (usa valor recebido/fornecedor)
-                $taxesCost = $this->sumTaxesProviderCost($fornecedor, $item);
+        // taxes sobre custo (usa valor recebido/fornecedor)
+        $taxesCost = $this->sumTaxesProviderCost($fornecedor, $item);
 
-                $sumHotelSale += $this->unitSale($item);
+        $sumHotelSale += $this->unitSale($item);
 
-                // soma total por item (base + taxas)
-                $sumTotalHotelCost += $this->sumTotal($item->received_proposal ?? 0, $taxesCost, 1);
-                $sumTotalHotelSale += $this->sumTotal($this->unitSale($item), $taxes, 1);
-            }
-        }
+        // soma total por item (base + taxas)
+        $sumTotalHotelCost += $this->sumTotal($item->received_proposal ?? 0, $taxesCost, 1);
+        $sumTotalHotelSale += $this->sumTotal($this->unitSale($item), $taxes, 1);
+        //     }
+        // }
 
         // determina IOF: pega o maior IOF disponível entre fornecedor e evento (se existirem)
         $iofs = [];

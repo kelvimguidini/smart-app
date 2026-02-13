@@ -202,7 +202,7 @@ const diffFields = (item) => {
     const diffs = [];
     const ignoreFields = ['updated_at', 'created_at', 'deleted_at'];
 
-    for (const key in newObj) {
+    for (let key in newObj) {
         if (ignoreFields.includes(key)) continue;
         if (oldObj[key] !== newObj[key]) {
             let oldVal = oldObj[key] ?? '';

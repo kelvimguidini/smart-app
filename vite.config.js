@@ -1,53 +1,27 @@
-import { defineConfig } from 'vite';
-import laravel from 'laravel-vite-plugin';
-import vue from '@vitejs/plugin-vue';
-import basicSsl from '@vitejs/plugin-basic-ssl';
+import { defineConfig } from 'vite'
+import laravel from 'laravel-vite-plugin'
+import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
+    server: {
+        host: '0.0.0.0',
+        port: 5173,
+        strictPort: true,
+        hmr: {
+            host: 'localhost',
+        },
+    },
+    build: {
+        outDir: 'public/build',
+        emptyOutDir: true,
+        manifest: true,
+    },
     plugins: [
         laravel({
             input: 'resources/js/app.js',
             ssr: 'resources/js/ssr.js',
             refresh: true,
         }),
-        // basicSsl(),
-        vue({
-            template: {
-                transformAssetUrls: {
-                    base: null,
-                    includeAbsolute: false,
-                },
-            },
-        })
+        vue(),
     ],
-    ssr: {
-        noExternal: ['@inertiajs/server'],
-    },
-    server: {
-        // host: 'https://smart4bts.com.br',
-        host: 'localhost',
-        watch: {
-            // Recarrega a página sempre que um arquivo for alterado
-            usePolling: true,
-            interval: 100,
-
-            onWatched: (event, path) => {
-                server.ws.send({ type: 'full-reload' })
-            },
-        },
-        cors: true,
-        hmr: true,
-        proxy: {
-            '/api': {
-                target: 'http://localhost:8000',
-                changeOrigin: true,
-                secure: false,
-            },
-            "/": {
-                target: "http://localhost:8000",
-                // target: "https://smart4bts.com.br",
-            }
-        },
-        https: false,
-    },
-});
+})

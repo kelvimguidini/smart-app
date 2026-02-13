@@ -221,7 +221,6 @@ const adjustStickyColumns = () => {
 };
 
 onMounted(() => {
-    console.log('ListHotelFull mounted', props.eventHotels);
     nextTick(() => {
         adjustStickyColumns();
 
@@ -287,10 +286,10 @@ onMounted(() => {
                                 <Link class="btn btn-info btn-sm btn-icon-split" :disabled="statusBlockEdit()"
                                     v-if="!isViewMode"
                                     :href="route('event-edit', { 'id': evho.event_id, 'tab': 1, 'ehotel': evho.id })">
-                                <span class="icon text-white-50">
-                                    <i class="fas fa-edit"></i>
-                                </span>
-                                <span class="text">Editar</span>
+                                    <span class="icon text-white-50">
+                                        <i class="fas fa-edit"></i>
+                                    </span>
+                                    <span class="text">Editar</span>
                                 </Link>
 
                                 <Modal v-if="!isViewMode" modal-title="Confirmar Remoção"
@@ -307,7 +306,7 @@ onMounted(() => {
                                     <template v-slot:content>
                                         <span class="text-dark text-left">Tem certeza que deseja remover o hotel {{
                                             evho.hotel.name
-                                        }} do evento {{ evho.event.name }}</span>
+                                            }} do evento {{ evho.event.name }}</span>
                                     </template>
                                 </Modal>
                             </th>
@@ -381,11 +380,11 @@ onMounted(() => {
                             <td class="align-middle bg-white sticky-col">{{ opt.apto_hotel?.name }}</td>
                             <td class="align-middle bg-white sticky-col">{{
                                 new Date(opt.in).toLocaleDateString()
-                            }}
+                                }}
                             </td>
                             <td class="align-middle bg-white sticky-col">{{
                                 new Date(opt.out).toLocaleDateString()
-                            }}
+                                }}
                             </td>
                             <td class="align-middle bg-white sticky-col">
                                 {{ opt.count ? parseFloat(opt.count).toLocaleString('pt-BR', {
@@ -416,20 +415,20 @@ onMounted(() => {
                             </td>
                             <td class=" align-middle">{{
                                 formatCurrency(opt.received_proposal, evho.currency.sigla)
-                            }}</td>
+                                }}</td>
                             <td class="align-middle">{{
                                 opt.received_proposal_percent
-                            }}
+                                }}
                             </td>
                             <template v-if="showDetails">
 
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((unitSale(opt) * evho.iss_percent) / 100, evho.currency.sigla)
-                                    }}</b>
+                                        }}</b>
                                 </td>
                                 <td class=" align-middle text-success">
                                     <b>{{ formatCurrency((unitCost(opt) * evho.iss_percent) / 100, evho.currency.sigla)
-                                    }}</b>
+                                        }}</b>
                                 </td>
 
                                 <td class="align-middle">
@@ -443,11 +442,11 @@ onMounted(() => {
 
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((unitSale(opt) * evho.iva_percent) / 100, evho.currency.sigla)
-                                    }}</b>
+                                        }}</b>
                                 </td>
                                 <td class=" align-middle text-success">
                                     <b>{{ formatCurrency((unitCost(opt) * evho.iva_percent) / 100, evho.currency.sigla)
-                                    }}</b>
+                                        }}</b>
                                 </td>
 
                                 <td class="align-middle">
@@ -461,11 +460,11 @@ onMounted(() => {
 
                                 <td class="align-middle bg-secondary text-white">{{
                                     formatCurrency(opt.compare_trivago, evho.currency.sigla)
-                                }}
+                                    }}
                                 </td>
                                 <td class="align-middle bg-secondary text-white">{{
                                     formatCurrency(opt.compare_website_htl, evho.currency.sigla)
-                                }}
+                                    }}
                                 </td>
                                 <td class="align-middle bg-secondary text-white">
                                     {{ formatCurrency(opt.compare_omnibess, evho.currency.sigla) }}
@@ -549,7 +548,7 @@ onMounted(() => {
                                 </td>
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((sumCost(evho) * evho.iss_percent) / 100, evho.currency.sigla)
-                                    }}</b>
+                                        }}</b>
                                 </td>
                                 <td class="align-middle">
                                     <b>{{ formatCurrency(sumTaxes(evho, 'serv'), evho.currency.sigla) }}</b>
@@ -563,7 +562,7 @@ onMounted(() => {
                                 </td>
                                 <td class="align-middle text-success">
                                     <b>{{ formatCurrency((sumCost(evho) * evho.iva_percent) / 100, evho.currency.sigla)
-                                    }}</b>
+                                        }}</b>
                                 </td>
                                 <td class="align-middle">
                                     <b>{{ formatCurrency(sumTaxes(evho, 'sc'), evho.currency.sigla) }}</b>

@@ -29,7 +29,7 @@ RUN composer install --prefer-dist --no-progress --no-interaction
 
 # Instale as dependências do Node.js
 RUN npm install
-
+RUN npm run build
 # Defina as permissões adequadas
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
@@ -41,9 +41,9 @@ EXPOSE 8000
 RUN pecl install xdebug \
     && docker-php-ext-enable xdebug
 
-# Configuração do Xdebug
+# Configuração do Xdebug (modo profissional)
 RUN echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.start_with_request=trigger" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.client_host=host.docker.internal" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.client_port=9001" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 

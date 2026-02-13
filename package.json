@@ -13,6 +13,7 @@
         "axios": "^1.6.2",
         "bootstrap": "^5.3.5",
         "chart.js": "^4.4.1",
+        "chartjs-adapter-date-fns": "^3.0.0",
         "color-name": "^2.0.0",
         "crypto-js": "^4.2.0",
         "datatables.net": "^1.13.1",
@@ -31,7 +32,7 @@
         "vuedraggable": "^4.1.0"
     },
     "scripts": {
-        "dev": "vite",
+        "dev": "vite --host",
         "build": "vite build",
         "serve": "vite preview"
     },

@@ -1,7 +1,7 @@
 <script setup>
 
 import Chart from 'chart.js/auto';
-
+import 'chartjs-adapter-date-fns'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/inertia-vue3';
 import { ref, onMounted } from 'vue';
@@ -252,35 +252,33 @@ const renderEventMonth = (response) => {
                 }
             },
             scales: {
-                xAxes: [{
+                x: {
+                    type: 'time',
                     time: {
-                        unit: 'date'
+                        unit: 'day'
                     },
-                    gridLines: {
+                    grid: {
                         display: false,
                         drawBorder: false
                     },
                     ticks: {
                         maxTicksLimit: 7
                     }
-                }],
-                yAxes: [{
+                },
+                y: {
                     ticks: {
                         maxTicksLimit: 5,
                         padding: 10,
-                        // Include a dollar sign in the ticks
-                        callback: function (value, index, values) {
+                        callback: function (value) {
                             return number_format(value);
                         }
                     },
-                    gridLines: {
+                    grid: {
                         color: "rgb(234, 236, 244)",
-                        zeroLineColor: "rgb(234, 236, 244)",
                         drawBorder: false,
                         borderDash: [2],
-                        zeroLineBorderDash: [2]
                     }
-                }],
+                }
             },
             legend: {
                 display: true

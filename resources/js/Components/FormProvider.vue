@@ -353,25 +353,24 @@ const updateForm = () => {
                             </select>
                         </div>
                     </div>
-                </div>
 
-                <div class="col-6">
-                    <div class="form-group">
-                        <VDatePicker v-model="date" @update:modelValue="updateForm"
-                            :model-config="{ type: 'string', mask: 'YYYY-MM-DD', timeAdjust: '00:00:00' }">
-                            <template #default="{ inputValue, inputEvents }">
+                    <div class="col-6">
+                        <div class="form-group">
+                            <VDatePicker v-model="date" @update:modelValue="updateForm"
+                                :model-config="{ type: 'string', mask: 'YYYY-MM-DD', timeAdjust: '00:00:00' }">
+                                <template #default="{ inputValue, inputEvents }">
 
-                                <InputLabel for="in" value="Prazo:" />
-                                <TextInput readonly class="form-control custom-datepicker" :value="inputValue"
-                                    v-on="inputEvents" />
-                                <InputError class="mt-2 text-danger" :message="form.errors.date" />
+                                    <InputLabel for="in" value="Prazo:" />
+                                    <TextInput readonly class="form-control custom-datepicker" :value="inputValue"
+                                        v-on="inputEvents" />
+                                    <InputError class="mt-2 text-danger" :message="form.errors.date" />
 
-                            </template>
-                        </VDatePicker>
+                                </template>
+                            </VDatePicker>
+                        </div>
                     </div>
+
                 </div>
-
-
             </div>
             <div class="col-md-6 col-lg-4 mb-3">
                 <div class="form-group">

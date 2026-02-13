@@ -165,6 +165,7 @@ class ProviderController extends Controller
             'event_id' => 'required|integer',
             'currency' => 'required|integer',
             'taxa_4bts' => 'required|numeric|min:0|max:100',
+            'payment_method' => 'nullable|string|max:255',
         ]);
 
         try {
@@ -211,6 +212,7 @@ class ProviderController extends Controller
                 $provider->iof = $request->iof;
                 $provider->service_charge = $request->service_charge;
                 $provider->taxa_4bts = $request->taxa_4bts;
+                $provider->payment_method = $request->payment_method;
 
                 $provider->save();
             } else {
@@ -230,7 +232,8 @@ class ProviderController extends Controller
                             'iof' => $request->iof,
                             'taxa_4bts' => $request->taxa_4bts,
                             'service_charge' => $request->service_charge,
-                            'deadline_date' => $request->deadline
+                            'deadline_date' => $request->deadline,
+                            'payment_method' => $request->payment_method
                         ]);
                         break;
                     case 'ab':
@@ -247,7 +250,8 @@ class ProviderController extends Controller
                             'iof' => $request->iof,
                             'taxa_4bts' => $request->taxa_4bts,
                             'service_charge' => $request->service_charge,
-                            'deadline_date' => $request->deadline
+                            'deadline_date' => $request->deadline,
+                            'payment_method' => $request->payment_method
                         ]);
                         break;
                     case 'hall':
@@ -264,7 +268,8 @@ class ProviderController extends Controller
                             'iof' => $request->iof,
                             'taxa_4bts' => $request->taxa_4bts,
                             'service_charge' => $request->service_charge,
-                            'deadline_date' => $request->deadline
+                            'deadline_date' => $request->deadline,
+                            'payment_method' => $request->payment_method
                         ]);
                         break;
                 }
