@@ -55,6 +55,7 @@ const form = useForm({
     customer_observation: '',
     type: '',
     taxa_4bts: null, // Novo campo
+    payment_method: ''
 });
 
 const submit = () => {
@@ -178,8 +179,12 @@ const edit = () => {
         form.iof = props.eventProvider.iof;
         form.service_charge = props.eventProvider.service_charge;
         $("#service_charge").maskMoney('mask', form.service_charge);
-        const parts = props.eventProvider.deadline_date.split('-');
-        const deadline = new Date(parts[0], parts[1] - 1, parts[2]);
+        let deadline = null;
+
+        if (props.eventProvider?.deadline_date) {
+            const parts = props.eventProvider.deadline_date.split('-');
+            deadline = new Date(parts[0], parts[1] - 1, parts[2]);
+        }
         form.deadline = deadline;
         date.value = deadline;
 

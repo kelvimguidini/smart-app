@@ -22,6 +22,7 @@ services:
       MYSQL_PASSWORD: casanova
     volumes:
       - mysql_data:/var/lib/mysql369
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
 
 volumes:
   mysql_data:

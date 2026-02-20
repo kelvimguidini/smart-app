@@ -129,7 +129,8 @@ class ProviderController extends Controller
                     'national' => $request->national,
                     'iss_percent' => $request->iss_percent,
                     'service_percent' => $request->service_percent,
-                    'iva_percent' => $request->iva_percent
+                    'iva_percent' => $request->iva_percent,
+                    'payment_method' => $request->payment_method
                 ]);
 
                 $status = StatusHistory::create([
