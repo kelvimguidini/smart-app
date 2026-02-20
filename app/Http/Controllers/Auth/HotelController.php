@@ -50,13 +50,13 @@ class HotelController extends Controller
             'purpose' => 'required|integer',
             'in' => 'required|date',
             'out' => 'required|date|after_or_equal:in',
-            'received_proposal' => 'required|numeric',
-            'received_proposal_percent' => 'required|numeric',
-            'kickback' => 'required|numeric',
-            'count' => 'required|numeric',
-            'compare_trivago' => 'required|numeric',
-            'compare_website_htl' => 'required|numeric',
-            'compare_omnibess' => 'required|numeric',
+            'received_proposal' => 'nullable|numeric',
+            'received_proposal_percent' => 'nullable|numeric',
+            'kickback' => 'nullable|numeric',
+            'count' => 'nullable|numeric',
+            'compare_trivago' => 'nullable|numeric',
+            'compare_website_htl' => 'nullable|numeric',
+            'compare_omnibess' => 'nullable|numeric',
         ]);
 
         try {

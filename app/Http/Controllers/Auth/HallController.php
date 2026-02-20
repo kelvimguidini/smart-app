@@ -36,10 +36,10 @@ class HallController extends Controller
             'service' => 'required|integer',
             'in' => 'required|date',
             'out' => 'required|date|after_or_equal:in',
-            'received_proposal' => 'required|numeric',
-            'received_proposal_percent' => 'required|numeric',
-            'kickback' => 'required|numeric',
-            'count' => 'required|numeric',
+            'received_proposal' => 'nullable|numeric',
+            'received_proposal_percent' => 'nullable|numeric',
+            'kickback' => 'nullable|numeric',
+            'count' => 'nullable|numeric',
         ]);
 
         try {

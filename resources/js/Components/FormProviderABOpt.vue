@@ -296,7 +296,7 @@ const isLoader = ref(false);
 
                         <div class="form-group">
                             <InputLabel for="count" value="QTD:" />
-                            <TextInput type="number" class="form-control" v-model="formOpt.count" required autofocus
+                            <TextInput type="number" class="form-control" v-model="formOpt.count" autofocus
                                 min="0" step="0.01" autocomplete="count" />
                         </div>
                     </div>
@@ -305,7 +305,7 @@ const isLoader = ref(false);
 
                         <div class="form-group">
                             <InputLabel for="kickback" id="kickback" value="Comissão (%):" />
-                            <TextInput type="number" class="form-control" v-model="formOpt.kickback" required autofocus
+                            <TextInput type="number" class="form-control" v-model="formOpt.kickback" autofocus
                                 min="0" step="0.01" autocomplete="kickback" />
                         </div>
                     </div>
@@ -317,7 +317,7 @@ const isLoader = ref(false);
                         <div class="form-group">
                             <InputLabel for="received_proposal" value="Proposta Recebida:" />
                             <TextInput type="text" id="received_proposal" class="form-control money"
-                                v-model="formOpt.received_proposal" required autofocus
+                                v-model="formOpt.received_proposal" autofocus
                                 autocomplete="received_proposal" />
                         </div>
                     </div>
@@ -327,7 +327,7 @@ const isLoader = ref(false);
                         <div class="form-group">
                             <InputLabel for="received_proposal_percent" value="Markup (%):" />
                             <TextInput type="number" class="form-control percent"
-                                v-model="formOpt.received_proposal_percent" required autofocus min="0" step="0.01"
+                                v-model="formOpt.received_proposal_percent" autofocus min="0" step="0.01"
                                 autocomplete="received_proposal_percent" />
                         </div>
 

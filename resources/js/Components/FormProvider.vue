@@ -266,7 +266,7 @@ const updateForm = () => {
                         <div class="form-group">
                             <InputLabel for="iss_percent" value="ISS:" />
                             <TextInput type="number" class="form-control form-control-sm percent"
-                                v-model="form.iss_percent" required autofocus min="0" step="0.01"
+                                v-model="form.iss_percent" autofocus min="0" step="0.01"
                                 autocomplete="iss_percent" />
                         </div>
                     </div>
@@ -274,7 +274,7 @@ const updateForm = () => {
                         <div class="form-group">
                             <InputLabel for="service_percent" value="Serviço:" />
                             <TextInput type="number" class="form-control form-control-sm percent"
-                                v-model="form.service_percent" required autofocus min="0" step="0.01"
+                                v-model="form.service_percent" autofocus min="0" step="0.01"
                                 autocomplete="service_percent" />
                         </div>
                     </div>
@@ -282,7 +282,7 @@ const updateForm = () => {
                         <div class="form-group">
                             <InputLabel for="iva_percent" value="IVA:" />
                             <TextInput type="number" class="form-control form-control-sm percent"
-                                v-model="form.iva_percent" required autofocus min="0" step="0.01"
+                                v-model="form.iva_percent" autofocus min="0" step="0.01"
                                 autocomplete="iva_percent" />
                         </div>
                     </div>
@@ -332,14 +332,14 @@ const updateForm = () => {
                         <div class="form-group">
                             <InputLabel for="iof" value="IOF:" />
                             <TextInput type="number" class="form-control form-control-sm percent" v-model="form.iof"
-                                required autofocus min="0" step="0.01" autocomplete="iof" />
+                                autofocus min="0" step="0.01" autocomplete="iof" />
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="form-group">
                             <InputLabel for="service_charge" value="Taxa de Turismo:" />
                             <TextInput type="text" class="form-control form-control-sm percent money"
-                                id="service_charge" v-model="form.service_charge" required autofocus
+                                id="service_charge" v-model="form.service_charge" autofocus
                                 autocomplete="service_charge" />
                         </div>
                     </div>
@@ -351,7 +351,7 @@ const updateForm = () => {
 
                         <div class="form-group">
                             <InputLabel for="payment_method" value="Forma de Pagamento:" />
-                            <select class="form-control" v-model="form.payment_method" required>
+                            <select class="form-control" v-model="form.payment_method">
                                 <option value="INDEFINIDO">Indefinido</option>
                                 <option value="CASH">Dinheiro</option>
                                 <option value="CARTAO">Cartão</option>
@@ -381,7 +381,7 @@ const updateForm = () => {
                 <div class="form-group">
                     <InputLabel for="taxa_4bts" value="Taxa 4BTS (%):" />
                     <TextInput type="number" class="form-control form-control-sm percent" v-model="form.taxa_4bts"
-                        required autofocus min="0" step="0.01" autocomplete="taxa_4bts" />
+                        autofocus min="0" step="0.01" autocomplete="taxa_4bts" />
                 </div>
             </div>
             <div class="col-12 d-flex justify-content-end">
