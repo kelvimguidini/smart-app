@@ -6,7 +6,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import Loader from '@/Components/Loader.vue';
 import { Head, useForm } from '@inertiajs/inertia-vue3';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import ListHotelFull from '@/Components/ListHotelFull.vue';
 import ListABFull from '@/Components/ListABFull.vue';
 import ListHallFull from '@/Components/ListHallFull.vue';
@@ -172,7 +172,7 @@ const props = defineProps({
 const crdsBkp = ref([]);
 
 const edit = (event) => {
-    crdsBkp.value = crdsBkp = [...props.crds];
+    crdsBkp.value = JSON.parse(JSON.stringify(props.crds));
 
     if (event != null) {
         form.id = event.id;
@@ -241,7 +241,7 @@ onMounted(() => {
         theme: "bootstrap4", language: "pt-Br"
     }).on('select2:select', (e) => {
         form.customer = e.params.data.id;
-        props.crds = crdsBkp.filter((v) => v.customer && v.customer.id == form.customer);
+        props.crds = crdsBkp.value.filter((v) => v.customer && v.customer.id == form.customer);
     });
 
     $('#crd_id').select2({
@@ -285,269 +285,267 @@ const removeCountry = (index) => {
     if (form.countries.length > 1) {
         form.countries.splice(index, 1);
     }
+};
 
+const submit = () => {
+    form.post(route('event-save'), {
+        onSuccess: () => {
+            mount();
+            $('#tabs').tabs({ active: 1 });
+        }
+    });
+};
 
-    const submit = () => {
-        form.post(route('event-save'), {
-            onSuccess: () => {
-                mount();
-                $('#tabs').tabs({ active: 1 });
-            }
-        });
-    };
-
-    //FORMS
-    const form = useForm({
+//FORMS
+const form = useForm({
+    id: 0,
+    name: '',
+    customer: '',
+    code: '',
+    requester: '',
+    sector: '',
+    paxBase: '',
+    cc: '',
+    date: '',
+    date_final: '',
+    crd_id: '',
+    hotel_operator: '',
+    air_operator: '',
+    land_operator: '',
+    countries: [{
         id: 0,
-        name: '',
-        customer: '',
-        code: '',
-        requester: '',
-        sector: '',
-        paxBase: '',
-        cc: '',
-        date: '',
-        date_final: '',
-        crd_id: '',
-        hotel_operator: '',
-        air_operator: '',
-        land_operator: '',
-        countries: [{
-            id: 0,
-            pais: '',
-            cidade: '',
-            errors: '',
-        }]
-    });
+        pais: '',
+        cidade: '',
+        errors: '',
+    }]
+});
 
-    const formDelete = useForm({
-        id: 0
-    });
+const formDelete = useForm({
+    id: 0
+});
 
+const range = ref({
+    start: new Date(),
+    end: new Date(),
+});
 
-    const range = ref({
-        start: new Date(),
-        end: new Date(),
-    });
+const updateForm = () => {
+    form.date = range.value.start ? range.value.start.toISOString().split('T')[0] : '';
+    form.date_final = range.value.end ? range.value.end.toISOString().split('T')[0] : '';
+};
 
+watch(
+    () => props.event,
+    (newEvent) => {
+        if (newEvent) {
+            range.value.start = new Date(newEvent.date);
+            range.value.end = new Date(newEvent.date_final);
+        }
+    },
+    { immediate: true }
+);
+//FIM FORMS
 
-    const updateForm = () => {
-        form.date = range.value.start ? range.value.start.toISOString().split('T')[0] : '';
-        form.date_final = range.value.end ? range.value.end.toISOString().split('T')[0] : '';
-    };
+//VARIAVEIS
+const isLoader = ref(false);
+//FIM VARIAVEIS
 
-    watch(
-        () => props.event,
-        (newEvent) => {
-            if (newEvent) {
-                range.value.start = new Date(newEvent.date);
-                range.value.end = new Date(newEvent.date_final);
-            }
+//FUNÇÕES HOTEL
+
+const formProviderOptRef = ref(null);
+
+const hotelSelected = ref(0);
+
+const selectHotel = (id) => {
+    var hotel = props.providers.filter((item) => { return item.id == id })[0] || null;
+
+    hotelSelected.value = hotel.id;
+}
+
+const deleteOpt = (id) => {
+    isLoader.value = true;
+    formDelete.id = id;
+    formDelete.delete(route('opt-delete'), {
+        onFinish: () => {
+            isLoader.value = false;
+            formDelete.reset();
+            mount();
         },
-        { immediate: true }
-    );
-    //FIM FORMS
+    });
+};
 
-    //VARIAVEIS
-    const isLoader = ref(false);
-    //FIM VARIAVEIS
+const duplicate = (opt) => {
+    if (formProviderOptRef.value) {
+        formProviderOptRef.value.duplicate(opt);
+    }
+}
 
-    //FUNÇÕES HOTEL
+const editOpt = (opt) => {
+    if (formProviderOptRef.value) {
+        formProviderOptRef.value.editOpt(opt);
+    }
+};
+//FIM FUNÇÕES HOTEL
 
-    const formProviderOptRef = ref(null);
+//FUNÇÕES ALIMENTAÇÃO E BEBIDAS
 
-    const hotelSelected = ref(0);
+const formProviderOptRefAB = ref(null);
 
-    const selectHotel = (id) => {
-        var hotel = props.providers.filter((item) => { return item.id == id })[0] || null;
+const deleteOptAB = (id) => {
+    isLoader.value = true;
+    formDelete.id = id;
+    formDelete.delete(route('opt-ab-delete'), {
+        onFinish: () => {
+            isLoader.value = false;
+            formDelete.reset();
+            mount();
+        },
+    });
+};
 
-        hotelSelected.value = hotel.id;
+const duplicateAB = (opt) => {
+    if (formProviderOptRefAB.value) {
+        formProviderOptRefAB.value.duplicate(opt);
+    }
+}
+
+const editOptAB = (opt) => {
+    if (formProviderOptRefAB.value) {
+        formProviderOptRefAB.value.editOpt(opt);
+    }
+};
+
+//FIM FUNÇÕES ALIMENTAÇÃO E BEBIDAS
+
+//FUNÇÕES SALÕES
+
+const formProviderOptRefHall = ref(null);
+
+
+const deleteOptHall = (id) => {
+    isLoader.value = true;
+    formDelete.id = id;
+    formDelete.delete(route('opt-hall-delete'), {
+        onFinish: () => {
+            isLoader.value = false;
+            formDelete.reset();
+            mount();
+        },
+    });
+};
+
+const duplicateHall = (opt) => {
+    if (formProviderOptRefHall.value) {
+        formProviderOptRefHall.value.duplicate(opt);
+    }
+}
+
+const editOptHall = (opt) => {
+    if (formProviderOptRefHall.value) {
+        formProviderOptRefHall.value.editOpt(opt);
+    }
+};
+
+//FIM FUNÇÕES SALÕES
+
+//FUNÇÕES ADD
+
+const formProviderOptRefAdd = ref(null);
+
+
+const deleteOptAdd = (id) => {
+    isLoader.value = true;
+    formDelete.id = id;
+    formDelete.delete(route('opt-add-delete'), {
+        onFinish: () => {
+            isLoader.value = false;
+            formDelete.reset();
+            mount();
+        },
+    });
+};
+
+const duplicateAdd = (opt) => {
+    if (formProviderOptRefAdd.value) {
+        formProviderOptRefAdd.value.duplicate(opt);
+    }
+}
+
+const editOptAdd = (opt) => {
+    if (formProviderOptRefAdd.value) {
+        formProviderOptRefAdd.value.editOpt(opt);
+    }
+};
+
+//FIM FUNÇÕES ADD
+
+
+//FUNÇÕES TRANSPORTE
+
+const formProviderOptRefTransport = ref(null);
+
+
+const deleteOptTransport = (id) => {
+    isLoader.value = true;
+    formDelete.id = id;
+    formDelete.delete(route('opt-transport-delete'), {
+        onFinish: () => {
+            isLoader.value = false;
+            formDelete.reset();
+            mount();
+        },
+    });
+};
+
+const duplicateTransport = (opt) => {
+    if (formProviderOptRefTransport.value) {
+        formProviderOptRefTransport.value.duplicate(opt);
+    }
+}
+
+const editOptTransport = (opt) => {
+    if (formProviderOptRefTransport.value) {
+        formProviderOptRefTransport.value.editOpt(opt);
     }
 
-    const deleteOpt = (id) => {
-        isLoader.value = true;
-        formDelete.id = id;
-        formDelete.delete(route('opt-delete'), {
-            onFinish: () => {
-                isLoader.value = false;
-                formDelete.reset();
-                mount();
-            },
-        });
-    };
+};
 
-    const duplicate = (opt) => {
-        if (formProviderOptRef.value) {
-            formProviderOptRef.value.duplicate(opt);
-        }
+//FIM FUNÇÕES ALIMENTAÇÃO E BEBIDAS
+
+const formProviderHotelRef = ref(null);
+const formProviderAbRef = ref(null);
+const formProviderHallRef = ref(null);
+const formProviderAddRef = ref(null);
+const formProviderTransportRef = ref(null);
+const newEventProv = (type) => {
+    switch (props.type) {
+        case 'hotel':
+            if (formProviderHotelRef.value) {
+                formProviderHotelRef.value.newEventProvider();
+            }
+            break;
+        case 'ab':
+            if (formProviderAbRef.value) {
+                formProviderAbRef.value.newEventProvider();
+            }
+            break;
+        case 'hall':
+            if (formProviderHallRef.value) {
+                formProviderHallRef.value.newEventProvider();
+            }
+            break;
+        case 'add':
+            if (formProviderAddRef.value) {
+                formProviderAddRef.value.newEventProvider();
+            }
+            break;
+        case 'transport':
+            if (formProviderTransportRef.value) {
+                formProviderTransportRef.value.newEventProvider();
+            }
+            break;
     }
-
-    const editOpt = (opt) => {
-        if (formProviderOptRef.value) {
-            formProviderOptRef.value.editOpt(opt);
-        }
-    };
-    //FIM FUNÇÕES HOTEL
-
-    //FUNÇÕES ALIMENTAÇÃO E BEBIDAS
-
-    const formProviderOptRefAB = ref(null);
-
-    const deleteOptAB = (id) => {
-        isLoader.value = true;
-        formDelete.id = id;
-        formDelete.delete(route('opt-ab-delete'), {
-            onFinish: () => {
-                isLoader.value = false;
-                formDelete.reset();
-                mount();
-            },
-        });
-    };
-
-    const duplicateAB = (opt) => {
-        if (formProviderOptRefAB.value) {
-            formProviderOptRefAB.value.duplicate(opt);
-        }
-    }
-
-    const editOptAB = (opt) => {
-        if (formProviderOptRefAB.value) {
-            formProviderOptRefAB.value.editOpt(opt);
-        }
-    };
-
-    //FIM FUNÇÕES ALIMENTAÇÃO E BEBIDAS
-
-    //FUNÇÕES SALÕES
-
-    const formProviderOptRefHall = ref(null);
-
-
-    const deleteOptHall = (id) => {
-        isLoader.value = true;
-        formDelete.id = id;
-        formDelete.delete(route('opt-hall-delete'), {
-            onFinish: () => {
-                isLoader.value = false;
-                formDelete.reset();
-                mount();
-            },
-        });
-    };
-
-    const duplicateHall = (opt) => {
-        if (formProviderOptRefHall.value) {
-            formProviderOptRefHall.value.duplicate(opt);
-        }
-    }
-
-    const editOptHall = (opt) => {
-        if (formProviderOptRefHall.value) {
-            formProviderOptRefHall.value.editOpt(opt);
-        }
-    };
-
-    //FIM FUNÇÕES SALÕES
-
-    //FUNÇÕES ADD
-
-    const formProviderOptRefAdd = ref(null);
-
-
-    const deleteOptAdd = (id) => {
-        isLoader.value = true;
-        formDelete.id = id;
-        formDelete.delete(route('opt-add-delete'), {
-            onFinish: () => {
-                isLoader.value = false;
-                formDelete.reset();
-                mount();
-            },
-        });
-    };
-
-    const duplicateAdd = (opt) => {
-        if (formProviderOptRefAdd.value) {
-            formProviderOptRefAdd.value.duplicate(opt);
-        }
-    }
-
-    const editOptAdd = (opt) => {
-        if (formProviderOptRefAdd.value) {
-            formProviderOptRefAdd.value.editOpt(opt);
-        }
-    };
-
-    //FIM FUNÇÕES ADD
-
-
-    //FUNÇÕES TRANSPORTE
-
-    const formProviderOptRefTransport = ref(null);
-
-
-    const deleteOptTransport = (id) => {
-        isLoader.value = true;
-        formDelete.id = id;
-        formDelete.delete(route('opt-transport-delete'), {
-            onFinish: () => {
-                isLoader.value = false;
-                formDelete.reset();
-                mount();
-            },
-        });
-    };
-
-    const duplicateTransport = (opt) => {
-        if (formProviderOptRefTransport.value) {
-            formProviderOptRefTransport.value.duplicate(opt);
-        }
-    }
-
-    const editOptTransport = (opt) => {
-        if (formProviderOptRefTransport.value) {
-            formProviderOptRefTransport.value.editOpt(opt);
-        }
-
-    };
-
-    //FIM FUNÇÕES ALIMENTAÇÃO E BEBIDAS
-
-    const formProviderHotelRef = ref(null);
-    const formProviderAbRef = ref(null);
-    const formProviderHallRef = ref(null);
-    const formProviderAddRef = ref(null);
-    const formProviderTransportRef = ref(null);
-    const newEventProv = (type) => {
-        switch (props.type) {
-            case 'hotel':
-                if (formProviderHotelRef.value) {
-                    formProviderHotelRef.value.newEventProvider();
-                }
-                break;
-            case 'ab':
-                if (formProviderAbRef.value) {
-                    formProviderAbRef.value.newEventProvider();
-                }
-                break;
-            case 'hall':
-                if (formProviderHallRef.value) {
-                    formProviderHallRef.value.newEventProvider();
-                }
-                break;
-            case 'add':
-                if (formProviderAddRef.value) {
-                    formProviderAddRef.value.newEventProvider();
-                }
-                break;
-            case 'transport':
-                if (formProviderTransportRef.value) {
-                    formProviderTransportRef.value.newEventProvider();
-                }
-                break;
-        }
-    };
+};
 
 
 </script>
