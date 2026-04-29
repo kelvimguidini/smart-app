@@ -27,7 +27,11 @@ class Event extends Model
         'air_operator',
         'land_operator',
         'exchange_rate',
-        'valor_faturamento'
+        'valor_faturamento',
+        'exchange_rates'
+    ];
+    protected $casts = [
+        'exchange_rates' => 'array',
     ];
     protected $table = 'event';
 

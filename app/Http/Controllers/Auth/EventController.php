@@ -637,20 +637,20 @@ class EventController extends Controller
             $user = User::find(Auth::user()->id);
 
             // Verifica se o usuário tem a permissão 'status_level_2'
-            // if (!$user->getPermissions()->contains('name', 'status_level_2')) {
-            //     // Busca no StatusHistory se há algum registro com status proibido
-            //     $historyExists = StatusHistory::whereIn('table', array_keys($relatedTables))
-            //         ->whereIn('table_id', $allTableIds)
-            //         ->whereIn('status', ['dating_with_customer'])
-            //         ->exists();
+            if (!$user->getPermissions()->contains('name', 'status_level_2')) {
+                // Busca no StatusHistory se há algum registro com status proibido
+                $historyExists = StatusHistory::whereIn('table', array_keys($relatedTables))
+                    ->whereIn('table_id', $allTableIds)
+                    ->whereIn('status', ['approved_by_manager', 'dating_with_customer', 'Cancelled', 'sent_to_customer'])
+                    ->exists();
 
-            //     if ($historyExists) {
-            //         return redirect()->back()->with('flash', [
-            //             'message' => 'Esse evento não pode ser apagado porque existe um ou mais cadastros finalizados!',
-            //             'type' => 'danger'
-            //         ]);
-            //     }
-            // }
+                if ($historyExists) {
+                    return redirect()->back()->with('flash', [
+                        'message' => 'Esse evento não pode ser apagado porque existe um ou mais cadastros finalizados!',
+                        'type' => 'danger'
+                    ]);
+                }
+            }
 
             $r = Event::find($request->id);
 
@@ -667,14 +667,14 @@ class EventController extends Controller
     {
         $request->validate([
             'event_id' => 'required|exists:event,id',
-            'exchange_rate' => 'required|numeric'
+            'exchange_rates' => 'required|array',
         ]);
 
         $event = Event::find($request->event_id);
-        $event->exchange_rate = $request->exchange_rate;
+        $event->exchange_rates = $request->exchange_rates;
         $event->save();
 
-        return redirect()->back()->with('flash', ['message' => 'Câmbio salvo com sucesso!', 'type' => 'success']);
+        return redirect()->back()->with('flash', ['message' => 'Câmbios salvos com sucesso!', 'type' => 'success']);
     }
 
     public function saveValorFaturamento(Request $request)

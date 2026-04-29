@@ -142,15 +142,8 @@ class ProviderTransportController extends Controller
 
 
                 $user = User::find(Auth::user()->id);
-                if (!$user->getPermissions()->contains('name', 'status_level_2')) {
-                    $history = StatusHistory::with('user')->where('table', "event_transports")
-                        ->where('table_id', $request->id)
-                        ->orderBy('created_at', 'desc')
-                        ->first();
-
-                    if ($history && ($history->status == "dating_with_customer" || $history->status == "Cancelled")) {
-                        return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
-                    }
+                if (!$user->getPermissions()->contains('name', 'status_level_2') && StatusHistory::isBlockedTableRecord('event_transports', $request->id)) {
+                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
                 }
 
                 $provider = EventTransport::find($request->id);
@@ -224,15 +217,8 @@ class ProviderTransportController extends Controller
         try {
 
             $user = User::find(Auth::user()->id);
-            if (!$user->getPermissions()->contains('name', 'status_level_2')) {
-                $history = StatusHistory::with('user')->where('table', "event_transports")
-                    ->where('table_id', $request->id)
-                    ->orderBy('created_at', 'desc')
-                    ->first();
-
-                if ($history && ($history->status == "dating_with_customer" || $history->status == "Cancelled")) {
-                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser apagado devido ao status atual!', 'type' => 'danger']);
-                }
+            if (!$user->getPermissions()->contains('name', 'status_level_2') && StatusHistory::isBlockedTableRecord('event_transports', $request->id)) {
+                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser apagado devido ao status atual!', 'type' => 'danger']);
             }
 
             $r = ProviderTransport::withoutGlobalScope('active')->find($request->id);

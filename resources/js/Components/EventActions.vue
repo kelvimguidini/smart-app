@@ -1,9 +1,10 @@
 <template>
     <div>
 
-        <!-- Modal de câmbio -->
-        <Modal :key="index" modal-title="Câmbio" :ok-botton-callback="saveExchangeRate"
-            :ok-botton-callback-param="event.id" btn-class="btn-sm btn-primary btn-icon-split mr-2">
+        <!-- Modal de câmbio por moeda -->
+        <Modal :key="index" modal-title="Câmbio" :ok-botton-callback="saveExchangeRates"
+            v-if="event.currencies && event.currencies.length" :ok-botton-callback-param="event.id"
+            btn-class="btn-sm btn-primary btn-icon-split mr-2">
             <template v-slot:button>
                 <span class="icon text-white-50">
                     <i class="fas fa-exchange-alt"></i>
@@ -12,8 +13,13 @@
             </template>
             <template v-slot:content>
                 <div class="form-group">
-                    <label for="exchangeRate">Valor do Câmbio:</label>
-                    <input type="text" class="form-control" v-model="exchangeRate" :id="'exchangeRate_' + event.id" />
+                    <div v-for="currency in event.currencies" :key="currency.id" class="mb-2">
+                        <label :for="'exchangeRate_' + event.id + '_' + currency.sigla">
+                            Câmbio {{ currency.sigla }}:
+                        </label>
+                        <input type="text" class="form-control" v-model="exchangeRates[currency.sigla]"
+                            :id="'exchangeRate_' + event.id + '_' + currency.sigla" />
+                    </div>
                 </div>
             </template>
         </Modal>
@@ -37,10 +43,10 @@
 
         <Link v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin')"
             class="btn-sm btn-info btn-icon-split mr-2" :href="route('event-edit', { id: event.id })">
-        <span class="icon text-white-50">
-            <i class="fas fa-edit"></i>
-        </span>
-        <span class="text">Editar</span>
+            <span class="icon text-white-50">
+                <i class="fas fa-edit"></i>
+            </span>
+            <span class="text">Editar</span>
         </Link>
 
         <Modal v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin')" :key="index"
@@ -92,7 +98,8 @@ const formDelete = useForm({
 });
 const isLoader = ref(false);
 
-const exchangeRate = ref(0);
+// Para múltiplas moedas
+const exchangeRates = ref({});
 const vlFaturamento = ref(0);
 
 const deleteEvent = (id) => {
@@ -121,15 +128,25 @@ const saveFaturamento = async (eventId) => {
 };
 
 
-const saveExchangeRate = async (eventId) => {
+
+// Salva todos os câmbios das moedas
+const saveExchangeRates = async (eventId) => {
     try {
         isLoader.value = true;
+        // Monta objeto para envio: { moeda: valor }
+        const rates = {};
+        if (event.currencies && event.currencies.length) {
+            event.currencies.forEach(currency => {
+                const val = $("#exchangeRate_" + eventId + "_" + currency.sigla).maskMoney('unmasked')[0];
+                rates[currency.sigla] = val;
+            });
+        }
         await axios.post(route('event-save-exchange-rate'), {
             event_id: eventId,
-            exchange_rate: $('#exchangeRate_' + eventId).maskMoney('unmasked')[0]
+            exchange_rates: rates
         });
     } catch (error) {
-        console.error('Erro ao salvar o câmbio:', error);
+        console.error('Erro ao salvar os câmbios:', error);
     } finally {
         isLoader.value = false;
     }
@@ -140,12 +157,23 @@ const props = defineProps({
     index: Number
 });
 
-// Função para atualizar os campos
+
+// Função para atualizar os campos de câmbio por moeda
 const updateFields = () => {
-    if (props.event?.exchange_rate) {
-        exchangeRate.value = props.event.exchange_rate;
-        $("#exchangeRate_" + props.event.id).maskMoney('mask', props.event.exchange_rate);
+    // Atualiza câmbios por moeda
+    if (props.event?.currencies && Array.isArray(props.event.currencies)) {
+        props.event.currencies.forEach(currency => {
+            if (!exchangeRates.value) exchangeRates.value = {};
+            // Se já existe valor salvo para a moeda
+            if (props.event.exchange_rates && props.event.exchange_rates[currency.sigla]) {
+                exchangeRates.value[currency.sigla] = props.event.exchange_rates[currency.sigla];
+                $("#exchangeRate_" + props.event.id + "_" + currency.sigla).maskMoney('mask', props.event.exchange_rates[currency.sigla]);
+            } else {
+                exchangeRates.value[currency.sigla] = '';
+            }
+        });
     }
+    // Valor faturamento
     if (props.event?.valor_faturamento) {
         vlFaturamento.value = props.event.valor_faturamento;
     }

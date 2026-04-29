@@ -18,6 +18,35 @@ class StatusHistory extends Model
 
     protected $dates = ['created_at'];
 
+    const BLOCKED_STATUSES = [
+        'approved_by_manager',
+        'dating_with_customer',
+        'Cancelled',
+        'sent_to_customer',
+    ];
+
+    public static function queryLatestFor(string $table, $tableId)
+    {
+        return self::where('table', $table)
+            ->where('table_id', $tableId)
+            ->latest('created_at');
+    }
+
+    public static function latestFor(string $table, $tableId)
+    {
+        return self::queryLatestFor($table, $tableId)->first();
+    }
+
+    public static function isBlockedStatus(?string $status): bool
+    {
+        return $status !== null && in_array($status, self::BLOCKED_STATUSES, true);
+    }
+
+    public static function isBlockedTableRecord(string $table, $tableId): bool
+    {
+        return self::isBlockedStatus(self::latestFor($table, $tableId)?->status);
+    }
+
     public function user()
     {
         return $this->hasOne(User::class, 'id', 'user_id');
