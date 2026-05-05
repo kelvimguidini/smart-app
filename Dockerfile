@@ -1,51 +1,79 @@
-# Use a imagem oficial do PHP 8.1
-FROM php:8.1
+# Stage 1: Builder
+FROM php:8.1 as builder
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
-# Instale as dependências do Laravel e a extensão PDO MySQL
+# Instale dependências PHP
 RUN apt-get update && apt-get install -y \
     git \
     libzip-dev \
     zip \
     unzip \
-    && docker-php-ext-install zip pdo_mysql
+    --no-install-recommends \
+    && docker-php-ext-install zip pdo_mysql \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Instale o Composer
+# Instale Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Instale o Node.js e o npm
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-RUN apt-get install -y nodejs
+WORKDIR /build
 
-# Defina o diretório de trabalho como o diretório do aplicativo Laravel
-WORKDIR /var/www/html
+# Copie apenas composer.json e package.json
+COPY composer.json composer.lock* ./
+COPY package.json package-lock.json* ./
 
-# Copie os arquivos do aplicativo para o contêiner
-COPY . .
+# Instale dependências PHP
+RUN composer install --prefer-dist --no-progress --no-interaction --no-dev --no-scripts
 
-# Instale as dependências do Composer
-RUN composer install --prefer-dist --no-progress --no-interaction
+# Instale Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Instale as dependências do Node.js
-RUN npm install
-RUN npm run build
-# Defina as permissões adequadas
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+# Instale dependências NPM
+RUN npm ci --omit=dev
 
-# Exponha a porta 8000 (ou a porta que sua aplicação utiliza)
-EXPOSE 8000
+# ---
+# Stage 2: Runtime
+FROM php:8.1
 
-# Instale o Xdebug
-RUN pecl install xdebug \
-    && docker-php-ext-enable xdebug
+ENV COMPOSER_ALLOW_SUPERUSER=1
 
-# Configuração do Xdebug (modo profissional)
+# Instale apenas extensões necessárias
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    libzip-dev \
+    nodejs \
+    --no-install-recommends \
+    && docker-php-ext-install zip pdo_mysql \
+    && pecl install xdebug \
+    && docker-php-ext-enable xdebug \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Configuração do Xdebug
 RUN echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.client_host=host.docker.internal" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
     && echo "xdebug.client_port=9003" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
-# Comando padrão para executar a aplicação Laravel
+# Instale Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+WORKDIR /var/www/html
+
+# Copie vendor e node_modules do builder
+COPY --from=builder /build/vendor ./vendor
+COPY --from=builder /build/node_modules ./node_modules
+
+# Copie o restante do projeto
+COPY . .
+
+# Instale dependências de produção (após copiar tudo)
+RUN composer install --prefer-dist --no-progress --no-interaction --no-dev && \
+    npm run build && \
+    chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && \
+    chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
+EXPOSE 8000
+
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+

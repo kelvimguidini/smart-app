@@ -1,3 +1,43 @@
+# Dependencies
 vendor/
 node_modules/
 package-lock.json
+composer.lock
+
+# Storage & logs
+storage/logs/*
+storage/app/*
+storage/framework/*
+!storage/app/.gitkeep
+!storage/logs/.gitkeep
+!storage/framework/.gitkeep
+
+# Build outputs
+public/build/
+public/hot
+
+# Environment
+.env.local
+.env.*.local
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*.swo
+Thumbs.db
+
+# Git & CI
+.git/
+.github/
+.gitlab-ci.yml
+.github/
+
+# Tests
+tests/
+.phpunit.result.cache
+
+# Docs
+Docs/
+README.md

@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('event', function (Blueprint $table) {
-            $table->json('exchange_rates')->nullable()->after('exchange_rate');
+            $table->longText('exchange_rates')->nullable()->after('exchange_rate');
         });
     }
 

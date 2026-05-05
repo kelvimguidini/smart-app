@@ -16,12 +16,12 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Setup PHP (PHP 8.1)
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.1'
+          php-version: "8.1"
 
       - name: Install PHP dependencies
         run: composer install --no-dev --prefer-dist
@@ -31,17 +31,17 @@ jobs:
           npm install
           npm run build
 
-      - name: Run Migrations
-        env:
-          APP_ENV: production
-          APP_KEY: ${{ secrets.APP_KEY }}
-          DB_CONNECTION: mysql
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_PORT: ${{ secrets.DB_PORT }}
-          DB_DATABASE: ${{ secrets.DB_DATABASE }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        run: php artisan migrate --force
+      # - name: Run Migrations
+      #   env:
+      #     APP_ENV: production
+      #     APP_KEY: ${{ secrets.APP_KEY }}
+      #     DB_CONNECTION: mysql
+      #     DB_HOST: ${{ secrets.DB_HOST }}
+      #     DB_PORT: ${{ secrets.DB_PORT }}
+      #     DB_DATABASE: ${{ secrets.DB_DATABASE }}
+      #     DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      #     DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      #   run: php artisan migrate --force
 
       - name: Upload Files via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -52,8 +52,8 @@ jobs:
           port: 2121
           protocol: ftps
           timeout: 30000
-          local-dir: ./ 
-          server-dir: /www/  # Certifique-se de que o diretório termina com "/"
+          local-dir: ./
+          server-dir: /www/ # Certifique-se de que o diretório termina com "/"
           exclude: |
             **/.git*
             **/node_modules/**
