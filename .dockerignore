@@ -1,9 +1,6 @@
 # Dependencies
 vendor/
 node_modules/
-package-lock.json
-composer.lock
-
 # Storage & logs
 storage/logs/*
 storage/app/*

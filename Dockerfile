@@ -29,7 +29,7 @@ RUN composer install --prefer-dist --no-progress --no-interaction --no-dev --no-
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs --no-install-recommends && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Instale dependências NPM
-RUN npm ci --omit=dev
+RUN npm install --legacy-peer-deps
 
 # ---
 # Stage 2: Runtime
@@ -42,8 +42,9 @@ RUN apt-get update && apt-get install -y \
     curl \
     git \
     libzip-dev \
-    nodejs \
     --no-install-recommends \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs --no-install-recommends \
     && docker-php-ext-install zip pdo_mysql \
     && pecl install xdebug \
     && docker-php-ext-enable xdebug \
@@ -69,6 +70,7 @@ COPY . .
 
 # Instale dependências de produção (após copiar tudo)
 RUN composer install --prefer-dist --no-progress --no-interaction --no-dev && \
+    npm install --legacy-peer-deps && \
     npm run build && \
     chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && \
     chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
