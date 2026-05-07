@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Crypt;
 Route::middleware(['guest', 'cors'])->group(function () {
 
     Route::get('login', function () {
-        $path = public_path('app/index.html');
+        $path = public_path('angular.html');
         if (file_exists($path)) {
             return file_get_contents($path);
         }
@@ -34,7 +34,7 @@ Route::middleware(['guest', 'cors'])->group(function () {
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
     Route::get('forgot-password', function () {
-        $path = public_path('app/index.html');
+        $path = public_path('angular.html');
         if (file_exists($path)) {
             return file_get_contents($path);
         }
@@ -45,7 +45,7 @@ Route::middleware(['guest', 'cors'])->group(function () {
         ->name('password.email');
 
     Route::get('reset-password/{token}', function () {
-        $path = public_path('app/index.html');
+        $path = public_path('angular.html');
         if (file_exists($path)) {
             return file_get_contents($path);
         }

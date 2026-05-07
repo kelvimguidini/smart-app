@@ -21,8 +21,15 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "outputPath": "../public/app",
-            "index": "src/index.html",
+            "outputPath": {
+              "base": "/app/public",
+              "browser": ""
+            },
+            "deleteOutputPath": false,
+            "index": {
+              "input": "src/index.html",
+              "output": "angular.html"
+            },
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
