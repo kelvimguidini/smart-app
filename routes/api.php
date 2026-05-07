@@ -21,3 +21,7 @@ Route::post('login', [AuthController::class, 'login']);
 Route::middleware('auth.api')->group(function () {
     Route::get('events', [EventApiController::class, 'index']);
 });
+
+Route::middleware('auth:sanctum')->get('/user', function (\Illuminate\Http\Request $request) {
+    return $request->user();
+});

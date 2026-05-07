@@ -2,48 +2,40 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { ToastService } from '../../services/toast.service';
-import { AuthService } from '../../services/auth.service';
 import { environment } from '../../../environments/environment';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-forgot-password',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  imports: [CommonModule, FormsModule, RouterLink],
+  templateUrl: './forgot-password.component.html',
+  styleUrls: ['./forgot-password.component.scss']
 })
-export class LoginComponent {
+export class ForgotPasswordComponent {
   private readonly http: HttpClient = inject(HttpClient);
-  private readonly router: Router = inject(Router);
   private readonly toastService: ToastService = inject(ToastService);
-  private readonly authService: AuthService = inject(AuthService);
-
   private readonly apiUrl = environment.apiUrl;
 
-  form = {
-    email: '',
-    password: '',
-    remember: false
-  };
-
+  email: string = '';
+  status: string | null = null;
   errors: any = {};
   processing = false;
 
   submit() {
     this.processing = true;
     this.errors = {};
+    this.status = null;
 
     this.http.get(`${this.apiUrl}/sanctum/csrf-cookie`).subscribe({
       next: () => {
-        this.http.post(`${this.apiUrl}/login`, this.form).subscribe({
+        this.http.post(`${this.apiUrl}/forgot-password`, { email: this.email }).subscribe({
           next: (response: any) => {
-            // Após o login, buscamos os dados do usuário para atualizar o estado global
-            this.authService.checkAuth().subscribe(() => {
-              this.processing = false;
-              this.router.navigate(['/dashboard']);
-            });
+            this.processing = false;
+            this.status = response.status;
+            this.toastService.success(this.status || 'Link de redefinição enviado!');
+            this.email = '';
           },
           error: (err: HttpErrorResponse) => {
             this.processing = false;
@@ -51,8 +43,9 @@ export class LoginComponent {
               this.errors = err.error.errors;
             } else if (err.error && err.error.message) {
               this.toastService.error(err.error.message);
+            } else {
+              this.toastService.error('Ocorreu um erro ao processar sua solicitação.');
             }
-            this.form.password = '';
           }
         });
       },

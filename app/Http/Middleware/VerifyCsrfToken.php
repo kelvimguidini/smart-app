@@ -16,5 +16,6 @@ class VerifyCsrfToken extends Middleware
         'sanctum/csrf-cookie',
         'localhost:8000',
         'localhost:5173',
+        'localhost:4201',
     ];
 }

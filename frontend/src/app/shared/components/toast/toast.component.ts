@@ -8,7 +8,7 @@ import { ToastService } from '../../../services/toast.service';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100">
       @for (toast of toastService.toasts(); track toast) {
         <div class="toast show align-items-center text-white border-0 mb-2" 
              [class.bg-success]="toast.type === 'success'"

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Chart, registerables } from 'chart.js';
 import 'chartjs-adapter-date-fns';
+import { environment } from '../../../environments/environment';
 
 Chart.register(...registerables);
 
@@ -15,6 +16,7 @@ Chart.register(...registerables);
 })
 export class DashboardComponent implements OnInit {
   private readonly http: HttpClient = inject(HttpClient);
+  private readonly apiUrl = environment.apiUrl;
 
   pendingValidate = { loading: true, data: 0, error: false };
   linksApproved = { loading: true, data: 0, error: false };
@@ -28,7 +30,7 @@ export class DashboardComponent implements OnInit {
   }
 
   fetchDashboardData() {
-    this.http.get('http://localhost:8000/dashboard-data', { withCredentials: true }).subscribe({
+    this.http.get(`${this.apiUrl}/dashboard-data`).subscribe({
       next: (response: any) => {
         const data = response;
         try { this.renderWaitApproval(data.waitApproval); } catch(e) { this.waitApproval.error = true; }

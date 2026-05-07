@@ -34,7 +34,9 @@
     },
     "scripts": {
         "dev": "vite --host",
-        "build": "vite build",
+        "build1": "vite build",
+        "build": "vite build && npm run build:frontend",
+        "build:frontend": "cd frontend && npm install && npm run build && rm -rf ../public/app && mkdir -p ../public/app && cp -r dist/frontend/browser/* ../public/app/",
         "serve": "vite preview"
     },
     "devDependencies": {

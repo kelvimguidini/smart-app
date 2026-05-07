@@ -1,35 +1,40 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ToastService } from '../../services/toast.service';
-import { AuthService } from '../../services/auth.service';
 import { environment } from '../../../environments/environment';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-reset-password',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  templateUrl: './reset-password.component.html',
+  styleUrls: ['./reset-password.component.scss']
 })
-export class LoginComponent {
+export class ResetPasswordComponent implements OnInit {
   private readonly http: HttpClient = inject(HttpClient);
+  private readonly route: ActivatedRoute = inject(ActivatedRoute);
   private readonly router: Router = inject(Router);
   private readonly toastService: ToastService = inject(ToastService);
-  private readonly authService: AuthService = inject(AuthService);
-
   private readonly apiUrl = environment.apiUrl;
 
   form = {
+    token: '',
     email: '',
     password: '',
-    remember: false
+    password_confirmation: ''
   };
 
   errors: any = {};
   processing = false;
+
+  ngOnInit() {
+    // Capture token from path and email from query params
+    this.form.token = this.route.snapshot.params['token'] || '';
+    this.form.email = this.route.snapshot.queryParams['email'] || '';
+  }
 
   submit() {
     this.processing = true;
@@ -37,13 +42,11 @@ export class LoginComponent {
 
     this.http.get(`${this.apiUrl}/sanctum/csrf-cookie`).subscribe({
       next: () => {
-        this.http.post(`${this.apiUrl}/login`, this.form).subscribe({
+        this.http.post(`${this.apiUrl}/reset-password`, this.form).subscribe({
           next: (response: any) => {
-            // Após o login, buscamos os dados do usuário para atualizar o estado global
-            this.authService.checkAuth().subscribe(() => {
-              this.processing = false;
-              this.router.navigate(['/dashboard']);
-            });
+            this.processing = false;
+            this.toastService.success(response.status || 'Senha redefinida com sucesso!');
+            this.router.navigate(['/login']);
           },
           error: (err: HttpErrorResponse) => {
             this.processing = false;
@@ -51,8 +54,9 @@ export class LoginComponent {
               this.errors = err.error.errors;
             } else if (err.error && err.error.message) {
               this.toastService.error(err.error.message);
+            } else {
+              this.toastService.error('Erro ao redefinir senha.');
             }
-            this.form.password = '';
           }
         });
       },

@@ -26,15 +26,9 @@ jobs:
       - name: Install PHP dependencies
         run: composer install --no-dev --prefer-dist
 
-      - name: Install Frontend Dependencies & Build (Vue/Inertia - Legacy)
+      - name: Build All Frontends (Legacy Vue + New Angular)
         run: |
-          npm install
-          npm run build
-
-      - name: Install & Build Angular Frontend
-        run: |
-          cd frontend
-          npm install
+          npm install --legacy-peer-deps
           npm run build
 
       # - name: Run Migrations
