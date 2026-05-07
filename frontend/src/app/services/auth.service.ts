@@ -8,7 +8,7 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  // adicione outros campos se necessário
+  permissions?: any[];
 }
 
 @Injectable({

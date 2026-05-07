@@ -7,10 +7,12 @@ import { environment } from '../../../environments/environment';
 
 Chart.register(...registerables);
 
+import { AuthenticatedLayoutComponent } from '../../shared/layouts/authenticated-layout/authenticated-layout.component';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, AuthenticatedLayoutComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
@@ -68,7 +70,11 @@ export class DashboardComponent implements OnInit {
   }
 
   renderUserGroups(response: any) {
-    this.groups.data = response.original || response;
+    const data = response.original || response;
+    this.groups.data = data.map((group: any) => ({
+      ...group,
+      color: this.generateColor()
+    }));
     this.groups.loading = false;
   }
 

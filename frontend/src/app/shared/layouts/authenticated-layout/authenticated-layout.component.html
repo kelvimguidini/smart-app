@@ -1,0 +1,39 @@
+<div id="wrapper">
+    <!-- Sidebar -->
+    <app-menu></app-menu>
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+
+        <!-- Main Content -->
+        <div id="content">
+            
+            <!-- Topbar -->
+            <app-navbar></app-navbar>
+
+            <!-- Begin Page Content -->
+            <div class="container-fluid">
+                <ng-content></ng-content>
+            </div>
+            <!-- /.container-fluid -->
+
+        </div>
+        <!-- End of Main Content -->
+
+        <!-- Footer -->
+        <footer class="sticky-footer bg-white mt-auto">
+            <div class="container my-auto">
+                <div class="copyright text-center my-auto">
+                    <span>Copyright &copy; CODE WEY Desenvolvimento</span>
+                </div>
+            </div>
+        </footer>
+        <!-- End of Footer -->
+
+    </div>
+    <!-- End of Content Wrapper -->
+
+</div>
+
+<!-- Toast for global messages -->
+<app-toast></app-toast>

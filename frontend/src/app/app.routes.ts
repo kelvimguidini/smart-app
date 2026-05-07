@@ -8,9 +8,9 @@ import { authGuard } from './guards/auth.guard';
 import { guestGuard } from './guards/guest.guard';
 
 export const routes: Routes = [
-    { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
-    { path: 'forgot-password', component: ForgotPasswordComponent, canActivate: [guestGuard] },
-    { path: 'reset-password/:token', component: ResetPasswordComponent, canActivate: [guestGuard] },
-    { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
+    { path: 'login', component: LoginComponent, canActivate: [guestGuard], title: 'Logar - SmartApp' },
+    { path: 'forgot-password', component: ForgotPasswordComponent, canActivate: [guestGuard], title: 'Recuperar Senha - SmartApp' },
+    { path: 'reset-password/:token', component: ResetPasswordComponent, canActivate: [guestGuard], title: 'Redefinir Senha - SmartApp' },
+    { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard], title: 'Dashboard - SmartApp' },
     { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
 ];

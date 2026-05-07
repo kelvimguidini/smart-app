@@ -47,7 +47,14 @@ use Inertia\Inertia;
 
 Route::middleware(['auth', 'cors'])->group(function () {
 
-    Route::get('/', function () {
+    Route::get('/', function (Request $request) {
+        $path = public_path('angular.html');
+        if (file_exists($path)) {
+            if ($request->header('X-Inertia')) {
+                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
+            }
+            return file_get_contents($path);
+        }
         return Inertia::render('Dashboard');
     })->name('dashboard');
 

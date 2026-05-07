@@ -1,0 +1,41 @@
+<nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow" style="height: 70px; padding-top: 0; padding-bottom: 0;">
+
+    <!-- Sidebar Toggle (Topbar) -->
+    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+        <i class="fa fa-bars"></i>
+    </button>
+
+    <!-- Logo placeholder or search -->
+    <div class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 mw-100 d-flex align-items-center" style="overflow: hidden;">
+        <img src="/logo.png" style="max-height: 120px; object-fit: contain;" alt="Logo">
+    </div>
+
+    <!-- Topbar Navbar -->
+    <ul class="navbar-nav ml-auto">
+
+        <div class="topbar-divider d-none d-sm-block"></div>
+
+        <!-- Nav Item - User Information -->
+        <li class="nav-item dropdown" [class.show]="isUserMenuOpen">
+            <a class="nav-link d-flex align-items-center" href="javascript:void(0)" id="userDropdown" role="button" (click)="toggleUserMenu()">
+                <img class="img-profile rounded-circle mr-2" [src]="imgProfile" style="height: 2rem; width: 2rem;">
+                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ user()?.name }}</span>
+                <i class="fas fa-caret-down fa-sm fa-fw text-gray-400"></i>
+            </a>
+            <!-- Dropdown - User Information -->
+            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" [class.show]="isUserMenuOpen" aria-labelledby="userDropdown" style="right: 0; left: auto;">
+                <a class="dropdown-item" routerLink="/profile">
+                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                    Perfil
+                </a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="javascript:void(0)" (click)="logout()">
+                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                    Sair
+                </a>
+            </div>
+        </li>
+
+    </ul>
+
+</nav>

@@ -26,6 +26,9 @@ jobs:
       - name: Install PHP dependencies
         run: composer install --no-dev --prefer-dist
 
+      - name: Run Angular Tests
+        run: npm run test:frontend
+
       - name: Build All Frontends (Legacy Vue + New Angular)
         run: |
           npm install --legacy-peer-deps

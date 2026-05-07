@@ -23,5 +23,7 @@ Route::middleware('auth.api')->group(function () {
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (\Illuminate\Http\Request $request) {
-    return $request->user();
+    $user = $request->user();
+    $user->permissions = $user->getPermissions();
+    return $user;
 });
