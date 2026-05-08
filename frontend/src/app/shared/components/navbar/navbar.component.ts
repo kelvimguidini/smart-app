@@ -1,4 +1,4 @@
-import { Component, inject, HostListener, ElementRef } from '@angular/core';
+import { Component, inject, ElementRef, HostListener, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
@@ -15,8 +15,10 @@ export class NavbarComponent {
   el = inject(ElementRef);
   user = this.authService.user;
 
+  toggleSidebar = output<void>();
+
   public isUserMenuOpen = false;
-  public imgProfile = 'https://startbootstrap.github.io/startbootstrap-sb-admin-2/img/undraw_profile.svg';
+  public imgProfile = 'images/undraw_profile.svg';
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {

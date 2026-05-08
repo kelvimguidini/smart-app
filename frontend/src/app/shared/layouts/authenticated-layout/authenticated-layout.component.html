@@ -1,6 +1,6 @@
-<div id="wrapper">
+<div id="wrapper" [class.sidebar-toggled]="isSidebarToggled()">
     <!-- Sidebar -->
-    <app-menu></app-menu>
+    <app-menu [isToggled]="isSidebarToggled()" (toggleSidebar)="toggleSidebar()"></app-menu>
 
     <!-- Content Wrapper -->
     <div id="content-wrapper" class="d-flex flex-column">
@@ -9,7 +9,7 @@
         <div id="content">
             
             <!-- Topbar -->
-            <app-navbar></app-navbar>
+            <app-navbar (toggleSidebar)="toggleSidebar()"></app-navbar>
 
             <!-- Begin Page Content -->
             <div class="container-fluid">

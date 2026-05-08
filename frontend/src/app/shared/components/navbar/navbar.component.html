@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow" style="height: 70px; padding-top: 0; padding-bottom: 0;">
 
     <!-- Sidebar Toggle (Topbar) -->
-    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3" (click)="toggleSidebar.emit()">
         <i class="fa fa-bars"></i>
     </button>
 
@@ -16,11 +16,11 @@
         <div class="topbar-divider d-none d-sm-block"></div>
 
         <!-- Nav Item - User Information -->
-        <li class="nav-item dropdown" [class.show]="isUserMenuOpen">
-            <a class="nav-link d-flex align-items-center" href="javascript:void(0)" id="userDropdown" role="button" (click)="toggleUserMenu()">
+        <li class="nav-item dropdown no-arrow" [class.show]="isUserMenuOpen">
+            <a class="nav-link dropdown-toggle d-flex align-items-center" href="javascript:void(0)" id="userDropdown" role="button" (click)="toggleUserMenu()">
                 <img class="img-profile rounded-circle mr-2" [src]="imgProfile" style="height: 2rem; width: 2rem;">
                 <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ user()?.name }}</span>
-                <i class="fas fa-caret-down fa-sm fa-fw text-gray-400"></i>
+                <!-- <i class="fas fa-caret-down fa-sm fa-fw text-gray-400"></i> -->
             </a>
             <!-- Dropdown - User Information -->
             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" [class.show]="isUserMenuOpen" aria-labelledby="userDropdown" style="right: 0; left: auto;">

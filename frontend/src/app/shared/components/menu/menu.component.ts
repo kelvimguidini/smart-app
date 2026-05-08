@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
@@ -32,6 +32,9 @@ interface MenuItem {
 export class MenuComponent {
   private readonly authService = inject(AuthService);
   
+  isToggled = input<boolean>(false);
+  toggleSidebar = output<void>();
+
   menuTitle = 'SmartApp';
   userPermissions = this.authService.user()?.permissions || [];
 
