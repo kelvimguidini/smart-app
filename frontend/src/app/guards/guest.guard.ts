@@ -13,6 +13,11 @@ export const guestGuard: CanActivateFn = (route, state) => {
     return false;
   }
 
+  // Se estamos no processo de logout, permite exibir a tela de login sem revalidar.
+  if (authService.isLoggingOut()) {
+    return true;
+  }
+
   // Senão, tenta validar com o servidor (útil se o cara digitar /login na URL)
   return authService.checkAuth().pipe(
     take(1),

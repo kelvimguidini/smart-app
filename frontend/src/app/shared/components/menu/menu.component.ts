@@ -1,4 +1,4 @@
-import { Component, inject, signal, input, output } from '@angular/core';
+import { Component, computed, inject, signal, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
@@ -36,7 +36,7 @@ export class MenuComponent {
   toggleSidebar = output<void>();
 
   menuTitle = 'SmartApp';
-  userPermissions = this.authService.user()?.permissions || [];
+  userPermissions = computed(() => this.authService.user()?.permissions || []);
 
   menuItems: MenuItem[] = [
     {
@@ -149,9 +149,10 @@ export class MenuComponent {
   ];
 
   hasPermission(role: string | string[]): boolean {
-    if (!this.userPermissions) return false;
+    const permissions = this.userPermissions();
+    if (!permissions || permissions.length === 0) return false;
     const roles = Array.isArray(role) ? role : [role];
-    return roles.some(r => this.userPermissions.some(p => p.name === r));
+    return roles.some(r => permissions.some(p => p.name === r));
   }
 
   canShowMenu(menuItem: MenuItem): boolean {
@@ -161,6 +162,17 @@ export class MenuComponent {
   }
 
   toggleCollapse(menuItem: MenuItem) {
+    const isExpanding = menuItem.collapsed;
+    
+    if (isExpanding) {
+      // Fecha todos os outros antes de abrir o atual
+      this.menuItems.forEach(item => {
+        if (!item.isItem) {
+          item.collapsed = true;
+        }
+      });
+    }
+    
     menuItem.collapsed = !menuItem.collapsed;
   }
 }

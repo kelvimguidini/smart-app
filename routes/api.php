@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EventApiController;
+use App\Http\Controllers\Api\RoleApiController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,8 +19,14 @@ use Illuminate\Support\Facades\Route;
 Route::post('login', [AuthController::class, 'login']);
 
 
-Route::middleware('auth.api')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
     Route::get('events', [EventApiController::class, 'index']);
+
+    // // Rotas de Grupos de Acesso (Roles)
+    // Route::get('roles', [RoleApiController::class, 'index']);
+    // Route::post('roles', [RoleApiController::class, 'store']);
+    // Route::delete('roles', [RoleApiController::class, 'delete']);
+    // Route::delete('roles/permission', [RoleApiController::class, 'removePermission']);
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (\Illuminate\Http\Request $request) {

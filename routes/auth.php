@@ -55,8 +55,30 @@ Route::middleware(['auth', 'cors'])->group(function () {
             }
             return file_get_contents($path);
         }
-        return Inertia::render('Dashboard');
+        abort(404);
     })->name('dashboard');
+
+    Route::get('dashboard', function (Request $request) {
+        $path = public_path('angular.html');
+        if (file_exists($path)) {
+            if ($request->header('X-Inertia')) {
+                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
+            }
+            return file_get_contents($path);
+        }
+        abort(404);
+    });
+
+    Route::get('roles', function (Request $request) {
+        $path = public_path('angular.html');
+        if (file_exists($path)) {
+            if ($request->header('X-Inertia')) {
+                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
+            }
+            return file_get_contents($path);
+        }
+        abort(404);
+    })->name('roles');
 
     Route::get('/user', function (Request $request) {
         return $request->user();

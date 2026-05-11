@@ -22,6 +22,7 @@ export class AuthService {
   
   user = signal<User | null>(null);
   isAuthenticated = signal<boolean>(false);
+  isLoggingOut = signal<boolean>(false);
 
   constructor() { }
 
@@ -32,7 +33,8 @@ export class AuthService {
         this.isAuthenticated.set(true);
       }),
       map(() => true),
-      catchError(() => {
+      catchError((err) => {
+        console.error('Auth check failed', err);
         this.user.set(null);
         this.isAuthenticated.set(false);
         return of(false);
@@ -50,17 +52,18 @@ export class AuthService {
   }
 
   logout() {
-    this.http.post(`${this.baseUrl}/logout`, {}).subscribe({
-      next: () => {
-        this.user.set(null);
-        this.isAuthenticated.set(false);
-        this.router.navigate(['/login']);
-      },
-      error: () => {
-        this.user.set(null);
-        this.isAuthenticated.set(false);
-        this.router.navigate(['/login']);
-      }
+    this.isLoggingOut.set(true);
+    this.user.set(null);
+    this.isAuthenticated.set(false);
+
+    this.http.get(`${this.baseUrl}/logout`, { withCredentials: true }).subscribe({
+      next: () => this.finalizeLogout(),
+      error: () => this.finalizeLogout()
     });
+  }
+
+  private finalizeLogout() {
+    this.isLoggingOut.set(false);
+    this.router.navigate(['/login'], { replaceUrl: true });
   }
 }

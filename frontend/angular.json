@@ -21,10 +21,7 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "outputPath": {
-              "base": "/app/public",
-              "browser": ""
-            },
+            "outputPath": "../public",
             "deleteOutputPath": false,
             "index": {
               "input": "src/index.html",

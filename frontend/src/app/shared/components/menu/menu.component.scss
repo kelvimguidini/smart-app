@@ -117,17 +117,16 @@
    COLLAPSE ARROW
 ========================================= */
 
-.nav-link[data-toggle="collapse"]::after {
+/* = :not(.toggled) so it only shows when expanded */
+.sidebar:not(.toggled) .nav-link[data-toggle="collapse"]::after {
     content: '\f105';
     font-family: 'Font Awesome 5 Free';
     font-weight: 900;
-
     margin-left: auto;
-
     transition: transform .2s ease;
 }
 
-.nav-link[data-toggle="collapse"]:not(.collapsed)::after {
+.sidebar:not(.toggled) .nav-link[data-toggle="collapse"]:not(.collapsed)::after {
     transform: rotate(90deg);
 }
 
@@ -209,19 +208,44 @@
 
 .sidebar.toggled {
     width: 6.5rem;
+    overflow: visible; /* Necessário para o submenu flutuar */
 }
 
 .sidebar.toggled .sidebar-brand-text,
-.sidebar.toggled .nav-link span,
-.sidebar.toggled .collapse {
+.sidebar.toggled .nav-link span {
     display: none;
 }
 
 .sidebar.toggled .nav-link {
     justify-content: center;
+    padding: 0.75rem 1rem;
 }
 
 .sidebar.toggled .nav-link i {
     margin-right: 0;
-    font-size: 1rem;
+    font-size: 1.1rem;
+}
+
+/* Floating Submenu */
+.sidebar.toggled .nav-item .collapse {
+    position: absolute;
+    left: calc(6.5rem + 5px);
+    top: 2px;
+    z-index: 1000;
+    display: none; /* Esconde por padrão no modo mobile/toggled */
+    min-width: 10rem;
+}
+
+.sidebar.toggled .nav-item:hover .collapse {
+    display: block !important;
+}
+
+.sidebar.toggled .nav-item .collapse .collapse-inner {
+    margin: 0;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.2);
+    border: 1px solid #e3e6f0;
+}
+
+.sidebar.toggled .sidebar-divider {
+    margin: 0 1rem 1rem;
 }
