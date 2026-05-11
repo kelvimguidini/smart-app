@@ -43,9 +43,17 @@ class PasswordResetLinkController extends Controller
         );
 
         if ($status == Password::RESET_LINK_SENT) {
+            if ($request->wantsJson()) {
+                return response()->json(['status' => trans($status)]);
+            }
+
             return Inertia::render('Auth/ForgotPassword', [
                 'flash' => ['message' => trans($status), 'type' => 'warning'],
             ]);
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json(['message' => trans($status)], 422);
         }
 
         return Inertia::render('Auth/ForgotPassword', [

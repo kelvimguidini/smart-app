@@ -1,0 +1,160 @@
+<app-authenticated-layout>
+    <!-- Header -->
+  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+  </div>
+  <!-- Content Row -->
+  <div class="row">
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card shadow h-100 py-2" [ngClass]="{'border-left-primary': !waitApproval.loading && !waitApproval.error, 'border-left-danger': waitApproval.error}">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-uppercase mb-1" [ngClass]="{'text-primary': !waitApproval.loading && !waitApproval.error, 'text-danger': waitApproval.error, 'text-muted': waitApproval.loading}">
+                Fechado com o cliente
+              </div>
+              <div class="h5 mb-0 font-weight-bold" [ngClass]="{'text-gray-800': !waitApproval.loading && !waitApproval.error, 'text-muted': waitApproval.loading}">
+                {{ waitApproval.loading ? '-' : (waitApproval.error ? "Erro" : waitApproval.data.hotels) }}
+              </div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-2x text-gray-300" [ngClass]="{'fa-bed': !waitApproval.loading && !waitApproval.error, 'fa-exclamation-circle': waitApproval.error, 'fa-spinner fa-spin': waitApproval.loading}"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card shadow h-100 py-2" [ngClass]="{'border-left-success': !waitApproval.loading && !waitApproval.error, 'border-left-danger': waitApproval.error}">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-uppercase mb-1" [ngClass]="{'text-success': !waitApproval.loading && !waitApproval.error, 'text-danger': waitApproval.error, 'text-muted': waitApproval.loading}">
+                Cancelados
+              </div>
+              <div class="h5 mb-0 font-weight-bold" [ngClass]="{'text-gray-800': !waitApproval.loading && !waitApproval.error, 'text-muted': waitApproval.loading}">
+                {{ waitApproval.loading ? '-' : (waitApproval.error ? "Erro" : waitApproval.data.transports) }}
+              </div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-2x text-gray-300" [ngClass]="{'fa-car-alt': !waitApproval.loading && !waitApproval.error, 'fa-exclamation-circle': waitApproval.error, 'fa-spinner fa-spin': waitApproval.loading}"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card shadow h-100 py-2" [ngClass]="{'border-left-info': !linksApproved.loading && !linksApproved.error, 'border-left-danger': linksApproved.error}">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-uppercase mb-1" [ngClass]="{'text-info': !linksApproved.loading && !linksApproved.error, 'text-danger': linksApproved.error, 'text-muted': linksApproved.loading}">
+                Aprovação De Orçamento
+              </div>
+              <div class="row no-gutters align-items-center">
+                <div class="col-auto">
+                  <div class="h5 mb-0 font-weight-bold" [ngClass]="{'text-gray-800': !linksApproved.loading && !linksApproved.error, 'text-muted': linksApproved.loading}">
+                    {{ linksApproved.loading ? '-' : (linksApproved.error ? "Erro" : linksApproved.data + "%") }}
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="progress progress-sm mr-2">
+                    <div class="progress-bar bg-info" role="progressbar" [style.width]="linksApproved.data + '%'" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-2x text-gray-300" [ngClass]="{'fa-clipboard-list': !linksApproved.loading && !linksApproved.error, 'fa-exclamation-circle': linksApproved.error, 'fa-spinner fa-spin': linksApproved.loading}"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card shadow h-100 py-2" [ngClass]="{'border-left-warning': !pendingValidate.loading && !pendingValidate.error, 'border-left-danger': pendingValidate.error}">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-uppercase mb-1" [ngClass]="{'text-warning': !pendingValidate.loading && !pendingValidate.error, 'text-danger': pendingValidate.error, 'text-muted': pendingValidate.loading}">
+                Orçamentos não avaliados
+              </div>
+              <div class="h5 mb-0 font-weight-bold" [ngClass]="{'text-gray-800': !pendingValidate.loading && !pendingValidate.error, 'text-muted': pendingValidate.loading}">
+                {{ pendingValidate.loading ? '-' : (pendingValidate.error ? "Erro" : pendingValidate.data) }}
+              </div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-2x text-gray-300" [ngClass]="{'fa-comments': !pendingValidate.loading && !pendingValidate.error, 'fa-exclamation-circle': pendingValidate.error, 'fa-spinner fa-spin': pendingValidate.loading}"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Row -->
+  <div class="row">
+    <!-- Area Chart -->
+    <div class="col-xl-8 col-lg-7">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+          <h6 class="m-0 font-weight-bold text-primary">Eventos Por Mês</h6>
+        </div>
+        <div class="card-body">
+          <div class="chart-area" style="height: 320px;">
+            <canvas id="area-event"></canvas>
+            <div *ngIf="events.loading" class="text-center">Carregando...</div>
+            <div *ngIf="events.error" class="text-center text-danger">Ocorreu um erro ao carregar os dados..</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pie Chart -->
+    <div class="col-xl-4 col-lg-5">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+          <h6 class="m-0 font-weight-bold text-primary">Status</h6>
+        </div>
+        <div class="card-body">
+          <div class="chart-pie pt-4 pb-2" style="height: 250px;">
+            <canvas id="pie-hotel-status"></canvas>
+          </div>
+          <div *ngIf="eventStatus.loading" class="text-center">Carregando...</div>
+          <div *ngIf="eventStatus.error" class="text-center text-danger">Ocorreu um erro ao carregar os dados..</div>
+          <div *ngIf="!eventStatus.loading && !eventStatus.error" class="mt-4 text-center small">
+            <span *ngFor="let data of eventStatus.data?.hotel" class="mr-2">
+              <i class="fas fa-circle" [style.color]="data.backgroundColor"></i> {{ data.label }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Row -->
+  <div class="row">
+    <div class="col-lg-8 mb-7">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Percentual De Usuários Por Grupo</h6>
+        </div>
+        <div class="card-body">
+          <div *ngIf="groups.loading" class="text-center">Carregando...</div>
+          <div *ngIf="groups.error" class="text-center text-danger">Ocorreu um erro ao carregar os dados..</div>
+          <ng-container *ngIf="!groups.loading && !groups.error">
+            <ng-container *ngFor="let group of groups.data">
+              <h4 class="small font-weight-bold">{{ group.Name }} <span class="float-right">{{ group.CountUsers }}</span></h4>
+              <div class="progress mb-4">
+                <div class="progress-bar" role="progressbar" [style.width]="group.Percentage + '%'" [style.backgroundColor]="group.color" [attr.aria-valuenow]="group.Percentage" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </ng-container>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-authenticated-layout>

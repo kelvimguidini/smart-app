@@ -1,6 +1,17 @@
 version: '3.8'
 
 services:
+  angular:
+    image: node:20
+    working_dir: /app/frontend
+    volumes:
+      - .:/app
+    ports:
+      - "4201:4201"
+    command: bash -c "npm install --legacy-peer-deps && npx ng serve --host 0.0.0.0 --port 4201 --poll 2000"
+    depends_on:
+      - app
+
   app:
     build: .
     ports:

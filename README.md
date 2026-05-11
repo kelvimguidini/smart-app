@@ -26,17 +26,29 @@ backend
 - MySQL
 
 frontend
-- [vuejs](https://learnvue.co/) - Framework JS.
+- [Angular](https://angular.dev/) - Framework JS (SPA).
+- Tailwind CSS & Bootstrap.
+- (Legado: Vue.js)
 
 
 ## Instalação
 
 Descrição do processo de instalação/configuração 
 
-Instalar as dependencias do projeto.
+O projeto está configurado para rodar facilmente com **Docker Compose**, servindo tanto o backend Laravel (porta 8000) quanto o novo frontend Angular (porta 4201).
 
 ```sh
+# Sobe o banco de dados, o backend e compila o Angular no modo watch (live-reload)
+docker-compose up -d --build
+```
+
+O Frontend Angular estará disponível em: `http://localhost:4201`
+O Backend Laravel estará disponível em: `http://localhost:8000`
+
+Se precisar instalar dependências manualmente sem Docker:
+```sh
 composer install
+cd frontend && npm install
 ```
 
 Criar base vazia em banco MySQL e configurar arquivo `.env` com os dados da conexão ao banco de dados

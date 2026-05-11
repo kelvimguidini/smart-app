@@ -39,6 +39,9 @@ class AuthenticatedSessionController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if ($user == null) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'E-mail não encontrado!', 'type' => 'danger'], 401);
+            }
             return Inertia::render('Auth/Login', [
                 'canResetPassword' => Route::has('password.request'),
                 'flash' => ['message' => 'E-mail não encontrado!', 'type' => 'danger'],
@@ -48,6 +51,9 @@ class AuthenticatedSessionController extends Controller
 
         if ($user && $user->is_api_user) {
             Auth::logout();
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Usuário exclusivo da API não pode acessar o painel web.', 'type' => 'danger'], 403);
+            }
             return Inertia::render('Auth/Login', [
                 'canResetPassword' => Route::has('password.request'),
                 'flash' => ['message' => 'Usuário exclusivo da API não pode acessar o painel web.', 'type' => 'danger'],
@@ -56,6 +62,9 @@ class AuthenticatedSessionController extends Controller
         }
 
         if ($user->email_verified_at == null) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'E-mail não verificado.', 'type' => 'warning', 'needs_verification' => true], 403);
+            }
             return Inertia::render(
                 'Auth/VerifyEmail',
                 ['flash' => ['message' => session('status'), 'type' => 'warning'], 'email' => $request->email],
@@ -65,6 +74,9 @@ class AuthenticatedSessionController extends Controller
 
         $response = $request->authenticate();
         if ($response === true) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => trans('auth.failed'), 'type' => 'danger'], 401);
+            }
             return Inertia::render('Auth/Login', [
                 'canResetPassword' => Route::has('password.request'),
                 'flash' => ['message' => trans('auth.failed'), 'type' => 'danger'],
@@ -73,6 +85,10 @@ class AuthenticatedSessionController extends Controller
         }
 
         $request->session()->regenerate();
+
+        if ($request->wantsJson()) {
+            return response()->json(['user' => Auth::user(), 'redirect' => RouteServiceProvider::HOME]);
+        }
 
         return redirect()->intended(RouteServiceProvider::HOME);
     }
@@ -90,6 +106,10 @@ class AuthenticatedSessionController extends Controller
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();
+
+        if ($request->wantsJson()) {
+            return response()->noContent();
+        }
 
         return redirect('/');
     }

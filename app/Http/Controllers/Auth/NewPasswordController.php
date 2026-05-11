@@ -64,11 +64,20 @@ class NewPasswordController extends Controller
         // the application's home authenticated view. If there is an error we can
         // redirect them back to where they came from with their error message.
         if ($status == Password::PASSWORD_RESET) {
+            if ($request->wantsJson()) {
+                return response()->json(['status' => trans($status)]);
+            }
+
             return Inertia::render('Auth/Login', [
                 'canResetPassword' => true,
                 'flash' => ['message' => trans($status), 'type' => 'success']
             ]);
         }
+
+        if ($request->wantsJson()) {
+            return response()->json(['message' => trans($status)], 422);
+        }
+
         return Inertia::render('Auth/ResetPassword', [
             'email' => $request->email,
             'token' => $request->route('token'),

@@ -1,0 +1,61 @@
+<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar" [class.toggled]="isToggled()">
+
+    <!-- Sidebar - Brand -->
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" routerLink="/dashboard">
+        <div class="sidebar-brand-icon rotate-n-15">
+            <i class="fas fa-laugh-wink"></i>
+        </div>
+        <div class="sidebar-brand-text mx-3">SmartApp</div>
+    </a>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider my-0">
+
+    <ng-container *ngFor="let menuItem of menuItems; let i = index">
+        <li *ngIf="canShowMenu(menuItem)" class="nav-item" [class.active]="menuItem.active">
+            
+            <hr *ngIf="menuItem.divider" class="sidebar-divider d-none d-md-block">
+
+            <!-- Nav Item -->
+            <a *ngIf="menuItem.isItem" class="nav-link" [routerLink]="menuItem.link" routerLinkActive="active">
+                <i [class]="menuItem.icon || 'fa-solid fa-check'"></i>
+                <span>{{ menuItem.name }}</span>
+            </a>
+
+            <!-- Nav Item - Collapse Menu -->
+            <a *ngIf="!menuItem.isItem" class="nav-link" 
+               [class.collapsed]="menuItem.collapsed" 
+               href="javascript:void(0)"
+               (click)="toggleCollapse(menuItem)"
+               data-toggle="collapse"
+               [attr.aria-expanded]="!menuItem.collapsed">
+                <i [class]="menuItem.icon || 'fa-solid fa-check'"></i>
+                <span>{{ menuItem.name }}</span>
+            </a>
+            
+            <div *ngIf="!menuItem.isItem" class="collapse" [class.show]="!menuItem.collapsed" style="visibility: inherit">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <h6 class="collapse-header">{{ menuItem.collapseHeader }}:</h6>
+                    <ng-container *ngFor="let subMenuItem of menuItem.subMenu">
+                        <a *ngIf="hasPermission(subMenuItem.role)" 
+                           class="collapse-item" 
+                           [routerLink]="subMenuItem.link"
+                           routerLinkActive="active"
+                           [class.active]="subMenuItem.active">
+                            {{ subMenuItem.name }}
+                        </a>
+                    </ng-container>
+                </div>
+            </div>
+        </li>
+    </ng-container>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider d-none d-md-block">
+
+    <!-- Sidebar Toggler (Sidebar) -->
+    <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle" (click)="toggleSidebar.emit()"></button>
+    </div>
+
+</ul>

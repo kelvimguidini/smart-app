@@ -19,3 +19,15 @@ yarn-error.log
 /.idea
 /.vscode
 xdebug.log
+
+# Angular build artifacts
+/public/angular.html
+/public/main-*.js
+/public/polyfills-*.js
+/public/runtime-*.js
+/public/styles-*.css
+/public/3rdpartylicenses.txt
+/public/prerendered-routes.json
+/public/chunk-*.js
+/public/media/
+/public/app/

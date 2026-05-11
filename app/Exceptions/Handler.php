@@ -69,7 +69,7 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
-        if ($request->is('api/*')) {
+        if ($request->expectsJson() || $request->is('api/*')) {
             // Erros de validação
             if ($exception instanceof \Illuminate\Validation\ValidationException) {
                 return response()->json([
@@ -98,17 +98,12 @@ class Handler extends ExceptionHandler
                 ], 401);
             }
 
-            // return parent::render($request, $exception);
-
             // Outros erros
             return response()->json([
-                'message' => 'Erro interno no servidor.' . $exception->getMessage(),
+                'message' => 'Erro interno no servidor: ' . $exception->getMessage(),
             ], 500);
         }
 
-        return redirect()->back()->with('flash', [
-            'message' => $exception->getMessage(),
-            'type' => 'danger',
-        ]);
+        return parent::render($request, $exception);
     }
 }

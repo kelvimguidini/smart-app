@@ -23,19 +23,43 @@ use Illuminate\Support\Facades\Crypt;
 
 Route::middleware(['guest', 'cors'])->group(function () {
 
-    Route::get('login', [AuthenticatedSessionController::class, 'create'])
-        ->name('login');
+    Route::get('login', function (\Illuminate\Http\Request $request) {
+        $path = public_path('angular.html');
+        if (file_exists($path)) {
+            if ($request->header('X-Inertia')) {
+                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
+            }
+            return file_get_contents($path);
+        }
+        return app(AuthenticatedSessionController::class)->create();
+    })->name('login');
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
-    Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
-        ->name('password.request');
+    Route::get('forgot-password', function (\Illuminate\Http\Request $request) {
+        $path = public_path('angular.html');
+        if (file_exists($path)) {
+            if ($request->header('X-Inertia')) {
+                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
+            }
+            return file_get_contents($path);
+        }
+        return app(PasswordResetLinkController::class)->create();
+    })->name('password.request');
 
     Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
         ->name('password.email');
 
-    Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
-        ->name('password.reset');
+    Route::get('reset-password/{token}', function (\Illuminate\Http\Request $request) {
+        $path = public_path('angular.html');
+        if (file_exists($path)) {
+            if ($request->header('X-Inertia')) {
+                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
+            }
+            return file_get_contents($path);
+        }
+        return app(NewPasswordController::class)->create();
+    })->name('password.reset');
 
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->name('password.update');
