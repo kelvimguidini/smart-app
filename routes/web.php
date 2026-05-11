@@ -29,7 +29,7 @@ Route::middleware(['guest', 'cors'])->group(function () {
             if ($request->header('X-Inertia')) {
                 return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
             }
-            return file_get_contents($path);
+            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
         }
         return app(AuthenticatedSessionController::class)->create();
     })->name('login');
@@ -42,7 +42,7 @@ Route::middleware(['guest', 'cors'])->group(function () {
             if ($request->header('X-Inertia')) {
                 return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
             }
-            return file_get_contents($path);
+            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
         }
         return app(PasswordResetLinkController::class)->create();
     })->name('password.request');
@@ -56,7 +56,7 @@ Route::middleware(['guest', 'cors'])->group(function () {
             if ($request->header('X-Inertia')) {
                 return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
             }
-            return file_get_contents($path);
+            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
         }
         return app(NewPasswordController::class)->create();
     })->name('password.reset');

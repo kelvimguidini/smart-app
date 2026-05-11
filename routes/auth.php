@@ -53,7 +53,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
             if ($request->header('X-Inertia')) {
                 return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
             }
-            return file_get_contents($path);
+            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
         }
         abort(404);
     })->name('dashboard');
@@ -64,7 +64,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
             if ($request->header('X-Inertia')) {
                 return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
             }
-            return file_get_contents($path);
+            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
         }
         abort(404);
     });
@@ -75,7 +75,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
             if ($request->header('X-Inertia')) {
                 return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
             }
-            return file_get_contents($path);
+            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
         }
         abort(404);
     })->name('roles');
