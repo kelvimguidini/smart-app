@@ -24,41 +24,32 @@ use Illuminate\Support\Facades\Crypt;
 Route::middleware(['guest', 'cors'])->group(function () {
 
     Route::get('login', function (\Illuminate\Http\Request $request) {
-        $path = base_path('public/angular.html');
-        if (file_exists($path)) {
-            if ($request->header('X-Inertia')) {
-                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
-            }
-            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
+        $path = base_path('public/browser/angular.html');
+        if ($request->header('X-Inertia')) {
+            return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
         }
-        return app(AuthenticatedSessionController::class)->create();
+        return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
     })->name('login');
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
     Route::get('forgot-password', function (\Illuminate\Http\Request $request) {
-        $path = base_path('public/angular.html');
-        if (file_exists($path)) {
-            if ($request->header('X-Inertia')) {
-                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
-            }
-            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
+        $path = base_path('public/browser/angular.html');
+        if ($request->header('X-Inertia')) {
+            return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
         }
-        return app(PasswordResetLinkController::class)->create();
+        return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
     })->name('password.request');
 
     Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
         ->name('password.email');
 
     Route::get('reset-password/{token}', function (\Illuminate\Http\Request $request) {
-        $path = base_path('public/angular.html');
-        if (file_exists($path)) {
-            if ($request->header('X-Inertia')) {
-                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
-            }
-            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
+        $path = base_path('public/browser/angular.html');
+        if ($request->header('X-Inertia')) {
+            return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
         }
-        return app(NewPasswordController::class)->create();
+        return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
     })->name('password.reset');
 
     Route::post('reset-password', [NewPasswordController::class, 'store'])

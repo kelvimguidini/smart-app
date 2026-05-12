@@ -48,18 +48,15 @@ use Inertia\Inertia;
 Route::middleware(['auth', 'cors'])->group(function () {
 
     Route::get('/', function (Request $request) {
-        $path = base_path('public/angular.html');
-        if (file_exists($path)) {
-            if ($request->header('X-Inertia')) {
-                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
-            }
-            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
+        $path = base_path('public/browser/angular.html');
+        if ($request->header('X-Inertia')) {
+            return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
         }
-        abort(404);
+        return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
     })->name('dashboard');
 
     Route::get('dashboard', function (Request $request) {
-        $path = base_path('public/angular.html');
+        $path = base_path('public/browser/angular.html');
         if (file_exists($path)) {
             if ($request->header('X-Inertia')) {
                 return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
@@ -70,7 +67,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
     });
 
     Route::get('roles', function (Request $request) {
-        $path = base_path('public/angular.html');
+        $path = base_path('public/browser/angular.html');
         if (file_exists($path)) {
             if ($request->header('X-Inertia')) {
                 return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
