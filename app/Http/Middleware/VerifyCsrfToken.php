@@ -14,8 +14,21 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         'https://smart4bts.com.br',
         'sanctum/csrf-cookie',
-        'localhost:8000',
-        'localhost:5173',
-        'localhost:4201',
     ];
+
+    /**
+     * Determine if the session and input CSRF tokens match.
+     * Desativa a verificação de CSRF no ambiente de desenvolvimento local.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return bool
+     */
+    protected function tokensMatch($request)
+    {
+        if (app()->environment('local')) {
+            return true;
+        }
+
+        return parent::tokensMatch($request);
+    }
 }

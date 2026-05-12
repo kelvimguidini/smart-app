@@ -9,12 +9,19 @@ use Closure;
 
 class Authenticate extends Middleware
 {
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @param  string[]  ...$guards
+     * @return mixed
+     *
+     * @throws \Illuminate\Auth\AuthenticationException
+     */
     public function handle($request, Closure $next, ...$guards)
     {
-
-        if (!Auth::check()) {
-            return redirect('/login'); // Redirecionamento absoluto
-        }
+        $this->authenticate($request, $guards);
 
         return $next($request);
     }
@@ -28,8 +35,10 @@ class Authenticate extends Middleware
      */
     protected function redirectTo($request)
     {
-        if (! $request->expectsJson()) {
-            return redirect(RouteServiceProvider::LOGIN);
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return null;
         }
+
+        return route('login');
     }
 }

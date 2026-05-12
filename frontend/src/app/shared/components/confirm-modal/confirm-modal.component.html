@@ -1,0 +1,29 @@
+<!-- Botão que abre o modal -->
+<a href="javascript:void(0)" [class]="btnClass" [class.disabled]="btnDisabled" (click)="openModal($event)">
+    <ng-content select="[modal-button]"></ng-content>
+</a>
+
+<!-- Modal -->
+<div *ngIf="showModal" class="modal fade shadow show" [id]="modalId" style="display: block;" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" [class.modal-content-big]="contentBig" role="document" cdkDrag>
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header" cdkDragHandle style="cursor: move;">
+                <h5 class="modal-title text-dark font-weight-bold">{{ modalTitle }}</h5>
+                <button type="button" class="btn-close" (click)="closeModal()" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-start py-4">
+                <p class="mb-0">{{ message }}</p>
+                <ng-content select="[modal-content]"></ng-content>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary px-4" (click)="closeModal()">{{ cancelButtonLabel }}</button>
+                <button type="button" class="btn btn-primary px-4" (click)="onConfirm()">
+                    {{ okButtonLabel }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Backdrop -->
+<div *ngIf="showModal" class="modal-backdrop fade show"></div>

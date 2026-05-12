@@ -1,0 +1,47 @@
+.datatable-wrapper {
+    min-height: 100px;
+}
+
+.loader-overlay-inner {
+    position: absolute;
+    top: 50px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.5);
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 50px;
+}
+
+.pagination {
+    .page-link {
+        color: #4e73df;
+        box-shadow: none;
+        
+        &:focus {
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+        }
+    }
+
+    .page-item.active .page-link {
+        background-color: #4e73df;
+        border-color: #4e73df;
+        color: white;
+    }
+
+    .page-item.disabled .page-link {
+        color: #858796;
+        background-color: #fff;
+        border-color: #dddfeb;
+    }
+}
+
+// Estilos globais para tabelas dentro do datatable
+::ng-content {
+    table {
+        margin-bottom: 0;
+    }
+}

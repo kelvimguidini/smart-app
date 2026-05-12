@@ -14,18 +14,25 @@ class EmailVerificationNotificationController extends Controller
      * Send a new email verification notification.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
         $user = User::where('email', $request->email)->first();
 
         if ($user->email_verified_at != null) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Email already verified.']);
+            }
             return redirect()->intended(RouteServiceProvider::HOME);
         }
 
         $user->sendEmailVerificationNotification();
 
-        return Inertia::render('Auth/VerifyEmail', ['flash' => ['message' => session('status'), 'type' => 'warning'], 'email' => $request->email]);
+        if ($request->wantsJson()) {
+            return response()->json(['status' => 'verification-link-sent']);
+        }
+
+        return redirect()->back()->with('status', 'verification-link-sent');
     }
 }

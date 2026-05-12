@@ -178,7 +178,7 @@ export class MenuComponent {
 
   isAngularRoute(link: string | undefined): boolean {
     if (!link) return false;
-    const angularRoutes = ['/dashboard', '/roles'];
+    const angularRoutes = ['/dashboard', '/apto'];
     return angularRoutes.includes(link);
   }
 }

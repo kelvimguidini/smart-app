@@ -6,13 +6,14 @@ import { RoleService, Role, Permission, RoleCreateUpdateRequest } from '../../se
 import { ToastService } from '../../services/toast.service';
 import { environment } from '../../../environments/environment';
 import { AuthenticatedLayoutComponent } from "../../shared/layouts/authenticated-layout/authenticated-layout.component";
+import { ConfirmModalComponent } from "../../shared/components/confirm-modal/confirm-modal.component";
 
 declare var $: any; // jQuery
 
 @Component({
   selector: 'app-roles',
   standalone: true,
-  imports: [CommonModule, FormsModule, AuthenticatedLayoutComponent],
+  imports: [CommonModule, FormsModule, AuthenticatedLayoutComponent, ConfirmModalComponent],
   templateUrl: './roles.component.html',
   styleUrls: ['./roles.component.scss']
 })
@@ -188,10 +189,6 @@ export class RolesComponent implements OnInit {
    * Deletar role
    */
   deleteRole(roleId: number): void {
-    if (!confirm('Tem certeza que deseja apagar esse registro?')) {
-      return;
-    }
-
     this.isLoader = true;
     this.roleService.deleteRole(roleId).subscribe({
       next: (response: any) => {
@@ -211,10 +208,6 @@ export class RolesComponent implements OnInit {
    * Remover permissão de uma role
    */
   removePermission(roleId: number, permissionId: number): void {
-    if (!confirm('Tem certeza que deseja remover essa permissão?')) {
-      return;
-    }
-
     this.isLoader = true;
     this.roleService.removePermission(roleId, permissionId).subscribe({
       next: (response: any) => {

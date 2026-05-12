@@ -100,9 +100,9 @@ const menuItem = [
                 role: ['category_admin']
             },
             {
-                link: route().current('apto') ? '' : route('apto'),
+                link: '/apto',
                 name: 'Apartamento',
-                active: route().current('apto'),
+                active: window.location.pathname === '/apto',
                 role: ['apto_admin']
             },
             {

@@ -1,0 +1,67 @@
+<div class="datatable-wrapper position-relative">
+    <!-- Loader overlay dentro do componente -->
+    <div *ngIf="loading" class="loader-overlay-inner">
+        <div class="spinner-border text-primary spinner-border-sm" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+    </div>
+
+    <!-- Top Controls: Per Page and Search -->
+    <div class="row mb-3 align-items-center">
+        <div class="col-sm-12 col-md-6">
+            <div class="d-flex align-items-center">
+                <span class="small text-muted">Mostrar</span>
+                <select class="form-select form-select-sm mx-2 w-auto" [(ngModel)]="pagination.per_page" (change)="onPerPageSelect()">
+                    <option *ngFor="let opt of perPageOptions" [value]="opt">{{ opt }}</option>
+                </select>
+                <span class="small text-muted">registros</span>
+            </div>
+        </div>
+        <div class="col-sm-12 col-md-6">
+            <div class="d-flex justify-content-md-end align-items-center mt-2 mt-md-0">
+                <label class="me-2 mb-0 small text-muted">Pesquisar:</label>
+                <input type="search" class="form-control form-control-sm w-auto" [(ngModel)]="searchQuery" (input)="onSearchInput()" placeholder="Buscar...">
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Content Wrapper -->
+    <div class="table-responsive">
+        <ng-content></ng-content>
+    </div>
+
+    <!-- Bottom Controls: Pagination Info and Navigation -->
+    <div class="row mt-3 align-items-center">
+        <div class="col-sm-12 col-md-5">
+            <div class="text-muted small">
+                Mostrando de {{ pagination.from || 0 }} até {{ pagination.to || 0 }} de {{ pagination.total }} registros
+            </div>
+        </div>
+        <div class="col-sm-12 col-md-7">
+            <nav aria-label="Navegação de página" *ngIf="pagination.last_page >= 1">
+                <ul class="pagination pagination-sm justify-content-md-end mb-0">
+                    <!-- Anterior -->
+                    <li class="page-item" [class.disabled]="pagination.current_page === 1">
+                        <a class="page-link" href="javascript:void(0)" (click)="onPageClick(pagination.current_page - 1)">
+                            <i class="fas fa-chevron-left small"></i>
+                        </a>
+                    </li>
+                    
+                    <!-- Números -->
+                    <li class="page-item" *ngFor="let p of getVisiblePages()" [class.active]="pagination.current_page === p" [class.disabled]="p === '...'">
+                        <a class="page-link" href="javascript:void(0)" (click)="onPageClick(p)">
+                            {{ p }}
+                        </a>
+                    </li>
+                    
+                    <!-- Próximo -->
+                    <li class="page-item" [class.disabled]="pagination.current_page === pagination.last_page">
+                        <a class="page-link" href="javascript:void(0)" (click)="onPageClick(pagination.current_page + 1)">
+                            <i class="fas fa-chevron-right small"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>

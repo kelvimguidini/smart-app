@@ -10,22 +10,10 @@ use Inertia\Inertia;
 class PasswordResetLinkController extends Controller
 {
     /**
-     * Display the password reset link request view.
-     *
-     * @return \Inertia\Response
-     */
-    public function create()
-    {
-        return Inertia::render('Auth/ForgotPassword', [
-            'flash' => ['message' => session('status'), 'type' => 'warning'],
-        ]);
-    }
-
-    /**
      * Handle an incoming password reset link request.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\JsonResponse
      *
      * @throws \Illuminate\Validation\ValidationException
      */
@@ -35,29 +23,14 @@ class PasswordResetLinkController extends Controller
             'email' => 'required|email',
         ]);
 
-        // We will send the password reset link to this user. Once we have attempted
-        // to send the link, we will examine the response then see the message we
-        // need to show to the user. Finally, we'll send out a proper response.
         $status = Password::sendResetLink(
             $request->only('email')
         );
 
         if ($status == Password::RESET_LINK_SENT) {
-            if ($request->wantsJson()) {
-                return response()->json(['status' => trans($status)]);
-            }
-
-            return Inertia::render('Auth/ForgotPassword', [
-                'flash' => ['message' => trans($status), 'type' => 'warning'],
-            ]);
+            return response()->json(['status' => trans($status)]);
         }
 
-        if ($request->wantsJson()) {
-            return response()->json(['message' => trans($status)], 422);
-        }
-
-        return Inertia::render('Auth/ForgotPassword', [
-            'flash' => ['message' => trans($status), 'type' => 'danger'],
-        ]);
+        return response()->json(['message' => trans($status)], 422);
     }
 }

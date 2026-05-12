@@ -47,6 +47,14 @@ export class LoginComponent {
           },
           error: (err: HttpErrorResponse) => {
             this.processing = false;
+            
+            // Check for needs_verification flag
+            if (err.status === 403 && err.error && err.error.needs_verification) {
+              const email = err.error.email || this.form.email;
+              this.router.navigate(['/verify-email'], { queryParams: { email: email } });
+              return;
+            }
+
             if (err.status === 422) {
               this.errors = err.error.errors;
             } else if (err.error && err.error.message) {

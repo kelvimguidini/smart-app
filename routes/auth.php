@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Auth\ABController;
 use App\Http\Controllers\Auth\AddController;
-use App\Http\Controllers\Auth\AptoController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\BrandController;
 use App\Http\Controllers\Auth\BrokerController;
@@ -76,6 +75,17 @@ Route::middleware(['auth', 'cors'])->group(function () {
         }
         abort(404);
     })->name('roles');
+
+    Route::get('apto', function (Request $request) {
+        $path = base_path('public/browser/angular.html');
+        if (file_exists($path)) {
+            if ($request->header('X-Inertia')) {
+                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
+            }
+            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
+        }
+        abort(404);
+    })->name('apto');
 
     Route::get('/user', function (Request $request) {
         return $request->user();
@@ -156,15 +166,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
 
 
-    Route::get('apto', [AptoController::class, 'create'])
-        ->name('apto');
-
-    Route::post('apto-save', [AptoController::class, 'store'])
-        ->name('apto-save');
-
-    Route::delete('apto-delete', [AptoController::class, 'delete'])
-        ->name('apto-delete');
-
+    // Apto routes migrated to api.php (Angular)
 
     Route::get('category', [CategoryController::class, 'create'])
         ->name('category');
@@ -530,8 +532,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::put('/categories/activate/{id}', [CategoryController::class, 'activateM'])->name('categories-activate');
     Route::put('/categories/deactivate/{id}', [CategoryController::class, 'deactivateM'])->name('categories-deactivate');
 
-    Route::put('/aptos/activate/{id}', [AptoController::class, 'activateM'])->name('aptos-activate');
-    Route::put('/aptos/deactivate/{id}', [AptoController::class, 'deactivateM'])->name('aptos-deactivate');
+    // Apto activate/deactivate routes migrated to api.php (Angular)
 
     Route::put('/vehicles/activate/{id}', [VehicleController::class, 'activateM'])->name('vehicles-activate');
     Route::put('/vehicles/deactivate/{id}', [VehicleController::class, 'deactivateM'])->name('vehicles-deactivate');

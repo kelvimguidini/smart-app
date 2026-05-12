@@ -161,15 +161,14 @@
                                     *ngFor="let permission of role.permissions"
                                   >
                                     {{ permission.title }}
-                                    <button 
-                                      type="button"
-                                      class="btn btn-danger btn-circle btn-sm"
-                                      (click)="removePermission(role.id, permission.id)"
-                                      [disabled]="isLoader"
-                                      title="Remover permissão"
-                                    >
-                                      <i class="fas fa-trash"></i>
-                                    </button>
+                                    <app-confirm-modal 
+                                      [btnClass]="'btn btn-danger btn-circle btn-sm'" 
+                                      [modalTitle]="'Confirmar remoção de permissão'" 
+                                      [message]="'Tem certeza que deseja remover a permissão ' + permission.title + ' do grupo ' + role.name + '?'"
+                                      [okButtonLabel]="'Confirmar'"
+                                      (confirm)="removePermission(role.id, permission.id)">
+                                      <i modal-button class="fas fa-trash"></i>
+                                    </app-confirm-modal>
                                   </li>
                                 </ul>
                               </div>
@@ -187,18 +186,17 @@
                         ></button>
 
                         <!-- Botão Deletar -->
-                        <button 
-                          type="button"
-                          class="btn btn-sm btn-danger btn-icon-split"
-                          (click)="deleteRole(role.id)"
-                          [disabled]="isLoader"
-                          title="Deletar grupo"
-                        >
-                          <span class="icon text-white-50">
+                        <app-confirm-modal 
+                          [btnClass]="'btn btn-sm btn-danger btn-icon-split'" 
+                          [modalTitle]="'Confirmar Exclusão de ' + role.name" 
+                          [message]="'Tem certeza que deseja apagar esse registro?'"
+                          [okButtonLabel]="'Confirmar'"
+                          (confirm)="deleteRole(role.id)">
+                          <span modal-button class="icon text-white-50">
                             <i class="fas fa-trash"></i>
                           </span>
-                          <span class="text">Excluir</span>
-                        </button>
+                          <span modal-button class="text">Excluir</span>
+                        </app-confirm-modal>
                       </td>
                     </tr>
                   </tbody>

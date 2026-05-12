@@ -16,21 +16,27 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
+/**
+ * Rotas para Terceiros (API Externa)
+ */
 Route::post('login', [AuthController::class, 'login']);
+Route::get('events', [EventApiController::class, 'index'])->middleware('auth:api');
 
-
+/**
+ * Rotas internas para o SPA Angular
+ */
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('events', [EventApiController::class, 'index']);
+    Route::get('/user', function (\Illuminate\Http\Request $request) {
+        $user = $request->user();
+        $user->permissions = $user->getPermissions();
+        return $user;
+    });
 
-    // // Rotas de Grupos de Acesso (Roles)
-    // Route::get('roles', [RoleApiController::class, 'index']);
-    // Route::post('roles', [RoleApiController::class, 'store']);
-    // Route::delete('roles', [RoleApiController::class, 'delete']);
-    // Route::delete('roles/permission', [RoleApiController::class, 'removePermission']);
-});
-
-Route::middleware('auth:sanctum')->get('/user', function (\Illuminate\Http\Request $request) {
-    $user = $request->user();
-    $user->permissions = $user->getPermissions();
-    return $user;
+    // Rotas de Apartamentos (Apto)
+    Route::get('aptos', [\App\Http\Controllers\Api\AptoApiController::class, 'index']);
+    Route::post('aptos', [\App\Http\Controllers\Api\AptoApiController::class, 'store']);
+    Route::delete('aptos/{id}', [\App\Http\Controllers\Api\AptoApiController::class, 'destroy']);
+    Route::put('aptos/{id}/activate', [\App\Http\Controllers\Api\AptoApiController::class, 'activateItem']);
+    Route::put('aptos/{id}/deactivate', [\App\Http\Controllers\Api\AptoApiController::class, 'deactivateItem']);
 });
