@@ -175,4 +175,10 @@ export class MenuComponent {
     
     menuItem.collapsed = !menuItem.collapsed;
   }
+
+  isAngularRoute(link: string | undefined): boolean {
+    if (!link) return false;
+    const angularRoutes = ['/dashboard', '/roles'];
+    return angularRoutes.includes(link);
+  }
 }

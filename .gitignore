@@ -31,3 +31,4 @@ xdebug.log
 /public/chunk-*.js
 /public/media/
 /public/app/
+public/browser/*

@@ -37,10 +37,19 @@
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">{{ menuItem.collapseHeader }}:</h6>
                     <ng-container *ngFor="let subMenuItem of menuItem.subMenu">
-                        <a *ngIf="hasPermission(subMenuItem.role)" 
+                        <!-- Angular Link -->
+                        <a *ngIf="hasPermission(subMenuItem.role) && isAngularRoute(subMenuItem.link)" 
                            class="collapse-item" 
                            [routerLink]="subMenuItem.link"
                            routerLinkActive="active"
+                           [class.active]="subMenuItem.active">
+                            {{ subMenuItem.name }}
+                        </a>
+                        
+                        <!-- Vue Link (Full Page Reload) -->
+                        <a *ngIf="hasPermission(subMenuItem.role) && !isAngularRoute(subMenuItem.link)" 
+                           class="collapse-item" 
+                           [href]="subMenuItem.link"
                            [class.active]="subMenuItem.active">
                             {{ subMenuItem.name }}
                         </a>
