@@ -420,6 +420,80 @@
         </template>
     </Modal>
 
+    <Modal modal-title="Envio de Proposta (Sem Valores)"
+        v-if="prov && prov.providerBudget && $page.props.auth.permissions.some((p) => p.name === 'event_admin') && ['created', 'briefing', 'provider_requested', 'provider_responsed', 'sent_maneger', 'add_information', 'added_information'].includes(prov.status)"
+        :ok-botton-callback="sendProposalWithoutValues"
+        :ok-botton-callback-param="{ event_id: event.id, provider_id: prov.id, emails: emails, download: !sendEmail, message: message, copyMe: copyMe, type: prov.table }"
+        :ok-botton-label="!sendEmail ? 'Baixar PDF' : 'Enviar Proposta'"
+        :btn-class="prov.sended_mail ? 'btn-sm btn-warning btn-icon-split mr-2' : 'btn-sm btn-secondary btn-icon-split mr-2'">
+        <template v-slot:button>
+            <div @click="{
+                emails = event.customer != null ? event.customer.email : '';
+                sendEmail = true;
+                message = '';
+                copyMe = false;
+            }">
+                <span class="icon text-white-50">
+                    <i v-if="!prov.sended_mail" class="fas fa-file-pdf"></i>
+                    <i v-if="prov.sended_mail" class="fas fa-exclamation-triangle"></i>
+                </span>
+                <span class="text">Proposta (Sem Valores)</span>
+            </div>
+        </template>
+        <template v-slot:content>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" v-model="sendEmail" type="checkbox" id="autoSizingCheckWithoutValues">
+                            <label class="form-check-label" for="autoSizingCheckWithoutValues">
+                                Enviar E-mail
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="row" v-if="sendEmail">
+                <div class="col-12">
+
+                    <div class="form-group">
+                        <InputLabel value="Enviar para:" />
+                        <TextInput type="text" class="form-control" v-model="emails" />
+                    </div>
+
+                    <div class="alert alert-warning " role="alert">
+                        <h4 class="alert-heading text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Separe os e-mails com ; (ponto e vírgula)
+                        </h4>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="form-group">
+                        <div class="form-check">
+                            <InputLabel value=" " />
+                            <CKEditor v-model:contentCode="message" :height="150" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" v-model="copyMe" type="checkbox" id="check-copymeWithoutValues">
+                            <label class="form-check-label" for="check-copymeWithoutValues">
+                                Enviar cópia para mim
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </template>
+    </Modal>
+
     <Modal modal-title="Faturamento"
         v-if="$page.props.auth.permissions.some((p) => p.name === 'event_admin') && prov.status == 'dating_with_customer'"
         :ok-botton-callback="sendInvoice"
@@ -727,6 +801,49 @@ const sendProposal = (array) => {
         });
 
         formProposal.post(route('proposal-hotel-email'), {
+            onFinish: () => {
+                isLoader.value = false;
+            },
+        });
+    }
+
+
+};
+
+const sendProposalWithoutValues = (array) => {
+    isLoader.value = true;
+
+    if (array['download']) {
+        // Abrir uma nova guia com a URL de download
+        const downloadUrl = route('proposal-hotel-without-values', {
+            download: array['download'],
+            provider_id: array['provider_id'],
+            event_id: array['event_id'],
+            type: array['type'],
+        });
+
+        const downloadWindow = window.open(downloadUrl, '_blank');
+
+        // Verificar periodicamente se a guia foi fechada
+        const checkDownloadWindow = setInterval(() => {
+            if (downloadWindow.closed) {
+                // Quando a guia for fechada, parar o loader e limpar o temporizador
+                isLoader.value = false;
+                clearInterval(checkDownloadWindow);
+            }
+        }, 1000);
+    } else {
+        const formProposal = useForm({
+            download: array['download'],
+            provider_id: array['provider_id'],
+            event_id: array['event_id'],
+            message: array['message'],
+            emails: array['emails'],
+            copyMe: array['copyMe'],
+            type: array['type'],
+        });
+
+        formProposal.post(route('proposal-hotel-email-without-values'), {
             onFinish: () => {
                 isLoader.value = false;
             },

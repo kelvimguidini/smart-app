@@ -494,29 +494,17 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     Route::post('proposal-hotel-email', [ProviderController::class, 'proposalPdf'])
         ->name('proposal-hotel-email');
+
+    Route::get('proposal-hotel-without-values/{download}/{provider_id}/{event_id}/{type}', [ProviderController::class, 'proposalPdfWithoutValues'])
+        ->name('proposal-hotel-without-values');
+
+    Route::post('proposal-hotel-email-without-values', [ProviderController::class, 'proposalPdfWithoutValues'])
+        ->name('proposal-hotel-email-without-values');
     //FIM HOTEL
 
     //dashboard
     Route::get('/dashboard-data', [HomeController::class, 'fetchDashboardData'])
         ->name('dashboard-data');
-
-    Route::get('dash-pending-validate', [HomeController::class, 'pendingValidate'])
-        ->name('dash-pending-validate');
-
-    Route::get('dash-event-status', [HomeController::class, 'eventStatus'])
-        ->name('dash-event-status');
-
-    Route::get('dash-wait-approval', [HomeController::class, 'waitApproval'])
-        ->name('dash-wait-approval');
-
-    Route::get('dash-by-months', [HomeController::class, 'byMonths'])
-        ->name('dash-by-months');
-
-    Route::get('dash-links-approved', [HomeController::class, 'linksApproved'])
-        ->name('dash-links-approved');
-
-    Route::get('dash-users-groups', [HomeController::class, 'userGroups'])
-        ->name('dash-users-groups');
 
 
     //FIM dashboard

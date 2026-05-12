@@ -65,7 +65,7 @@ export class DashboardComponent implements OnInit {
   }
 
   renderLinksApproved(response: any) {
-    this.linksApproved.data = response;
+    this.linksApproved.data = response ?? 0;
     this.linksApproved.loading = false;
   }
 

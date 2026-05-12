@@ -504,6 +504,93 @@ class ProviderController extends Controller
         }
     }
 
+    public function proposalPdfWithoutValues(Request $request)
+    {
+        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator') && !Gate::allows('land_operator')) {
+            abort(403);
+        }
+
+        $pdf = $this->createPDF($this->getEventDataBase($request->provider_id, $request->event_id, $request->type), 3);
+        // return $pdf;
+        // Renderize o HTML como PDF
+        $pdf->render();
+        // Retorna o PDF como um arquivo de download
+        if ($request->download == "true") {
+            return $pdf->stream('ID' . $request->event_id . ' - ' . $this->providerName . ' - Proposta_sem_valores.pdf');
+        } else {
+
+            $sub = "Proposta para hotel (Sem Valores)";
+            $user = User::find(Auth::user()->id);
+            $data = [
+                'body' => $request->message != null ? urldecode($request->message) : "",
+                'hasAttachment' => true,
+                'signature' => $user->signature != null ? $user->signature : "",
+                'subject' => $sub
+            ];
+            $send = Mail::to(explode(";", $request->emails));
+
+            if ($request->copyMe == "true") {
+                $send->cc($user->email);
+            }
+
+            $send->send(new PdfEmail($pdf->output(), 'ID' . $request->event_id . ' - ' . $this->providerName . ' - Proposta.pdf', $data, $sub));
+
+            DB::table('email_log')->insert(
+                array(
+                    'event_id' => $request->event_id,
+                    'provider_id' => $request->provider_id,
+                    'sender_id' => $user->id,
+                    'body' => urldecode($request->message),
+                    'attachment' => $pdf->output(),
+                    'to' => $request->emails,
+                    'type' => 'proposal'
+                )
+            );
+
+            if ($request->type == 'event_hotels') {
+                $eventHotel = EventHotel::where('event_id', $request->event_id)->where('hotel_id', $request->provider_id)->first();
+
+                if ($eventHotel) {
+                    $eventHotel->sended_mail = true;
+                    $eventHotel->update();
+                }
+            }
+            if ($request->type == 'event_hotels') {
+                $eventAdd = EventAdd::where('event_id', $request->event_id)->where('add_id', $request->provider_id)->first();
+
+                if ($eventAdd) {
+                    $eventAdd->sended_mail = true;
+                    $eventAdd->update();
+                }
+            }
+            if ($request->type == 'event_hotels') {
+                $eventAb = EventAB::where('event_id', $request->event_id)->where('ab_id', $request->provider_id)->first();
+
+                if ($eventAb) {
+                    $eventAb->sended_mail = true;
+                    $eventAb->update();
+                }
+            }
+            if ($request->type == 'event_hotels') {
+                $eventHall = EventHall::where('event_id', $request->event_id)->where('hall_id', $request->provider_id)->first();
+
+                if ($eventHall) {
+                    $eventHall->sended_mail = true;
+                    $eventHall->update();
+                }
+            }
+            if ($request->type == 'event_hotels') {
+                $eventT = EventTransport::where('event_id', $request->event_id)->where('transport_id', $request->provider_id)->first();
+
+                if ($eventT) {
+                    $eventT->sended_mail = true;
+                    $eventT->update();
+                }
+            }
+            return redirect()->back()->with('flash', ['message' => 'E-mail enviado com sucesso!', 'type' => 'success']);
+        }
+    }
+
 
     public function invoicingPdf(Request $request)
     {
@@ -576,6 +663,14 @@ class ProviderController extends Controller
                 break;
             case 2:
                 $html = view('invoicePDF', [
+                    'event' => $paramters['eventDataBase'],
+                    'provider' => $paramters['providerDataBase'],
+                    'table' => $paramters['table'],
+                ])->render();
+
+                break;
+            case 3:
+                $html = view('proposalPdfWithoutValues', [
                     'event' => $paramters['eventDataBase'],
                     'provider' => $paramters['providerDataBase'],
                     'table' => $paramters['table'],
