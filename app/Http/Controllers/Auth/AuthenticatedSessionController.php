@@ -9,7 +9,7 @@ use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
+// use Inertia\Inertia; // Inertia removed, Angular handles views
 use PharIo\Manifest\Email;
 
 class AuthenticatedSessionController extends Controller
@@ -19,13 +19,7 @@ class AuthenticatedSessionController extends Controller
      *
      * @return \Inertia\Response
      */
-    public function create()
-    {
-        return Inertia::render('Auth/Login', [
-            'canResetPassword' => Route::has('password.request'),
-            'flash' => ['message' => session('status'), 'type' => 'warning'],
-        ]);
-    }
+    // Login view removed after migration to Angular
 
     /**
      * Handle an incoming authentication request.
@@ -42,11 +36,7 @@ class AuthenticatedSessionController extends Controller
             if ($request->wantsJson()) {
                 return response()->json(['message' => 'E-mail não encontrado!', 'type' => 'danger'], 401);
             }
-            return Inertia::render('Auth/Login', [
-                'canResetPassword' => Route::has('password.request'),
-                'flash' => ['message' => 'E-mail não encontrado!', 'type' => 'danger'],
-                'email' => $request->email
-            ]);
+            return response()->json(['message' => 'E-mail não encontrado!', 'type' => 'danger', 'email' => $request->email], 401);
         }
 
         if ($user && $user->is_api_user) {
@@ -54,21 +44,14 @@ class AuthenticatedSessionController extends Controller
             if ($request->wantsJson()) {
                 return response()->json(['message' => 'Usuário exclusivo da API não pode acessar o painel web.', 'type' => 'danger'], 403);
             }
-            return Inertia::render('Auth/Login', [
-                'canResetPassword' => Route::has('password.request'),
-                'flash' => ['message' => 'Usuário exclusivo da API não pode acessar o painel web.', 'type' => 'danger'],
-                'email' => $request->email
-            ]);
+            return response()->json(['message' => 'Usuário exclusivo da API não pode acessar o painel web.', 'type' => 'danger', 'email' => $request->email], 403);
         }
 
         if ($user->email_verified_at == null) {
             if ($request->wantsJson()) {
                 return response()->json(['message' => 'E-mail não verificado.', 'type' => 'warning', 'needs_verification' => true], 403);
             }
-            return Inertia::render(
-                'Auth/VerifyEmail',
-                ['flash' => ['message' => session('status'), 'type' => 'warning'], 'email' => $request->email],
-            );
+            return response()->json(['message' => session('status'), 'type' => 'warning', 'email' => $request->email], 403);
         }
 
 
@@ -77,11 +60,7 @@ class AuthenticatedSessionController extends Controller
             if ($request->wantsJson()) {
                 return response()->json(['message' => trans('auth.failed'), 'type' => 'danger'], 401);
             }
-            return Inertia::render('Auth/Login', [
-                'canResetPassword' => Route::has('password.request'),
-                'flash' => ['message' => trans('auth.failed'), 'type' => 'danger'],
-                'email' => $request->email
-            ]);
+            return response()->json(['message' => trans('auth.failed'), 'type' => 'danger', 'email' => $request->email], 401);
         }
 
         $request->session()->regenerate();
