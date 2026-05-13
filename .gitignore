@@ -33,3 +33,5 @@ xdebug.log
 /public/app/
 public/build/*
 public/browser/*
+public/browser/angular.html
+public/stats.json

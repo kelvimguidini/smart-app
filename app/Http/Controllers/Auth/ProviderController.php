@@ -101,6 +101,10 @@ class ProviderController extends Controller
                 $hotel->service_percent = $request->service_percent;
                 $hotel->iva_percent = $request->iva_percent;
                 $hotel->payment_method = $request->payment_method;
+                $hotel->checkin_time = $request->checkin_time;
+                $hotel->checkin_time_end = $request->checkin_time_end;
+                $hotel->checkout_time = $request->checkout_time;
+                $hotel->checkout_time_end = $request->checkout_time_end;
 
                 $hotel->save();
             } else {
@@ -117,7 +121,11 @@ class ProviderController extends Controller
                     'iss_percent' => $request->iss_percent,
                     'service_percent' => $request->service_percent,
                     'iva_percent' => $request->iva_percent,
-                    'payment_method' => $request->payment_method
+                    'payment_method' => $request->payment_method,
+                    'checkin_time' => $request->checkin_time,
+                    'checkin_time_end' => $request->checkin_time_end,
+                    'checkout_time' => $request->checkout_time,
+                    'checkout_time_end' => $request->checkout_time_end
                 ]);
 
                 $hotelService = ProviderServices::create([
@@ -174,8 +182,14 @@ class ProviderController extends Controller
             if ($request->id > 0) {
 
                 $user = User::find(Auth::user()->id);
-                if (!$user->getPermissions()->contains('name', 'status_level_2') && StatusHistory::isBlockedTableRecord("event_{$request->type}s", $request->id)) {
-                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
+                if (!$user->getPermissions()->contains('name', 'status_level_2')) {
+                    if (StatusHistory::isBlockedTableRecord("event_{$request->type}s", $request->id)) {
+                        return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
+                    }
+
+                    if (StatusHistory::isProviderBlockedInEvent($request->event_id, $request->provider_id, $request->type)) {
+                        return redirect()->back()->with('flash', ['message' => 'Esse fornecedor já possui um registro bloqueado neste evento!', 'type' => 'danger']);
+                    }
                 }
 
                 switch ($request->type) {
@@ -207,9 +221,17 @@ class ProviderController extends Controller
                 $provider->service_charge = $request->service_charge;
                 $provider->taxa_4bts = $request->taxa_4bts;
                 $provider->payment_method = $request->payment_method;
+                $provider->checkin_time = $request->checkin_time;
+                $provider->checkin_time_end = $request->checkin_time_end;
+                $provider->checkout_time = $request->checkout_time;
+                $provider->checkout_time_end = $request->checkout_time_end;
 
                 $provider->save();
             } else {
+                $user = User::find(Auth::user()->id);
+                if (!$user->getPermissions()->contains('name', 'status_level_2') && StatusHistory::isProviderBlockedInEvent($request->event_id, $request->provider_id, $request->type)) {
+                    return redirect()->back()->with('flash', ['message' => 'Esse fornecedor já possui um registro bloqueado neste evento!', 'type' => 'danger']);
+                }
 
                 switch ($request->type) {
                     case 'hotel':
@@ -227,7 +249,11 @@ class ProviderController extends Controller
                             'taxa_4bts' => $request->taxa_4bts,
                             'service_charge' => $request->service_charge,
                             'deadline_date' => $request->deadline,
-                            'payment_method' => $request->payment_method
+                            'payment_method' => $request->payment_method,
+                            'checkin_time' => $request->checkin_time,
+                            'checkin_time_end' => $request->checkin_time_end,
+                            'checkout_time' => $request->checkout_time,
+                            'checkout_time_end' => $request->checkout_time_end
                         ]);
                         break;
                     case 'ab':

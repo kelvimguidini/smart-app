@@ -82,9 +82,9 @@ const menuItem = [
                 role: ['broker_admin']
             },
             {
-                link: route().current('regime') ? '' : route('regime'),
+                link: '/regime',
                 name: 'Regime',
-                active: route().current('regime'),
+                active: window.location.pathname === '/regime',
                 role: ['regime_admin']
             },
             {
@@ -94,9 +94,9 @@ const menuItem = [
                 role: ['purpose_admin']
             },
             {
-                link: route().current('category') ? '' : route('category'),
+                link: '/category',
                 name: 'Categoria',
-                active: route().current('category'),
+                active: window.location.pathname === '/category',
                 role: ['category_admin']
             },
             {

@@ -21,8 +21,11 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "outputPath": "../public",
-            "baseHref": "/browser/",
+            "outputPath": {
+              "base": "../public",
+              "browser": ""
+            },
+            "baseHref": "/",
             "deleteOutputPath": false,
             "index": {
               "input": "src/index.html",

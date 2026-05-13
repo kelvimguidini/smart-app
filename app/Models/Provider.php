@@ -32,7 +32,11 @@ class Provider extends Model
         'has_hall',
         'active',
         'codestur',
-        'payment_method'
+        'payment_method',
+        'checkin_time',
+        'checkin_time_end',
+        'checkout_time',
+        'checkout_time_end'
     ];
 
     protected $table = 'provider';

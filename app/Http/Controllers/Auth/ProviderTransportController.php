@@ -142,8 +142,14 @@ class ProviderTransportController extends Controller
 
 
                 $user = User::find(Auth::user()->id);
-                if (!$user->getPermissions()->contains('name', 'status_level_2') && StatusHistory::isBlockedTableRecord('event_transports', $request->id)) {
-                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
+                if (!$user->getPermissions()->contains('name', 'status_level_2')) {
+                    if (StatusHistory::isBlockedTableRecord('event_transports', $request->id)) {
+                        return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
+                    }
+
+                    if (StatusHistory::isProviderBlockedInEvent($request->event_id, $request->provider_id, 'transport')) {
+                        return redirect()->back()->with('flash', ['message' => 'Esse fornecedor já possui um registro bloqueado neste evento!', 'type' => 'danger']);
+                    }
                 }
 
                 $provider = EventTransport::find($request->id);
@@ -165,6 +171,10 @@ class ProviderTransportController extends Controller
 
                 $provider->save();
             } else {
+                $user = User::find(Auth::user()->id);
+                if (!$user->getPermissions()->contains('name', 'status_level_2') && StatusHistory::isProviderBlockedInEvent($request->event_id, $request->provider_id, 'transport')) {
+                    return redirect()->back()->with('flash', ['message' => 'Esse fornecedor já possui um registro bloqueado neste evento!', 'type' => 'danger']);
+                }
 
                 $provider = EventTransport::create([
                     'transport_id' => $request->provider_id,

@@ -571,7 +571,11 @@ function quebraTexto($texto, $limite = 40)
                             <?php $hotelTaxa4BTS = ((($sumTotalHotelSale * $percIOF) / 100) + $sumTotalHotelSale) * ($hotelEvent->taxa_4bts / 100); ?>
                             <tr style="background-color: #ffe0b1">
                                 <td colspan="1"><b>Comentários:</b></td>
-                                <td colspan="5">{{ $hotelEvent->customer_observation }}</td>
+                                <td colspan="3">{{ $hotelEvent->customer_observation }}</td>
+                                <td colspan="2">
+                                    <b>Check-in:</b> {{ $hotelEvent->checkin_time }} - {{ $hotelEvent->checkin_time_end }} <br>
+                                    <b>Check-out:</b> {{ $hotelEvent->checkout_time }} - {{ $hotelEvent->checkout_time_end }}
+                                </td>
                                 <td><b>Serviço 4BTS ({{ number_format($hotelEvent->taxa_4bts, 2) }}%)</b></td>
                                 <td>{{ formatCurrency($hotelTaxa4BTS, $hotelEvent->currency->symbol) }}</td>
                                 <td><b>Prazo</b></td>

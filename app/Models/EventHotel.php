@@ -26,7 +26,11 @@ class EventHotel extends Model
         'service_charge',
         'deadline_date',
         'order',
-        'payment_method'
+        'payment_method',
+        'checkin_time',
+        'checkin_time_end',
+        'checkout_time',
+        'checkout_time_end'
     ];
     protected $table = 'event_hotel';
 

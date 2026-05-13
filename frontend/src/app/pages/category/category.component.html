@@ -1,16 +1,9 @@
-<app-authenticated-layout title="Apartamento">
+<app-authenticated-layout title="Categorias">
     <ng-container header>
         <div class="d-sm-flex align-items-center justify-content-between">
-            <h1 class="h3 mb-0 text-gray-800">Apartamento</h1>
+            <h1 class="h3 mb-0 text-gray-800">Categorias</h1>
         </div>
     </ng-container>
-
-    <!-- Loader overlay -->
-    <!-- <div *ngIf="isLoader" class="loader-overlay">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Carregando...</span>
-        </div>
-    </div> -->
 
     <div class="row position-relative">
         <!-- Form Section -->
@@ -86,12 +79,12 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr *ngFor="let apto of aptos" [class.table-info]="isAptoInEdition(apto.id)">
-                                        <th scope="row">{{ apto.id }}</th>
-                                        <td>{{ apto.name }}</td>
+                                    <tr *ngFor="let category of categories" [class.table-info]="isCategoryInEdition(category.id)">
+                                        <th scope="row">{{ category.id }}</th>
+                                        <td>{{ category.name }}</td>
                                         <td>
                                             <!-- Editar -->
-                                            <button class="btn btn-sm btn-info btn-icon-split me-2 mb-1" (click)="edit(apto)" title="Editar">
+                                            <button class="btn btn-sm btn-info btn-icon-split me-2 mb-1" (click)="edit(category)" title="Editar">
                                                 <span class="icon text-white-50">
                                                     <i class="fas fa-edit"></i>
                                                 </span>
@@ -104,7 +97,7 @@
                                                 [modalTitle]="'Atenção'" 
                                                 [message]="'Tem certeza que deseja apagar esse registro?'"
                                                 [okButtonLabel]="'Confirmar'"
-                                                (confirm)="deleteApto(apto.id)">
+                                                (confirm)="deleteCategory(category.id)">
                                                 <span modal-button class="icon text-white-50">
                                                     <i class="fas fa-trash"></i>
                                                 </span>
@@ -112,7 +105,7 @@
                                             </app-confirm-modal>
 
                                             <!-- Ativar -->
-                                            <button *ngIf="!apto.active" class="btn btn-sm btn-success btn-icon-split me-2 mb-1" (click)="activateApto(apto.id)" title="Ativar">
+                                            <button *ngIf="!category.active" class="btn btn-sm btn-success btn-icon-split me-2 mb-1" (click)="activateCategory(category.id)" title="Ativar">
                                                 <span class="icon text-white-50">
                                                     <i class="fas fa-check"></i>
                                                 </span>
@@ -121,12 +114,12 @@
 
                                             <!-- Inativar -->
                                             <app-confirm-modal 
-                                                *ngIf="apto.active"
+                                                *ngIf="category.active"
                                                 [btnClass]="'btn btn-sm btn-warning btn-icon-split me-2 mb-1'" 
                                                 [modalTitle]="'Atenção'" 
                                                 [message]="'Tem certeza que deseja inativar esse registro?'"
                                                 [okButtonLabel]="'Confirmar'"
-                                                (confirm)="deactivateApto(apto.id)">
+                                                (confirm)="deactivateCategory(category.id)">
                                                 <span modal-button class="icon text-white-50">
                                                     <i class="fas fa-ban"></i>
                                                 </span>
@@ -134,9 +127,9 @@
                                             </app-confirm-modal>
                                         </td>
                                     </tr>
-                                    <tr *ngIf="aptos.length === 0 && !isLoader">
+                                    <tr *ngIf="categories.length === 0 && !isLoader">
                                         <td colspan="3" class="text-center py-4 text-muted">
-                                            Nenhum apartamento encontrado.
+                                            Nenhuma categoria encontrada.
                                         </td>
                                     </tr>
                                 </tbody>

@@ -55,7 +55,12 @@ const form = useForm({
     customer_observation: '',
     type: '',
     taxa_4bts: null, // Novo campo
-    payment_method: ''
+    payment_method: '',
+    checkin_time: '',
+    checkin_time_end: '',
+    checkout_time: '',
+    checkout_time_end: '',
+    override_times: false
 });
 
 const submit = () => {
@@ -114,7 +119,15 @@ const selectProvider = (id) => {
         form.iva_percent = prov.iva_percent;
         form.service_percent = prov.service_percent;
 
+
         form.payment_method = prov.payment_method || 'INDEFINIDO';
+
+        if (!form.id || !form.override_times) {
+            form.checkin_time = prov.checkin_time || '';
+            form.checkin_time_end = prov.checkin_time_end || '';
+            form.checkout_time = prov.checkout_time || '';
+            form.checkout_time_end = prov.checkout_time_end || '';
+        }
 
         if (props.selectCallBack && typeof props.selectCallBack === 'function') {
             props.selectCallBack(id);
@@ -191,8 +204,31 @@ const edit = () => {
         form.internal_observation = props.eventProvider.internal_observation;
         form.customer_observation = props.eventProvider.customer_observation;
 
+
         form.taxa_4bts = props.eventProvider.taxa_4bts;
         form.payment_method = props.eventProvider.payment_method || 'INDEFINIDO';
+
+        form.checkin_time = props.eventProvider.checkin_time || '';
+        form.checkin_time_end = props.eventProvider.checkin_time_end || '';
+        form.checkout_time = props.eventProvider.checkout_time || '';
+        form.checkout_time_end = props.eventProvider.checkout_time_end || '';
+
+        // Check if values differ from provider to set override_times
+        var prov = props.providers.filter((item) => { 
+            let id = props.type == 'hotel' ? props.eventProvider.hotel_id : 
+                     props.type == 'ab' ? props.eventProvider.ab_id :
+                     props.type == 'hall' ? props.eventProvider.hall_id :
+                     props.type == 'add' ? props.eventProvider.add_id :
+                     props.type == 'transport' ? props.eventProvider.transport_id : 0;
+            return item.id == id;
+        })[0] || null;
+
+        if (prov) {
+            form.override_times = (form.checkin_time != prov.checkin_time || 
+                                   form.checkin_time_end != prov.checkin_time_end ||
+                                   form.checkout_time != prov.checkout_time ||
+                                   form.checkout_time_end != prov.checkout_time_end);
+        }
 
         $('#currency' + props.type).val(props.eventProvider.currency_id).trigger('change');
     }
@@ -384,6 +420,54 @@ const updateForm = () => {
                         autofocus min="0" step="0.01" autocomplete="taxa_4bts" />
                 </div>
             </div>
+
+            <!-- Checkin / Checkout Times -->
+            <div class="col-12" v-if="type === 'hotel'">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="override_times" v-model="form.override_times">
+                                    <label class="form-check-label" for="override_times">Alterar horários padrão do hotel?</label>
+                                </div>
+                            </div>
+                            <div class="col" v-if="form.override_times">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group mb-0">
+                                            <InputLabel value="Check-in Início:" />
+                                            <TextInput type="time" class="form-control form-control-sm" v-model="form.checkin_time" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group mb-0">
+                                            <InputLabel value="Check-in Fim:" />
+                                            <TextInput type="time" class="form-control form-control-sm" v-model="form.checkin_time_end" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group mb-0">
+                                            <InputLabel value="Check-out Início:" />
+                                            <TextInput type="time" class="form-control form-control-sm" v-model="form.checkout_time" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group mb-0">
+                                            <InputLabel value="Check-out Fim:" />
+                                            <TextInput type="time" class="form-control form-control-sm" v-model="form.checkout_time_end" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col text-muted small" v-else>
+                                Usando horários padrão: {{ form.checkin_time }} - {{ form.checkin_time_end }} / {{ form.checkout_time }} - {{ form.checkout_time_end }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-12 d-flex justify-content-end">
                 <PrimaryButton css-class="btn btn-primary m-1" :class="{ 'opacity-25': form.processing }"
                     :disabled="form.processing">

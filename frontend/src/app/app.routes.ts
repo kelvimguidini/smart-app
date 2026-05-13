@@ -5,6 +5,8 @@ import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
 import { RolesComponent } from './pages/roles/roles.component';
 import { AptoComponent } from './pages/apto/apto.component';
+import { RegimeComponent } from './pages/regime/regime.component';
+import { CategoryComponent } from './pages/category/category.component';
 import { VerifyEmailComponent } from './pages/verify-email/verify-email.component';
 
 import { authGuard } from './guards/auth.guard';
@@ -18,5 +20,7 @@ export const routes: Routes = [
     { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard], title: 'Dashboard - SmartApp' },
     { path: 'roles', component: RolesComponent, canActivate: [authGuard], title: 'Grupo de Acesso - SmartApp' },
     { path: 'apto', component: AptoComponent, canActivate: [authGuard], title: 'Apartamento - SmartApp' },
+    { path: 'regime', component: RegimeComponent, canActivate: [authGuard], title: 'Regime - SmartApp' },
+    { path: 'category', component: CategoryComponent, canActivate: [authGuard], title: 'Categorias - SmartApp' },
     { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
 ];

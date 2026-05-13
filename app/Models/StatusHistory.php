@@ -47,6 +47,40 @@ class StatusHistory extends Model
         return self::isBlockedStatus(self::latestFor($table, $tableId)?->status);
     }
 
+    public static function isProviderBlockedInEvent(int $eventId, int $providerId, string $type): bool
+    {
+        $checks = [];
+        if (in_array($type, ['hotel', 'ab', 'hall'])) {
+            $checks = [
+                ['table' => 'event_hotels', 'model' => EventHotel::class, 'col' => 'hotel_id'],
+                ['table' => 'event_abs', 'model' => EventAB::class, 'col' => 'ab_id'],
+                ['table' => 'event_halls', 'model' => EventHall::class, 'col' => 'hall_id'],
+            ];
+        } elseif ($type === 'add') {
+            $checks = [
+                ['table' => 'event_adds', 'model' => EventAdd::class, 'col' => 'add_id'],
+            ];
+        } elseif ($type === 'transport') {
+            $checks = [
+                ['table' => 'event_transports', 'model' => EventTransport::class, 'col' => 'transport_id'],
+            ];
+        }
+
+        foreach ($checks as $check) {
+            $ids = $check['model']::where('event_id', $eventId)
+                ->where($check['col'], $providerId)
+                ->pluck('id');
+
+            foreach ($ids as $id) {
+                if (self::isBlockedTableRecord($check['table'], $id)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     public function user()
     {
         return $this->hasOne(User::class, 'id', 'user_id');

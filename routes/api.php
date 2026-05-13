@@ -39,4 +39,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('aptos/{id}', [\App\Http\Controllers\Api\AptoApiController::class, 'destroy']);
     Route::put('aptos/{id}/activate', [\App\Http\Controllers\Api\AptoApiController::class, 'activateItem']);
     Route::put('aptos/{id}/deactivate', [\App\Http\Controllers\Api\AptoApiController::class, 'deactivateItem']);
+
+    // Rotas de Regimes
+    Route::get('regimes', [\App\Http\Controllers\Api\RegimeApiController::class, 'index']);
+    Route::post('regimes', [\App\Http\Controllers\Api\RegimeApiController::class, 'store']);
+    Route::delete('regimes/{id}', [\App\Http\Controllers\Api\RegimeApiController::class, 'destroy']);
+    Route::put('regimes/{id}/activate', [\App\Http\Controllers\Api\RegimeApiController::class, 'activateItem']);
+    Route::put('regimes/{id}/deactivate', [\App\Http\Controllers\Api\RegimeApiController::class, 'deactivateItem']);
+
+    // Rotas de Categorias
+    Route::get('categories', [\App\Http\Controllers\Api\CategoryApiController::class, 'index']);
+    Route::post('categories', [\App\Http\Controllers\Api\CategoryApiController::class, 'store']);
+    Route::delete('categories/{id}', [\App\Http\Controllers\Api\CategoryApiController::class, 'destroy']);
+    Route::put('categories/{id}/activate', [\App\Http\Controllers\Api\CategoryApiController::class, 'activateItem']);
+    Route::put('categories/{id}/deactivate', [\App\Http\Controllers\Api\CategoryApiController::class, 'deactivateItem']);
 });

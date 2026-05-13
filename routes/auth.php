@@ -47,7 +47,7 @@ use Inertia\Inertia;
 Route::middleware(['auth', 'cors'])->group(function () {
 
     Route::get('/', function (Request $request) {
-        $path = base_path('public/browser/angular.html');
+        $path = base_path('public/angular.html');
         if ($request->header('X-Inertia')) {
             return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
         }
@@ -55,7 +55,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
     })->name('dashboard');
 
     Route::get('dashboard', function (Request $request) {
-        $path = base_path('public/browser/angular.html');
+        $path = base_path('public/angular.html');
         if (file_exists($path)) {
             if ($request->header('X-Inertia')) {
                 return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
@@ -66,7 +66,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
     });
 
     Route::get('roles', function (Request $request) {
-        $path = base_path('public/browser/angular.html');
+        $path = base_path('public/angular.html');
         if (file_exists($path)) {
             if ($request->header('X-Inertia')) {
                 return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
@@ -77,7 +77,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
     })->name('roles');
 
     Route::get('apto', function (Request $request) {
-        $path = base_path('public/browser/angular.html');
+        $path = base_path('public/angular.html');
         if (file_exists($path)) {
             if ($request->header('X-Inertia')) {
                 return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
@@ -168,24 +168,32 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     // Apto routes migrated to api.php (Angular)
 
-    Route::get('category', [CategoryController::class, 'create'])
-        ->name('category');
+    Route::get('category', function (Request $request) {
+        $path = base_path('public/angular.html');
+        if (file_exists($path)) {
+            if ($request->header('X-Inertia')) {
+                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
+            }
+            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
+        }
+        abort(404);
+    })->name('category');
 
-    Route::post('category-save', [CategoryController::class, 'store'])
-        ->name('category-save');
-
-    Route::delete('category-delete', [CategoryController::class, 'delete'])
-        ->name('category-delete');
+    // Category save and delete routes migrated to api.php (Angular)
 
 
-    Route::get('regime', [RegimeController::class, 'create'])
-        ->name('regime');
+    Route::get('regime', function (Request $request) {
+        $path = base_path('public/angular.html');
+        if (file_exists($path)) {
+            if ($request->header('X-Inertia')) {
+                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
+            }
+            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
+        }
+        abort(404);
+    })->name('regime');
 
-    Route::post('regime-save', [RegimeController::class, 'store'])
-        ->name('regime-save');
-
-    Route::delete('regime-delete', [RegimeController::class, 'delete'])
-        ->name('regime-delete');
+    // Regime save and delete routes migrated to api.php (Angular)
 
 
 
@@ -529,8 +537,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::put('/brands/activate/{id}', [BrandController::class, 'activateM'])->name('brand-activate');
     Route::put('/brands/deactivate/{id}', [BrandController::class, 'deactivateM'])->name('brand-deactivate');
 
-    Route::put('/categories/activate/{id}', [CategoryController::class, 'activateM'])->name('categories-activate');
-    Route::put('/categories/deactivate/{id}', [CategoryController::class, 'deactivateM'])->name('categories-deactivate');
+    // Categories activate/deactivate routes migrated to api.php (Angular)
 
     // Apto activate/deactivate routes migrated to api.php (Angular)
 
@@ -552,8 +559,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::put('/services/activate/{id}', [ServiceController::class, 'activateM'])->name('services-activate');
     Route::put('/services/deactivate/{id}', [ServiceController::class, 'deactivateM'])->name('services-deactivate');
 
-    Route::put('/regimes/activate/{id}', [RegimeController::class, 'activateM'])->name('regimes-activate');
-    Route::put('/regimes/deactivate/{id}', [RegimeController::class, 'deactivateM'])->name('regimes-deactivate');
+    // Regimes activate/deactivate routes migrated to api.php (Angular)
 
     Route::put('/purposes/activate/{id}', [PurposeController::class, 'activateM'])->name('purposes-activate');
     Route::put('/purposes/deactivate/{id}', [PurposeController::class, 'deactivateM'])->name('purposes-deactivate');

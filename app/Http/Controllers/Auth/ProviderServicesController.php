@@ -136,8 +136,14 @@ class ProviderServicesController extends Controller // Atualize a herança
             if ($request->id > 0) {
 
                 $user = User::find(Auth::user()->id);
-                if (!$user->getPermissions()->contains('name', 'status_level_2') && StatusHistory::isBlockedTableRecord('event_adds', $request->id)) {
-                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
+                if (!$user->getPermissions()->contains('name', 'status_level_2')) {
+                    if (StatusHistory::isBlockedTableRecord('event_adds', $request->id)) {
+                        return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
+                    }
+
+                    if (StatusHistory::isProviderBlockedInEvent($request->event_id, $request->provider_id, 'add')) {
+                        return redirect()->back()->with('flash', ['message' => 'Esse fornecedor já possui um registro bloqueado neste evento!', 'type' => 'danger']);
+                    }
                 }
 
                 $provider = EventAdd::find($request->id);
@@ -160,6 +166,11 @@ class ProviderServicesController extends Controller // Atualize a herança
 
                 $provider->save();
             } else {
+                $user = User::find(Auth::user()->id);
+                if (!$user->getPermissions()->contains('name', 'status_level_2') && StatusHistory::isProviderBlockedInEvent($request->event_id, $request->provider_id, 'add')) {
+                    return redirect()->back()->with('flash', ['message' => 'Esse fornecedor já possui um registro bloqueado neste evento!', 'type' => 'danger']);
+                }
+
                 $provider = EventAdd::create([
                     'add_id' => $request->provider_id,
                     'event_id' => $request->event_id,

@@ -30,7 +30,11 @@ const form = useForm({
     service_percent: null,
     iva_percent: null,
     iss_percent: null,
-    payment_method: 'INDEFINIDO'
+    payment_method: 'INDEFINIDO',
+    checkin_time: '',
+    checkin_time_end: '',
+    checkout_time: '',
+    checkout_time_end: ''
 });
 
 const formDelete = useForm({
@@ -76,6 +80,10 @@ const edit = (hotel) => {
         form.service_percent = hotel.service_percent;
         form.iva_percent = hotel.iva_percent;
         form.payment_method = hotel.payment_method || 'INDEFINIDO';
+        form.checkin_time = hotel.checkin_time || '';
+        form.checkin_time_end = hotel.checkin_time_end || '';
+        form.checkout_time = hotel.checkout_time || '';
+        form.checkout_time_end = hotel.checkout_time_end || '';
 
         $('#city').val(hotel.city_id).trigger('change');
         $('.phone').val(form.phone).trigger('keyup');
@@ -263,6 +271,28 @@ const deactivate = (id) => {
                                             autofocus autocomplete="contact_reservations" />
                                         <InputError class="mt-2 text-danger"
                                             :message="form.errors.contact_reservations" />
+                                    </div>
+                                </div>
+
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <InputLabel for="checkin_time" value="Check-in (Início - Fim):" />
+                                        <div class="d-flex align-items-center">
+                                            <TextInput type="time" class="form-control mr-2" v-model="form.checkin_time" />
+                                            <span> - </span>
+                                            <TextInput type="time" class="form-control ml-2" v-model="form.checkin_time_end" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <InputLabel for="checkout_time" value="Check-out (Início - Fim):" />
+                                        <div class="d-flex align-items-center">
+                                            <TextInput type="time" class="form-control mr-2" v-model="form.checkout_time" />
+                                            <span> - </span>
+                                            <TextInput type="time" class="form-control ml-2" v-model="form.checkout_time_end" />
+                                        </div>
                                     </div>
                                 </div>
 

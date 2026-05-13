@@ -57,8 +57,15 @@ class TransportController extends Controller
         try {
 
             $user = User::find(Auth::user()->id);
-            if (!$user->getPermissions()->contains('name', 'status_level_2') && StatusHistory::isBlockedTableRecord('event_transports', $request->event_transport_id)) {
-                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
+            if (!$user->getPermissions()->contains('name', 'status_level_2')) {
+                if (StatusHistory::isBlockedTableRecord('event_transports', $request->event_transport_id)) {
+                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
+                }
+
+                $eventTransport = EventTransport::find($request->event_transport_id);
+                if (StatusHistory::isProviderBlockedInEvent($eventTransport->event_id, $eventTransport->transport_id, 'transport')) {
+                    return redirect()->back()->with('flash', ['message' => 'Esse fornecedor já possui um registro bloqueado neste evento!', 'type' => 'danger']);
+                }
             }
 
             if ($request->id > 0) {
@@ -161,11 +168,20 @@ class TransportController extends Controller
 
 
             $user = User::find(Auth::user()->id);
-            if (!$user->getPermissions()->contains('name', 'status_level_2') && StatusHistory::isBlockedTableRecord('event_transports', $eventHotel->id)) {
-                return redirect()->back()->with('flash', [
-                    'message' => 'Esse registro não pode ser apagado devido ao status atual!',
-                    'type' => 'danger'
-                ]);
+            if (!$user->getPermissions()->contains('name', 'status_level_2')) {
+                if (StatusHistory::isBlockedTableRecord('event_transports', $eventHotel->id)) {
+                    return redirect()->back()->with('flash', [
+                        'message' => 'Esse registro não pode ser apagado devido ao status atual!',
+                        'type' => 'danger'
+                    ]);
+                }
+
+                if (StatusHistory::isProviderBlockedInEvent($eventHotel->event_id, $eventHotel->transport_id, 'transport')) {
+                    return redirect()->back()->with('flash', [
+                        'message' => 'Esse fornecedor já possui um registro bloqueado neste evento!',
+                        'type' => 'danger'
+                    ]);
+                }
             }
             // Excluir o registro do Opt
             $opt->delete();

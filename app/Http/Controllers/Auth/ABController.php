@@ -46,8 +46,15 @@ class ABController extends Controller
         try {
 
             $user = User::find(Auth::user()->id);
-            if (!$user->getPermissions()->contains('name', 'status_level_2') && StatusHistory::isBlockedTableRecord('event_abs', $request->event_ab_id)) {
-                return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
+            if (!$user->getPermissions()->contains('name', 'status_level_2')) {
+                if (StatusHistory::isBlockedTableRecord('event_abs', $request->event_ab_id)) {
+                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
+                }
+
+                $eventAB = EventAB::find($request->event_ab_id);
+                if (StatusHistory::isProviderBlockedInEvent($eventAB->event_id, $eventAB->ab_id, 'ab')) {
+                    return redirect()->back()->with('flash', ['message' => 'Esse fornecedor já possui um registro bloqueado neste evento!', 'type' => 'danger']);
+                }
             }
 
             if ($request->id > 0) {
@@ -144,11 +151,20 @@ class ABController extends Controller
             }
 
             $user = User::find(Auth::user()->id);
-            if (!$user->getPermissions()->contains('name', 'status_level_2') && StatusHistory::isBlockedTableRecord('event_ab', $eventHotel->id)) {
-                return redirect()->back()->with('flash', [
-                    'message' => 'Esse registro não pode ser apagado devido ao status atual!',
-                    'type' => 'danger'
-                ]);
+            if (!$user->getPermissions()->contains('name', 'status_level_2')) {
+                if (StatusHistory::isBlockedTableRecord('event_abs', $eventHotel->id)) {
+                    return redirect()->back()->with('flash', [
+                        'message' => 'Esse registro não pode ser apagado devido ao status atual!',
+                        'type' => 'danger'
+                    ]);
+                }
+
+                if (StatusHistory::isProviderBlockedInEvent($eventHotel->event_id, $eventHotel->ab_id, 'ab')) {
+                    return redirect()->back()->with('flash', [
+                        'message' => 'Esse fornecedor já possui um registro bloqueado neste evento!',
+                        'type' => 'danger'
+                    ]);
+                }
             }
 
             $opt->delete();
