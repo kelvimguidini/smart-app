@@ -142,7 +142,7 @@ export class MenuComponent {
       collapseHeader: 'Cotações',
       collapsed: true,
       subMenu: [
-        { link: '/event-create', name: 'Cadastro Inicial', role: 'event_admin' },
+        { link: '/event', name: 'Cadastro Inicial', role: 'event_admin' },
         { link: '/event-list', name: 'Listar', role: ['event_admin', 'hotel_operator', 'land_operator', 'air_operator'] }
       ],
     },
