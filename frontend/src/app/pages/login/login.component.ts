@@ -30,6 +30,7 @@ export class LoginComponent {
 
   errors: any = {};
   processing = false;
+  showPassword = false;
 
   submit() {
     this.processing = true;

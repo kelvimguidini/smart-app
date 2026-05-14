@@ -1,41 +1,48 @@
-<div class="bg-gradient-primary min-vh-100 d-flex flex-column justify-content-center">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-xl-10 col-lg-12 col-md-9">
-                <div class="card o-hidden border-0 shadow-lg my-5">
-                    <div class="card-body p-0">
-                        <div class="row">
-                            <div class="col-lg-6 d-none d-lg-block bg-password-image"></div>
-                            <div class="col-lg-6">
-                                <div class="p-5">
-                                    <div class="text-center">
-                                        <h1 class="h4 text-gray-900 mb-4">Ativar Conta</h1>
-                                    </div>
-                                    
-                                    <div class="mb-4 text-sm text-gray-600">
-                                        Sua conta já foi criada! Antes de começar, confirme o seu endereço de cadastro clicando no link presente no e-mail que te enviamos. Caso não tenha recebido o e-mail, teremos o maior prazer em te enviar outro.
-                                    </div>
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-indigo-50 px-4 py-12">
+    <div class="w-full max-w-md animate-in">
+        <!-- Logo/Brand Section -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-3xl shadow-xl mb-4 transform hover:scale-105 transition-transform">
+                <img src="/logo.png" alt="SmartApp Logo" class="w-12 h-12 object-contain">
+            </div>
+            <h2 class="text-gray-800 text-3xl font-bold tracking-tight">SmartApp</h2>
+            <p class="text-gray-500 mt-2 opacity-80 font-medium">Verificação de E-mail</p>
+        </div>
 
-                                    <div class="alert alert-success" role="alert" *ngIf="verificationLinkSent">
-                                        Um novo link de verificação foi enviado para o endereço de e-mail de cadastro.
-                                    </div>
-
-                                    <form class="user" (ngSubmit)="submit()">
-                                        <button type="submit" class="btn btn-primary btn-user btn-block" [disabled]="processing" [class.opacity-50]="processing">
-                                            <span *ngIf="processing" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                            Enviar novamente o e-mail de verificação
-                                        </button>
-                                    </form>
-
-                                    <hr>
-                                    <div class="text-center">
-                                        <a class="small" href="/login">Voltar ao Login</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <div class="bg-white/95 backdrop-blur-sm shadow-2xl rounded-3xl overflow-hidden border border-white/20">
+            <div class="px-8 py-10">
+                <div class="mb-8 text-sm text-gray-600 leading-relaxed text-center">
+                    Sua conta já foi criada! Antes de começar, confirme o seu endereço de cadastro clicando no link presente no e-mail que te enviamos. 
+                    Caso não tenha recebido o e-mail, teremos o maior prazer em te enviar outro.
                 </div>
+
+                <!-- Session Status -->
+                <div *ngIf="verificationLinkSent" class="mb-6 p-4 bg-green-50 rounded-2xl border border-green-100 font-medium text-sm text-green-700 animate-in">
+                    <i class="fas fa-check-circle me-2"></i>Um novo link de verificação foi enviado para o endereço de e-mail de cadastro.
+                </div>
+
+                <form (ngSubmit)="submit()" class="space-y-6">
+                    <div class="pt-2">
+                        <button type="submit" 
+                            class="w-full flex items-center justify-center px-6 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-200 transform active:scale-[0.98] transition-all disabled:opacity-50" 
+                            [disabled]="processing">
+                            <span *ngIf="processing" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                            <i *ngIf="!processing" class="fas fa-paper-plane me-2"></i>
+                            {{ processing ? 'Enviando...' : 'Reenviar E-mail de Verificação' }}
+                        </button>
+                    </div>
+
+                    <div class="text-center">
+                        <a routerLink="/login" class="inline-flex items-center text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors">
+                            <i class="fas fa-arrow-left me-2"></i>Voltar para o login
+                        </a>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Footer decoration -->
+            <div class="px-8 py-4 bg-gray-50 border-t border-gray-100 text-center">
+                <span class="text-xs text-gray-400 font-medium">&copy; CODE WEY Desenvolvimento</span>
             </div>
         </div>
     </div>

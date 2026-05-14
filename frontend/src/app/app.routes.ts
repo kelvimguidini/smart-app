@@ -7,6 +7,9 @@ import { RolesComponent } from './pages/roles/roles.component';
 import { AptoComponent } from './pages/apto/apto.component';
 import { RegimeComponent } from './pages/regime/regime.component';
 import { CategoryComponent } from './pages/category/category.component';
+import { PurposeComponent } from './pages/purpose/purpose.component';
+import { ServiceTypeComponent } from './pages/service-type/service-type.component';
+import { ConfirmPasswordComponent } from './pages/confirm-password/confirm-password.component';
 import { VerifyEmailComponent } from './pages/verify-email/verify-email.component';
 
 import { authGuard } from './guards/auth.guard';
@@ -22,5 +25,8 @@ export const routes: Routes = [
     { path: 'apto', component: AptoComponent, canActivate: [authGuard], title: 'Apartamento - SmartApp' },
     { path: 'regime', component: RegimeComponent, canActivate: [authGuard], title: 'Regime - SmartApp' },
     { path: 'category', component: CategoryComponent, canActivate: [authGuard], title: 'Categorias - SmartApp' },
+    { path: 'purpose', component: PurposeComponent, canActivate: [authGuard], title: 'Propósitos - SmartApp' },
+    { path: 'service-type', component: ServiceTypeComponent, canActivate: [authGuard], title: 'Tipos de Serviço - SmartApp' },
+    { path: 'confirm-password', component: ConfirmPasswordComponent, canActivate: [authGuard], title: 'Confirmar Senha - SmartApp' },
     { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
 ];

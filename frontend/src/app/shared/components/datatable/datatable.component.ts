@@ -14,7 +14,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 export class DatatableComponent implements OnInit, OnDestroy {
   @Input() pagination: any = {
     current_page: 1,
-    per_page: 20,
+    per_page: 10,
     total: 0,
     last_page: 1,
     from: 0,

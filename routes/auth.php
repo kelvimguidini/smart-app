@@ -197,14 +197,18 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
 
 
-    Route::get('purpose', [PurposeController::class, 'create'])
-        ->name('purpose');
+    Route::get('purpose', function (Request $request) {
+        $path = base_path('public/angular.html');
+        if (file_exists($path)) {
+            if ($request->header('X-Inertia')) {
+                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
+            }
+            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
+        }
+        abort(404);
+    })->name('purpose');
 
-    Route::post('purpose-save', [PurposeController::class, 'store'])
-        ->name('purpose-save');
-
-    Route::delete('purpose-delete', [PurposeController::class, 'delete'])
-        ->name('purpose-delete');
+    // Purpose save and delete routes migrated to api.php (Angular)
 
 
     Route::get('broker', [BrokerController::class, 'create'])
@@ -322,14 +326,18 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
 
 
-    Route::get('service-type', [ServiceTypeController::class, 'create'])
-        ->name('service-type');
+    Route::get('service-type', function (Request $request) {
+        $path = base_path('public/angular.html');
+        if (file_exists($path)) {
+            if ($request->header('X-Inertia')) {
+                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
+            }
+            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
+        }
+        abort(404);
+    })->name('service-type');
 
-    Route::post('service-type-save', [ServiceTypeController::class, 'store'])
-        ->name('service-type-save');
-
-    Route::delete('service-type-delete', [ServiceTypeController::class, 'delete'])
-        ->name('service-type-delete');
+    // Service Type save and delete routes migrated to api.php (Angular)
 
 
 
@@ -547,8 +555,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::put('/transport_services/activate/{id}', [TransportServiceController::class, 'activateM'])->name('transport_services-activate');
     Route::put('/transport_services/deactivate/{id}', [TransportServiceController::class, 'deactivateM'])->name('transport_services-deactivate');
 
-    Route::put('/service_types/activate/{id}', [ServiceTypeController::class, 'activateM'])->name('service_types-activate');
-    Route::put('/service_types/deactivate/{id}', [ServiceTypeController::class, 'deactivateM'])->name('service_types-deactivate');
+    // Service Type activate/deactivate routes migrated to api.php (Angular)
 
     Route::put('/service_halls/activate/{id}', [ServiceHallController::class, 'activateM'])->name('service_halls-activate');
     Route::put('/service_halls/deactivate/{id}', [ServiceHallController::class, 'deactivateM'])->name('service_halls-deactivate');
@@ -561,8 +568,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     // Regimes activate/deactivate routes migrated to api.php (Angular)
 
-    Route::put('/purposes/activate/{id}', [PurposeController::class, 'activateM'])->name('purposes-activate');
-    Route::put('/purposes/deactivate/{id}', [PurposeController::class, 'deactivateM'])->name('purposes-deactivate');
+    // Purposes activate/deactivate routes migrated to api.php (Angular)
 
     Route::put('/purpose_halls/activate/{id}', [PurposeHallController::class, 'activateM'])->name('purpose_halls-activate');
     Route::put('/purpose_halls/deactivate/{id}', [PurposeHallController::class, 'deactivateM'])->name('purpose_halls-deactivate');

@@ -53,4 +53,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('categories/{id}', [\App\Http\Controllers\Api\CategoryApiController::class, 'destroy']);
     Route::put('categories/{id}/activate', [\App\Http\Controllers\Api\CategoryApiController::class, 'activateItem']);
     Route::put('categories/{id}/deactivate', [\App\Http\Controllers\Api\CategoryApiController::class, 'deactivateItem']);
+
+    // Rotas de Propósitos (Purpose)
+    Route::get('purposes', [\App\Http\Controllers\Api\PurposeApiController::class, 'index']);
+    Route::post('purposes', [\App\Http\Controllers\Api\PurposeApiController::class, 'store']);
+    Route::delete('purposes/{id}', [\App\Http\Controllers\Api\PurposeApiController::class, 'destroy']);
+    Route::put('purposes/{id}/activate', [\App\Http\Controllers\Api\PurposeApiController::class, 'activateItem']);
+    Route::put('purposes/{id}/deactivate', [\App\Http\Controllers\Api\PurposeApiController::class, 'deactivateItem']);
+
+    // Rotas de Tipos de Serviço (ServiceType)
+    Route::get('service-types', [\App\Http\Controllers\Api\ServiceTypeApiController::class, 'index']);
+    Route::post('service-types', [\App\Http\Controllers\Api\ServiceTypeApiController::class, 'store']);
+    Route::delete('service-types/{id}', [\App\Http\Controllers\Api\ServiceTypeApiController::class, 'destroy']);
+    Route::put('service-types/{id}/activate', [\App\Http\Controllers\Api\ServiceTypeApiController::class, 'activateItem']);
+    Route::put('service-types/{id}/deactivate', [\App\Http\Controllers\Api\ServiceTypeApiController::class, 'deactivateItem']);
 });

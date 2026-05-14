@@ -1,7 +1,7 @@
-<app-authenticated-layout title="Apartamento">
+<app-authenticated-layout title="Tipos de Serviço">
     <ng-container header>
         <div class="d-sm-flex align-items-center justify-content-between mb-4 animate-in">
-            <h1 class="h3 mb-0 text-gray-800">Gerenciamento de Apartamentos</h1>
+            <h1 class="h3 mb-0 text-gray-800">Gerenciamento de Tipos de Serviço</h1>
         </div>
     </ng-container>
 
@@ -11,20 +11,20 @@
             <div class="card mb-4 border-left-primary">
                 <div class="card-body">
                     <h5 class="card-title mb-4 text-primary font-weight-bold">
-                        <i class="fas fa-edit me-2"></i>{{ inEdition > 0 ? 'Editar Apartamento' : 'Cadastrar Novo Apartamento' }}
+                        <i class="fas fa-concierge-bell me-2"></i>{{ inEdition > 0 ? 'Editar Tipo de Serviço' : 'Novo Tipo de Serviço' }}
                     </h5>
                     <form (ngSubmit)="submit()">
                         <div class="row align-items-end">
                             <div class="col-lg-8">
                                 <div class="form-group mb-0">
-                                    <label for="name" class="form-label">Nome do Apartamento</label>
+                                    <label for="name" class="form-label">Nome do Serviço</label>
                                     <input 
                                         type="text" 
                                         id="name" 
                                         class="form-control" 
                                         [(ngModel)]="form.name" 
                                         name="name" 
-                                        placeholder="Ex: Apartamento 101"
+                                        placeholder="Ex: Recepção"
                                         required 
                                         autofocus>
                                     
@@ -67,7 +67,7 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between mb-4">
                         <h5 class="card-title mb-0 text-secondary font-weight-bold">
-                            <i class="fas fa-list me-2"></i>Lista de Apartamentos
+                            <i class="fas fa-list me-2"></i>Lista de Tipos de Serviço
                         </h5>
                     </div>
 
@@ -96,41 +96,41 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr *ngFor="let apto of aptos" [class.table-info]="isAptoInEdition(apto.id)">
-                                        <th scope="row" class="font-weight-bold">{{ apto.id }}</th>
+                                    <tr *ngFor="let serviceType of serviceTypes" [class.table-info]="isServiceTypeInEdition(serviceType.id)">
+                                        <th scope="row" class="font-weight-bold">{{ serviceType.id }}</th>
                                         <td>
-                                            <span [class.text-muted]="!apto.active">{{ apto.name }}</span>
-                                            <span *ngIf="!apto.active" class="badge bg-light text-muted ms-2">Inativo</span>
+                                            <span [class.text-muted]="!serviceType.active">{{ serviceType.name }}</span>
+                                            <span *ngIf="!serviceType.active" class="badge bg-light text-muted ms-2">Inativo</span>
                                         </td>
                                         <td class="text-end">
                                             <div class="d-flex justify-content-end gap-2 flex-wrap">
                                                 <!-- Editar -->
-                                                <button class="btn btn-sm btn-info text-white shadow-sm" (click)="edit(apto)" title="Editar">
+                                                <button class="btn btn-sm btn-info text-white shadow-sm" (click)="edit(serviceType)" title="Editar">
                                                     <i class="fas fa-edit me-1"></i> Editar
                                                 </button>
 
                                                 <!-- Ativar/Inativar -->
-                                                <button *ngIf="!apto.active" class="btn btn-sm btn-success shadow-sm" (click)="activateApto(apto.id)" title="Ativar">
+                                                <button *ngIf="!serviceType.active" class="btn btn-sm btn-success shadow-sm" (click)="activateServiceType(serviceType.id)" title="Ativar">
                                                     <i class="fas fa-check me-1"></i> Ativar
                                                 </button>
 
                                                 <app-confirm-modal 
-                                                    *ngIf="apto.active"
+                                                    *ngIf="serviceType.active"
                                                     [btnClass]="'btn btn-sm btn-warning shadow-sm'" 
-                                                    [modalTitle]="'Inativar Apartamento'" 
-                                                    [message]="'Tem certeza que deseja inativar o apartamento ' + apto.name + '?'"
+                                                    [modalTitle]="'Inativar Tipo de Serviço'" 
+                                                    [message]="'Tem certeza que deseja inativar o tipo de serviço ' + serviceType.name + '?'"
                                                     [okButtonLabel]="'Confirmar'"
-                                                    (confirm)="deactivateApto(apto.id)">
+                                                    (confirm)="deactivateServiceType(serviceType.id)">
                                                     <span modal-button><i class="fas fa-ban me-1"></i> Inativar</span>
                                                 </app-confirm-modal>
 
                                                 <!-- Deletar -->
                                                 <app-confirm-modal 
                                                     [btnClass]="'btn btn-sm btn-danger shadow-sm'" 
-                                                    [modalTitle]="'Excluir Apartamento'" 
-                                                    [message]="'Ação irreversível! Deseja realmente excluir o apartamento ' + apto.name + '?'"
+                                                    [modalTitle]="'Excluir Tipo de Serviço'" 
+                                                    [message]="'Ação irreversível! Deseja realmente excluir o tipo de serviço ' + serviceType.name + '?'"
                                                     [okButtonLabel]="'Excluir'"
-                                                    (confirm)="deleteApto(apto.id)">
+                                                    (confirm)="deleteServiceType(serviceType.id)">
                                                     <span modal-button><i class="fas fa-trash me-1"></i> Excluir</span>
                                                 </app-confirm-modal>
                                             </div>
@@ -143,10 +143,10 @@
                                             </div>
                                         </td>
                                     </tr>
-                                    <tr *ngIf="aptos.length === 0 && !isLoader">
+                                    <tr *ngIf="serviceTypes.length === 0 && !isLoader">
                                         <td colspan="3" class="text-center py-5 text-muted">
                                             <i class="fas fa-folder-open fa-3x mb-3 d-block opacity-25"></i>
-                                            Nenhum apartamento encontrado.
+                                            Nenhum tipo de serviço encontrado.
                                         </td>
                                     </tr>
                                 </tbody>

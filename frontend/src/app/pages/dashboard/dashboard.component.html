@@ -1,93 +1,103 @@
-<app-authenticated-layout>
-    <!-- Header -->
-  <div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-  </div>
-  <!-- Content Row -->
+<app-authenticated-layout title="Dashboard">
+  <ng-container header>
+    <div class="d-sm-flex align-items-center justify-content-between mb-4 animate-in">
+        <h1 class="h3 mb-0 text-gray-800">Painel de Indicadores</h1>
+    </div>
+  </ng-container>
+
+  <!-- Stat Cards Row -->
   <div class="row">
-    <div class="col-xl-3 col-md-6 mb-4">
-      <div class="card shadow h-100 py-2" [ngClass]="{'border-left-primary': !waitApproval.loading && !waitApproval.error, 'border-left-danger': waitApproval.error}">
+    <!-- Fechado com o cliente -->
+    <div class="col-xl-3 col-md-6 mb-4 animate-in" style="animation-delay: 0.1s;">
+      <div class="card h-100 py-2 border-left-primary shadow-sm hover:shadow-md transition-all">
         <div class="card-body">
           <div class="row no-gutters align-items-center">
             <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-uppercase mb-1" [ngClass]="{'text-primary': !waitApproval.loading && !waitApproval.error, 'text-danger': waitApproval.error, 'text-muted': waitApproval.loading}">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                 Fechado com o cliente
               </div>
-              <div class="h5 mb-0 font-weight-bold" [ngClass]="{'text-gray-800': !waitApproval.loading && !waitApproval.error, 'text-muted': waitApproval.loading}">
-                {{ waitApproval.loading ? '-' : (waitApproval.error ? "Erro" : waitApproval.data.hotels) }}
+              <div class="h5 mb-0 font-weight-bold text-gray-800">
+                <span *ngIf="waitApproval.loading" class="spinner-border spinner-border-sm text-muted"></span>
+                {{ waitApproval.loading ? '' : (waitApproval.error ? "Erro" : waitApproval.data.hotels) }}
               </div>
             </div>
             <div class="col-auto">
-              <i class="fas fa-2x text-gray-300" [ngClass]="{'fa-bed': !waitApproval.loading && !waitApproval.error, 'fa-exclamation-circle': waitApproval.error, 'fa-spinner fa-spin': waitApproval.loading}"></i>
+              <i class="fas fa-bed fa-2x text-gray-200"></i>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
-      <div class="card shadow h-100 py-2" [ngClass]="{'border-left-success': !waitApproval.loading && !waitApproval.error, 'border-left-danger': waitApproval.error}">
+    <!-- Cancelados -->
+    <div class="col-xl-3 col-md-6 mb-4 animate-in" style="animation-delay: 0.2s;">
+      <div class="card h-100 py-2 border-left-success shadow-sm hover:shadow-md transition-all">
         <div class="card-body">
           <div class="row no-gutters align-items-center">
             <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-uppercase mb-1" [ngClass]="{'text-success': !waitApproval.loading && !waitApproval.error, 'text-danger': waitApproval.error, 'text-muted': waitApproval.loading}">
+              <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                 Cancelados
               </div>
-              <div class="h5 mb-0 font-weight-bold" [ngClass]="{'text-gray-800': !waitApproval.loading && !waitApproval.error, 'text-muted': waitApproval.loading}">
-                {{ waitApproval.loading ? '-' : (waitApproval.error ? "Erro" : waitApproval.data.transports) }}
+              <div class="h5 mb-0 font-weight-bold text-gray-800">
+                <span *ngIf="waitApproval.loading" class="spinner-border spinner-border-sm text-muted"></span>
+                {{ waitApproval.loading ? '' : (waitApproval.error ? "Erro" : waitApproval.data.transports) }}
               </div>
             </div>
             <div class="col-auto">
-              <i class="fas fa-2x text-gray-300" [ngClass]="{'fa-car-alt': !waitApproval.loading && !waitApproval.error, 'fa-exclamation-circle': waitApproval.error, 'fa-spinner fa-spin': waitApproval.loading}"></i>
+              <i class="fas fa-car-alt fa-2x text-gray-200"></i>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
-      <div class="card shadow h-100 py-2" [ngClass]="{'border-left-info': !linksApproved.loading && !linksApproved.error, 'border-left-danger': linksApproved.error}">
+    <!-- Aprovação De Orçamento -->
+    <div class="col-xl-3 col-md-6 mb-4 animate-in" style="animation-delay: 0.3s;">
+      <div class="card h-100 py-2 border-left-info shadow-sm hover:shadow-md transition-all">
         <div class="card-body">
           <div class="row no-gutters align-items-center">
             <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-uppercase mb-1" [ngClass]="{'text-info': !linksApproved.loading && !linksApproved.error, 'text-danger': linksApproved.error, 'text-muted': linksApproved.loading}">
-                Aprovação De Orçamento
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                Aprovação de Orçamento
               </div>
               <div class="row no-gutters align-items-center">
                 <div class="col-auto">
-                  <div class="h5 mb-0 font-weight-bold" [ngClass]="{'text-gray-800': !linksApproved.loading && !linksApproved.error, 'text-muted': linksApproved.loading}">
-                    {{ linksApproved.loading ? '-' : (linksApproved.error ? "Erro" : linksApproved.data + "%") }}
+                  <div class="h5 mb-0 font-weight-bold text-gray-800 me-3">
+                    <span *ngIf="linksApproved.loading" class="spinner-border spinner-border-sm text-muted"></span>
+                    {{ linksApproved.loading ? '' : (linksApproved.error ? "Erro" : linksApproved.data + "%") }}
                   </div>
                 </div>
                 <div class="col">
-                  <div class="progress progress-sm mr-2">
+                  <div class="progress progress-sm rounded-pill">
                     <div class="progress-bar bg-info" role="progressbar" [style.width]="linksApproved.data + '%'" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
                   </div>
                 </div>
               </div>
             </div>
             <div class="col-auto">
-              <i class="fas fa-2x text-gray-300" [ngClass]="{'fa-clipboard-list': !linksApproved.loading && !linksApproved.error, 'fa-exclamation-circle': linksApproved.error, 'fa-spinner fa-spin': linksApproved.loading}"></i>
+              <i class="fas fa-clipboard-list fa-2x text-gray-200"></i>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
-      <div class="card shadow h-100 py-2" [ngClass]="{'border-left-warning': !pendingValidate.loading && !pendingValidate.error, 'border-left-danger': pendingValidate.error}">
+    <!-- Orçamentos não avaliados -->
+    <div class="col-xl-3 col-md-6 mb-4 animate-in" style="animation-delay: 0.4s;">
+      <div class="card h-100 py-2 border-left-warning shadow-sm hover:shadow-md transition-all">
         <div class="card-body">
           <div class="row no-gutters align-items-center">
             <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-uppercase mb-1" [ngClass]="{'text-warning': !pendingValidate.loading && !pendingValidate.error, 'text-danger': pendingValidate.error, 'text-muted': pendingValidate.loading}">
+              <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                 Orçamentos não avaliados
               </div>
-              <div class="h5 mb-0 font-weight-bold" [ngClass]="{'text-gray-800': !pendingValidate.loading && !pendingValidate.error, 'text-muted': pendingValidate.loading}">
-                {{ pendingValidate.loading ? '-' : (pendingValidate.error ? "Erro" : pendingValidate.data) }}
+              <div class="h5 mb-0 font-weight-bold text-gray-800">
+                <span *ngIf="pendingValidate.loading" class="spinner-border spinner-border-sm text-muted"></span>
+                {{ pendingValidate.loading ? '' : (pendingValidate.error ? "Erro" : pendingValidate.data) }}
               </div>
             </div>
             <div class="col-auto">
-              <i class="fas fa-2x text-gray-300" [ngClass]="{'fa-comments': !pendingValidate.loading && !pendingValidate.error, 'fa-exclamation-circle': pendingValidate.error, 'fa-spinner fa-spin': pendingValidate.loading}"></i>
+              <i class="fas fa-comments fa-2x text-gray-200"></i>
             </div>
           </div>
         </div>
@@ -95,39 +105,46 @@
     </div>
   </div>
 
-  <!-- Content Row -->
+  <!-- Charts Row -->
   <div class="row">
     <!-- Area Chart -->
-    <div class="col-xl-8 col-lg-7">
-      <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-          <h6 class="m-0 font-weight-bold text-primary">Eventos Por Mês</h6>
+    <div class="col-xl-8 col-lg-7 animate-in" style="animation-delay: 0.5s;">
+      <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-header bg-white py-3 d-flex flex-row align-items-center justify-content-between">
+          <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-chart-area me-2"></i>Eventos Por Mês</h6>
         </div>
         <div class="card-body">
-          <div class="chart-area" style="height: 320px;">
+          <div class="chart-area position-relative" style="height: 320px;">
             <canvas id="area-event"></canvas>
-            <div *ngIf="events.loading" class="text-center">Carregando...</div>
-            <div *ngIf="events.error" class="text-center text-danger">Ocorreu um erro ao carregar os dados..</div>
+            <div *ngIf="events.loading" class="position-absolute top-50 start-50 translate-middle">
+                <div class="spinner-border text-primary" role="status"></div>
+            </div>
+            <div *ngIf="events.error" class="text-center text-danger py-5">
+                <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                <p>Ocorreu um erro ao carregar os dados.</p>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Pie Chart -->
-    <div class="col-xl-4 col-lg-5">
-      <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-          <h6 class="m-0 font-weight-bold text-primary">Status</h6>
+    <div class="col-xl-4 col-lg-5 animate-in" style="animation-delay: 0.6s;">
+      <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-header bg-white py-3 d-flex flex-row align-items-center justify-content-between">
+          <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-chart-pie me-2"></i>Status</h6>
         </div>
         <div class="card-body">
-          <div class="chart-pie pt-4 pb-2" style="height: 250px;">
+          <div class="chart-pie pt-4 pb-2 position-relative" style="height: 250px;">
             <canvas id="pie-hotel-status"></canvas>
+            <div *ngIf="eventStatus.loading" class="position-absolute top-50 start-50 translate-middle">
+                <div class="spinner-border text-primary" role="status"></div>
+            </div>
           </div>
-          <div *ngIf="eventStatus.loading" class="text-center">Carregando...</div>
-          <div *ngIf="eventStatus.error" class="text-center text-danger">Ocorreu um erro ao carregar os dados..</div>
-          <div *ngIf="!eventStatus.loading && !eventStatus.error" class="mt-4 text-center small">
-            <span *ngFor="let data of eventStatus.data?.hotel" class="mr-2">
-              <i class="fas fa-circle" [style.color]="data.backgroundColor"></i> {{ data.label }}
+          <div *ngIf="eventStatus.error" class="text-center text-danger py-4">Erro ao carregar status.</div>
+          <div *ngIf="!eventStatus.loading && !eventStatus.error" class="mt-4 text-center small overflow-auto">
+            <span *ngFor="let data of eventStatus.data?.hotel" class="me-3 d-inline-block mb-2">
+              <i class="fas fa-circle me-1" [style.color]="data.backgroundColor"></i> {{ data.label }}
             </span>
           </div>
         </div>
@@ -135,23 +152,28 @@
     </div>
   </div>
 
-  <!-- Content Row -->
+  <!-- Bottom Row -->
   <div class="row">
-    <div class="col-lg-8 mb-7">
-      <div class="card shadow mb-4">
-        <div class="card-header py-3">
-          <h6 class="m-0 font-weight-bold text-primary">Percentual De Usuários Por Grupo</h6>
+    <div class="col-lg-8 mb-4 animate-in" style="animation-delay: 0.7s;">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+          <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-user-friends me-2"></i>Usuários Por Grupo</h6>
         </div>
         <div class="card-body">
-          <div *ngIf="groups.loading" class="text-center">Carregando...</div>
-          <div *ngIf="groups.error" class="text-center text-danger">Ocorreu um erro ao carregar os dados..</div>
+          <div *ngIf="groups.loading" class="text-center py-5">
+              <div class="spinner-border text-primary" role="status"></div>
+          </div>
+          <div *ngIf="groups.error" class="text-center text-danger">Erro ao carregar dados dos grupos.</div>
           <ng-container *ngIf="!groups.loading && !groups.error">
-            <ng-container *ngFor="let group of groups.data">
-              <h4 class="small font-weight-bold">{{ group.Name }} <span class="float-right">{{ group.CountUsers }}</span></h4>
-              <div class="progress mb-4">
-                <div class="progress-bar" role="progressbar" [style.width]="group.Percentage + '%'" [style.backgroundColor]="group.color" [attr.aria-valuenow]="group.Percentage" aria-valuemin="0" aria-valuemax="100"></div>
+            <div *ngFor="let group of groups.data" class="mb-4">
+              <div class="d-flex justify-content-between align-items-end mb-2">
+                  <h4 class="small font-weight-bold mb-0 text-gray-700">{{ group.Name }}</h4>
+                  <span class="badge bg-light text-primary font-weight-bold">{{ group.CountUsers }} usuários</span>
               </div>
-            </ng-container>
+              <div class="progress rounded-pill shadow-none" style="height: 10px;">
+                <div class="progress-bar rounded-pill" role="progressbar" [style.width]="group.Percentage + '%'" [style.backgroundColor]="group.color" [attr.aria-valuenow]="group.Percentage" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
           </ng-container>
         </div>
       </div>
