@@ -568,7 +568,7 @@ onMounted(() => {
                                     <b>{{ formatCurrency(sumTaxes(evho, 'sc'), evho.currency.sigla) }}</b>
                                 </td>
                                 <td class="align-middle">
-                                    <b>{{ formatCurrency(evho.service_charge,
+                                    <b>{{ formatCurrency(sumTaxes(evho, 'sc'),
                                         evho.currency.sigla) }}</b>
                                 </td>
                                 <td class="align-middle" colspan="3"></td>
@@ -611,7 +611,7 @@ onMounted(() => {
                             <td class="align-middle" colspan="2">
                                 <b>{{ formatCurrency(((sumCost(evho) * evho.iss_percent) / 100) +
                                     ((sumCost(evho) * evho.service_percent) / 100) + ((sumCost(evho) *
-                                        evho.iva_percent) / 100) + sumCost(evho), evho.currency.sigla) }}</b>
+                                        evho.iva_percent) / 100) + sumCost(evho) + sumTaxes(evho, 'sc'), evho.currency.sigla) }}</b>
                             </td>
 
                             <template v-if="showDetails">

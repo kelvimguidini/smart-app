@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../projeto0"
+		}
+	],
+	"settings": {
+		"angular.enable-strict-mode-prompt": false
+	}
+}
