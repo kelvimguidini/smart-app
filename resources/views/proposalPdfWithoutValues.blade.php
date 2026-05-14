@@ -556,7 +556,17 @@ function quebraTexto($texto, $limite = 40)
                             </tr>
                             @endforeach
                         </tbody>
-                        <tfoot class="table-footer"><tr style="background-color: #ffe0b1"><td colspan="1"><b>Comentários:</b></td><td colspan="3">{{ $hotelEvent->customer_observation }}</td><td><b>Prazo</b></td><td>{{ $hotelEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($hotelEvent->deadline_date)) }}</td></tr></tfoot>
+                        <tfoot class="table-footer">
+                            <tr style="background-color: #ffe0b1">
+                                <td colspan="1"><b>Comentários:</b></td>
+                                <td colspan="3">{{ $hotelEvent->customer_observation }}</td>
+                                <td colspan="2">
+                                    <b>Check-in:</b> {{ $hotelEvent->checkin_time }} - {{ $hotelEvent->checkin_time_end }} <br>
+                                    <b>Check-out:</b> {{ $hotelEvent->checkout_time }} - {{ $hotelEvent->checkout_time_end }}
+                                </td>
+                                <td><b>Prazo</b></td><td>{{ $hotelEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($hotelEvent->deadline_date)) }}</td>
+                            </tr>
+                        </tfoot>
 
                     </table>
                 </div>

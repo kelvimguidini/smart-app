@@ -580,9 +580,9 @@ function quebraTexto($texto, $limite = 40)
                                         </tr>
                                         <tr class="table-subheader" style="background-color: #ffe0b1">
                                             <th class="align-middle custom-bg-success-text-white">Check-in:</th>
-                                            <td class="align-middle" colspan="2">{{ $hotelEvent->checkin_time }} - {{ $hotelEvent->checkin_time_end }}</td>
+                                            <td class="" colspan="2">{{ $hotelEvent->checkin_time }} - {{ $hotelEvent->checkin_time_end }}</td>
                                             <th class="align-middle custom-bg-success-text-white">Check-out:</th>
-                                            <td class="align-middle" colspan="2">{{ $hotelEvent->checkout_time }} - {{ $hotelEvent->checkout_time_end }}</td>
+                                            <td class="" colspan="2">{{ $hotelEvent->checkout_time }} - {{ $hotelEvent->checkout_time_end }}</td>
                                             <th class="custom-bg-success-text-white" colspan="4"></th>
                                         </tr>
                                     </table>
