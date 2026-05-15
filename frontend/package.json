@@ -6,7 +6,7 @@
     "start": "ng serve --port 4201 --host 0.0.0.0",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "vitest run"
+    "test": "ng test --watch=false"
   },
   "private": true,
   "packageManager": "npm@10.9.0",

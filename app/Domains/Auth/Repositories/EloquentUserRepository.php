@@ -4,6 +4,7 @@ namespace App\Domains\Auth\Repositories;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class EloquentUserRepository implements UserRepositoryInterface
 {
