@@ -3,135 +3,92 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Role;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
+use App\Domains\Auth\Services\AuthServiceInterface;
+use App\Domains\Auth\Repositories\RoleRepositoryInterface;
 
 class RoleController extends Controller
 {
+    protected $authService;
+    protected $roleRepository;
+
+    public function __construct(
+        AuthServiceInterface $authService,
+        RoleRepositoryInterface $roleRepository
+    ) {
+        $this->authService = $authService;
+        $this->roleRepository = $roleRepository;
+    }
+
     /**
      * Display the registration view.
-     *
-     * @return \Inertia\Response
      */
     public function create()
     {
-        if (!Gate::allows('role_admin')) {
-            abort(403);
-        }
-
-        $r = Role::with('permissions')->get();
+        if (!Gate::allows('role_admin')) abort(403);
 
         return Inertia::render('Auth/Role', [
-            'roles' => $r,
+            'roles' => $this->roleRepository->allWithPermissions(),
         ]);
     }
 
     /**
      * Handle an incoming registration request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     *
-     * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request)
     {
-        if (!Gate::allows('role_admin')) {
-            abort(403);
-        }
+        if (!Gate::allows('role_admin')) abort(403);
 
         $request->validate([
             'name' => 'required|string|max:255',
             'permissions' => 'required',
         ]);
-        $r = Role::with('permissions')->get();
+
         try {
-
-            if ($request->id > 0) {
-
-                $role = Role::find($request->id);
-
-                $role->name = $request->name;
-                $role->active = $request->active;
-
-                $role->save();
-
-                DB::table('role_permission')->where([
-                    ['role_id', '=', $request->id]
-                ])->delete();
-            } else {
-
-                $role = Role::create([
-                    'name' => $request->name,
-                    'active' => true
-                ]);
-            }
+            $this->authService->storeRole(
+                $request->only(['name', 'active']), 
+                $request->id > 0 ? $request->id : null,
+                (array)$request->permissions
+            );
         } catch (Exception $e) {
             throw $e;
         }
 
-        // Insert some stuff
-        foreach ($request->permissions as $permission) {
-
-            DB::table('role_permission')->insert(
-                array(
-                    'permission_id' => DB::table('permission')->select('id')->where('name', $permission)->first()->id,
-                    'role_id' => $role->id
-                )
-            );
-        }
-
-        return redirect()->route('role')->with('flash', ['message' => trans('Registro salvo com sucesso'), 'type' => 'success']);
+        return redirect()->route('role')->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
     }
 
     /**
-     * Display the registration view.
-     *
-     * @return \Inertia\Response
+     * Delete role.
      */
     public function delete(Request $request)
     {
-        if (!Gate::allows('role_admin')) {
-            abort(403);
-        }
+        if (!Gate::allows('role_admin')) abort(403);
+
         try {
-
-            $r = Role::find($request->id);
-
-            $r->delete();
+            $this->roleRepository->delete($request->id);
         } catch (Exception $e) {
-
             throw $e;
         }
 
-        return redirect()->route('role')->with('flash', ['message' => trans('Registro apagado com sucesso!'), 'type' => 'success']);
+        return redirect()->route('role')->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
     }
 
-
-
     /**
-     * Display the registration view.
-     *
-     * @return \Inertia\Response
+     * Remove specific permission.
      */
     public function permissionRemove(Request $request)
     {
-        if (!Gate::allows('role_admin')) {
-            abort(403);
-        }
+        if (!Gate::allows('role_admin')) abort(403);
+
         try {
-            DB::table('role_permission')->where([
-                ['role_id', '=', $request->role_id],
-                ['permission_id', '=', $request->permission_id],
-            ])->delete();
+            $this->roleRepository->removePermission($request->role_id, $request->permission_id);
         } catch (Exception $e) {
             throw $e;
         }
 
-        return redirect()->route('role')->with('flash', ['message' => trans('Registro apagado com sucesso!'), 'type' => 'success']);
+        return redirect()->route('role')->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
     }
 }

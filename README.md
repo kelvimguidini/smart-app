@@ -79,3 +79,29 @@ Usuário inicial:
 admin@admin.com'
 Admin
 
+## 🛠️ Como executar os testes
+
+Você pode rodar todos os testes de uma vez antes de qualquer deploy para garantir a integridade do sistema:
+
+```powershell
+# Executar todos os testes
+php artisan test
+
+# Executar apenas um arquivo específico (ex: Permissões)
+php artisan test tests/Feature/AuthPermissionTest.php
+
+# Executar com detalhes de cada passo (útil para debug)
+php artisan test --verbose
+```
+
+### Frontend (Angular)
+
+Para executar os testes unitários do frontend:
+
+```sh
+cd frontend
+npm test
+```
+
+Os testes do Angular utilizam Jasmine e Karma para validar a lógica de serviços, guards e componentes sem depender da interface visual.
+
