@@ -221,12 +221,12 @@ class ProviderController extends Controller
                 $provider->service_charge = $request->service_charge;
                 $provider->taxa_4bts = $request->taxa_4bts;
                 $provider->payment_method = $request->payment_method;
-if ($request->type === 'hotel') {
-    $provider->checkin_time = $request->checkin_time;
-    $provider->checkin_time_end = $request->checkin_time_end;
-    $provider->checkout_time = $request->checkout_time;
-    $provider->checkout_time_end = $request->checkout_time_end;
-}
+                if ($request->type === 'hotel') {
+                    $provider->checkin_time = $request->checkin_time;
+                    $provider->checkin_time_end = $request->checkin_time_end;
+                    $provider->checkout_time = $request->checkout_time;
+                    $provider->checkout_time_end = $request->checkout_time_end;
+                }
 
                 $provider->save();
             } else {
