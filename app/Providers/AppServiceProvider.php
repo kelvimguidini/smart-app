@@ -82,7 +82,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(EventRepositoryInterface::class, EloquentEventRepository::class);
         $this->app->bind(ProviderBudgetRepositoryInterface::class, EloquentProviderBudgetRepository::class);
         $this->app->bind(StatusHistoryRepositoryInterface::class, EloquentStatusHistoryRepository::class);
-        $this->app->bind(ProposalHistoryRepositoryInterface::class, EloquentProposalHistoryRepository::class);
         $this->app->bind(EventHotelRepositoryInterface::class, EloquentEventHotelRepository::class);
         $this->app->bind(EventABRepositoryInterface::class, EloquentEventABRepository::class);
         $this->app->bind(EventABOptRepositoryInterface::class, EloquentEventABOptRepository::class);
@@ -97,7 +96,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(LookupRepositoryInterface::class, EloquentLookupRepository::class);
         $this->app->bind(EventHotelOptRepositoryInterface::class, EloquentEventHotelOptRepository::class);
         $this->app->bind(AptoRepositoryInterface::class, EloquentAptoRepository::class);
-        
+        $this->app->bind(DashboardRepositoryInterface::class, EloquentDashboardRepository::class);
+
         // Services
         $this->app->bind(EventServiceInterface::class, DefaultEventService::class);
         $this->app->bind(BudgetServiceInterface::class, DefaultBudgetService::class);

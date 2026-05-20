@@ -5,7 +5,6 @@ namespace App\Domains\Auth\Services;
 use App\Domains\Auth\Repositories\UserRepositoryInterface;
 use App\Domains\Auth\Repositories\RoleRepositoryInterface;
 use App\Models\User;
-use App\Models\Role;
 use Illuminate\Support\Facades\Hash;
 
 class DefaultAuthService implements AuthServiceInterface
@@ -70,16 +69,5 @@ class DefaultAuthService implements AuthServiceInterface
     public function removeUserRole(int $userId, int $roleId): bool
     {
         return $this->userRepository->removeRole($userId, $roleId);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function storeRole(array $data, ?int $id = null, array $permissionIds = []): Role
-    {
-        if ($id) {
-            return $this->roleRepository->update($id, $data, $permissionIds);
-        }
-        return $this->roleRepository->create($data, $permissionIds);
     }
 }

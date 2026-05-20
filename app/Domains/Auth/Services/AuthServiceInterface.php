@@ -42,14 +42,4 @@ interface AuthServiceInterface
      * @return bool
      */
     public function removeUserRole(int $userId, int $roleId): bool;
-
-    /**
-     * Salva ou atualiza um perfil e suas permissões.
-     *
-     * @param array $data
-     * @param int|null $id
-     * @param array $permissionIds
-     * @return Role
-     */
-    public function storeRole(array $data, ?int $id = null, array $permissionIds = []): Role;
 }

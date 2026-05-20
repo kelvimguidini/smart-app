@@ -48,37 +48,4 @@ class HomeController extends Controller
         if (Gate::allows('air_operator')) $roles[] = 'air_operator';
         return $roles;
     }
-
-    // Métodos individuais mantidos para compatibilidade se chamados via rota direta, 
-    // mas agora utilizando o repositório.
-
-    public function pendingValidate(Request $request)
-    {
-        return $this->dashboardRepository->getPendingValidateCount(Auth::user()->id, $this->getUserRoles());
-    }
-
-    public function eventStatus(Request $request)
-    {
-        return response()->json($this->dashboardRepository->getEventStatusCounts());
-    }
-
-    public function waitApproval(Request $request)
-    {
-        return response()->json($this->dashboardRepository->getWaitApprovalCounts());
-    }
-
-    public function linksApproved(Request $request)
-    {
-        return $this->dashboardRepository->getBudgetApprovalRate();
-    }
-
-    public function byMonths(Request $request)
-    {
-        return response()->json($this->dashboardRepository->getMonthlyEvolutionData(Auth::user()->id, $this->getUserRoles()));
-    }
-
-    public function userGroups(Request $request)
-    {
-        return response()->json($this->dashboardRepository->getUserGroupDistribution());
-    }
 }

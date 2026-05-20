@@ -7,19 +7,15 @@ use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
-use App\Domains\Auth\Services\AuthServiceInterface;
 use App\Domains\Auth\Repositories\RoleRepositoryInterface;
 
 class RoleController extends Controller
 {
-    protected $authService;
     protected $roleRepository;
 
     public function __construct(
-        AuthServiceInterface $authService,
         RoleRepositoryInterface $roleRepository
     ) {
-        $this->authService = $authService;
         $this->roleRepository = $roleRepository;
     }
 
@@ -48,10 +44,10 @@ class RoleController extends Controller
         ]);
 
         try {
-            $this->authService->storeRole(
-                $request->only(['name', 'active']), 
-                $request->id > 0 ? $request->id : null,
-                (array)$request->permissions
+            $this->roleRepository->saveRole(
+                $request->only(['name', 'active']),
+                (array)$request->permissions,
+                $request->id > 0 ? $request->id : null
             );
         } catch (Exception $e) {
             throw $e;
