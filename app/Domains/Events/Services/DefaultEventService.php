@@ -81,11 +81,11 @@ class DefaultEventService implements EventServiceInterface
     protected function getRelatedTablesIds(int $eventId): array
     {
         return [
-            'event_hotels' => $this->eventHotelRepository->getByEvent($eventId)->pluck('id')->toArray(),
-            'event_abs' => $this->eventABRepository->getIdsByEvent($eventId),
-            'event_halls' => $this->eventHallRepository->getIdsByEvent($eventId),
-            'event_adds' => $this->eventAddRepository->getIdsByEvent($eventId),
-            'event_transports' => $this->eventTransportRepository->getIdsByEvent($eventId),
+            'event_hotel' => $this->eventHotelRepository->getByEvent($eventId)->pluck('id')->toArray(),
+            'event_ab' => $this->eventABRepository->getIdsByEvent($eventId),
+            'event_hall' => $this->eventHallRepository->getIdsByEvent($eventId),
+            'event_add' => $this->eventAddRepository->getIdsByEvent($eventId),
+            'event_transport' => $this->eventTransportRepository->getIdsByEvent($eventId),
         ];
     }
 }

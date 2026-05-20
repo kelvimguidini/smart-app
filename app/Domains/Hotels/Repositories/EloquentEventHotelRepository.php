@@ -10,6 +10,14 @@ class EloquentEventHotelRepository implements EventHotelRepositoryInterface
     /**
      * @inheritDoc
      */
+    public function create(array $data): EventHotel
+    {
+        return EventHotel::create($data);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function update(int $id, array $data): EventHotel
     {
         $eventHotel = EventHotel::findOrFail($id);

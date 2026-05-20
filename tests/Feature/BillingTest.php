@@ -25,6 +25,15 @@ class BillingTest extends TestCase
         
         $this->user = User::factory()->create();
         $this->user->roles()->attach($role->id);
+
+        // Registrar Gates Manualmente para o ambiente de teste
+        foreach (Permission::all() as $permission) {
+            \Illuminate\Support\Facades\Gate::define($permission->name, function ($user) use ($permission) {
+                return $user->roles()->whereHas('permissions', function ($q) use ($permission) {
+                    $q->where('name', $permission->name);
+                })->exists();
+            });
+        }
     }
 
     /**
@@ -60,7 +69,7 @@ class BillingTest extends TestCase
         $event = Event::create(['name' => 'Evento Faturamento']);
 
         $this->actingAs($this->user)
-            ->post(route('event-save-valor-faturamento'), [
+            ->post(route('event-save-vl-faturamento'), [
                 'event_id' => $event->id,
                 'vl_faturamento' => 15000.50
             ]);

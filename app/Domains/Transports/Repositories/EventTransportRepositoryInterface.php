@@ -13,4 +13,5 @@ interface EventTransportRepositoryInterface
     public function getByEvent(int $eventId): Collection;
     public function find(int $id): ?EventTransport;
     public function saveEventTransport(array $data, ?int $id = null): EventTransport;
+    public function getIdsByEvent(int $eventId): array;
 }

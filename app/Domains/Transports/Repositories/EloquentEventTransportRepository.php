@@ -41,4 +41,9 @@ class EloquentEventTransportRepository implements EventTransportRepositoryInterf
         $item->save();
         return $item;
     }
+
+    public function getIdsByEvent(int $eventId): array
+    {
+        return EventTransport::where('event_id', $eventId)->pluck('id')->toArray();
+    }
 }

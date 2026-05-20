@@ -3,11 +3,12 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
+use App\Models\Permission;
+use App\Models\Role;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Tests\TestCase;
 
@@ -21,37 +22,24 @@ class RegistrationTest extends TestCase
     {
         parent::setUp();
 
-        // Inserir permissão e perfil manualmente via DB
-        $permissionId = DB::table('permission')->insertGetId([
-            'name' => 'user_admin',
+        // Criar permissão e perfil usando Eloquent (dados isolados via RefreshDatabase)
+        $permission = Permission::create([
+            'name'  => 'user_admin',
             'title' => 'Administrador de Usuários',
-            'created_at' => now(),
-            'updated_at' => now(),
         ]);
 
-        $roleId = DB::table('roles')->insertGetId([
-            'name' => 'Admin',
-            'active' => 1,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('role_permission')->insert([
-            'role_id' => $roleId,
-            'permission_id' => $permissionId,
-        ]);
+        $role = Role::create(['name' => 'Admin']);
+        $role->permissions()->attach($permission->id);
 
         $this->admin = User::factory()->create();
-        
-        DB::table('user_role')->insert([
-            'user_id' => $this->admin->id,
-            'role_id' => $roleId,
-        ]);
+        $this->admin->roles()->attach($role->id);
 
-        // Forçar a definição do Gate no ambiente de teste, pois o AuthServiceProvider 
-        // roda antes das sementes serem plantadas no banco de dados de teste.
-        Gate::define('user_admin', function ($user) {
-            return true; // Simplificado para o teste, já que o usuário actingAs já é o admin
+        // Registrar Gate manualmente pois o AuthServiceProvider
+        // roda antes das migrações/seeds do banco de teste.
+        Gate::define('user_admin', function ($user) use ($permission) {
+            return $user->roles()->whereHas('permissions', function ($q) use ($permission) {
+                $q->where('name', $permission->name);
+            })->exists();
         });
     }
 

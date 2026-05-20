@@ -138,6 +138,13 @@ class EventController extends Controller
     {
         if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator')) abort(403);
 
+        $request->validate([
+            'name' => 'required|string|max:255',
+            // Adjust validation: on update, date fields are optional
+            'date' => $request->has('id') ? 'sometimes|date' : 'required|date',
+            'date_final' => $request->has('id') ? 'sometimes|date|after_or_equal:date' : 'required|date|after_or_equal:date',
+        ]);
+
         try {
             $event = $this->eventService->store($request->all(), $request->id > 0 ? $request->id : null);
         } catch (Exception $e) {

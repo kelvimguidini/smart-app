@@ -386,4 +386,62 @@ class EloquentLookupRepository implements LookupRepositoryInterface
     public function deletePurposeHall(int $id): bool { return \App\Models\PurposeHall::withoutGlobalScope('active')->findOrFail($id)->delete(); }
     public function activatePurposeHall(int $id): bool { return \App\Models\PurposeHall::withoutGlobalScope('active')->findOrFail($id)->activate(); }
     public function deactivatePurposeHall(int $id): bool { return \App\Models\PurposeHall::withoutGlobalScope('active')->findOrFail($id)->deactivate(); }
+
+    // ProviderServices
+    public function getProviderServicesWithInactive(): Collection
+    {
+        return \App\Models\ProviderServices::withoutGlobalScope('active')->get();
+    }
+
+    public function saveProviderService(array $data, ?int $id = null): \App\Models\ProviderServices
+    {
+        $item = $id ? \App\Models\ProviderServices::withoutGlobalScope('active')->findOrFail($id) : new \App\Models\ProviderServices();
+        $item->fill($data);
+        $item->save();
+        return $item;
+    }
+
+    public function deleteProviderService(int $id): bool
+    {
+        return \App\Models\ProviderServices::withoutGlobalScope('active')->findOrFail($id)->delete();
+    }
+
+    public function activateProviderService(int $id): bool
+    {
+        return \App\Models\ProviderServices::withoutGlobalScope('active')->findOrFail($id)->activate();
+    }
+
+    public function deactivateProviderService(int $id): bool
+    {
+        return \App\Models\ProviderServices::withoutGlobalScope('active')->findOrFail($id)->deactivate();
+    }
+
+    // ProviderTransport
+    public function getProviderTransportsWithInactive(): Collection
+    {
+        return \App\Models\ProviderTransport::withoutGlobalScope('active')->get();
+    }
+
+    public function saveProviderTransport(array $data, ?int $id = null): \App\Models\ProviderTransport
+    {
+        $item = $id ? \App\Models\ProviderTransport::withoutGlobalScope('active')->findOrFail($id) : new \App\Models\ProviderTransport();
+        $item->fill($data);
+        $item->save();
+        return $item;
+    }
+
+    public function deleteProviderTransport(int $id): bool
+    {
+        return \App\Models\ProviderTransport::withoutGlobalScope('active')->findOrFail($id)->delete();
+    }
+
+    public function activateProviderTransport(int $id): bool
+    {
+        return \App\Models\ProviderTransport::withoutGlobalScope('active')->findOrFail($id)->activate();
+    }
+
+    public function deactivateProviderTransport(int $id): bool
+    {
+        return \App\Models\ProviderTransport::withoutGlobalScope('active')->findOrFail($id)->deactivate();
+    }
 }

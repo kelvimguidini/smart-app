@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Collection;
 
 class EloquentEventHallRepository implements EventHallRepositoryInterface
 {
+    public function create(array $data): EventHall
+    {
+        return EventHall::create($data);
+    }
+
     public function update(int $id, array $data): \App\Models\EventHall
     {
         $eventHall = EventHall::findOrFail($id);

@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Collection;
 
 class EloquentEventABRepository implements EventABRepositoryInterface
 {
+    public function create(array $data): EventAB
+    {
+        return EventAB::create($data);
+    }
+
     public function update(int $id, array $data): EventAB
     {
         $eventAb = EventAB::findOrFail($id);

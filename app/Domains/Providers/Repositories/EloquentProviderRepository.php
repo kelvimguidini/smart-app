@@ -41,6 +41,12 @@ class EloquentProviderRepository implements ProviderRepositoryInterface
     public function createWithService(array $data): Provider
     {
         return DB::transaction(function () use ($data) {
+            // Se não for hotel, remove campos de horário
+            $isHotel = ($data['type'] ?? null) === 'hotel';
+            if (!$isHotel) {
+                unset($data['checkin_time'], $data['checkin_time_end'], $data['checkout_time'], $data['checkout_time_end']);
+            }
+
             $provider = Provider::create($data);
 
             ProviderServices::create([
@@ -66,6 +72,13 @@ class EloquentProviderRepository implements ProviderRepositoryInterface
     public function update(int $id, array $data): Provider
     {
         $provider = Provider::withoutGlobalScope('active')->findOrFail($id);
+
+        // Se não for hotel, remove campos de horário
+        $isHotel = ($data['type'] ?? null) === 'hotel';
+        if (!$isHotel) {
+            unset($data['checkin_time'], $data['checkin_time_end'], $data['checkout_time'], $data['checkout_time_end']);
+        }
+
         $provider->update($data);
         return $provider;
     }

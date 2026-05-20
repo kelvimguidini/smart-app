@@ -28,6 +28,15 @@ class EventFlowTest extends TestCase
         
         $this->user = User::factory()->create();
         $this->user->roles()->attach($role->id);
+
+        // Registrar Gates Manualmente para o ambiente de teste
+        foreach (Permission::all() as $permission) {
+            \Illuminate\Support\Facades\Gate::define($permission->name, function ($user) use ($permission) {
+                return $user->roles()->whereHas('permissions', function ($q) use ($permission) {
+                    $q->where('name', $permission->name);
+                })->exists();
+            });
+        }
     }
 
     /**
@@ -46,7 +55,7 @@ class EventFlowTest extends TestCase
         ];
 
         $response = $this->actingAs($this->user)
-            ->post(route('event-store'), $eventData);
+            ->post(route('event-save'), $eventData);
 
         $event = Event::where('name', 'Novo Evento Corporativo')->first();
         
@@ -69,7 +78,7 @@ class EventFlowTest extends TestCase
         // que deve limpar os vínculos conforme implementado no EventService.
         
         $this->actingAs($this->user)
-            ->get(route('event-delete', ['id' => $event->id]));
+            ->delete(route('event-delete', ['id' => $event->id]));
 
         $this->assertSoftDeleted('event', ['id' => $event->id]);
     }
@@ -90,7 +99,7 @@ class EventFlowTest extends TestCase
         ];
 
         $response = $this->actingAs($this->user)
-            ->post(route('event-store'), $eventData);
+            ->post(route('event-save'), $eventData);
 
         // Dependendo da implementação, pode retornar erro de validação (422) ou redirecionar com flash erro
         // Vamos checar se o evento NÃO foi criado
