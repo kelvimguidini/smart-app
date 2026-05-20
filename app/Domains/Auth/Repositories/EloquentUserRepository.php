@@ -68,12 +68,16 @@ class EloquentUserRepository implements UserRepositoryInterface
 
     public function activate(int $id): bool
     {
-        return User::withoutGlobalScope('active')->findOrFail($id)->activate();
+        $user = User::withoutGlobalScope('active')->findOrFail($id);
+        $user->activate();
+        return true;
     }
 
     public function deactivate(int $id): bool
     {
-        return User::withoutGlobalScope('active')->findOrFail($id)->deactivate();
+        $user = User::withoutGlobalScope('active')->findOrFail($id);
+        $user->deactivate();
+        return true;
     }
 
     public function removeRole(int $userId, int $roleId): bool
