@@ -77,4 +77,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Rotas de Cidades para Autocomplete
     Route::get('cities/search', [\App\Http\Controllers\Api\CityApiController::class, 'search']);
+
+    // Rotas de Hotéis (Fornecedores)
+    Route::get('hotels', [\App\Http\Controllers\Api\ProviderApiController::class, 'index']);
+    Route::post('hotels', [\App\Http\Controllers\Api\ProviderApiController::class, 'store']);
+    Route::delete('hotels/{id}', [\App\Http\Controllers\Api\ProviderApiController::class, 'destroy']);
+    Route::put('hotels/{id}/activate', [\App\Http\Controllers\Api\ProviderApiController::class, 'activateItem']);
+    Route::put('hotels/{id}/deactivate', [\App\Http\Controllers\Api\ProviderApiController::class, 'deactivateItem']);
 });

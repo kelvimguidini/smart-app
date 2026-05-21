@@ -19,7 +19,7 @@
                             <!-- Nome -->
                             <div class="col-lg-4 mb-3">
                                 <div class="form-group mb-0">
-                                    <label for="name" class="form-label">Nome:</label>
+                                    <label for="name" class="form-label">Nome: <span class="text-danger">*</span></label>
                                     <input 
                                         type="text" 
                                         id="name" 
@@ -56,7 +56,7 @@
                             <!-- Contato -->
                             <div class="col-lg-4 mb-3">
                                 <div class="form-group mb-0">
-                                    <label for="contact" class="form-label">Contato:</label>
+                                    <label for="contact" class="form-label">Contato: <span class="text-danger">*</span></label>
                                     <input 
                                         type="text" 
                                         id="contact" 
@@ -75,7 +75,7 @@
                             <!-- Telefone -->
                             <div class="col-lg-4 mb-3">
                                 <div class="form-group mb-0">
-                                    <label for="phone" class="form-label">Telefone:</label>
+                                    <label for="phone" class="form-label">Telefone: <span class="text-danger">*</span></label>
                                     <input 
                                         type="text" 
                                         id="phone" 
@@ -96,7 +96,7 @@
                             <!-- E-mail -->
                             <div class="col-lg-4 mb-3">
                                 <div class="form-group mb-0">
-                                    <label for="email" class="form-label">E-mail:</label>
+                                    <label for="email" class="form-label">E-mail: <span class="text-danger">*</span></label>
                                     <input 
                                         type="email" 
                                         id="email" 
@@ -121,13 +121,13 @@
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" id="nationalTrue" [value]="true" [(ngModel)]="form.national" name="national">
                                                 <label class="form-check-label" for="nationalTrue">
-                                                    Broker Nacional
+                                                    Nacional
                                                 </label>
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" id="nationalFalse" [value]="false" [(ngModel)]="form.national" name="national">
                                                 <label class="form-check-label" for="nationalFalse">
-                                                    Broker Internacional
+                                                    Internacional
                                                 </label>
                                             </div>
                                         </div>

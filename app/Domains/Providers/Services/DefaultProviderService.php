@@ -38,6 +38,14 @@ class DefaultProviderService implements ProviderServiceInterface
     /**
      * @inheritDoc
      */
+    public function getProviders(array $params)
+    {
+        return $this->providerRepository->getPaginatedProviders($params);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function bulkActivate(array $ids, string $type): void
     {
         DB::transaction(function () use ($ids, $type) {

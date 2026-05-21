@@ -132,7 +132,7 @@ export class BrokerComponent implements OnInit {
       contact: broker.contact,
       phone: broker.phone,
       email: broker.email,
-      national: broker.national
+      national: String(broker.national) === '1' || String(broker.national) === 'true'
     };
     
     // Set initial city name for the autocomplete input

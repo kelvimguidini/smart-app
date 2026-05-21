@@ -73,6 +73,9 @@ use App\Domains\Shared\Repositories\EloquentBrokerRepository;
 use App\Domains\Shared\Services\BrokerServiceInterface;
 use App\Domains\Shared\Services\DefaultBrokerService;
 
+use App\Domains\Shared\Repositories\ProposalHistoryRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentProposalHistoryRepository;
+
 use App\Domains\Shared\Repositories\CategoryRepositoryInterface;
 use App\Domains\Shared\Repositories\EloquentCategoryRepository;
 use App\Domains\Shared\Services\CategoryServiceInterface;
@@ -149,6 +152,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ServiceTypeRepositoryInterface::class, EloquentServiceTypeRepository::class);
         $this->app->bind(RegimeRepositoryInterface::class, EloquentRegimeRepository::class);
         $this->app->bind(CityRepositoryInterface::class, EloquentCityRepository::class);
+        $this->app->bind(ProposalHistoryRepositoryInterface::class, EloquentProposalHistoryRepository::class);
 
         // New Services
         $this->app->bind(BrokerServiceInterface::class, DefaultBrokerService::class);

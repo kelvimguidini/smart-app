@@ -11,6 +11,7 @@ interface ProviderRepositoryInterface
 {
     public function find(int $id): ?Provider;
     public function allWithCity(): Collection;
+    public function getPaginatedProviders(array $params);
     public function allWithCityAdmin(): Collection;
     public function allServicesWithCity(): Collection;
     public function allTransportWithCity(): Collection;

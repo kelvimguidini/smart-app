@@ -409,14 +409,16 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
 
     //HOTEL
-    Route::get('hotel', [ProviderController::class, 'create'])
-        ->name('hotel');
-
-    Route::post('hotel-save', [ProviderController::class, 'store'])
-        ->name('hotel-save');
-
-    Route::delete('hotel-delete', [ProviderController::class, 'delete'])
-        ->name('hotel-delete');
+    Route::get('hotel', function (Request $request) {
+        $path = base_path('public/angular.html');
+        if (file_exists($path)) {
+            if ($request->header('X-Inertia')) {
+                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
+            }
+            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
+        }
+        abort(404);
+    })->name('hotel');
 
     Route::post('hotel-event-save', [ProviderController::class, 'storeEventProvider'])
         ->name('hotel-event-save');
@@ -580,8 +582,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::put('/provider_services/activate/{id}', [ProviderServicesController::class, 'activateM'])->name('provider_services-activate');
     Route::put('/provider_services/deactivate/{id}', [ProviderServicesController::class, 'deactivateM'])->name('provider_services-deactivate');
 
-    Route::put('/providers/activate/{id}', [ProviderController::class, 'activateM'])->name('providers-activate');
-    Route::put('/providers/deactivate/{id}', [ProviderController::class, 'deactivateM'])->name('providers-deactivate');
+    // Providers activate/deactivate routes migrated to api.php (Angular)
 
     Route::put('/measures/activate/{id}', [MeasureController::class, 'activateM'])->name('measures-activate');
     Route::put('/measures/deactivate/{id}', [MeasureController::class, 'deactivateM'])->name('measures-deactivate');

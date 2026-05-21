@@ -5,6 +5,13 @@ namespace App\Domains\Providers\Services;
 interface ProviderServiceInterface
 {
     /**
+     * Retorna a listagem paginada de fornecedores.
+     *
+     * @param array $params
+     */
+    public function getProviders(array $params);
+
+    /**
      * Ativa fornecedores em massa.
      *
      * @param array $ids

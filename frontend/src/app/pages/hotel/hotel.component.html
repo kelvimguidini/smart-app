@@ -1,0 +1,500 @@
+<app-authenticated-layout title="Hotéis (Fornecedores)">
+  <ng-container header>
+    <div class="d-sm-flex align-items-center justify-content-between mb-4 animate-in">
+      <h1 class="h3 mb-0 text-gray-800">Gerenciamento de Hotéis</h1>
+    </div>
+  </ng-container>
+
+  <div class="row position-relative">
+    <!-- Form Section -->
+    <div class="col-lg-12 animate-in" style="animation-delay: 0.1s">
+      <div class="card mb-4 border-left-primary">
+        <div class="card-body">
+          <h5 class="card-title mb-4 text-primary font-weight-bold">
+            <i class="fas fa-edit me-2"></i>
+            {{ inEdition > 0 ? 'Editar Hotel' : 'Cadastrar Novo Hotel' }}
+          </h5>
+          <form (ngSubmit)="submit()">
+            <div class="row align-items-start">
+              <!-- Nome -->
+              <div class="col-lg-4 mb-3">
+                <div class="form-group mb-0">
+                  <label for="name" class="form-label"
+                    >Nome: <span class="text-danger">*</span></label
+                  >
+                  <input
+                    type="text"
+                    id="name"
+                    class="form-control"
+                    [(ngModel)]="form.name"
+                    name="name"
+                    placeholder="Ex: Hotel Plaza"
+                    required
+                    autofocus
+                  />
+
+                  <div *ngIf="errors['name']" class="text-danger mt-1">
+                    <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Município (Autocomplete) -->
+              <div class="col-lg-4 mb-3">
+                <app-autocomplete
+                  id="city"
+                  label="Cidade"
+                  placeholder="Digite para buscar a cidade..."
+                  [required]="true"
+                  [searchFn]="searchCities"
+                  [displayFn]="displayCity"
+                  valueField="id"
+                  [initialText]="selectedCityName"
+                  [(ngModel)]="form.city_id"
+                  name="city"
+                  [errors]="errors['city_id']"
+                ></app-autocomplete>
+              </div>
+
+              <!-- E-mail -->
+              <div class="col-lg-4 mb-3">
+                <div class="form-group mb-0">
+                  <label for="email" class="form-label">E-mail:</label>
+                  <input
+                    type="email"
+                    id="email"
+                    class="form-control"
+                    [(ngModel)]="form.email"
+                    name="email"
+                    placeholder="exemplo@email.com"
+                  />
+
+                  <div *ngIf="errors['email']" class="text-danger mt-1">
+                    <small *ngFor="let err of errors['email']" class="d-block">{{ err }}</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Contato -->
+              <div class="col-lg-4 mb-3">
+                <div class="form-group mb-0">
+                  <label for="contact" class="form-label">Contato:</label>
+                  <input
+                    type="text"
+                    id="contact"
+                    class="form-control"
+                    [(ngModel)]="form.contact"
+                    name="contact"
+                    placeholder="Ex: João Silva"
+                  />
+
+                  <div *ngIf="errors['contact']" class="text-danger mt-1">
+                    <small *ngFor="let err of errors['contact']" class="d-block">{{ err }}</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Telefone -->
+              <div class="col-lg-4 mb-3">
+                <div class="form-group mb-0">
+                  <label for="phone" class="form-label">Telefone:</label>
+                  <input
+                    type="text"
+                    id="phone"
+                    class="form-control"
+                    [(ngModel)]="form.phone"
+                    name="phone"
+                    placeholder="Ex: (11) 99999-9999"
+                    mask="(00) 0000-00009"
+                    [dropSpecialCharacters]="false"
+                  />
+
+                  <div *ngIf="errors['phone']" class="text-danger mt-1">
+                    <small *ngFor="let err of errors['phone']" class="d-block">{{ err }}</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Payment Method -->
+              <div class="col-lg-4 mb-3">
+                <div class="form-group mb-0">
+                  <label for="payment_method" class="form-label">Forma de Pagamento:</label>
+                  <select
+                    id="payment_method"
+                    class="form-select animate-in"
+                    [(ngModel)]="form.payment_method"
+                    name="payment_method"
+                  >
+                    <option value="">Indefinido</option>
+                    <option value="Dinheiro">Dinheiro</option>
+                    <option value="Cartão">Cartão</option>
+                  </select>
+
+                  <div *ngIf="errors['payment_method']" class="text-danger mt-1">
+                    <small *ngFor="let err of errors['payment_method']" class="d-block">
+                      {{ err }}
+                    </small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Linha Taxas + Check-in + Check-out -->
+              <div class="col-lg-4 mb-3">
+                <div class="form-group h-100">
+                  <label class="form-label fw-bold">Taxas (%)</label>
+
+                  <div class="row g-2">
+                    <div class="col-4">
+                      <small class="text-muted d-block mb-1">ISS</small>
+                      <input
+                        type="number"
+                        class="form-control text-start"
+                        [(ngModel)]="form.iss_percent"
+                        name="iss_percent"
+                        min="0"
+                        max="100"
+                        step="0.1"
+                        (input)="validatePercent($event)"
+                      />
+                    </div>
+
+                    <div class="col-4">
+                      <small class="text-muted d-block mb-1">Serviço</small>
+                      <input
+                        type="number"
+                        class="form-control text-start"
+                        [(ngModel)]="form.service_percent"
+                        name="service_percent"
+                        min="0"
+                        max="100"
+                        step="0.1"
+                        (input)="validatePercent($event)"
+                      />
+                    </div>
+
+                    <div class="col-4">
+                      <small class="text-muted d-block mb-1">IVA</small>
+                      <input
+                        type="number"
+                        class="form-control text-start"
+                        [(ngModel)]="form.iva_percent"
+                        name="iva_percent"
+                        min="0"
+                        max="100"
+                        step="0.1"
+                        (input)="validatePercent($event)"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Check-in -->
+              <div class="col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-bold">Check-in</label>
+
+                  <div class="row align-items-center g-2">
+                    <div class="col-5">
+                      <small class="text-muted d-block">Início</small>
+                      <input
+                        type="time"
+                        class="form-control"
+                        [(ngModel)]="form.checkin_time"
+                        name="checkin_time"
+                      />
+                    </div>
+
+                    <div class="col-5">
+                      <small class="text-muted d-block">Fim</small>
+                      <input
+                        type="time"
+                        class="form-control"
+                        [(ngModel)]="form.checkin_time_end"
+                        name="checkin_time_end"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Check-out -->
+              <div class="col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-bold">Check-out</label>
+
+                  <div class="row align-items-center g-2">
+                    <div class="col-5">
+                      <small class="text-muted d-block">Início</small>
+                      <input
+                        type="time"
+                        class="form-control"
+                        [(ngModel)]="form.checkout_time"
+                        name="checkout_time"
+                      />
+                    </div>
+
+                    <div class="col-5">
+                      <small class="text-muted d-block">Fim</small>
+                      <input
+                        type="time"
+                        class="form-control"
+                        [(ngModel)]="form.checkout_time_end"
+                        name="checkout_time_end"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Nacional Radios -->
+              <div class="col-lg-4 mb-3">
+                <div class="form-group mb-0">
+                  <label class="form-label"></label>
+                  <div class="card">
+                    <div class="card-body py-2">
+                      <div class="form-check">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          id="nationalTrue"
+                          [value]="true"
+                          [(ngModel)]="form.national"
+                          name="national"
+                        />
+                        <label class="form-check-label" for="nationalTrue">Nacional</label>
+                      </div>
+                      <div class="form-check">
+                        <input
+                          class="form-check-input"
+                          type="radio"
+                          id="nationalFalse"
+                          [value]="false"
+                          [(ngModel)]="form.national"
+                          name="national"
+                        />
+                        <label class="form-check-label" for="nationalFalse">Internacional</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Botões -->
+              <div class="col-lg-8">
+                <div class="d-flex align-items-center justify-content-end">
+                  <button
+                    type="button"
+                    *ngIf="inEdition > 0"
+                    class="btn btn-outline-secondary me-2"
+                    (click)="resetForm()"
+                    [disabled]="processing"
+                  >
+                    <i class="fas fa-plus me-1"></i>
+                    Novo
+                  </button>
+
+                  <button
+                    type="submit"
+                    class="btn btn-primary shadow-sm"
+                    [disabled]="processing"
+                    [class.opacity-50]="processing"
+                  >
+                    <span
+                      *ngIf="processing"
+                      class="spinner-border spinner-border-sm me-1"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                    <i *ngIf="!processing" class="fas fa-save me-1"></i>
+                    Salvar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="col-lg-12 animate-in" style="animation-delay: 0.2s">
+      <div class="card mb-4 border-left-secondary">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-4">
+            <h5 class="card-title mb-0 text-secondary font-weight-bold">
+              <i class="fas fa-list me-2"></i>
+              Lista de Hotéis
+            </h5>
+          </div>
+
+          <app-datatable
+            [pagination]="pagination"
+            [loading]="isLoader"
+            (search)="onSearch($event)"
+            (pageChange)="onPageChange($event)"
+            (perPageChange)="onPerPageChange($event)"
+          >
+            <div class="table-responsive">
+              <table class="table table-hover" width="100%" cellspacing="0">
+                <thead class="table-light">
+                  <tr>
+                    <th scope="col" (click)="sortBy('id')" style="cursor: pointer; width: 80px">
+                      <div class="d-flex align-items-center">
+                        ID
+                        <i
+                          class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary':
+                              sortColumn === 'id' && sortDirection === 'asc',
+                            'fa-sort-down text-primary':
+                              sortColumn === 'id' && sortDirection === 'desc',
+                          }"
+                        ></i>
+                      </div>
+                    </th>
+                    <th scope="col" (click)="sortBy('name')" style="cursor: pointer">
+                      <div class="d-flex align-items-center">
+                        Nome
+                        <i
+                          class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary':
+                              sortColumn === 'name' && sortDirection === 'asc',
+                            'fa-sort-down text-primary':
+                              sortColumn === 'name' && sortDirection === 'desc',
+                          }"
+                        ></i>
+                      </div>
+                    </th>
+                    <th scope="col">Município</th>
+                    <th scope="col" (click)="sortBy('email')" style="cursor: pointer">
+                      <div class="d-flex align-items-center">
+                        E-mail
+                        <i
+                          class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary':
+                              sortColumn === 'email' && sortDirection === 'asc',
+                            'fa-sort-down text-primary':
+                              sortColumn === 'email' && sortDirection === 'desc',
+                          }"
+                        ></i>
+                      </div>
+                    </th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col" class="text-end">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    *ngFor="let provider of providers"
+                    [class.table-info]="isProviderInEdition(provider.id)"
+                  >
+                    <th scope="row" class="font-weight-bold">{{ provider.id }}</th>
+                    <td>
+                      <span [class.text-muted]="!provider.active">{{ provider.name }}</span>
+                      <span *ngIf="!provider.active" class="badge bg-light text-muted ms-2">
+                        Inativo
+                      </span>
+                    </td>
+                    <td>
+                      <span [class.text-muted]="!provider.active">
+                        {{
+                          provider.city
+                            ? provider.city.name +
+                              ' - ' +
+                              (provider.city.states ? provider.city.states : provider.city.country)
+                            : '-'
+                        }}
+                      </span>
+                    </td>
+                    <td>
+                      <span [class.text-muted]="!provider.active">{{ provider.email }}</span>
+                    </td>
+                    <td>
+                      <span [class.text-muted]="!provider.active">
+                        {{ provider.national ? 'Nacional' : 'Internacional' }}
+                      </span>
+                    </td>
+                    <td class="text-end">
+                      <div class="d-flex justify-content-end gap-2 flex-wrap">
+                        <!-- Editar -->
+                        <button
+                          class="btn btn-sm btn-info text-white shadow-sm"
+                          (click)="edit(provider)"
+                          title="Editar"
+                        >
+                          <i class="fas fa-edit me-1"></i>
+                          Editar
+                        </button>
+
+                        <!-- Ativar/Inativar -->
+                        <button
+                          *ngIf="!provider.active"
+                          class="btn btn-sm btn-success shadow-sm"
+                          (click)="activateProvider(provider.id)"
+                          title="Ativar"
+                        >
+                          <i class="fas fa-check me-1"></i>
+                          Ativar
+                        </button>
+
+                        <app-confirm-modal
+                          *ngIf="provider.active"
+                          [btnClass]="'btn btn-sm btn-warning shadow-sm'"
+                          [modalTitle]="'Inativar Hotel'"
+                          [message]="
+                            'Tem certeza que deseja inativar o hotel ' + provider.name + '?'
+                          "
+                          [okButtonLabel]="'Confirmar'"
+                          (confirm)="deactivateProvider(provider.id)"
+                        >
+                          <span modal-button>
+                            <i class="fas fa-ban me-1"></i>
+                            Inativar
+                          </span>
+                        </app-confirm-modal>
+
+                        <!-- Deletar -->
+                        <app-confirm-modal
+                          [btnClass]="'btn btn-sm btn-danger shadow-sm'"
+                          [modalTitle]="'Excluir Hotel'"
+                          [message]="
+                            'Ação irreversível! Deseja realmente excluir o hotel ' +
+                            provider.name +
+                            '?'
+                          "
+                          [okButtonLabel]="'Excluir'"
+                          (confirm)="deleteProvider(provider.id)"
+                        >
+                          <span modal-button>
+                            <i class="fas fa-trash me-1"></i>
+                            Excluir
+                          </span>
+                        </app-confirm-modal>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr *ngFor="let i of [1, 2, 3, 4, 5].slice(0, isLoader ? 5 : 0)">
+                    <td colspan="6" class="text-center py-3">
+                      <div class="placeholder-glow">
+                        <span class="placeholder col-12 rounded"></span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr *ngIf="providers.length === 0 && !isLoader">
+                    <td colspan="6" class="text-center py-5 text-muted">
+                      <i class="fas fa-folder-open fa-3x mb-3 d-block opacity-25"></i>
+                      Nenhum hotel encontrado.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </app-datatable>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-authenticated-layout>

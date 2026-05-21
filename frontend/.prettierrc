@@ -3,7 +3,6 @@
   "singleQuote": true,
   "tabWidth": 2,
   "useTabs": false,
-  "htmlWhitespaceSensitivity": "ignore",
   "overrides": [
     {
       "files": "*.html",

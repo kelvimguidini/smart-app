@@ -1,5 +1,5 @@
 <div class="form-group mb-0 position-relative">
-  <label *ngIf="label" [for]="id" class="form-label">{{ label }}:</label>
+  <label *ngIf="label" [for]="id" class="form-label">{{ label }}: <span *ngIf="required" class="text-danger">*</span></label>
   <div class="position-relative">
       <input 
           type="text" 

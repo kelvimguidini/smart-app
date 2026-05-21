@@ -52,65 +52,7 @@ class ProviderController extends Controller
         $this->userRepository = $userRepository;
     }
 
-    public function activateM($id)
-    {
-        if (!Gate::allows('admin_provider')) abort(403);
-        $this->providerService->bulkActivate([$id], 'hotel');
-        return redirect()->back()->with('flash', ['message' => 'Registro ativado com sucesso!', 'type' => 'success']);
-    }
 
-    public function deactivateM($id)
-    {
-        if (!Gate::allows('admin_provider')) abort(403);
-        $this->providerService->bulkDeactivate([$id], 'hotel');
-        return redirect()->back()->with('flash', ['message' => 'Registro inativado com sucesso.']);
-    }
-
-    public function bulkAction(Request $request)
-    {
-        if (!Gate::allows('admin_provider')) abort(403);
-        
-        $ids = $request->input('ids', []);
-        $action = $request->input('action'); // activate / deactivate
-        $type = $request->input('type', 'hotel');
-
-        if (empty($ids)) return redirect()->back()->with('flash', ['message' => 'Nenhum registro selecionado.', 'type' => 'warning']);
-
-        if ($action === 'activate') {
-            $this->providerService->bulkActivate($ids, $type);
-        } else {
-            $this->providerService->bulkDeactivate($ids, $type);
-        }
-
-        return redirect()->back()->with('flash', ['message' => 'Ação em massa executada com sucesso!', 'type' => 'success']);
-    }
-
-    public function create(Request $request)
-    {
-        if (!Gate::allows('admin_provider')) abort(403);
-
-        return Inertia::render('Auth/Auxiliaries/Provider', [
-            'hotels' => $this->providerRepository->allWithCityAdmin(),
-            'cities' => $this->cityRepository->all()
-        ]);
-    }
-
-    public function store(Request $request)
-    {
-        if (!Gate::allows('admin_provider')) abort(403);
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'payment_method' => 'nullable|string|max:255',
-        ]);
-
-        try {
-            $this->providerService->storeProvider($request->all(), $request->id > 0 ? $request->id : null, Auth::user()->id);
-        } catch (Exception $e) {
-            throw $e;
-        }
-        return redirect()->back()->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
-    }
 
     public function storeEventProvider(Request $request)
     {
@@ -181,16 +123,7 @@ class ProviderController extends Controller
         return redirect()->route('event-edit', ['id' => $request->event_id, 'tab' => $tab, 'ehotel' => $provider->id])->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
     }
 
-    public function delete(Request $request)
-    {
-        if (!Gate::allows('admin_provider')) abort(403);
-        try {
-            $this->providerRepository->delete($request->id);
-        } catch (Exception $e) {
-            throw $e;
-        }
-        return redirect()->back()->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
-    }
+
 
     public function proposalPdf(Request $request)
     {

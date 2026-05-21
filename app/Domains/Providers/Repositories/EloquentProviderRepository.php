@@ -20,6 +20,30 @@ class EloquentProviderRepository implements ProviderRepositoryInterface
         return Provider::with("city")->get();
     }
 
+    public function getPaginatedProviders(array $params)
+    {
+        $query = Provider::with('city')->withoutGlobalScope('active');
+
+
+
+        if (!empty($params['search'])) {
+            $search = $params['search'];
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('contact', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
+        $sortColumn = $params['sort_column'] ?? 'id';
+        $sortDirection = $params['sort_direction'] ?? 'desc';
+        
+        $query->orderBy($sortColumn, $sortDirection);
+
+        return $query->paginate($params['per_page'] ?? 10);
+    }
+
     public function allWithCityAdmin(): Collection
     {
         return Provider::with('city')->withoutGlobalScope('active')->get();
