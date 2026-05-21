@@ -22,11 +22,17 @@ class DefaultPurposeService implements PurposeServiceInterface
 
     public function create(array $data): Purpose
     {
+        if (isset($data['name'])) {
+            $data['name'] = mb_strtoupper($data['name']);
+        }
         return $this->purposeRepository->create($data);
     }
 
     public function update(int $id, array $data): Purpose
     {
+        if (isset($data['name'])) {
+            $data['name'] = mb_strtoupper($data['name']);
+        }
         return $this->purposeRepository->update($id, $data);
     }
 

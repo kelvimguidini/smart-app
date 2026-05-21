@@ -27,7 +27,8 @@ class PasswordConfirmationTest extends TestCase
             'password' => 'password',
         ]);
 
-        $response->assertRedirect();
+        $response->assertStatus(200);
+        $response->assertJson(['message' => 'Password confirmed']);
     }
 
     public function test_password_is_not_confirmed_with_invalid_password()
@@ -38,8 +39,8 @@ class PasswordConfirmationTest extends TestCase
             'password' => 'wrong-password',
         ]);
 
-        // O projeto retorna a view com flash message em vez de erro de sessão padrão
-        $response->assertStatus(200);
-        $response->assertSee(trans('auth.password')); 
+        // O projeto agora retorna JSON com status 422 para erros de validação
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['password']);
     }
 }

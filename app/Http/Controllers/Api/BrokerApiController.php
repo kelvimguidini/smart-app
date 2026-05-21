@@ -52,7 +52,7 @@ class BrokerApiController extends Controller
             'contact' => 'required|string|max:255',
             'phone' => 'required|string|max:255',
             'email' => 'required|string|email|max:255',
-            'city_id' => 'required|integer|exists:cities,id',
+            'city_id' => 'required|integer|exists:city,id',
             'national' => 'nullable|boolean'
         ]);
 

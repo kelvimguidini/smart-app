@@ -68,7 +68,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('service-types/{id}/activate', [\App\Http\Controllers\Api\ServiceTypeApiController::class, 'activateItem']);
     Route::put('service-types/{id}/deactivate', [\App\Http\Controllers\Api\ServiceTypeApiController::class, 'deactivateItem']);
 
-    // Rotas de Brokers (Despachantes/Corretoras)
+    // Rotas de Brokers (Brokers/Corretoras)
     Route::get('brokers', [\App\Http\Controllers\Api\BrokerApiController::class, 'index']);
     Route::post('brokers', [\App\Http\Controllers\Api\BrokerApiController::class, 'store']);
     Route::delete('brokers/{id}', [\App\Http\Controllers\Api\BrokerApiController::class, 'destroy']);

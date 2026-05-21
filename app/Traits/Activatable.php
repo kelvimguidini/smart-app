@@ -4,6 +4,11 @@ namespace App\Traits;
 
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * @property bool $active
+ * @method bool save(array $options = [])
+ * @method static void addGlobalScope(string $identifier, \Closure|string $scope)
+ */
 trait Activatable
 {
     /**
@@ -22,7 +27,7 @@ trait Activatable
     public function activate()
     {
         $this->active = true;
-        $this->save();
+        return $this->save();
     }
 
     /**
@@ -31,7 +36,7 @@ trait Activatable
     public function deactivate()
     {
         $this->active = false;
-        $this->save();
+        return $this->save();
     }
 
     /**

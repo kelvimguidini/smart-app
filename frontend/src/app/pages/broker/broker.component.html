@@ -1,7 +1,7 @@
 <app-authenticated-layout title="Broker">
     <ng-container header>
         <div class="d-sm-flex align-items-center justify-content-between mb-4 animate-in">
-            <h1 class="h3 mb-0 text-gray-800">Broker</h1>
+            <h1 class="h3 mb-0 text-gray-800">Gerenciamento de Broker</h1>
         </div>
     </ng-container>
 
@@ -38,43 +38,19 @@
 
                             <!-- Município (Autocomplete) -->
                             <div class="col-lg-4 mb-3">
-                                <div class="form-group mb-0 position-relative">
-                                    <label for="city" class="form-label">Cidade:</label>
-                                    <div class="position-relative">
-                                        <input 
-                                            type="text" 
-                                            id="city" 
-                                            class="form-control" 
-                                            [(ngModel)]="selectedCityName" 
-                                            (input)="onCitySearchChange($event)"
-                                            (blur)="hideCityDropdown()"
-                                            name="city" 
-                                            placeholder="Digite para buscar a cidade..."
-                                            autocomplete="off"
-                                            required>
-                                            
-                                        <div *ngIf="isSearchingCity" class="position-absolute" style="right: 10px; top: 10px;">
-                                            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Dropdown Autocomplete -->
-                                    <ul *ngIf="showCityDropdown" class="list-group position-absolute w-100 shadow" style="z-index: 1000; max-height: 200px; overflow-y: auto;">
-                                        <li 
-                                            *ngFor="let city of citySearchResults" 
-                                            class="list-group-item list-group-item-action cursor-pointer"
-                                            (mousedown)="selectCity(city)">
-                                            {{ city.name }} - {{ city.states ? city.states : city.country }}
-                                        </li>
-                                        <li *ngIf="citySearchResults.length === 0" class="list-group-item text-muted">
-                                            Nenhuma cidade encontrada
-                                        </li>
-                                    </ul>
-
-                                    <div *ngIf="errors['city_id']" class="text-danger mt-1">
-                                        <small *ngFor="let err of errors['city_id']" class="d-block">{{ err }}</small>
-                                    </div>
-                                </div>
+                                <app-autocomplete
+                                    id="city"
+                                    label="Cidade"
+                                    placeholder="Digite para buscar a cidade..."
+                                    [required]="true"
+                                    [searchFn]="searchCities"
+                                    [displayFn]="displayCity"
+                                    valueField="id"
+                                    [initialText]="selectedCityName"
+                                    [(ngModel)]="form.city_id"
+                                    name="city"
+                                    [errors]="errors['city_id']">
+                                </app-autocomplete>
                             </div>
 
                             <!-- Contato -->
@@ -107,6 +83,8 @@
                                         [(ngModel)]="form.phone" 
                                         name="phone" 
                                         placeholder="Ex: (11) 99999-9999"
+                                        mask="(00) 0000-00009"
+                                        [dropSpecialCharacters]="false"
                                         required>
                                     
                                     <div *ngIf="errors['phone']" class="text-danger mt-1">
@@ -224,6 +202,11 @@
                                                 Contato <i class="fas fa-sort ms-2 text-muted" [ngClass]="{'fa-sort-up text-primary': sortColumn === 'contact' && sortDirection === 'asc', 'fa-sort-down text-primary': sortColumn === 'contact' && sortDirection === 'desc'}"></i>
                                             </div>
                                         </th>
+                                        <th scope="col" (click)="sortBy('phone')" style="cursor: pointer;">
+                                            <div class="d-flex align-items-center">
+                                                Telefone <i class="fas fa-sort ms-2 text-muted" [ngClass]="{'fa-sort-up text-primary': sortColumn === 'phone' && sortDirection === 'asc', 'fa-sort-down text-primary': sortColumn === 'phone' && sortDirection === 'desc'}"></i>
+                                            </div>
+                                        </th>
                                         <th scope="col" (click)="sortBy('email')" style="cursor: pointer;">
                                             <div class="d-flex align-items-center">
                                                 E-mail <i class="fas fa-sort ms-2 text-muted" [ngClass]="{'fa-sort-up text-primary': sortColumn === 'email' && sortDirection === 'asc', 'fa-sort-down text-primary': sortColumn === 'email' && sortDirection === 'desc'}"></i>
@@ -282,14 +265,14 @@
                                         </td>
                                     </tr>
                                     <tr *ngFor="let i of [1,2,3,4,5].slice(0, isLoader ? 5 : 0)">
-                                        <td colspan="7" class="text-center py-3">
+                                        <td colspan="8" class="text-center py-3">
                                             <div class="placeholder-glow">
                                                 <span class="placeholder col-12 rounded"></span>
                                             </div>
                                         </td>
                                     </tr>
                                     <tr *ngIf="brokers.length === 0 && !isLoader">
-                                        <td colspan="7" class="text-center py-5 text-muted">
+                                        <td colspan="8" class="text-center py-5 text-muted">
                                             <i class="fas fa-folder-open fa-3x mb-3 d-block opacity-25"></i>
                                             Nenhum broker encontrado.
                                         </td>

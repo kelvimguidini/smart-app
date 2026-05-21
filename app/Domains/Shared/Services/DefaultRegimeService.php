@@ -22,11 +22,17 @@ class DefaultRegimeService implements RegimeServiceInterface
 
     public function create(array $data): Regime
     {
+        if (isset($data['name'])) {
+            $data['name'] = mb_strtoupper($data['name']);
+        }
         return $this->regimeRepository->create($data);
     }
 
     public function update(int $id, array $data): Regime
     {
+        if (isset($data['name'])) {
+            $data['name'] = mb_strtoupper($data['name']);
+        }
         return $this->regimeRepository->update($id, $data);
     }
 

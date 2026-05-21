@@ -11,4 +11,19 @@ class EloquentCityRepository implements CityRepositoryInterface
     {
         return City::all();
     }
+
+    public function search(string $term = '')
+    {
+        $query = City::withoutGlobalScope('active');
+        
+        if (!empty($term)) {
+            $query->where('name', 'like', '%' . $term . '%')
+                  ->orWhere('states', 'like', '%' . $term . '%');
+        }
+
+        return $query->select('id', 'name', 'states', 'country')
+                     ->orderBy('name', 'asc')
+                     ->limit(20)
+                     ->get();
+    }
 }

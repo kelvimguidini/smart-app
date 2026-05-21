@@ -8,4 +8,5 @@ use Illuminate\Database\Eloquent\Collection;
 interface CityRepositoryInterface
 {
     public function all(): Collection;
+    public function search(string $term = '');
 }

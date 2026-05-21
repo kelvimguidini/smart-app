@@ -2,13 +2,19 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Domains\Shared\Services\CityServiceInterface;
 use App\Http\Controllers\Controller;
-use App\Models\City;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 
 class CityApiController extends Controller
 {
+    protected $cityService;
+
+    public function __construct(CityServiceInterface $cityService)
+    {
+        $this->cityService = $cityService;
+    }
+
     /**
      * Search cities for autocomplete
      *
@@ -18,18 +24,7 @@ class CityApiController extends Controller
     {
         $term = $request->get('term', '');
         
-        $query = City::withoutGlobalScope('active');
-        
-        if (!empty($term)) {
-            $query->where('name', 'like', '%' . $term . '%')
-                  ->orWhere('states', 'like', '%' . $term . '%');
-        }
-
-        // Limit results to 20 for performance
-        $cities = $query->select('id', 'name', 'states', 'country')
-                        ->orderBy('name', 'asc')
-                        ->limit(20)
-                        ->get();
+        $cities = $this->cityService->search($term);
 
         return response()->json($cities);
     }

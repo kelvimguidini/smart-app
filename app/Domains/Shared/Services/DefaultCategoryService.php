@@ -22,11 +22,17 @@ class DefaultCategoryService implements CategoryServiceInterface
 
     public function create(array $data): Category
     {
+        if (isset($data['name'])) {
+            $data['name'] = mb_strtoupper($data['name']);
+        }
         return $this->categoryRepository->create($data);
     }
 
     public function update(int $id, array $data): Category
     {
+        if (isset($data['name'])) {
+            $data['name'] = mb_strtoupper($data['name']);
+        }
         return $this->categoryRepository->update($id, $data);
     }
 

@@ -2,6 +2,7 @@ import { ApplicationConfig, provideZoneChangeDetection, APP_INITIALIZER } from '
 import { APP_BASE_HREF } from '@angular/common';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideEnvironmentNgxMask } from 'ngx-mask';
 
 import { routes } from './app.routes';
 import { authInterceptor } from './interceptors/auth.interceptor';
@@ -19,6 +20,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptors([authInterceptor])
     ),
+    provideEnvironmentNgxMask(),
     AuthService,
     {
       provide: APP_INITIALIZER,

@@ -93,6 +93,9 @@ use App\Domains\Shared\Repositories\EloquentRegimeRepository;
 use App\Domains\Shared\Services\RegimeServiceInterface;
 use App\Domains\Shared\Services\DefaultRegimeService;
 
+use App\Domains\Shared\Services\CityServiceInterface;
+use App\Domains\Shared\Services\DefaultCityService;
+
 use App\Domains\Hotels\Services\AptoServiceInterface;
 use App\Domains\Hotels\Services\DefaultAptoService;
 use Illuminate\Support\Facades\Schema;
@@ -145,6 +148,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PurposeRepositoryInterface::class, EloquentPurposeRepository::class);
         $this->app->bind(ServiceTypeRepositoryInterface::class, EloquentServiceTypeRepository::class);
         $this->app->bind(RegimeRepositoryInterface::class, EloquentRegimeRepository::class);
+        $this->app->bind(CityRepositoryInterface::class, EloquentCityRepository::class);
 
         // New Services
         $this->app->bind(BrokerServiceInterface::class, DefaultBrokerService::class);
@@ -152,6 +156,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PurposeServiceInterface::class, DefaultPurposeService::class);
         $this->app->bind(ServiceTypeServiceInterface::class, DefaultServiceTypeService::class);
         $this->app->bind(RegimeServiceInterface::class, DefaultRegimeService::class);
+        $this->app->bind(CityServiceInterface::class, DefaultCityService::class);
         $this->app->bind(AptoServiceInterface::class, DefaultAptoService::class);
     }
 

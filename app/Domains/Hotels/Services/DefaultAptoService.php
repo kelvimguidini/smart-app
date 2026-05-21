@@ -22,11 +22,17 @@ class DefaultAptoService implements AptoServiceInterface
 
     public function create(array $data): Apto
     {
+        if (isset($data['name'])) {
+            $data['name'] = mb_strtoupper($data['name']);
+        }
         return $this->aptoRepository->create($data);
     }
 
     public function update(int $id, array $data): Apto
     {
+        if (isset($data['name'])) {
+            $data['name'] = mb_strtoupper($data['name']);
+        }
         return $this->aptoRepository->update($id, $data);
     }
 

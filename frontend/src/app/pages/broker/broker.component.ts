@@ -11,11 +11,13 @@ import { ToastService } from '../../services/toast.service';
 import { AuthenticatedLayoutComponent } from "../../shared/layouts/authenticated-layout/authenticated-layout.component";
 import { ConfirmModalComponent } from "../../shared/components/confirm-modal/confirm-modal.component";
 import { DatatableComponent } from "../../shared/components/datatable/datatable.component";
+import { AutocompleteComponent } from "../../shared/components/autocomplete/autocomplete.component";
+import { NgxMaskDirective } from 'ngx-mask';
 
 @Component({
   selector: 'app-broker',
   standalone: true,
-  imports: [CommonModule, FormsModule, AuthenticatedLayoutComponent, ConfirmModalComponent, DatatableComponent],
+  imports: [CommonModule, FormsModule, AuthenticatedLayoutComponent, ConfirmModalComponent, DatatableComponent, AutocompleteComponent, NgxMaskDirective],
   templateUrl: './broker.component.html',
   styleUrls: ['./broker.component.scss']
 })
@@ -43,12 +45,11 @@ export class BrokerComponent implements OnInit {
   sortColumn: string = 'id';
   sortDirection: string = 'desc';
 
-  // City Autocomplete state
-  citySearchSubject = new Subject<string>();
-  citySearchResults: City[] = [];
-  isSearchingCity: boolean = false;
-  showCityDropdown: boolean = false;
   selectedCityName: string = '';
+
+  // Autocomplete Functions
+  searchCities = (term: string) => this.cityService.searchCities(term);
+  displayCity = (city: any) => city ? `${city.name} - ${city.states ? city.states : city.country}` : '';
 
   form = {
     id: 0,
@@ -62,21 +63,6 @@ export class BrokerComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadBrokers();
-
-    // Setup City Search Autocomplete
-    this.citySearchSubject.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap((term: string) => {
-        this.isSearchingCity = true;
-        return this.cityService.searchCities(term).pipe(
-          finalize(() => this.isSearchingCity = false)
-        );
-      })
-    ).subscribe((cities: City[]) => {
-      this.citySearchResults = cities;
-      this.showCityDropdown = cities.length > 0;
-    });
   }
 
   loadBrokers(): void {
@@ -170,35 +156,11 @@ export class BrokerComponent implements OnInit {
       national: false
     };
     this.selectedCityName = '';
-    this.showCityDropdown = false;
     this.errors = {};
     this.inEdition = 0;
   }
 
-  // City Autocomplete Methods
-  onCitySearchChange(event: any): void {
-    const term = event.target.value;
-    this.selectedCityName = term;
-    
-    if (term.length >= 2) {
-      this.citySearchSubject.next(term);
-    } else {
-      this.showCityDropdown = false;
-      this.citySearchResults = [];
-    }
-  }
 
-  selectCity(city: City): void {
-    this.form.city_id = city.id;
-    this.selectedCityName = `${city.name} - ${city.states ? city.states : city.country}`;
-    this.showCityDropdown = false;
-  }
-
-  hideCityDropdown(): void {
-    setTimeout(() => {
-      this.showCityDropdown = false;
-    }, 200);
-  }
 
   private validateForm(): boolean {
     this.errors = {};
@@ -248,7 +210,7 @@ export class BrokerComponent implements OnInit {
     this.brokerService.saveBroker(data).subscribe({
       next: (response: any) => {
         this.processing = false;
-        this.toastService.success(response.message || 'Despachante salvo com sucesso');
+        this.toastService.success(response.message || 'Broker salvo com sucesso');
         this.resetForm();
         this.loadBrokers();
       },
@@ -257,7 +219,7 @@ export class BrokerComponent implements OnInit {
         if (error.status === 422) {
           this.errors = error.error.errors || {};
         } else {
-          this.toastService.error('Erro ao salvar despachante');
+          this.toastService.error('Erro ao salvar broker');
         }
         console.error('Erro ao salvar broker:', error);
       }
@@ -269,12 +231,12 @@ export class BrokerComponent implements OnInit {
     this.brokerService.deleteBroker(brokerId).subscribe({
       next: (response: any) => {
         this.isLoader = false;
-        this.toastService.success(response.message || 'Despachante apagado com sucesso');
+        this.toastService.success(response.message || 'Broker apagado com sucesso');
         this.loadBrokers();
       },
       error: (error: HttpErrorResponse) => {
         this.isLoader = false;
-        this.toastService.error('Erro ao apagar despachante');
+        this.toastService.error('Erro ao apagar broker');
         console.error('Erro ao deletar broker:', error);
       }
     });
@@ -285,12 +247,12 @@ export class BrokerComponent implements OnInit {
     this.brokerService.activateBroker(brokerId).subscribe({
       next: (response: any) => {
         this.isLoader = false;
-        this.toastService.success(response.message || 'Despachante ativado com sucesso');
+        this.toastService.success(response.message || 'Broker ativado com sucesso');
         this.loadBrokers();
       },
       error: (error: HttpErrorResponse) => {
         this.isLoader = false;
-        this.toastService.error('Erro ao ativar despachante');
+        this.toastService.error('Erro ao ativar broker');
         console.error('Erro ao ativar broker:', error);
       }
     });
@@ -301,12 +263,12 @@ export class BrokerComponent implements OnInit {
     this.brokerService.deactivateBroker(brokerId).subscribe({
       next: (response: any) => {
         this.isLoader = false;
-        this.toastService.success(response.message || 'Despachante inativado com sucesso');
+        this.toastService.success(response.message || 'Broker inativado com sucesso');
         this.loadBrokers();
       },
       error: (error: HttpErrorResponse) => {
         this.isLoader = false;
-        this.toastService.error('Erro ao inativar despachante');
+        this.toastService.error('Erro ao inativar broker');
         console.error('Erro ao inativar broker:', error);
       }
     });

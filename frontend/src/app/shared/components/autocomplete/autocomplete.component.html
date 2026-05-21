@@ -1,0 +1,38 @@
+<div class="form-group mb-0 position-relative">
+  <label *ngIf="label" [for]="id" class="form-label">{{ label }}:</label>
+  <div class="position-relative">
+      <input 
+          type="text" 
+          [id]="id" 
+          class="form-control" 
+          [class.is-invalid]="errors && errors.length > 0"
+          [(ngModel)]="inputText" 
+          (input)="onInput($event)"
+          (blur)="onBlur()"
+          [name]="id" 
+          [placeholder]="placeholder"
+          autocomplete="off"
+          [required]="required">
+          
+      <div *ngIf="isSearching" class="position-absolute" style="right: 10px; top: 10px;">
+          <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+      </div>
+  </div>
+
+  <!-- Dropdown Autocomplete -->
+  <ul *ngIf="showDropdown" class="list-group position-absolute w-100 shadow" style="z-index: 1000; max-height: 200px; overflow-y: auto;">
+      <li 
+          *ngFor="let item of searchResults" 
+          class="list-group-item list-group-item-action cursor-pointer"
+          (mousedown)="selectItem(item)">
+          {{ displayFn(item) }}
+      </li>
+      <li *ngIf="searchResults.length === 0" class="list-group-item text-muted">
+          Nenhum registro encontrado
+      </li>
+  </ul>
+
+  <div *ngIf="errors && errors.length > 0" class="text-danger mt-1">
+      <small *ngFor="let err of errors" class="d-block">{{ err }}</small>
+  </div>
+</div>
