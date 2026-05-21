@@ -183,7 +183,6 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
         Fruitcake\Cors\CorsServiceProvider::class,
-        Spatie\Permission\PermissionServiceProvider::class,
         /*
          * Package Service Providers...
          */

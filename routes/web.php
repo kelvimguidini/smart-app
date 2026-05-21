@@ -84,4 +84,12 @@ Route::middleware(['cors'])->group(function () {
 
 
 
+Route::get('/clear-all-cache', function() {
+    \Illuminate\Support\Facades\Artisan::call('config:clear');
+    \Illuminate\Support\Facades\Artisan::call('cache:clear');
+    \Illuminate\Support\Facades\Artisan::call('view:clear');
+    \Illuminate\Support\Facades\Artisan::call('route:clear');
+    return "Caches limpos com sucesso! Verifique se os erros detalhados pararam de aparecer.";
+});
+
 require __DIR__ . '/auth.php';

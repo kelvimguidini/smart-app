@@ -3,129 +3,106 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Customer;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use App\Domains\Customers\Repositories\CustomerRepositoryInterface;
 
 class CustomerController extends Controller
 {
+    protected $customerRepository;
+
+    public function __construct(CustomerRepositoryInterface $customerRepository)
+    {
+        $this->customerRepository = $customerRepository;
+    }
+
     public function activateM($id)
     {
-        if (!Gate::allows('customer_admin')) {
-            abort(403);
-        }
-        return $this->activate($id, Customer::class);
+        if (!Gate::allows('customer_admin')) abort(403);
+        $this->customerRepository->activate($id);
+        return redirect()->back()->with('flash', ['message' => 'Registro ativado com sucesso!', 'type' => 'success']);
     }
 
     public function deactivateM($id)
     {
-        if (!Gate::allows('customer_admin')) {
-            abort(403);
-        }
-        return $this->deactivate($id, Customer::class);
+        if (!Gate::allows('customer_admin')) abort(403);
+        $this->customerRepository->deactivate($id);
+        return redirect()->back()->with('flash', ['message' => 'Registro inativado com sucesso.']);
     }
 
-    /**
-     * Display the registration view.
-     *
-     * @return \Inertia\Response
-     */
     public function create(Request $request)
     {
-        if (!Gate::allows('customer_admin')) {
-            abort(403);
-        }
+        if (!Gate::allows('customer_admin')) abort(403);
 
-        $t = Customer::withoutGlobalScope('active')->get();
         return Inertia::render('Auth/Auxiliaries/Customer', [
-            'customers' => $t
+            'customers' => $this->customerRepository->allWithInactive()
         ]);
     }
 
-    /**
-     * Handle an incoming registration request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
     public function store(Request $request)
     {
-        if (!Gate::allows('customer_admin')) {
-            abort(403);
-        }
+        if (!Gate::allows('customer_admin')) abort(403);
 
         $request->validate([
             'name' => 'required|string|max:255',
         ]);
+
         try {
-            $url = false;
+            $url = null;
             if ($request->file('logo')) {
                 $path = Storage::putFile('public/logos', $request->file('logo'));
                 $url = Storage::url($path);
                 Artisan::call('files:copy');
             }
 
+            $data = [
+                'name' => $request->name,
+                'color' => $request->color,
+                'document' => $request->document,
+                'phone' => $request->phone,
+                'email' => $request->email,
+                'responsibleAuthorizing' => $request->responsibleAuthorizing,
+            ];
+
+            if ($url) {
+                $data['logo'] = $url;
+            } elseif ($request->logo) {
+                $data['logo'] = $request->logo;
+            }
+
             if ($request->id > 0) {
-
-                $customer = Customer::withoutGlobalScope('active')->find($request->id);
-
-                $customer->name = $request->name;
-                $customer->color = $request->color;
-                $customer->document = $request->document;
-                $customer->phone = $request->phone;
-                $customer->email = $request->email;
-                $customer->responsibleAuthorizing = $request->responsibleAuthorizing;
-                $customer->logo = $url ?  $url : $request->logo;
-                $customer->save();
+                $this->customerRepository->update($request->id, $data);
             } else {
-
-                $customer = Customer::create([
-                    'name' => $request->name,
-                    'document' => $request->document,
-                    'color' => $request->color,
-                    'phone' => $request->phone,
-                    'email' => $request->email,
-                    'responsibleAuthorizing' => $request->responsibleAuthorizing,
-                    'logo' => $url,
-                ]);
+                $this->customerRepository->create($data);
             }
         } catch (Exception $e) {
-            if (isset($path)) {
-                Storage::delete($path);
-            }
+            if (isset($path)) Storage::delete($path);
             throw $e;
         }
-        return redirect()->route('customer')->with('flash', ['message' => trans('Registro salvo com sucesso'), 'type' => 'success']);
+
+        return redirect()->route('customer')->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
     }
 
-    /**
-     * Display the registration view.
-     *
-     * @return \Inertia\Response
-     */
     public function delete(Request $request)
     {
-        if (!Gate::allows('customer_admin')) {
-            abort(403);
-        }
+        if (!Gate::allows('customer_admin')) abort(403);
+
         try {
-
-            $r = Customer::withoutGlobalScope('active')->find($request->id);
-
-            $r->delete();
-
-            Storage::delete($r->logo);
+            $customer = $this->customerRepository->find($request->id);
+            if ($customer->logo) {
+                // Tentar converter URL pública de volta para path de storage se necessário
+                $path = str_replace('/storage/', 'public/', $customer->logo);
+                Storage::delete($path);
+            }
+            $this->customerRepository->delete($request->id);
         } catch (Exception $e) {
-
             throw $e;
         }
 
-        return redirect()->route('customer')->with('flash', ['message' => trans('Registro apagado com sucesso!'), 'type' => 'success']);
+        return redirect()->route('customer')->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
     }
 }

@@ -27,7 +27,7 @@ class VerifyEmailController extends Controller
 
         $user = User::find($request->id);
 
-        if ($user == null) {
+        if ($user == null || !hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
             return redirect()->route('login')->with('flash', ['message' => 'Link inválido!', 'type' => 'danger']);
         }
 

@@ -3,40 +3,41 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Mail\PdfEmail;
-use App\Models\Event;
-use App\Models\EventAB;
-use App\Models\EventAdd;
-use App\Models\EventHall;
-use App\Models\EventHotel;
 use App\Models\EventHotelOpt;
-use App\Models\Provider;
 use App\Models\StatusHistory;
-use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Crypt;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
-use Dompdf\Dompdf;
-use Dompdf\Options;
+use App\Domains\Hotels\Repositories\EventHotelRepositoryInterface;
+use App\Domains\Hotels\Repositories\EventHotelOptRepositoryInterface;
+use App\Domains\Providers\Repositories\ProviderRepositoryInterface;
+use App\Domains\Auth\Repositories\UserRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Mail\Mailable;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use PDF;
 
 class HotelController extends Controller
 {
+    protected $eventHotelRepository;
+    protected $eventHotelOptRepository;
+    protected $providerRepository;
+    protected $userRepository;
+
+    public function __construct(
+        EventHotelRepositoryInterface $eventHotelRepository,
+        EventHotelOptRepositoryInterface $eventHotelOptRepository,
+        ProviderRepositoryInterface $providerRepository,
+        UserRepositoryInterface $userRepository
+    ) {
+        $this->eventHotelRepository = $eventHotelRepository;
+        $this->eventHotelOptRepository = $eventHotelOptRepository;
+        $this->providerRepository = $providerRepository;
+        $this->userRepository = $userRepository;
+    }
 
     /**
      * Handle an incoming registration request.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse
-     *
-     * @throws \Illuminate\Validation\ValidationException
      */
     public function storeHotelOpt(Request $request)
     {
@@ -60,22 +61,20 @@ class HotelController extends Controller
         ]);
 
         try {
-
-            $user = User::find(Auth::user()->id);
+            $user = $this->userRepository->find(Auth::user()->id);
             if (!$user->getPermissions()->contains('name', 'status_level_2')) {
                 if (StatusHistory::isBlockedTableRecord('event_hotels', $request->event_hotel_id)) {
                     return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
                 }
 
-                $eventHotel = EventHotel::find($request->event_hotel_id);
+                $eventHotel = $this->eventHotelRepository->find($request->event_hotel_id);
                 if (StatusHistory::isProviderBlockedInEvent($eventHotel->event_id, $eventHotel->hotel_id, 'hotel')) {
                     return redirect()->back()->with('flash', ['message' => 'Esse fornecedor já possui um registro bloqueado neste evento!', 'type' => 'danger']);
                 }
             }
 
             if ($request->id > 0) {
-
-                $opt = EventHotelOpt::find($request->id);
+                $opt = $this->eventHotelOptRepository->find($request->id);
 
                 $opt->event_hotel_id = $request->event_hotel_id;
                 $opt->broker_id = $request->broker;
@@ -96,7 +95,6 @@ class HotelController extends Controller
 
                 $opt->save();
             } else {
-
                 $opt = EventHotelOpt::create([
                     'event_hotel_id' => $request->event_hotel_id,
                     'broker_id' => $request->broker,
@@ -123,9 +121,7 @@ class HotelController extends Controller
     }
 
     /**
-     * Display the registration view.
-     *
-     * @return \Inertia\Response
+     * Remove a provider.
      */
     public function delete(Request $request)
     {
@@ -133,23 +129,16 @@ class HotelController extends Controller
             abort(403);
         }
         try {
-
-            $r = Provider::find($request->id);
-
+            $r = $this->providerRepository->find($request->id);
             $r->delete();
         } catch (Exception $e) {
-
             throw $e;
         }
-
         return redirect()->back()->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
     }
 
-
     /**
-     * Display the registration view.
-     *
-     * @return \Inertia\Response
+     * Remove an event hotel.
      */
     public function eventHotelDelete(Request $request)
     {
@@ -157,27 +146,20 @@ class HotelController extends Controller
             abort(403);
         }
         try {
-
-            $user = User::find(Auth::user()->id);
+            $user = $this->userRepository->find(Auth::user()->id);
             if (!$user->getPermissions()->contains('name', 'status_level_2') && StatusHistory::isBlockedTableRecord('event_hotels', $request->id)) {
                 return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser apagado devido ao status atual!', 'type' => 'danger']);
             }
-            $r = EventHotel::find($request->id);
-
+            $r = $this->eventHotelRepository->find($request->id);
             $r->delete();
         } catch (Exception $e) {
-
             throw $e;
         }
-
         return redirect()->route('event-edit',  ['id' => $request->event_id, 'tab' => 1])->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
     }
 
-
     /**
-     * Display the registration view.
-     *
-     * @return \Inertia\Response
+     * Remove a hotel option.
      */
     public function optDelete(Request $request)
     {
@@ -185,9 +167,8 @@ class HotelController extends Controller
             abort(403);
         }
         try {
-
-            $opt = EventHotelOpt::with('event_hotel')->find($request->id);
-            $eventHotel = $opt->event_hotel()->first();
+            $opt = $this->eventHotelOptRepository->findWithHotel($request->id);
+            $eventHotel = $opt->event_hotel;
 
             if (!$eventHotel) {
                 return redirect()->back()->with('flash', [
@@ -196,8 +177,7 @@ class HotelController extends Controller
                 ]);
             }
 
-
-            $user = User::find(Auth::user()->id);
+            $user = $this->userRepository->find(Auth::user()->id);
             if (!$user->getPermissions()->contains('name', 'status_level_2')) {
                 if (StatusHistory::isBlockedTableRecord('event_hotels', $eventHotel->id)) {
                     return redirect()->back()->with('flash', [
@@ -213,13 +193,10 @@ class HotelController extends Controller
                     ]);
                 }
             }
-            // Excluir o registro do Opt
             $opt->delete();
         } catch (Exception $e) {
-
             throw $e;
         }
-
         return redirect()->back()->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
     }
 }

@@ -3,181 +3,97 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Role;
-use App\Models\User;
 use Exception;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Gate;
+use App\Domains\Auth\Services\AuthServiceInterface;
+use App\Domains\Auth\Repositories\UserRepositoryInterface;
+use App\Domains\Auth\Repositories\RoleRepositoryInterface;
 
 class RegisteredUserController extends Controller
 {
+    protected $authService;
+    protected $userRepository;
+    protected $roleRepository;
+
+    public function __construct(
+        AuthServiceInterface $authService,
+        UserRepositoryInterface $userRepository,
+        RoleRepositoryInterface $roleRepository
+    ) {
+        $this->authService = $authService;
+        $this->userRepository = $userRepository;
+        $this->roleRepository = $roleRepository;
+    }
 
     public function activateM($id)
     {
-        if (!Gate::allows('local_admin')) {
-            abort(403);
-        }
-        return $this->activate($id, User::class);
+        if (!Gate::allows('local_admin')) abort(403);
+        $this->authService->setUserStatus($id, true);
+        return redirect()->back()->with('flash', ['message' => 'Registro ativado com sucesso!', 'type' => 'success']);
     }
 
     public function deactivateM($id)
     {
-        if (!Gate::allows('local_admin')) {
-            abort(403);
-        }
-        return $this->deactivate($id, User::class);
+        if (!Gate::allows('local_admin')) abort(403);
+        $this->authService->setUserStatus($id, false);
+        return redirect()->back()->with('flash', ['message' => 'Registro inativado com sucesso.']);
     }
 
-    /**
-     * Display the registration view.
-     *
-     * @return \Inertia\Response
-     */
     public function create()
     {
-        if (!Gate::allows('user_admin')) {
-            abort(403);
-        }
-
-        $users = User::withoutGlobalScope('active')->with('roles')->get();
-        $roles = Role::all();
-        // $userEdit = $request->id > 0 ? User::find($request->id) : null;
+        if (!Gate::allows('user_admin')) abort(403);
 
         return Inertia::render('Auth/Register', [
-            'users' => $users,
-            'roles' => $roles,
-            // 'userEdit' => $userEdit
+            'users' => $this->userRepository->allWithRolesAndInactive(),
+            'roles' => $this->roleRepository->allWithPermissions(),
         ]);
     }
 
-    /**
-     * Handle an incoming registration request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
     public function store(Request $request)
     {
-        if (!Gate::allows('user_admin')) {
-            abort(403);
-        }
+        if (!Gate::allows('user_admin')) abort(403);
 
-
-        if ($request->id > 0) {
-
-
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255',
-                'phone' => 'required|string|max:255',
-            ]);
-
-            $userEdit = User::withoutGlobalScope('active')->with('roles')->find($request->id);
-
-            $userEdit->name = $request->name;
-            $userEdit->email = $request->email;
-            $userEdit->phone = $request->phone;
-            $userEdit->signature = $request->signature;
-            $userEdit->save();
-
-            foreach ($userEdit->roles as $role) {
-                DB::table('user_role')->where(['role_id' => $role->id, 'user_id' => $userEdit->id])->delete();
-            }
-
-            foreach ($request->roles as $role) {
-
-                DB::table('user_role')->insert(
-                    array(
-                        'user_id' => $userEdit->id,
-                        'role_id' => $role
-                    )
-                );
-            }
-
-            return redirect()->route('register')->with('flash', ['message' => trans('Registro salvo com sucesso'), 'type' => 'success']);
-        }
-
-        $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'phone' => 'required|string|max:255'
-        ]);
+            'email' => 'required|string|email|max:255' . ($request->id > 0 ? '' : '|unique:users'),
+            'phone' => 'nullable|string|max:255'
+        ];
+        $request->validate($rules);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'signature' => $request->signature,
-            'password' => Hash::make('qwerty'),
-        ]);
-
-        // Insert some stuff
-        foreach ($request->roles as $role) {
-
-            DB::table('user_role')->insert(
-                array(
-                    'user_id' => $user->id,
-                    'role_id' => $role
-                )
-            );
+        try {
+            $this->authService->storeUser($request->all(), $request->id > 0 ? $request->id : null, (array)$request->roles);
+        } catch (Exception $e) {
+            throw $e;
         }
 
-        $user->sendEmailVerificationNotification();
-
-        return redirect()->route('register')->with('flash', ['message' => trans('Registro salvo com sucesso'), 'type' => 'success']);
+        return redirect()->route('register')->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
     }
 
-
-
-    /**
-     * Display the registration view.
-     *
-     * @return \Inertia\Response
-     */
     public function delete(Request $request)
     {
-        if (!Gate::allows('user_admin')) {
-            abort(403);
-        }
+        if (!Gate::allows('user_admin')) abort(403);
+        
         try {
-
-            $r = User::withoutGlobalScope('active')->find($request->id);
-
-            $r->delete();
+            $this->authService->deleteUser($request->id);
         } catch (Exception $e) {
-
             throw $e;
         }
 
-        return redirect()->back()->with('flash', ['message' => trans('Registro apagado com sucesso!'), 'type' => 'success']);
+        return redirect()->back()->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
     }
 
-
-
-    /**
-     * Display the registration view.
-     *
-     * @return \Inertia\Response
-     */
     public function roleRemove(Request $request)
     {
-        if (!Gate::allows('user_admin')) {
-            abort(403);
-        }
+        if (!Gate::allows('user_admin')) abort(403);
+        
         try {
-            DB::table('user_role')->where([
-                ['role_id', '=', $request->role_id],
-                ['user_id', '=', $request->user_id],
-            ])->delete();
+            $this->authService->removeUserRole($request->user_id, $request->role_id);
         } catch (Exception $e) {
             throw $e;
         }
 
-        return redirect()->back()->with('flash', ['message' => trans('Registro apagado com sucesso!'), 'type' => 'success']);
+        return redirect()->back()->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
     }
 }

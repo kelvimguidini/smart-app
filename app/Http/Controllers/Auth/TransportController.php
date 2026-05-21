@@ -3,36 +3,36 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Mail\PdfEmail;
-use App\Models\Event;
-use App\Models\EventAB;
-use App\Models\EventAdd;
-use App\Models\EventHall;
-use App\Models\EventHotel;
-use App\Models\EventTransport;
-use App\Models\EventTransportOpt;
-use App\Models\StatusHistory;
-use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\Gate;
-use Dompdf\Dompdf;
-use Dompdf\Options;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use App\Domains\Transports\Repositories\EventTransportRepositoryInterface;
+use App\Domains\Transports\Repositories\EventTransportOptRepositoryInterface;
+use App\Domains\Auth\Repositories\UserRepositoryInterface;
+use App\Domains\Shared\Repositories\StatusHistoryRepositoryInterface;
 
 class TransportController extends Controller
 {
+    protected $eventTransportRepository;
+    protected $eventTransportOptRepository;
+    protected $userRepository;
+    protected $statusHistoryRepository;
+
+    public function __construct(
+        EventTransportRepositoryInterface $eventTransportRepository,
+        EventTransportOptRepositoryInterface $eventTransportOptRepository,
+        UserRepositoryInterface $userRepository,
+        StatusHistoryRepositoryInterface $statusHistoryRepository
+    ) {
+        $this->eventTransportRepository = $eventTransportRepository;
+        $this->eventTransportOptRepository = $eventTransportOptRepository;
+        $this->userRepository = $userRepository;
+        $this->statusHistoryRepository = $statusHistoryRepository;
+    }
 
     /**
      * Handle an incoming registration request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     *
-     * @throws \Illuminate\Validation\ValidationException
      */
     public function storeOpt(Request $request)
     {
@@ -55,57 +55,39 @@ class TransportController extends Controller
         ]);
 
         try {
-
-            $user = User::find(Auth::user()->id);
+            $user = $this->userRepository->find(Auth::user()->id);
             if (!$user->getPermissions()->contains('name', 'status_level_2')) {
-                if (StatusHistory::isBlockedTableRecord('event_transports', $request->event_transport_id)) {
+                if ($this->statusHistoryRepository->isBlockedTableRecord('event_transports', $request->event_transport_id)) {
                     return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
                 }
 
-                $eventTransport = EventTransport::find($request->event_transport_id);
-                if (StatusHistory::isProviderBlockedInEvent($eventTransport->event_id, $eventTransport->transport_id, 'transport')) {
+                $eventTransport = $this->eventTransportRepository->find($request->event_transport_id);
+                if ($this->statusHistoryRepository->isProviderBlockedInEvent($eventTransport->event_id, $eventTransport->transport_id, 'transport')) {
                     return redirect()->back()->with('flash', ['message' => 'Esse fornecedor já possui um registro bloqueado neste evento!', 'type' => 'danger']);
                 }
             }
 
+            $data = [
+                'event_transport_id' => $request->event_transport_id,
+                'broker_id' => $request->broker,
+                'vehicle_id' => $request->vehicle,
+                'model_id' => $request->model,
+                'service_id' => $request->service,
+                'brand_id' => $request->brand,
+                'observation' => $request->observation,
+                'in' => $request->in,
+                'out' => $request->out,
+                'received_proposal_percent' => $request->received_proposal_percent,
+                'received_proposal' => $request->received_proposal,
+                'kickback' => $request->kickback,
+                'count' => $request->count,
+                'order' => $request->order,
+            ];
+
             if ($request->id > 0) {
-
-                $opt = EventTransportOpt::find($request->id);
-
-                $opt->event_transport_id = $request->event_transport_id;
-                $opt->broker_id = $request->broker;
-                $opt->vehicle_id = $request->vehicle;
-                $opt->model_id = $request->model;
-                $opt->service_id = $request->service;
-                $opt->brand_id = $request->brand;
-                $opt->observation = $request->observation;
-                $opt->in = $request->in;
-                $opt->out = $request->out;
-                $opt->received_proposal_percent = $request->received_proposal_percent;
-                $opt->received_proposal = $request->received_proposal;
-                $opt->kickback = $request->kickback;
-                $opt->count = $request->count;
-                $opt->order = $request->order;
-
-                $opt->save();
+                $this->eventTransportOptRepository->update($request->id, $data);
             } else {
-
-                $opt = EventTransportOpt::create([
-                    'event_transport_id' => $request->event_transport_id,
-                    'broker_id' => $request->broker,
-                    'model_id' => $request->model,
-                    'service_id' => $request->service,
-                    'brand_id' => $request->brand,
-                    'vehicle_id' => $request->vehicle,
-                    'observation' => $request->observation,
-                    'in' => $request->in,
-                    'out' => $request->out,
-                    'received_proposal_percent' => $request->received_proposal_percent,
-                    'received_proposal' => $request->received_proposal,
-                    'kickback' => $request->kickback,
-                    'count' => $request->count,
-                    'order' => $request->order,
-                ]);
+                $this->eventTransportOptRepository->create($data);
             }
         } catch (Exception $e) {
             throw $e;
@@ -113,11 +95,8 @@ class TransportController extends Controller
         return redirect()->back()->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
     }
 
-
     /**
-     * Display the registration view.
-     *
-     * @return \Inertia\Response
+     * Delete event transport.
      */
     public function eventTransportDelete(Request $request)
     {
@@ -125,28 +104,20 @@ class TransportController extends Controller
             abort(403);
         }
         try {
-
-            $user = User::find(Auth::user()->id);
-            if (!$user->getPermissions()->contains('name', 'status_level_2') && StatusHistory::isBlockedTableRecord('event_transports', $request->id)) {
+            $user = $this->userRepository->find(Auth::user()->id);
+            if (!$user->getPermissions()->contains('name', 'status_level_2') && $this->statusHistoryRepository->isBlockedTableRecord('event_transports', $request->id)) {
                 return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser apagado devido ao status atual!', 'type' => 'danger']);
             }
-
-            $r = EventTransport::find($request->id);
-
+            $r = $this->eventTransportRepository->find($request->id);
             $r->delete();
         } catch (Exception $e) {
-
             throw $e;
         }
-
         return redirect()->route('event-edit',  ['id' => $request->event_id, 'tab' => 5])->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
     }
 
-
     /**
-     * Display the registration view.
-     *
-     * @return \Inertia\Response
+     * Delete opt.
      */
     public function optDelete(Request $request)
     {
@@ -154,42 +125,28 @@ class TransportController extends Controller
             abort(403);
         }
         try {
+            $opt = $this->eventTransportOptRepository->findWithDetails($request->id);
+            $eventTransport = $opt->event_transport;
 
-
-            $opt = EventTransportOpt::with('event_transport')->find($request->id);
-            $eventHotel = $opt->event_transport()->first();
-
-            if (!$eventHotel) {
-                return redirect()->back()->with('flash', [
-                    'message' => 'Erro: Registro não associado a um hotel válido!',
-                    'type' => 'danger'
-                ]);
+            if (!$eventTransport) {
+                return redirect()->back()->with('flash', ['message' => 'Erro: Registro não associado a um fornecedor válido!', 'type' => 'danger']);
             }
 
-
-            $user = User::find(Auth::user()->id);
+            $user = $this->userRepository->find(Auth::user()->id);
             if (!$user->getPermissions()->contains('name', 'status_level_2')) {
-                if (StatusHistory::isBlockedTableRecord('event_transports', $eventHotel->id)) {
-                    return redirect()->back()->with('flash', [
-                        'message' => 'Esse registro não pode ser apagado devido ao status atual!',
-                        'type' => 'danger'
-                    ]);
+                if ($this->statusHistoryRepository->isBlockedTableRecord('event_transports', $eventTransport->id)) {
+                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser apagado devido ao status atual!', 'type' => 'danger']);
                 }
 
-                if (StatusHistory::isProviderBlockedInEvent($eventHotel->event_id, $eventHotel->transport_id, 'transport')) {
-                    return redirect()->back()->with('flash', [
-                        'message' => 'Esse fornecedor já possui um registro bloqueado neste evento!',
-                        'type' => 'danger'
-                    ]);
+                if ($this->statusHistoryRepository->isProviderBlockedInEvent($eventTransport->event_id, $eventTransport->transport_id, 'transport')) {
+                    return redirect()->back()->with('flash', ['message' => 'Esse fornecedor já possui um registro bloqueado neste evento!', 'type' => 'danger']);
                 }
             }
-            // Excluir o registro do Opt
+
             $opt->delete();
         } catch (Exception $e) {
-
             throw $e;
         }
-
         return redirect()->back()->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
     }
 }

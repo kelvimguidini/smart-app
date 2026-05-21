@@ -3,104 +3,62 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Frequency;
-use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
+use App\Domains\Shared\Repositories\LookupRepositoryInterface;
 
 class FrequencyController extends Controller
 {
+    protected $lookupRepository;
+
+    public function __construct(LookupRepositoryInterface $lookupRepository)
+    {
+        $this->lookupRepository = $lookupRepository;
+    }
+
     public function activateM($id)
     {
-        if (!Gate::allows('frequency_admin')) {
-            abort(403);
-        }
-        return $this->activate($id, Frequency::class);
+        if (!Gate::allows('frequency_admin')) abort(403);
+        $this->lookupRepository->activateFrequency($id);
+        return redirect()->back()->with('flash', ['message' => 'Registro ativado com sucesso!', 'type' => 'success']);
     }
 
     public function deactivateM($id)
     {
-        if (!Gate::allows('frequency_admin')) {
-            abort(403);
-        }
-        return $this->deactivate($id, Frequency::class);
+        if (!Gate::allows('frequency_admin')) abort(403);
+        $this->lookupRepository->deactivateFrequency($id);
+        return redirect()->back()->with('flash', ['message' => 'Registro inativado com sucesso.']);
     }
 
-    /**
-     * Display the registration view.
-     *
-     * @return \Inertia\Response
-     */
     public function create()
     {
-        if (!Gate::allows('frequency_admin')) {
-            abort(403);
-        }
+        if (!Gate::allows('frequency_admin')) abort(403);
 
-        $t = Frequency::withoutGlobalScope('active')->get();
         return Inertia::render('Auth/Auxiliaries/Frequency', [
-            'frequencies' => $t
+            'frequencies' => $this->lookupRepository->getFrequenciesWithInactive()
         ]);
     }
 
-    /**
-     * Handle an incoming registration request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
     public function store(Request $request)
     {
-        if (!Gate::allows('frequency_admin')) {
-            abort(403);
-        }
+        if (!Gate::allows('frequency_admin')) abort(403);
 
-        $request->validate([
-            'name' => 'required|string|max:255'
-        ]);
+        $request->validate(['name' => 'required|string|max:255']);
+
         try {
-
-            if ($request->id > 0) {
-
-                $obj = Frequency::withoutGlobalScope('active')->find($request->id);
-
-                $obj->name = $request->name;
-                $obj->save();
-            } else {
-
-                $obj = Frequency::create([
-                    'name' => $request->name
-                ]);
-            }
-        } catch (Exception $e) {
+            $this->lookupRepository->saveFrequency(['name' => $request->name], $request->id > 0 ? $request->id : null);
+        } catch (\Exception $e) {
             throw $e;
         }
-        return redirect()->route('frequency')->with('flash', ['message' => trans('Registro salvo com sucesso'), 'type' => 'success']);
+
+        return redirect()->route('frequency')->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
     }
 
-    /**
-     * Display the registration view.
-     *
-     * @return \Inertia\Response
-     */
     public function delete(Request $request)
     {
-        if (!Gate::allows('frequency_admin')) {
-            abort(403);
-        }
-        try {
-
-            $r = Frequency::withoutGlobalScope('active')->find($request->id);
-
-            $r->delete();
-        } catch (Exception $e) {
-
-            throw $e;
-        }
-
-        return redirect()->route('frequency')->with('flash', ['message' => trans('Registro apagado com sucesso!'), 'type' => 'success']);
+        if (!Gate::allows('frequency_admin')) abort(403);
+        $this->lookupRepository->deleteFrequency($request->id);
+        return redirect()->route('frequency')->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
     }
 }

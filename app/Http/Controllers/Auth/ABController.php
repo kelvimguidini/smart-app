@@ -3,26 +3,36 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\EventAB;
-use App\Models\EventABOpt;
-use App\Models\StatusHistory;
-use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
+use App\Domains\FoodBeverage\Repositories\EventABRepositoryInterface;
+use App\Domains\FoodBeverage\Repositories\EventABOptRepositoryInterface;
+use App\Domains\Auth\Repositories\UserRepositoryInterface;
+use App\Domains\Shared\Repositories\StatusHistoryRepositoryInterface;
 
 class ABController extends Controller
 {
+    protected $eventABRepository;
+    protected $eventABOptRepository;
+    protected $userRepository;
+    protected $statusHistoryRepository;
+
+    public function __construct(
+        EventABRepositoryInterface $eventABRepository,
+        EventABOptRepositoryInterface $eventABOptRepository,
+        UserRepositoryInterface $userRepository,
+        StatusHistoryRepositoryInterface $statusHistoryRepository
+    ) {
+        $this->eventABRepository = $eventABRepository;
+        $this->eventABOptRepository = $eventABOptRepository;
+        $this->userRepository = $userRepository;
+        $this->statusHistoryRepository = $statusHistoryRepository;
+    }
 
     /**
      * Handle an incoming registration request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     *
-     * @throws \Illuminate\Validation\ValidationException
      */
     public function storeOpt(Request $request)
     {
@@ -44,53 +54,37 @@ class ABController extends Controller
         ]);
 
         try {
-
-            $user = User::find(Auth::user()->id);
+            $user = $this->userRepository->find(Auth::user()->id);
             if (!$user->getPermissions()->contains('name', 'status_level_2')) {
-                if (StatusHistory::isBlockedTableRecord('event_abs', $request->event_ab_id)) {
+                if ($this->statusHistoryRepository->isBlockedTableRecord('event_abs', $request->event_ab_id)) {
                     return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser atualizado devido ao status atual!', 'type' => 'danger']);
                 }
 
-                $eventAB = EventAB::find($request->event_ab_id);
-                if (StatusHistory::isProviderBlockedInEvent($eventAB->event_id, $eventAB->ab_id, 'ab')) {
+                $eventAB = $this->eventABRepository->find($request->event_ab_id);
+                if ($this->statusHistoryRepository->isProviderBlockedInEvent($eventAB->event_id, $eventAB->ab_id, 'ab')) {
                     return redirect()->back()->with('flash', ['message' => 'Esse fornecedor já possui um registro bloqueado neste evento!', 'type' => 'danger']);
                 }
             }
 
+            $data = [
+                'event_ab_id' => $request->event_ab_id,
+                'broker_id' => $request->broker,
+                'local_id' => $request->local_id,
+                'service_id' => $request->service_id,
+                'service_type_id' => $request->service_type_id,
+                'in' => $request->in,
+                'out' => $request->out,
+                'received_proposal_percent' => $request->received_proposal_percent,
+                'received_proposal' => $request->received_proposal,
+                'kickback' => $request->kickback,
+                'count' => $request->count,
+                'order' => $request->order,
+            ];
+
             if ($request->id > 0) {
-
-                $opt = EventABOpt::find($request->id);
-
-                $opt->event_ab_id = $request->event_ab_id;
-                $opt->broker_id = $request->broker;
-                $opt->local_id = $request->local_id;
-                $opt->service_id = $request->service_id;
-                $opt->service_type_id = $request->service_type_id;
-                $opt->in = $request->in;
-                $opt->out = $request->out;
-                $opt->received_proposal_percent = $request->received_proposal_percent;
-                $opt->received_proposal = $request->received_proposal;
-                $opt->kickback = $request->kickback;
-                $opt->count = $request->count;
-                $opt->order = $request->order;
-
-                $opt->save();
+                $this->eventABOptRepository->update($request->id, $data);
             } else {
-
-                $opt = EventABOpt::create([
-                    'event_ab_id' => $request->event_ab_id,
-                    'broker_id' => $request->broker,
-                    'local_id' => $request->local_id,
-                    'service_id' => $request->service_id,
-                    'service_type_id' => $request->service_type_id,
-                    'in' => $request->in,
-                    'out' => $request->out,
-                    'received_proposal_percent' => $request->received_proposal_percent,
-                    'received_proposal' => $request->received_proposal,
-                    'kickback' => $request->kickback,
-                    'count' => $request->count,
-                    'order' => $request->order,
-                ]);
+                $this->eventABOptRepository->create($data);
             }
         } catch (Exception $e) {
             throw $e;
@@ -98,11 +92,8 @@ class ABController extends Controller
         return redirect()->back()->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
     }
 
-
     /**
-     * Display the registration view.
-     *
-     * @return \Inertia\Response
+     * Delete event AB.
      */
     public function eventABDelete(Request $request)
     {
@@ -110,27 +101,20 @@ class ABController extends Controller
             abort(403);
         }
         try {
-
-            $user = User::find(Auth::user()->id);
-            if (!$user->getPermissions()->contains('name', 'status_level_2') && StatusHistory::isBlockedTableRecord('event_abs', $request->id)) {
+            $user = $this->userRepository->find(Auth::user()->id);
+            if (!$user->getPermissions()->contains('name', 'status_level_2') && $this->statusHistoryRepository->isBlockedTableRecord('event_abs', $request->id)) {
                 return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser apagado devido ao status atual!', 'type' => 'danger']);
             }
-            $r = EventAB::find($request->id);
-
+            $r = $this->eventABRepository->find($request->id);
             $r->delete();
         } catch (Exception $e) {
-
             throw $e;
         }
-
         return redirect()->route('event-edit',  ['id' => $request->event_id, 'tab' => 2])->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
     }
 
-
     /**
-     * Display the registration view.
-     *
-     * @return \Inertia\Response
+     * Delete opt.
      */
     public function optDelete(Request $request)
     {
@@ -138,41 +122,28 @@ class ABController extends Controller
             abort(403);
         }
         try {
+            $opt = $this->eventABOptRepository->findWithDetails($request->id);
+            $eventAB = $opt->event_ab;
 
-
-            $opt = EventABOpt::with('event_ab')->find($request->id);
-            $eventHotel = $opt->event_ab()->first();
-
-            if (!$eventHotel) {
-                return redirect()->back()->with('flash', [
-                    'message' => 'Erro: Registro não associado a um hotel válido!',
-                    'type' => 'danger'
-                ]);
+            if (!$eventAB) {
+                return redirect()->back()->with('flash', ['message' => 'Erro: Registro não associado a um fornecedor válido!', 'type' => 'danger']);
             }
 
-            $user = User::find(Auth::user()->id);
+            $user = $this->userRepository->find(Auth::user()->id);
             if (!$user->getPermissions()->contains('name', 'status_level_2')) {
-                if (StatusHistory::isBlockedTableRecord('event_abs', $eventHotel->id)) {
-                    return redirect()->back()->with('flash', [
-                        'message' => 'Esse registro não pode ser apagado devido ao status atual!',
-                        'type' => 'danger'
-                    ]);
+                if ($this->statusHistoryRepository->isBlockedTableRecord('event_abs', $eventAB->id)) {
+                    return redirect()->back()->with('flash', ['message' => 'Esse registro não pode ser apagado devido ao status atual!', 'type' => 'danger']);
                 }
 
-                if (StatusHistory::isProviderBlockedInEvent($eventHotel->event_id, $eventHotel->ab_id, 'ab')) {
-                    return redirect()->back()->with('flash', [
-                        'message' => 'Esse fornecedor já possui um registro bloqueado neste evento!',
-                        'type' => 'danger'
-                    ]);
+                if ($this->statusHistoryRepository->isProviderBlockedInEvent($eventAB->event_id, $eventAB->ab_id, 'ab')) {
+                    return redirect()->back()->with('flash', ['message' => 'Esse fornecedor já possui um registro bloqueado neste evento!', 'type' => 'danger']);
                 }
             }
 
             $opt->delete();
         } catch (Exception $e) {
-
             throw $e;
         }
-
         return redirect()->back()->with('flash', ['message' => 'Registro apagado com sucesso!', 'type' => 'success']);
     }
 }

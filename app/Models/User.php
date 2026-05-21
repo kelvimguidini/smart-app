@@ -11,12 +11,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasRoles;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
     use UniqueNameTrait;
     use Activatable;
     /**

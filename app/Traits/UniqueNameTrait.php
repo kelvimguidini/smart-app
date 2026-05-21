@@ -11,9 +11,13 @@ trait UniqueNameTrait
         static::saving(function ($model) {
 
             $name = $model->getAttribute('name');
-            $id = $model->getAttribute('id');
-            $exists = static::where('name', $name)
-                ->where('id', '!=', $id) // Ignora o registro atual
+            $id   = $model->getAttribute('id');
+
+            // withoutGlobalScopes() evita que escopos como SoftDeletes ou 'active'
+            // sejam aplicados, prevenindo erros de coluna inexistente (ex: deleted_at).
+            $exists = static::withoutGlobalScopes()
+                ->where('name', $name)
+                ->where('id', '!=', $id)
                 ->exists();
 
             if ($exists) {
