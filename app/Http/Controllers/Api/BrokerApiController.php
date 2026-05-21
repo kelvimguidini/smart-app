@@ -3,12 +3,19 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Broker;
+use App\Domains\Shared\Services\BrokerServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class BrokerApiController extends Controller
 {
+    protected $brokerService;
+
+    public function __construct(BrokerServiceInterface $brokerService)
+    {
+        $this->brokerService = $brokerService;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -20,32 +27,10 @@ class BrokerApiController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $query = Broker::with('city')->withoutGlobalScope('active');
+        $filters = $request->only(['search', 'sort_column', 'sort_direction']);
+        $perPage = $request->get('per_page', 10);
 
-        // Search
-        if ($request->has('search') && !empty($request->search)) {
-            $query->where(function($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('email', 'like', '%' . $request->search . '%')
-                  ->orWhere('contact', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        // Sorting
-        $sortColumn = $request->get('sort_column', 'id');
-        $sortDirection = $request->get('sort_direction', 'desc');
-        
-        // Allowed columns for sorting
-        $allowedColumns = ['id', 'name', 'email', 'contact', 'active'];
-        if (in_array($sortColumn, $allowedColumns)) {
-            $query->orderBy($sortColumn, $sortDirection);
-        } else {
-            $query->orderBy('id', 'desc');
-        }
-
-        // Pagination
-        $perPage = $request->get('per_page', 20);
-        $brokers = $query->paginate($perPage);
+        $brokers = $this->brokerService->list($filters, $perPage);
 
         return response()->json($brokers);
     }
@@ -73,14 +58,10 @@ class BrokerApiController extends Controller
 
         try {
             if ($request->id > 0) {
-                $broker = Broker::withoutGlobalScope('active')->findOrFail($request->id);
-                $broker->fill($request->only(['name', 'city_id', 'contact', 'phone', 'email', 'national']));
-                $broker->save();
-                
+                $broker = $this->brokerService->update($request->id, $request->only(['name', 'city_id', 'contact', 'phone', 'email', 'national']));
                 return response()->json(['message' => 'Registro atualizado com sucesso', 'data' => $broker]);
             } else {
-                $broker = Broker::create($request->only(['name', 'city_id', 'contact', 'phone', 'email', 'national']));
-                
+                $broker = $this->brokerService->create($request->only(['name', 'city_id', 'contact', 'phone', 'email', 'national']));
                 return response()->json(['message' => 'Registro salvo com sucesso', 'data' => $broker]);
             }
         } catch (\Exception $e) {
@@ -101,8 +82,7 @@ class BrokerApiController extends Controller
         }
 
         try {
-            $broker = Broker::withoutGlobalScope('active')->findOrFail($id);
-            $broker->delete();
+            $this->brokerService->delete($id);
             return response()->json(['message' => 'Registro apagado com sucesso!']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao apagar o registro', 'error' => $e->getMessage()], 500);
@@ -122,8 +102,7 @@ class BrokerApiController extends Controller
         }
 
         try {
-            $broker = Broker::withoutGlobalScope('active')->findOrFail($id);
-            $broker->activate();
+            $this->brokerService->activate($id);
             return response()->json(['message' => 'Registro ativado com sucesso!']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao ativar o registro', 'error' => $e->getMessage()], 500);
@@ -143,8 +122,7 @@ class BrokerApiController extends Controller
         }
 
         try {
-            $broker = Broker::withoutGlobalScope('active')->findOrFail($id);
-            $broker->deactivate();
+            $this->brokerService->deactivate($id);
             return response()->json(['message' => 'Registro inativado com sucesso.']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao inativar o registro', 'error' => $e->getMessage()], 500);

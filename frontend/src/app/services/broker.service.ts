@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 import { City } from './city.service';
 
 export interface Broker {
@@ -40,7 +41,7 @@ export interface BrokerPaginatedResponse {
 })
 export class BrokerService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = '/api/brokers';
+  private readonly apiUrl = environment.apiUrl;
 
   getBrokers(params: any): Observable<BrokerPaginatedResponse> {
     let httpParams = new HttpParams();
@@ -50,22 +51,22 @@ export class BrokerService {
       }
     });
 
-    return this.http.get<BrokerPaginatedResponse>(this.apiUrl, { params: httpParams });
+    return this.http.get<BrokerPaginatedResponse>(`${this.apiUrl}/api/brokers`, { params: httpParams });
   }
 
   saveBroker(data: BrokerCreateUpdateRequest): Observable<any> {
-    return this.http.post(this.apiUrl, data);
+    return this.http.post(`${this.apiUrl}/api/brokers`, data);
   }
 
   deleteBroker(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`);
+    return this.http.delete(`${this.apiUrl}/api/brokers/${id}`);
   }
 
   activateBroker(id: number): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}/activate`, {});
+    return this.http.put(`${this.apiUrl}/api/brokers/${id}/activate`, {});
   }
 
   deactivateBroker(id: number): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}/deactivate`, {});
+    return this.http.put(`${this.apiUrl}/api/brokers/${id}/deactivate`, {});
   }
 }

@@ -22,15 +22,43 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Apto;
 use Illuminate\Database\Eloquent\Collection;
+use App\Domains\Shared\Repositories\BrokerRepositoryInterface;
+use App\Domains\Shared\Repositories\RegimeRepositoryInterface;
+use App\Domains\Shared\Repositories\PurposeRepositoryInterface;
+use App\Domains\Shared\Repositories\ServiceTypeRepositoryInterface;
+use App\Domains\Shared\Repositories\CategoryRepositoryInterface;
+use App\Domains\Hotels\Repositories\AptoRepositoryInterface;
 
 class EloquentLookupRepository implements LookupRepositoryInterface
 {
-    public function getAllBrokers(): Collection { return Broker::all(); }
+    protected $brokerRepo;
+    protected $regimeRepo;
+    protected $purposeRepo;
+    protected $serviceTypeRepo;
+    protected $categoryRepo;
+    protected $aptoRepo;
+
+    public function __construct(
+        BrokerRepositoryInterface $brokerRepo,
+        RegimeRepositoryInterface $regimeRepo,
+        PurposeRepositoryInterface $purposeRepo,
+        ServiceTypeRepositoryInterface $serviceTypeRepo,
+        CategoryRepositoryInterface $categoryRepo,
+        AptoRepositoryInterface $aptoRepo
+    ) {
+        $this->brokerRepo = $brokerRepo;
+        $this->regimeRepo = $regimeRepo;
+        $this->purposeRepo = $purposeRepo;
+        $this->serviceTypeRepo = $serviceTypeRepo;
+        $this->categoryRepo = $categoryRepo;
+        $this->aptoRepo = $aptoRepo;
+    }
+    public function getAllBrokers(): Collection { return $this->brokerRepo->all(); }
     public function getAllCurrencies(): Collection { return Currency::all(); }
-    public function getAllRegimes(): Collection { return Regime::all(); }
-    public function getAllPurposes(): Collection { return Purpose::all(); }
+    public function getAllRegimes(): Collection { return $this->regimeRepo->all(); }
+    public function getAllPurposes(): Collection { return $this->purposeRepo->all(); }
     public function getAllServices(): Collection { return Service::all(); }
-    public function getAllServiceTypes(): Collection { return ServiceType::all(); }
+    public function getAllServiceTypes(): Collection { return $this->serviceTypeRepo->all(); }
     public function getAllLocals(): Collection { return Local::all(); }
     public function getAllServiceHalls(): Collection { return ServiceHall::all(); }
     public function getAllPurposeHalls(): Collection { return PurposeHall::all(); }
@@ -42,10 +70,10 @@ class EloquentLookupRepository implements LookupRepositoryInterface
     public function getAllCarModels(): Collection { return CarModel::all(); }
     public function getAllTransportServices(): Collection { return TransportService::all(); }
     public function getAllBrands(): Collection { return Brand::all(); }
-    public function getAllCategories(): Collection { return Category::all(); }
+    public function getAllCategories(): Collection { return $this->categoryRepo->all(); }
     public function getAllAptos(): Collection
     {
-        return \App\Models\AptoHotel::all();
+        return $this->aptoRepo->all();
     }
 
     // Brokers

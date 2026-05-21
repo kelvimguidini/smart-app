@@ -11,6 +11,7 @@ import { PurposeComponent } from './pages/purpose/purpose.component';
 import { ServiceTypeComponent } from './pages/service-type/service-type.component';
 import { ConfirmPasswordComponent } from './pages/confirm-password/confirm-password.component';
 import { VerifyEmailComponent } from './pages/verify-email/verify-email.component';
+import { BrokerComponent } from './pages/broker/broker.component';
 
 import { authGuard } from './guards/auth.guard';
 import { guestGuard } from './guards/guest.guard';
@@ -27,6 +28,7 @@ export const routes: Routes = [
     { path: 'category', component: CategoryComponent, canActivate: [authGuard], title: 'Categorias - SmartApp' },
     { path: 'purpose', component: PurposeComponent, canActivate: [authGuard], title: 'Propósitos - SmartApp' },
     { path: 'service-type', component: ServiceTypeComponent, canActivate: [authGuard], title: 'Tipos de Serviço - SmartApp' },
+    { path: 'broker', component: BrokerComponent, canActivate: [authGuard], title: 'Broker - SmartApp' },
     { path: 'confirm-password', component: ConfirmPasswordComponent, canActivate: [authGuard], title: 'Confirmar Senha - SmartApp' },
     { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
 ];

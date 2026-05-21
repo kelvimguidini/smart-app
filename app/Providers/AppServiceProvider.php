@@ -66,6 +66,35 @@ use App\Domains\Providers\Services\ProviderServiceInterface;
 use App\Domains\Providers\Services\DefaultProviderService;
 use App\Domains\Auth\Services\AuthServiceInterface;
 use App\Domains\Auth\Services\DefaultAuthService;
+
+// New Repositories and Services
+use App\Domains\Shared\Repositories\BrokerRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentBrokerRepository;
+use App\Domains\Shared\Services\BrokerServiceInterface;
+use App\Domains\Shared\Services\DefaultBrokerService;
+
+use App\Domains\Shared\Repositories\CategoryRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentCategoryRepository;
+use App\Domains\Shared\Services\CategoryServiceInterface;
+use App\Domains\Shared\Services\DefaultCategoryService;
+
+use App\Domains\Shared\Repositories\PurposeRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentPurposeRepository;
+use App\Domains\Shared\Services\PurposeServiceInterface;
+use App\Domains\Shared\Services\DefaultPurposeService;
+
+use App\Domains\Shared\Repositories\ServiceTypeRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentServiceTypeRepository;
+use App\Domains\Shared\Services\ServiceTypeServiceInterface;
+use App\Domains\Shared\Services\DefaultServiceTypeService;
+
+use App\Domains\Shared\Repositories\RegimeRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentRegimeRepository;
+use App\Domains\Shared\Services\RegimeServiceInterface;
+use App\Domains\Shared\Services\DefaultRegimeService;
+
+use App\Domains\Hotels\Services\AptoServiceInterface;
+use App\Domains\Hotels\Services\DefaultAptoService;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -109,6 +138,21 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(RoleRepositoryInterface::class, EloquentRoleRepository::class);
         $this->app->bind(EventRepositoryInterface::class, EloquentEventRepository::class);
         $this->app->bind(StatusHistoryRepositoryInterface::class, EloquentStatusHistoryRepository::class);
+
+        // New Repositories
+        $this->app->bind(BrokerRepositoryInterface::class, EloquentBrokerRepository::class);
+        $this->app->bind(CategoryRepositoryInterface::class, EloquentCategoryRepository::class);
+        $this->app->bind(PurposeRepositoryInterface::class, EloquentPurposeRepository::class);
+        $this->app->bind(ServiceTypeRepositoryInterface::class, EloquentServiceTypeRepository::class);
+        $this->app->bind(RegimeRepositoryInterface::class, EloquentRegimeRepository::class);
+
+        // New Services
+        $this->app->bind(BrokerServiceInterface::class, DefaultBrokerService::class);
+        $this->app->bind(CategoryServiceInterface::class, DefaultCategoryService::class);
+        $this->app->bind(PurposeServiceInterface::class, DefaultPurposeService::class);
+        $this->app->bind(ServiceTypeServiceInterface::class, DefaultServiceTypeService::class);
+        $this->app->bind(RegimeServiceInterface::class, DefaultRegimeService::class);
+        $this->app->bind(AptoServiceInterface::class, DefaultAptoService::class);
     }
 
     /**

@@ -16,11 +16,6 @@ class CityApiController extends Controller
      */
     public function search(Request $request)
     {
-        // Require user to be authenticated, but maybe any auth user can search cities
-        if (!auth()->check()) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
-
         $term = $request->get('term', '');
         
         $query = City::withoutGlobalScope('active');

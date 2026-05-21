@@ -3,12 +3,19 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\ServiceType;
+use App\Domains\Shared\Services\ServiceTypeServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class ServiceTypeApiController extends Controller
 {
+    protected $serviceTypeService;
+
+    public function __construct(ServiceTypeServiceInterface $serviceTypeService)
+    {
+        $this->serviceTypeService = $serviceTypeService;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -20,28 +27,10 @@ class ServiceTypeApiController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $query = ServiceType::withoutGlobalScope('active');
+        $filters = $request->only(['search', 'sort_column', 'sort_direction']);
+        $perPage = $request->get('per_page', 10);
 
-        // Search
-        if ($request->has('search') && !empty($request->search)) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
-
-        // Sorting
-        $sortColumn = $request->get('sort_column', 'id');
-        $sortDirection = $request->get('sort_direction', 'desc');
-        
-        // Allowed columns for sorting
-        $allowedColumns = ['id', 'name', 'active'];
-        if (in_array($sortColumn, $allowedColumns)) {
-            $query->orderBy($sortColumn, $sortDirection);
-        } else {
-            $query->orderBy('id', 'desc');
-        }
-
-        // Pagination
-        $perPage = $request->get('per_page', 20);
-        $serviceTypes = $query->paginate($perPage);
+        $serviceTypes = $this->serviceTypeService->list($filters, $perPage);
 
         return response()->json($serviceTypes);
     }
@@ -64,16 +53,10 @@ class ServiceTypeApiController extends Controller
 
         try {
             if ($request->id > 0) {
-                $serviceType = ServiceType::withoutGlobalScope('active')->findOrFail($request->id);
-                $serviceType->name = $request->name;
-                $serviceType->save();
-                
+                $serviceType = $this->serviceTypeService->update($request->id, $request->only('name'));
                 return response()->json(['message' => 'Registro atualizado com sucesso', 'data' => $serviceType]);
             } else {
-                $serviceType = ServiceType::create([
-                    'name' => $request->name
-                ]);
-                
+                $serviceType = $this->serviceTypeService->create($request->only('name'));
                 return response()->json(['message' => 'Registro salvo com sucesso', 'data' => $serviceType]);
             }
         } catch (\Exception $e) {
@@ -94,8 +77,7 @@ class ServiceTypeApiController extends Controller
         }
 
         try {
-            $serviceType = ServiceType::withoutGlobalScope('active')->findOrFail($id);
-            $serviceType->delete();
+            $this->serviceTypeService->delete($id);
             return response()->json(['message' => 'Registro apagado com sucesso!']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao apagar o registro', 'error' => $e->getMessage()], 500);
@@ -115,8 +97,7 @@ class ServiceTypeApiController extends Controller
         }
 
         try {
-            $serviceType = ServiceType::withoutGlobalScope('active')->findOrFail($id);
-            $serviceType->activate();
+            $this->serviceTypeService->activate($id);
             return response()->json(['message' => 'Registro ativado com sucesso!']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao ativar o registro', 'error' => $e->getMessage()], 500);
@@ -136,8 +117,7 @@ class ServiceTypeApiController extends Controller
         }
 
         try {
-            $serviceType = ServiceType::withoutGlobalScope('active')->findOrFail($id);
-            $serviceType->deactivate();
+            $this->serviceTypeService->deactivate($id);
             return response()->json(['message' => 'Registro inativado com sucesso.']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao inativar o registro', 'error' => $e->getMessage()], 500);

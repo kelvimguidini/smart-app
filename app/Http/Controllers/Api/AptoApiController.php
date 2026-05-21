@@ -5,15 +5,15 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use App\Domains\Hotels\Repositories\AptoRepositoryInterface;
+use App\Domains\Hotels\Services\AptoServiceInterface;
 
 class AptoApiController extends Controller
 {
-    protected $aptoRepository;
+    protected $aptoService;
 
-    public function __construct(AptoRepositoryInterface $aptoRepository)
+    public function __construct(AptoServiceInterface $aptoService)
     {
-        $this->aptoRepository = $aptoRepository;
+        $this->aptoService = $aptoService;
     }
 
     /**
@@ -28,9 +28,9 @@ class AptoApiController extends Controller
         }
 
         $filters = $request->only(['search', 'sort_column', 'sort_direction']);
-        $perPage = $request->get('per_page', 20);
+        $perPage = $request->get('per_page', 10);
         
-        $aptos = $this->aptoRepository->list($filters, $perPage);
+        $aptos = $this->aptoService->list($filters, $perPage);
 
         return response()->json($aptos);
     }
@@ -53,10 +53,10 @@ class AptoApiController extends Controller
 
         try {
             if ($request->id > 0) {
-                $apto = $this->aptoRepository->update($request->id, $request->only('name'));
+                $apto = $this->aptoService->update($request->id, $request->only('name'));
                 return response()->json(['message' => 'Registro atualizado com sucesso', 'data' => $apto]);
             } else {
-                $apto = $this->aptoRepository->create($request->only('name'));
+                $apto = $this->aptoService->create($request->only('name'));
                 return response()->json(['message' => 'Registro salvo com sucesso', 'data' => $apto]);
             }
         } catch (\Exception $e) {
@@ -77,7 +77,7 @@ class AptoApiController extends Controller
         }
 
         try {
-            $this->aptoRepository->delete($id);
+            $this->aptoService->delete($id);
             return response()->json(['message' => 'Registro apagado com sucesso!']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao apagar o registro', 'error' => $e->getMessage()], 500);
@@ -97,7 +97,7 @@ class AptoApiController extends Controller
         }
 
         try {
-            $this->aptoRepository->activate($id);
+            $this->aptoService->activate($id);
             return response()->json(['message' => 'Registro ativado com sucesso!']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao ativar o registro', 'error' => $e->getMessage()], 500);
@@ -117,7 +117,7 @@ class AptoApiController extends Controller
         }
 
         try {
-            $this->aptoRepository->deactivate($id);
+            $this->aptoService->deactivate($id);
             return response()->json(['message' => 'Registro inativado com sucesso.']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao inativar o registro', 'error' => $e->getMessage()], 500);

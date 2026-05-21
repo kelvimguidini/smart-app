@@ -3,12 +3,19 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Purpose;
+use App\Domains\Shared\Services\PurposeServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class PurposeApiController extends Controller
 {
+    protected $purposeService;
+
+    public function __construct(PurposeServiceInterface $purposeService)
+    {
+        $this->purposeService = $purposeService;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -20,28 +27,10 @@ class PurposeApiController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $query = Purpose::withoutGlobalScope('active');
+        $filters = $request->only(['search', 'sort_column', 'sort_direction']);
+        $perPage = $request->get('per_page', 10);
 
-        // Search
-        if ($request->has('search') && !empty($request->search)) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
-
-        // Sorting
-        $sortColumn = $request->get('sort_column', 'id');
-        $sortDirection = $request->get('sort_direction', 'desc');
-        
-        // Allowed columns for sorting
-        $allowedColumns = ['id', 'name', 'active'];
-        if (in_array($sortColumn, $allowedColumns)) {
-            $query->orderBy($sortColumn, $sortDirection);
-        } else {
-            $query->orderBy('id', 'desc');
-        }
-
-        // Pagination
-        $perPage = $request->get('per_page', 20);
-        $purposes = $query->paginate($perPage);
+        $purposes = $this->purposeService->list($filters, $perPage);
 
         return response()->json($purposes);
     }
@@ -64,16 +53,10 @@ class PurposeApiController extends Controller
 
         try {
             if ($request->id > 0) {
-                $purpose = Purpose::withoutGlobalScope('active')->findOrFail($request->id);
-                $purpose->name = $request->name;
-                $purpose->save();
-                
+                $purpose = $this->purposeService->update($request->id, $request->only('name'));
                 return response()->json(['message' => 'Registro atualizado com sucesso', 'data' => $purpose]);
             } else {
-                $purpose = Purpose::create([
-                    'name' => $request->name
-                ]);
-                
+                $purpose = $this->purposeService->create($request->only('name'));
                 return response()->json(['message' => 'Registro salvo com sucesso', 'data' => $purpose]);
             }
         } catch (\Exception $e) {
@@ -94,8 +77,7 @@ class PurposeApiController extends Controller
         }
 
         try {
-            $purpose = Purpose::withoutGlobalScope('active')->findOrFail($id);
-            $purpose->delete();
+            $this->purposeService->delete($id);
             return response()->json(['message' => 'Registro apagado com sucesso!']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao apagar o registro', 'error' => $e->getMessage()], 500);
@@ -115,8 +97,7 @@ class PurposeApiController extends Controller
         }
 
         try {
-            $purpose = Purpose::withoutGlobalScope('active')->findOrFail($id);
-            $purpose->activate();
+            $this->purposeService->activate($id);
             return response()->json(['message' => 'Registro ativado com sucesso!']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao ativar o registro', 'error' => $e->getMessage()], 500);
@@ -136,8 +117,7 @@ class PurposeApiController extends Controller
         }
 
         try {
-            $purpose = Purpose::withoutGlobalScope('active')->findOrFail($id);
-            $purpose->deactivate();
+            $this->purposeService->deactivate($id);
             return response()->json(['message' => 'Registro inativado com sucesso.']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao inativar o registro', 'error' => $e->getMessage()], 500);

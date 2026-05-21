@@ -4,7 +4,7 @@ use App\Http\Controllers\Auth\ABController;
 use App\Http\Controllers\Auth\AddController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\BrandController;
-use App\Http\Controllers\Auth\BrokerController;
+
 use App\Http\Controllers\Auth\BrokerTransportController;
 use App\Http\Controllers\Auth\BudgetController;
 use App\Http\Controllers\Auth\CarModelController;
@@ -209,6 +209,17 @@ Route::middleware(['auth', 'cors'])->group(function () {
     })->name('purpose');
 
     // Purpose save and delete routes migrated to api.php (Angular)
+
+    Route::get('broker', function (Request $request) {
+        $path = base_path('public/angular.html');
+        if (file_exists($path)) {
+            if ($request->header('X-Inertia')) {
+                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
+            }
+            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
+        }
+        abort(404);
+    })->name('broker');
 
 
     Route::get('broker-trans', [BrokerTransportController::class, 'create'])

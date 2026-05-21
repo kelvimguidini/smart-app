@@ -3,12 +3,19 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Regime;
+use App\Domains\Shared\Services\RegimeServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class RegimeApiController extends Controller
 {
+    protected $regimeService;
+
+    public function __construct(RegimeServiceInterface $regimeService)
+    {
+        $this->regimeService = $regimeService;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -20,28 +27,10 @@ class RegimeApiController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $query = Regime::withoutGlobalScope('active');
+        $filters = $request->only(['search', 'sort_column', 'sort_direction']);
+        $perPage = $request->get('per_page', 10);
 
-        // Search
-        if ($request->has('search') && !empty($request->search)) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
-
-        // Sorting
-        $sortColumn = $request->get('sort_column', 'id');
-        $sortDirection = $request->get('sort_direction', 'desc');
-        
-        // Allowed columns for sorting
-        $allowedColumns = ['id', 'name', 'active'];
-        if (in_array($sortColumn, $allowedColumns)) {
-            $query->orderBy($sortColumn, $sortDirection);
-        } else {
-            $query->orderBy('id', 'desc');
-        }
-
-        // Pagination
-        $perPage = $request->get('per_page', 20);
-        $regimes = $query->paginate($perPage);
+        $regimes = $this->regimeService->list($filters, $perPage);
 
         return response()->json($regimes);
     }
@@ -64,16 +53,10 @@ class RegimeApiController extends Controller
 
         try {
             if ($request->id > 0) {
-                $regime = Regime::withoutGlobalScope('active')->findOrFail($request->id);
-                $regime->name = $request->name;
-                $regime->save();
-                
+                $regime = $this->regimeService->update($request->id, $request->only('name'));
                 return response()->json(['message' => 'Registro atualizado com sucesso', 'data' => $regime]);
             } else {
-                $regime = Regime::create([
-                    'name' => $request->name
-                ]);
-                
+                $regime = $this->regimeService->create($request->only('name'));
                 return response()->json(['message' => 'Registro salvo com sucesso', 'data' => $regime]);
             }
         } catch (\Exception $e) {
@@ -94,8 +77,7 @@ class RegimeApiController extends Controller
         }
 
         try {
-            $regime = Regime::withoutGlobalScope('active')->findOrFail($id);
-            $regime->delete();
+            $this->regimeService->delete($id);
             return response()->json(['message' => 'Registro apagado com sucesso!']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao apagar o registro', 'error' => $e->getMessage()], 500);
@@ -115,8 +97,7 @@ class RegimeApiController extends Controller
         }
 
         try {
-            $regime = Regime::withoutGlobalScope('active')->findOrFail($id);
-            $regime->activate();
+            $this->regimeService->activate($id);
             return response()->json(['message' => 'Registro ativado com sucesso!']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao ativar o registro', 'error' => $e->getMessage()], 500);
@@ -136,8 +117,7 @@ class RegimeApiController extends Controller
         }
 
         try {
-            $regime = Regime::withoutGlobalScope('active')->findOrFail($id);
-            $regime->deactivate();
+            $this->regimeService->deactivate($id);
             return response()->json(['message' => 'Registro inativado com sucesso.']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao inativar o registro', 'error' => $e->getMessage()], 500);
