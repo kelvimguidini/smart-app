@@ -67,4 +67,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('service-types/{id}', [\App\Http\Controllers\Api\ServiceTypeApiController::class, 'destroy']);
     Route::put('service-types/{id}/activate', [\App\Http\Controllers\Api\ServiceTypeApiController::class, 'activateItem']);
     Route::put('service-types/{id}/deactivate', [\App\Http\Controllers\Api\ServiceTypeApiController::class, 'deactivateItem']);
+
+    // Rotas de Brokers (Despachantes/Corretoras)
+    Route::get('brokers', [\App\Http\Controllers\Api\BrokerApiController::class, 'index']);
+    Route::post('brokers', [\App\Http\Controllers\Api\BrokerApiController::class, 'store']);
+    Route::delete('brokers/{id}', [\App\Http\Controllers\Api\BrokerApiController::class, 'destroy']);
+    Route::put('brokers/{id}/activate', [\App\Http\Controllers\Api\BrokerApiController::class, 'activateItem']);
+    Route::put('brokers/{id}/deactivate', [\App\Http\Controllers\Api\BrokerApiController::class, 'deactivateItem']);
+
+    // Rotas de Cidades para Autocomplete
+    Route::get('cities/search', [\App\Http\Controllers\Api\CityApiController::class, 'search']);
 });

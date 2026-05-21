@@ -211,16 +211,6 @@ Route::middleware(['auth', 'cors'])->group(function () {
     // Purpose save and delete routes migrated to api.php (Angular)
 
 
-    Route::get('broker', [BrokerController::class, 'create'])
-        ->name('broker');
-
-    Route::post('broker-save', [BrokerController::class, 'store'])
-        ->name('broker-save');
-
-    Route::delete('broker-delete', [BrokerController::class, 'delete'])
-        ->name('broker-delete');
-
-
     Route::get('broker-trans', [BrokerTransportController::class, 'create'])
         ->name('broker-trans');
 
@@ -608,9 +598,6 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     Route::put('/broker_transports/activate/{id}', [BrokerTransportController::class, 'activateM'])->name('broker_transports-activate');
     Route::put('/broker_transports/deactivate/{id}', [BrokerTransportController::class, 'deactivateM'])->name('broker_transports-deactivate');
-
-    Route::put('/brokers/activate/{id}', [BrokerController::class, 'activateM'])->name('brokers-activate');
-    Route::put('/brokers/deactivate/{id}', [BrokerController::class, 'deactivateM'])->name('brokers-deactivate');
 
     Route::put('/register/activate/{id}', [RegisteredUserController::class, 'activateM'])->name('register-activate');
     Route::put('/register/deactivate/{id}', [RegisteredUserController::class, 'deactivateM'])->name('register-deactivate');

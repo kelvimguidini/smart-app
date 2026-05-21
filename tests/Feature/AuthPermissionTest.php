@@ -6,13 +6,13 @@ use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Event;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Gate;
 use Tests\TestCase;
 
 class AuthPermissionTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     protected $admin;
     protected $consultant;
