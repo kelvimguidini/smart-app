@@ -273,24 +273,10 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
 
 
-    Route::get('local', [LocalController::class, 'create'])
-        ->name('local');
-
-    Route::post('local-save', [LocalController::class, 'store'])
-        ->name('local-save');
-
-    Route::delete('local-delete', [LocalController::class, 'delete'])
-        ->name('local-delete');
+    // Local save and delete routes migrated to api.php (Angular)
 
 
-    Route::get('service', [ServiceController::class, 'create'])
-        ->name('service');
-
-    Route::post('service-save', [ServiceController::class, 'store'])
-        ->name('service-save');
-
-    Route::delete('service-delete', [ServiceController::class, 'delete'])
-        ->name('service-delete');
+    // Service save and delete routes migrated to api.php (Angular)
 
 
 
@@ -326,17 +312,6 @@ Route::middleware(['auth', 'cors'])->group(function () {
         ->name('purpose-hall-delete');
 
 
-
-    Route::get('service-type', function (Request $request) {
-        $path = base_path('public/angular.html');
-        if (file_exists($path)) {
-            if ($request->header('X-Inertia')) {
-                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
-            }
-            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
-        }
-        abort(404);
-    })->name('service-type');
 
     // Service Type save and delete routes migrated to api.php (Angular)
 
@@ -566,8 +541,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::put('/service_adds/activate/{id}', [ServiceAddController::class, 'activateM'])->name('service_adds-activate');
     Route::put('/service_adds/deactivate/{id}', [ServiceAddController::class, 'deactivateM'])->name('service_adds-deactivate');
 
-    Route::put('/services/activate/{id}', [ServiceController::class, 'activateM'])->name('services-activate');
-    Route::put('/services/deactivate/{id}', [ServiceController::class, 'deactivateM'])->name('services-deactivate');
+    // Services activate/deactivate routes migrated to api.php (Angular)
 
     // Regimes activate/deactivate routes migrated to api.php (Angular)
 
@@ -587,8 +561,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::put('/measures/activate/{id}', [MeasureController::class, 'activateM'])->name('measures-activate');
     Route::put('/measures/deactivate/{id}', [MeasureController::class, 'deactivateM'])->name('measures-deactivate');
 
-    Route::put('/locals/activate/{id}', [LocalController::class, 'activateM'])->name('locals-activate');
-    Route::put('/locals/deactivate/{id}', [LocalController::class, 'deactivateM'])->name('locals-deactivate');
+    // Locals activate/deactivate routes migrated to api.php (Angular)
 
     Route::put('/frequencies/activate/{id}', [FrequencyController::class, 'activateM'])->name('frequencies-activate');
     Route::put('/frequencies/deactivate/{id}', [FrequencyController::class, 'deactivateM'])->name('frequencies-deactivate');

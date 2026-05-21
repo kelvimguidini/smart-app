@@ -68,6 +68,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('service-types/{id}/activate', [\App\Http\Controllers\Api\ServiceTypeApiController::class, 'activateItem']);
     Route::put('service-types/{id}/deactivate', [\App\Http\Controllers\Api\ServiceTypeApiController::class, 'deactivateItem']);
 
+    // Rotas de Serviços (Service)
+    Route::get('services', [\App\Http\Controllers\Api\ServiceApiController::class, 'index']);
+    Route::post('services', [\App\Http\Controllers\Api\ServiceApiController::class, 'store']);
+    Route::delete('services/{id}', [\App\Http\Controllers\Api\ServiceApiController::class, 'destroy']);
+    Route::put('services/{id}/activate', [\App\Http\Controllers\Api\ServiceApiController::class, 'activateItem']);
+    Route::put('services/{id}/deactivate', [\App\Http\Controllers\Api\ServiceApiController::class, 'deactivateItem']);
+
+    // Rotas de Locais (Local)
+    Route::get('locals', [\App\Http\Controllers\Api\LocalApiController::class, 'index']);
+    Route::post('locals', [\App\Http\Controllers\Api\LocalApiController::class, 'store']);
+    Route::delete('locals/{id}', [\App\Http\Controllers\Api\LocalApiController::class, 'destroy']);
+    Route::put('locals/{id}/activate', [\App\Http\Controllers\Api\LocalApiController::class, 'activateItem']);
+    Route::put('locals/{id}/deactivate', [\App\Http\Controllers\Api\LocalApiController::class, 'deactivateItem']);
+
     // Rotas de Brokers (Brokers/Corretoras)
     Route::get('brokers', [\App\Http\Controllers\Api\BrokerApiController::class, 'index']);
     Route::post('brokers', [\App\Http\Controllers\Api\BrokerApiController::class, 'store']);

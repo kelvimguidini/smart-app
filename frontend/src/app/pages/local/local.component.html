@@ -96,31 +96,31 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr *ngFor="let serviceType of serviceTypes" [class.table-info]="isServiceTypeInEdition(serviceType.id)">
-                                        <th scope="row" class="font-weight-bold">{{ serviceType.id }}</th>
+                                    <tr *ngFor="let local of locals" [class.table-info]="isLocalInEdition(local.id)">
+                                        <th scope="row" class="font-weight-bold">{{ local.id }}</th>
                                         <td>
-                                            <span [class.text-muted]="!serviceType.active">{{ serviceType.name }}</span>
-                                            <span *ngIf="!serviceType.active" class="badge bg-light text-muted ms-2">Inativo</span>
+                                            <span [class.text-muted]="!local.active">{{ local.name }}</span>
+                                            <span *ngIf="!local.active" class="badge bg-light text-muted ms-2">Inativo</span>
                                         </td>
                                         <td class="text-end">
                                             <div class="d-flex justify-content-end gap-2 flex-wrap">
                                                 <!-- Editar -->
-                                                <button class="btn btn-sm btn-info text-white shadow-sm" (click)="edit(serviceType)" title="Editar">
+                                                <button class="btn btn-sm btn-info text-white shadow-sm" (click)="edit(local)" title="Editar">
                                                     <i class="fas fa-edit me-1"></i> Editar
                                                 </button>
 
                                                 <!-- Ativar/Inativar -->
-                                                <button *ngIf="!serviceType.active" class="btn btn-sm btn-success shadow-sm" (click)="activateServiceType(serviceType.id)" title="Ativar">
+                                                <button *ngIf="!local.active" class="btn btn-sm btn-success shadow-sm" (click)="activateLocal(local.id)" title="Ativar">
                                                     <i class="fas fa-check me-1"></i> Ativar
                                                 </button>
 
                                                 <app-confirm-modal 
-                                                    *ngIf="serviceType.active"
+                                                    *ngIf="local.active"
                                                     [btnClass]="'btn btn-sm btn-warning shadow-sm'" 
                                                     [modalTitle]="'Inativar Tipo de Serviço'" 
-                                                    [message]="'Tem certeza que deseja inativar o tipo de serviço ' + serviceType.name + '?'"
+                                                    [message]="'Tem certeza que deseja inativar o tipo de serviço ' + local.name + '?'"
                                                     [okButtonLabel]="'Confirmar'"
-                                                    (confirm)="deactivateServiceType(serviceType.id)">
+                                                    (confirm)="deactivateLocal(local.id)">
                                                     <span modal-button><i class="fas fa-ban me-1"></i> Inativar</span>
                                                 </app-confirm-modal>
 
@@ -128,9 +128,9 @@
                                                 <app-confirm-modal 
                                                     [btnClass]="'btn btn-sm btn-danger shadow-sm'" 
                                                     [modalTitle]="'Excluir Tipo de Serviço'" 
-                                                    [message]="'Ação irreversível! Deseja realmente excluir o tipo de serviço ' + serviceType.name + '?'"
+                                                    [message]="'Ação irreversível! Deseja realmente excluir o tipo de serviço ' + local.name + '?'"
                                                     [okButtonLabel]="'Excluir'"
-                                                    (confirm)="deleteServiceType(serviceType.id)">
+                                                    (confirm)="deleteLocal(local.id)">
                                                     <span modal-button><i class="fas fa-trash me-1"></i> Excluir</span>
                                                 </app-confirm-modal>
                                             </div>
@@ -143,7 +143,7 @@
                                             </div>
                                         </td>
                                     </tr>
-                                    <tr *ngIf="serviceTypes.length === 0 && !isLoader">
+                                    <tr *ngIf="locals.length === 0 && !isLoader">
                                         <td colspan="3" class="text-center py-5 text-muted">
                                             <i class="fas fa-folder-open fa-3x mb-3 d-block opacity-25"></i>
                                             Nenhum tipo de serviço encontrado.
@@ -158,3 +158,5 @@
         </div>
     </div>
 </app-authenticated-layout>
+
+

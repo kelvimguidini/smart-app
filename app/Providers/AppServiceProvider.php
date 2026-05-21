@@ -101,6 +101,17 @@ use App\Domains\Shared\Services\DefaultCityService;
 
 use App\Domains\Hotels\Services\AptoServiceInterface;
 use App\Domains\Hotels\Services\DefaultAptoService;
+
+use App\Domains\Shared\Repositories\ServiceRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentServiceRepository;
+use App\Domains\Shared\Services\ServiceServiceInterface;
+use App\Domains\Shared\Services\DefaultServiceService;
+
+use App\Domains\Shared\Repositories\LocalRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentLocalRepository;
+use App\Domains\Shared\Services\LocalServiceInterface;
+use App\Domains\Shared\Services\DefaultLocalService;
+
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -153,6 +164,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(RegimeRepositoryInterface::class, EloquentRegimeRepository::class);
         $this->app->bind(CityRepositoryInterface::class, EloquentCityRepository::class);
         $this->app->bind(ProposalHistoryRepositoryInterface::class, EloquentProposalHistoryRepository::class);
+        $this->app->bind(ServiceRepositoryInterface::class, EloquentServiceRepository::class);
+        $this->app->bind(LocalRepositoryInterface::class, EloquentLocalRepository::class);
 
         // New Services
         $this->app->bind(BrokerServiceInterface::class, DefaultBrokerService::class);
@@ -162,6 +175,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(RegimeServiceInterface::class, DefaultRegimeService::class);
         $this->app->bind(CityServiceInterface::class, DefaultCityService::class);
         $this->app->bind(AptoServiceInterface::class, DefaultAptoService::class);
+        $this->app->bind(ServiceServiceInterface::class, DefaultServiceService::class);
+        $this->app->bind(LocalServiceInterface::class, DefaultLocalService::class);
     }
 
     /**

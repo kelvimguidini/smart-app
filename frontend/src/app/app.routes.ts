@@ -13,6 +13,8 @@ import { ConfirmPasswordComponent } from './pages/confirm-password/confirm-passw
 import { VerifyEmailComponent } from './pages/verify-email/verify-email.component';
 import { BrokerComponent } from './pages/broker/broker.component';
 import { HotelComponent } from './pages/hotel/hotel.component';
+import { ServiceComponent } from './pages/service/service.component';
+import { LocalComponent } from './pages/local/local.component';
 
 import { authGuard } from './guards/auth.guard';
 import { guestGuard } from './guards/guest.guard';
@@ -29,6 +31,8 @@ export const routes: Routes = [
     { path: 'category', component: CategoryComponent, canActivate: [authGuard], title: 'Categorias - SmartApp' },
     { path: 'purpose', component: PurposeComponent, canActivate: [authGuard], title: 'Propósitos - SmartApp' },
     { path: 'service-type', component: ServiceTypeComponent, canActivate: [authGuard], title: 'Tipos de Serviço - SmartApp' },
+    { path: 'service', component: ServiceComponent, canActivate: [authGuard], title: 'Serviços - SmartApp' },
+    { path: 'local', component: LocalComponent, canActivate: [authGuard], title: 'Locais - SmartApp' },
     { path: 'broker', component: BrokerComponent, canActivate: [authGuard], title: 'Broker - SmartApp' },
     { path: 'hotel', component: HotelComponent, canActivate: [authGuard], title: 'Hotéis - SmartApp' },
     { path: 'confirm-password', component: ConfirmPasswordComponent, canActivate: [authGuard], title: 'Confirmar Senha - SmartApp' },
