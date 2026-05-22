@@ -20,7 +20,7 @@ export class RolesComponent implements OnInit {
 
   roles: Role[] = [];
   permissionList: Permission[] = [];
-  
+
   // Controle do Formulário e UI
   inEdition: number = 0;
   isLoader: boolean = false;
@@ -31,11 +31,18 @@ export class RolesComponent implements OnInit {
     id: 0,
     name: '',
     permissions: [] as string[],
-    active: true
+    active: true,
   };
 
   // Estado do Datatable
-  pagination: any = null;
+  pagination: any = {
+    current_page: 1,
+    per_page: 10,
+    total: 0,
+    last_page: 1,
+    from: 0,
+    to: 0,
+  };
   currentPage: number = 1;
   perPage: number = 10;
   searchQuery: string = '';
@@ -51,13 +58,13 @@ export class RolesComponent implements OnInit {
    */
   loadRoles(): void {
     this.isLoader = true;
-    
+
     const params = {
       page: this.currentPage,
       per_page: this.perPage,
       search: this.searchQuery,
       sort_column: this.sortColumn,
-      sort_direction: this.sortDirection
+      sort_direction: this.sortDirection,
     };
 
     this.roleService.getRoles(params).subscribe({
@@ -113,7 +120,7 @@ export class RolesComponent implements OnInit {
     this.form.active = role.active;
     this.form.permissions = role.permissions ? role.permissions.map((p) => p.name) : [];
     this.errors = {};
-    
+
     // Scroll para o topo
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -123,12 +130,23 @@ export class RolesComponent implements OnInit {
     this.resetForm();
   }
 
+  togglePermission(permissionName: string, event: Event): void {
+    const isChecked = (event.target as HTMLInputElement).checked;
+    if (isChecked) {
+      if (!this.form.permissions.includes(permissionName)) {
+        this.form.permissions.push(permissionName);
+      }
+    } else {
+      this.form.permissions = this.form.permissions.filter((p) => p !== permissionName);
+    }
+  }
+
   private resetForm(): void {
     this.form = {
       id: 0,
       name: '',
       permissions: [],
-      active: true
+      active: true,
     };
     this.errors = {};
   }
@@ -201,6 +219,7 @@ export class RolesComponent implements OnInit {
 
   removePermission(roleId: number, permissionId: number): void {
     this.isLoader = true;
+    this.closePermissionsModal();
     this.roleService.removePermission(roleId, permissionId).subscribe({
       next: (response: any) => {
         this.isLoader = false;
@@ -217,5 +236,20 @@ export class RolesComponent implements OnInit {
 
   isRoleInEdition(roleId: number): boolean {
     return this.inEdition === roleId;
+  }
+
+  showPermissionsModalId: number | null = null;
+
+  /**
+   * Abre o modal de permissões via binding do Angular
+   */
+  openPermissionsModal(role: Role): void {
+    this.showPermissionsModalId = role.id;
+    document.body.classList.add('modal-open');
+  }
+
+  closePermissionsModal(): void {
+    this.showPermissionsModalId = null;
+    document.body.classList.remove('modal-open');
   }
 }

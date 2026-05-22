@@ -11,26 +11,18 @@
       <div class="card mb-4 border-left-primary">
         <div class="card-body">
           <h5 class="card-title mb-4 text-primary font-weight-bold">
-            <i class="fas fa-concierge-bell me-2"></i
-            >{{ inEdition > 0 ? 'Editar Tipo de Serviço' : 'Novo Tipo de Serviço' }}
+            <i class="fas fa-concierge-bell me-2"></i>
+            {{ inEdition > 0 ? 'Editar Tipo de Serviço' : 'Novo Tipo de Serviço' }}
           </h5>
           <form (ngSubmit)="submit()">
             <div class="row align-items-end">
               <div class="col-lg-8">
                 <div class="form-group mb-0">
-                  <label for="name" class="form-label"
-                    >Nome do local <span class="text-danger">*</span></label
-                  >
-                  <input
-                    type="text"
-                    id="name"
-                    class="form-control"
-                    [(ngModel)]="form.name"
-                    name="name"
-                    placeholder="Ex: Recepção"
-                    required
-                    autofocus
-                  />
+                  <label for="name" class="form-label">
+                    Nome do local
+                    <span class="text-danger">*</span>
+                  </label>
+                  <input type="text" id="name" class="form-control" [(ngModel)]="form.name" name="name" placeholder="Ex: Recepção" required autofocus />
 
                   <div *ngIf="errors['name']" class="text-danger mt-1">
                     <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
@@ -39,28 +31,13 @@
               </div>
               <div class="col-lg-4">
                 <div class="d-flex align-items-center justify-content-end">
-                  <button
-                    type="button"
-                    *ngIf="inEdition > 0"
-                    class="btn btn-outline-secondary me-2"
-                    (click)="resetForm()"
-                    [disabled]="processing"
-                  >
-                    <i class="fas fa-plus me-1"></i> Novo
+                  <button type="button" *ngIf="inEdition > 0" class="btn btn-outline-secondary me-2" (click)="resetForm()" [disabled]="processing">
+                    <i class="fas fa-times me-1"></i>
+                    Cancelar
                   </button>
 
-                  <button
-                    type="submit"
-                    class="btn btn-primary shadow-sm"
-                    [disabled]="processing"
-                    [class.opacity-50]="processing"
-                  >
-                    <span
-                      *ngIf="processing"
-                      class="spinner-border spinner-border-sm me-1"
-                      role="status"
-                      aria-hidden="true"
-                    ></span>
+                  <button type="submit" class="btn btn-primary shadow-sm" [disabled]="processing" [class.opacity-50]="processing">
+                    <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
                     <i *ngIf="!processing" class="fas fa-save me-1"></i>
                     Salvar
                   </button>
@@ -78,7 +55,8 @@
         <div class="card-body">
           <div class="d-flex align-items-center justify-content-between mb-4">
             <h5 class="card-title mb-0 text-secondary font-weight-bold">
-              <i class="fas fa-list me-2"></i>Lista de Tipos de Serviço
+              <i class="fas fa-list me-2"></i>
+              Lista de Tipos de Serviço
             </h5>
           </div>
 
@@ -87,8 +65,7 @@
             [loading]="isLoader"
             (search)="onSearch($event)"
             (pageChange)="onPageChange($event)"
-            (perPageChange)="onPerPageChange($event)"
-          >
+            (perPageChange)="onPerPageChange($event)">
             <div class="table-responsive">
               <table class="table table-hover" width="100%" cellspacing="0">
                 <thead class="table-light">
@@ -99,12 +76,9 @@
                         <i
                           class="fas fa-sort ms-2 text-muted"
                           [ngClass]="{
-                            'fa-sort-up text-primary':
-                              sortColumn === 'id' && sortDirection === 'asc',
-                            'fa-sort-down text-primary':
-                              sortColumn === 'id' && sortDirection === 'desc',
-                          }"
-                        ></i>
+                            'fa-sort-up text-primary': sortColumn === 'id' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'id' && sortDirection === 'desc',
+                          }"></i>
                       </div>
                     </th>
                     <th scope="col" (click)="sortBy('name')" style="cursor: pointer">
@@ -113,12 +87,9 @@
                         <i
                           class="fas fa-sort ms-2 text-muted"
                           [ngClass]="{
-                            'fa-sort-up text-primary':
-                              sortColumn === 'name' && sortDirection === 'asc',
-                            'fa-sort-down text-primary':
-                              sortColumn === 'name' && sortDirection === 'desc',
-                          }"
-                        ></i>
+                            'fa-sort-up text-primary': sortColumn === 'name' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'name' && sortDirection === 'desc',
+                          }"></i>
                       </div>
                     </th>
                     <th scope="col" class="text-end">Ações</th>
@@ -129,57 +100,46 @@
                     <th scope="row" class="font-weight-bold">{{ local.id }}</th>
                     <td>
                       <span [class.text-muted]="!local.active">{{ local.name }}</span>
-                      <span *ngIf="!local.active" class="badge bg-light text-muted ms-2"
-                        >Inativo</span
-                      >
+                      <span *ngIf="!local.active" class="badge bg-light text-muted ms-2">Inativo</span>
                     </td>
                     <td class="text-end">
                       <div class="d-flex justify-content-end gap-2 flex-wrap">
                         <!-- Editar -->
-                        <button
-                          class="btn btn-sm btn-info text-white shadow-sm"
-                          (click)="edit(local)"
-                          title="Editar"
-                        >
-                          <i class="fas fa-edit me-1"></i> Editar
+                        <button class="btn btn-sm btn-info text-white shadow-sm" (click)="edit(local)" title="Editar">
+                          <i class="fas fa-edit me-1"></i>
+                          Editar
                         </button>
 
                         <!-- Ativar/Inativar -->
-                        <button
-                          *ngIf="!local.active"
-                          class="btn btn-sm btn-success shadow-sm"
-                          (click)="activateLocal(local.id)"
-                          title="Ativar"
-                        >
-                          <i class="fas fa-check me-1"></i> Ativar
+                        <button *ngIf="!local.active" class="btn btn-sm btn-success shadow-sm" (click)="activateLocal(local.id)" title="Ativar">
+                          <i class="fas fa-check me-1"></i>
+                          Ativar
                         </button>
 
                         <app-confirm-modal
                           *ngIf="local.active"
                           [btnClass]="'btn btn-sm btn-warning shadow-sm'"
                           [modalTitle]="'Inativar Tipo de Serviço'"
-                          [message]="
-                            'Tem certeza que deseja inativar o tipo de serviço ' + local.name + '?'
-                          "
+                          [message]="'Tem certeza que deseja inativar o tipo de serviço ' + local.name + '?'"
                           [okButtonLabel]="'Confirmar'"
-                          (confirm)="deactivateLocal(local.id)"
-                        >
-                          <span modal-button><i class="fas fa-ban me-1"></i> Inativar</span>
+                          (confirm)="deactivateLocal(local.id)">
+                          <span modal-button>
+                            <i class="fas fa-ban me-1"></i>
+                            Inativar
+                          </span>
                         </app-confirm-modal>
 
                         <!-- Deletar -->
                         <app-confirm-modal
                           [btnClass]="'btn btn-sm btn-danger shadow-sm'"
                           [modalTitle]="'Excluir Tipo de Serviço'"
-                          [message]="
-                            'Ação irreversível! Deseja realmente excluir o tipo de serviço ' +
-                            local.name +
-                            '?'
-                          "
+                          [message]="'Ação irreversível! Deseja realmente excluir o tipo de serviço ' + local.name + '?'"
                           [okButtonLabel]="'Excluir'"
-                          (confirm)="deleteLocal(local.id)"
-                        >
-                          <span modal-button><i class="fas fa-trash me-1"></i> Excluir</span>
+                          (confirm)="deleteLocal(local.id)">
+                          <span modal-button>
+                            <i class="fas fa-trash me-1"></i>
+                            Excluir
+                          </span>
                         </app-confirm-modal>
                       </div>
                     </td>

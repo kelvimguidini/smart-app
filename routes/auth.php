@@ -28,7 +28,6 @@ use App\Http\Controllers\Auth\PurposeController;
 use App\Http\Controllers\Auth\PurposeHallController;
 use App\Http\Controllers\Auth\RegimeController;
 use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\Auth\ServiceAddController;
 use App\Http\Controllers\Auth\ServiceController;
 use App\Http\Controllers\Auth\ServiceHallController;
@@ -65,7 +64,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
         abort(404);
     });
 
-    Route::get('roles', function (Request $request) {
+    Route::get('role', function (Request $request) {
         $path = base_path('public/angular.html');
         if (file_exists($path)) {
             if ($request->header('X-Inertia')) {
@@ -74,7 +73,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
             return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
         }
         abort(404);
-    })->name('roles');
+    })->name('role');
 
     Route::get('apto', function (Request $request) {
         $path = base_path('public/angular.html');
@@ -116,19 +115,6 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     //ROLE
     Route::delete('role-remove', [RegisteredUserController::class, 'roleRemove'])->name('role-remove');
-
-    Route::get('role', [RoleController::class, 'create'])
-        ->name('role');
-
-    Route::post('role-save', [RoleController::class, 'store'])
-        ->name('role-save');
-
-    Route::delete('role-delete', [RoleController::class, 'delete'])
-        ->name('role-delete');
-
-
-    Route::delete('permission-remove', [RoleController::class, 'permissionRemove'])
-        ->name('permission-remove');
 
     //TABELS AUXILIARES
     Route::get('customer', [CustomerController::class, 'create'])

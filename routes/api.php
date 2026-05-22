@@ -33,6 +33,12 @@ Route::middleware('auth:sanctum')->group(function () {
         return $user;
     });
 
+    // Rotas de Grupo de Acesso (Roles)
+    Route::get('roles', [RoleApiController::class, 'index']);
+    Route::post('roles', [RoleApiController::class, 'store']);
+    Route::delete('roles', [RoleApiController::class, 'delete']);
+    Route::delete('roles/permission', [RoleApiController::class, 'removePermission']);
+
     // Rotas de Apartamentos (Apto)
     Route::get('aptos', [\App\Http\Controllers\Api\AptoApiController::class, 'index']);
     Route::post('aptos', [\App\Http\Controllers\Api\AptoApiController::class, 'store']);

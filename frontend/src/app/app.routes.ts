@@ -27,7 +27,7 @@ export const routes: Routes = [
   { path: 'reset-password/:token', component: ResetPasswordComponent, canActivate: [guestGuard], title: 'Redefinir Senha - SmartApp' },
   { path: 'verify-email', component: VerifyEmailComponent, canActivate: [guestGuard], title: 'Ativar Conta - SmartApp' },
   { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard], title: 'Dashboard - SmartApp' },
-  { path: 'roles', component: RolesComponent, canActivate: [authGuard], title: 'Grupo de Acesso - SmartApp' },
+  { path: 'role', component: RolesComponent, canActivate: [authGuard], title: 'Grupo de Acesso - SmartApp' },
   { path: 'apto', component: AptoComponent, canActivate: [authGuard], title: 'Apartamento - SmartApp' },
   { path: 'regime', component: RegimeComponent, canActivate: [authGuard], title: 'Regime - SmartApp' },
   { path: 'category', component: CategoryComponent, canActivate: [authGuard], title: 'Categorias - SmartApp' },
