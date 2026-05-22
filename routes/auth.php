@@ -280,14 +280,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
 
 
-    Route::get('service-hall', [ServiceHallController::class, 'create'])
-        ->name('service-hall');
-
-    Route::post('service-hall-save', [ServiceHallController::class, 'store'])
-        ->name('service-hall-save');
-
-    Route::delete('service-hall-delete', [ServiceHallController::class, 'delete'])
-        ->name('service-hall-delete');
+    // Service Hall save and delete routes migrated to api.php (Angular)
 
 
     Route::get('service-add', [ServiceAddController::class, 'create'])
@@ -302,14 +295,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
 
 
-    Route::get('purpose-hall', [PurposeHallController::class, 'create'])
-        ->name('purpose-hall');
-
-    Route::post('purpose-hall-save', [PurposeHallController::class, 'store'])
-        ->name('purpose-hall-save');
-
-    Route::delete('purpose-hall-delete', [PurposeHallController::class, 'delete'])
-        ->name('purpose-hall-delete');
+    // Purpose Hall save and delete routes migrated to api.php (Angular)
 
 
 
@@ -535,8 +521,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     // Service Type activate/deactivate routes migrated to api.php (Angular)
 
-    Route::put('/service_halls/activate/{id}', [ServiceHallController::class, 'activateM'])->name('service_halls-activate');
-    Route::put('/service_halls/deactivate/{id}', [ServiceHallController::class, 'deactivateM'])->name('service_halls-deactivate');
+    // Service Halls activate/deactivate routes migrated to api.php (Angular)
 
     Route::put('/service_adds/activate/{id}', [ServiceAddController::class, 'activateM'])->name('service_adds-activate');
     Route::put('/service_adds/deactivate/{id}', [ServiceAddController::class, 'deactivateM'])->name('service_adds-deactivate');
@@ -547,8 +532,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     // Purposes activate/deactivate routes migrated to api.php (Angular)
 
-    Route::put('/purpose_halls/activate/{id}', [PurposeHallController::class, 'activateM'])->name('purpose_halls-activate');
-    Route::put('/purpose_halls/deactivate/{id}', [PurposeHallController::class, 'deactivateM'])->name('purpose_halls-deactivate');
+    // Purpose Halls activate/deactivate routes migrated to api.php (Angular)
 
     Route::put('/provider_transports/activate/{id}', [ProviderTransportController::class, 'activateM'])->name('provider_transports-activate');
     Route::put('/provider_transports/deactivate/{id}', [ProviderTransportController::class, 'deactivateM'])->name('provider_transports-deactivate');

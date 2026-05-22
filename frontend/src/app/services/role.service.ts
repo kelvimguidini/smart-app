@@ -19,6 +19,22 @@ export interface Role {
   updated_at?: string;
 }
 
+export interface PaginationResponse<T> {
+  data: T[];
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+  from: number;
+  to: number;
+  links: any[];
+}
+
+export interface RoleListResponse {
+  roles: PaginationResponse<Role>;
+  permissionList: Permission[];
+}
+
 export interface RoleCreateUpdateRequest {
   id?: number;
   name: string;
@@ -36,8 +52,8 @@ export class RoleService {
   /**
    * Obter lista de roles com suas permissões e lista de permissões disponíveis
    */
-  getRoles(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/api/roles`);
+  getRoles(params: any = {}): Observable<RoleListResponse> {
+    return this.http.get<RoleListResponse>(`${this.apiUrl}/api/roles`, { params });
   }
 
   /**

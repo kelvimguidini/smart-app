@@ -32,4 +32,14 @@ interface EventRepositoryInterface
      * @return Event|null
      */
     public function findWithLocals(int $id): ?Event;
+
+    /**
+     * Obtém os dados da proposta de um evento.
+     *
+     * @param int $eventId
+     * @param int $providerId
+     * @param string $table
+     * @return array
+     */
+    public function getProposalData(int $eventId, int $providerId, string $table): array;
 }

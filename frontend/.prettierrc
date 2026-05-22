@@ -1,13 +1,18 @@
 {
-  "printWidth": 100,
+  "printWidth": 140,
   "singleQuote": true,
   "tabWidth": 2,
   "useTabs": false,
+  "bracketSameLine": true,
+  "htmlWhitespaceSensitivity": "ignore",
+  "singleAttributePerLine": false,
+
   "overrides": [
     {
       "files": "*.html",
       "options": {
-        "parser": "angular"
+        "parser": "angular",
+        "printWidth": 160
       }
     }
   ]

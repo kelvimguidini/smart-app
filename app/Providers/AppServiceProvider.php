@@ -112,6 +112,20 @@ use App\Domains\Shared\Repositories\EloquentLocalRepository;
 use App\Domains\Shared\Services\LocalServiceInterface;
 use App\Domains\Shared\Services\DefaultLocalService;
 
+use App\Domains\Shared\Repositories\ServiceHallRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentServiceHallRepository;
+use App\Domains\Shared\Services\ServiceHallServiceInterface;
+use App\Domains\Shared\Services\DefaultServiceHallService;
+
+use App\Domains\Shared\Repositories\PurposeHallRepositoryInterface;
+use App\Domains\Shared\Repositories\RoleRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentRoleRepository;
+use App\Domains\Shared\Repositories\EloquentPurposeHallRepository;
+use App\Domains\Shared\Services\PurposeHallServiceInterface;
+use App\Domains\Shared\Services\RoleServiceInterface;
+use App\Domains\Shared\Services\DefaultRoleService;
+use App\Domains\Shared\Services\DefaultPurposeHallService;
+
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -166,6 +180,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ProposalHistoryRepositoryInterface::class, EloquentProposalHistoryRepository::class);
         $this->app->bind(ServiceRepositoryInterface::class, EloquentServiceRepository::class);
         $this->app->bind(LocalRepositoryInterface::class, EloquentLocalRepository::class);
+        $this->app->bind(ServiceHallRepositoryInterface::class, EloquentServiceHallRepository::class);
+        $this->app->bind(PurposeHallRepositoryInterface::class, EloquentPurposeHallRepository::class);
+        $this->app->bind(RoleRepositoryInterface::class, EloquentRoleRepository::class);
 
         // New Services
         $this->app->bind(BrokerServiceInterface::class, DefaultBrokerService::class);
@@ -177,6 +194,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AptoServiceInterface::class, DefaultAptoService::class);
         $this->app->bind(ServiceServiceInterface::class, DefaultServiceService::class);
         $this->app->bind(LocalServiceInterface::class, DefaultLocalService::class);
+        $this->app->bind(ServiceHallServiceInterface::class, DefaultServiceHallService::class);
+        $this->app->bind(PurposeHallServiceInterface::class, DefaultPurposeHallService::class);
+        $this->app->bind(RoleServiceInterface::class, DefaultRoleService::class);
     }
 
     /**
@@ -200,3 +220,4 @@ class AppServiceProvider extends ServiceProvider
         EventTransportOpt::observe(GenericHistoryObserver::class);
     }
 }
+

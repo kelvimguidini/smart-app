@@ -82,6 +82,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('locals/{id}/activate', [\App\Http\Controllers\Api\LocalApiController::class, 'activateItem']);
     Route::put('locals/{id}/deactivate', [\App\Http\Controllers\Api\LocalApiController::class, 'deactivateItem']);
 
+    // Rotas de Serviços do Salão (ServiceHall)
+    Route::get('service-halls', [\App\Http\Controllers\Api\ServiceHallApiController::class, 'index']);
+    Route::post('service-halls', [\App\Http\Controllers\Api\ServiceHallApiController::class, 'store']);
+    Route::delete('service-halls/{id}', [\App\Http\Controllers\Api\ServiceHallApiController::class, 'destroy']);
+    Route::put('service-halls/{id}/activate', [\App\Http\Controllers\Api\ServiceHallApiController::class, 'activateItem']);
+    Route::put('service-halls/{id}/deactivate', [\App\Http\Controllers\Api\ServiceHallApiController::class, 'deactivateItem']);
+
+    // Rotas de Propósito do Salão (PurposeHall)
+    Route::get('purpose-halls', [\App\Http\Controllers\Api\PurposeHallApiController::class, 'index']);
+    Route::post('purpose-halls', [\App\Http\Controllers\Api\PurposeHallApiController::class, 'store']);
+    Route::delete('purpose-halls/{id}', [\App\Http\Controllers\Api\PurposeHallApiController::class, 'destroy']);
+    Route::put('purpose-halls/{id}/activate', [\App\Http\Controllers\Api\PurposeHallApiController::class, 'activateItem']);
+    Route::put('purpose-halls/{id}/deactivate', [\App\Http\Controllers\Api\PurposeHallApiController::class, 'deactivateItem']);
+
     // Rotas de Brokers (Brokers/Corretoras)
     Route::get('brokers', [\App\Http\Controllers\Api\BrokerApiController::class, 'index']);
     Route::post('brokers', [\App\Http\Controllers\Api\BrokerApiController::class, 'store']);

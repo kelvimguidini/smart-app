@@ -12,12 +12,12 @@ use Illuminate\Support\Facades\DB;
 
 class DefaultProviderService implements ProviderServiceInterface
 {
-    protected $providerRepository;
-    protected $eventRepository;
-    protected $lookupRepository;
-    protected $statusHistoryRepository;
-    protected $notificationService;
-    protected $userRepository;
+    protected ProviderRepositoryInterface $providerRepository;
+    protected EventRepositoryInterface $eventRepository;
+    protected LookupRepositoryInterface $lookupRepository;
+    protected StatusHistoryRepositoryInterface $statusHistoryRepository;
+    protected NotificationServiceInterface $notificationService;
+    protected UserRepositoryInterface $userRepository;
 
     public function __construct(
         ProviderRepositoryInterface $providerRepository,
