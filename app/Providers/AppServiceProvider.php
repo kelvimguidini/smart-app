@@ -58,66 +58,6 @@ use App\Domains\Shared\Repositories\StatusHistoryRepositoryInterface;
 use App\Domains\Shared\Repositories\EloquentStatusHistoryRepository;
 use App\Domains\Events\Services\EventServiceInterface;
 use App\Domains\Events\Services\DefaultEventService;
-<?php
-
-namespace App\Providers;
-
-use App\Models\Event;
-use App\Models\EventAB;
-use App\Models\EventABOpt;
-use App\Models\EventAdd;
-use App\Models\EventAddOpt;
-use App\Models\EventHall;
-use App\Models\EventHallOpt;
-use App\Models\EventHotel;
-use App\Models\EventHotelOpt;
-use App\Models\EventTransport;
-use App\Models\EventTransportOpt;
-use App\Observers\GenericHistoryObserver;
-use App\Domains\Events\Repositories\EventRepositoryInterface;
-use App\Domains\Events\Repositories\EloquentEventRepository;
-use App\Domains\Budgets\Repositories\ProviderBudgetRepositoryInterface;
-use App\Domains\Budgets\Repositories\EloquentProviderBudgetRepository;
-use App\Domains\Dashboard\Repositories\DashboardRepositoryInterface;
-use App\Domains\Dashboard\Repositories\EloquentDashboardRepository;
-use App\Domains\Hotels\Repositories\EventHotelRepositoryInterface;
-use App\Domains\Hotels\Repositories\EloquentEventHotelRepository;
-use App\Domains\FoodBeverage\Repositories\EventABRepositoryInterface;
-use App\Domains\FoodBeverage\Repositories\EloquentEventABRepository;
-use App\Domains\FoodBeverage\Repositories\EventABOptRepositoryInterface;
-use App\Domains\FoodBeverage\Repositories\EloquentEventABOptRepository;
-use App\Domains\Halls\Repositories\EventHallRepositoryInterface;
-use App\Domains\Halls\Repositories\EloquentEventHallRepository;
-use App\Domains\Halls\Repositories\EventHallOptRepositoryInterface;
-use App\Domains\Halls\Repositories\EloquentEventHallOptRepository;
-use App\Domains\Additions\Repositories\EventAddRepositoryInterface;
-use App\Domains\Additions\Repositories\EloquentEventAddRepository;
-use App\Domains\Additions\Repositories\EventAddOptRepositoryInterface;
-use App\Domains\Additions\Repositories\EloquentEventAddOptRepository;
-use App\Domains\Transports\Repositories\EventTransportRepositoryInterface;
-use App\Domains\Transports\Repositories\EloquentEventTransportRepository;
-use App\Domains\Transports\Repositories\EventTransportOptRepositoryInterface;
-use App\Domains\Transports\Repositories\EloquentEventTransportOptRepository;
-use App\Domains\Customers\Repositories\CustomerRepositoryInterface;
-use App\Domains\Customers\Repositories\EloquentCustomerRepository;
-use App\Domains\Providers\Repositories\ProviderRepositoryInterface;
-use App\Domains\Providers\Repositories\EloquentProviderRepository;
-use App\Domains\Hotels\Repositories\EventHotelOptRepositoryInterface;
-use App\Domains\Hotels\Repositories\EloquentEventHotelOptRepository;
-use App\Domains\Hotels\Repositories\AptoRepositoryInterface;
-use App\Domains\Hotels\Repositories\EloquentAptoRepository;
-use App\Domains\Auth\Repositories\UserRepositoryInterface;
-use App\Domains\Auth\Repositories\EloquentUserRepository;
-use App\Domains\Auth\Repositories\RoleRepositoryInterface;
-use App\Domains\Auth\Repositories\EloquentRoleRepository;
-use App\Domains\Shared\Repositories\LookupRepositoryInterface;
-use App\Domains\Shared\Repositories\EloquentLookupRepository;
-use App\Domains\Shared\Repositories\CityRepositoryInterface;
-use App\Domains\Shared\Repositories\EloquentCityRepository;
-use App\Domains\Shared\Repositories\StatusHistoryRepositoryInterface;
-use App\Domains\Shared\Repositories\EloquentStatusHistoryRepository;
-use App\Domains\Events\Services\EventServiceInterface;
-use App\Domains\Events\Services\DefaultEventService;
 use App\Domains\Budgets\Services\BudgetServiceInterface;
 use App\Domains\Budgets\Services\DefaultBudgetService;
 use App\Domains\Shared\Services\NotificationServiceInterface;
@@ -267,6 +207,19 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(LocalServiceInterface::class, DefaultLocalService::class);
         $this->app->bind(ServiceHallServiceInterface::class, DefaultServiceHallService::class);
         $this->app->bind(PurposeHallServiceInterface::class, DefaultPurposeHallService::class);
+        $this->app->bind(RoleServiceInterface::class, DefaultRoleService::class);
+        
+        // API Terceiros Services & Repositories
+        $this->app->bind(AuthApiRepositoryInterface::class, EloquentAuthApiRepository::class);
+        $this->app->bind(AuthApiServiceInterface::class, DefaultAuthApiService::class);
+        $this->app->bind(EventApiRepositoryInterface::class, EloquentEventApiRepository::class);
+        $this->app->bind(EventApiServiceInterface::class, DefaultEventApiService::class);
+    }
+
+    /**
+     * Bootstrap any application services.
+     *
+     * @return void
      */
     public function boot()
     {
