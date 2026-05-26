@@ -53,7 +53,11 @@
                       </label>
                       <div class="card border border-light">
                         <div class="card-body p-3" style="max-height: 250px; overflow-y: auto; background: #fcfcfd">
-                          <div class="row">
+                          <div *ngIf="isLoader" class="text-center py-4">
+                            <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                            <small class="d-block mt-2 text-muted">Carregando permissões...</small>
+                          </div>
+                          <div class="row" *ngIf="!isLoader">
                             <div class="col-md-4" *ngFor="let option of permissionList">
                               <div class="form-check custom-checkbox ms-4">
                                 <input
@@ -68,6 +72,9 @@
                                   {{ option.title }}
                                 </label>
                               </div>
+                            </div>
+                            <div *ngIf="permissionList.length === 0" class="col-12 text-muted small">
+                              Nenhuma permissão disponível.
                             </div>
                           </div>
                         </div>

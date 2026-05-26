@@ -1,0 +1,348 @@
+<app-authenticated-layout title="Usuários">
+  <ng-container header>
+    <div class="d-sm-flex align-items-center justify-content-between mb-4 animate-in">
+      <h1 class="h3 mb-0 text-gray-800">Gerenciamento de Usuários</h1>
+    </div>
+  </ng-container>
+
+  <div class="row position-relative">
+    <div class="col-lg-12 animate-in" style="animation-delay: 0.1s">
+      <div class="card mb-4 border-left-primary">
+        <div class="card-body">
+          <h5 class="card-title mb-4 text-primary font-weight-bold">
+            <i class="fas fa-user-edit me-2"></i>
+            {{ userInEdition > 0 ? 'Editar Usuário' : 'Cadastrar Novo Usuário' }}
+          </h5>
+
+          <form [formGroup]="userForm" (ngSubmit)="submit()">
+            <div class="row">
+              <div class="col-lg-4 mb-3">
+                <div class="form-group mb-0">
+                  <label for="name" class="form-label">
+                    Nome:
+                    <span class="text-danger">*</span>
+                  </label>
+                  <input type="text" id="name" class="form-control" formControlName="name" placeholder="Ex: João Silva" required autofocus />
+                  <div *ngIf="userForm.get('name')?.invalid && userForm.get('name')?.touched" class="text-danger mt-1">
+                    <small>O nome é obrigatório</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4 mb-3">
+                <div class="form-group mb-0">
+                  <label for="phone" class="form-label">
+                    Telefone:
+                    <span class="text-danger">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="phone"
+                    class="form-control"
+                    formControlName="phone"
+                    placeholder="Ex: (11) 99999-9999"
+                    mask="(00) 0000-00009"
+                    [dropSpecialCharacters]="false"
+                    required />
+                  <div *ngIf="userForm.get('phone')?.invalid && userForm.get('phone')?.touched" class="text-danger mt-1">
+                    <small>O telefone é obrigatório</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4 mb-3">
+                <div class="form-group mb-0">
+                  <label for="email" class="form-label">
+                    E-mail:
+                    <span class="text-danger">*</span>
+                  </label>
+                  <input type="email" id="email" class="form-control" formControlName="email" placeholder="exemplo@email.com" required />
+                  <div *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched" class="text-danger mt-1">
+                    <small *ngIf="userForm.get('email')?.errors?.['required']">O e-mail é obrigatório</small>
+                    <small *ngIf="userForm.get('email')?.errors?.['email']">O e-mail informado não é válido</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-8 mb-3">
+                <div class="form-group mb-0">
+                  <label for="signature" class="form-label">Assinatura:</label>
+                  <quill-editor
+                    formControlName="signature"
+                    [modules]="quillModules"
+                    placeholder="Sua assinatura de email..."
+                    [style]="{ height: '150px' }"></quill-editor>
+                </div>
+              </div>
+
+              <div class="col-lg-4 mb-3">
+                <div class="form-group mb-0">
+                  <label class="form-label">
+                    Grupo de acesso:
+                    <span class="text-danger">*</span>
+                  </label>
+                  <div class="card" [ngClass]="{ 'border-danger': userForm.get('roles')?.invalid && userForm.get('roles')?.touched }">
+                    <div class="card-body py-2" style="max-height: 190px; overflow-y: auto;">
+                      <div *ngIf="isLoader" class="text-center py-4">
+                        <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                        <small class="d-block mt-2 text-muted">Carregando...</small>
+                      </div>
+                      <ng-container *ngIf="!isLoader">
+                        <div class="form-check" *ngFor="let role of roles">
+                          <input class="form-check-input" type="checkbox"
+                                 [id]="'role_' + role.id"
+                                 [checked]="hasRole(role.id)"
+                                 (change)="onRoleChange($event, role.id)">
+                          <label class="form-check-label text-muted" [for]="'role_' + role.id">
+                            {{ role.name }}
+                          </label>
+                        </div>
+                        <div *ngIf="roles.length === 0" class="text-muted small mt-1">
+                          <i class="fas fa-info-circle me-1"></i> Nenhum grupo disponível.
+                        </div>
+                      </ng-container>
+                    </div>
+                  </div>
+                  <div *ngIf="userForm.get('roles')?.invalid && userForm.get('roles')?.touched" class="text-danger mt-1">
+                    <small>Selecione pelo menos um grupo de acesso</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row mt-3">
+              <div class="col-12 d-flex justify-content-end">
+                <button *ngIf="userInEdition > 0" type="button" class="btn btn-outline-secondary me-2" (click)="resetForm()" [disabled]="processing">
+                  <i class="fas fa-times me-1"></i>
+                  Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary shadow-sm" [disabled]="userForm.invalid || processing" [class.opacity-50]="processing">
+                  <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                  <i *ngIf="!processing" class="fas fa-save me-1"></i>
+                  Salvar
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-12 animate-in" style="animation-delay: 0.2s">
+      <div class="card mb-4 border-left-secondary">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-4">
+            <h5 class="card-title mb-0 text-secondary font-weight-bold">
+              <i class="fas fa-users me-2"></i>
+              Lista de Usuários
+            </h5>
+          </div>
+
+          <app-datatable
+            [pagination]="pagination"
+            [loading]="isLoader"
+            (search)="onSearch($event)"
+            (pageChange)="onPageChange($event)"
+            (perPageChange)="onPerPageChange($event)">
+            <div class="table-responsive">
+              <table class="table table-hover" width="100%" cellspacing="0">
+                <thead class="table-light">
+                  <tr>
+                    <th scope="col" (click)="sortBy('id')" style="cursor: pointer; width: 80px">
+                      <div class="d-flex align-items-center">
+                        ID
+                        <i
+                          class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'id' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'id' && sortDirection === 'desc',
+                          }"></i>
+                      </div>
+                    </th>
+                    <th scope="col" (click)="sortBy('name')" style="cursor: pointer">
+                      <div class="d-flex align-items-center">
+                        Nome
+                        <i
+                          class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'name' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'name' && sortDirection === 'desc',
+                          }"></i>
+                      </div>
+                    </th>
+                    <th scope="col" (click)="sortBy('email')" style="cursor: pointer">
+                      <div class="d-flex align-items-center">
+                        Email
+                        <i
+                          class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'email' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'email' && sortDirection === 'desc',
+                          }"></i>
+                      </div>
+                    </th>
+                    <th scope="col" (click)="sortBy('phone')" style="cursor: pointer">
+                      <div class="d-flex align-items-center">
+                        Telefone
+                        <i
+                          class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'phone' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'phone' && sortDirection === 'desc',
+                          }"></i>
+                      </div>
+                    </th>
+                    <th scope="col" (click)="sortBy('is_api_user')" style="cursor: pointer">
+                      <div class="d-flex align-items-center">
+                        Tipo
+                        <i
+                          class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'is_api_user' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'is_api_user' && sortDirection === 'desc',
+                          }"></i>
+                      </div>
+                    </th>
+                    <th scope="col" (click)="sortBy('email_verified_at')" style="cursor: pointer; text-align: center">
+                      <div class="d-flex align-items-center justify-content-center">
+                        Situação acesso
+                        <i
+                          class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'email_verified_at' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'email_verified_at' && sortDirection === 'desc',
+                          }"></i>
+                      </div>
+                    </th>
+                    <th scope="col" class="text-end">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let user of users" [class.table-info]="userInEdition === user.id">
+                    <th scope="row" class="font-weight-bold">{{ user.id }}</th>
+                    <td>
+                      <span [class.text-muted]="!user.active">{{ user.name }}</span>
+                      <span *ngIf="!user.active" class="badge bg-light text-muted ms-2 border">Inativo</span>
+                    </td>
+                    <td>
+                      <span [class.text-muted]="!user.active">{{ user.email }}</span>
+                    </td>
+                    <td>
+                      <span [class.text-muted]="!user.active">{{ user.phone }}</span>
+                    </td>
+                    <td>
+                      <span class="badge" [ngClass]="user.is_api_user ? 'bg-info text-white' : 'bg-secondary'">
+                        <i class="fas" [ngClass]="user.is_api_user ? 'fa-robot' : 'fa-user'"></i>
+                        {{ user.is_api_user ? ' API' : ' Sistema' }}
+                      </span>
+                    </td>
+                    <td class="text-center">
+                      <i class="fas" [ngClass]="user.email_verified_at ? 'fa-check text-success fs-5' : 'fa-times text-danger fs-5'"></i>
+                    </td>
+                    <td class="text-end">
+                      <div class="d-flex justify-content-end gap-2 flex-wrap">
+                        <button class="btn btn-sm btn-info text-white shadow-sm" (click)="edit(user)" title="Editar">
+                          <i class="fas fa-edit me-1"></i>
+                          Editar
+                        </button>
+
+                        <button type="button" class="btn btn-sm btn-primary shadow-sm" (click)="openRolesModal(user)" title="Ver detalhes dos grupos de acesso">
+                          <i class="fas fa-shield-alt me-1"></i>
+                          Grupos
+                        </button>
+
+                        <button *ngIf="!user.active" class="btn btn-sm btn-success shadow-sm" (click)="activate(user.id)" title="Ativar">
+                          <i class="fas fa-check me-1"></i>
+                          Ativar
+                        </button>
+
+                        <app-confirm-modal
+                          *ngIf="user.active"
+                          [btnClass]="'btn btn-sm btn-warning shadow-sm'"
+                          [modalTitle]="'Inativar Usuário'"
+                          [message]="'Tem certeza que deseja inativar o usuário ' + user.name + '?'"
+                          [okButtonLabel]="'Confirmar'"
+                          (confirm)="deactivate(user.id)">
+                          <span modal-button>
+                            <i class="fas fa-ban me-1"></i>
+                            Inativar
+                          </span>
+                        </app-confirm-modal>
+
+                        <app-confirm-modal
+                          [btnClass]="'btn btn-sm btn-danger shadow-sm'"
+                          [modalTitle]="'Excluir Usuário'"
+                          [message]="'Ação irreversível! Deseja realmente excluir o usuário ' + user.name + '?'"
+                          [okButtonLabel]="'Excluir'"
+                          (confirm)="deleteUser(user.id)">
+                          <span modal-button>
+                            <i class="fas fa-trash me-1"></i>
+                            Excluir
+                          </span>
+                        </app-confirm-modal>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr *ngFor="let i of [1, 2, 3, 4, 5].slice(0, isLoader ? 5 : 0)">
+                    <td colspan="7" class="text-center py-3">
+                      <div class="placeholder-glow">
+                        <span class="placeholder col-12 rounded"></span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr *ngIf="users.length === 0 && !isLoader">
+                    <td colspan="7" class="text-center py-5 text-muted">
+                      <i class="fas fa-users-slash fa-3x mb-3 d-block opacity-25"></i>
+                      Nenhum usuário encontrado.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </app-datatable>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-authenticated-layout>
+
+<!-- Modais de Grupos (Renderizados no final da página para evitar problemas de z-index) -->
+<ng-container *ngFor="let user of users">
+  <div
+    class="modal fade"
+    [class.show]="showRolesModalId === user.id"
+    [style.display]="showRolesModalId === user.id ? 'block' : 'none'"
+    [style.background]="showRolesModalId === user.id ? 'rgba(0,0,0,0.5)' : ''"
+    id="rolesModal{{ user.id }}"
+    tabindex="-1"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-3xl text-start">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title font-weight-bold">
+            <i class="fas fa-users-cog me-2"></i>
+            Grupos: {{ user.name }}
+          </h5>
+          <button type="button" class="btn-close" (click)="closeRolesModal()" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-0">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between align-items-center py-3" *ngFor="let role of user.roles">
+              <span class="text-sm font-weight-bold">{{ role.name }}</span>
+              <app-confirm-modal
+                [btnClass]="'btn btn-sm btn-danger shadow-sm'"
+                [modalTitle]="'Remover Grupo'"
+                [message]="'Deseja remover o grupo ' + role.name + ' do usuário ' + user.name + '?'"
+                [okButtonLabel]="'Remover'"
+                (confirm)="removeRole(user.id, role.id)">
+                <span modal-button>
+                  <i class="fas fa-trash me-1"></i>
+                  Remover
+                </span>
+              </app-confirm-modal>
+            </li>
+            <li *ngIf="!user.roles || user.roles.length === 0" class="list-group-item text-center py-4 text-muted">Nenhum grupo atribuído.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>

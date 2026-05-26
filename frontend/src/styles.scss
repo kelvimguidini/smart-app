@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import 'quill/dist/quill.snow.css';
+
 :root {
   --radius-sm: 4px;
   --radius-md: 8px;
@@ -31,10 +33,10 @@ body {
 }
 
 .form-control, .form-select {
-  border-radius: var(--radius-md);
-  padding: 0.6rem 1rem;
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.75rem;
   border: 1px solid #d1d3e2;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
   
   &:focus {
@@ -49,12 +51,70 @@ body {
   }
 }
 
+.form-select {
+  padding-right: 2.25rem;
+}
+
+.form-control-sm, .form-select-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: var(--radius-sm);
+}
+
+.form-select-sm {
+  padding-right: 1.75rem;
+}
+
 .form-label {
   font-weight: 700;
   color: #4e5e7a;
   margin-bottom: 0.5rem;
   font-size: 0.85rem;
-  display: inline-block;
+  display: block; // Change from inline-block to block to prevent layout issues
+}
+
+// Quill Editor Overrides to match standard inputs
+quill-editor {
+  display: block;
+  width: 100%;
+
+  .ql-toolbar.ql-snow {
+    border: 1px solid #d1d3e2;
+    border-top-left-radius: var(--radius-md);
+    border-top-right-radius: var(--radius-md);
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+    font-family: inherit;
+    padding: 0.5rem;
+  }
+  
+  .ql-container.ql-snow {
+    border: 1px solid #d1d3e2;
+    border-top: none;
+    border-bottom-left-radius: var(--radius-md);
+    border-bottom-right-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: #5a5c69;
+    background-color: #fff;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    
+    &:focus-within {
+      border-color: #4e73df;
+      box-shadow: 0 0 0 0.2rem var(--primary-glow);
+    }
+  }
+  
+  .ql-editor {
+    min-height: 120px;
+    padding: 0.4rem 0.75rem;
+    
+    &.ql-blank::before {
+      color: #b7b9cc;
+      font-style: normal;
+      left: 0.75rem;
+    }
+  }
 }
 
 // Buttons
@@ -213,12 +273,12 @@ body {
     font-size: 0.7rem;
     letter-spacing: 0.08em;
     color: #4e73df;
-    padding: 1rem;
+    padding: 0.5rem 0.75rem;
     vertical-align: middle;
   }
   
   tbody td, tbody th {
-    padding: 1rem;
+    padding: 0.5rem 0.75rem;
     vertical-align: middle;
     border-bottom: 1px solid #e3e6f0;
     font-size: 0.9rem;
@@ -226,6 +286,29 @@ body {
 
   &.table-hover tbody tr:hover {
     background-color: rgba(78, 115, 223, 0.03);
+  }
+
+  // Estilizar os botões de ação nas tabelas para ter um ícone destacado
+  .btn-sm {
+    padding: 0 0.6rem 0 0;
+    display: inline-flex;
+    align-items: center;
+    overflow: hidden;
+    border: none;
+
+    span[modal-button] {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    i {
+      background-color: rgba(0, 0, 0, 0.15);
+      padding: 0.35rem 0.5rem;
+      margin-right: 0.5rem !important;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
   }
 }
 

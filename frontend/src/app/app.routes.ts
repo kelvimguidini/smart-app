@@ -4,6 +4,8 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { ForgotPasswordComponent } from './pages/auth/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './pages/auth/reset-password/reset-password.component';
 import { RolesComponent } from './pages/user/roles/roles.component';
+import { UsersComponent } from './pages/user/users/users.component';
+import { ProfileComponent } from './pages/user/profile/profile.component';
 import { AptoComponent } from './pages/hotel/apto/apto.component';
 import { RegimeComponent } from './pages/hotel/regime/regime.component';
 import { CategoryComponent } from './pages/hotel/category/category.component';
@@ -28,6 +30,8 @@ export const routes: Routes = [
   { path: 'verify-email', component: VerifyEmailComponent, canActivate: [guestGuard], title: 'Ativar Conta - SmartApp' },
   { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard], title: 'Dashboard - SmartApp' },
   { path: 'role', component: RolesComponent, canActivate: [authGuard], title: 'Grupo de Acesso - SmartApp' },
+  { path: 'register', component: UsersComponent, canActivate: [authGuard], title: 'Usuários - SmartApp' },
+  { path: 'profile', component: ProfileComponent, canActivate: [authGuard], title: 'Meus Dados - SmartApp' },
   { path: 'apto', component: AptoComponent, canActivate: [authGuard], title: 'Apartamento - SmartApp' },
   { path: 'regime', component: RegimeComponent, canActivate: [authGuard], title: 'Regime - SmartApp' },
   { path: 'category', component: CategoryComponent, canActivate: [authGuard], title: 'Categorias - SmartApp' },

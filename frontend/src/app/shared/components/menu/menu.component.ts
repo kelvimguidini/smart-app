@@ -57,9 +57,14 @@ export class MenuComponent implements OnInit {
     
     this.menuItems.forEach(item => {
       if (!item.isItem && item.subMenu) {
-        const isActive = item.subMenu.some(sub => urlWithoutParams.startsWith(sub.link));
+        const isActive = item.subMenu.some(sub => {
+          return urlWithoutParams === sub.link || urlWithoutParams.startsWith(sub.link + '/');
+        });
         if (isActive) {
           item.collapsed = false;
+        } else {
+          // Garante que menus inativos comecem fechados para evitar dois abertos
+          item.collapsed = true;
         }
       }
     });

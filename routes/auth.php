@@ -20,14 +20,12 @@ use App\Http\Controllers\Auth\HomeController;
 use App\Http\Controllers\Auth\HotelController;
 use App\Http\Controllers\Auth\LocalController;
 use App\Http\Controllers\Auth\MeasureController;
-use App\Http\Controllers\Auth\ProfileUserController;
 use App\Http\Controllers\Auth\ProviderController;
 use App\Http\Controllers\Auth\ProviderServicesController;
 use App\Http\Controllers\Auth\ProviderTransportController;
 use App\Http\Controllers\Auth\PurposeController;
 use App\Http\Controllers\Auth\PurposeHallController;
 use App\Http\Controllers\Auth\RegimeController;
-use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\ServiceAddController;
 use App\Http\Controllers\Auth\ServiceController;
 use App\Http\Controllers\Auth\ServiceHallController;
@@ -99,22 +97,30 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::get('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 
-    //USER
-    Route::get('register', [RegisteredUserController::class, 'create'])
-        ->name('register');
+    // USER routes migrated to api.php (Angular)
+    Route::get('register', function (Request $request) {
+        $path = base_path('public/angular.html');
+        if (file_exists($path)) {
+            if ($request->header('X-Inertia')) {
+                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
+            }
+            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
+        }
+        abort(404);
+    })->name('register');
 
-    Route::post('register', [RegisteredUserController::class, 'store']);
+    Route::get('profile', function (Request $request) {
+        $path = base_path('public/angular.html');
+        if (file_exists($path)) {
+            if ($request->header('X-Inertia')) {
+                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
+            }
+            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
+        }
+        abort(404);
+    })->name('profile');
 
-    Route::get('profile', [ProfileUserController::class, 'create'])
-        ->name('profile');
-
-    Route::post('profile', [ProfileUserController::class, 'store'])
-        ->name('profile');
-
-    Route::delete('user-delete', [RegisteredUserController::class, 'delete'])->name('user-delete');
-
-    //ROLE
-    Route::delete('role-remove', [RegisteredUserController::class, 'roleRemove'])->name('role-remove');
+    // ROLE routes migrated to api.php (Angular)
 
     //TABELS AUXILIARES
     Route::get('customer', [CustomerController::class, 'create'])
@@ -554,8 +560,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::put('/broker_transports/activate/{id}', [BrokerTransportController::class, 'activateM'])->name('broker_transports-activate');
     Route::put('/broker_transports/deactivate/{id}', [BrokerTransportController::class, 'deactivateM'])->name('broker_transports-deactivate');
 
-    Route::put('/register/activate/{id}', [RegisteredUserController::class, 'activateM'])->name('register-activate');
-    Route::put('/register/deactivate/{id}', [RegisteredUserController::class, 'deactivateM'])->name('register-deactivate');
+    // Register activate/deactivate routes migrated to api.php (Angular)
 
     //FIM ativar - desativar
 

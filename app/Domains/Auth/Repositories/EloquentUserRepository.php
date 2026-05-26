@@ -4,6 +4,7 @@ namespace App\Domains\Auth\Repositories;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class EloquentUserRepository implements UserRepositoryInterface
@@ -26,6 +27,25 @@ class EloquentUserRepository implements UserRepositoryInterface
     public function allWithRolesAndInactive(): Collection
     {
         return User::withoutGlobalScope('active')->with('roles')->get();
+    }
+
+    public function paginateWithRolesAndInactive(int $perPage = 10, ?string $search = null, string $sortColumn = 'id', string $sortDirection = 'desc'): LengthAwarePaginator
+    {
+        $query = User::withoutGlobalScope('active')->with('roles');
+        
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+        
+        $sortDirection = strtolower($sortDirection) === 'asc' ? 'asc' : 'desc';
+        $allowedColumns = ['id', 'name', 'email', 'phone'];
+        $sortColumn = in_array($sortColumn, $allowedColumns) ? $sortColumn : 'id';
+
+        return $query->orderBy($sortColumn, $sortDirection)->paginate($perPage);
     }
 
     public function allNonApi(): Collection

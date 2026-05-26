@@ -37,7 +37,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('roles', [RoleApiController::class, 'index']);
     Route::post('roles', [RoleApiController::class, 'store']);
     Route::delete('roles', [RoleApiController::class, 'delete']);
-    Route::delete('roles/permission', [RoleApiController::class, 'removePermission']);
+    // Rotas de Usuários
+    Route::get('users', [\App\Http\Controllers\Api\UserApiController::class, 'index']);
+    Route::post('users', [\App\Http\Controllers\Api\UserApiController::class, 'store']);
+    Route::delete('users/{id}', [\App\Http\Controllers\Api\UserApiController::class, 'destroy']);
+    Route::put('users/{id}/activate', [\App\Http\Controllers\Api\UserApiController::class, 'activateItem']);
+    Route::put('users/{id}/deactivate', [\App\Http\Controllers\Api\UserApiController::class, 'deactivateItem']);
+    Route::delete('users/role', [\App\Http\Controllers\Api\UserApiController::class, 'roleRemove']);
+
+    // Rotas de Perfil
+    Route::get('profile', [\App\Http\Controllers\Api\ProfileApiController::class, 'show']);
+    Route::post('profile', [\App\Http\Controllers\Api\ProfileApiController::class, 'store']);
 
     // Rotas de Apartamentos (Apto)
     Route::get('aptos', [\App\Http\Controllers\Api\AptoApiController::class, 'index']);

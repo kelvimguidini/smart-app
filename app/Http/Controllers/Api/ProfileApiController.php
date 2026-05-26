@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use Inertia\Inertia;
 use App\Domains\Auth\Services\AuthServiceInterface;
 use App\Domains\Auth\Repositories\UserRepositoryInterface;
+use Exception;
 
-class ProfileUserController extends Controller
+class ProfileApiController extends Controller
 {
     protected $authService;
     protected $userRepository;
@@ -23,22 +23,18 @@ class ProfileUserController extends Controller
         $this->userRepository = $userRepository;
     }
 
-    /**
-     * Display the profile view.
-     */
-    public function create(Request $request)
+    public function show(Request $request)
     {
-        return Inertia::render('Auth/Profile', [
-            'user' => $this->userRepository->findWithRoles(Auth::user()->id)
+        return response()->json([
+            'user' => $this->userRepository->findWithRoles(Auth::id())
         ]);
     }
 
-    /**
-     * Update user profile.
-     */
     public function store(Request $request)
     {
-        if (!Gate::allows('profile_edit', $request->id)) abort(403);
+        $id = $request->id ?? Auth::id();
+        
+        if (!Gate::allows('profile_edit', $id)) abort(403);
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -47,11 +43,10 @@ class ProfileUserController extends Controller
         ]);
 
         try {
-            $this->authService->storeUser($request->all(), $request->id);
-        } catch (\Exception $e) {
-            throw $e;
+            $user = $this->authService->storeUser($request->all(), $id);
+            return response()->json(['message' => 'Registro salvo com sucesso', 'data' => $user]);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
         }
-
-        return redirect()->back()->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
     }
 }

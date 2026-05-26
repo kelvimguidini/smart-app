@@ -1,7 +1,7 @@
-<app-authenticated-layout title="Tipos de Serviço">
+<app-authenticated-layout title="Serviços de Salão">
     <ng-container header>
         <div class="d-sm-flex align-items-center justify-content-between mb-4 animate-in">
-            <h1 class="h3 mb-0 text-gray-800">Gerenciamento de Tipos de Serviço</h1>
+            <h1 class="h3 mb-0 text-gray-800">Gerenciamento de Serviços de Salão</h1>
         </div>
     </ng-container>
 
@@ -11,7 +11,7 @@
             <div class="card mb-4 border-left-primary">
                 <div class="card-body">
                     <h5 class="card-title mb-4 text-primary font-weight-bold">
-                        <i class="fas fa-concierge-bell me-2"></i>{{ inEdition > 0 ? 'Editar Tipo de Serviço' : 'Novo Tipo de Serviço' }}
+                        <i class="fas fa-concierge-bell me-2"></i>{{ inEdition > 0 ? 'Editar Serviço' : 'Novo Serviço' }}
                     </h5>
                     <form (ngSubmit)="submit()">
                         <div class="row align-items-end">
@@ -67,7 +67,7 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between mb-4">
                         <h5 class="card-title mb-0 text-secondary font-weight-bold">
-                            <i class="fas fa-list me-2"></i>Lista de Tipos de Serviço
+                            <i class="fas fa-list me-2"></i>Lista de Serviços
                         </h5>
                     </div>
 
@@ -117,8 +117,8 @@
                                                 <app-confirm-modal 
                                                     *ngIf="serviceHall.active"
                                                     [btnClass]="'btn btn-sm btn-warning shadow-sm'" 
-                                                    [modalTitle]="'Inativar Tipo de Serviço'" 
-                                                    [message]="'Tem certeza que deseja inativar o tipo de serviço ' + serviceHall.name + '?'"
+                                                    [modalTitle]="'Inativar Serviço'" 
+                                                    [message]="'Tem certeza que deseja inativar o serviço ' + serviceHall.name + '?'"
                                                     [okButtonLabel]="'Confirmar'"
                                                     (confirm)="deactivateServiceHall(serviceHall.id)">
                                                     <span modal-button><i class="fas fa-ban me-1"></i> Inativar</span>
@@ -127,8 +127,8 @@
                                                 <!-- Deletar -->
                                                 <app-confirm-modal 
                                                     [btnClass]="'btn btn-sm btn-danger shadow-sm'" 
-                                                    [modalTitle]="'Excluir Tipo de Serviço'" 
-                                                    [message]="'Ação irreversível! Deseja realmente excluir o tipo de serviço ' + serviceHall.name + '?'"
+                                                    [modalTitle]="'Excluir Serviço'" 
+                                                    [message]="'Ação irreversível! Deseja realmente excluir o serviço ' + serviceHall.name + '?'"
                                                     [okButtonLabel]="'Excluir'"
                                                     (confirm)="deleteServiceHall(serviceHall.id)">
                                                     <span modal-button><i class="fas fa-trash me-1"></i> Excluir</span>
@@ -146,7 +146,7 @@
                                     <tr *ngIf="serviceHalls.length === 0 && !isLoader">
                                         <td colspan="3" class="text-center py-5 text-muted">
                                             <i class="fas fa-folder-open fa-3x mb-3 d-block opacity-25"></i>
-                                            Nenhum tipo de serviço encontrado.
+                                            Nenhum serviço encontrado.
                                         </td>
                                     </tr>
                                 </tbody>
