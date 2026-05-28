@@ -89,6 +89,7 @@ export class HotelComponent implements OnInit {
       checkout_time: '',
       checkout_time_end: '',
       has_hotel: true,
+      type: 'hotel',
     };
   }
 
@@ -164,6 +165,7 @@ export class HotelComponent implements OnInit {
       checkout_time: provider.checkout_time || '',
       checkout_time_end: provider.checkout_time_end || '',
       has_hotel: true,
+      type: 'hotel',
     };
 
     this.selectedCityName = provider.city

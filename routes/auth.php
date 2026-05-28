@@ -14,19 +14,15 @@ use App\Http\Controllers\Auth\CustomerController;
 use App\Http\Controllers\Auth\CrdController;
 use App\Http\Controllers\Auth\CurrencyController;
 use App\Http\Controllers\Auth\EventController;
-use App\Http\Controllers\Auth\FrequencyController;
 use App\Http\Controllers\Auth\HallController;
 use App\Http\Controllers\Auth\HomeController;
 use App\Http\Controllers\Auth\HotelController;
 use App\Http\Controllers\Auth\LocalController;
-use App\Http\Controllers\Auth\MeasureController;
 use App\Http\Controllers\Auth\ProviderController;
-use App\Http\Controllers\Auth\ProviderServicesController;
 use App\Http\Controllers\Auth\ProviderTransportController;
 use App\Http\Controllers\Auth\PurposeController;
 use App\Http\Controllers\Auth\PurposeHallController;
 use App\Http\Controllers\Auth\RegimeController;
-use App\Http\Controllers\Auth\ServiceAddController;
 use App\Http\Controllers\Auth\ServiceController;
 use App\Http\Controllers\Auth\ServiceHallController;
 use App\Http\Controllers\Auth\ServiceTypeController;
@@ -274,19 +270,6 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     // Service Hall save and delete routes migrated to api.php (Angular)
 
-
-    Route::get('service-add', [ServiceAddController::class, 'create'])
-        ->name('service-add');
-
-    Route::post('service-add-save', [ServiceAddController::class, 'store'])
-        ->name('service-add-save');
-
-    Route::delete('service-add-delete', [ServiceAddController::class, 'delete'])
-        ->name('service-add-delete');
-
-
-
-
     // Purpose Hall save and delete routes migrated to api.php (Angular)
 
 
@@ -303,27 +286,6 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     Route::delete('currency-delete', [CurrencyController::class, 'delete'])
         ->name('currency-delete');
-
-
-    Route::get('measure', [MeasureController::class, 'create'])
-        ->name('measure');
-
-    Route::post('measure-save', [MeasureController::class, 'store'])
-        ->name('measure-save');
-
-    Route::delete('measure-delete', [MeasureController::class, 'delete'])
-        ->name('measure-delete');
-
-
-    Route::get('frequency', [FrequencyController::class, 'create'])
-        ->name('frequency');
-
-    Route::post('frequency-save', [FrequencyController::class, 'store'])
-        ->name('frequency-save');
-
-    Route::delete('frequency-delete', [FrequencyController::class, 'delete'])
-        ->name('frequency-delete');
-
 
     //Eventos
     Route::get('event-list/{page?}', [EventController::class, 'list'])
@@ -417,18 +379,6 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::delete('event-add-delete', [AddController::class, 'eventAddDelete'])
         ->name('event-add-delete');
 
-    Route::get('provider-service', [ProviderServicesController::class, 'create'])
-        ->name('provider-service');
-
-    Route::post('provider-service-save', [ProviderServicesController::class, 'store'])
-        ->name('provider-service-save');
-
-    Route::delete('provider-service-delete', [ProviderServicesController::class, 'delete'])
-        ->name('provider-service-delete');
-
-    Route::post('provider-service-event-save', [ProviderServicesController::class, 'storeEventProvider'])
-        ->name('provider-service-event-save');
-
     //TRANSPORTE
     Route::post('transport-opt-save', [TransportController::class, 'storeOpt'])
         ->name('transport-opt-save');
@@ -515,9 +465,6 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     // Service Halls activate/deactivate routes migrated to api.php (Angular)
 
-    Route::put('/service_adds/activate/{id}', [ServiceAddController::class, 'activateM'])->name('service_adds-activate');
-    Route::put('/service_adds/deactivate/{id}', [ServiceAddController::class, 'deactivateM'])->name('service_adds-deactivate');
-
     // Services activate/deactivate routes migrated to api.php (Angular)
 
     // Regimes activate/deactivate routes migrated to api.php (Angular)
@@ -529,18 +476,9 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::put('/provider_transports/activate/{id}', [ProviderTransportController::class, 'activateM'])->name('provider_transports-activate');
     Route::put('/provider_transports/deactivate/{id}', [ProviderTransportController::class, 'deactivateM'])->name('provider_transports-deactivate');
 
-    Route::put('/provider_services/activate/{id}', [ProviderServicesController::class, 'activateM'])->name('provider_services-activate');
-    Route::put('/provider_services/deactivate/{id}', [ProviderServicesController::class, 'deactivateM'])->name('provider_services-deactivate');
-
     // Providers activate/deactivate routes migrated to api.php (Angular)
 
-    Route::put('/measures/activate/{id}', [MeasureController::class, 'activateM'])->name('measures-activate');
-    Route::put('/measures/deactivate/{id}', [MeasureController::class, 'deactivateM'])->name('measures-deactivate');
-
     // Locals activate/deactivate routes migrated to api.php (Angular)
-
-    Route::put('/frequencies/activate/{id}', [FrequencyController::class, 'activateM'])->name('frequencies-activate');
-    Route::put('/frequencies/deactivate/{id}', [FrequencyController::class, 'deactivateM'])->name('frequencies-deactivate');
 
     Route::put('/customers/activate/{id}', [CustomerController::class, 'activateM'])->name('customers-activate');
     Route::put('/customers/deactivate/{id}', [CustomerController::class, 'deactivateM'])->name('customers-deactivate');

@@ -2,36 +2,19 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Domains\Shared\Services\CityServiceInterface;
-use App\Domains\Shared\Repositories\LookupRepositoryInterface;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use App\Models\City;
+use App\Domains\Customers\Repositories\CustomerRepositoryInterface;
+use App\Models\Crd;
 
-class CityApiController extends Controller
+class CrdApiController extends Controller
 {
-    protected $cityService;
-    protected $lookupRepository;
+    protected $customerRepository;
 
-    public function __construct(CityServiceInterface $cityService, LookupRepositoryInterface $lookupRepository)
+    public function __construct(CustomerRepositoryInterface $customerRepository)
     {
-        $this->cityService = $cityService;
-        $this->lookupRepository = $lookupRepository;
-    }
-
-    /**
-     * Search cities for autocomplete
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function search(Request $request)
-    {
-        $term = $request->get('term', '');
-        
-        $cities = $this->cityService->search($term);
-
-        return response()->json($cities);
+        $this->customerRepository = $customerRepository;
     }
 
     /**
@@ -41,24 +24,23 @@ class CityApiController extends Controller
      */
     public function index(Request $request)
     {
-        if (!Gate::allows('city_admin')) {
+        if (!Gate::allows('crd_admin')) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $perPage = $request->get('per_page', 10);
         $search = $request->get('search', '');
 
-        $query = City::withoutGlobalScope('active');
+        $query = Crd::with('customer')->withoutGlobalScope('active');
 
         if (!empty($search)) {
             $query->where('name', 'like', '%' . $search . '%')
-                  ->orWhere('states', 'like', '%' . $search . '%')
-                  ->orWhere('country', 'like', '%' . $search . '%');
+                  ->orWhere('number', 'like', '%' . $search . '%');
         }
 
-        $cities = $query->paginate($perPage);
+        $crds = $query->paginate($perPage);
 
-        return response()->json($cities);
+        return response()->json($crds);
     }
 
     /**
@@ -69,27 +51,28 @@ class CityApiController extends Controller
      */
     public function store(Request $request)
     {
-        if (!Gate::allows('city_admin')) {
+        if (!Gate::allows('crd_admin')) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'states' => 'nullable|string|max:255',
-            'country' => 'nullable|string|max:255',
-            'lat' => 'nullable|string|max:50',
-            'lng' => 'nullable|string|max:50',
+            'number' => 'required|string|max:18',
         ]);
 
         try {
-            $data = $request->only('name', 'states', 'country', 'lat', 'lng', 'place_id');
+            $data = [
+                'name' => $request->name,
+                'number' => $request->number,
+                'customer_id' => $request->customer_id,
+            ];
 
             if ($request->id > 0) {
-                $city = $this->lookupRepository->saveCity($data, $request->id);
-                return response()->json(['message' => 'Registro atualizado com sucesso', 'data' => $city]);
+                $crd = $this->customerRepository->saveCrd($data, $request->id);
+                return response()->json(['message' => 'Registro atualizado com sucesso', 'data' => $crd]);
             } else {
-                $city = $this->lookupRepository->saveCity($data);
-                return response()->json(['message' => 'Registro salvo com sucesso', 'data' => $city]);
+                $crd = $this->customerRepository->saveCrd($data);
+                return response()->json(['message' => 'Registro salvo com sucesso', 'data' => $crd]);
             }
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao salvar o registro', 'error' => $e->getMessage()], 500);
@@ -104,12 +87,12 @@ class CityApiController extends Controller
      */
     public function destroy($id)
     {
-        if (!Gate::allows('city_admin')) {
+        if (!Gate::allows('crd_admin')) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         try {
-            $this->lookupRepository->deleteCity($id);
+            $this->customerRepository->deleteCrd($id);
             return response()->json(['message' => 'Registro apagado com sucesso!']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao apagar o registro', 'error' => $e->getMessage()], 500);
@@ -124,12 +107,12 @@ class CityApiController extends Controller
      */
     public function activateItem($id)
     {
-        if (!Gate::allows('city_admin')) {
+        if (!Gate::allows('crd_admin')) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         try {
-            $this->lookupRepository->activateCity($id);
+            $this->customerRepository->activateCrd($id);
             return response()->json(['message' => 'Registro ativado com sucesso!']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao ativar o registro', 'error' => $e->getMessage()], 500);
@@ -144,12 +127,12 @@ class CityApiController extends Controller
      */
     public function deactivateItem($id)
     {
-        if (!Gate::allows('city_admin')) {
+        if (!Gate::allows('crd_admin')) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         try {
-            $this->lookupRepository->deactivateCity($id);
+            $this->customerRepository->deactivateCrd($id);
             return response()->json(['message' => 'Registro inativado com sucesso.']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao inativar o registro', 'error' => $e->getMessage()], 500);

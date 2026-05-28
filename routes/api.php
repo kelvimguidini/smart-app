@@ -68,7 +68,28 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('categories', [\App\Http\Controllers\Api\CategoryApiController::class, 'store']);
     Route::delete('categories/{id}', [\App\Http\Controllers\Api\CategoryApiController::class, 'destroy']);
     Route::put('categories/{id}/activate', [\App\Http\Controllers\Api\CategoryApiController::class, 'activateItem']);
-    Route::put('categories/{id}/deactivate', [\App\Http\Controllers\Api\CategoryApiController::class, 'deactivateItem']);
+    Route::put('/categories/deactivate/{id}', [\App\Http\Controllers\Api\CategoryApiController::class, 'deactivateItem']);
+
+    // Currencies
+    Route::get('/currencies', [\App\Http\Controllers\Api\CurrencyApiController::class, 'index']);
+    Route::post('/currencies', [\App\Http\Controllers\Api\CurrencyApiController::class, 'store']);
+    Route::delete('/currencies/{id}', [\App\Http\Controllers\Api\CurrencyApiController::class, 'destroy']);
+    Route::put('/currencies/activate/{id}', [\App\Http\Controllers\Api\CurrencyApiController::class, 'activateItem']);
+    Route::put('/currencies/deactivate/{id}', [\App\Http\Controllers\Api\CurrencyApiController::class, 'deactivateItem']);
+
+    // Customers
+    Route::get('/customers', [\App\Http\Controllers\Api\CustomerApiController::class, 'index']);
+    Route::post('/customers', [\App\Http\Controllers\Api\CustomerApiController::class, 'store']);
+    Route::delete('/customers/{id}', [\App\Http\Controllers\Api\CustomerApiController::class, 'destroy']);
+    Route::put('/customers/activate/{id}', [\App\Http\Controllers\Api\CustomerApiController::class, 'activateItem']);
+    Route::put('/customers/deactivate/{id}', [\App\Http\Controllers\Api\CustomerApiController::class, 'deactivateItem']);
+
+    // CRDs
+    Route::get('/crds', [\App\Http\Controllers\Api\CrdApiController::class, 'index']);
+    Route::post('/crds', [\App\Http\Controllers\Api\CrdApiController::class, 'store']);
+    Route::delete('/crds/{id}', [\App\Http\Controllers\Api\CrdApiController::class, 'destroy']);
+    Route::put('/crds/activate/{id}', [\App\Http\Controllers\Api\CrdApiController::class, 'activateItem']);
+    Route::put('/crds/deactivate/{id}', [\App\Http\Controllers\Api\CrdApiController::class, 'deactivateItem']);
 
     // Rotas de Propósitos (Purpose)
     Route::get('purposes', [\App\Http\Controllers\Api\PurposeApiController::class, 'index']);
@@ -119,7 +140,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('brokers/{id}/activate', [\App\Http\Controllers\Api\BrokerApiController::class, 'activateItem']);
     Route::put('brokers/{id}/deactivate', [\App\Http\Controllers\Api\BrokerApiController::class, 'deactivateItem']);
 
-    // Rotas de Cidades para Autocomplete
+    // Rotas de Cidades
+    Route::get('cities', [\App\Http\Controllers\Api\CityApiController::class, 'index']);
+    Route::post('cities', [\App\Http\Controllers\Api\CityApiController::class, 'store']);
+    Route::delete('cities/{id}', [\App\Http\Controllers\Api\CityApiController::class, 'destroy']);
+    Route::put('cities/activate/{id}', [\App\Http\Controllers\Api\CityApiController::class, 'activateItem']);
+    Route::put('cities/deactivate/{id}', [\App\Http\Controllers\Api\CityApiController::class, 'deactivateItem']);
     Route::get('cities/search', [\App\Http\Controllers\Api\CityApiController::class, 'search']);
 
     // Rotas de Hotéis (Fornecedores)
@@ -127,5 +153,32 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('hotels', [\App\Http\Controllers\Api\ProviderApiController::class, 'store']);
     Route::delete('hotels/{id}', [\App\Http\Controllers\Api\ProviderApiController::class, 'destroy']);
     Route::put('hotels/{id}/activate', [\App\Http\Controllers\Api\ProviderApiController::class, 'activateItem']);
-    Route::put('hotels/{id}/deactivate', [\App\Http\Controllers\Api\ProviderApiController::class, 'deactivateItem']);
+    // Rotas de Medidas (Measure)
+    Route::get('measures', [\App\Http\Controllers\Api\MeasureApiController::class, 'index']);
+    Route::post('measures', [\App\Http\Controllers\Api\MeasureApiController::class, 'store']);
+    Route::delete('measures/{id}', [\App\Http\Controllers\Api\MeasureApiController::class, 'destroy']);
+    Route::put('measures/{id}/activate', [\App\Http\Controllers\Api\MeasureApiController::class, 'activateItem']);
+    Route::put('measures/{id}/deactivate', [\App\Http\Controllers\Api\MeasureApiController::class, 'deactivateItem']);
+
+    // Rotas de Frequências (Frequency)
+    Route::get('frequencies', [\App\Http\Controllers\Api\FrequencyApiController::class, 'index']);
+    Route::post('frequencies', [\App\Http\Controllers\Api\FrequencyApiController::class, 'store']);
+    Route::delete('frequencies/{id}', [\App\Http\Controllers\Api\FrequencyApiController::class, 'destroy']);
+    Route::put('frequencies/{id}/activate', [\App\Http\Controllers\Api\FrequencyApiController::class, 'activateItem']);
+    Route::put('frequencies/{id}/deactivate', [\App\Http\Controllers\Api\FrequencyApiController::class, 'deactivateItem']);
+
+    // Rotas de Serviços Adicionais (ServiceAdd)
+    Route::get('service-adds', [\App\Http\Controllers\Api\ServiceAddApiController::class, 'index']);
+    Route::post('service-adds', [\App\Http\Controllers\Api\ServiceAddApiController::class, 'store']);
+    Route::delete('service-adds/{id}', [\App\Http\Controllers\Api\ServiceAddApiController::class, 'destroy']);
+    Route::put('service-adds/{id}/activate', [\App\Http\Controllers\Api\ServiceAddApiController::class, 'activateItem']);
+    Route::put('service-adds/{id}/deactivate', [\App\Http\Controllers\Api\ServiceAddApiController::class, 'deactivateItem']);
+
+    // Rotas de Fornecedores de Serviço (ProviderService)
+    Route::get('provider-services', [\App\Http\Controllers\Api\ProviderServiceApiController::class, 'index']);
+    Route::post('provider-services', [\App\Http\Controllers\Api\ProviderServiceApiController::class, 'store']);
+    Route::delete('provider-services/{id}', [\App\Http\Controllers\Api\ProviderServiceApiController::class, 'destroy']);
+    Route::put('provider-services/{id}/activate', [\App\Http\Controllers\Api\ProviderServiceApiController::class, 'activateItem']);
+    Route::put('provider-services/{id}/deactivate', [\App\Http\Controllers\Api\ProviderServiceApiController::class, 'deactivateItem']);
+
 });

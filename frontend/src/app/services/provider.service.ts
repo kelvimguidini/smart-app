@@ -42,6 +42,7 @@ export interface ProviderCreateUpdateRequest {
   checkout_time: string;
   checkout_time_end: string;
   has_hotel: boolean;
+  type?: string;
 }
 
 export interface ProviderPaginatedResponse {

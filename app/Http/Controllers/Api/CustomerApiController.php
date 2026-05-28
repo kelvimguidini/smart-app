@@ -2,36 +2,19 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Domains\Shared\Services\CityServiceInterface;
-use App\Domains\Shared\Repositories\LookupRepositoryInterface;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use App\Models\City;
+use App\Domains\Customers\Repositories\CustomerRepositoryInterface;
+use App\Models\Customer;
 
-class CityApiController extends Controller
+class CustomerApiController extends Controller
 {
-    protected $cityService;
-    protected $lookupRepository;
+    protected $customerRepository;
 
-    public function __construct(CityServiceInterface $cityService, LookupRepositoryInterface $lookupRepository)
+    public function __construct(CustomerRepositoryInterface $customerRepository)
     {
-        $this->cityService = $cityService;
-        $this->lookupRepository = $lookupRepository;
-    }
-
-    /**
-     * Search cities for autocomplete
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function search(Request $request)
-    {
-        $term = $request->get('term', '');
-        
-        $cities = $this->cityService->search($term);
-
-        return response()->json($cities);
+        $this->customerRepository = $customerRepository;
     }
 
     /**
@@ -41,24 +24,23 @@ class CityApiController extends Controller
      */
     public function index(Request $request)
     {
-        if (!Gate::allows('city_admin')) {
+        if (!Gate::allows('customer_admin')) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $perPage = $request->get('per_page', 10);
         $search = $request->get('search', '');
 
-        $query = City::withoutGlobalScope('active');
+        $query = Customer::withoutGlobalScope('active');
 
         if (!empty($search)) {
             $query->where('name', 'like', '%' . $search . '%')
-                  ->orWhere('states', 'like', '%' . $search . '%')
-                  ->orWhere('country', 'like', '%' . $search . '%');
+                  ->orWhere('document', 'like', '%' . $search . '%');
         }
 
-        $cities = $query->paginate($perPage);
+        $customers = $query->paginate($perPage);
 
-        return response()->json($cities);
+        return response()->json($customers);
     }
 
     /**
@@ -69,27 +51,33 @@ class CityApiController extends Controller
      */
     public function store(Request $request)
     {
-        if (!Gate::allows('city_admin')) {
+        if (!Gate::allows('customer_admin')) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'states' => 'nullable|string|max:255',
-            'country' => 'nullable|string|max:255',
-            'lat' => 'nullable|string|max:50',
-            'lng' => 'nullable|string|max:50',
         ]);
 
         try {
-            $data = $request->only('name', 'states', 'country', 'lat', 'lng', 'place_id');
+            $data = $request->only('name', 'color', 'document', 'phone', 'email', 'responsibleAuthorizing');
+            
+            // Handle logo upload if provided
+            if ($request->hasFile('logo')) {
+                $path = \Illuminate\Support\Facades\Storage::putFile('public/logos', $request->file('logo'));
+                $data['logo'] = \Illuminate\Support\Facades\Storage::url($path);
+                \Illuminate\Support\Facades\Artisan::call('files:copy');
+            } elseif ($request->filled('logo') && is_string($request->logo)) {
+                // Keep existing logo if passed as string (e.g. from existing record)
+                $data['logo'] = $request->logo;
+            }
 
             if ($request->id > 0) {
-                $city = $this->lookupRepository->saveCity($data, $request->id);
-                return response()->json(['message' => 'Registro atualizado com sucesso', 'data' => $city]);
+                $customer = $this->customerRepository->update($request->id, $data);
+                return response()->json(['message' => 'Registro atualizado com sucesso', 'data' => $customer]);
             } else {
-                $city = $this->lookupRepository->saveCity($data);
-                return response()->json(['message' => 'Registro salvo com sucesso', 'data' => $city]);
+                $customer = $this->customerRepository->create($data);
+                return response()->json(['message' => 'Registro salvo com sucesso', 'data' => $customer]);
             }
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao salvar o registro', 'error' => $e->getMessage()], 500);
@@ -104,12 +92,17 @@ class CityApiController extends Controller
      */
     public function destroy($id)
     {
-        if (!Gate::allows('city_admin')) {
+        if (!Gate::allows('customer_admin')) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         try {
-            $this->lookupRepository->deleteCity($id);
+            $customer = $this->customerRepository->find($id);
+            if ($customer && $customer->logo) {
+                $path = str_replace('/storage/', 'public/', $customer->logo);
+                \Illuminate\Support\Facades\Storage::delete($path);
+            }
+            $this->customerRepository->delete($id);
             return response()->json(['message' => 'Registro apagado com sucesso!']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao apagar o registro', 'error' => $e->getMessage()], 500);
@@ -124,12 +117,12 @@ class CityApiController extends Controller
      */
     public function activateItem($id)
     {
-        if (!Gate::allows('city_admin')) {
+        if (!Gate::allows('customer_admin')) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         try {
-            $this->lookupRepository->activateCity($id);
+            $this->customerRepository->activate($id);
             return response()->json(['message' => 'Registro ativado com sucesso!']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao ativar o registro', 'error' => $e->getMessage()], 500);
@@ -144,12 +137,12 @@ class CityApiController extends Controller
      */
     public function deactivateItem($id)
     {
-        if (!Gate::allows('city_admin')) {
+        if (!Gate::allows('customer_admin')) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         try {
-            $this->lookupRepository->deactivateCity($id);
+            $this->customerRepository->deactivate($id);
             return response()->json(['message' => 'Registro inativado com sucesso.']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao inativar o registro', 'error' => $e->getMessage()], 500);

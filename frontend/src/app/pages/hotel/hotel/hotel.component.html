@@ -96,7 +96,8 @@
                 <div class="form-group mb-0">
                   <label for="payment_method" class="form-label">Forma de Pagamento:</label>
                   <select id="payment_method" class="form-select animate-in" [(ngModel)]="form.payment_method" name="payment_method">
-                    <option value="">Indefinido</option>
+                    <option value="" disabled selected>Selecione...</option>
+                    <option value="Indefinido">Indefinido</option>
                     <option value="Dinheiro">Dinheiro</option>
                     <option value="Cartão">Cartão</option>
                   </select>
@@ -196,21 +197,11 @@
               </div>
 
               <!-- Nacional Radios -->
-              <div class="col-lg-4 mb-3">
-                <div class="form-group mb-0">
-                  <label class="form-label"></label>
-                  <div class="card">
-                    <div class="card-body py-2">
-                      <div class="form-check">
-                        <input class="form-check-input" type="radio" id="nationalTrue" [value]="true" [(ngModel)]="form.national" name="national" />
-                        <label class="form-check-label" for="nationalTrue">Nacional</label>
-                      </div>
-                      <div class="form-check">
-                        <input class="form-check-input" type="radio" id="nationalFalse" [value]="false" [(ngModel)]="form.national" name="national" />
-                        <label class="form-check-label" for="nationalFalse">Internacional</label>
-                      </div>
-                    </div>
-                  </div>
+              <div class="col-lg-3 form-group mb-3">
+                <label class="form-label d-block">Nacional?</label>
+                <div class="form-check form-switch form-check-inline mt-2">
+                  <input class="form-check-input" type="checkbox" id="national" [(ngModel)]="form.national" name="national" />
+                  <label class="form-check-label" for="national">{{ form.national ? 'Sim' : 'Não' }}</label>
                 </div>
               </div>
 

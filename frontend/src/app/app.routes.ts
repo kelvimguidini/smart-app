@@ -19,6 +19,13 @@ import { ServiceComponent } from './pages/a&b/service/service.component';
 import { LocalComponent } from './pages/a&b/local/local.component';
 import { ServiceHallComponent } from './pages/hall/service-hall/service-hall.component';
 import { PurposeHallComponent } from './pages/hall/purpose-hall/purpose-hall.component';
+import { MeasureComponent } from './pages/adds/measure/measure.component';
+import { FrequencyComponent } from './pages/adds/frequency/frequency.component';
+import { ServiceAddComponent } from './pages/adds/service-add/service-add.component';
+import { ProviderServiceComponent } from './pages/adds/provider-service/provider-service.component';
+import { CurrenciesComponent } from './pages/admin/currencies/currencies.component';
+import { CustomersComponent } from './pages/admin/customers/customers.component';
+import { CrdsComponent } from './pages/admin/crds/crds.component';
 
 import { authGuard } from './guards/auth.guard';
 import { guestGuard } from './guards/guest.guard';
@@ -43,6 +50,13 @@ export const routes: Routes = [
   { path: 'purpose-hall', component: PurposeHallComponent, canActivate: [authGuard], title: 'Propósitos do Salão - SmartApp' },
   { path: 'broker', component: BrokerComponent, canActivate: [authGuard], title: 'Broker - SmartApp' },
   { path: 'hotel', component: HotelComponent, canActivate: [authGuard], title: 'Hotéis - SmartApp' },
+  { path: 'measure', component: MeasureComponent, canActivate: [authGuard], title: 'Medidas - SmartApp' },
+  { path: 'frequency', component: FrequencyComponent, canActivate: [authGuard], title: 'Frequências - SmartApp' },
+  { path: 'service-add', component: ServiceAddComponent, canActivate: [authGuard], title: 'Serviços Adicionais - SmartApp' },
+  { path: 'provider-service', component: ProviderServiceComponent, canActivate: [authGuard], title: 'Fornecedores de Serviço - SmartApp' },
+  { path: 'currency', component: CurrenciesComponent, canActivate: [authGuard], title: 'Moedas - SmartApp' },
+  { path: 'customer', component: CustomersComponent, canActivate: [authGuard], title: 'Clientes - SmartApp' },
+  { path: 'crd', component: CrdsComponent, canActivate: [authGuard], title: 'CRDs - SmartApp' },
   { path: 'confirm-password', component: ConfirmPasswordComponent, canActivate: [authGuard], title: 'Confirmar Senha - SmartApp' },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 ];

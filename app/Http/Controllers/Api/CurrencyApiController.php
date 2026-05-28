@@ -2,36 +2,19 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Domains\Shared\Services\CityServiceInterface;
-use App\Domains\Shared\Repositories\LookupRepositoryInterface;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use App\Models\City;
+use App\Domains\Shared\Repositories\LookupRepositoryInterface;
+use App\Models\Currency;
 
-class CityApiController extends Controller
+class CurrencyApiController extends Controller
 {
-    protected $cityService;
     protected $lookupRepository;
 
-    public function __construct(CityServiceInterface $cityService, LookupRepositoryInterface $lookupRepository)
+    public function __construct(LookupRepositoryInterface $lookupRepository)
     {
-        $this->cityService = $cityService;
         $this->lookupRepository = $lookupRepository;
-    }
-
-    /**
-     * Search cities for autocomplete
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function search(Request $request)
-    {
-        $term = $request->get('term', '');
-        
-        $cities = $this->cityService->search($term);
-
-        return response()->json($cities);
     }
 
     /**
@@ -41,24 +24,22 @@ class CityApiController extends Controller
      */
     public function index(Request $request)
     {
-        if (!Gate::allows('city_admin')) {
+        if (!Gate::allows('currency_admin')) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $perPage = $request->get('per_page', 10);
         $search = $request->get('search', '');
 
-        $query = City::withoutGlobalScope('active');
+        $query = Currency::withoutGlobalScope('active');
 
         if (!empty($search)) {
-            $query->where('name', 'like', '%' . $search . '%')
-                  ->orWhere('states', 'like', '%' . $search . '%')
-                  ->orWhere('country', 'like', '%' . $search . '%');
+            $query->where('name', 'like', '%' . $search . '%');
         }
 
-        $cities = $query->paginate($perPage);
+        $currencies = $query->paginate($perPage);
 
-        return response()->json($cities);
+        return response()->json($currencies);
     }
 
     /**
@@ -69,27 +50,21 @@ class CityApiController extends Controller
      */
     public function store(Request $request)
     {
-        if (!Gate::allows('city_admin')) {
+        if (!Gate::allows('currency_admin')) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $request->validate([
-            'name' => 'required|string|max:255',
-            'states' => 'nullable|string|max:255',
-            'country' => 'nullable|string|max:255',
-            'lat' => 'nullable|string|max:50',
-            'lng' => 'nullable|string|max:50',
+            'name' => 'required|string|max:255'
         ]);
 
         try {
-            $data = $request->only('name', 'states', 'country', 'lat', 'lng', 'place_id');
-
             if ($request->id > 0) {
-                $city = $this->lookupRepository->saveCity($data, $request->id);
-                return response()->json(['message' => 'Registro atualizado com sucesso', 'data' => $city]);
+                $currency = $this->lookupRepository->saveCurrency($request->only('name'), $request->id);
+                return response()->json(['message' => 'Registro atualizado com sucesso', 'data' => $currency]);
             } else {
-                $city = $this->lookupRepository->saveCity($data);
-                return response()->json(['message' => 'Registro salvo com sucesso', 'data' => $city]);
+                $currency = $this->lookupRepository->saveCurrency($request->only('name'));
+                return response()->json(['message' => 'Registro salvo com sucesso', 'data' => $currency]);
             }
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao salvar o registro', 'error' => $e->getMessage()], 500);
@@ -104,12 +79,12 @@ class CityApiController extends Controller
      */
     public function destroy($id)
     {
-        if (!Gate::allows('city_admin')) {
+        if (!Gate::allows('currency_admin')) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         try {
-            $this->lookupRepository->deleteCity($id);
+            $this->lookupRepository->deleteCurrency($id);
             return response()->json(['message' => 'Registro apagado com sucesso!']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao apagar o registro', 'error' => $e->getMessage()], 500);
@@ -124,12 +99,12 @@ class CityApiController extends Controller
      */
     public function activateItem($id)
     {
-        if (!Gate::allows('city_admin')) {
+        if (!Gate::allows('currency_admin')) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         try {
-            $this->lookupRepository->activateCity($id);
+            $this->lookupRepository->activateCurrency($id);
             return response()->json(['message' => 'Registro ativado com sucesso!']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao ativar o registro', 'error' => $e->getMessage()], 500);
@@ -144,12 +119,12 @@ class CityApiController extends Controller
      */
     public function deactivateItem($id)
     {
-        if (!Gate::allows('city_admin')) {
+        if (!Gate::allows('currency_admin')) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         try {
-            $this->lookupRepository->deactivateCity($id);
+            $this->lookupRepository->deactivateCurrency($id);
             return response()->json(['message' => 'Registro inativado com sucesso.']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao inativar o registro', 'error' => $e->getMessage()], 500);

@@ -137,6 +137,26 @@ use App\Domains\Shared\Services\RoleServiceInterface;
 use App\Domains\Shared\Services\DefaultRoleService;
 use App\Domains\Shared\Services\DefaultPurposeHallService;
 
+use App\Domains\Shared\Repositories\ServiceAddRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentServiceAddRepository;
+use App\Domains\Shared\Services\ServiceAddServiceInterface;
+use App\Domains\Shared\Services\DefaultServiceAddService;
+
+use App\Domains\Providers\Repositories\ProviderServiceRepositoryInterface;
+use App\Domains\Providers\Repositories\EloquentProviderServiceRepository;
+use App\Domains\Providers\Services\ProviderServiceServiceInterface;
+use App\Domains\Providers\Services\DefaultProviderServiceService;
+
+use App\Domains\Shared\Repositories\MeasureRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentMeasureRepository;
+use App\Domains\Shared\Services\MeasureServiceInterface;
+use App\Domains\Shared\Services\DefaultMeasureService;
+
+use App\Domains\Shared\Repositories\FrequencyRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentFrequencyRepository;
+use App\Domains\Shared\Services\FrequencyServiceInterface;
+use App\Domains\Shared\Services\DefaultFrequencyService;
+
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -195,6 +215,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PurposeHallRepositoryInterface::class, EloquentPurposeHallRepository::class);
         $this->app->bind(SharedRoleRepositoryInterface::class, SharedEloquentRoleRepository::class);
 
+        $this->app->bind(ServiceAddRepositoryInterface::class, EloquentServiceAddRepository::class);
+        $this->app->bind(ProviderServiceRepositoryInterface::class, EloquentProviderServiceRepository::class);
+        $this->app->bind(MeasureRepositoryInterface::class, EloquentMeasureRepository::class);
+        $this->app->bind(FrequencyRepositoryInterface::class, EloquentFrequencyRepository::class);
+
         // New Services
         $this->app->bind(BrokerServiceInterface::class, DefaultBrokerService::class);
         $this->app->bind(CategoryServiceInterface::class, DefaultCategoryService::class);
@@ -208,6 +233,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ServiceHallServiceInterface::class, DefaultServiceHallService::class);
         $this->app->bind(PurposeHallServiceInterface::class, DefaultPurposeHallService::class);
         $this->app->bind(RoleServiceInterface::class, DefaultRoleService::class);
+        
+        $this->app->bind(ServiceAddServiceInterface::class, DefaultServiceAddService::class);
+        $this->app->bind(ProviderServiceServiceInterface::class, DefaultProviderServiceService::class);
+        $this->app->bind(MeasureServiceInterface::class, DefaultMeasureService::class);
+        $this->app->bind(FrequencyServiceInterface::class, DefaultFrequencyService::class);
         
         // API Terceiros Services & Repositories
         $this->app->bind(AuthApiRepositoryInterface::class, EloquentAuthApiRepository::class);
