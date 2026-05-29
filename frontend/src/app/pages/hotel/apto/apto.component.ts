@@ -25,6 +25,7 @@ export class AptoComponent implements OnInit {
   inEdition: number = 0;
   isLoader: boolean = false;
   processing: boolean = false;
+  showModal: boolean = false;
   errors: any = {};
 
   // Pagination and Filtering state
@@ -122,6 +123,16 @@ export class AptoComponent implements OnInit {
     this.loadAptos();
   }
 
+  openModal(): void {
+    this.resetForm();
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.resetForm();
+  }
+
   /**
    * Editar apartamento
    */
@@ -130,14 +141,14 @@ export class AptoComponent implements OnInit {
     this.form.id = apto.id;
     this.form.name = apto.name;
     this.errors = {};
+    this.showModal = true;
   }
 
   /**
    * Cancelar edição
    */
   cancelEdit(): void {
-    this.inEdition = 0;
-    this.resetForm();
+    this.closeModal();
   }
 
   /**
@@ -150,6 +161,7 @@ export class AptoComponent implements OnInit {
     };
     this.errors = {};
     this.inEdition = 0;
+    this.processing = false;
   }
 
   /**
@@ -160,10 +172,9 @@ export class AptoComponent implements OnInit {
 
     if (!this.form.name || this.form.name.trim() === '') {
       this.errors.name = ['O nome é obrigatório'];
-      return false;
     }
 
-    return true;
+    return Object.keys(this.errors).length === 0;
   }
 
   /**
@@ -185,7 +196,7 @@ export class AptoComponent implements OnInit {
       next: (response: any) => {
         this.processing = false;
         this.toastService.success(response.message || 'Apartamento salvo com sucesso');
-        this.resetForm();
+        this.closeModal();
         this.loadAptos();
       },
       error: (error: HttpErrorResponse) => {

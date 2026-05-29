@@ -25,6 +25,7 @@ export class FrequencyComponent implements OnInit {
   isLoader: boolean = false;
   processing: boolean = false;
   errors: any = {};
+  showModal: boolean = false;
 
   // Pagination and Filtering state
   pagination: any = {
@@ -106,11 +107,26 @@ export class FrequencyComponent implements OnInit {
     this.loadFrequencies();
   }
 
+  openModal(): void {
+    this.resetForm();
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.resetForm();
+  }
+
   edit(frequency: Frequency): void {
     this.inEdition = frequency.id;
     this.form.id = frequency.id;
     this.form.name = frequency.name;
     this.errors = {};
+    this.showModal = true;
+  }
+
+  cancelEdit(): void {
+    this.closeModal();
   }
 
   resetForm(): void {
@@ -149,7 +165,7 @@ export class FrequencyComponent implements OnInit {
       next: (response: any) => {
         this.processing = false;
         this.toastService.success(response.message || 'Frequência salva com sucesso');
-        this.resetForm();
+        this.closeModal();
         this.loadFrequencies();
       },
       error: (error: HttpErrorResponse) => {

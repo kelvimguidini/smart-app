@@ -100,7 +100,7 @@
 
           <app-datatable
             [pagination]="{ current_page: currentPage, last_page: lastPage, total: totalItems, per_page: perPage, from: ((currentPage - 1) * perPage) + 1, to: ((currentPage - 1) * perPage) + currencies.length }"
-            [loading]="processing"
+            [loading]="isLoader"
             (pageChange)="onPageChange($event)"
             (search)="onSearch($event)">
             

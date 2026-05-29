@@ -24,6 +24,7 @@ export class CategoryComponent implements OnInit {
   inEdition: number = 0;
   isLoader: boolean = false;
   processing: boolean = false;
+  showModal: boolean = false;
   errors: any = {};
 
   // Pagination and Filtering state
@@ -121,6 +122,16 @@ export class CategoryComponent implements OnInit {
     this.loadCategories();
   }
 
+  openModal(): void {
+    this.resetForm();
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.resetForm();
+  }
+
   /**
    * Editar categoria
    */
@@ -129,14 +140,14 @@ export class CategoryComponent implements OnInit {
     this.form.id = category.id;
     this.form.name = category.name;
     this.errors = {};
+    this.showModal = true;
   }
 
   /**
    * Cancelar edição
    */
   cancelEdit(): void {
-    this.inEdition = 0;
-    this.resetForm();
+    this.closeModal();
   }
 
   /**
@@ -149,6 +160,7 @@ export class CategoryComponent implements OnInit {
     };
     this.errors = {};
     this.inEdition = 0;
+    this.processing = false;
   }
 
   /**
@@ -159,10 +171,9 @@ export class CategoryComponent implements OnInit {
 
     if (!this.form.name || this.form.name.trim() === '') {
       this.errors.name = ['O nome é obrigatório'];
-      return false;
     }
 
-    return true;
+    return Object.keys(this.errors).length === 0;
   }
 
   /**
@@ -184,7 +195,7 @@ export class CategoryComponent implements OnInit {
       next: (response: any) => {
         this.processing = false;
         this.toastService.success(response.message || 'Categoria salva com sucesso');
-        this.resetForm();
+        this.closeModal();
         this.loadCategories();
       },
       error: (error: HttpErrorResponse) => {

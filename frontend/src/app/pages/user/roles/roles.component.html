@@ -6,112 +6,120 @@
   </ng-container>
 
   <div class="row position-relative">
-    <!-- Main Content (9/12) -->
-    <div class="col-lg-9">
-      <!-- Card Formulário -->
-      <div class="row">
-        <div class="col-lg-12 animate-in" style="animation-delay: 0.1s">
-          <div class="card mb-4 border-left-primary">
-            <div class="card-body">
-              <h5 class="card-title mb-4 text-primary font-weight-bold">
-                <i class="fas fa-user-shield me-2"></i>
-                {{ inEdition > 0 ? 'Editar Grupo' : 'Cadastrar Novo Grupo' }}
-              </h5>
-              <form (ngSubmit)="submit()" #formRole="ngForm">
-                <div class="row">
-                  <!-- Campo Nome -->
-                  <div class="col-lg-12 mb-4">
-                    <div class="form-group mb-0">
-                      <label for="name" class="form-label">
-                        Nome do Grupo
-                        <span class="text-danger">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        class="form-control"
-                        id="name"
-                        placeholder="Ex: Administrador"
-                        [(ngModel)]="form.name"
-                        name="name"
-                        required
-                        autofocus
-                        autocomplete="name"
-                        [class.is-invalid]="errors.name" />
-                      <div *ngIf="errors.name" class="invalid-feedback d-block text-danger">
-                        <i class="fas fa-exclamation-circle me-1"></i>
-                        {{ errors.name[0] }}
-                      </div>
+    <!-- Modal de Cadastro/Edição -->
+    <div class="modal fade" 
+         [class.show]="showModal" 
+         [style.display]="showModal ? 'block' : 'none'" 
+         [style.background]="showModal ? 'rgba(0,0,0,0.5)' : ''" 
+         tabindex="-1" 
+         role="dialog" 
+         aria-labelledby="roleModalLabel" 
+         aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg rounded-3xl">
+          <div class="modal-header bg-light">
+            <h5 class="modal-title font-weight-bold text-primary" id="roleModalLabel">
+              <i class="fas fa-user-shield me-2"></i>{{ inEdition > 0 ? 'Editar Grupo de Acesso' : 'Novo Grupo de Acesso' }}
+            </h5>
+            <button type="button" class="btn-close" (click)="closeModal()" aria-label="Fechar" [disabled]="processing"></button>
+          </div>
+          <form (ngSubmit)="submit()">
+            <div class="modal-body p-4">
+              <div class="row">
+                <!-- Campo Nome -->
+                <div class="col-lg-12 mb-3">
+                  <div class="form-group mb-0">
+                    <label for="name" class="form-label">
+                      Nome do Grupo <span class="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="name"
+                      placeholder="Ex: Administrador"
+                      [(ngModel)]="form.name"
+                      name="name"
+                      required
+                      autofocus
+                      [class.is-invalid]="errors['name']" />
+                    
+                    <div *ngIf="errors['name']" class="text-danger mt-1">
+                      <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
                     </div>
                   </div>
+                </div>
 
-                  <!-- Campo Permissões -->
-                  <div class="col-lg-12 mb-4">
-                    <div class="form-group mb-0">
-                      <label class="form-label">
-                        Atribuir Permissões
-                        <span class="text-danger">*</span>
-                      </label>
-                      <div class="card border border-light">
-                        <div class="card-body p-3" style="max-height: 250px; overflow-y: auto; background: #fcfcfd">
-                          <div *ngIf="isLoader" class="text-center py-4">
-                            <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
-                            <small class="d-block mt-2 text-muted">Carregando permissões...</small>
+                <!-- Campo Permissões -->
+                <div class="col-lg-12 mb-3">
+                  <div class="form-group mb-0">
+                    <label class="form-label">
+                      Atribuir Permissões <span class="text-danger">*</span>
+                    </label>
+                    <div class="card border border-light" [class.border-danger]="errors['permissions']">
+                      <div class="card-body p-3" style="max-height: 250px; overflow-y: auto; background: #fcfcfd">
+                        <div *ngIf="isLoader" class="text-center py-4">
+                          <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                          <small class="d-block mt-2 text-muted">Carregando permissões...</small>
+                        </div>
+                        <div class="row" *ngIf="!isLoader">
+                          <div class="col-md-4 mb-2" *ngFor="let option of permissionList">
+                            <div class="form-check custom-checkbox ms-4">
+                              <input
+                                class="form-check-input cursor-pointer"
+                                type="checkbox"
+                                [value]="option.name"
+                                [checked]="form.permissions.includes(option.name)"
+                                (change)="togglePermission(option.name, $event)"
+                                [id]="'perm_' + option.name"
+                                [name]="'perm_' + option.name" />
+                              <label class="form-check-label cursor-pointer text-sm text-gray-700" [for]="'perm_' + option.name">
+                                {{ option.title }}
+                              </label>
+                            </div>
                           </div>
-                          <div class="row" *ngIf="!isLoader">
-                            <div class="col-md-4" *ngFor="let option of permissionList">
-                              <div class="form-check custom-checkbox ms-4">
-                                <input
-                                  class="form-check-input cursor-pointer"
-                                  type="checkbox"
-                                  [value]="option.name"
-                                  [checked]="form.permissions.includes(option.name)"
-                                  (change)="togglePermission(option.name, $event)"
-                                  [id]="'perm_' + option.name"
-                                  [name]="'perm_' + option.name" />
-                                <label class="form-check-label cursor-pointer text-sm" [for]="'perm_' + option.name">
-                                  {{ option.title }}
-                                </label>
-                              </div>
-                            </div>
-                            <div *ngIf="permissionList.length === 0" class="col-12 text-muted small">
-                              Nenhuma permissão disponível.
-                            </div>
+                          <div *ngIf="permissionList.length === 0" class="col-12 text-muted small">
+                            Nenhuma permissão disponível.
                           </div>
                         </div>
                       </div>
-                      <div *ngIf="errors.permissions" class="invalid-feedback d-block text-danger mt-2">
-                        <i class="fas fa-exclamation-circle me-1"></i>
-                        {{ errors.permissions[0] }}
-                      </div>
+                    </div>
+                    
+                    <div *ngIf="errors['permissions']" class="text-danger mt-1">
+                      <small *ngFor="let err of errors['permissions']" class="d-block">{{ err }}</small>
                     </div>
                   </div>
                 </div>
-
-                <!-- Botões de Ação -->
-                <div class="d-flex align-items-center justify-content-end gap-2 mt-2">
-                  <button type="button" class="btn btn-outline-secondary" (click)="cancelEdit()" *ngIf="inEdition > 0">
-                    <i class="fas fa-times me-1"></i>
-                    Cancelar
-                  </button>
-                  <button type="submit" class="btn btn-primary shadow-sm" [disabled]="processing" [class.opacity-50]="processing">
-                    <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                    <i *ngIf="!processing" class="fas fa-save me-1"></i>
-                    Salvar
-                  </button>
-                </div>
-              </form>
+              </div>
             </div>
-          </div>
+            <div class="modal-footer bg-light border-0">
+              <button type="button" class="btn btn-outline-secondary" (click)="closeModal()" [disabled]="processing">
+                <i class="fas fa-times me-1"></i> Cancelar
+              </button>
+              <button type="submit" class="btn btn-primary shadow-sm" [disabled]="processing">
+                <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                <i *ngIf="!processing" class="fas fa-save me-1"></i> Salvar
+              </button>
+            </div>
+          </form>
         </div>
+      </div>
+    </div>
 
+    <!-- Main Content (9/12) -->
+    <div class="col-lg-9">
+      <div class="row">
         <!-- Tabela de Roles -->
         <div class="col-lg-12 animate-in" style="animation-delay: 0.2s">
           <div class="card mb-4 border-left-secondary">
             <div class="card-body">
-              <h5 class="card-title mb-4 text-secondary font-weight-bold">
-                <i class="fas fa-users me-2"></i>
-                Grupos Existentes
-              </h5>
+              <div class="d-flex align-items-center justify-content-between mb-4">
+                <h5 class="card-title mb-0 text-secondary font-weight-bold">
+                  <i class="fas fa-users me-2"></i> Grupos Existentes
+                </h5>
+                <button class="btn btn-primary btn-sm shadow-sm" (click)="openModal()" [disabled]="processing">
+                  <i class="fas fa-plus me-1"></i> Novo Grupo
+                </button>
+              </div>
 
               <app-datatable
                 [pagination]="pagination"

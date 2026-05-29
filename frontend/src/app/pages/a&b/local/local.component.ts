@@ -25,6 +25,7 @@ export class LocalComponent implements OnInit {
   isLoader: boolean = false;
   processing: boolean = false;
   errors: any = {};
+  showModal: boolean = false;
 
   // Pagination and Filtering state
   pagination: any = {
@@ -76,8 +77,8 @@ export class LocalComponent implements OnInit {
       },
       error: (error: HttpErrorResponse) => {
         this.isLoader = false;
-        this.toastService.error('Erro ao carregar tipos de serviço');
-        console.error('Erro ao carregar tipos de serviço:', error);
+        this.toastService.error('Erro ao carregar locais');
+        console.error('Erro ao carregar locais:', error);
       },
     });
   }
@@ -121,14 +122,29 @@ export class LocalComponent implements OnInit {
     this.loadLocals();
   }
 
+  openModal(): void {
+    this.resetForm();
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.resetForm();
+  }
+
   /**
-   * Editar tipo de serviço
+   * Editar local
    */
   edit(local: Local): void {
     this.inEdition = local.id;
     this.form.id = local.id;
     this.form.name = local.name;
     this.errors = {};
+    this.showModal = true;
+  }
+
+  cancelEdit(): void {
+    this.closeModal();
   }
 
   /**
@@ -158,7 +174,7 @@ export class LocalComponent implements OnInit {
   }
 
   /**
-   * Salvar tipo de serviço (criar ou atualizar)
+   * Salvar local (criar ou atualizar)
    */
   submit(): void {
     if (!this.validateForm()) {
@@ -175,8 +191,8 @@ export class LocalComponent implements OnInit {
     this.localService.saveLocal(data).subscribe({
       next: (response: any) => {
         this.processing = false;
-        this.toastService.success(response.message || 'Tipo de serviço salvo com sucesso');
-        this.resetForm();
+        this.toastService.success(response.message || 'Local salvo com sucesso');
+        this.closeModal();
         this.loadLocals();
       },
       error: (error: HttpErrorResponse) => {
@@ -184,66 +200,66 @@ export class LocalComponent implements OnInit {
         if (error.status === 422) {
           this.errors = error.error.errors || {};
         } else {
-          this.toastService.error('Erro ao salvar tipo de serviço');
+          this.toastService.error('Erro ao salvar local');
         }
-        console.error('Erro ao salvar tipo de serviço:', error);
+        console.error('Erro ao salvar local:', error);
       },
     });
   }
 
   /**
-   * Deletar tipo de serviço
+   * Deletar local
    */
   deleteLocal(localId: number): void {
     this.isLoader = true;
     this.localService.deleteLocal(localId).subscribe({
       next: (response: any) => {
         this.isLoader = false;
-        this.toastService.success(response.message || 'Tipo de serviço apagado com sucesso');
+        this.toastService.success(response.message || 'Local apagado com sucesso');
         this.loadLocals();
       },
       error: (error: HttpErrorResponse) => {
         this.isLoader = false;
-        this.toastService.error('Erro ao apagar tipo de serviço');
-        console.error('Erro ao deletar tipo de serviço:', error);
+        this.toastService.error('Erro ao apagar local');
+        console.error('Erro ao deletar local:', error);
       },
     });
   }
 
   /**
-   * Ativar tipo de serviço
+   * Ativar local
    */
   activateLocal(localId: number): void {
     this.isLoader = true;
     this.localService.activateLocal(localId).subscribe({
       next: (response: any) => {
         this.isLoader = false;
-        this.toastService.success(response.message || 'Tipo de serviço ativado com sucesso');
+        this.toastService.success(response.message || 'Local ativado com sucesso');
         this.loadLocals();
       },
       error: (error: HttpErrorResponse) => {
         this.isLoader = false;
-        this.toastService.error('Erro ao ativar tipo de serviço');
-        console.error('Erro ao ativar tipo de serviço:', error);
+        this.toastService.error('Erro ao ativar local');
+        console.error('Erro ao ativar local:', error);
       },
     });
   }
 
   /**
-   * Inativar tipo de serviço
+   * Inativar local
    */
   deactivateLocal(localId: number): void {
     this.isLoader = true;
     this.localService.deactivateLocal(localId).subscribe({
       next: (response: any) => {
         this.isLoader = false;
-        this.toastService.success(response.message || 'Tipo de serviço inativado com sucesso');
+        this.toastService.success(response.message || 'Local inativado com sucesso');
         this.loadLocals();
       },
       error: (error: HttpErrorResponse) => {
         this.isLoader = false;
-        this.toastService.error('Erro ao inativar tipo de serviço');
-        console.error('Erro ao inativar tipo de serviço:', error);
+        this.toastService.error('Erro ao inativar local');
+        console.error('Erro ao inativar local:', error);
       },
     });
   }

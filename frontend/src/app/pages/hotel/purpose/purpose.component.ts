@@ -24,6 +24,7 @@ export class PurposeComponent implements OnInit {
   inEdition: number = 0;
   isLoader: boolean = false;
   processing: boolean = false;
+  showModal: boolean = false;
   errors: any = {};
 
   // Pagination and Filtering state
@@ -121,6 +122,16 @@ export class PurposeComponent implements OnInit {
     this.loadPurposes();
   }
 
+  openModal(): void {
+    this.resetForm();
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.resetForm();
+  }
+
   /**
    * Editar propósito
    */
@@ -129,6 +140,14 @@ export class PurposeComponent implements OnInit {
     this.form.id = purpose.id;
     this.form.name = purpose.name;
     this.errors = {};
+    this.showModal = true;
+  }
+
+  /**
+   * Cancelar edição
+   */
+  cancelEdit(): void {
+    this.closeModal();
   }
 
   /**
@@ -141,6 +160,7 @@ export class PurposeComponent implements OnInit {
     };
     this.errors = {};
     this.inEdition = 0;
+    this.processing = false;
   }
 
   /**
@@ -151,10 +171,9 @@ export class PurposeComponent implements OnInit {
 
     if (!this.form.name || this.form.name.trim() === '') {
       this.errors.name = ['O nome é obrigatório'];
-      return false;
     }
 
-    return true;
+    return Object.keys(this.errors).length === 0;
   }
 
   /**
@@ -176,7 +195,7 @@ export class PurposeComponent implements OnInit {
       next: (response: any) => {
         this.processing = false;
         this.toastService.success(response.message || 'Propósito salvo com sucesso');
-        this.resetForm();
+        this.closeModal();
         this.loadPurposes();
       },
       error: (error: HttpErrorResponse) => {

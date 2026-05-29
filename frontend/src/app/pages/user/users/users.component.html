@@ -6,134 +6,154 @@
   </ng-container>
 
   <div class="row position-relative">
-    <div class="col-lg-12 animate-in" style="animation-delay: 0.1s">
-      <div class="card mb-4 border-left-primary">
-        <div class="card-body">
-          <h5 class="card-title mb-4 text-primary font-weight-bold">
-            <i class="fas fa-user-edit me-2"></i>
-            {{ userInEdition > 0 ? 'Editar Usuário' : 'Cadastrar Novo Usuário' }}
-          </h5>
-
+    <!-- Modal de Cadastro/Edição -->
+    <div class="modal fade" 
+         [class.show]="showModal" 
+         [style.display]="showModal ? 'block' : 'none'" 
+         [style.background]="showModal ? 'rgba(0,0,0,0.5)' : ''" 
+         tabindex="-1" 
+         role="dialog" 
+         aria-labelledby="userModalLabel" 
+         aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg rounded-3xl">
+          <div class="modal-header bg-light">
+            <h5 class="modal-title font-weight-bold text-primary" id="userModalLabel">
+              <i class="fas fa-user-edit me-2"></i>{{ userInEdition > 0 ? 'Editar Usuário' : 'Novo Usuário' }}
+            </h5>
+            <button type="button" class="btn-close" (click)="closeModal()" aria-label="Fechar" [disabled]="processing"></button>
+          </div>
           <form [formGroup]="userForm" (ngSubmit)="submit()">
-            <div class="row">
-              <div class="col-lg-4 mb-3">
-                <div class="form-group mb-0">
-                  <label for="name" class="form-label">
-                    Nome:
-                    <span class="text-danger">*</span>
-                  </label>
-                  <input type="text" id="name" class="form-control" formControlName="name" placeholder="Ex: João Silva" required autofocus />
-                  <div *ngIf="userForm.get('name')?.invalid && userForm.get('name')?.touched" class="text-danger mt-1">
-                    <small>O nome é obrigatório</small>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-4 mb-3">
-                <div class="form-group mb-0">
-                  <label for="phone" class="form-label">
-                    Telefone:
-                    <span class="text-danger">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="phone"
-                    class="form-control"
-                    formControlName="phone"
-                    placeholder="Ex: (11) 99999-9999"
-                    mask="(00) 0000-00009"
-                    [dropSpecialCharacters]="false"
-                    required />
-                  <div *ngIf="userForm.get('phone')?.invalid && userForm.get('phone')?.touched" class="text-danger mt-1">
-                    <small>O telefone é obrigatório</small>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-4 mb-3">
-                <div class="form-group mb-0">
-                  <label for="email" class="form-label">
-                    E-mail:
-                    <span class="text-danger">*</span>
-                  </label>
-                  <input type="email" id="email" class="form-control" formControlName="email" placeholder="exemplo@email.com" required />
-                  <div *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched" class="text-danger mt-1">
-                    <small *ngIf="userForm.get('email')?.errors?.['required']">O e-mail é obrigatório</small>
-                    <small *ngIf="userForm.get('email')?.errors?.['email']">O e-mail informado não é válido</small>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-lg-8 mb-3">
-                <div class="form-group mb-0">
-                  <label for="signature" class="form-label">Assinatura:</label>
-                  <quill-editor
-                    formControlName="signature"
-                    [modules]="quillModules"
-                    placeholder="Sua assinatura de email..."
-                    [style]="{ height: '150px' }"></quill-editor>
-                </div>
-              </div>
-
-              <div class="col-lg-4 mb-3">
-                <div class="form-group mb-0">
-                  <label class="form-label">
-                    Grupo de acesso:
-                    <span class="text-danger">*</span>
-                  </label>
-                  <div class="card" [ngClass]="{ 'border-danger': userForm.get('roles')?.invalid && userForm.get('roles')?.touched }">
-                    <div class="card-body py-2" style="max-height: 190px; overflow-y: auto;">
-                      <div *ngIf="isLoader" class="text-center py-4">
-                        <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
-                        <small class="d-block mt-2 text-muted">Carregando...</small>
-                      </div>
-                      <ng-container *ngIf="!isLoader">
-                        <div class="form-check" *ngFor="let role of roles">
-                          <input class="form-check-input" type="checkbox"
-                                 [id]="'role_' + role.id"
-                                 [checked]="hasRole(role.id)"
-                                 (change)="onRoleChange($event, role.id)">
-                          <label class="form-check-label text-muted" [for]="'role_' + role.id">
-                            {{ role.name }}
-                          </label>
-                        </div>
-                        <div *ngIf="roles.length === 0" class="text-muted small mt-1">
-                          <i class="fas fa-info-circle me-1"></i> Nenhum grupo disponível.
-                        </div>
-                      </ng-container>
+            <div class="modal-body p-4">
+              <div class="row">
+                <!-- Nome -->
+                <div class="col-lg-4 mb-3">
+                  <div class="form-group mb-0">
+                    <label for="name" class="form-label">
+                      Nome <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" id="name" class="form-control" formControlName="name" placeholder="Ex: João Silva" autofocus [class.is-invalid]="errors['name'] || (userForm.get('name')?.invalid && userForm.get('name')?.touched)" />
+                    
+                    <div *ngIf="errors['name'] || (userForm.get('name')?.invalid && userForm.get('name')?.touched)" class="text-danger mt-1">
+                      <small *ngIf="userForm.get('name')?.errors?.['required']" class="d-block">O nome é obrigatório</small>
+                      <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
                     </div>
                   </div>
-                  <div *ngIf="userForm.get('roles')?.invalid && userForm.get('roles')?.touched" class="text-danger mt-1">
-                    <small>Selecione pelo menos um grupo de acesso</small>
+                </div>
+
+                <!-- Telefone -->
+                <div class="col-lg-4 mb-3">
+                  <div class="form-group mb-0">
+                    <label for="phone" class="form-label">
+                      Telefone <span class="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="phone"
+                      class="form-control"
+                      formControlName="phone"
+                      placeholder="Ex: (11) 99999-9999"
+                      mask="(00) 0000-00009"
+                      [dropSpecialCharacters]="false"
+                      [class.is-invalid]="errors['phone'] || (userForm.get('phone')?.invalid && userForm.get('phone')?.touched)" />
+                    
+                    <div *ngIf="errors['phone'] || (userForm.get('phone')?.invalid && userForm.get('phone')?.touched)" class="text-danger mt-1">
+                      <small *ngIf="userForm.get('phone')?.errors?.['required']" class="d-block">O telefone é obrigatório</small>
+                      <small *ngFor="let err of errors['phone']" class="d-block">{{ err }}</small>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- E-mail -->
+                <div class="col-lg-4 mb-3">
+                  <div class="form-group mb-0">
+                    <label for="email" class="form-label">
+                      E-mail <span class="text-danger">*</span>
+                    </label>
+                    <input type="email" id="email" class="form-control" formControlName="email" placeholder="exemplo@email.com" [class.is-invalid]="errors['email'] || (userForm.get('email')?.invalid && userForm.get('email')?.touched)" />
+                    
+                    <div *ngIf="errors['email'] || (userForm.get('email')?.invalid && userForm.get('email')?.touched)" class="text-danger mt-1">
+                      <small *ngIf="userForm.get('email')?.errors?.['required']" class="d-block">O e-mail é obrigatório</small>
+                      <small *ngIf="userForm.get('email')?.errors?.['email']" class="d-block">O e-mail informado não é válido</small>
+                      <small *ngFor="let err of errors['email']" class="d-block">{{ err }}</small>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Assinatura -->
+                <div class="col-lg-8 mb-3">
+                  <div class="form-group mb-0">
+                    <label for="signature" class="form-label">Assinatura</label>
+                    <quill-editor
+                      formControlName="signature"
+                      [modules]="quillModules"
+                      placeholder="Sua assinatura de email..."
+                      [style]="{ height: '150px' }"></quill-editor>
+                  </div>
+                </div>
+
+                <!-- Grupo de acesso -->
+                <div class="col-lg-4 mb-3">
+                  <div class="form-group mb-0">
+                    <label class="form-label">
+                      Grupo de acesso <span class="text-danger">*</span>
+                    </label>
+                    <div class="card" [ngClass]="{ 'border-danger': errors['roles'] || (userForm.get('roles')?.invalid && userForm.get('roles')?.touched) }">
+                      <div class="card-body py-2" style="max-height: 150px; overflow-y: auto;">
+                        <div *ngIf="isLoader" class="text-center py-4">
+                          <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                          <small class="d-block mt-2 text-muted">Carregando...</small>
+                        </div>
+                        <ng-container *ngIf="!isLoader">
+                          <div class="form-check" *ngFor="let role of roles">
+                            <input class="form-check-input cursor-pointer" type="checkbox"
+                                   [id]="'role_' + role.id"
+                                   [checked]="hasRole(role.id)"
+                                   (change)="onRoleChange($event, role.id)">
+                            <label class="form-check-label text-muted cursor-pointer" [for]="'role_' + role.id">
+                              {{ role.name }}
+                            </label>
+                          </div>
+                          <div *ngIf="roles.length === 0" class="text-muted small mt-1">
+                            <i class="fas fa-info-circle me-1"></i> Nenhum grupo disponível.
+                          </div>
+                        </ng-container>
+                      </div>
+                    </div>
+                    
+                    <div *ngIf="errors['roles'] || (userForm.get('roles')?.invalid && userForm.get('roles')?.touched)" class="text-danger mt-1">
+                      <small *ngIf="userForm.get('roles')?.errors?.['required']" class="d-block">Selecione pelo menos um grupo de acesso</small>
+                      <small *ngFor="let err of errors['roles']" class="d-block">{{ err }}</small>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-
-            <div class="row mt-3">
-              <div class="col-12 d-flex justify-content-end">
-                <button *ngIf="userInEdition > 0" type="button" class="btn btn-outline-secondary me-2" (click)="resetForm()" [disabled]="processing">
-                  <i class="fas fa-times me-1"></i>
-                  Cancelar
-                </button>
-                <button type="submit" class="btn btn-primary shadow-sm" [disabled]="userForm.invalid || processing" [class.opacity-50]="processing">
-                  <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                  <i *ngIf="!processing" class="fas fa-save me-1"></i>
-                  Salvar
-                </button>
-              </div>
+            <div class="modal-footer bg-light border-0">
+              <button type="button" class="btn btn-outline-secondary" (click)="closeModal()" [disabled]="processing">
+                <i class="fas fa-times me-1"></i> Cancelar
+              </button>
+              <button type="submit" class="btn btn-primary shadow-sm" [disabled]="processing">
+                <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                <i *ngIf="!processing" class="fas fa-save me-1"></i> Salvar
+              </button>
             </div>
           </form>
         </div>
       </div>
     </div>
 
+    <!-- Datatable Section -->
     <div class="col-lg-12 animate-in" style="animation-delay: 0.2s">
       <div class="card mb-4 border-left-secondary">
         <div class="card-body">
           <div class="d-flex align-items-center justify-content-between mb-4">
             <h5 class="card-title mb-0 text-secondary font-weight-bold">
-              <i class="fas fa-users me-2"></i>
-              Lista de Usuários
+              <i class="fas fa-users me-2"></i> Lista de Usuários
             </h5>
+            <button class="btn btn-primary btn-sm shadow-sm" (click)="openModal()" [disabled]="processing">
+              <i class="fas fa-plus me-1"></i> Novo Usuário
+            </button>
           </div>
 
           <app-datatable

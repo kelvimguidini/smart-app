@@ -25,6 +25,7 @@ export class RolesComponent implements OnInit {
   inEdition: number = 0;
   isLoader: boolean = false;
   processing: boolean = false;
+  showModal: boolean = false;
   errors: any = {};
 
   form = {
@@ -113,6 +114,16 @@ export class RolesComponent implements OnInit {
 
   // --- FORMULÁRIO ---
 
+  openModal(): void {
+    this.resetForm();
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.resetForm();
+  }
+
   edit(role: Role): void {
     this.inEdition = role.id;
     this.form.id = role.id;
@@ -120,14 +131,11 @@ export class RolesComponent implements OnInit {
     this.form.active = role.active;
     this.form.permissions = role.permissions ? role.permissions.map((p) => p.name) : [];
     this.errors = {};
-
-    // Scroll para o topo
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.showModal = true;
   }
 
   cancelEdit(): void {
-    this.inEdition = 0;
-    this.resetForm();
+    this.closeModal();
   }
 
   togglePermission(permissionName: string, event: Event): void {
@@ -142,6 +150,7 @@ export class RolesComponent implements OnInit {
   }
 
   private resetForm(): void {
+    this.inEdition = 0;
     this.form = {
       id: 0,
       name: '',
@@ -156,15 +165,13 @@ export class RolesComponent implements OnInit {
 
     if (!this.form.name || this.form.name.trim() === '') {
       this.errors.name = ['O nome é obrigatório'];
-      return false;
     }
 
-    if (this.form.permissions.length === 0) {
+    if (!this.form.permissions || this.form.permissions.length === 0) {
       this.errors.permissions = ['Selecione pelo menos uma permissão'];
-      return false;
     }
 
-    return true;
+    return Object.keys(this.errors).length === 0;
   }
 
   submit(): void {
@@ -185,8 +192,7 @@ export class RolesComponent implements OnInit {
       next: (response: any) => {
         this.processing = false;
         this.toastService.success('Grupo de acesso salvo com sucesso');
-        this.resetForm();
-        this.inEdition = 0;
+        this.closeModal();
         this.loadRoles();
       },
       error: (error: any) => {

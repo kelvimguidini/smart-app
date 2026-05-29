@@ -24,6 +24,8 @@ export class UsersComponent implements OnInit {
   processing = false;
   userInEdition = 0;
   showRolesModalId = 0;
+  showModal = false;
+  errors: any = {};
   
   quillModules = {
     toolbar: [
@@ -121,25 +123,43 @@ export class UsersComponent implements OnInit {
     this.loadUsers();
   }
 
+  openModal(): void {
+    this.resetForm();
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.resetForm();
+  }
+
   submit(): void {
+    this.userForm.markAllAsTouched();
     if (this.userForm.invalid) return;
     this.processing = true;
+    this.errors = {};
+
     this.userService.saveUser(this.userForm.value).subscribe({
       next: () => {
         this.toastService.success('Registro salvo com sucesso');
-        this.processing = false;
+        this.closeModal();
         this.loadUsers();
-        this.resetForm();
       },
-      error: () => {
+      error: (err: any) => {
         this.processing = false;
-        this.toastService.error('Erro ao salvar');
+        if (err.status === 422) {
+          this.errors = err.error.errors || {};
+        } else {
+          this.toastService.error('Erro ao salvar');
+        }
+        console.error(err);
       }
     });
   }
 
   edit(user: User): void {
     this.userInEdition = user.id;
+    this.errors = {};
     this.userForm.patchValue({
       id: user.id,
       name: user.name || '',
@@ -148,7 +168,7 @@ export class UsersComponent implements OnInit {
       signature: user.signature || '',
       roles: user.roles?.map((r: any) => r.id) || []
     });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.showModal = true;
   }
 
   deleteUser(id: number): void {
@@ -237,5 +257,7 @@ export class UsersComponent implements OnInit {
   resetForm(): void {
     this.userForm.reset({ id: 0, roles: [] });
     this.userInEdition = 0;
+    this.processing = false;
+    this.errors = {};
   }
 }

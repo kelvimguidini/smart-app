@@ -6,70 +6,74 @@
     </ng-container>
 
     <div class="row position-relative">
-        <!-- Form Section -->
-        <div class="col-lg-12 animate-in" style="animation-delay: 0.1s;">
-            <div class="card mb-4 border-left-primary">
-                <div class="card-body">
-                    <h5 class="card-title mb-4 text-primary font-weight-bold">
-                        <i class="fas fa-tags me-2"></i>{{ inEdition > 0 ? 'Editar Categoria' : 'Nova Categoria' }}
-                    </h5>
-                    <form (ngSubmit)="submit()">
-                        <div class="row align-items-end">
-                            <div class="col-lg-8">
-                                <div class="form-group mb-0">
-                                    <label for="name" class="form-label">Nome da Categoria <span class="text-danger">*</span></label>
-                                    <input 
-                                        type="text" 
-                                        id="name" 
-                                        class="form-control" 
-                                        [(ngModel)]="form.name" 
-                                        name="name" 
-                                        placeholder="Ex: Luxo"
-                                        required 
-                                        autofocus>
-                                    
-                                    <div *ngIf="errors['name']" class="text-danger mt-1">
-                                        <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4">
-                                <div class="d-flex align-items-center justify-content-end">
-                                    <button 
-                                        type="button" 
-                                        *ngIf="inEdition > 0" 
-                                        class="btn btn-outline-secondary me-2" 
-                                        (click)="resetForm()"
-                                        [disabled]="processing">
-                                        <i class="fas fa-times me-1"></i> Cancelar
-                                    </button>
-
-                                    <button 
-                                        type="submit" 
-                                        class="btn btn-primary shadow-sm" 
-                                        [disabled]="processing" 
-                                        [class.opacity-50]="processing">
-                                        <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                                        <i *ngIf="!processing" class="fas fa-save me-1"></i>
-                                        Salvar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Table Section -->
-        <div class="col-lg-12 animate-in" style="animation-delay: 0.2s;">
-            <div class="card mb-4 border-left-secondary">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between mb-4">
-                        <h5 class="card-title mb-0 text-secondary font-weight-bold">
-                            <i class="fas fa-list me-2"></i>Lista de Categorias
-                        </h5>
+    <!-- Modal de Cadastro/Edição -->
+    <div class="modal fade" 
+         [class.show]="showModal" 
+         [style.display]="showModal ? 'block' : 'none'" 
+         [style.background]="showModal ? 'rgba(0,0,0,0.5)' : ''" 
+         tabindex="-1" 
+         role="dialog" 
+         aria-labelledby="categoryModalLabel" 
+         aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg rounded-3xl">
+          <div class="modal-header bg-light">
+            <h5 class="modal-title font-weight-bold text-primary" id="categoryModalLabel">
+              <i class="fas fa-tags me-2"></i>{{ inEdition > 0 ? 'Editar Categoria' : 'Nova Categoria' }}
+            </h5>
+            <button type="button" class="btn-close" (click)="closeModal()" aria-label="Fechar" [disabled]="processing"></button>
+          </div>
+          <form (ngSubmit)="submit()">
+            <div class="modal-body p-4">
+              <div class="row">
+                <!-- Nome da Categoria -->
+                <div class="col-lg-12 mb-3">
+                  <div class="form-group mb-0">
+                    <label for="name" class="form-label">Nome da Categoria <span class="text-danger">*</span></label>
+                    <input 
+                      type="text" 
+                      id="name" 
+                      class="form-control" 
+                      [(ngModel)]="form.name" 
+                      name="name" 
+                      placeholder="Ex: Standard"
+                      required 
+                      autofocus
+                      [class.is-invalid]="errors['name']">
+                    
+                    <div *ngIf="errors['name']" class="text-danger mt-1">
+                      <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer bg-light border-0">
+              <button type="button" class="btn btn-outline-secondary" (click)="closeModal()" [disabled]="processing">
+                <i class="fas fa-times me-1"></i> Cancelar
+              </button>
+              <button type="submit" class="btn btn-primary shadow-sm" [disabled]="processing">
+                <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                <i *ngIf="!processing" class="fas fa-save me-1"></i> Salvar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="col-lg-12 animate-in" style="animation-delay: 0.2s;">
+      <div class="card mb-4 border-left-secondary">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-4">
+            <h5 class="card-title mb-0 text-secondary font-weight-bold">
+              <i class="fas fa-list me-2"></i>Lista de Categorias
+            </h5>
+            <button class="btn btn-primary btn-sm shadow-sm" (click)="openModal()" [disabled]="processing">
+              <i class="fas fa-plus me-1"></i> Nova Categoria
+            </button>
+          </div>
 
                     <app-datatable 
                         [pagination]="pagination" 

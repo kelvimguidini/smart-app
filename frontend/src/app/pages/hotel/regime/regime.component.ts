@@ -24,6 +24,7 @@ export class RegimeComponent implements OnInit {
   inEdition: number = 0;
   isLoader: boolean = false;
   processing: boolean = false;
+  showModal: boolean = false;
   errors: any = {};
 
   // Pagination and Filtering state
@@ -121,6 +122,16 @@ export class RegimeComponent implements OnInit {
     this.loadRegimes();
   }
 
+  openModal(): void {
+    this.resetForm();
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.resetForm();
+  }
+
   /**
    * Editar regime
    */
@@ -129,14 +140,14 @@ export class RegimeComponent implements OnInit {
     this.form.id = regime.id;
     this.form.name = regime.name;
     this.errors = {};
+    this.showModal = true;
   }
 
   /**
    * Cancelar edição
    */
   cancelEdit(): void {
-    this.inEdition = 0;
-    this.resetForm();
+    this.closeModal();
   }
 
   /**
@@ -149,6 +160,7 @@ export class RegimeComponent implements OnInit {
     };
     this.errors = {};
     this.inEdition = 0;
+    this.processing = false;
   }
 
   /**
@@ -159,10 +171,9 @@ export class RegimeComponent implements OnInit {
 
     if (!this.form.name || this.form.name.trim() === '') {
       this.errors.name = ['O nome é obrigatório'];
-      return false;
     }
 
-    return true;
+    return Object.keys(this.errors).length === 0;
   }
 
   /**
@@ -184,7 +195,7 @@ export class RegimeComponent implements OnInit {
       next: (response: any) => {
         this.processing = false;
         this.toastService.success(response.message || 'Regime salvo com sucesso');
-        this.resetForm();
+        this.closeModal();
         this.loadRegimes();
       },
       error: (error: HttpErrorResponse) => {

@@ -25,6 +25,7 @@ export class ServiceTypeComponent implements OnInit {
   isLoader: boolean = false;
   processing: boolean = false;
   errors: any = {};
+  showModal: boolean = false;
 
   // Pagination and Filtering state
   pagination: any = {
@@ -121,6 +122,16 @@ export class ServiceTypeComponent implements OnInit {
     this.loadServiceTypes();
   }
 
+  openModal(): void {
+    this.resetForm();
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.resetForm();
+  }
+
   /**
    * Editar tipo de serviço
    */
@@ -129,6 +140,11 @@ export class ServiceTypeComponent implements OnInit {
     this.form.id = serviceType.id;
     this.form.name = serviceType.name;
     this.errors = {};
+    this.showModal = true;
+  }
+
+  cancelEdit(): void {
+    this.closeModal();
   }
 
   /**
@@ -176,7 +192,7 @@ export class ServiceTypeComponent implements OnInit {
       next: (response: any) => {
         this.processing = false;
         this.toastService.success(response.message || 'Tipo de serviço salvo com sucesso');
-        this.resetForm();
+        this.closeModal();
         this.loadServiceTypes();
       },
       error: (error: HttpErrorResponse) => {

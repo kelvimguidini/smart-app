@@ -38,6 +38,7 @@ export class CurrenciesComponent implements OnInit {
   };
   inEdition = 0;
   processing = false;
+  isLoader = false;
   showModal = false;
   errors: any = {};
 
@@ -46,7 +47,7 @@ export class CurrenciesComponent implements OnInit {
   }
 
   loadCurrencies(): void {
-    this.processing = true;
+    this.isLoader = true;
     const params = {
       page: this.currentPage,
       per_page: this.perPage,
@@ -61,11 +62,11 @@ export class CurrenciesComponent implements OnInit {
         this.currentPage = response.current_page;
         this.lastPage = response.last_page;
         this.totalItems = response.total;
-        this.processing = false;
+        this.isLoader = false;
       },
       error: (err) => {
         this.toastr.error('Erro ao carregar moedas');
-        this.processing = false;
+        this.isLoader = false;
         console.error(err);
       },
     });

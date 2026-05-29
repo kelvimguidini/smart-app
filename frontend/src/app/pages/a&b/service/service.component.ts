@@ -25,6 +25,7 @@ export class ServiceComponent implements OnInit {
   isLoader: boolean = false;
   processing: boolean = false;
   errors: any = {};
+  showModal: boolean = false;
 
   // Pagination and Filtering state
   pagination: any = {
@@ -76,8 +77,8 @@ export class ServiceComponent implements OnInit {
       },
       error: (error: HttpErrorResponse) => {
         this.isLoader = false;
-        this.toastService.error('Erro ao carregar tipos de serviço');
-        console.error('Erro ao carregar tipos de serviço:', error);
+        this.toastService.error('Erro ao carregar serviços');
+        console.error('Erro ao carregar serviços:', error);
       },
     });
   }
@@ -121,14 +122,29 @@ export class ServiceComponent implements OnInit {
     this.loadServices();
   }
 
+  openModal(): void {
+    this.resetForm();
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.resetForm();
+  }
+
   /**
-   * Editar tipo de serviço
+   * Editar serviço
    */
   edit(service: Service): void {
     this.inEdition = service.id;
     this.form.id = service.id;
     this.form.name = service.name;
     this.errors = {};
+    this.showModal = true;
+  }
+
+  cancelEdit(): void {
+    this.closeModal();
   }
 
   /**
@@ -158,7 +174,7 @@ export class ServiceComponent implements OnInit {
   }
 
   /**
-   * Salvar tipo de serviço (criar ou atualizar)
+   * Salvar serviço (criar ou atualizar)
    */
   submit(): void {
     if (!this.validateForm()) {
@@ -176,7 +192,7 @@ export class ServiceComponent implements OnInit {
       next: (response: any) => {
         this.processing = false;
         this.toastService.success(response.message || 'Serviço salvo com sucesso');
-        this.resetForm();
+        this.closeModal();
         this.loadServices();
       },
       error: (error: HttpErrorResponse) => {
@@ -192,7 +208,7 @@ export class ServiceComponent implements OnInit {
   }
 
   /**
-   * Deletar tipo de serviço
+   * Deletar serviço
    */
   deleteService(serviceId: number): void {
     this.isLoader = true;
@@ -211,7 +227,7 @@ export class ServiceComponent implements OnInit {
   }
 
   /**
-   * Ativar tipo de serviço
+   * Ativar serviço
    */
   activateService(serviceId: number): void {
     this.isLoader = true;
@@ -230,7 +246,7 @@ export class ServiceComponent implements OnInit {
   }
 
   /**
-   * Inativar tipo de serviço
+   * Inativar serviço
    */
   deactivateService(serviceId: number): void {
     this.isLoader = true;

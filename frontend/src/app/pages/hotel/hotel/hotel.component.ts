@@ -35,6 +35,7 @@ export class HotelComponent implements OnInit {
   isLoader = false;
   processing = false;
   inEdition = 0;
+  showModal = false;
 
   pagination = {
     currentPage: 1,
@@ -146,6 +147,16 @@ export class HotelComponent implements OnInit {
     this.loadProviders();
   }
 
+  openModal(): void {
+    this.resetForm();
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.resetForm();
+  }
+
   edit(provider: Provider): void {
     this.inEdition = provider.id;
     this.form = {
@@ -172,17 +183,18 @@ export class HotelComponent implements OnInit {
       ? `${provider.city.name} - ${provider.city.states ? provider.city.states : provider.city.country}`
       : '';
     this.errors = {};
+    this.showModal = true;
   }
 
   cancelEdit(): void {
-    this.inEdition = 0;
-    this.resetForm();
+    this.closeModal();
   }
 
   resetForm(): void {
     this.form = this.getEmptyForm();
     this.selectedCityName = '';
     this.errors = {};
+    this.inEdition = 0;
   }
 
   isProviderInEdition(id: number): boolean {
@@ -232,8 +244,7 @@ export class HotelComponent implements OnInit {
     this.providerService.saveProvider(this.form).subscribe({
       next: (res) => {
         this.toastr.success(res.message || 'Hotel salvo com sucesso!');
-        this.resetForm();
-        this.inEdition = 0;
+        this.closeModal();
         this.loadProviders();
         this.processing = false;
       },
