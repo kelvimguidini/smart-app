@@ -5,7 +5,6 @@ use App\Http\Controllers\Auth\AddController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 
-use App\Http\Controllers\Auth\BrokerTransportController;
 use App\Http\Controllers\Auth\BudgetController;
 
 use App\Http\Controllers\Auth\CategoryController;
@@ -209,14 +208,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
     })->name('broker');
 
 
-    Route::get('broker-trans', [BrokerTransportController::class, 'create'])
-        ->name('broker-trans');
-
-    Route::post('broker-trans-save', [BrokerTransportController::class, 'store'])
-        ->name('broker-trans-save');
-
-    Route::delete('broker-trans-delete', [BrokerTransportController::class, 'delete'])
-        ->name('broker-trans-delete');
+    // Broker Trans routes migrated to api.php (Angular)
 
 
 
@@ -453,8 +445,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
 
 
-    Route::put('/broker_transports/activate/{id}', [BrokerTransportController::class, 'activateM'])->name('broker_transports-activate');
-    Route::put('/broker_transports/deactivate/{id}', [BrokerTransportController::class, 'deactivateM'])->name('broker_transports-deactivate');
+    // Broker Transports activate/deactivate routes migrated to api.php (Angular)
 
     // Register activate/deactivate routes migrated to api.php (Angular)
 

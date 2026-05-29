@@ -177,6 +177,16 @@ use App\Domains\Shared\Repositories\EloquentTransportServiceRepository;
 use App\Domains\Shared\Services\TransportServiceServiceInterface;
 use App\Domains\Shared\Services\DefaultTransportServiceService;
 
+use App\Domains\Shared\Repositories\BrokerTransportRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentBrokerTransportRepository;
+use App\Domains\Shared\Services\BrokerTransportServiceInterface;
+use App\Domains\Shared\Services\DefaultBrokerTransportService;
+
+use App\Domains\Shared\Repositories\ProviderTransportRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentProviderTransportRepository;
+use App\Domains\Shared\Services\ProviderTransportServiceInterface;
+use App\Domains\Shared\Services\DefaultProviderTransportService;
+
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -243,6 +253,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CarModelRepositoryInterface::class, EloquentCarModelRepository::class);
         $this->app->bind(VehicleRepositoryInterface::class, EloquentVehicleRepository::class);
         $this->app->bind(TransportServiceRepositoryInterface::class, EloquentTransportServiceRepository::class);
+        $this->app->bind(BrokerTransportRepositoryInterface::class, EloquentBrokerTransportRepository::class);
+        $this->app->bind(ProviderTransportRepositoryInterface::class, EloquentProviderTransportRepository::class);
 
         // New Services
         $this->app->bind(BrokerServiceInterface::class, DefaultBrokerService::class);
@@ -266,6 +278,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CarModelServiceInterface::class, DefaultCarModelService::class);
         $this->app->bind(VehicleServiceInterface::class, DefaultVehicleService::class);
         $this->app->bind(TransportServiceServiceInterface::class, DefaultTransportServiceService::class);
+        $this->app->bind(BrokerTransportServiceInterface::class, DefaultBrokerTransportService::class);
+        $this->app->bind(ProviderTransportServiceInterface::class, DefaultProviderTransportService::class);
         
         // API Terceiros Services & Repositories
         $this->app->bind(AuthApiRepositoryInterface::class, EloquentAuthApiRepository::class);

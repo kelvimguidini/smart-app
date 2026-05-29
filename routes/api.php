@@ -209,4 +209,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('transport-services/{id}/activate', [\App\Http\Controllers\Api\TransportServiceApiController::class, 'activateItem']);
     Route::put('transport-services/{id}/deactivate', [\App\Http\Controllers\Api\TransportServiceApiController::class, 'deactivateItem']);
 
+    // Rotas de Brokers de Transporte (BrokerTransport)
+    Route::get('broker-transports', [\App\Http\Controllers\Api\BrokerTransportApiController::class, 'index']);
+    Route::post('broker-transports', [\App\Http\Controllers\Api\BrokerTransportApiController::class, 'store']);
+    Route::delete('broker-transports/{id}', [\App\Http\Controllers\Api\BrokerTransportApiController::class, 'destroy']);
+    Route::put('broker-transports/{id}/activate', [\App\Http\Controllers\Api\BrokerTransportApiController::class, 'activateItem']);
+    Route::put('broker-transports/{id}/deactivate', [\App\Http\Controllers\Api\BrokerTransportApiController::class, 'deactivateItem']);
+
+    // Rotas de Fornecedores de Transporte (ProviderTransport)
+    Route::get('provider-transports', [\App\Http\Controllers\Api\ProviderTransportApiController::class, 'index']);
+    Route::post('provider-transports', [\App\Http\Controllers\Api\ProviderTransportApiController::class, 'store']);
+    Route::delete('provider-transports/{id}', [\App\Http\Controllers\Api\ProviderTransportApiController::class, 'destroy']);
+    Route::put('provider-transports/{id}/activate', [\App\Http\Controllers\Api\ProviderTransportApiController::class, 'activateItem']);
+    Route::put('provider-transports/{id}/deactivate', [\App\Http\Controllers\Api\ProviderTransportApiController::class, 'deactivateItem']);
+
 });
+
