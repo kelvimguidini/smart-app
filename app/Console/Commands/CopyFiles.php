@@ -31,6 +31,10 @@ class CopyFiles extends Command
 
 
             if (!File::exists($destinationPath . '/' . $relativePath)) {
+                $dir = dirname($destinationPath . '/' . $relativePath);
+                if (!File::isDirectory($dir)) {
+                    File::makeDirectory($dir, 0755, true, true);
+                }
                 // Copie o arquivo para o destino
                 File::copy($sourcePath . '/' . $relativePath, $destinationPath . '/' . $relativePath);
                 $this->info('Copied: ' . $relativePath);

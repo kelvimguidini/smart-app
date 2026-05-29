@@ -12,7 +12,7 @@ use App\Http\Controllers\Auth\CategoryController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\CustomerController;
 use App\Http\Controllers\Auth\CrdController;
-use App\Http\Controllers\Auth\CurrencyController;
+
 use App\Http\Controllers\Auth\EventController;
 use App\Http\Controllers\Auth\HallController;
 use App\Http\Controllers\Auth\HomeController;
@@ -278,14 +278,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
 
 
-    Route::get('currency', [CurrencyController::class, 'create'])
-        ->name('currency');
 
-    Route::post('currency-save', [CurrencyController::class, 'store'])
-        ->name('currency-save');
-
-    Route::delete('currency-delete', [CurrencyController::class, 'delete'])
-        ->name('currency-delete');
 
     //Eventos
     Route::get('event-list/{page?}', [EventController::class, 'list'])
@@ -483,8 +476,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::put('/customers/activate/{id}', [CustomerController::class, 'activateM'])->name('customers-activate');
     Route::put('/customers/deactivate/{id}', [CustomerController::class, 'deactivateM'])->name('customers-deactivate');
 
-    Route::put('/currencies/activate/{id}', [CurrencyController::class, 'activateM'])->name('currencies-activate');
-    Route::put('/currencies/deactivate/{id}', [CurrencyController::class, 'deactivateM'])->name('currencies-deactivate');
+
 
     Route::put('/crds/activate/{id}', [CrdController::class, 'activateM'])->name('crds-activate');
     Route::put('/crds/deactivate/{id}', [CrdController::class, 'deactivateM'])->name('crds-deactivate');

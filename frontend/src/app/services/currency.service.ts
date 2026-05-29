@@ -6,6 +6,8 @@ import { environment } from '../../environments/environment';
 export interface Currency {
   id: number;
   name: string;
+  symbol?: string;
+  sigla?: string;
   active: boolean;
   created_at?: string;
   updated_at?: string;
@@ -25,6 +27,8 @@ export interface PaginationResponse<T> {
 export interface CurrencyCreateUpdateRequest {
   id?: number;
   name: string;
+  symbol?: string;
+  sigla?: string;
 }
 
 @Injectable({

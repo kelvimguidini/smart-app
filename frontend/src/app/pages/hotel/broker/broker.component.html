@@ -6,146 +6,145 @@
     </ng-container>
 
     <div class="row position-relative">
-        <!-- Form Section -->
-        <div class="col-lg-12 animate-in" style="animation-delay: 0.1s;">
-            <div class="card mb-4 border-left-primary">
-                <div class="card-body">
-                    <h5 class="card-title mb-4 text-primary font-weight-bold">
-                        <i class="fas fa-edit me-2"></i>{{ inEdition > 0 ? 'Editar Broker' : 'Cadastrar Novo Broker' }}
-                    </h5>
+        <!-- Modal de Cadastro/Edição -->
+        <div class="modal fade" 
+             [class.show]="showModal" 
+             [style.display]="showModal ? 'block' : 'none'" 
+             [style.background]="showModal ? 'rgba(0,0,0,0.5)' : ''" 
+             tabindex="-1" 
+             role="dialog" 
+             aria-labelledby="brokerModalLabel" 
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                <div class="modal-content border-0 shadow-lg rounded-3xl">
+                    <div class="modal-header bg-light">
+                        <h5 class="modal-title font-weight-bold text-primary" id="brokerModalLabel">
+                            <i class="fas fa-edit me-2"></i>{{ inEdition > 0 ? 'Editar Broker' : 'Cadastrar Novo Broker' }}
+                        </h5>
+                        <button type="button" class="btn-close" (click)="closeModal()" aria-label="Fechar" [disabled]="processing"></button>
+                    </div>
                     <form (ngSubmit)="submit()">
-                        <div class="row align-items-start">
-                            
-                            <!-- Nome -->
-                            <div class="col-lg-4 mb-3">
-                                <div class="form-group mb-0">
-                                    <label for="name" class="form-label">Nome: <span class="text-danger">*</span></label>
-                                    <input 
-                                        type="text" 
-                                        id="name" 
-                                        class="form-control" 
-                                        [(ngModel)]="form.name" 
-                                        name="name" 
-                                        placeholder="Ex: Broker"
-                                        required 
-                                        autofocus>
-                                    
-                                    <div *ngIf="errors['name']" class="text-danger mt-1">
-                                        <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
+                        <div class="modal-body p-4">
+                            <div class="row align-items-start">
+                                <!-- Nome -->
+                                <div class="col-lg-6 mb-3">
+                                    <div class="form-group mb-0">
+                                        <label for="name" class="form-label">Nome: <span class="text-danger">*</span></label>
+                                        <input 
+                                            type="text" 
+                                            id="name" 
+                                            class="form-control" 
+                                            [class.is-invalid]="errors['name']"
+                                            [(ngModel)]="form.name" 
+                                            name="name" 
+                                            placeholder="Ex: Broker"
+                                            required 
+                                            autofocus>
+                                        
+                                        <div *ngIf="errors['name']" class="text-danger mt-1">
+                                            <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Município (Autocomplete) -->
-                            <div class="col-lg-4 mb-3">
-                                <app-autocomplete
-                                    id="city"
-                                    label="Cidade"
-                                    placeholder="Digite para buscar a cidade..."
-                                    [required]="true"
-                                    [searchFn]="searchCities"
-                                    [displayFn]="displayCity"
-                                    valueField="id"
-                                    [initialText]="selectedCityName"
-                                    [(ngModel)]="form.city_id"
-                                    name="city"
-                                    [errors]="errors['city_id']">
-                                </app-autocomplete>
-                            </div>
+                                <!-- Município (Autocomplete) -->
+                                <div class="col-lg-6 mb-3">
+                                    <app-autocomplete
+                                        id="city"
+                                        label="Cidade"
+                                        placeholder="Digite para buscar a cidade..."
+                                        [required]="true"
+                                        [searchFn]="searchCities"
+                                        [displayFn]="displayCity"
+                                        valueField="id"
+                                        [initialText]="selectedCityName"
+                                        [(ngModel)]="form.city_id"
+                                        name="city"
+                                        [errors]="errors['city_id']">
+                                    </app-autocomplete>
+                                </div>
 
-                            <!-- Contato -->
-                            <div class="col-lg-4 mb-3">
-                                <div class="form-group mb-0">
-                                    <label for="contact" class="form-label">Contato: <span class="text-danger">*</span></label>
-                                    <input 
-                                        type="text" 
-                                        id="contact" 
-                                        class="form-control" 
-                                        [(ngModel)]="form.contact" 
-                                        name="contact" 
-                                        placeholder="Ex: João Silva"
-                                        required>
-                                    
-                                    <div *ngIf="errors['contact']" class="text-danger mt-1">
-                                        <small *ngFor="let err of errors['contact']" class="d-block">{{ err }}</small>
+                                <!-- Contato -->
+                                <div class="col-lg-6 mb-3">
+                                    <div class="form-group mb-0">
+                                        <label for="contact" class="form-label">Contato: <span class="text-danger">*</span></label>
+                                        <input 
+                                            type="text" 
+                                            id="contact" 
+                                            class="form-control" 
+                                            [class.is-invalid]="errors['contact']"
+                                            [(ngModel)]="form.contact" 
+                                            name="contact" 
+                                            placeholder="Ex: João Silva"
+                                            required>
+                                        
+                                        <div *ngIf="errors['contact']" class="text-danger mt-1">
+                                            <small *ngFor="let err of errors['contact']" class="d-block">{{ err }}</small>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Telefone -->
-                            <div class="col-lg-4 mb-3">
-                                <div class="form-group mb-0">
-                                    <label for="phone" class="form-label">Telefone: <span class="text-danger">*</span></label>
-                                    <input 
-                                        type="text" 
-                                        id="phone" 
-                                        class="form-control" 
-                                        [(ngModel)]="form.phone" 
-                                        name="phone" 
-                                        placeholder="Ex: (11) 99999-9999"
-                                        mask="(00) 0000-00009"
-                                        [dropSpecialCharacters]="false"
-                                        required>
-                                    
-                                    <div *ngIf="errors['phone']" class="text-danger mt-1">
-                                        <small *ngFor="let err of errors['phone']" class="d-block">{{ err }}</small>
+                                <!-- Telefone -->
+                                <div class="col-lg-6 mb-3">
+                                    <div class="form-group mb-0">
+                                        <label for="phone" class="form-label">Telefone: <span class="text-danger">*</span></label>
+                                        <input 
+                                            type="text" 
+                                            id="phone" 
+                                            class="form-control" 
+                                            [class.is-invalid]="errors['phone']"
+                                            [(ngModel)]="form.phone" 
+                                            name="phone" 
+                                            placeholder="Ex: (11) 99999-9999"
+                                            mask="(00) 0000-00009"
+                                            [dropSpecialCharacters]="false"
+                                            required>
+                                        
+                                        <div *ngIf="errors['phone']" class="text-danger mt-1">
+                                            <small *ngFor="let err of errors['phone']" class="d-block">{{ err }}</small>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- E-mail -->
-                            <div class="col-lg-4 mb-3">
-                                <div class="form-group mb-0">
-                                    <label for="email" class="form-label">E-mail: <span class="text-danger">*</span></label>
-                                    <input 
-                                        type="email" 
-                                        id="email" 
-                                        class="form-control" 
-                                        [(ngModel)]="form.email" 
-                                        name="email" 
-                                        placeholder="exemplo@email.com"
-                                        required>
-                                    
-                                    <div *ngIf="errors['email']" class="text-danger mt-1">
-                                        <small *ngFor="let err of errors['email']" class="d-block">{{ err }}</small>
+                                <!-- E-mail -->
+                                <div class="col-lg-8 mb-3">
+                                    <div class="form-group mb-0">
+                                        <label for="email" class="form-label">E-mail: <span class="text-danger">*</span></label>
+                                        <input 
+                                            type="email" 
+                                            id="email" 
+                                            class="form-control" 
+                                            [class.is-invalid]="errors['email']"
+                                            [(ngModel)]="form.email" 
+                                            name="email" 
+                                            placeholder="exemplo@email.com"
+                                            required>
+                                        
+                                        <div *ngIf="errors['email']" class="text-danger mt-1">
+                                            <small *ngFor="let err of errors['email']" class="d-block">{{ err }}</small>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Nacional Radios -->
-                            <div class="col-lg-3 form-group mb-3">
-                                <label class="form-label d-block">Nacional?</label>
-                                <div class="form-check form-switch form-check-inline mt-2">
-                                    <input class="form-check-input" type="checkbox" id="national" [(ngModel)]="form.national" name="national" />
-                                    <label class="form-check-label" for="national">{{ form.national ? 'Sim' : 'Não' }}</label>
+                                <!-- Nacional Radios -->
+                                <div class="col-lg-4 mb-3">
+                                    <label class="form-label d-block">Nacional?</label>
+                                    <div class="form-switch mt-2">
+                                        <input class="form-check-input cursor-pointer" type="checkbox" id="national" [(ngModel)]="form.national" name="national" />
+                                        <label class="form-check-label cursor-pointer text-muted ms-2" for="national">{{ form.national ? 'Sim' : 'Não' }}</label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Botões -->
-                        <div class="row mt-3">
-                            <div class="col-12 d-flex justify-content-end">
-                                <button 
-                                    type="button" 
-                                    *ngIf="inEdition > 0" 
-                                    class="btn btn-outline-secondary me-2" 
-                                    (click)="resetForm()"
-                                    [disabled]="processing">
-                                    <i class="fas fa-times me-1"></i> Cancelar
-                                </button>
-
-                                <button 
-                                    type="submit" 
-                                    class="btn btn-primary shadow-sm" 
-                                    [disabled]="processing" 
-                                    [class.opacity-50]="processing">
-                                    <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                                    <i *ngIf="!processing" class="fas fa-save me-1"></i>
-                                    Salvar
-                                </button>
-                            </div>
+                        <div class="modal-footer bg-light border-0">
+                            <button type="button" class="btn btn-outline-secondary" (click)="closeModal()" [disabled]="processing">
+                                <i class="fas fa-times me-1"></i> Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-primary shadow-sm" [disabled]="processing">
+                                <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                <i *ngIf="!processing" class="fas fa-save me-1"></i> Salvar
+                            </button>
                         </div>
-
                     </form>
                 </div>
             </div>
@@ -159,6 +158,9 @@
                         <h5 class="card-title mb-0 text-secondary font-weight-bold">
                             <i class="fas fa-list me-2"></i>Lista de Brokers
                         </h5>
+                        <button class="btn btn-primary btn-sm shadow-sm" (click)="openModal()" [disabled]="processing">
+                            <i class="fas fa-plus me-1"></i> Novo Broker
+                        </button>
                     </div>
 
                     <app-datatable 

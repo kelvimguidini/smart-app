@@ -6,11 +6,13 @@ import { CustomerService, Customer } from '../../../services/customer.service';
 import { AuthenticatedLayoutComponent } from '../../../shared/layouts/authenticated-layout/authenticated-layout.component';
 import { DatatableComponent } from '../../../shared/components/datatable/datatable.component';
 import { ToastService } from '../../../services/toast.service';
+import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
+import { NgxMaskDirective } from 'ngx-mask';
 
 @Component({
   selector: 'app-crds',
   standalone: true,
-  imports: [CommonModule, FormsModule, AuthenticatedLayoutComponent, DatatableComponent],
+  imports: [CommonModule, FormsModule, AuthenticatedLayoutComponent, DatatableComponent, ConfirmModalComponent, NgxMaskDirective],
   templateUrl: './crds.component.html',
   styleUrls: ['./crds.component.scss'],
 })
@@ -46,6 +48,8 @@ export class CrdsComponent implements OnInit {
 
   inEdition = 0;
   processing = false;
+  showModal = false;
+  errors: any = {};
 
   ngOnInit(): void {
     this.loadCrds();
@@ -53,6 +57,7 @@ export class CrdsComponent implements OnInit {
   }
 
   loadCrds(): void {
+    this.processing = true;
     const params = {
       page: this.currentPage,
       per_page: this.perPage,
@@ -67,9 +72,11 @@ export class CrdsComponent implements OnInit {
         this.currentPage = response.current_page;
         this.lastPage = response.last_page;
         this.totalItems = response.total;
+        this.processing = false;
       },
       error: (err: any) => {
         this.toastr.error('Erro ao carregar CRDs');
+        this.processing = false;
         console.error(err);
       },
     });
@@ -104,6 +111,16 @@ export class CrdsComponent implements OnInit {
   }
 
   // Form Actions
+  openModal(): void {
+    this.resetForm();
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.resetForm();
+  }
+
   resetForm(): void {
     this.inEdition = 0;
     this.form = {
@@ -113,6 +130,7 @@ export class CrdsComponent implements OnInit {
       customer_id: 0,
     };
     this.processing = false;
+    this.errors = {};
   }
 
   edit(crd: Crd): void {
@@ -123,12 +141,32 @@ export class CrdsComponent implements OnInit {
       number: crd.number,
       customer_id: crd.customer_id,
     };
-    document.getElementById('formSection')?.scrollIntoView({ behavior: 'smooth' });
+    this.errors = {};
+    this.showModal = true;
+  }
+
+  private validateForm(): boolean {
+    this.errors = {};
+
+    if (!this.form.name || this.form.name.trim() === '') {
+      this.errors.name = ['O nome é obrigatório'];
+    }
+
+    if (!this.form.number || this.form.number.trim() === '') {
+      this.errors.number = ['O número é obrigatório'];
+    } else if (this.form.number.replace(/\D/g, '').length !== 14) {
+      this.errors.number = ['O número do CRD deve conter exatamente 14 dígitos'];
+    }
+
+    if (!this.form.customer_id || this.form.customer_id <= 0) {
+      this.errors.customer_id = ['O cliente é obrigatório'];
+    }
+
+    return Object.keys(this.errors).length === 0;
   }
 
   save(): void {
-    if (!this.form.name || !this.form.number || !this.form.customer_id) {
-      this.toastr.warning('Preencha todos os campos obrigatórios');
+    if (!this.validateForm()) {
       return;
     }
 
@@ -137,12 +175,16 @@ export class CrdsComponent implements OnInit {
     this.crdService.saveCrd(this.form).subscribe({
       next: (res) => {
         this.toastr.success(res.message || 'CRD salvo com sucesso');
-        this.resetForm();
+        this.closeModal();
         this.loadCrds();
       },
       error: (err: any) => {
-        this.toastr.error('Erro ao salvar CRD');
         this.processing = false;
+        if (err.status === 422) {
+          this.errors = err.error.errors || {};
+        } else {
+          this.toastr.error('Erro ao salvar CRD');
+        }
         console.error(err);
       },
     });
@@ -150,34 +192,44 @@ export class CrdsComponent implements OnInit {
 
   // Action Actions
   activate(id: number): void {
+    this.processing = true;
     this.crdService.activateCrd(id).subscribe({
       next: () => {
         this.toastr.success('CRD ativado com sucesso');
         this.loadCrds();
       },
-      error: (err: any) => this.toastr.error('Erro ao ativar CRD'),
+      error: (err: any) => {
+        this.toastr.error('Erro ao ativar CRD');
+        this.processing = false;
+      },
     });
   }
 
   deactivate(id: number): void {
+    this.processing = true;
     this.crdService.deactivateCrd(id).subscribe({
       next: () => {
         this.toastr.success('CRD inativado com sucesso');
         this.loadCrds();
       },
-      error: (err: any) => this.toastr.error('Erro ao inativar CRD'),
+      error: (err: any) => {
+        this.toastr.error('Erro ao inativar CRD');
+        this.processing = false;
+      },
     });
   }
 
   deleteCrd(id: number): void {
-    if (confirm('Tem certeza que deseja apagar este CRD?')) {
-      this.crdService.deleteCrd(id).subscribe({
-        next: () => {
-          this.toastr.success('CRD apagado com sucesso');
-          this.loadCrds();
-        },
-        error: (err: any) => this.toastr.error('Erro ao apagar CRD'),
-      });
-    }
+    this.processing = true;
+    this.crdService.deleteCrd(id).subscribe({
+      next: () => {
+        this.toastr.success('CRD apagado com sucesso');
+        this.loadCrds();
+      },
+      error: (err: any) => {
+        this.toastr.error('Erro ao apagar CRD');
+        this.processing = false;
+      },
+    });
   }
 }

@@ -55,15 +55,16 @@ class CurrencyApiController extends Controller
         }
 
         $request->validate([
-            'name' => 'required|string|max:255'
+            'name' => 'required|string|max:255',
+            'symbol' => 'required|string|max:255'
         ]);
 
         try {
             if ($request->id > 0) {
-                $currency = $this->lookupRepository->saveCurrency($request->only('name'), $request->id);
+                $currency = $this->lookupRepository->saveCurrency($request->only('name', 'sigla', 'symbol'), $request->id);
                 return response()->json(['message' => 'Registro atualizado com sucesso', 'data' => $currency]);
             } else {
-                $currency = $this->lookupRepository->saveCurrency($request->only('name'));
+                $currency = $this->lookupRepository->saveCurrency($request->only('name', 'sigla', 'symbol'));
                 return response()->json(['message' => 'Registro salvo com sucesso', 'data' => $currency]);
             }
         } catch (\Exception $e) {

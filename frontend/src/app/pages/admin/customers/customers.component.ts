@@ -6,11 +6,12 @@ import { AuthenticatedLayoutComponent } from '../../../shared/layouts/authentica
 import { DatatableComponent } from '../../../shared/components/datatable/datatable.component';
 import { ToastService } from '../../../services/toast.service';
 import { NgxMaskDirective } from 'ngx-mask';
+import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-customers',
   standalone: true,
-  imports: [CommonModule, FormsModule, AuthenticatedLayoutComponent, DatatableComponent, NgxMaskDirective],
+  imports: [CommonModule, FormsModule, AuthenticatedLayoutComponent, DatatableComponent, NgxMaskDirective, ConfirmModalComponent],
   templateUrl: './customers.component.html',
   styleUrls: ['./customers.component.scss'],
 })
@@ -52,12 +53,15 @@ export class CustomersComponent implements OnInit {
 
   inEdition = 0;
   processing = false;
+  showModal = false;
+  errors: any = {};
 
   ngOnInit(): void {
     this.loadCustomers();
   }
 
   loadCustomers(): void {
+    this.processing = true;
     const params = {
       page: this.currentPage,
       per_page: this.perPage,
@@ -72,9 +76,11 @@ export class CustomersComponent implements OnInit {
         this.currentPage = response.current_page;
         this.lastPage = response.last_page;
         this.totalItems = response.total;
+        this.processing = false;
       },
       error: (err) => {
         this.toastr.error('Erro ao carregar clientes');
+        this.processing = false;
         console.error(err);
       },
     });
@@ -99,6 +105,16 @@ export class CustomersComponent implements OnInit {
   }
 
   // Form Actions
+  openModal(): void {
+    this.resetForm();
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.resetForm();
+  }
+
   resetForm(): void {
     this.inEdition = 0;
     this.form = {
@@ -113,6 +129,7 @@ export class CustomersComponent implements OnInit {
     this.logoFile = null;
     this.currentLogoUrl = null;
     this.processing = false;
+    this.errors = {};
 
     // Reset file input
     const fileInput = document.getElementById('logoFile') as HTMLInputElement;
@@ -132,23 +149,42 @@ export class CustomersComponent implements OnInit {
     };
     this.currentLogoUrl = customer.logo || null;
     this.logoFile = null;
+    this.errors = {};
 
     // Reset file input
     const fileInput = document.getElementById('logoFile') as HTMLInputElement;
     if (fileInput) fileInput.value = '';
 
-    document.getElementById('formSection')?.scrollIntoView({ behavior: 'smooth' });
+    this.showModal = true;
   }
 
   onFileChange(event: any): void {
     if (event.target.files && event.target.files.length > 0) {
-      this.logoFile = event.target.files[0];
+      const file = event.target.files[0];
+      this.logoFile = file;
+      // Create local URL for immediate visual preview inside the modal
+      this.currentLogoUrl = URL.createObjectURL(file);
     }
   }
 
+  private validateForm(): boolean {
+    this.errors = {};
+
+    if (!this.form.name || this.form.name.trim() === '') {
+      this.errors.name = ['O nome é obrigatório'];
+    }
+
+    if (this.form.email && this.form.email.trim() !== '') {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email)) {
+        this.errors.email = ['O e-mail informado não é válido'];
+      }
+    }
+
+    return Object.keys(this.errors).length === 0;
+  }
+
   save(): void {
-    if (!this.form.name) {
-      this.toastr.warning('O nome do cliente é obrigatório');
+    if (!this.validateForm()) {
       return;
     }
 
@@ -172,12 +208,16 @@ export class CustomersComponent implements OnInit {
     this.customerService.saveCustomer(formData).subscribe({
       next: (res) => {
         this.toastr.success(res.message || 'Cliente salvo com sucesso');
-        this.resetForm();
+        this.closeModal();
         this.loadCustomers();
       },
       error: (err) => {
-        this.toastr.error('Erro ao salvar cliente');
         this.processing = false;
+        if (err.status === 422) {
+          this.errors = err.error.errors || {};
+        } else {
+          this.toastr.error('Erro ao salvar cliente');
+        }
         console.error(err);
       },
     });
@@ -185,6 +225,7 @@ export class CustomersComponent implements OnInit {
 
   // Action Actions
   activate(id: number): void {
+    this.processing = true;
     this.customerService.activateCustomer(id).subscribe({
       next: () => {
         this.toastr.success('Cliente ativado com sucesso');
@@ -192,12 +233,14 @@ export class CustomersComponent implements OnInit {
       },
       error: (err) => {
         this.toastr.error('Erro ao ativar cliente');
+        this.processing = false;
         console.error(err);
       },
     });
   }
 
   deactivate(id: number): void {
+    this.processing = true;
     this.customerService.deactivateCustomer(id).subscribe({
       next: () => {
         this.toastr.success('Cliente inativado com sucesso');
@@ -205,23 +248,24 @@ export class CustomersComponent implements OnInit {
       },
       error: (err) => {
         this.toastr.error('Erro ao inativar cliente');
+        this.processing = false;
         console.error(err);
       },
     });
   }
 
   deleteCustomer(id: number): void {
-    if (confirm('Tem certeza que deseja apagar este cliente?')) {
-      this.customerService.deleteCustomer(id).subscribe({
-        next: () => {
-          this.toastr.success('Cliente apagado com sucesso');
-          this.loadCustomers();
-        },
-        error: (err) => {
-          this.toastr.error('Erro ao apagar cliente');
-          console.error(err);
-        },
-      });
-    }
+    this.processing = true;
+    this.customerService.deleteCustomer(id).subscribe({
+      next: () => {
+        this.toastr.success('Cliente apagado com sucesso');
+        this.loadCustomers();
+      },
+      error: (err) => {
+        this.toastr.error('Erro ao apagar cliente');
+        this.processing = false;
+        console.error(err);
+      },
+    });
   }
 }

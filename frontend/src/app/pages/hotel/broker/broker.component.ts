@@ -39,6 +39,7 @@ export class BrokerComponent implements OnInit {
   isLoader: boolean = false;
   processing: boolean = false;
   errors: any = {};
+  showModal: boolean = false;
 
   // Pagination and Filtering state
   pagination: any = {
@@ -131,6 +132,16 @@ export class BrokerComponent implements OnInit {
     this.loadBrokers();
   }
 
+  openModal(): void {
+    this.resetForm();
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.resetForm();
+  }
+
   edit(broker: Broker): void {
     this.inEdition = broker.id;
     this.form = {
@@ -146,11 +157,11 @@ export class BrokerComponent implements OnInit {
     // Set initial city name for the autocomplete input
     this.selectedCityName = broker.city ? `${broker.city.name} - ${broker.city.states ? broker.city.states : broker.city.country}` : '';
     this.errors = {};
+    this.showModal = true;
   }
 
   cancelEdit(): void {
-    this.inEdition = 0;
-    this.resetForm();
+    this.closeModal();
   }
 
   resetForm(): void {
@@ -217,7 +228,7 @@ export class BrokerComponent implements OnInit {
       next: (response: any) => {
         this.processing = false;
         this.toastService.success(response.message || 'Broker salvo com sucesso');
-        this.resetForm();
+        this.closeModal();
         this.loadBrokers();
       },
       error: (error: HttpErrorResponse) => {
