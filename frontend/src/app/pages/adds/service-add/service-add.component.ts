@@ -25,6 +25,7 @@ export class ServiceAddComponent implements OnInit {
   isLoader: boolean = false;
   processing: boolean = false;
   errors: any = {};
+  showModal: boolean = false;
 
   // Pagination and Filtering state
   pagination: any = {
@@ -106,11 +107,26 @@ export class ServiceAddComponent implements OnInit {
     this.loadServiceAdds();
   }
 
+  openModal(): void {
+    this.resetForm();
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.resetForm();
+  }
+
   edit(serviceAdd: ServiceAdd): void {
     this.inEdition = serviceAdd.id;
     this.form.id = serviceAdd.id;
     this.form.name = serviceAdd.name;
     this.errors = {};
+    this.showModal = true;
+  }
+
+  cancelEdit(): void {
+    this.closeModal();
   }
 
   resetForm(): void {
@@ -149,7 +165,7 @@ export class ServiceAddComponent implements OnInit {
       next: (response: any) => {
         this.processing = false;
         this.toastService.success(response.message || 'Serviço salvo com sucesso');
-        this.resetForm();
+        this.closeModal();
         this.loadServiceAdds();
       },
       error: (error: HttpErrorResponse) => {

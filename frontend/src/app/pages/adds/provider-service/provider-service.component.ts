@@ -31,6 +31,7 @@ export class ProviderServiceComponent implements OnInit {
   processing: boolean = false;
   errors: any = {};
   selectedCityName: string = '';
+  showModal: boolean = false;
 
   // Pagination and Filtering state
   pagination: any = {
@@ -133,6 +134,16 @@ export class ProviderServiceComponent implements OnInit {
     this.loadProviderServices();
   }
 
+  openModal(): void {
+    this.resetForm();
+    this.showModal = true;
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+    this.resetForm();
+  }
+
   edit(providerService: ProviderService): void {
     this.inEdition = providerService.id;
     this.form = {
@@ -155,6 +166,11 @@ export class ProviderServiceComponent implements OnInit {
       this.selectedCityName = '';
     }
     this.errors = {};
+    this.showModal = true;
+  }
+
+  cancelEdit(): void {
+    this.closeModal();
   }
 
   resetForm(): void {
@@ -256,7 +272,7 @@ export class ProviderServiceComponent implements OnInit {
       next: (response: any) => {
         this.processing = false;
         this.toastService.success(response.message || 'Fornecedor salvo com sucesso');
-        this.resetForm();
+        this.closeModal();
         this.loadProviderServices();
       },
       error: (error: HttpErrorResponse) => {
