@@ -181,4 +181,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('provider-services/{id}/activate', [\App\Http\Controllers\Api\ProviderServiceApiController::class, 'activateItem']);
     Route::put('provider-services/{id}/deactivate', [\App\Http\Controllers\Api\ProviderServiceApiController::class, 'deactivateItem']);
 
+    // Rotas de Marcas de Veículo (Brand)
+    Route::get('brands', [\App\Http\Controllers\Api\BrandApiController::class, 'index']);
+    Route::post('brands', [\App\Http\Controllers\Api\BrandApiController::class, 'store']);
+    Route::delete('brands/{id}', [\App\Http\Controllers\Api\BrandApiController::class, 'destroy']);
+    Route::put('brands/{id}/activate', [\App\Http\Controllers\Api\BrandApiController::class, 'activateItem']);
+    Route::put('brands/{id}/deactivate', [\App\Http\Controllers\Api\BrandApiController::class, 'deactivateItem']);
+
+    // Rotas de Modelos de Veículo (CarModel)
+    Route::get('car-models', [\App\Http\Controllers\Api\CarModelApiController::class, 'index']);
+    Route::post('car-models', [\App\Http\Controllers\Api\CarModelApiController::class, 'store']);
+    Route::delete('car-models/{id}', [\App\Http\Controllers\Api\CarModelApiController::class, 'destroy']);
+    Route::put('car-models/{id}/activate', [\App\Http\Controllers\Api\CarModelApiController::class, 'activateItem']);
+    Route::put('car-models/{id}/deactivate', [\App\Http\Controllers\Api\CarModelApiController::class, 'deactivateItem']);
+
 });

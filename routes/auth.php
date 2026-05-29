@@ -3,11 +3,11 @@
 use App\Http\Controllers\Auth\ABController;
 use App\Http\Controllers\Auth\AddController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\BrandController;
+
 
 use App\Http\Controllers\Auth\BrokerTransportController;
 use App\Http\Controllers\Auth\BudgetController;
-use App\Http\Controllers\Auth\CarModelController;
+
 use App\Http\Controllers\Auth\CategoryController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\CustomerController;
@@ -230,24 +230,10 @@ Route::middleware(['auth', 'cors'])->group(function () {
         ->name('vehicle-delete');
 
 
-    Route::get('brand', [BrandController::class, 'create'])
-        ->name('brand');
-
-    Route::post('brand-save', [BrandController::class, 'store'])
-        ->name('brand-save');
-
-    Route::delete('brand-delete', [BrandController::class, 'delete'])
-        ->name('brand-delete');
 
 
-    Route::get('car-model', [CarModelController::class, 'create'])
-        ->name('car-model');
 
-    Route::post('car-model-save', [CarModelController::class, 'store'])
-        ->name('car-model-save');
 
-    Route::delete('car-model-delete', [CarModelController::class, 'delete'])
-        ->name('car-model-delete');
 
 
     Route::get('transport-service', [TransportServiceController::class, 'create'])
@@ -440,9 +426,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     //FIM status
 
-    //ativar - desativar
-    Route::put('/brands/activate/{id}', [BrandController::class, 'activateM'])->name('brand-activate');
-    Route::put('/brands/deactivate/{id}', [BrandController::class, 'deactivateM'])->name('brand-deactivate');
+
 
     // Categories activate/deactivate routes migrated to api.php (Angular)
 
@@ -484,8 +468,7 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::put('/cities/activate/{id}', [CityController::class, 'activateM'])->name('cities-activate');
     Route::put('/cities/deactivate/{id}', [CityController::class, 'deactivateM'])->name('cities-deactivate');
 
-    Route::put('/car_models/activate/{id}', [CarModelController::class, 'activateM'])->name('car_models-activate');
-    Route::put('/car_models/deactivate/{id}', [CarModelController::class, 'deactivateM'])->name('car_models-deactivate');
+
 
     Route::put('/broker_transports/activate/{id}', [BrokerTransportController::class, 'activateM'])->name('broker_transports-activate');
     Route::put('/broker_transports/deactivate/{id}', [BrokerTransportController::class, 'deactivateM'])->name('broker_transports-deactivate');
