@@ -27,8 +27,7 @@ use App\Http\Controllers\Auth\ServiceController;
 use App\Http\Controllers\Auth\ServiceHallController;
 use App\Http\Controllers\Auth\ServiceTypeController;
 use App\Http\Controllers\Auth\TransportController;
-use App\Http\Controllers\Auth\TransportServiceController;
-use App\Http\Controllers\Auth\VehicleController;
+
 use App\Http\Controllers\Auth\StatusHistoryController;
 use App\Http\Controllers\Auth\CityController;
 use App\Http\Controllers\Auth\ProposalHistoryController;
@@ -220,14 +219,6 @@ Route::middleware(['auth', 'cors'])->group(function () {
         ->name('broker-trans-delete');
 
 
-    Route::get('vehicle', [VehicleController::class, 'create'])
-        ->name('vehicle');
-
-    Route::post('vehicle-save', [VehicleController::class, 'store'])
-        ->name('vehicle-save');
-
-    Route::delete('vehicle-delete', [VehicleController::class, 'delete'])
-        ->name('vehicle-delete');
 
 
 
@@ -236,14 +227,8 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
 
 
-    Route::get('transport-service', [TransportServiceController::class, 'create'])
-        ->name('transport-service');
 
-    Route::post('transport-service-save', [TransportServiceController::class, 'store'])
-        ->name('transport-service-save');
-
-    Route::delete('transport-service-delete', [TransportServiceController::class, 'delete'])
-        ->name('transport-service-delete');
+    // Transport Service routes migrated to api.php (Angular)
 
 
 
@@ -432,11 +417,9 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     // Apto activate/deactivate routes migrated to api.php (Angular)
 
-    Route::put('/vehicles/activate/{id}', [VehicleController::class, 'activateM'])->name('vehicles-activate');
-    Route::put('/vehicles/deactivate/{id}', [VehicleController::class, 'deactivateM'])->name('vehicles-deactivate');
 
-    Route::put('/transport_services/activate/{id}', [TransportServiceController::class, 'activateM'])->name('transport_services-activate');
-    Route::put('/transport_services/deactivate/{id}', [TransportServiceController::class, 'deactivateM'])->name('transport_services-deactivate');
+
+    // Transport Services activate/deactivate routes migrated to api.php (Angular)
 
     // Service Type activate/deactivate routes migrated to api.php (Angular)
 

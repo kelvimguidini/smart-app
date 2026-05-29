@@ -28,6 +28,8 @@ import { CustomersComponent } from './pages/admin/customers/customers.component'
 import { CrdsComponent } from './pages/admin/crds/crds.component';
 import { BrandComponent } from './pages/transport/brand/brand.component';
 import { CarModelComponent } from './pages/transport/car-model/car-model.component';
+import { VehicleComponent } from './pages/transport/vehicle/vehicle.component';
+import { TransportServiceComponent } from './pages/transport/transport-service/transport-service.component';
 
 import { authGuard } from './guards/auth.guard';
 import { guestGuard } from './guards/guest.guard';
@@ -59,6 +61,8 @@ export const routes: Routes = [
   { path: 'currency', component: CurrenciesComponent, canActivate: [authGuard], title: 'Moedas - SmartApp' },
   { path: 'brand', component: BrandComponent, canActivate: [authGuard], title: 'Marcas de Veículo - SmartApp' },
   { path: 'car-model', component: CarModelComponent, canActivate: [authGuard], title: 'Modelos de Veículo - SmartApp' },
+  { path: 'vehicle', component: VehicleComponent, canActivate: [authGuard], title: 'Tipos de Veículo - SmartApp' },
+  { path: 'transport-service', component: TransportServiceComponent, canActivate: [authGuard], title: 'Serviços de Transporte - SmartApp' },
   { path: 'customer', component: CustomersComponent, canActivate: [authGuard], title: 'Clientes - SmartApp' },
   { path: 'crd', component: CrdsComponent, canActivate: [authGuard], title: 'CRDs - SmartApp' },
   { path: 'confirm-password', component: ConfirmPasswordComponent, canActivate: [authGuard], title: 'Confirmar Senha - SmartApp' },

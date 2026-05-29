@@ -195,4 +195,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('car-models/{id}/activate', [\App\Http\Controllers\Api\CarModelApiController::class, 'activateItem']);
     Route::put('car-models/{id}/deactivate', [\App\Http\Controllers\Api\CarModelApiController::class, 'deactivateItem']);
 
+    // Rotas de Tipos de Veículo (Vehicle)
+    Route::get('vehicles', [\App\Http\Controllers\Api\VehicleApiController::class, 'index']);
+    Route::post('vehicles', [\App\Http\Controllers\Api\VehicleApiController::class, 'store']);
+    Route::delete('vehicles/{id}', [\App\Http\Controllers\Api\VehicleApiController::class, 'destroy']);
+    Route::put('vehicles/{id}/activate', [\App\Http\Controllers\Api\VehicleApiController::class, 'activateItem']);
+    Route::put('vehicles/{id}/deactivate', [\App\Http\Controllers\Api\VehicleApiController::class, 'deactivateItem']);
+
+    // Rotas de Serviços de Transporte (TransportService)
+    Route::get('transport-services', [\App\Http\Controllers\Api\TransportServiceApiController::class, 'index']);
+    Route::post('transport-services', [\App\Http\Controllers\Api\TransportServiceApiController::class, 'store']);
+    Route::delete('transport-services/{id}', [\App\Http\Controllers\Api\TransportServiceApiController::class, 'destroy']);
+    Route::put('transport-services/{id}/activate', [\App\Http\Controllers\Api\TransportServiceApiController::class, 'activateItem']);
+    Route::put('transport-services/{id}/deactivate', [\App\Http\Controllers\Api\TransportServiceApiController::class, 'deactivateItem']);
+
 });

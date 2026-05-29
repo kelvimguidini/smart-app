@@ -167,6 +167,16 @@ use App\Domains\Shared\Repositories\EloquentCarModelRepository;
 use App\Domains\Shared\Services\CarModelServiceInterface;
 use App\Domains\Shared\Services\DefaultCarModelService;
 
+use App\Domains\Shared\Repositories\VehicleRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentVehicleRepository;
+use App\Domains\Shared\Services\VehicleServiceInterface;
+use App\Domains\Shared\Services\DefaultVehicleService;
+
+use App\Domains\Shared\Repositories\TransportServiceRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentTransportServiceRepository;
+use App\Domains\Shared\Services\TransportServiceServiceInterface;
+use App\Domains\Shared\Services\DefaultTransportServiceService;
+
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -231,6 +241,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(FrequencyRepositoryInterface::class, EloquentFrequencyRepository::class);
         $this->app->bind(BrandRepositoryInterface::class, EloquentBrandRepository::class);
         $this->app->bind(CarModelRepositoryInterface::class, EloquentCarModelRepository::class);
+        $this->app->bind(VehicleRepositoryInterface::class, EloquentVehicleRepository::class);
+        $this->app->bind(TransportServiceRepositoryInterface::class, EloquentTransportServiceRepository::class);
 
         // New Services
         $this->app->bind(BrokerServiceInterface::class, DefaultBrokerService::class);
@@ -252,6 +264,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(FrequencyServiceInterface::class, DefaultFrequencyService::class);
         $this->app->bind(BrandServiceInterface::class, DefaultBrandService::class);
         $this->app->bind(CarModelServiceInterface::class, DefaultCarModelService::class);
+        $this->app->bind(VehicleServiceInterface::class, DefaultVehicleService::class);
+        $this->app->bind(TransportServiceServiceInterface::class, DefaultTransportServiceService::class);
         
         // API Terceiros Services & Repositories
         $this->app->bind(AuthApiRepositoryInterface::class, EloquentAuthApiRepository::class);
