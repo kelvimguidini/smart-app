@@ -6,7 +6,7 @@ import { EventService } from '../../../services/event.service';
 import { AuthService } from '../../../services/auth.service';
 import { DatatableComponent } from '../../../shared/components/datatable/datatable.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
-import { AuthenticatedLayoutComponent } from '../../../shared/components/authenticated-layout/authenticated-layout.component';
+import { AuthenticatedLayoutComponent } from '../../../shared/layouts/authenticated-layout/authenticated-layout.component';
 
 @Component({
   selector: 'app-event-list',

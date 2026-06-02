@@ -32,6 +32,10 @@ export class EventCreateComponent implements OnInit {
   processing = false;
   errors: any = {};
 
+  parseFloat(value: any): number {
+    return parseFloat(value || 0);
+  }
+
   // Active state
   eventId: number = 0;
   activeTab: number = 0; // 0 = Básico, 1 = Hotel, 2 = A&B, 3 = Salões, 4 = Adicionais, 5 = Transporte
