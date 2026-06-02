@@ -242,7 +242,7 @@ const setRange = (opt) => {
 
                 <div class="form-group">
                     <InputLabel for="purpose" value="Propósito:" />
-                    <select class="form-control" id="purpose" :required="required">
+                    <select class="form-control" id="purpose" required="required">
                         <option value="">.::Selecione::.</option>
                         <option v-for="(option, index) in purposes" :value="option.id">
                             {{ option.name }}

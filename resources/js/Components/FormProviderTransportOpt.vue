@@ -44,11 +44,11 @@ const props = defineProps({
 const formOpt = useForm({
     event_transport_id: 0,
     id: 0,
-    broker: 0,
-    vehicle: 0,
-    model: 0,
-    service: 0,
-    brand: 0,
+    broker: '',
+    vehicle: '',
+    model: '',
+    service: '',
+    brand: '',
     observation: '',
     in: '',
     out: '',
@@ -296,7 +296,7 @@ const isLoader = ref(false);
 
                 <div class="form-group">
                     <InputLabel for="brand" value="Marca:" />
-                    <select class="form-control" id="brand" :required="required">
+                    <select class="form-control" id="brand" required="required">
                         <option value="">.::Selecione::.</option>
                         <option v-for="(option, index) in brands" :value="option.id">
                             {{ option.name }}

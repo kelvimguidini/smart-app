@@ -673,7 +673,7 @@ const newEventProv = (type) => {
                                     <div class="form-group">
                                         <InputLabel for="customer" value="Empresa:" />
 
-                                        <select class="form-control" id="customer" :required="required">
+                                        <select class="form-control" id="customer" required="required">
                                             <option value="">.::Selecione::.</option>
                                             <option v-for="(option, index) in customers"
                                                 :selected="option.id == form.customer" :value="option.id">
@@ -741,7 +741,7 @@ const newEventProv = (type) => {
                                     <div class="form-group">
                                         <InputLabel for="CRD" value="CRD:" />
 
-                                        <select class="form-control" id="crd_id" :required="required">
+                                        <select class="form-control" id="crd_id" required="required">
                                             <option value="">.::Selecione::.</option>
                                             <option v-for="(option, index) in crds" :selected="option.id == form.crd_id"
                                                 :value="option.id">

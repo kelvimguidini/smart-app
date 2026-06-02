@@ -280,7 +280,7 @@ const updateForm = () => {
             <div class="col-md-6 col-lg-4 mb-3">
                 <div class="form-group">
                     <InputLabel for="hotel" value="Fornecedor:" />
-                    <select class="form-control form-control-sm" :id="'hotel-select' + type" :required="required">
+                    <select class="form-control form-control-sm" :id="'hotel-select' + type" required="required">
                         <option value="">.::Selecione::.</option>
                         <option v-for="(option, index) in providers" :selected="option.id == form.provider_id"
                             :value="option.id">
@@ -329,7 +329,7 @@ const updateForm = () => {
                     <div class="col-6">
                         <div class="form-group">
                             <InputLabel for="currencies" value="Moeda:" />
-                            <select class="form-control form-control-sm" :id="'currency' + type" :required="required">
+                            <select class="form-control form-control-sm" :id="'currency' + type" required="required">
                                 <option value="">.::Selecione::.</option>
                                 <option v-for="(option, index) in currencies" :selected="option.id == form.currency"
                                     :value="option.id">

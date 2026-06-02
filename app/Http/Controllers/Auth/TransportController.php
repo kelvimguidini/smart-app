@@ -41,11 +41,11 @@ class TransportController extends Controller
         }
 
         $request->validate([
-            'broker' => 'required|integer',
-            'vehicle' => 'required|integer',
-            'model' => 'required|integer',
-            'service' => 'required|integer',
-            'brand' => 'required|integer',
+            'broker' => 'nullable|integer|exists:broker_transport,id',
+            'vehicle' => 'nullable|integer|exists:vehicle,id',
+            'model' => 'nullable|integer|exists:car_model,id',
+            'service' => 'nullable|integer|exists:transport_service,id',
+            'brand' => 'nullable|integer|exists:car_brand,id',
             'in' => 'required|date',
             'out' => 'required|date|after_or_equal:in',
             'received_proposal' => 'nullable|numeric',
