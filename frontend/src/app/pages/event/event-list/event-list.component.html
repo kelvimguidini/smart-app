@@ -20,16 +20,21 @@
         <div class="card-body">
           <form (ngSubmit)="onSearch()">
             <div class="row align-items-end">
-              <!-- Data Início -->
-              <div class="col-md-3 mb-3">
-                <label for="startDate" class="form-label small font-weight-bold">Data de Início:</label>
-                <input type="date" id="startDate" class="form-control form-control-sm" [(ngModel)]="filters.startDate" name="startDate">
-              </div>
-
-              <!-- Data Fim -->
-              <div class="col-md-3 mb-3">
-                <label for="endDate" class="form-label small font-weight-bold">Data Final:</label>
-                <input type="date" id="endDate" class="form-control form-control-sm" [(ngModel)]="filters.endDate" name="endDate">
+              <!-- Período (Range) -->
+              <div class="col-md-6 mb-3">
+                <label for="dateRange" class="form-label small font-weight-bold">Período (Início - Fim):</label>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text bg-light"><i class="fas fa-calendar-alt text-primary"></i></span>
+                  <input type="text" 
+                         #dateRangePicker 
+                         id="dateRange" 
+                         class="form-control form-control-sm bg-white" 
+                         placeholder="Selecione o período de início e fim..." 
+                         readonly>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="clearDateRange()" style="border: 1px solid #d1d3e2; border-left: none;">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
               </div>
 
               <!-- Cidade -->

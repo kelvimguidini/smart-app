@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -7,6 +7,7 @@ import { AuthService } from '../../../services/auth.service';
 import { DatatableComponent } from '../../../shared/components/datatable/datatable.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 import { AuthenticatedLayoutComponent } from '../../../shared/layouts/authenticated-layout/authenticated-layout.component';
+import flatpickr from 'flatpickr';
 
 @Component({
   selector: 'app-event-list',
@@ -15,9 +16,12 @@ import { AuthenticatedLayoutComponent } from '../../../shared/layouts/authentica
   templateUrl: './event-list.component.html',
   styleUrls: ['./event-list.component.scss'],
 })
-export class EventListComponent implements OnInit {
+export class EventListComponent implements OnInit, AfterViewInit {
   private readonly eventService = inject(EventService);
   private readonly authService = inject(AuthService);
+
+  @ViewChild('dateRangePicker') dateRangePickerElement!: ElementRef;
+  private flatpickrInstance: any;
 
   events: any[] = [];
   pagination: any = {};
@@ -47,6 +51,71 @@ export class EventListComponent implements OnInit {
   ngOnInit() {
     this.loadInitialLookups();
     this.loadEvents();
+  }
+
+  ngAfterViewInit() {
+    this.flatpickrInstance = flatpickr(this.dateRangePickerElement.nativeElement, {
+      mode: 'range',
+      dateFormat: 'Y-m-d',
+      altInput: true,
+      altFormat: 'd/m/Y',
+      locale: {
+        firstDayOfWeek: 1,
+        weekdays: {
+          shorthand: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+          longhand: [
+            'Domingo',
+            'Segunda-feira',
+            'Terça-feira',
+            'Quarta-feira',
+            'Quinta-feira',
+            'Sexta-feira',
+            'Sábado',
+          ],
+        },
+        months: {
+          shorthand: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+          longhand: [
+            'Janeiro',
+            'Fevereiro',
+            'Março',
+            'Abril',
+            'Maio',
+            'Junho',
+            'Julho',
+            'Agosto',
+            'Setembro',
+            'Outubro',
+            'Novembro',
+            'Dezembro',
+          ],
+        },
+        rangeSeparator: ' até ',
+      },
+      onChange: (selectedDates) => {
+        if (selectedDates.length === 2) {
+          const formatDate = (date: Date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+          };
+          this.filters.startDate = formatDate(selectedDates[0]);
+          this.filters.endDate = formatDate(selectedDates[1]);
+        } else if (selectedDates.length === 0) {
+          this.filters.startDate = '';
+          this.filters.endDate = '';
+        }
+      },
+    });
+  }
+
+  clearDateRange() {
+    this.filters.startDate = '';
+    this.filters.endDate = '';
+    if (this.flatpickrInstance) {
+      this.flatpickrInstance.clear();
+    }
   }
 
   loadInitialLookups() {

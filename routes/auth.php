@@ -1,32 +1,12 @@
 <?php
 
-use App\Http\Controllers\Auth\ABController;
-use App\Http\Controllers\Auth\AddController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-
-
 use App\Http\Controllers\Auth\BudgetController;
-
-use App\Http\Controllers\Auth\CategoryController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\CustomerController;
 use App\Http\Controllers\Auth\CrdController;
-
-use App\Http\Controllers\Auth\EventController;
-use App\Http\Controllers\Auth\HallController;
 use App\Http\Controllers\Auth\HomeController;
-use App\Http\Controllers\Auth\HotelController;
-use App\Http\Controllers\Auth\LocalController;
 use App\Http\Controllers\Auth\ProviderController;
-use App\Http\Controllers\Auth\ProviderTransportController;
-use App\Http\Controllers\Auth\PurposeController;
-use App\Http\Controllers\Auth\PurposeHallController;
-use App\Http\Controllers\Auth\RegimeController;
-use App\Http\Controllers\Auth\ServiceController;
-use App\Http\Controllers\Auth\ServiceHallController;
-use App\Http\Controllers\Auth\ServiceTypeController;
-use App\Http\Controllers\Auth\TransportController;
-
 use App\Http\Controllers\Auth\StatusHistoryController;
 use App\Http\Controllers\Auth\CityController;
 use App\Http\Controllers\Auth\ProposalHistoryController;
@@ -239,9 +219,38 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     // Service Type save and delete routes migrated to api.php (Angular)
 
+    // SPA Angular Pages routes registration for Ziggy compatibility
+    $angularRoutes = [
+        'service',
+        'service-type',
+        'local',
+        'service-hall',
+        'purpose-hall',
+        'measure',
+        'frequency',
+        'service-add',
+        'provider-service',
+        'brand',
+        'car-model',
+        'vehicle',
+        'transport-service',
+        'broker-trans',
+        'provider-transport',
+        'currency'
+    ];
 
-
-
+    foreach ($angularRoutes as $route) {
+        Route::get($route, function (Request $request) {
+            $path = base_path('public/angular.html');
+            if (file_exists($path)) {
+                if ($request->header('X-Inertia')) {
+                    return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
+                }
+                return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
+            }
+            abort(404);
+        })->name($route);
+    }
 
     //Eventos (SPA Angular)
     Route::get('event-list/{page?}', function (Request $request) {
@@ -288,27 +297,12 @@ Route::middleware(['auth', 'cors'])->group(function () {
         abort(404);
     })->name('event-edit');
 
-    Route::post('event-save', [EventController::class, 'store'])
-        ->name('event-save');
-
-
-    Route::delete('event-delete', [EventController::class, 'delete'])
-        ->name('event-delete');
-
-
     Route::get('invoice/{download}/{provider_id}/{event_id}/{type}', [ProviderController::class, 'invoicingPdf'])
         ->name('invoice');
 
 
     Route::post('invoice-email', [ProviderController::class, 'invoicingPdf'])
         ->name('invoice-email');
-
-    Route::post('event/save-exchange-rate', [EventController::class, 'saveExchangeRate'])
-        ->name('event-save-exchange-rate');
-
-
-    Route::post('event/save-vl-faturamento', [EventController::class, 'saveValorFaturamento'])
-        ->name('event-save-vl-faturamento');
 
 
     //HOTEL
@@ -325,70 +319,6 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
     Route::post('hotel-event-save', [ProviderController::class, 'storeEventProvider'])
         ->name('hotel-event-save');
-
-    Route::delete('event-hotel-delete', [HotelController::class, 'eventHotelDelete'])
-        ->name('event-hotel-delete');
-
-    Route::post('hotel-opt-save', [HotelController::class, 'storeHotelOpt'])
-        ->name('hotel-opt-save');
-
-    Route::delete('opt-delete', [HotelController::class, 'optDelete'])
-        ->name('opt-delete');
-
-    //AB
-    Route::post('ab-opt-save', [ABController::class, 'storeOpt'])
-        ->name('ab-opt-save');
-
-    Route::delete('opt-ab-delete', [ABController::class, 'optDelete'])
-        ->name('opt-ab-delete');
-
-    Route::delete('event-ab-delete', [ABController::class, 'eventABDelete'])
-        ->name('event-ab-delete');
-
-
-    //HALL
-    Route::post('hall-opt-save', [HallController::class, 'storeOpt'])
-        ->name('hall-opt-save');
-
-    Route::delete('opt-hall-delete', [HallController::class, 'optDelete'])
-        ->name('opt-hall-delete');
-
-    Route::delete('event-hall-delete', [HallController::class, 'eventHallDelete'])
-        ->name('event-hall-delete');
-
-
-    //ADICIONAL
-    Route::post('add-opt-save', [AddController::class, 'storeOpt'])
-        ->name('add-opt-save');
-
-    Route::delete('opt-add-delete', [AddController::class, 'optDelete'])
-        ->name('opt-add-delete');
-
-    Route::delete('event-add-delete', [AddController::class, 'eventAddDelete'])
-        ->name('event-add-delete');
-
-    //TRANSPORTE
-    Route::post('transport-opt-save', [TransportController::class, 'storeOpt'])
-        ->name('transport-opt-save');
-
-    Route::delete('opt-transport-delete', [TransportController::class, 'optDelete'])
-        ->name('opt-transport-delete');
-
-    Route::delete('event-transport-delete', [TransportController::class, 'eventTransportDelete'])
-        ->name('event-transport-delete');
-
-
-    Route::get('provider-transport', [ProviderTransportController::class, 'create'])
-        ->name('provider-transport');
-
-    Route::post('provider-transport-save', [ProviderTransportController::class, 'store'])
-        ->name('provider-transport-save');
-
-    Route::delete('provider-transport-delete', [ProviderTransportController::class, 'delete'])
-        ->name('provider-transport-delete');
-
-    Route::post('provider-transport-event-save', [ProviderTransportController::class, 'storeEventProvider'])
-        ->name('provider-transport-event-save');
 
     //ORÇAMENTO
     Route::post('budget-prove', [BudgetController::class, 'prove'])
@@ -436,34 +366,6 @@ Route::middleware(['auth', 'cors'])->group(function () {
     //FIM status
 
 
-
-    // Categories activate/deactivate routes migrated to api.php (Angular)
-
-    // Apto activate/deactivate routes migrated to api.php (Angular)
-
-
-
-    // Transport Services activate/deactivate routes migrated to api.php (Angular)
-
-    // Service Type activate/deactivate routes migrated to api.php (Angular)
-
-    // Service Halls activate/deactivate routes migrated to api.php (Angular)
-
-    // Services activate/deactivate routes migrated to api.php (Angular)
-
-    // Regimes activate/deactivate routes migrated to api.php (Angular)
-
-    // Purposes activate/deactivate routes migrated to api.php (Angular)
-
-    // Purpose Halls activate/deactivate routes migrated to api.php (Angular)
-
-    Route::put('/provider_transports/activate/{id}', [ProviderTransportController::class, 'activateM'])->name('provider_transports-activate');
-    Route::put('/provider_transports/deactivate/{id}', [ProviderTransportController::class, 'deactivateM'])->name('provider_transports-deactivate');
-
-    // Providers activate/deactivate routes migrated to api.php (Angular)
-
-    // Locals activate/deactivate routes migrated to api.php (Angular)
-
     Route::put('/customers/activate/{id}', [CustomerController::class, 'activateM'])->name('customers-activate');
     Route::put('/customers/deactivate/{id}', [CustomerController::class, 'deactivateM'])->name('customers-deactivate');
 
@@ -475,13 +377,6 @@ Route::middleware(['auth', 'cors'])->group(function () {
     Route::put('/cities/activate/{id}', [CityController::class, 'activateM'])->name('cities-activate');
     Route::put('/cities/deactivate/{id}', [CityController::class, 'deactivateM'])->name('cities-deactivate');
 
-
-
-    // Broker Transports activate/deactivate routes migrated to api.php (Angular)
-
-    // Register activate/deactivate routes migrated to api.php (Angular)
-
-    //FIM ativar - desativar
 
     Route::post('/update-provider-order', [ProviderController::class, 'updateOrder'])->name('update-provider-order');
 

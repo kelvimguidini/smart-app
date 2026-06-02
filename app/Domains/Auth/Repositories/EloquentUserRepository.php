@@ -50,7 +50,7 @@ class EloquentUserRepository implements UserRepositoryInterface
 
     public function allNonApi(): Collection
     {
-        return User::where('type', '!=', 'api')->get();
+        return User::where('is_api_user', '!=', 1)->get();
     }
 
     public function create(array $data, array $roleIds = []): User

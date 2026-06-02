@@ -36,7 +36,7 @@
         "dev": "vite --host",
         "build1": "vite build",
         "build": "vite build && npm run build:frontend",
-        "build:frontend": "cd frontend && npm install && npm run build",
+        "build:frontend": "cd frontend && npm install --legacy-peer-deps && npm run build",
         "test:frontend": "cd frontend && npm run test",
         "serve": "vite preview"
     },

@@ -77,4 +77,5 @@ export const routes: Routes = [
   { path: 'crd', component: CrdsComponent, canActivate: [authGuard], title: 'CRDs - SmartApp' },
   { path: 'confirm-password', component: ConfirmPasswordComponent, canActivate: [authGuard], title: 'Confirmar Senha - SmartApp' },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: '**', redirectTo: 'dashboard' }
 ];

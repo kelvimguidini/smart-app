@@ -81,7 +81,7 @@
       <!-- ==================== TABS CONTENT ==================== -->
 
       <!-- TAB 0: BÁSICO -->
-      <div *ngIf="activeTab === 0" class="card shadow-sm border-left-primary mb-4 animate-in">
+      <div [class.d-none]="activeTab !== 0" class="card shadow-sm border-left-primary mb-4 animate-in">
         <div class="card-body">
           <form (ngSubmit)="saveBasic()">
             <div class="row">
@@ -175,16 +175,21 @@
               <!-- Coluna 3 -->
               <div class="col-lg-4">
                 <div class="form-group mb-3">
-                  <label for="date" class="form-label font-weight-bold">Data de Início: <span class="text-danger">*</span></label>
-                  <input type="date" id="date" class="form-control" [class.is-invalid]="errors.date" [(ngModel)]="basicForm.date" name="date" required />
+                  <label for="dateRange" class="form-label font-weight-bold">Período do Evento (Início - Fim): <span class="text-danger">*</span></label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="fas fa-calendar-alt text-primary"></i></span>
+                    <input type="text" 
+                           #dateRangePicker 
+                           id="dateRange" 
+                           class="form-control bg-white" 
+                           [class.is-invalid]="errors.date || errors.date_final" 
+                           placeholder="Selecione o período..." 
+                           readonly 
+                           required>
+                  </div>
                   <div *ngIf="errors.date" class="text-danger mt-1">
                     <small *ngFor="let err of errors.date" class="d-block">{{ err }}</small>
                   </div>
-                </div>
-
-                <div class="form-group mb-3">
-                  <label for="date_final" class="form-label font-weight-bold">Data Final: <span class="text-danger">*</span></label>
-                  <input type="date" id="date_final" class="form-control" [class.is-invalid]="errors.date_final" [(ngModel)]="basicForm.date_final" name="date_final" required />
                   <div *ngIf="errors.date_final" class="text-danger mt-1">
                     <small *ngFor="let err of errors.date_final" class="d-block">{{ err }}</small>
                   </div>

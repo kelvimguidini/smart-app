@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -12,6 +12,7 @@ import { ToastService } from '../../../services/toast.service';
 import { AutocompleteComponent } from '../../../shared/components/autocomplete/autocomplete.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 import { AuthenticatedLayoutComponent } from '../../../shared/layouts/authenticated-layout/authenticated-layout.component';
+import flatpickr from 'flatpickr';
 
 @Component({
   selector: 'app-event-create',
@@ -20,13 +21,16 @@ import { AuthenticatedLayoutComponent } from '../../../shared/layouts/authentica
   templateUrl: './event-create.component.html',
   styleUrls: ['./event-create.component.scss'],
 })
-export class EventCreateComponent implements OnInit {
+export class EventCreateComponent implements OnInit, AfterViewInit {
   private readonly eventService = inject(EventService);
   private readonly authService = inject(AuthService);
   private readonly cityService = inject(CityService);
   private readonly toastService = inject(ToastService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+
+  @ViewChild('dateRangePicker') dateRangePickerElement!: ElementRef;
+  private flatpickrInstance: any;
 
   isLoader = false;
   processing = false;
@@ -158,6 +162,64 @@ export class EventCreateComponent implements OnInit {
     });
   }
 
+  ngAfterViewInit() {
+    this.flatpickrInstance = flatpickr(this.dateRangePickerElement.nativeElement, {
+      mode: 'range',
+      dateFormat: 'Y-m-d',
+      altInput: true,
+      altFormat: 'd/m/Y',
+      defaultDate: this.basicForm.date && this.basicForm.date_final ? [this.basicForm.date, this.basicForm.date_final] : undefined,
+      locale: {
+        firstDayOfWeek: 1,
+        weekdays: {
+          shorthand: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+          longhand: [
+            'Domingo',
+            'Segunda-feira',
+            'Terça-feira',
+            'Quarta-feira',
+            'Quinta-feira',
+            'Sexta-feira',
+            'Sábado',
+          ],
+        },
+        months: {
+          shorthand: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+          longhand: [
+            'Janeiro',
+            'Fevereiro',
+            'Março',
+            'Abril',
+            'Maio',
+            'Junho',
+            'Julho',
+            'Agosto',
+            'Setembro',
+            'Outubro',
+            'Novembro',
+            'Dezembro',
+          ],
+        },
+        rangeSeparator: ' até ',
+      },
+      onChange: (selectedDates) => {
+        if (selectedDates.length === 2) {
+          const formatDate = (date: Date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+          };
+          this.basicForm.date = formatDate(selectedDates[0]);
+          this.basicForm.date_final = formatDate(selectedDates[1]);
+        } else {
+          this.basicForm.date = '';
+          this.basicForm.date_final = '';
+        }
+      },
+    });
+  }
+
   loadInitialData() {
     this.isLoader = true;
     this.eventService.getEditData(this.eventId).subscribe({
@@ -206,6 +268,9 @@ export class EventCreateComponent implements OnInit {
           }
           if (res.event.date_final) {
             this.basicForm.date_final = res.event.date_final.split('T')[0];
+          }
+          if (this.flatpickrInstance && this.basicForm.date && this.basicForm.date_final) {
+            this.flatpickrInstance.setDate([this.basicForm.date, this.basicForm.date_final]);
           }
 
           this.basicForm.crd_id = res.event.crd_id || '';
