@@ -12,6 +12,7 @@ interface EventTransportRepositoryInterface
     public function updateByEventAndProvider(int $eventId, int $providerId, array $data): bool;
     public function getByEvent(int $eventId): Collection;
     public function find(int $id): ?EventTransport;
+    public function findWithDetails(int $id): ?EventTransport;
     public function saveEventTransport(array $data, ?int $id = null): EventTransport;
     public function getIdsByEvent(int $eventId): array;
 }

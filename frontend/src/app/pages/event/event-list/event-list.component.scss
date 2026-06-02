@@ -1,0 +1,31 @@
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.table-row-hover {
+  transition: background-color 0.2s ease-in-out;
+  
+  &:hover {
+    background-color: rgba(78, 115, 223, 0.05) !important;
+  }
+}
+
+.expanded-providers-box {
+  background-color: #f8f9fc !important;
+  border-left: 4px solid #4e73df;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

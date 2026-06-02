@@ -1,0 +1,126 @@
+.nav-tabs {
+  border-bottom: 2px solid rgba(78, 115, 223, 0.1);
+  margin-bottom: 1.5rem;
+
+  .nav-item {
+    margin-bottom: -2px;
+  }
+
+  .nav-link {
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: #858796;
+    font-weight: 600;
+    padding: 0.75rem 1.25rem;
+    transition: all 0.2s ease-in-out;
+
+    &:hover:not(.disabled) {
+      color: #4e73df;
+      border-bottom-color: rgba(78, 115, 223, 0.3);
+      background-color: rgba(78, 115, 223, 0.03);
+    }
+
+    &.active {
+      color: #4e73df;
+      background-color: transparent;
+      border-bottom-color: #4e73df;
+    }
+
+    &.disabled {
+      color: #d1d3e2;
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+}
+
+.sticky-col {
+  position: sticky;
+  z-index: 2;
+  background-color: #ffffff;
+}
+
+.sticky-col::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: inherit;
+  z-index: -1;
+}
+
+.table-header {
+  background-color: #4e73df !important;
+  color: #ffffff !important;
+  font-weight: bold;
+}
+
+.table-header-c1 {
+  background-color: #f8f9fc !important;
+  color: #5a5c69 !important;
+  font-weight: bold;
+}
+
+.table-header-c2 {
+  background-color: #eaecf4 !important;
+  color: #3a3b45 !important;
+  font-weight: bold;
+}
+
+.table-subheader {
+  background-color: #f8f9fc !important;
+  font-weight: bold;
+  color: #4e73df;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.modal-backdrop-blur {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-dialog {
+  max-width: 800px;
+  width: 90%;
+  margin: 1.75rem auto;
+}
+
+.card-provider-group {
+  border-radius: 1.25rem;
+  overflow: hidden;
+  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+  transition: transform 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+  }
+}

@@ -243,18 +243,50 @@ Route::middleware(['auth', 'cors'])->group(function () {
 
 
 
-    //Eventos
-    Route::get('event-list/{page?}', [EventController::class, 'list'])
-        ->name('event-list');
+    //Eventos (SPA Angular)
+    Route::get('event-list/{page?}', function (Request $request) {
+        $path = base_path('public/angular.html');
+        if (file_exists($path)) {
+            if ($request->header('X-Inertia')) {
+                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
+            }
+            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
+        }
+        abort(404);
+    })->name('event-list');
 
-    Route::post('event-list/{page?}', [EventController::class, 'list'])
-        ->name('event-list.filter');
+    Route::post('event-list/{page?}', function (Request $request) {
+        $path = base_path('public/angular.html');
+        if (file_exists($path)) {
+            if ($request->header('X-Inertia')) {
+                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
+            }
+            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
+        }
+        abort(404);
+    })->name('event-list.filter');
 
-    Route::get('event', [EventController::class, 'create'])
-        ->name('event-create');
+    Route::get('event', function (Request $request) {
+        $path = base_path('public/angular.html');
+        if (file_exists($path)) {
+            if ($request->header('X-Inertia')) {
+                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
+            }
+            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
+        }
+        abort(404);
+    })->name('event-create');
 
-    Route::get('event/{id}/{tab?}/{ehotel?}', [EventController::class, 'create'])
-        ->name('event-edit');
+    Route::get('event/{id}/{tab?}/{ehotel?}', function (Request $request) {
+        $path = base_path('public/angular.html');
+        if (file_exists($path)) {
+            if ($request->header('X-Inertia')) {
+                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
+            }
+            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
+        }
+        abort(404);
+    })->name('event-edit');
 
     Route::post('event-save', [EventController::class, 'store'])
         ->name('event-save');

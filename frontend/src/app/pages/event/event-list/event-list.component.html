@@ -1,0 +1,221 @@
+<app-authenticated-layout>
+  <ng-container header>
+    <div class="d-sm-flex align-items-center justify-content-between mb-4 animate-in">
+      <h1 class="h3 mb-0 text-gray-800"><i class="fa fa-calendar-check me-2 text-primary"></i>Eventos</h1>
+      <a routerLink="/event" class="btn btn-primary btn-sm shadow-sm">
+        <i class="fas fa-plus me-1"></i> Novo Evento
+      </a>
+    </div>
+  </ng-container>
+
+  <div class="row">
+    <!-- Filtros de Busca -->
+    <div class="col-lg-12 mb-4 animate-in" style="animation-delay: 0.1s;">
+      <div class="card shadow-sm border-left-secondary">
+        <div class="card-header bg-white py-3">
+          <h6 class="m-0 font-weight-bold text-secondary">
+            <i class="fas fa-filter me-1"></i> Filtros de Pesquisa
+          </h6>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="onSearch()">
+            <div class="row align-items-end">
+              <!-- Data Início -->
+              <div class="col-md-3 mb-3">
+                <label for="startDate" class="form-label small font-weight-bold">Data de Início:</label>
+                <input type="date" id="startDate" class="form-control form-control-sm" [(ngModel)]="filters.startDate" name="startDate">
+              </div>
+
+              <!-- Data Fim -->
+              <div class="col-md-3 mb-3">
+                <label for="endDate" class="form-label small font-weight-bold">Data Final:</label>
+                <input type="date" id="endDate" class="form-control form-control-sm" [(ngModel)]="filters.endDate" name="endDate">
+              </div>
+
+              <!-- Cidade -->
+              <div class="col-md-3 mb-3">
+                <label for="city" class="form-label small font-weight-bold">Cidade:</label>
+                <input type="text" id="city" class="form-control form-control-sm" [(ngModel)]="filters.city" name="city" placeholder="Ex: São Paulo">
+              </div>
+
+              <!-- Consultor -->
+              <div class="col-md-3 mb-3">
+                <label for="consultant" class="form-label small font-weight-bold">Consultor:</label>
+                <select id="consultant" class="form-select form-select-sm" [(ngModel)]="filters.consultant" name="consultant">
+                  <option value="">Todos</option>
+                  <option *ngFor="let option of users" [value]="option.id">{{ option.name }}</option>
+                </select>
+              </div>
+
+              <!-- Cliente -->
+              <div class="col-md-3 mb-3">
+                <label for="client" class="form-label small font-weight-bold">Cliente:</label>
+                <select id="client" class="form-select form-select-sm" [(ngModel)]="filters.client" name="client">
+                  <option value="">Todos</option>
+                  <option *ngFor="let option of customers" [value]="option.id">{{ option.name }}</option>
+                </select>
+              </div>
+
+              <!-- Status Hotel -->
+              <div class="col-md-3 mb-3">
+                <label for="status" class="form-label small font-weight-bold">Status do Fornecedor:</label>
+                <select id="status" class="form-select form-select-sm" [(ngModel)]="filters.status" name="status">
+                  <option value="">Todos</option>
+                  <option *ngFor="let key of allStatusKeys" [value]="key">{{ allStatus[key]?.label }}</option>
+                </select>
+              </div>
+
+              <!-- Código Zendesk -->
+              <div class="col-md-3 mb-3">
+                <label for="eventCode" class="form-label small font-weight-bold">Código do Zendesk:</label>
+                <input type="text" id="eventCode" class="form-control form-control-sm" [(ngModel)]="filters.eventCode" name="eventCode" placeholder="Ex: ZK1234">
+              </div>
+
+              <!-- Botão Filtrar -->
+              <div class="col-md-3 mb-3 text-end">
+                <button type="submit" class="btn btn-secondary btn-sm shadow-sm w-100" [disabled]="isLoader">
+                  <i class="fas fa-search me-1"></i> Filtrar Resultados
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabela de Eventos -->
+    <div class="col-lg-12 animate-in" style="animation-delay: 0.2s;">
+      <div class="card shadow-sm border-left-primary">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-4">
+            <h5 class="card-title mb-0 text-primary font-weight-bold">
+              <i class="fas fa-list me-2"></i>Lista de Eventos
+            </h5>
+          </div>
+
+          <app-datatable
+            [pagination]="pagination"
+            [loading]="isLoader"
+            (pageChange)="onPageChange($event)">
+
+            <div class="table-responsive">
+              <table class="table table-hover align-middle" width="100%" cellspacing="0">
+                <thead class="table-light">
+                  <tr>
+                    <th scope="col" style="width: 60px;">#</th>
+                    <th scope="col">Cliente</th>
+                    <th scope="col">Nome do Evento</th>
+                    <th scope="col">Código Zendesk</th>
+                    <th scope="col">Data Início</th>
+                    <th scope="col">Data Fim</th>
+                    <th scope="col" class="text-end" style="width: 180px;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <ng-container *ngFor="let event of events">
+                    <!-- Linha Principal do Evento -->
+                    <tr class="cursor-pointer table-row-hover" [class.table-primary]="expandedEventId === event.id">
+                      <td (click)="toggleEventDetails(event)" class="font-weight-bold">
+                        <i class="fas" [ngClass]="expandedEventId === event.id ? 'fa-chevron-down text-primary' : 'fa-chevron-right text-muted'"></i> {{ event.id }}
+                      </td>
+                      <td (click)="toggleEventDetails(event)">{{ event.customer?.name || '-' }}</td>
+                      <td (click)="toggleEventDetails(event)">
+                        <span class="font-weight-bold text-dark">{{ event.name }}</span>
+                      </td>
+                      <td (click)="toggleEventDetails(event)"><code>{{ event.code }}</code></td>
+                      <td (click)="toggleEventDetails(event)">{{ event.date | date:'dd/MM/yyyy' }}</td>
+                      <td (click)="toggleEventDetails(event)">{{ event.date_final | date:'dd/MM/yyyy' }}</td>
+                      <td class="text-end">
+                        <div class="d-flex justify-content-end gap-2">
+                          <a [routerLink]="['/event', event.id]" class="btn btn-sm btn-info text-white shadow-sm" title="Editar Evento">
+                            <i class="fas fa-edit me-1"></i> Editar
+                          </a>
+                          <app-confirm-modal
+                            [btnClass]="'btn btn-sm btn-danger shadow-sm'"
+                            [modalTitle]="'Excluir Evento'"
+                            [message]="'Ação irreversível! Deseja realmente excluir o evento ' + event.name + ' e todos os seus vínculos?'"
+                            [okButtonLabel]="'Excluir'"
+                            (confirm)="deleteEvent(event.id)">
+                            <span modal-button><i class="fas fa-trash"></i></span>
+                          </app-confirm-modal>
+                        </div>
+                      </td>
+                    </tr>
+
+                    <!-- Linha de Detalhes Expandida (Providers Vinculados) -->
+                    <tr *ngIf="expandedEventId === event.id">
+                      <td colspan="7" class="p-0 border-0">
+                        <div class="expanded-providers-box p-4 bg-light border-bottom animate-in">
+                          <h6 class="font-weight-bold text-secondary mb-3">
+                            <i class="fas fa-hotel me-1 text-primary"></i> Fornecedores Vinculados neste Evento
+                          </h6>
+                          <div class="table-responsive bg-white rounded shadow-sm">
+                            <table class="table table-sm table-borderless align-middle mb-0">
+                              <thead class="table-secondary">
+                                <tr>
+                                  <th scope="col" class="ps-3">Tipo</th>
+                                  <th scope="col">Fornecedor</th>
+                                  <th scope="col">Cidade</th>
+                                  <th scope="col">Status Cotação</th>
+                                  <th scope="col" class="text-end pe-3">Ações rápidas</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr *ngFor="let prov of expandedProviders">
+                                  <td class="ps-3"><span class="badge bg-secondary">{{ prov.type }}</span></td>
+                                  <td class="font-weight-bold text-dark">{{ prov.name }}</td>
+                                  <td>{{ prov.city?.name || '-' }}</td>
+                                  <td>
+                                    <span class="badge" [ngClass]="{
+                                      'bg-primary': prov.status === 'dating_with_customer',
+                                      'bg-warning text-dark': prov.status === 'requested',
+                                      'bg-success': prov.status === 'Approved',
+                                      'bg-danger': prov.status === 'Cancelled'
+                                    }">
+                                      {{ getStatusLabel(prov.status) }}
+                                    </span>
+                                  </td>
+                                  <td class="text-end pe-3">
+                                    <a [routerLink]="['/event', event.id, prov.table === 'event_hotels' ? 1 : prov.table === 'event_abs' ? 2 : prov.table === 'event_halls' ? 3 : prov.table === 'event_adds' ? 4 : 5]" class="btn btn-sm btn-outline-primary py-0 px-2" title="Ir para aba do fornecedor">
+                                      <i class="fas fa-arrow-right"></i> Gerenciar
+                                    </a>
+                                  </td>
+                                </tr>
+                                <tr *ngIf="expandedProviders.length === 0">
+                                  <td colspan="5" class="text-center py-4 text-muted">
+                                    <i class="fas fa-info-circle me-1"></i> Nenhum fornecedor vinculado a este evento.
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </ng-container>
+
+                  <!-- Placeholders de carregamento -->
+                  <tr *ngFor="let i of [1,2,3,4,5].slice(0, isLoader ? 5 : 0)">
+                    <td colspan="7" class="text-center py-3">
+                      <div class="placeholder-glow">
+                        <span class="placeholder col-12 rounded"></span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- Sem resultados -->
+                  <tr *ngIf="events.length === 0 && !isLoader">
+                    <td colspan="7" class="text-center py-5 text-muted">
+                      <i class="fas fa-folder-open fa-3x mb-3 d-block opacity-25"></i>
+                      Nenhum evento encontrado no sistema.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </app-datatable>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-authenticated-layout>

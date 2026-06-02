@@ -223,5 +223,45 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('provider-transports/{id}/activate', [\App\Http\Controllers\Api\ProviderTransportApiController::class, 'activateItem']);
     Route::put('provider-transports/{id}/deactivate', [\App\Http\Controllers\Api\ProviderTransportApiController::class, 'deactivateItem']);
 
+    // Rotas de Eventos (Angular SPA)
+    Route::get('events/list', [\App\Http\Controllers\Api\EventApiController::class, 'listEvents']);
+    Route::get('events/{id}/edit-data', [\App\Http\Controllers\Api\EventApiController::class, 'getEditData']);
+    Route::post('events', [\App\Http\Controllers\Api\EventApiController::class, 'store']);
+    Route::delete('events/{id}', [\App\Http\Controllers\Api\EventApiController::class, 'destroy']);
+    Route::post('events/save-exchange-rate', [\App\Http\Controllers\Api\EventApiController::class, 'saveExchangeRate']);
+    Route::post('events/save-vl-faturamento', [\App\Http\Controllers\Api\EventApiController::class, 'saveValorFaturamento']);
+
+    // Rotas de Vinculação de Fornecedores de Evento e Opções
+    // 1. Hotel
+    Route::post('event-hotels', [\App\Http\Controllers\Api\EventHotelApiController::class, 'store']);
+    Route::delete('event-hotels/{id}', [\App\Http\Controllers\Api\EventHotelApiController::class, 'destroy']);
+    Route::post('event-hotels/opts', [\App\Http\Controllers\Api\EventHotelApiController::class, 'storeOpt']);
+    Route::delete('event-hotels/opts/{id}', [\App\Http\Controllers\Api\EventHotelApiController::class, 'destroyOpt']);
+
+    // 2. A&B
+    Route::post('event-abs', [\App\Http\Controllers\Api\EventABApiController::class, 'store']);
+    Route::delete('event-abs/{id}', [\App\Http\Controllers\Api\EventABApiController::class, 'destroy']);
+    Route::post('event-abs/opts', [\App\Http\Controllers\Api\EventABApiController::class, 'storeOpt']);
+    Route::delete('event-abs/opts/{id}', [\App\Http\Controllers\Api\EventABApiController::class, 'destroyOpt']);
+
+    // 3. Salão
+    Route::post('event-halls', [\App\Http\Controllers\Api\EventHallApiController::class, 'store']);
+    Route::delete('event-halls/{id}', [\App\Http\Controllers\Api\EventHallApiController::class, 'destroy']);
+    Route::post('event-halls/opts', [\App\Http\Controllers\Api\EventHallApiController::class, 'storeOpt']);
+    Route::delete('event-halls/opts/{id}', [\App\Http\Controllers\Api\EventHallApiController::class, 'destroyOpt']);
+
+    // 4. Adicional
+    Route::post('event-adds', [\App\Http\Controllers\Api\EventAddApiController::class, 'store']);
+    Route::delete('event-adds/{id}', [\App\Http\Controllers\Api\EventAddApiController::class, 'destroy']);
+    Route::post('event-adds/opts', [\App\Http\Controllers\Api\EventAddApiController::class, 'storeOpt']);
+    Route::delete('event-adds/opts/{id}', [\App\Http\Controllers\Api\EventAddApiController::class, 'destroyOpt']);
+
+    // 5. Transporte
+    Route::post('event-transports', [\App\Http\Controllers\Api\EventTransportApiController::class, 'store']);
+    Route::delete('event-transports/{id}', [\App\Http\Controllers\Api\EventTransportApiController::class, 'destroy']);
+    Route::post('event-transports/opts', [\App\Http\Controllers\Api\EventTransportApiController::class, 'storeOpt']);
+    Route::delete('event-transports/opts/{id}', [\App\Http\Controllers\Api\EventTransportApiController::class, 'destroyOpt']);
+
 });
+
 

@@ -1,0 +1,813 @@
+<app-authenticated-layout>
+  <!-- Loading overlay -->
+  <div *ngIf="isLoader" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-75" style="z-index: 2000;">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Carregando...</span>
+    </div>
+  </div>
+
+  <ng-container header>
+    <div class="d-sm-flex align-items-center justify-content-between mb-4 animate-in">
+      <h1 class="h3 mb-0 text-gray-800">
+        <i class="fa fa-calendar-check me-2 text-primary"></i>
+        {{ eventId ? 'Editar Evento: ' + (event?.name || '') : 'Cadastro Inicial' }}
+      </h1>
+      <a routerLink="/event-list" class="btn btn-secondary btn-sm shadow-sm">
+        <i class="fas fa-arrow-left me-1"></i> Voltar para Lista
+      </a>
+    </div>
+  </ng-container>
+
+  <!-- TAB NAVIGATION -->
+  <div class="row">
+    <div class="col-lg-12">
+      <ul class="nav nav-tabs animate-in" style="animation-delay: 0.05s;">
+        <li class="nav-item">
+          <a class="nav-link" [class.active]="activeTab === 0" (click)="activeTab = 0" style="cursor: pointer;">
+            <i class="fas fa-info-circle me-1"></i> Básico
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" 
+             [class.active]="activeTab === 1" 
+             [class.disabled]="!event || !hasPermission('hotel_operator') && !hasPermission('event_admin')"
+             (click)="event && (hasPermission('hotel_operator') || hasPermission('event_admin')) && activeTab = 1" 
+             style="cursor: pointer;">
+            <i class="fas fa-hotel me-1"></i> Hotel
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" 
+             [class.active]="activeTab === 2" 
+             [class.disabled]="!event || !hasPermission('hotel_operator') && !hasPermission('event_admin')"
+             (click)="event && (hasPermission('hotel_operator') || hasPermission('event_admin')) && activeTab = 2" 
+             style="cursor: pointer;">
+            <i class="fas fa-utensils me-1"></i> A&B
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" 
+             [class.active]="activeTab === 3" 
+             [class.disabled]="!event || !hasPermission('hotel_operator') && !hasPermission('event_admin')"
+             (click)="event && (hasPermission('hotel_operator') || hasPermission('event_admin')) && activeTab = 3" 
+             style="cursor: pointer;">
+            <i class="fas fa-door-open me-1"></i> Salões
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" 
+             [class.active]="activeTab === 4" 
+             [class.disabled]="!event || !hasPermission('hotel_operator') && !hasPermission('event_admin')"
+             (click)="event && (hasPermission('hotel_operator') || hasPermission('event_admin')) && activeTab = 4" 
+             style="cursor: pointer;">
+            <i class="fas fa-concierge-bell me-1"></i> Adicionais
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" 
+             [class.active]="activeTab === 5" 
+             [class.disabled]="!event || !hasPermission('land_operator') && !hasPermission('event_admin')"
+             (click)="event && (hasPermission('land_operator') || hasPermission('event_admin')) && activeTab = 5" 
+             style="cursor: pointer;">
+            <i class="fas fa-bus me-1"></i> Transporte
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-12">
+      <!-- ==================== TABS CONTENT ==================== -->
+
+      <!-- TAB 0: BÁSICO -->
+      <div *ngIf="activeTab === 0" class="card shadow-sm border-left-primary mb-4 animate-in">
+        <div class="card-body">
+          <form (ngSubmit)="saveBasic()">
+            <div class="row">
+              <!-- Coluna 1 -->
+              <div class="col-lg-4">
+                <div class="form-group mb-3">
+                  <label for="name" class="form-label font-weight-bold">Nome do Evento: <span class="text-danger">*</span></label>
+                  <input type="text" id="name" class="form-control" [class.is-invalid]="errors.name" [(ngModel)]="basicForm.name" name="name" required />
+                  <div *ngIf="errors.name" class="text-danger mt-1">
+                    <small *ngFor="let err of errors.name" class="d-block">{{ err }}</small>
+                  </div>
+                </div>
+
+                <div class="form-group mb-3">
+                  <label for="code" class="form-label font-weight-bold">Código do Zendesk: <span class="text-danger">*</span></label>
+                  <input type="text" id="code" class="form-control" [class.is-invalid]="errors.code" [(ngModel)]="basicForm.code" name="code" required />
+                  <div *ngIf="errors.code" class="text-danger mt-1">
+                    <small *ngFor="let err of errors.code" class="d-block">{{ err }}</small>
+                  </div>
+                </div>
+
+                <!-- Locais dinâmicos -->
+                <div class="border rounded p-3 bg-light">
+                  <h6 class="font-weight-bold text-primary mb-3"><i class="fas fa-map-marker-alt me-1"></i> Locais do Evento</h6>
+                  <div *ngFor="let country of basicForm.countries; let i = index" class="mb-3 p-2 border-bottom">
+                    <div class="form-group mb-2">
+                      <label [for]="'country-' + i" class="form-label small font-weight-bold">País:</label>
+                      <input [id]="'country-' + i" type="text" class="form-control form-control-sm" [(ngModel)]="country.pais" name="country_{{i}}" required />
+                    </div>
+                    <div class="form-group mb-2">
+                      <label [for]="'city-' + i" class="form-label small font-weight-bold">Cidade:</label>
+                      <input [id]="'city-' + i" type="text" class="form-control form-control-sm" [(ngModel)]="country.cidade" name="city_{{i}}" required />
+                    </div>
+                    <button *ngIf="basicForm.countries.length > 1" type="button" (click)="removeCountry(i)" class="btn btn-sm btn-outline-danger mt-1">
+                      <i class="fas fa-trash me-1"></i> Remover Local
+                    </button>
+                  </div>
+
+                  <button type="button" (click)="addCountry()" class="btn btn-sm btn-info w-100 mt-2">
+                    <i class="fas fa-plus me-1"></i> Adicionar Local
+                  </button>
+                </div>
+              </div>
+
+              <!-- Coluna 2 -->
+              <div class="col-lg-4">
+                <div class="form-group mb-3">
+                  <label for="requester" class="form-label font-weight-bold">Solicitante: <span class="text-danger">*</span></label>
+                  <input type="text" id="requester" class="form-control" [class.is-invalid]="errors.requester" [(ngModel)]="basicForm.requester" name="requester" required />
+                  <div *ngIf="errors.requester" class="text-danger mt-1">
+                    <small *ngFor="let err of errors.requester" class="d-block">{{ err }}</small>
+                  </div>
+                </div>
+
+                <div class="form-group mb-3">
+                  <label for="customer" class="form-label font-weight-bold">Empresa / Cliente: <span class="text-danger">*</span></label>
+                  <select id="customer" class="form-select" [class.is-invalid]="errors.customer" [(ngModel)]="basicForm.customer" (change)="onCustomerChange()" name="customer" required>
+                    <option value="">.:: Selecione ::.</option>
+                    <option *ngFor="let option of customers" [value]="option.id">{{ option.name }}</option>
+                  </select>
+                  <div *ngIf="errors.customer" class="text-danger mt-1">
+                    <small *ngFor="let err of errors.customer" class="d-block">{{ err }}</small>
+                  </div>
+                </div>
+
+                <div class="form-group mb-3">
+                  <label for="sector" class="form-label font-weight-bold">Setor: <span class="text-danger">*</span></label>
+                  <input type="text" id="sector" class="form-control" [class.is-invalid]="errors.sector" [(ngModel)]="basicForm.sector" name="sector" required />
+                  <div *ngIf="errors.sector" class="text-danger mt-1">
+                    <small *ngFor="let err of errors.sector" class="d-block">{{ err }}</small>
+                  </div>
+                </div>
+
+                <div class="form-group mb-3">
+                  <label for="paxBase" class="form-label font-weight-bold">Base de Pax: <span class="text-danger">*</span></label>
+                  <input type="text" id="paxBase" class="form-control" [class.is-invalid]="errors.paxBase" [(ngModel)]="basicForm.paxBase" name="paxBase" required />
+                  <div *ngIf="errors.paxBase" class="text-danger mt-1">
+                    <small *ngFor="let err of errors.paxBase" class="d-block">{{ err }}</small>
+                  </div>
+                </div>
+
+                <div class="form-group mb-3">
+                  <label for="cc" class="form-label font-weight-bold">Centro de Custo: <span class="text-danger">*</span></label>
+                  <input type="text" id="cc" class="form-control" [class.is-invalid]="errors.cc" [(ngModel)]="basicForm.cc" name="cc" required />
+                  <div *ngIf="errors.cc" class="text-danger mt-1">
+                    <small *ngFor="let err of errors.cc" class="d-block">{{ err }}</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Coluna 3 -->
+              <div class="col-lg-4">
+                <div class="form-group mb-3">
+                  <label for="date" class="form-label font-weight-bold">Data de Início: <span class="text-danger">*</span></label>
+                  <input type="date" id="date" class="form-control" [class.is-invalid]="errors.date" [(ngModel)]="basicForm.date" name="date" required />
+                  <div *ngIf="errors.date" class="text-danger mt-1">
+                    <small *ngFor="let err of errors.date" class="d-block">{{ err }}</small>
+                  </div>
+                </div>
+
+                <div class="form-group mb-3">
+                  <label for="date_final" class="form-label font-weight-bold">Data Final: <span class="text-danger">*</span></label>
+                  <input type="date" id="date_final" class="form-control" [class.is-invalid]="errors.date_final" [(ngModel)]="basicForm.date_final" name="date_final" required />
+                  <div *ngIf="errors.date_final" class="text-danger mt-1">
+                    <small *ngFor="let err of errors.date_final" class="d-block">{{ err }}</small>
+                  </div>
+                </div>
+
+                <div class="form-group mb-3">
+                  <label for="crd_id" class="form-label font-weight-bold">CRD: <span class="text-danger">*</span></label>
+                  <select id="crd_id" class="form-select" [class.is-invalid]="errors.crd_id" [(ngModel)]="basicForm.crd_id" name="crd_id" required>
+                    <option value="">.:: Selecione ::.</option>
+                    <option *ngFor="let option of crdsFiltered" [value]="option.id">{{ option.number }}</option>
+                  </select>
+                  <div *ngIf="errors.crd_id" class="text-danger mt-1">
+                    <small *ngFor="let err of errors.crd_id" class="d-block">{{ err }}</small>
+                  </div>
+                </div>
+
+                <div class="form-group mb-3">
+                  <label for="hotel_operator" class="form-label font-weight-bold">Operador - Hotel:</label>
+                  <select id="hotel_operator" class="form-select" [(ngModel)]="basicForm.hotel_operator" name="hotel_operator">
+                    <option value="">.:: Selecione ::.</option>
+                    <option *ngFor="let option of users" [value]="option.id">{{ option.name }}</option>
+                  </select>
+                </div>
+
+                <div class="form-group mb-3">
+                  <label for="land_operator" class="form-label font-weight-bold">Operador - Terrestre:</label>
+                  <select id="land_operator" class="form-select" [(ngModel)]="basicForm.land_operator" name="land_operator">
+                    <option value="">.:: Selecione ::.</option>
+                    <option *ngFor="let option of users" [value]="option.id">{{ option.name }}</option>
+                  </select>
+                </div>
+
+                <div class="form-group mb-3">
+                  <label for="air_operator" class="form-label font-weight-bold">Operador - Aéreo:</label>
+                  <select id="air_operator" class="form-select" [(ngModel)]="basicForm.air_operator" name="air_operator">
+                    <option value="">.:: Selecione ::.</option>
+                    <option *ngFor="let option of users" [value]="option.id">{{ option.name }}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+              <button type="submit" class="btn btn-primary px-4 shadow-sm" [disabled]="processing">
+                <span *ngIf="processing" class="spinner-border spinner-border-sm me-1"></span>
+                <i class="fas fa-save me-1"></i> Salvar e Avançar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ==================== PROVIDER TAB WRAPPERS (1 TO 5) ==================== -->
+      <div *ngIf="activeTab > 0" class="animate-in">
+        
+        <!-- Tab Content Header Actions -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="m-0 font-weight-bold text-primary">
+            <i class="fas fa-list me-1"></i>
+            {{ activeTab === 1 ? 'Hotéis Vinculados' : activeTab === 2 ? 'Alimentação e Bebidas' : activeTab === 3 ? 'Salões Vinculados' : activeTab === 4 ? 'Serviços Adicionais' : 'Transportes Terrestres' }}
+          </h5>
+          
+          <div class="d-flex gap-2">
+            <!-- View Details Toggle Button -->
+            <button type="button" class="btn btn-sm btn-info text-white shadow-sm" 
+                    (click)="toggleDetails(activeTab === 1 ? 'hotel' : activeTab === 2 ? 'ab' : activeTab === 3 ? 'hall' : activeTab === 4 ? 'add' : 'transport')">
+              <i class="fas" [ngClass]="(activeTab === 1 ? showDetailsHotel : activeTab === 2 ? showDetailsAB : activeTab === 3 ? showDetailsHall : activeTab === 4 ? showDetailsAdd : showDetailsTransport) ? 'fa-eye-slash' : 'fa-eye'"></i>
+              {{ (activeTab === 1 ? showDetailsHotel : activeTab === 2 ? showDetailsAB : activeTab === 3 ? showDetailsHall : activeTab === 4 ? showDetailsAdd : showDetailsTransport) ? ' Ocultar Detalhes' : ' Exibir Detalhes' }}
+            </button>
+
+            <!-- Vincular Fornecedor button -->
+            <button type="button" class="btn btn-sm btn-success shadow-sm" 
+                    (click)="openAddProviderLink(activeTab === 1 ? 'hotel' : activeTab === 2 ? 'ab' : activeTab === 3 ? 'hall' : activeTab === 4 ? 'add' : 'transport')">
+              <i class="fas fa-plus me-1"></i> Vincular Novo Fornecedor
+            </button>
+          </div>
+        </div>
+
+        <!-- Linked Providers Loop -->
+        <ng-container *ngFor="let item of (activeTab === 1 ? eventHotels : activeTab === 2 ? eventABs : activeTab === 3 ? eventHalls : activeTab === 4 ? eventAdds : eventTransports); let provIdx = index">
+          <div class="card card-provider-group mb-4 shadow-sm">
+            <div class="card-header bg-light py-3 d-sm-flex align-items-center justify-content-between">
+              <div>
+                <h6 class="m-0 font-weight-bold text-primary">
+                  Fornecedor {{ provIdx + 1 }}: {{ item.hotel?.name || item.ab?.name || item.hall?.name || item.add?.name || item.transport?.name }}
+                  <span class="badge ms-2" [ngClass]="item.hotel?.national || item.ab?.national || item.hall?.national || item.add?.national || item.transport?.national ? 'bg-success' : 'bg-info'">
+                    {{ (item.hotel?.national || item.ab?.national || item.hall?.national || item.add?.national || item.transport?.national) ? 'Nacional' : 'Internacional' }}
+                  </span>
+                </h6>
+              </div>
+              <div class="d-flex gap-2">
+                <button type="button" class="btn btn-sm btn-outline-info" (click)="openAddProviderLink(activeTab === 1 ? 'hotel' : activeTab === 2 ? 'ab' : activeTab === 3 ? 'hall' : activeTab === 4 ? 'add' : 'transport', item)">
+                  <i class="fas fa-edit me-1"></i> Editar Cadastro
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-success" (click)="openAddOpt(activeTab === 1 ? 'hotel' : activeTab === 2 ? 'ab' : activeTab === 3 ? 'hall' : activeTab === 4 ? 'add' : 'transport', item.id)">
+                  <i class="fas fa-plus me-1"></i> Adicionar Tarifa
+                </button>
+                <app-confirm-modal
+                  [btnClass]="'btn btn-sm btn-outline-danger'"
+                  [modalTitle]="'Remover Vínculo'"
+                  [message]="'Tem certeza de que deseja remover ' + (item.hotel?.name || item.ab?.name || item.hall?.name || item.add?.name || item.transport?.name) + ' do evento?'"
+                  [okButtonLabel]="'Remover'"
+                  (confirm)="deleteProviderLink(activeTab === 1 ? 'hotel' : activeTab === 2 ? 'ab' : activeTab === 3 ? 'hall' : activeTab === 4 ? 'add' : 'transport', item.id)">
+                  <span modal-button><i class="fas fa-trash"></i> Excluir Vínculo</span>
+                </app-confirm-modal>
+              </div>
+            </div>
+            
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-sm table-bordered text-center align-middle mb-0" style="min-width: 1200px;">
+                  <thead class="table-light">
+                    <tr>
+                      <th scope="col" class="sticky-col">Serviço/Detalhe</th>
+                      <th scope="col" class="sticky-col">Broker</th>
+                      <th scope="col" *ngIf="activeTab === 1">Regime</th>
+                      <th scope="col" *ngIf="activeTab === 1 || activeTab === 3">Propósito</th>
+                      <th scope="col" *ngIf="activeTab === 1">Apto</th>
+                      <th scope="col" *ngIf="activeTab === 2">Tipo Serviço</th>
+                      <th scope="col" *ngIf="activeTab === 2">Local</th>
+                      <th scope="col" *ngIf="activeTab === 4">Frequência</th>
+                      <th scope="col" *ngIf="activeTab === 4">Medida</th>
+                      <th scope="col" *ngIf="activeTab === 5">Veículo</th>
+                      <th scope="col" *ngIf="activeTab === 5">Modelo</th>
+                      <th scope="col" *ngIf="activeTab === 5">Marca</th>
+                      <th scope="col">IN</th>
+                      <th scope="col">OUT</th>
+                      <th scope="col">QTD</th>
+                      <th scope="col">Dias</th>
+                      <th scope="col" class="bg-success text-white">Comissão (%)</th>
+                      <th scope="col" class="bg-success text-white">Unidade Venda</th>
+                      <th scope="col" class="bg-success text-white">Total Venda</th>
+                      <th scope="col" class="bg-warning text-dark">Unidade Custo</th>
+                      <th scope="col" class="bg-warning text-dark">Custo TTL</th>
+                      <th scope="col">Prop. Recebida</th>
+                      <th scope="col">%</th>
+
+                      <!-- Details Tax Columns -->
+                      <ng-container *ngIf="activeTab === 1 ? showDetailsHotel : activeTab === 2 ? showDetailsAB : activeTab === 3 ? showDetailsHall : activeTab === 4 ? showDetailsAdd : showDetailsTransport">
+                        <th class="bg-light text-primary">ISS Clt ({{ item.iss_percent }}%)</th>
+                        <th class="bg-light text-primary">ISS Cst ({{ item.iss_percent }}%)</th>
+                        <th class="bg-light text-primary">Serv Clt ({{ item.service_percent }}%)</th>
+                        <th class="bg-light text-primary">Serv Cst ({{ item.service_percent }}%)</th>
+                        <th class="bg-light text-primary">IVA Clt ({{ item.iva_percent }}%)</th>
+                        <th class="bg-light text-primary">IVA Cst ({{ item.iva_percent }}%)</th>
+                        <th class="bg-light text-primary" *ngIf="activeTab === 1 || activeTab === 2">Tx. Tur Clt</th>
+                        <th class="bg-light text-primary" *ngIf="activeTab === 1 || activeTab === 2">Tx. Tur Cst</th>
+                      </ng-container>
+                      <th scope="col" style="width: 100px;">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- Empty list placeholder -->
+                    <tr *ngIf="(item.event_hotels_opt || item.event_ab_opts || item.event_hall_opts || item.event_add_opts || item.event_transport_opts)?.length === 0">
+                      <td [attr.colspan]="activeTab === 1 ? (showDetailsHotel ? 30 : 20) : activeTab === 2 ? (showDetailsAB ? 29 : 19) : (activeTab === 1 ? showDetailsHotel : activeTab === 2 ? showDetailsAB : activeTab === 3 ? showDetailsHall : activeTab === 4 ? showDetailsAdd : showDetailsTransport) ? 28 : 18" class="py-4 text-muted">
+                        <i class="fas fa-info-circle me-1"></i> Nenhuma tarifa ou detalhe cadastrado para este fornecedor.
+                      </td>
+                    </tr>
+
+                    <!-- Options Loop -->
+                    <tr *ngFor="let opt of (item.event_hotels_opt || item.event_ab_opts || item.event_hall_opts || item.event_add_opts || item.event_transport_opts)">
+                      <!-- Service/Type Display -->
+                      <td class="font-weight-bold bg-white sticky-col text-dark">
+                        {{ activeTab === 1 ? (opt.category?.name || 'Apto') : (opt.service?.name || '-') }}
+                      </td>
+                      <td class="bg-white sticky-col">{{ opt.broker?.name || '-' }}</td>
+                      
+                      <!-- Tab Specific Columns -->
+                      <td *ngIf="activeTab === 1">{{ opt.regime?.name || '-' }}</td>
+                      <td *ngIf="activeTab === 1 || activeTab === 3">{{ opt.purpose?.name || '-' }}</td>
+                      <td *ngIf="activeTab === 1">{{ opt.apto?.name || '-' }}</td>
+                      <td *ngIf="activeTab === 2">{{ opt.service_type?.name || '-' }}</td>
+                      <td *ngIf="activeTab === 2">{{ opt.local?.name || '-' }}</td>
+                      <td *ngIf="activeTab === 4">{{ opt.frequency?.name || '-' }}</td>
+                      <td *ngIf="activeTab === 4">{{ opt.measure?.name || '-' }}</td>
+                      <td *ngIf="activeTab === 5">{{ opt.vehicle?.name || '-' }}</td>
+                      <td *ngIf="activeTab === 5">{{ opt.car_model?.name || '-' }}</td>
+                      <td *ngIf="activeTab === 5">{{ opt.brand?.name || '-' }}</td>
+
+                      <td>{{ opt.in | date:'dd/MM/yyyy' }}</td>
+                      <td>{{ opt.out | date:'dd/MM/yyyy' }}</td>
+                      <td>{{ opt.count || 0 }}</td>
+                      <td>{{ daysBetween(opt.in, opt.out, activeTab === 2) }}</td>
+                      
+                      <!-- Sale and Cost Calculations -->
+                      <td class="bg-success bg-opacity-10 text-success font-weight-bold">{{ opt.kickback }}%</td>
+                      <td class="bg-success bg-opacity-10 text-success font-weight-bold">
+                        {{ formatCurrency(unitSale(opt), item.currency?.sigla) }}
+                      </td>
+                      <td class="bg-success text-white font-weight-bold">
+                        {{ formatCurrency(unitSale(opt) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count, item.currency?.sigla) }}
+                      </td>
+                      
+                      <td class="bg-warning bg-opacity-10 text-dark font-weight-bold">
+                        {{ formatCurrency(unitCost(opt), item.currency?.sigla) }}
+                      </td>
+                      <td class="bg-warning text-dark font-weight-bold">
+                        {{ formatCurrency(unitCost(opt) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count, item.currency?.sigla) }}
+                      </td>
+                      <td>{{ formatCurrency(opt.received_proposal || 0, item.currency?.sigla) }}</td>
+                      <td>{{ opt.received_proposal_percent }}%</td>
+
+                      <!-- Details Tax Values -->
+                      <ng-container *ngIf="activeTab === 1 ? showDetailsHotel : activeTab === 2 ? showDetailsAB : activeTab === 3 ? showDetailsHall : activeTab === 4 ? showDetailsAdd : showDetailsTransport">
+                        <td class="bg-light text-primary font-weight-bold">
+                          {{ formatCurrency((unitSale(opt) * parseFloat(item.iss_percent || 0)) / 100 * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count, item.currency?.sigla) }}
+                        </td>
+                        <td class="bg-light text-primary">
+                          {{ formatCurrency((unitCost(opt) * parseFloat(item.iss_percent || 0)) / 100 * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count, item.currency?.sigla) }}
+                        </td>
+                        <td class="bg-light text-primary font-weight-bold">
+                          {{ formatCurrency((unitSale(opt) * parseFloat(item.service_percent || 0)) / 100 * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count, item.currency?.sigla) }}
+                        </td>
+                        <td class="bg-light text-primary">
+                          {{ formatCurrency((unitCost(opt) * parseFloat(item.service_percent || 0)) / 100 * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count, item.currency?.sigla) }}
+                        </td>
+                        <td class="bg-light text-primary font-weight-bold">
+                          {{ formatCurrency((unitSale(opt) * parseFloat(item.iva_percent || 0)) / 100 * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count, item.currency?.sigla) }}
+                        </td>
+                        <td class="bg-light text-primary">
+                          {{ formatCurrency((unitCost(opt) * parseFloat(item.iva_percent || 0)) / 100 * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count, item.currency?.sigla) }}
+                        </td>
+                        <td class="bg-light text-primary font-weight-bold" *ngIf="activeTab === 1 || activeTab === 2">
+                          {{ formatCurrency(parseFloat(item.service_charge || 0) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count, item.currency?.sigla) }}
+                        </td>
+                        <td class="bg-light text-primary" *ngIf="activeTab === 1 || activeTab === 2">
+                          {{ formatCurrency(parseFloat(item.service_charge || 0) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count, item.currency?.sigla) }}
+                        </td>
+                      </ng-container>
+
+                      <!-- Action Buttons -->
+                      <td>
+                        <div class="d-flex justify-content-center gap-1">
+                          <button type="button" class="btn btn-circle btn-sm btn-info text-white" 
+                                  [disabled]="statusBlockEdit(item)" 
+                                  (click)="openAddOpt(activeTab === 1 ? 'hotel' : activeTab === 2 ? 'ab' : activeTab === 3 ? 'hall' : activeTab === 4 ? 'add' : 'transport', item.id, opt)">
+                            <i class="fas fa-edit"></i>
+                          </button>
+                          <button type="button" class="btn btn-circle btn-sm btn-secondary text-white" 
+                                  [disabled]="statusBlockEdit(item)" 
+                                  (click)="openAddOpt(activeTab === 1 ? 'hotel' : activeTab === 2 ? 'ab' : activeTab === 3 ? 'hall' : activeTab === 4 ? 'add' : 'transport', item.id, opt, true)">
+                            <i class="fas fa-clone"></i>
+                          </button>
+                          <app-confirm-modal
+                            [btnClass]="'btn btn-circle btn-sm btn-danger'"
+                            [modalTitle]="'Remover Tarifa'"
+                            [message]="'Deseja realmente remover esta tarifa?'"
+                            [okButtonLabel]="'Remover'"
+                            (confirm)="deleteOpt(activeTab === 1 ? 'hotel' : activeTab === 2 ? 'ab' : activeTab === 3 ? 'hall' : activeTab === 4 ? 'add' : 'transport', opt.id)">
+                            <span modal-button><i class="fas fa-trash"></i></span>
+                          </app-confirm-modal>
+                        </div>
+                      </td>
+                    </tr>
+
+                    <!-- Total / Summary Row -->
+                    <tr class="table-subheader">
+                      <td class="sticky-col bg-light text-dark font-weight-bold">Diária Média:</td>
+                      <td class="sticky-col bg-light text-dark font-weight-bold">{{ formatCurrency(average(item, activeTab === 2), item.currency?.sigla) }}</td>
+                      <td [attr.colspan]="activeTab === 1 ? 3 : 1" *ngIf="activeTab === 1 || activeTab === 2 || activeTab === 3 || activeTab === 4 || activeTab === 5"></td>
+                      
+                      <td class="font-weight-bold">Room Nights:</td>
+                      <td class="font-weight-bold text-dark">{{ roomNights(item, activeTab === 2) }}</td>
+                      <td class="font-weight-bold"># Qtd:</td>
+                      <td>{{ sumCount(item) }}</td>
+                      <td>{{ sumNts(item, activeTab === 2) }}</td>
+                      
+                      <td class="bg-success text-white font-weight-bold" colspan="2">Total Venda:</td>
+                      <td class="bg-success text-white font-weight-bold">{{ formatCurrency(sumSale(item, activeTab === 2), item.currency?.sigla) }}</td>
+                      
+                      <td class="bg-warning text-dark font-weight-bold">Total Custo:</td>
+                      <td class="bg-warning text-dark font-weight-bold">{{ formatCurrency(sumCost(item, activeTab === 2), item.currency?.sigla) }}</td>
+                      
+                      <td>Margem %</td>
+                      <td class="font-weight-bold">
+                        {{ sumSale(item, activeTab === 2) > 0 ? ((1 - (sumCost(item, activeTab === 2) / sumSale(item, activeTab === 2))) * 100 | number:'1.2-2') : '0.00' }}%
+                      </td>
+
+                      <!-- Summary Tax Columns -->
+                      <ng-container *ngIf="activeTab === 1 ? showDetailsHotel : activeTab === 2 ? showDetailsAB : activeTab === 3 ? showDetailsHall : activeTab === 4 ? showDetailsAdd : showDetailsTransport">
+                        <td class="bg-light text-primary font-weight-bold">{{ formatCurrency(sumTaxes(item, 'iss', activeTab === 2), item.currency?.sigla) }}</td>
+                        <td class="bg-light text-primary font-weight-bold">{{ formatCurrency(sumCost(item, activeTab === 2) * parseFloat(item.iss_percent || 0) / 100, item.currency?.sigla) }}</td>
+                        <td class="bg-light text-primary font-weight-bold">{{ formatCurrency(sumTaxes(item, 'serv', activeTab === 2), item.currency?.sigla) }}</td>
+                        <td class="bg-light text-primary font-weight-bold">{{ formatCurrency(sumCost(item, activeTab === 2) * parseFloat(item.service_percent || 0) / 100, item.currency?.sigla) }}</td>
+                        <td class="bg-light text-primary font-weight-bold">{{ formatCurrency(sumTaxes(item, 'iva', activeTab === 2), item.currency?.sigla) }}</td>
+                        <td class="bg-light text-primary font-weight-bold">{{ formatCurrency(sumCost(item, activeTab === 2) * parseFloat(item.iva_percent || 0) / 100, item.currency?.sigla) }}</td>
+                        <td class="bg-light text-primary font-weight-bold" *ngIf="activeTab === 1 || activeTab === 2">{{ formatCurrency(sumTaxes(item, 'sc', activeTab === 2), item.currency?.sigla) }}</td>
+                        <td class="bg-light text-primary font-weight-bold" *ngIf="activeTab === 1 || activeTab === 2">{{ formatCurrency(sumTaxes(item, 'sc', activeTab === 2), item.currency?.sigla) }}</td>
+                      </ng-container>
+                      <td></td>
+                    </tr>
+
+                    <!-- Internal Observations Row -->
+                    <tr>
+                      <td class="bg-white sticky-col text-start font-weight-bold" colspan="2">OBSERVAÇÃO INTERNA:</td>
+                      <td class="text-start text-dark" [attr.colspan]="activeTab === 1 ? 9 : activeTab === 2 ? 7 : 7">
+                        {{ item.internal_observation || '-' }}
+                      </td>
+                      <td colspan="2" class="font-weight-bold">Faturamento Venda:</td>
+                      <td colspan="2" class="bg-success text-white font-weight-bold fs-5">
+                        {{ formatCurrency(sumSale(item, activeTab === 2) + sumTaxes(item, 'iss', activeTab === 2) + sumTaxes(item, 'serv', activeTab === 2) + sumTaxes(item, 'iva', activeTab === 2) + sumTaxes(item, 'sc', activeTab === 2), item.currency?.sigla) }}
+                      </td>
+                      <ng-container *ngIf="activeTab === 1 ? showDetailsHotel : activeTab === 2 ? showDetailsAB : activeTab === 3 ? showDetailsHall : activeTab === 4 ? showDetailsAdd : showDetailsTransport">
+                        <td [attr.colspan]="activeTab === 1 || activeTab === 2 ? 8 : 6"></td>
+                      </ng-container>
+                      <td></td>
+                    </tr>
+
+                    <!-- Customer Observations Row -->
+                    <tr>
+                      <td class="bg-white sticky-col text-start font-weight-bold" colspan="2">OBSERVAÇÃO CLIENTE:</td>
+                      <td class="text-start text-dark" [attr.colspan]="activeTab === 1 ? 9 : activeTab === 2 ? 7 : 7">
+                        {{ item.customer_observation || '-' }}
+                      </td>
+                      <td colspan="2" class="font-weight-bold">Faturamento Custo:</td>
+                      <td colspan="2" class="bg-warning text-dark font-weight-bold fs-5">
+                        {{ formatCurrency(sumCost(item, activeTab === 2) + (sumCost(item, activeTab === 2) * parseFloat(item.iss_percent || 0) / 100) + (sumCost(item, activeTab === 2) * parseFloat(item.service_percent || 0) / 100) + (sumCost(item, activeTab === 2) * parseFloat(item.iva_percent || 0) / 100) + sumTaxes(item, 'sc', activeTab === 2), item.currency?.sigla) }}
+                      </td>
+                      <ng-container *ngIf="activeTab === 1 ? showDetailsHotel : activeTab === 2 ? showDetailsAB : activeTab === 3 ? showDetailsHall : activeTab === 4 ? showDetailsAdd : showDetailsTransport">
+                        <td [attr.colspan]="activeTab === 1 || activeTab === 2 ? 8 : 6"></td>
+                      </ng-container>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- Empty Page State -->
+        <div *ngIf="(activeTab === 1 ? eventHotels : activeTab === 2 ? eventABs : activeTab === 3 ? eventHalls : activeTab === 4 ? eventAdds : eventTransports)?.length === 0" class="alert alert-secondary py-5 text-center shadow-sm">
+          <i class="fas fa-folder-open fa-3x mb-3 text-muted"></i>
+          <h5 class="text-secondary font-weight-bold">Nenhum fornecedor vinculado</h5>
+          <p class="text-muted mb-0">Use o botão no topo para vincular um fornecedor a este evento.</p>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== DIALOG MODALS ==================== -->
+
+  <!-- MODAL 1: VINCULAR FORNECEDOR -->
+  <div *ngIf="showProviderLinkForm" class="modal-backdrop-blur">
+    <div class="modal-dialog">
+      <div class="modal-content shadow rounded-3xl border-0">
+        <div class="modal-header bg-primary text-white py-3">
+          <h5 class="modal-title font-weight-bold">
+            <i class="fas" [ngClass]="providerLinkType === 'hotel' ? 'fa-hotel' : providerLinkType === 'ab' ? 'fa-utensils' : providerLinkType === 'hall' ? 'fa-door-open' : providerLinkType === 'add' ? 'fa-concierge-bell' : 'fa-bus'"></i>
+            {{ providerLinkForm.id ? 'Editar Vínculo' : 'Vincular Novo Fornecedor' }}
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="closeProviderLinkForm()"></button>
+        </div>
+        <div class="modal-body p-4 bg-light">
+          <form (ngSubmit)="saveProviderLink()">
+            <div class="row">
+              <!-- Select Fornecedor -->
+              <div class="col-md-6 form-group mb-3">
+                <label for="provider_id" class="form-label font-weight-bold">Fornecedor: <span class="text-danger">*</span></label>
+                <select id="provider_id" class="form-select" [class.is-invalid]="errors.provider_id" [(ngModel)]="providerLinkForm.provider_id" name="provider_id" required [disabled]="providerLinkForm.id > 0">
+                  <option value="">.:: Selecione ::.</option>
+                  <option *ngFor="let option of (providerLinkType === 'hotel' || providerLinkType === 'ab' ? providers : providerLinkType === 'add' ? providersService : providersTransport)" [value]="option.id">
+                    {{ option.name }} ({{ option.city?.name || 'S/ Cidade' }})
+                  </option>
+                </select>
+                <div *ngIf="errors.provider_id" class="text-danger mt-1">
+                  <small *ngFor="let err of errors.provider_id" class="d-block">{{ err }}</small>
+                </div>
+              </div>
+
+              <!-- Select Moeda -->
+              <div class="col-md-6 form-group mb-3">
+                <label for="currency_id" class="form-label font-weight-bold">Moeda: <span class="text-danger">*</span></label>
+                <select id="currency_id" class="form-select" [class.is-invalid]="errors.currency_id" [(ngModel)]="providerLinkForm.currency_id" name="currency_id" required>
+                  <option value="">.:: Selecione ::.</option>
+                  <option *ngFor="let option of currencies" [value]="option.id">{{ option.name }} ({{ option.sigla }})</option>
+                </select>
+              </div>
+
+              <!-- ISS %, Service %, IVA % -->
+              <div class="col-md-4 form-group mb-3">
+                <label for="iss_percent" class="form-label font-weight-bold">ISS (%):</label>
+                <input type="number" step="0.01" id="iss_percent" class="form-control" [(ngModel)]="providerLinkForm.iss_percent" name="iss_percent" />
+              </div>
+              
+              <div class="col-md-4 form-group mb-3">
+                <label for="service_percent" class="form-label font-weight-bold">Serviço (%):</label>
+                <input type="number" step="0.01" id="service_percent" class="form-control" [(ngModel)]="providerLinkForm.service_percent" name="service_percent" />
+              </div>
+
+              <div class="col-md-4 form-group mb-3">
+                <label for="iva_percent" class="form-label font-weight-bold">IVA (%):</label>
+                <input type="number" step="0.01" id="iva_percent" class="form-control" [(ngModel)]="providerLinkForm.iva_percent" name="iva_percent" />
+              </div>
+
+              <!-- Service Charge (Turismo) - Hotel/AB only -->
+              <div class="col-md-6 form-group mb-3" *ngIf="providerLinkType === 'hotel' || providerLinkType === 'ab'">
+                <label for="service_charge" class="form-label font-weight-bold">Taxa Serviço Diária/Turismo:</label>
+                <input type="number" step="0.01" id="service_charge" class="form-control" [(ngModel)]="providerLinkForm.service_charge" name="service_charge" />
+              </div>
+
+              <!-- Forma de Pagamento -->
+              <div class="col-md-6 form-group mb-3" [ngClass]="providerLinkType !== 'hotel' && providerLinkType !== 'ab' ? 'col-md-12' : 'col-md-6'">
+                <label for="payment_method" class="form-label font-weight-bold">Forma de Pagamento:</label>
+                <input type="text" id="payment_method" class="form-control" [(ngModel)]="providerLinkForm.payment_method" name="payment_method" />
+              </div>
+
+              <!-- Observações -->
+              <div class="col-md-12 form-group mb-3">
+                <label for="internal_observation" class="form-label font-weight-bold">Observação Interna:</label>
+                <textarea id="internal_observation" rows="2" class="form-control" [(ngModel)]="providerLinkForm.internal_observation" name="internal_observation"></textarea>
+              </div>
+
+              <div class="col-md-12 form-group mb-3">
+                <label for="customer_observation" class="form-label font-weight-bold">Observação Cliente:</label>
+                <textarea id="customer_observation" rows="2" class="form-control" [(ngModel)]="providerLinkForm.customer_observation" name="customer_observation"></textarea>
+              </div>
+            </div>
+
+            <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
+              <button type="button" class="btn btn-secondary shadow-sm" (click)="closeProviderLinkForm()">Cancelar</button>
+              <button type="submit" class="btn btn-success shadow-sm" [disabled]="processing">
+                <span *ngIf="processing" class="spinner-border spinner-border-sm me-1"></span>
+                <i class="fas fa-save me-1"></i> Confirmar Vínculo
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: ADICIONAR/EDITAR TARIFA (OPTION) -->
+  <div *ngIf="showOptForm" class="modal-backdrop-blur">
+    <div class="modal-dialog">
+      <div class="modal-content shadow rounded-3xl border-0">
+        <div class="modal-header bg-primary text-white py-3">
+          <h5 class="modal-title font-weight-bold">
+            <i class="fas fa-edit me-1"></i>
+            {{ optForm.id ? 'Editar Tarifa' : 'Adicionar Nova Tarifa' }}
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="closeOptForm()"></button>
+        </div>
+        <div class="modal-body p-4 bg-light">
+          <form (ngSubmit)="saveOpt()">
+            <div class="row">
+              
+              <!-- BROKER (except tab 4) -->
+              <div class="col-md-6 form-group mb-3" *ngIf="optFormType !== 'add'">
+                <label for="broker_id" class="form-label font-weight-bold">Broker: <span class="text-danger">*</span></label>
+                <select id="broker_id" class="form-select" [(ngModel)]="optForm.broker_id" name="broker_id" required>
+                  <option value="">.:: Selecione ::.</option>
+                  <option *ngFor="let option of (optFormType === 'transport' ? brokersT : brokers)" [value]="option.id">{{ option.name }}</option>
+                </select>
+              </div>
+
+              <!-- REGIME (hotel only) -->
+              <div class="col-md-6 form-group mb-3" *ngIf="optFormType === 'hotel'">
+                <label for="regime_id" class="form-label font-weight-bold">Regime: <span class="text-danger">*</span></label>
+                <select id="regime_id" class="form-select" [(ngModel)]="optForm.regime_id" name="regime_id" required>
+                  <option value="">.:: Selecione ::.</option>
+                  <option *ngFor="let option of regimes" [value]="option.id">{{ option.name }}</option>
+                </select>
+              </div>
+
+              <!-- PROPÓSITO (hotel/hall only) -->
+              <div class="col-md-6 form-group mb-3" *ngIf="optFormType === 'hotel' || optFormType === 'hall'">
+                <label for="purpose_id" class="form-label font-weight-bold">Propósito: <span class="text-danger">*</span></label>
+                <select id="purpose_id" class="form-select" [(ngModel)]="optForm.purpose_id" name="purpose_id" required>
+                  <option value="">.:: Selecione ::.</option>
+                  <option *ngFor="let option of (optFormType === 'hall' ? purposesHall : purposes)" [value]="option.id">{{ option.name }}</option>
+                </select>
+              </div>
+
+              <!-- CATEGORIA APTO (hotel only) -->
+              <div class="col-md-6 form-group mb-3" *ngIf="optFormType === 'hotel'">
+                <label for="category_id" class="form-label font-weight-bold">Categoria Apto: <span class="text-danger">*</span></label>
+                <select id="category_id" class="form-select" [(ngModel)]="optForm.category_id" name="category_id" required>
+                  <option value="">.:: Selecione ::.</option>
+                  <option *ngFor="let option of catsHotel" [value]="option.id">{{ option.name }}</option>
+                </select>
+              </div>
+
+              <!-- TIPO APTO (hotel only) -->
+              <div class="col-md-6 form-group mb-3" *ngIf="optFormType === 'hotel'">
+                <label for="apto_id" class="form-label font-weight-bold">Tipo Apto: <span class="text-danger">*</span></label>
+                <select id="apto_id" class="form-select" [(ngModel)]="optForm.apto_id" name="apto_id" required>
+                  <option value="">.:: Selecione ::.</option>
+                  <option *ngFor="let option of aptosHotel" [value]="option.id">{{ option.name }}</option>
+                </select>
+              </div>
+
+              <!-- SERVIÇOS (A&B, Salões, Adicionais, Transporte) -->
+              <div class="col-md-6 form-group mb-3" *ngIf="optFormType !== 'hotel'">
+                <label for="service_id" class="form-label font-weight-bold">Serviço/Trecho: <span class="text-danger">*</span></label>
+                <select id="service_id" class="form-select" [(ngModel)]="optForm.service_id" name="service_id" required>
+                  <option value="">.:: Selecione ::.</option>
+                  <option *ngFor="let option of (optFormType === 'ab' ? services : optFormType === 'hall' ? servicesHall : optFormType === 'add' ? servicesAdd : servicesT)" [value]="option.id">{{ option.name }}</option>
+                </select>
+              </div>
+
+              <!-- TIPO SERVIÇO (A&B only) -->
+              <div class="col-md-6 form-group mb-3" *ngIf="optFormType === 'ab'">
+                <label for="service_type_id" class="form-label font-weight-bold">Tipo de Serviço: <span class="text-danger">*</span></label>
+                <select id="service_type_id" class="form-select" [(ngModel)]="optForm.service_type_id" name="service_type_id" required>
+                  <option value="">.:: Selecione ::.</option>
+                  <option *ngFor="let option of servicesType" [value]="option.id">{{ option.name }}</option>
+                </select>
+              </div>
+
+              <!-- LOCAL (A&B only) -->
+              <div class="col-md-6 form-group mb-3" *ngIf="optFormType === 'ab'">
+                <label for="local_id" class="form-label font-weight-bold">Local: <span class="text-danger">*</span></label>
+                <select id="local_id" class="form-select" [(ngModel)]="optForm.local_id" name="local_id" required>
+                  <option value="">.:: Selecione ::.</option>
+                  <option *ngFor="let option of locals" [value]="option.id">{{ option.name }}</option>
+                </select>
+              </div>
+
+              <!-- FREQUENCIA (Adicionais only) -->
+              <div class="col-md-6 form-group mb-3" *ngIf="optFormType === 'add'">
+                <label for="frequency_id" class="form-label font-weight-bold">Frequência: <span class="text-danger">*</span></label>
+                <select id="frequency_id" class="form-select" [(ngModel)]="optForm.frequency_id" name="frequency_id" required>
+                  <option value="">.:: Selecione ::.</option>
+                  <option *ngFor="let option of frequencies" [value]="option.id">{{ option.name }}</option>
+                </select>
+              </div>
+
+              <!-- MEDIDA (Adicionais only) -->
+              <div class="col-md-6 form-group mb-3" *ngIf="optFormType === 'add'">
+                <label for="measure_id" class="form-label font-weight-bold">Medida: <span class="text-danger">*</span></label>
+                <select id="measure_id" class="form-select" [(ngModel)]="optForm.measure_id" name="measure_id" required>
+                  <option value="">.:: Selecione ::.</option>
+                  <option *ngFor="let option of measures" [value]="option.id">{{ option.name }}</option>
+                </select>
+              </div>
+
+              <!-- VEICULO, MODELO, MARCA (Transporte only) -->
+              <div class="col-md-4 form-group mb-3" *ngIf="optFormType === 'transport'">
+                <label for="vehicle_id" class="form-label font-weight-bold">Tipo Veículo: <span class="text-danger">*</span></label>
+                <select id="vehicle_id" class="form-select" [(ngModel)]="optForm.vehicle_id" name="vehicle_id" required>
+                  <option value="">.:: Selecione ::.</option>
+                  <option *ngFor="let option of vehicles" [value]="option.id">{{ option.name }}</option>
+                </select>
+              </div>
+              <div class="col-md-4 form-group mb-3" *ngIf="optFormType === 'transport'">
+                <label for="car_model_id" class="form-label font-weight-bold">Modelo Veículo: <span class="text-danger">*</span></label>
+                <select id="car_model_id" class="form-select" [(ngModel)]="optForm.car_model_id" name="car_model_id" required>
+                  <option value="">.:: Selecione ::.</option>
+                  <option *ngFor="let option of models" [value]="option.id">{{ option.name }}</option>
+                </select>
+              </div>
+              <div class="col-md-4 form-group mb-3" *ngIf="optFormType === 'transport'">
+                <label for="brand_id" class="form-label font-weight-bold">Marca Veículo: <span class="text-danger">*</span></label>
+                <select id="brand_id" class="form-select" [(ngModel)]="optForm.brand_id" name="brand_id" required>
+                  <option value="">.:: Selecione ::.</option>
+                  <option *ngFor="let option of brands" [value]="option.id">{{ option.name }}</option>
+                </select>
+              </div>
+
+              <!-- DATAS IN / OUT -->
+              <div class="col-md-6 form-group mb-3">
+                <label for="opt_in" class="form-label font-weight-bold">Data Entrada (IN): <span class="text-danger">*</span></label>
+                <input type="date" id="opt_in" class="form-control" [class.is-invalid]="errors.in" [(ngModel)]="optForm.in" name="in" required />
+                <div *ngIf="errors.in" class="text-danger mt-1">
+                  <small *ngFor="let err of errors.in" class="d-block">{{ err }}</small>
+                </div>
+              </div>
+
+              <div class="col-md-6 form-group mb-3">
+                <label for="opt_out" class="form-label font-weight-bold">Data Saída (OUT): <span class="text-danger">*</span></label>
+                <input type="date" id="opt_out" class="form-control" [class.is-invalid]="errors.out" [(ngModel)]="optForm.out" name="out" required />
+                <div *ngIf="errors.out" class="text-danger mt-1">
+                  <small *ngFor="let err of errors.out" class="d-block">{{ err }}</small>
+                </div>
+              </div>
+
+              <!-- QUANTIDADE, COMISSÃO / KICKBACK -->
+              <div class="col-md-6 form-group mb-3">
+                <label for="count" class="form-label font-weight-bold">Quantidade: <span class="text-danger">*</span></label>
+                <input type="number" id="count" class="form-control" [class.is-invalid]="errors.count" [(ngModel)]="optForm.count" name="count" required />
+                <div *ngIf="errors.count" class="text-danger mt-1">
+                  <small *ngFor="let err of errors.count" class="d-block">{{ err }}</small>
+                </div>
+              </div>
+
+              <div class="col-md-6 form-group mb-3">
+                <label for="kickback" class="form-label font-weight-bold">Comissão (%):</label>
+                <input type="number" step="0.1" id="kickback" class="form-control" [(ngModel)]="optForm.kickback" name="kickback" />
+              </div>
+
+              <!-- PROPOSTA RECEBIDA (COST), PROPOSAL PERCENT -->
+              <div class="col-md-6 form-group mb-3">
+                <label for="received_proposal" class="form-label font-weight-bold">Proposta Recebida (Custo Unit.): <span class="text-danger">*</span></label>
+                <input type="number" step="0.01" id="received_proposal" class="form-control" [class.is-invalid]="errors.received_proposal" [(ngModel)]="optForm.received_proposal" name="received_proposal" required />
+                <div *ngIf="errors.received_proposal" class="text-danger mt-1">
+                  <small *ngFor="let err of errors.received_proposal" class="d-block">{{ err }}</small>
+                </div>
+              </div>
+
+              <div class="col-md-6 form-group mb-3">
+                <label for="received_proposal_percent" class="form-label font-weight-bold">Markup divisor (%): <span class="text-danger">*</span></label>
+                <input type="number" step="0.01" id="received_proposal_percent" class="form-control" [class.is-invalid]="errors.received_proposal_percent" [(ngModel)]="optForm.received_proposal_percent" name="received_proposal_percent" required />
+                <div *ngIf="errors.received_proposal_percent" class="text-danger mt-1">
+                  <small *ngFor="let err of errors.received_proposal_percent" class="d-block">{{ err }}</small>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
+              <button type="button" class="btn btn-secondary shadow-sm" (click)="closeOptForm()">Cancelar</button>
+              <button type="submit" class="btn btn-success shadow-sm" [disabled]="processing">
+                <span *ngIf="processing" class="spinner-border spinner-border-sm me-1"></span>
+                <i class="fas fa-save me-1"></i> Salvar Detalhe
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</app-authenticated-layout>

@@ -34,6 +34,33 @@ interface EventRepositoryInterface
     public function findWithLocals(int $id): ?Event;
 
     /**
+     * Cria um novo evento.
+     *
+     * @param array $data
+     * @return Event
+     */
+    public function create(array $data): Event;
+
+    /**
+     * Atualiza um evento existente.
+     *
+     * @param int $id
+     * @param array $data
+     * @param array $relatedTables
+     * @return Event
+     */
+    public function update(int $id, array $data, array $relatedTables): Event;
+
+    /**
+     * Exclui um evento e seus vinculos associados.
+     *
+     * @param int $id
+     * @param array $relatedTables
+     * @return bool
+     */
+    public function delete(int $id, array $relatedTables): bool;
+
+    /**
      * Obtém os dados da proposta de um evento.
      *
      * @param int $eventId

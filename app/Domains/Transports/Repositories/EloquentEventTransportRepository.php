@@ -34,6 +34,11 @@ class EloquentEventTransportRepository implements EventTransportRepositoryInterf
         return EventTransport::find($id);
     }
 
+    public function findWithDetails(int $id): ?EventTransport
+    {
+        return EventTransport::with(['transport', 'currency', 'eventTransportOpts'])->find($id);
+    }
+
     public function saveEventTransport(array $data, ?int $id = null): EventTransport
     {
         $item = $id ? EventTransport::findOrFail($id) : new EventTransport();

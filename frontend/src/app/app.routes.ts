@@ -32,6 +32,8 @@ import { VehicleComponent } from './pages/transport/vehicle/vehicle.component';
 import { TransportServiceComponent } from './pages/transport/transport-service/transport-service.component';
 import { BrokerTransComponent } from './pages/transport/broker-trans/broker-trans.component';
 import { ProviderTransportComponent } from './pages/transport/provider-transport/provider-transport.component';
+import { EventListComponent } from './pages/event/event-list/event-list.component';
+import { EventCreateComponent } from './pages/event/event-create/event-create.component';
 
 import { authGuard } from './guards/auth.guard';
 import { guestGuard } from './guards/guest.guard';
@@ -67,6 +69,10 @@ export const routes: Routes = [
   { path: 'transport-service', component: TransportServiceComponent, canActivate: [authGuard], title: 'Serviços de Transporte - SmartApp' },
   { path: 'broker-trans', component: BrokerTransComponent, canActivate: [authGuard], title: 'Brokers de Transporte - SmartApp' },
   { path: 'provider-transport', component: ProviderTransportComponent, canActivate: [authGuard], title: 'Fornecedores de Transporte - SmartApp' },
+  { path: 'event-list', component: EventListComponent, canActivate: [authGuard], title: 'Eventos - SmartApp' },
+  { path: 'event', component: EventCreateComponent, canActivate: [authGuard], title: 'Criar Evento - SmartApp' },
+  { path: 'event/:id', component: EventCreateComponent, canActivate: [authGuard], title: 'Editar Evento - SmartApp' },
+  { path: 'event/:id/:tab', component: EventCreateComponent, canActivate: [authGuard], title: 'Editar Evento - SmartApp' },
   { path: 'customer', component: CustomersComponent, canActivate: [authGuard], title: 'Clientes - SmartApp' },
   { path: 'crd', component: CrdsComponent, canActivate: [authGuard], title: 'CRDs - SmartApp' },
   { path: 'confirm-password', component: ConfirmPasswordComponent, canActivate: [authGuard], title: 'Confirmar Senha - SmartApp' },
