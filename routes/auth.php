@@ -97,23 +97,27 @@ Route::middleware(['auth', 'cors'])->group(function () {
     // ROLE routes migrated to api.php (Angular)
 
     //TABELS AUXILIARES
-    Route::get('customer', [CustomerController::class, 'create'])
-        ->name('customer');
+    Route::get('customer', function (Request $request) {
+        $path = base_path('public/angular.html');
+        if (file_exists($path)) {
+            if ($request->header('X-Inertia')) {
+                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
+            }
+            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
+        }
+        abort(404);
+    })->name('customer');
 
-    Route::post('customer-save', [CustomerController::class, 'store'])
-        ->name('customer-save');
-
-    Route::delete('customer-delete', [CustomerController::class, 'delete'])
-        ->name('customer-delete');
-
-    Route::get('crd', [CrdController::class, 'create'])
-        ->name('crd');
-
-    Route::post('crd-save', [CrdController::class, 'store'])
-        ->name('crd-save');
-
-    Route::delete('crd-delete', [CrdController::class, 'delete'])
-        ->name('crd-delete');
+    Route::get('crd', function (Request $request) {
+        $path = base_path('public/angular.html');
+        if (file_exists($path)) {
+            if ($request->header('X-Inertia')) {
+                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
+            }
+            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
+        }
+        abort(404);
+    })->name('crd');
 
 
 

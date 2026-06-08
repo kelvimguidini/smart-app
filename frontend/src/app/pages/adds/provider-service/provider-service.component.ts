@@ -15,7 +15,15 @@ import { NgxMaskDirective, NgxMaskPipe } from 'ngx-mask';
 @Component({
   selector: 'app-provider-service',
   standalone: true,
-  imports: [CommonModule, FormsModule, AutocompleteComponent, AuthenticatedLayoutComponent, ConfirmModalComponent, DatatableComponent, NgxMaskDirective, NgxMaskPipe],
+  imports: [
+    CommonModule,
+    FormsModule,
+    AutocompleteComponent,
+    AuthenticatedLayoutComponent,
+    ConfirmModalComponent,
+    DatatableComponent,
+    NgxMaskDirective,
+  ],
   templateUrl: './provider-service.component.html',
   styleUrls: ['./provider-service.component.scss'],
 })

@@ -49,7 +49,26 @@ class EloquentEventRepository implements EventRepositoryInterface
         if ($request->eventCode) $query->where('code', $request->eventCode);
         if ($request->client) $query->where('customer_id', $request->client);
 
-        return $query->orderBy('created_at', 'desc')->paginate($perPage, ['*'], 'page', $page);
+        $orderBy = $request->input('order_by', 'created_at');
+        $orderDir = $request->input('order_dir', 'desc');
+
+        $allowedOrderBy = ['id', 'name', 'code', 'date', 'date_final', 'created_at', 'customer_name'];
+        if (!in_array($orderBy, $allowedOrderBy)) {
+            $orderBy = 'created_at';
+        }
+        if (!in_array(strtolower($orderDir), ['asc', 'desc'])) {
+            $orderDir = 'desc';
+        }
+
+        if ($orderBy === 'customer_name') {
+            $query->leftJoin('customer', 'event.customer_id', '=', 'customer.id')
+                  ->select('event.*')
+                  ->orderBy('customer.name', $orderDir);
+        } else {
+            $query->orderBy('event.' . $orderBy, $orderDir);
+        }
+
+        return $query->paginate($perPage, ['*'], 'page', $page);
     }
 
     /**

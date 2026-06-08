@@ -46,3 +46,12 @@ a.disabled {
         }
     }
 }
+
+.modal-header {
+    user-select: none;
+    cursor: grab;
+
+    &:active {
+        cursor: grabbing;
+    }
+}

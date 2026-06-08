@@ -230,6 +230,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('events/{id}', [\App\Http\Controllers\Api\EventApiController::class, 'destroy']);
     Route::post('events/save-exchange-rate', [\App\Http\Controllers\Api\EventApiController::class, 'saveExchangeRate']);
     Route::post('events/save-vl-faturamento', [\App\Http\Controllers\Api\EventApiController::class, 'saveValorFaturamento']);
+    Route::get('events/history/{event_id}', [\App\Http\Controllers\Auth\ProposalHistoryController::class, 'getHistory']);
+    Route::post('events/history/restore', [\App\Http\Controllers\Auth\ProposalHistoryController::class, 'restore']);
 
     // Rotas de Vinculação de Fornecedores de Evento e Opções
     // 1. Hotel

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 import { EventService } from '../../../services/event.service';
 import { AuthService } from '../../../services/auth.service';
@@ -11,13 +11,14 @@ import { CityService } from '../../../services/city.service';
 import { ToastService } from '../../../services/toast.service';
 import { AutocompleteComponent } from '../../../shared/components/autocomplete/autocomplete.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { AuthenticatedLayoutComponent } from '../../../shared/layouts/authenticated-layout/authenticated-layout.component';
 import flatpickr from 'flatpickr';
 
 @Component({
   selector: 'app-event-create',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, AuthenticatedLayoutComponent, AutocompleteComponent, ConfirmModalComponent],
+  imports: [CommonModule, FormsModule, RouterLink, AuthenticatedLayoutComponent, AutocompleteComponent, ConfirmModalComponent, ModalComponent],
   templateUrl: './event-create.component.html',
   styleUrls: ['./event-create.component.scss'],
 })
@@ -83,7 +84,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     requester: '',
     sector: '',
     paxBase: '',
-    cc: '',
+    cc: '' as string | number,
     date: '',
     date_final: '',
     crd_id: '' as string | number,
@@ -115,6 +116,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     iss_percent: 0,
     service_percent: 0,
     iva_percent: 0,
+    taxa_4bts: 0,
     service_charge: 0,
     payment_method: '',
     internal_observation: '',
@@ -122,6 +124,58 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   };
   showProviderLinkForm = false;
   providerLinkType: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' = 'hotel';
+  selectedProviderName = '';
+
+  searchProviders = (term: string): Observable<any[]> => {
+    const termLower = term.toLowerCase();
+    let sourceList: any[] = [];
+    if (this.providerLinkType === 'hotel' || this.providerLinkType === 'ab') {
+      sourceList = this.providers;
+    } else if (this.providerLinkType === 'add') {
+      sourceList = this.providersService;
+    } else if (this.providerLinkType === 'transport') {
+      sourceList = this.providersTransport;
+    }
+    const filtered = sourceList.filter(p => 
+      (p.name && p.name.toLowerCase().includes(termLower)) || 
+      (p.city && (
+        (p.city.name && p.city.name.toLowerCase().includes(termLower)) ||
+        (p.city.states && p.city.states.toLowerCase().includes(termLower)) ||
+        (p.city.country && p.city.country.toLowerCase().includes(termLower))
+      ))
+    );
+    return of(filtered);
+  }
+
+  displayProvider = (provider: any): string => {
+    if (!provider) return '';
+    let locationStr = 'S/ Cidade';
+    if (provider.city) {
+      const stateOrCountry = provider.city.states || provider.city.country;
+      locationStr = provider.city.name + (stateOrCountry ? ` - ${stateOrCountry}` : '');
+    }
+    return `${provider.name} (${locationStr})`;
+  }
+
+  onProviderChange(providerId: any) {
+    if (!providerId) return;
+    let found: any = null;
+    if (this.providerLinkType === 'hotel' || this.providerLinkType === 'ab') {
+      found = this.providers.find(p => p.id === providerId);
+    } else if (this.providerLinkType === 'add') {
+      found = this.providersService.find(p => p.id === providerId);
+    } else if (this.providerLinkType === 'transport') {
+      found = this.providersTransport.find(p => p.id === providerId);
+    }
+    
+    if (found) {
+      this.providerLinkForm.taxa_4bts = found.taxa_4bts || 0;
+      this.providerLinkForm.iss_percent = found.iss_percent || 0;
+      this.providerLinkForm.service_percent = found.service_percent || 0;
+      this.providerLinkForm.iva_percent = found.iva_percent || 0;
+      this.providerLinkForm.payment_method = this.normalizePaymentMethod(found.payment_method);
+    }
+  }
 
   // Form State - Provider Options (detalhes/tarifas)
   optForm: any = {
@@ -224,6 +278,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     this.isLoader = true;
     this.eventService.getEditData(this.eventId).subscribe({
       next: (res) => {
+        console.log('loadInitialData: edit-data API response =', res);
         // Load master lists
         this.customers = res.customers || [];
         this.crds = res.crds || [];
@@ -311,17 +366,27 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   }
 
   // --- TAB 0: BÁSICO ---
-  onCustomerChange() {
+  onCustomerChange(customerId: any) {
     this.basicForm.crd_id = '';
-    this.filterCrds(this.basicForm.customer);
+    this.filterCrds(customerId);
   }
 
   filterCrds(customerId: any) {
-    if (!customerId) {
+    console.log('filterCrds: filtering for customerId =', customerId, 'Type:', typeof customerId);
+    console.log('filterCrds: available CRDs =', this.crds);
+    if (customerId === null || customerId === undefined || customerId === '') {
       this.crdsFiltered = [];
+      console.log('filterCrds: no customerId, cleared list');
       return;
     }
-    this.crdsFiltered = this.crds.filter((c) => c.customer_id == customerId || !c.customer_id);
+    const targetId = Number(customerId);
+    this.crdsFiltered = this.crds.filter((c) => {
+      const cId = c.customer_id ? Number(c.customer_id) : null;
+      const match = cId === targetId || !cId;
+      console.log(`Checking CRD ID ${c.id}: c.customer_id (${c.customer_id}) == customerId (${customerId}) -> Match: ${match}`);
+      return match;
+    });
+    console.log('filterCrds: filtered result =', this.crdsFiltered);
   }
 
   addCountry() {
@@ -361,23 +426,43 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   }
 
   // --- PROVIDER LINK VINCULOS ---
+  normalizePaymentMethod(method: string | null | undefined): string {
+    if (!method) return 'Indefinido';
+    const normalized = method.trim().toLowerCase();
+    if (normalized === 'dinheiro') return 'Dinheiro';
+    if (normalized === 'cartão' || normalized === 'cartao') return 'Cartão';
+    return 'Indefinido';
+  }
+
   openAddProviderLink(type: 'hotel' | 'ab' | 'hall' | 'add' | 'transport', editItem: any = null) {
     this.providerLinkType = type;
     this.errors = {};
 
     if (editItem) {
+      const pId = editItem.hotel_id || editItem.ab_id || editItem.hall_id || editItem.add_id || editItem.transport_id;
       this.providerLinkForm = {
         id: editItem.id,
-        provider_id: editItem.hotel_id || editItem.ab_id || editItem.hall_id || editItem.add_id || editItem.transport_id,
+        provider_id: pId,
         currency_id: editItem.currency_id,
         iss_percent: editItem.iss_percent || 0,
         service_percent: editItem.service_percent || 0,
         iva_percent: editItem.iva_percent || 0,
+        taxa_4bts: editItem.taxa_4bts || 0,
         service_charge: editItem.service_charge || 0,
-        payment_method: editItem.payment_method || '',
+        payment_method: this.normalizePaymentMethod(editItem.payment_method),
         internal_observation: editItem.internal_observation || '',
         customer_observation: editItem.customer_observation || '',
       };
+      // Find matching provider and display name
+      let found: any = null;
+      if (type === 'hotel' || type === 'ab') {
+        found = this.providers.find(p => p.id === pId);
+      } else if (type === 'add') {
+        found = this.providersService.find(p => p.id === pId);
+      } else if (type === 'transport') {
+        found = this.providersTransport.find(p => p.id === pId);
+      }
+      this.selectedProviderName = found ? this.displayProvider(found) : '';
     } else {
       this.providerLinkForm = {
         id: 0,
@@ -386,11 +471,13 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         iss_percent: 0,
         service_percent: 0,
         iva_percent: 0,
+        taxa_4bts: 0,
         service_charge: 0,
-        payment_method: '',
+        payment_method: 'Indefinido',
         internal_observation: '',
         customer_observation: '',
       };
+      this.selectedProviderName = '';
     }
 
     this.showProviderLinkForm = true;
@@ -408,6 +495,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     const payload = {
       ...this.providerLinkForm,
       event_id: this.eventId,
+      currency: this.providerLinkForm.currency_id,
     };
 
     let obs: Observable<any>;

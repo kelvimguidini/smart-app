@@ -29,3 +29,38 @@
 .animate-in {
   animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+// Estilos customizados para os botões de ação quadradinhos (sem labels) na tabela de eventos
+::ng-deep {
+  .btn-action {
+    width: 30px !important;
+    height: 30px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 0.35rem !important;
+    border: none !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+
+    i {
+      background-color: transparent !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      font-size: 0.8rem !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      line-height: 1 !important;
+    }
+
+    &:hover {
+      transform: translateY(-2px) scale(1.08) !important;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    &:active {
+      transform: translateY(0) scale(0.95) !important;
+    }
+  }
+}

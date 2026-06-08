@@ -119,4 +119,50 @@ export class EventService {
   deleteTransportOpt(id: number): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/api/event-transports/opts/${id}`);
   }
+
+  // 7. EVENT HISTORY ENDPOINTS
+  getHistory(eventId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/api/events/history/${eventId}`);
+  }
+
+  restoreHistory(tableName: string, recordId: number, historyId: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/api/events/history/restore`, { table_name: tableName, record_id: recordId, history_id: historyId });
+  }
+
+  // --- QUICK PROVIDER ACTIONS ---
+  getStatusHistory(table: string, tableId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/status-history/${table}/${tableId}`);
+  }
+
+  saveEventStatus(data: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/event-status-save`, data);
+  }
+
+  sendEventStatusEmail(data: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/send-mail`, data);
+  }
+
+  sendBudgetLinkEmail(data: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/create-link-email`, data);
+  }
+
+  sendProposalEmail(data: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/proposal-hotel-email`, data);
+  }
+
+  sendProposalWithoutValuesEmail(data: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/proposal-hotel-email-without-values`, data);
+  }
+
+  sendInvoiceEmail(data: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/invoice-email`, data);
+  }
+
+  proveBudget(data: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/budget-prove`, data);
+  }
+
+  getApiUrl(): string {
+    return this.apiUrl;
+  }
 }

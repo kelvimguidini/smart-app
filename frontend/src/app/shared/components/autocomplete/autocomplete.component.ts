@@ -28,6 +28,7 @@ export class AutocompleteComponent implements ControlValueAccessor, OnInit, OnDe
   @Input() valueField: string = 'id';
   @Input() initialText: string = '';
   @Input() errors: any[] = [];
+  @Input() disabled: boolean = false;
 
   inputText: string = '';
   searchResults: any[] = [];
@@ -152,5 +153,9 @@ export class AutocompleteComponent implements ControlValueAccessor, OnInit, OnDe
 
   registerOnTouched(fn: any): void {
     this.onTouched = fn;
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this.disabled = isDisabled;
   }
 }

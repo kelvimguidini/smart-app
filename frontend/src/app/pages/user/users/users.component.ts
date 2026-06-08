@@ -6,13 +6,14 @@ import { ToastService } from '../../../services/toast.service';
 import { AuthenticatedLayoutComponent } from '../../../shared/layouts/authenticated-layout/authenticated-layout.component';
 import { DatatableComponent } from '../../../shared/components/datatable/datatable.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { QuillModule } from 'ngx-quill';
 import { NgxMaskDirective } from 'ngx-mask';
 
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, AuthenticatedLayoutComponent, DatatableComponent, ConfirmModalComponent, QuillModule, NgxMaskDirective],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, AuthenticatedLayoutComponent, DatatableComponent, ConfirmModalComponent, ModalComponent, QuillModule, NgxMaskDirective],
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss']
 })
