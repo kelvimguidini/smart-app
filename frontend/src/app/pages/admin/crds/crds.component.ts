@@ -7,12 +7,13 @@ import { AuthenticatedLayoutComponent } from '../../../shared/layouts/authentica
 import { DatatableComponent } from '../../../shared/components/datatable/datatable.component';
 import { ToastService } from '../../../services/toast.service';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { NgxMaskDirective } from 'ngx-mask';
 
 @Component({
   selector: 'app-crds',
   standalone: true,
-  imports: [CommonModule, FormsModule, AuthenticatedLayoutComponent, DatatableComponent, ConfirmModalComponent, NgxMaskDirective],
+  imports: [CommonModule, FormsModule, AuthenticatedLayoutComponent, DatatableComponent, ConfirmModalComponent, NgxMaskDirective, ModalComponent],
   templateUrl: './crds.component.html',
   styleUrls: ['./crds.component.scss'],
 })

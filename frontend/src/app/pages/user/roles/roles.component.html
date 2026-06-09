@@ -13,70 +13,64 @@
       [title]="inEdition > 0 ? 'Editar Grupo de Acesso' : 'Novo Grupo de Acesso'"
       icon="fa-user-shield"
       size="lg">
-      <form (ngSubmit)="submit()">
-        <div class="row">
-          <!-- Campo Nome -->
-          <div class="col-lg-12 mb-3">
-            <div class="form-group mb-0">
-              <label for="name" class="form-label">
-                Nome do Grupo
-                <span class="text-danger">*</span>
-              </label>
-              <input
-                type="text"
-                class="form-control"
-                id="name"
-                placeholder="Ex: Administrador"
-                [(ngModel)]="form.name"
-                name="name"
-                required
-                autofocus
-                [class.is-invalid]="errors['name']" />
+      <form (ngSubmit)="submit()" class="d-flex flex-column flex-grow-1 min-h-0">
+        <!-- Campo Nome -->
+        <div class="form-group mb-3">
+          <label for="name" class="form-label">
+            Nome do Grupo
+            <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            id="name"
+            placeholder="Ex: Administrador"
+            [(ngModel)]="form.name"
+            name="name"
+            required
+            autofocus
+            [class.is-invalid]="errors['name']" />
 
-              <div *ngIf="errors['name']" class="text-danger mt-1">
-                <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
+          <div *ngIf="errors['name']" class="text-danger mt-1">
+            <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
+          </div>
+        </div>
+
+        <!-- Campo Permissões -->
+        <div class="form-group mb-0 d-flex flex-column flex-grow-1 min-h-0">
+          <label class="form-label">
+            Atribuir Permissões
+            <span class="text-danger">*</span>
+          </label>
+          <div class="card border border-light d-flex flex-column flex-grow-1 min-h-0" [class.border-danger]="errors['permissions']">
+            <div class="card-body p-3 flex-grow-1 overflow-auto" style="min-height: 150px; background: #fcfcfd">
+              <div *ngIf="isLoader" class="text-center py-4">
+                <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+                <small class="d-block mt-2 text-muted">Carregando permissões...</small>
+              </div>
+              <div class="row" *ngIf="!isLoader">
+                <div class="col-md-4 mb-2" *ngFor="let option of permissionList">
+                  <div class="form-check custom-checkbox ms-4">
+                    <input
+                      class="form-check-input cursor-pointer"
+                      type="checkbox"
+                      [value]="option.name"
+                      [checked]="form.permissions.includes(option.name)"
+                      (change)="togglePermission(option.name, $event)"
+                      [id]="'perm_' + option.name"
+                      [name]="'perm_' + option.name" />
+                    <label class="form-check-label cursor-pointer text-sm text-gray-700" [for]="'perm_' + option.name">
+                      {{ option.title }}
+                    </label>
+                  </div>
+                </div>
+                <div *ngIf="permissionList.length === 0" class="col-12 text-muted small">Nenhuma permissão disponível.</div>
               </div>
             </div>
           </div>
 
-          <!-- Campo Permissões -->
-          <div class="col-lg-12 mb-3">
-            <div class="form-group mb-0">
-              <label class="form-label">
-                Atribuir Permissões
-                <span class="text-danger">*</span>
-              </label>
-              <div class="card border border-light" [class.border-danger]="errors['permissions']">
-                <div class="card-body p-3" style="max-height: 250px; overflow-y: auto; background: #fcfcfd">
-                  <div *ngIf="isLoader" class="text-center py-4">
-                    <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
-                    <small class="d-block mt-2 text-muted">Carregando permissões...</small>
-                  </div>
-                  <div class="row" *ngIf="!isLoader">
-                    <div class="col-md-4 mb-2" *ngFor="let option of permissionList">
-                      <div class="form-check custom-checkbox ms-4">
-                        <input
-                          class="form-check-input cursor-pointer"
-                          type="checkbox"
-                          [value]="option.name"
-                          [checked]="form.permissions.includes(option.name)"
-                          (change)="togglePermission(option.name, $event)"
-                          [id]="'perm_' + option.name"
-                          [name]="'perm_' + option.name" />
-                        <label class="form-check-label cursor-pointer text-sm text-gray-700" [for]="'perm_' + option.name">
-                          {{ option.title }}
-                        </label>
-                      </div>
-                    </div>
-                    <div *ngIf="permissionList.length === 0" class="col-12 text-muted small">Nenhuma permissão disponível.</div>
-                  </div>
-                </div>
-              </div>
-
-              <div *ngIf="errors['permissions']" class="text-danger mt-1">
-                <small *ngFor="let err of errors['permissions']" class="d-block">{{ err }}</small>
-              </div>
-            </div>
+          <div *ngIf="errors['permissions']" class="text-danger mt-1">
+            <small *ngFor="let err of errors['permissions']" class="d-block">{{ err }}</small>
           </div>
         </div>
         <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
@@ -153,31 +147,29 @@
                         <td class="text-end">
                           <div class="d-flex justify-content-end gap-2 flex-wrap">
                             <!-- Botão Editar -->
-                            <button type="button" class="btn btn-sm btn-info text-white shadow-sm" (click)="edit(role)" title="Editar grupo">
-                              <i class="fas fa-edit me-1"></i>
-                              Editar
+                            <button type="button" class="btn btn-info text-white shadow-sm btn-action" (click)="edit(role)" data-tooltip="Editar Grupo">
+                              <i class="fas fa-edit"></i>
                             </button>
 
                             <!-- Botão Permissões (Modal) -->
                             <button
                               type="button"
-                              class="btn btn-sm btn-primary shadow-sm"
+                              class="btn btn-primary shadow-sm btn-action"
                               (click)="openPermissionsModal(role)"
-                              title="Ver detalhes das permissões">
-                              <i class="fas fa-shield-alt me-1"></i>
-                              Permissões
+                              data-tooltip="Ver detalhes das permissões">
+                              <i class="fas fa-shield-alt"></i>
                             </button>
 
                             <!-- Botão Deletar -->
                             <app-confirm-modal
-                              [btnClass]="'btn btn-sm btn-danger shadow-sm'"
+                              [btnClass]="'btn btn-danger shadow-sm btn-action'"
                               [modalTitle]="'Excluir Grupo'"
                               [message]="'CUIDADO! A exclusão do grupo ' + role.name + ' pode afetar os usuários vinculados. Confirmar?'"
                               [okButtonLabel]="'Excluir'"
+                              [tooltip]="'Excluir Grupo'"
                               (confirm)="deleteRole(role.id)">
                               <span modal-button>
-                                <i class="fas fa-trash me-1"></i>
-                                Excluir
+                                <i class="fas fa-trash"></i>
                               </span>
                             </app-confirm-modal>
                           </div>
@@ -239,29 +231,28 @@
 
 <!-- Modais de Permissões (Renderizados no final da página para evitar problemas de z-index) -->
 <ng-container *ngFor="let role of roles">
-  <app-modal
-    [show]="showPermissionsModalId === role.id"
-    (close)="closePermissionsModal()"
-    [title]="'Permissões: ' + role.name"
-    icon="fa-shield-alt"
-    size="md">
-    <ul class="list-group list-group-flush mb-3">
-      <li class="list-group-item d-flex justify-content-between align-items-center py-3" *ngFor="let permission of role.permissions">
-        <span class="text-sm font-weight-bold">{{ permission.title }}</span>
-        <app-confirm-modal
-          [btnClass]="'btn btn-sm btn-danger shadow-sm'"
-          [modalTitle]="'Remover Permissão'"
-          [message]="'Deseja remover a permissão ' + permission.title + ' do grupo ' + role.name + '?'"
-          [okButtonLabel]="'Remover'"
-          (confirm)="removePermission(role.id, permission.id)">
-          <span modal-button>
-            <i class="fas fa-trash me-1"></i>
-            Remover
-          </span>
-        </app-confirm-modal>
-      </li>
-      <li *ngIf="role.permissions.length === 0" class="list-group-item text-center py-4 text-muted">Nenhuma permissão atribuída.</li>
-    </ul>
+  <app-modal [show]="showPermissionsModalId === role.id" (close)="closePermissionsModal()" [title]="'Permissões: ' + role.name" icon="fa-shield-alt" size="md">
+    <div class="flex-grow-1 overflow-auto mb-3" style="min-height: 200px;">
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item d-flex justify-content-between align-items-center py-3" *ngFor="let permission of role.permissions">
+          <span class="text-sm font-weight-bold">{{ permission.title }}</span>
+          <div>
+            <app-confirm-modal
+              [btnClass]="'btn btn-danger shadow-sm btn-action'"
+              [modalTitle]="'Remover Permissão'"
+              [message]="'Deseja remover a permissão ' + permission.title + ' do grupo ' + role.name + '?'"
+              [okButtonLabel]="'Remover'"
+              [tooltip]="'Remover Permissão'"
+              (confirm)="removePermission(role.id, permission.id)">
+              <span modal-button>
+                <i class="fas fa-trash"></i>
+              </span>
+            </app-confirm-modal>
+          </div>
+        </li>
+        <li *ngIf="role.permissions.length === 0" class="list-group-item text-center py-4 text-muted">Nenhuma permissão atribuída.</li>
+      </ul>
+    </div>
     <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
       <button type="button" class="btn btn-secondary shadow-sm" (click)="closePermissionsModal()">Fechar</button>
     </div>

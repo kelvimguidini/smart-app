@@ -46,22 +46,25 @@ class ProviderServiceApiController extends Controller
             'national' => 'nullable|boolean',
             'iss_percent' => 'nullable|numeric',
             'service_percent' => 'nullable|numeric',
-            'iof' => 'nullable|numeric',
-            'service_charge' => 'nullable|numeric',
             'iva_percent' => 'nullable|numeric',
-            'has_additional' => 'nullable|boolean',
             'codestur' => 'nullable|string|max:255',
             'payment_method' => 'nullable|string|max:255',
         ]);
 
-        $data = $request->all();
+        $data = $request->only([
+            'name',
+            'city_id',
+            'contact',
+            'phone',
+            'email',
+            'codestur',
+            'payment_method',
+        ]);
+
         // Garantir booleanos / numéricos seguros
         $data['national'] = $request->boolean('national', true);
-        $data['has_additional'] = $request->boolean('has_additional', false);
         $data['iss_percent'] = $request->get('iss_percent', 0) ?: 0;
         $data['service_percent'] = $request->get('service_percent', 0) ?: 0;
-        $data['iof'] = $request->get('iof', 0) ?: 0;
-        $data['service_charge'] = $request->get('service_charge', 0) ?: 0;
         $data['iva_percent'] = $request->get('iva_percent', 0) ?: 0;
 
         try {

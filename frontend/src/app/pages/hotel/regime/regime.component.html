@@ -7,60 +7,46 @@
 
     <div class="row position-relative">
     <!-- Modal de Cadastro/Edição -->
-    <div class="modal fade" 
-         [class.show]="showModal" 
-         [style.display]="showModal ? 'block' : 'none'" 
-         [style.background]="showModal ? 'rgba(0,0,0,0.5)' : ''" 
-         tabindex="-1" 
-         role="dialog" 
-         aria-labelledby="regimeModalLabel" 
-         aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content border-0 shadow-lg rounded-3xl">
-          <div class="modal-header bg-light">
-            <h5 class="modal-title font-weight-bold text-primary" id="regimeModalLabel">
-              <i class="fas fa-briefcase me-2"></i>{{ inEdition > 0 ? 'Editar Regime' : 'Novo Regime' }}
-            </h5>
-            <button type="button" class="btn-close" (click)="closeModal()" aria-label="Fechar" [disabled]="processing"></button>
-          </div>
-          <form (ngSubmit)="submit()">
-            <div class="modal-body p-4">
-              <div class="row">
-                <!-- Nome do Regime -->
-                <div class="col-lg-12 mb-3">
-                  <div class="form-group mb-0">
-                    <label for="name" class="form-label">Nome do Regime <span class="text-danger">*</span></label>
-                    <input 
-                      type="text" 
-                      id="name" 
-                      class="form-control" 
-                      [(ngModel)]="form.name" 
-                      name="name" 
-                      placeholder="Ex: ALL"
-                      required 
-                      autofocus
-                      [class.is-invalid]="errors['name']">
-                    
-                    <div *ngIf="errors['name']" class="text-danger mt-1">
-                      <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
-                    </div>
-                  </div>
-                </div>
+    <app-modal
+      [show]="showModal"
+      (close)="closeModal()"
+      [title]="inEdition > 0 ? 'Editar Regime' : 'Novo Regime'"
+      icon="fa-briefcase"
+      size="md">
+      <form (ngSubmit)="submit()">
+        <div class="row">
+          <!-- Nome do Regime -->
+          <div class="col-lg-12 mb-3">
+            <div class="form-group mb-0">
+              <label for="name" class="form-label">Nome do Regime <span class="text-danger">*</span></label>
+              <input 
+                type="text" 
+                id="name" 
+                class="form-control" 
+                [(ngModel)]="form.name" 
+                name="name" 
+                placeholder="Ex: ALL"
+                required 
+                autofocus
+                [class.is-invalid]="errors['name']">
+              
+              <div *ngIf="errors['name']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
               </div>
             </div>
-            <div class="modal-footer bg-light border-0">
-              <button type="button" class="btn btn-outline-secondary" (click)="closeModal()" [disabled]="processing">
-                <i class="fas fa-times me-1"></i> Cancelar
-              </button>
-              <button type="submit" class="btn btn-primary shadow-sm" [disabled]="processing">
-                <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                <i *ngIf="!processing" class="fas fa-save me-1"></i> Salvar
-              </button>
-            </div>
-          </form>
+          </div>
         </div>
-      </div>
-    </div>
+        <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeModal()" [disabled]="processing">
+            <i class="fas fa-times me-1"></i> Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary shadow-sm" [disabled]="processing">
+            <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            <i *ngIf="!processing" class="fas fa-save me-1"></i> Salvar
+          </button>
+        </div>
+      </form>
+    </app-modal>
 
     <!-- Table Section -->
     <div class="col-lg-12 animate-in" style="animation-delay: 0.2s;">
@@ -109,33 +95,35 @@
                                         <td class="text-end">
                                             <div class="d-flex justify-content-end gap-2 flex-wrap">
                                                 <!-- Editar -->
-                                                <button class="btn btn-sm btn-info text-white shadow-sm" (click)="edit(regime)" title="Editar">
-                                                    <i class="fas fa-edit me-1"></i> Editar
+                                                <button class="btn btn-info text-white shadow-sm btn-action" (click)="edit(regime)" data-tooltip="Editar Regime">
+                                                    <i class="fas fa-edit"></i>
                                                 </button>
 
                                                 <!-- Ativar/Inativar -->
-                                                <button *ngIf="!regime.active" class="btn btn-sm btn-success shadow-sm" (click)="activateRegime(regime.id)" title="Ativar">
-                                                    <i class="fas fa-check me-1"></i> Ativar
+                                                <button *ngIf="!regime.active" class="btn btn-success shadow-sm btn-action" (click)="activateRegime(regime.id)" data-tooltip="Ativar Regime">
+                                                    <i class="fas fa-check"></i>
                                                 </button>
 
                                                 <app-confirm-modal 
                                                     *ngIf="regime.active"
-                                                    [btnClass]="'btn btn-sm btn-warning shadow-sm'" 
+                                                    [btnClass]="'btn btn-warning shadow-sm btn-action'" 
                                                     [modalTitle]="'Inativar Regime'" 
                                                     [message]="'Tem certeza que deseja inativar o regime ' + regime.name + '?'"
                                                     [okButtonLabel]="'Confirmar'"
+                                                    [tooltip]="'Inativar Regime'"
                                                     (confirm)="deactivateRegime(regime.id)">
-                                                    <span modal-button><i class="fas fa-ban me-1"></i> Inativar</span>
+                                                    <span modal-button><i class="fas fa-ban"></i></span>
                                                 </app-confirm-modal>
 
                                                 <!-- Deletar -->
                                                 <app-confirm-modal 
-                                                    [btnClass]="'btn btn-sm btn-danger shadow-sm'" 
+                                                    [btnClass]="'btn btn-danger shadow-sm btn-action'" 
                                                     [modalTitle]="'Excluir Regime'" 
                                                     [message]="'Ação irreversível! Deseja realmente excluir o regime ' + regime.name + '?'"
                                                     [okButtonLabel]="'Excluir'"
+                                                    [tooltip]="'Excluir Regime'"
                                                     (confirm)="deleteRegime(regime.id)">
-                                                    <span modal-button><i class="fas fa-trash me-1"></i> Excluir</span>
+                                                    <span modal-button><i class="fas fa-trash"></i></span>
                                                 </app-confirm-modal>
                                             </div>
                                         </td>

@@ -10,6 +10,7 @@ import { ToastService } from '../../../services/toast.service';
 import { AuthenticatedLayoutComponent } from '../../../shared/layouts/authenticated-layout/authenticated-layout.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 import { DatatableComponent } from '../../../shared/components/datatable/datatable.component';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { NgxMaskDirective, NgxMaskPipe } from 'ngx-mask';
 
 @Component({
@@ -22,6 +23,7 @@ import { NgxMaskDirective, NgxMaskPipe } from 'ngx-mask';
     AuthenticatedLayoutComponent,
     ConfirmModalComponent,
     DatatableComponent,
+    ModalComponent,
     NgxMaskDirective,
   ],
   templateUrl: './provider-service.component.html',

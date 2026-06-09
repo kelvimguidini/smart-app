@@ -452,3 +452,101 @@ quill-editor {
 ::-webkit-scrollbar-thumb:hover {
   background: #b7b9cc;
 }
+
+// Estilos customizados para os botões de ação quadradinhos (sem labels) nas tabelas
+.btn-action {
+  width: 30px !important;
+  height: 30px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 0.35rem !important;
+  border: none !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+
+  i {
+    background-color: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: 0.8rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+  }
+
+  &:hover {
+    transform: translateY(-2px) scale(1.08) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.95) !important;
+  }
+}
+
+// Custom CSS Tooltip
+[data-tooltip] {
+  position: relative;
+  
+  &::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%) scale(0.9);
+    background-color: rgba(33, 37, 41, 0.95);
+    color: #fff;
+    padding: 0.35rem 0.65rem;
+    border-radius: 0.25rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: normal;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1070;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    pointer-events: none;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%) scale(0.9);
+    border-width: 5px 5px 0;
+    border-style: solid;
+    border-color: rgba(33, 37, 41, 0.95) transparent transparent;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1070;
+    pointer-events: none;
+  }
+
+  &:hover {
+    z-index: 1080;
+
+    &::after, &::before {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) scale(1);
+    }
+  }
+}
+
+// Prevent clipping of tooltips by overflow containers (tables, modal bodies, etc.)
+.table-responsive:has([data-tooltip]:hover),
+.modal-body:has([data-tooltip]:hover),
+.overflow-auto:has([data-tooltip]:hover),
+.overflow-hidden:has([data-tooltip]:hover),
+.overflow-x-auto:has([data-tooltip]:hover),
+.overflow-y-auto:has([data-tooltip]:hover) {
+  overflow: visible !important;
+}
+

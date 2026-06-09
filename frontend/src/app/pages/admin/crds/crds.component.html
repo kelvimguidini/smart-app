@@ -7,84 +7,65 @@
 
   <div class="row position-relative">
     <!-- Modal de Cadastro/Edição -->
-    <div class="modal fade" 
-         [class.show]="showModal" 
-         [style.display]="showModal ? 'block' : 'none'" 
-         [style.background]="showModal ? 'rgba(0,0,0,0.5)' : ''" 
-         tabindex="-1" 
-         role="dialog" 
-         aria-labelledby="crdModalLabel" 
-         aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content border-0 shadow-lg rounded-3xl">
-          <div class="modal-header bg-light">
-            <h5 class="modal-title font-weight-bold text-primary" id="crdModalLabel">
-              <i class="fas fa-file-invoice-dollar me-2"></i>{{ inEdition > 0 ? 'Editar CRD' : 'Novo CRD' }}
-            </h5>
-            <button type="button" class="btn-close" (click)="closeModal()" aria-label="Fechar" [disabled]="processing"></button>
-          </div>
-          <form (ngSubmit)="save()">
-            <div class="modal-body p-4">
-              <div class="row">
-                <!-- Nome -->
-                <div class="col-lg-12 mb-3">
-                  <div class="form-group mb-0">
-                    <label for="name" class="form-label">
-                      Nome <span class="text-danger">*</span>
-                    </label>
-                    <input type="text" class="form-control" id="name" [(ngModel)]="form.name" name="name" required placeholder="Nome do CRD" autofocus [class.is-invalid]="errors['name']" />
-                    
-                    <div *ngIf="errors['name']" class="text-danger mt-1">
-                      <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Número -->
-                <div class="col-lg-6 mb-3">
-                  <div class="form-group mb-0">
-                    <label for="number" class="form-label">
-                      Número <span class="text-danger">*</span>
-                    </label>
-                    <input type="text" class="form-control" id="number" [(ngModel)]="form.number" name="number" required placeholder="Ex: 99.999.9999.99999" mask="00.000.0000.00000" [dropSpecialCharacters]="false" [class.is-invalid]="errors['number']" />
-                    
-                    <div *ngIf="errors['number']" class="text-danger mt-1">
-                      <small *ngFor="let err of errors['number']" class="d-block">{{ err }}</small>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Cliente -->
-                <div class="col-lg-6 mb-3">
-                  <div class="form-group mb-0">
-                    <label for="customer_id" class="form-label">
-                      Cliente <span class="text-danger">*</span>
-                    </label>
-                    <select class="form-select" id="customer_id" [(ngModel)]="form.customer_id" name="customer_id" required [class.is-invalid]="errors['customer_id']">
-                      <option [ngValue]="0" disabled selected>Selecione</option>
-                      <option *ngFor="let customer of customers" [ngValue]="customer.id">{{ customer.name }}</option>
-                    </select>
-                    
-                    <div *ngIf="errors['customer_id']" class="text-danger mt-1">
-                      <small *ngFor="let err of errors['customer_id']" class="d-block">{{ err }}</small>
-                    </div>
-                  </div>
-                </div>
+    <app-modal [show]="showModal" (close)="closeModal()" [title]="inEdition > 0 ? 'Editar CRD' : 'Cadastrar Novo CRD'" icon="fa-edit" size="md">
+      <form (ngSubmit)="save()" class="d-flex flex-column flex-grow-1 min-h-0">
+        <div class="row">
+          <!-- Nome -->
+          <div class="col-lg-12 mb-3">
+            <div class="form-group mb-0">
+              <label for="name" class="form-label">
+                Nome <span class="text-danger">*</span>
+              </label>
+              <input type="text" class="form-control" id="name" [(ngModel)]="form.name" name="name" required placeholder="Nome do CRD" autofocus [class.is-invalid]="errors['name']" />
+              
+              <div *ngIf="errors['name']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
               </div>
             </div>
-            <div class="modal-footer bg-light border-0">
-              <button type="button" class="btn btn-outline-secondary" (click)="closeModal()" [disabled]="processing">
-                <i class="fas fa-times me-1"></i> Cancelar
-              </button>
-              <button type="submit" class="btn btn-primary shadow-sm" [disabled]="processing">
-                <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                <i *ngIf="!processing" class="fas fa-save me-1"></i> Salvar
-              </button>
+          </div>
+
+          <!-- Número -->
+          <div class="col-lg-6 mb-3">
+            <div class="form-group mb-0">
+              <label for="number" class="form-label">
+                Número <span class="text-danger">*</span>
+              </label>
+              <input type="text" class="form-control" id="number" [(ngModel)]="form.number" name="number" required placeholder="Ex: 99.999.9999.99999" mask="00.000.0000.00000" [dropSpecialCharacters]="false" [class.is-invalid]="errors['number']" />
+              
+              <div *ngIf="errors['number']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['number']" class="d-block">{{ err }}</small>
+              </div>
             </div>
-          </form>
+          </div>
+
+          <!-- Cliente -->
+          <div class="col-lg-6 mb-3">
+            <div class="form-group mb-0">
+              <label for="customer_id" class="form-label">
+                Cliente <span class="text-danger">*</span>
+              </label>
+              <select class="form-select" id="customer_id" [(ngModel)]="form.customer_id" name="customer_id" required [class.is-invalid]="errors['customer_id']">
+                <option [ngValue]="0" disabled selected>Selecione</option>
+                <option *ngFor="let customer of customers" [ngValue]="customer.id">{{ customer.name }}</option>
+              </select>
+              
+              <div *ngIf="errors['customer_id']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['customer_id']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+        <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeModal()" [disabled]="processing">
+            <i class="fas fa-times me-1"></i> Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary shadow-sm" [disabled]="processing">
+            <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            <i *ngIf="!processing" class="fas fa-save me-1"></i> Salvar
+          </button>
+        </div>
+      </form>
+    </app-modal>
 
     <!-- Table Section -->
     <div class="col-lg-12 animate-in" style="animation-delay: 0.2s">
@@ -163,33 +144,35 @@
                     <td class="text-end">
                       <div class="d-flex justify-content-end gap-2 flex-wrap">
                         <!-- Editar -->
-                        <button class="btn btn-sm btn-info text-white shadow-sm" (click)="edit(crd)" title="Editar">
-                          <i class="fas fa-edit me-1"></i> Editar
+                        <button class="btn btn-info text-white shadow-sm btn-action" (click)="edit(crd)" data-tooltip="Editar CRD">
+                          <i class="fas fa-edit"></i>
                         </button>
 
                         <!-- Ativar/Inativar -->
-                        <button *ngIf="!crd.active" class="btn btn-sm btn-success shadow-sm" (click)="activate(crd.id)" title="Ativar">
-                          <i class="fas fa-check me-1"></i> Ativar
+                        <button *ngIf="!crd.active" class="btn btn-success shadow-sm btn-action" (click)="activate(crd.id)" data-tooltip="Ativar CRD">
+                          <i class="fas fa-check"></i>
                         </button>
 
                         <app-confirm-modal 
                           *ngIf="crd.active"
-                          [btnClass]="'btn btn-sm btn-warning shadow-sm'" 
+                          [btnClass]="'btn btn-warning shadow-sm btn-action'" 
                           [modalTitle]="'Inativar CRD'" 
                           [message]="'Tem certeza que deseja inativar o CRD ' + crd.name + '?'"
                           [okButtonLabel]="'Confirmar'"
+                          [tooltip]="'Inativar CRD'"
                           (confirm)="deactivate(crd.id)">
-                          <span modal-button><i class="fas fa-ban me-1"></i> Inativar</span>
+                          <span modal-button><i class="fas fa-ban"></i></span>
                         </app-confirm-modal>
 
                         <!-- Excluir -->
                         <app-confirm-modal 
-                          [btnClass]="'btn btn-sm btn-danger shadow-sm'" 
+                          [btnClass]="'btn btn-danger shadow-sm btn-action'" 
                           [modalTitle]="'Excluir CRD'" 
                           [message]="'Ação irreversível! Deseja realmente excluir o CRD ' + crd.name + '?'"
                           [okButtonLabel]="'Excluir'"
+                          [tooltip]="'Excluir CRD'"
                           (confirm)="deleteCrd(crd.id)">
-                          <span modal-button><i class="fas fa-trash me-1"></i> Excluir</span>
+                          <span modal-button><i class="fas fa-trash"></i></span>
                         </app-confirm-modal>
                       </div>
                     </td>

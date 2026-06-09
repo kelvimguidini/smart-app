@@ -10,6 +10,7 @@ import { AuthenticatedLayoutComponent } from '../../../shared/layouts/authentica
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 import { DatatableComponent } from '../../../shared/components/datatable/datatable.component';
 import { AutocompleteComponent } from '../../../shared/components/autocomplete/autocomplete.component';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { NgxMaskDirective } from 'ngx-mask';
 
 @Component({
@@ -22,6 +23,7 @@ import { NgxMaskDirective } from 'ngx-mask';
     ConfirmModalComponent,
     DatatableComponent,
     AutocompleteComponent,
+    ModalComponent,
     NgxMaskDirective
   ],
   templateUrl: './broker-trans.component.html',

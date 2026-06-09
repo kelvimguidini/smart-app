@@ -1,5 +1,5 @@
 <!-- Botão que abre o modal -->
-<a href="javascript:void(0)" [class]="btnClass" [class.disabled]="btnDisabled" (click)="openModal($event)">
+<a href="javascript:void(0)" [class]="btnClass" [class.disabled]="btnDisabled" [attr.data-tooltip]="tooltip || null" (click)="openModal($event)">
     <ng-content select="[modal-button]"></ng-content>
 </a>
 

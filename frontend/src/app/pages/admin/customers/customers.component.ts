@@ -7,11 +7,12 @@ import { DatatableComponent } from '../../../shared/components/datatable/datatab
 import { ToastService } from '../../../services/toast.service';
 import { NgxMaskDirective } from 'ngx-mask';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
 
 @Component({
   selector: 'app-customers',
   standalone: true,
-  imports: [CommonModule, FormsModule, AuthenticatedLayoutComponent, DatatableComponent, NgxMaskDirective, ConfirmModalComponent],
+  imports: [CommonModule, FormsModule, AuthenticatedLayoutComponent, DatatableComponent, NgxMaskDirective, ConfirmModalComponent, ModalComponent],
   templateUrl: './customers.component.html',
   styleUrls: ['./customers.component.scss'],
 })

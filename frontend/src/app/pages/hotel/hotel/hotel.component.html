@@ -7,246 +7,231 @@
 
   <div class="row position-relative">
     <!-- Modal de Cadastro/Edição -->
-    <div class="modal fade" 
-         [class.show]="showModal" 
-         [style.display]="showModal ? 'block' : 'none'" 
-         [style.background]="showModal ? 'rgba(0,0,0,0.5)' : ''" 
-         tabindex="-1" 
-         role="dialog" 
-         aria-labelledby="hotelModalLabel" 
-         aria-hidden="true">
-      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content border-0 shadow-lg rounded-3xl animate-in">
-          <div class="modal-header bg-light">
-            <h5 class="modal-title font-weight-bold text-primary" id="hotelModalLabel">
-              <i class="fas fa-edit me-2"></i>{{ inEdition > 0 ? 'Editar Hotel' : 'Cadastrar Novo Hotel' }}
-            </h5>
-            <button type="button" class="btn-close" (click)="closeModal()" aria-label="Fechar" [disabled]="processing"></button>
+    <app-modal [show]="showModal" (close)="closeModal()" [title]="inEdition > 0 ? 'Editar Hotel' : 'Cadastrar Novo Hotel'" icon="fa-edit" size="lg">
+      <form (ngSubmit)="submit()">
+        <div class="row align-items-start">
+          <!-- Nome -->
+          <div class="col-lg-6 mb-3">
+            <div class="form-group mb-0">
+              <label for="name" class="form-label">
+                Nome:
+                <span class="text-danger">*</span>
+              </label>
+              <input
+                type="text"
+                id="name"
+                class="form-control"
+                [class.is-invalid]="errors['name']"
+                [(ngModel)]="form.name"
+                name="name"
+                placeholder="Ex: Hotel Plaza"
+                required
+                autofocus />
+
+              <div *ngIf="errors['name']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
           </div>
-          <form (ngSubmit)="submit()">
-            <div class="modal-body p-4">
-              <div class="row align-items-start">
-                <!-- Nome -->
-                <div class="col-lg-6 mb-3">
-                  <div class="form-group mb-0">
-                    <label for="name" class="form-label">Nome: <span class="text-danger">*</span></label>
-                    <input 
-                      type="text" 
-                      id="name" 
-                      class="form-control" 
-                      [class.is-invalid]="errors['name']"
-                      [(ngModel)]="form.name" 
-                      name="name" 
-                      placeholder="Ex: Hotel Plaza"
-                      required 
-                      autofocus />
-                    
-                    <div *ngIf="errors['name']" class="text-danger mt-1">
-                      <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
-                    </div>
-                  </div>
+
+          <!-- Cidade (Autocomplete) -->
+          <div class="col-lg-6 mb-3">
+            <app-autocomplete
+              id="city"
+              label="Cidade"
+              placeholder="Digite para buscar a cidade..."
+              [required]="true"
+              [searchFn]="searchCities"
+              [displayFn]="displayCity"
+              valueField="id"
+              [initialText]="selectedCityName"
+              [(ngModel)]="form.city_id"
+              name="city"
+              [errors]="errors['city_id']"></app-autocomplete>
+          </div>
+
+          <!-- E-mail -->
+          <div class="col-lg-6 mb-3">
+            <div class="form-group mb-0">
+              <label for="email" class="form-label">E-mail:</label>
+              <input
+                type="email"
+                id="email"
+                class="form-control"
+                [class.is-invalid]="errors['email']"
+                [(ngModel)]="form.email"
+                name="email"
+                placeholder="exemplo@email.com" />
+
+              <div *ngIf="errors['email']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['email']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contato -->
+          <div class="col-lg-6 mb-3">
+            <div class="form-group mb-0">
+              <label for="contact" class="form-label">Contato:</label>
+              <input
+                type="text"
+                id="contact"
+                class="form-control"
+                [class.is-invalid]="errors['contact']"
+                [(ngModel)]="form.contact"
+                name="contact"
+                placeholder="Ex: João Silva" />
+
+              <div *ngIf="errors['contact']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['contact']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Telefone -->
+          <div class="col-lg-6 mb-3">
+            <div class="form-group mb-0">
+              <label for="phone" class="form-label">Telefone:</label>
+              <input
+                type="text"
+                id="phone"
+                class="form-control"
+                [class.is-invalid]="errors['phone']"
+                [(ngModel)]="form.phone"
+                name="phone"
+                placeholder="Ex: (11) 99999-9999"
+                mask="(00) 0000-00009"
+                [dropSpecialCharacters]="false" />
+
+              <div *ngIf="errors['phone']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['phone']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Forma de Pagamento -->
+          <div class="col-lg-6 mb-3">
+            <div class="form-group mb-0">
+              <label for="payment_method" class="form-label">Forma de Pagamento:</label>
+              <select
+                id="payment_method"
+                class="form-select"
+                [class.is-invalid]="errors['payment_method']"
+                [(ngModel)]="form.payment_method"
+                name="payment_method">
+                <option value="" disabled selected>Selecione...</option>
+                <option value="Indefinido">Indefinido</option>
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Cartão">Cartão</option>
+              </select>
+
+              <div *ngIf="errors['payment_method']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['payment_method']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Taxas (%) -->
+          <div class="col-lg-6 mb-3">
+            <div class="form-group mb-0">
+              <label class="form-label fw-bold">Taxas (%)</label>
+              <div class="row g-2">
+                <div class="col-4">
+                  <small class="text-muted d-block mb-1">ISS</small>
+                  <input
+                    type="number"
+                    class="form-control text-start"
+                    [(ngModel)]="form.iss_percent"
+                    name="iss_percent"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    (input)="validatePercent($event)" />
                 </div>
-
-                <!-- Município (Autocomplete) -->
-                <div class="col-lg-6 mb-3">
-                  <app-autocomplete
-                    id="city"
-                    label="Cidade"
-                    placeholder="Digite para buscar a cidade..."
-                    [required]="true"
-                    [searchFn]="searchCities"
-                    [displayFn]="displayCity"
-                    valueField="id"
-                    [initialText]="selectedCityName"
-                    [(ngModel)]="form.city_id"
-                    name="city"
-                    [errors]="errors['city_id']">
-                  </app-autocomplete>
+                <div class="col-4">
+                  <small class="text-muted d-block mb-1">Serviço</small>
+                  <input
+                    type="number"
+                    class="form-control text-start"
+                    [(ngModel)]="form.service_percent"
+                    name="service_percent"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    (input)="validatePercent($event)" />
                 </div>
-
-                <!-- E-mail -->
-                <div class="col-lg-6 mb-3">
-                  <div class="form-group mb-0">
-                    <label for="email" class="form-label">E-mail:</label>
-                    <input 
-                      type="email" 
-                      id="email" 
-                      class="form-control" 
-                      [class.is-invalid]="errors['email']"
-                      [(ngModel)]="form.email" 
-                      name="email" 
-                      placeholder="exemplo@email.com" />
-                    
-                    <div *ngIf="errors['email']" class="text-danger mt-1">
-                      <small *ngFor="let err of errors['email']" class="d-block">{{ err }}</small>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Contato -->
-                <div class="col-lg-6 mb-3">
-                  <div class="form-group mb-0">
-                    <label for="contact" class="form-label">Contato:</label>
-                    <input 
-                      type="text" 
-                      id="contact" 
-                      class="form-control" 
-                      [class.is-invalid]="errors['contact']"
-                      [(ngModel)]="form.contact" 
-                      name="contact" 
-                      placeholder="Ex: João Silva" />
-                    
-                    <div *ngIf="errors['contact']" class="text-danger mt-1">
-                      <small *ngFor="let err of errors['contact']" class="d-block">{{ err }}</small>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Telefone -->
-                <div class="col-lg-6 mb-3">
-                  <div class="form-group mb-0">
-                    <label for="phone" class="form-label">Telefone:</label>
-                    <input 
-                      type="text" 
-                      id="phone" 
-                      class="form-control" 
-                      [class.is-invalid]="errors['phone']"
-                      [(ngModel)]="form.phone" 
-                      name="phone" 
-                      placeholder="Ex: (11) 99999-9999"
-                      mask="(00) 0000-00009"
-                      [dropSpecialCharacters]="false" />
-                    
-                    <div *ngIf="errors['phone']" class="text-danger mt-1">
-                      <small *ngFor="let err of errors['phone']" class="d-block">{{ err }}</small>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Forma de Pagamento -->
-                <div class="col-lg-6 mb-3">
-                  <div class="form-group mb-0">
-                    <label for="payment_method" class="form-label">Forma de Pagamento:</label>
-                    <select 
-                      id="payment_method" 
-                      class="form-select" 
-                      [class.is-invalid]="errors['payment_method']"
-                      [(ngModel)]="form.payment_method" 
-                      name="payment_method">
-                      <option value="" disabled selected>Selecione...</option>
-                      <option value="Indefinido">Indefinido</option>
-                      <option value="Dinheiro">Dinheiro</option>
-                      <option value="Cartão">Cartão</option>
-                    </select>
-
-                    <div *ngIf="errors['payment_method']" class="text-danger mt-1">
-                      <small *ngFor="let err of errors['payment_method']" class="d-block">{{ err }}</small>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Taxas (%) -->
-                <div class="col-lg-6 mb-3">
-                  <div class="form-group mb-0">
-                    <label class="form-label fw-bold">Taxas (%)</label>
-                    <div class="row g-2">
-                      <div class="col-4">
-                        <small class="text-muted d-block mb-1">ISS</small>
-                        <input 
-                          type="number" 
-                          class="form-control text-start" 
-                          [(ngModel)]="form.iss_percent" 
-                          name="iss_percent" 
-                          min="0" 
-                          max="100" 
-                          step="0.1" 
-                          (input)="validatePercent($event)" />
-                      </div>
-                      <div class="col-4">
-                        <small class="text-muted d-block mb-1">Serviço</small>
-                        <input 
-                          type="number" 
-                          class="form-control text-start" 
-                          [(ngModel)]="form.service_percent" 
-                          name="service_percent" 
-                          min="0" 
-                          max="100" 
-                          step="0.1" 
-                          (input)="validatePercent($event)" />
-                      </div>
-                      <div class="col-4">
-                        <small class="text-muted d-block mb-1">IVA</small>
-                        <input 
-                          type="number" 
-                          class="form-control text-start" 
-                          [(ngModel)]="form.iva_percent" 
-                          name="iva_percent" 
-                          min="0" 
-                          max="100" 
-                          step="0.1" 
-                          (input)="validatePercent($event)" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Nacional Switch -->
-                <div class="col-lg-6 mb-3">
-                  <label class="form-label d-block fw-bold">Nacional?</label>
-                  <div class="form-switch mt-2">
-                    <input class="form-check-input cursor-pointer" type="checkbox" id="national" [(ngModel)]="form.national" name="national" />
-                    <label class="form-check-label cursor-pointer text-muted ms-2" for="national">{{ form.national ? 'Sim' : 'Não' }}</label>
-                  </div>
-                </div>
-
-                <!-- Check-in -->
-                <div class="col-lg-6 mb-3">
-                  <div class="form-group mb-0">
-                    <label class="form-label fw-bold">Check-in</label>
-                    <div class="row align-items-center g-2">
-                      <div class="col-6">
-                        <small class="text-muted d-block">Início</small>
-                        <input type="time" class="form-control" [(ngModel)]="form.checkin_time" name="checkin_time" />
-                      </div>
-                      <div class="col-6">
-                        <small class="text-muted d-block">Fim</small>
-                        <input type="time" class="form-control" [(ngModel)]="form.checkin_time_end" name="checkin_time_end" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Check-out -->
-                <div class="col-lg-6 mb-3">
-                  <div class="form-group mb-0">
-                    <label class="form-label fw-bold">Check-out</label>
-                    <div class="row align-items-center g-2">
-                      <div class="col-6">
-                        <small class="text-muted d-block">Início</small>
-                        <input type="time" class="form-control" [(ngModel)]="form.checkout_time" name="checkout_time" />
-                      </div>
-                      <div class="col-6">
-                        <small class="text-muted d-block">Fim</small>
-                        <input type="time" class="form-control" [(ngModel)]="form.checkout_time_end" name="checkout_time_end" />
-                      </div>
-                    </div>
-                  </div>
+                <div class="col-4">
+                  <small class="text-muted d-block mb-1">IVA</small>
+                  <input
+                    type="number"
+                    class="form-control text-start"
+                    [(ngModel)]="form.iva_percent"
+                    name="iva_percent"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    (input)="validatePercent($event)" />
                 </div>
               </div>
             </div>
-            <div class="modal-footer bg-light border-0">
-              <button type="button" class="btn btn-outline-secondary" (click)="closeModal()" [disabled]="processing">
-                <i class="fas fa-times me-1"></i> Cancelar
-              </button>
-              <button type="submit" class="btn btn-primary shadow-sm" [disabled]="processing">
-                <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                <i *ngIf="!processing" class="fas fa-save me-1"></i> Salvar
-              </button>
+          </div>
+
+          <!-- Nacional Switch -->
+          <div class="col-lg-6 mb-3">
+            <label class="form-label d-block fw-bold">Nacional?</label>
+            <div class="form-switch mt-2">
+              <input class="form-check-input cursor-pointer" type="checkbox" id="national" [(ngModel)]="form.national" name="national" />
+              <label class="form-check-label cursor-pointer text-muted ms-2" for="national">{{ form.national ? 'Sim' : 'Não' }}</label>
             </div>
-          </form>
+          </div>
+
+          <!-- Check-in -->
+          <div class="col-lg-6 mb-3">
+            <div class="form-group mb-0">
+              <label class="form-label fw-bold">Check-in</label>
+              <div class="row align-items-center g-2">
+                <div class="col-6">
+                  <small class="text-muted d-block">Início</small>
+                  <input type="time" class="form-control" [(ngModel)]="form.checkin_time" name="checkin_time" />
+                </div>
+                <div class="col-6">
+                  <small class="text-muted d-block">Fim</small>
+                  <input type="time" class="form-control" [(ngModel)]="form.checkin_time_end" name="checkin_time_end" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Check-out -->
+          <div class="col-lg-6 mb-3">
+            <div class="form-group mb-0">
+              <label class="form-label fw-bold">Check-out</label>
+              <div class="row align-items-center g-2">
+                <div class="col-6">
+                  <small class="text-muted d-block">Início</small>
+                  <input type="time" class="form-control" [(ngModel)]="form.checkout_time" name="checkout_time" />
+                </div>
+                <div class="col-6">
+                  <small class="text-muted d-block">Fim</small>
+                  <input type="time" class="form-control" [(ngModel)]="form.checkout_time_end" name="checkout_time_end" />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+        <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeModal()" [disabled]="processing">
+            <i class="fas fa-times me-1"></i>
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary shadow-sm" [disabled]="processing">
+            <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            <i *ngIf="!processing" class="fas fa-save me-1"></i>
+            Salvar
+          </button>
+        </div>
+      </form>
+    </app-modal>
 
     <!-- Table Section -->
     <div class="col-lg-12 animate-in" style="animation-delay: 0.2s">
@@ -258,7 +243,8 @@
               Lista de Hotéis
             </h5>
             <button class="btn btn-primary btn-sm shadow-sm" (click)="openModal()" [disabled]="processing">
-              <i class="fas fa-plus me-1"></i> Novo Hotel
+              <i class="fas fa-plus me-1"></i>
+              Novo Hotel
             </button>
           </div>
 
@@ -294,7 +280,7 @@
                           }"></i>
                       </div>
                     </th>
-                    <th scope="col">Município</th>
+                    <th scope="col">Cidade</th>
                     <th scope="col" (click)="sortBy('email')" style="cursor: pointer">
                       <div class="d-flex align-items-center">
                         E-mail
@@ -333,41 +319,39 @@
                     <td class="text-end">
                       <div class="d-flex justify-content-end gap-2 flex-wrap">
                         <!-- Editar -->
-                        <button class="btn btn-sm btn-info text-white shadow-sm" (click)="edit(provider)" title="Editar">
-                          <i class="fas fa-edit me-1"></i>
-                          Editar
+                        <button class="btn btn-info text-white shadow-sm btn-action" (click)="edit(provider)" data-tooltip="Editar Hotel">
+                          <i class="fas fa-edit"></i>
                         </button>
 
                         <!-- Ativar/Inativar -->
-                        <button *ngIf="!provider.active" class="btn btn-sm btn-success shadow-sm" (click)="activateProvider(provider.id)" title="Ativar">
-                          <i class="fas fa-check me-1"></i>
-                          Ativar
+                        <button
+                          *ngIf="!provider.active"
+                          class="btn btn-success shadow-sm btn-action"
+                          (click)="activateProvider(provider.id)"
+                          data-tooltip="Ativar Hotel">
+                          <i class="fas fa-check"></i>
                         </button>
 
                         <app-confirm-modal
                           *ngIf="provider.active"
-                          [btnClass]="'btn btn-sm btn-warning shadow-sm'"
+                          [btnClass]="'btn btn-warning shadow-sm btn-action'"
                           [modalTitle]="'Inativar Hotel'"
                           [message]="'Tem certeza que deseja inativar o hotel ' + provider.name + '?'"
                           [okButtonLabel]="'Confirmar'"
+                          [tooltip]="'Inativar Hotel'"
                           (confirm)="deactivateProvider(provider.id)">
-                          <span modal-button>
-                            <i class="fas fa-ban me-1"></i>
-                            Inativar
-                          </span>
+                          <span modal-button><i class="fas fa-ban"></i></span>
                         </app-confirm-modal>
 
                         <!-- Deletar -->
                         <app-confirm-modal
-                          [btnClass]="'btn btn-sm btn-danger shadow-sm'"
+                          [btnClass]="'btn btn-danger shadow-sm btn-action'"
                           [modalTitle]="'Excluir Hotel'"
                           [message]="'Ação irreversível! Deseja realmente excluir o hotel ' + provider.name + '?'"
                           [okButtonLabel]="'Excluir'"
+                          [tooltip]="'Excluir Hotel'"
                           (confirm)="deleteProvider(provider.id)">
-                          <span modal-button>
-                            <i class="fas fa-trash me-1"></i>
-                            Excluir
-                          </span>
+                          <span modal-button><i class="fas fa-trash"></i></span>
                         </app-confirm-modal>
                       </div>
                     </td>

@@ -10,6 +10,7 @@ import { CityService, City } from '../../../services/city.service';
 import { ToastService } from '../../../services/toast.service';
 import { AuthenticatedLayoutComponent } from '../../../shared/layouts/authenticated-layout/authenticated-layout.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { DatatableComponent } from '../../../shared/components/datatable/datatable.component';
 import { AutocompleteComponent } from '../../../shared/components/autocomplete/autocomplete.component';
 import { NgxMaskDirective } from 'ngx-mask';
@@ -22,6 +23,7 @@ import { NgxMaskDirective } from 'ngx-mask';
     FormsModule,
     AuthenticatedLayoutComponent,
     ConfirmModalComponent,
+    ModalComponent,
     DatatableComponent,
     AutocompleteComponent,
     NgxMaskDirective,
@@ -201,7 +203,7 @@ export class BrokerComponent implements OnInit {
     }
 
     if (!this.form.city_id || this.form.city_id <= 0) {
-      this.errors.city_id = ['O município é obrigatório. Selecione um município da lista.'];
+      this.errors.city_id = ['A Cidade é obrigatória. Selecione uma cidade da lista.'];
     }
 
     return Object.keys(this.errors).length === 0;

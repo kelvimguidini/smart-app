@@ -17,6 +17,7 @@ export class ConfirmModalComponent {
   @Input() btnClass: string = 'btn btn-primary';
   @Input() btnDisabled: boolean = false;
   @Input() contentBig: boolean = false;
+  @Input() tooltip: string = '';
 
   @Output() confirm = new EventEmitter<void>();
 

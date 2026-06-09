@@ -22,10 +22,7 @@ class ProviderServices extends Model
         'national',
         'iss_percent',
         'service_percent',
-        'iof',
-        'service_charge',
         'iva_percent',
-        'has_additional',
         'active',
         'codestur',
         'payment_method'

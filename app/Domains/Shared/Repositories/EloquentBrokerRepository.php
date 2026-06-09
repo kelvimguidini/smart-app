@@ -21,14 +21,17 @@ class EloquentBrokerRepository extends EloquentBaseRepository implements BrokerR
         $query = $this->model->with('city')->withoutGlobalScope('active');
 
         if (isset($filters['search']) && !empty($filters['search'])) {
-            $query->where('name', 'like', '%' . $filters['search'] . '%')
-                  ->orWhere('document', 'like', '%' . $filters['search'] . '%');
+            $query->where(function ($q) use ($filters) {
+                $q->where('name', 'like', '%' . $filters['search'] . '%')
+                  ->orWhere('contact', 'like', '%' . $filters['search'] . '%')
+                  ->orWhere('email', 'like', '%' . $filters['search'] . '%');
+            });
         }
 
         $sortColumn = $filters['sort_column'] ?? 'id';
         $sortDirection = $filters['sort_direction'] ?? 'desc';
         
-        $allowedColumns = ['id', 'name', 'document', 'active'];
+        $allowedColumns = ['id', 'name', 'contact', 'email', 'phone', 'active'];
         if (in_array($sortColumn, $allowedColumns)) {
             $query->orderBy($sortColumn, $sortDirection);
         } else {

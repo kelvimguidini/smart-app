@@ -7,22 +7,25 @@
 
   <div class="row position-relative">
     <!-- Modal de Cadastro/Edição -->
-    <app-modal
-      [show]="showModal"
-      (close)="closeModal()"
-      [title]="userInEdition > 0 ? 'Editar Usuário' : 'Novo Usuário'"
-      icon="fa-user-edit"
-      size="lg">
-      <form [formGroup]="userForm" (ngSubmit)="submit()">
+    <app-modal [show]="showModal" (close)="closeModal()" [title]="userInEdition > 0 ? 'Editar Usuário' : 'Novo Usuário'" icon="fa-user-edit" size="lg">
+      <form [formGroup]="userForm" (ngSubmit)="submit()" class="d-flex flex-column flex-grow-1 min-h-0">
         <div class="row">
           <!-- Nome -->
           <div class="col-lg-4 mb-3">
             <div class="form-group mb-0">
               <label for="name" class="form-label">
-                Nome <span class="text-danger">*</span>
+                Nome
+                <span class="text-danger">*</span>
               </label>
-              <input type="text" id="name" class="form-control" formControlName="name" placeholder="Ex: João Silva" autofocus [class.is-invalid]="errors['name'] || (userForm.get('name')?.invalid && userForm.get('name')?.touched)" />
-              
+              <input
+                type="text"
+                id="name"
+                class="form-control"
+                formControlName="name"
+                placeholder="Ex: João Silva"
+                autofocus
+                [class.is-invalid]="errors['name'] || (userForm.get('name')?.invalid && userForm.get('name')?.touched)" />
+
               <div *ngIf="errors['name'] || (userForm.get('name')?.invalid && userForm.get('name')?.touched)" class="text-danger mt-1">
                 <small *ngIf="userForm.get('name')?.errors?.['required']" class="d-block">O nome é obrigatório</small>
                 <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
@@ -34,7 +37,8 @@
           <div class="col-lg-4 mb-3">
             <div class="form-group mb-0">
               <label for="phone" class="form-label">
-                Telefone <span class="text-danger">*</span>
+                Telefone
+                <span class="text-danger">*</span>
               </label>
               <input
                 type="text"
@@ -45,7 +49,7 @@
                 mask="(00) 0000-00009"
                 [dropSpecialCharacters]="false"
                 [class.is-invalid]="errors['phone'] || (userForm.get('phone')?.invalid && userForm.get('phone')?.touched)" />
-              
+
               <div *ngIf="errors['phone'] || (userForm.get('phone')?.invalid && userForm.get('phone')?.touched)" class="text-danger mt-1">
                 <small *ngIf="userForm.get('phone')?.errors?.['required']" class="d-block">O telefone é obrigatório</small>
                 <small *ngFor="let err of errors['phone']" class="d-block">{{ err }}</small>
@@ -57,10 +61,17 @@
           <div class="col-lg-4 mb-3">
             <div class="form-group mb-0">
               <label for="email" class="form-label">
-                E-mail <span class="text-danger">*</span>
+                E-mail
+                <span class="text-danger">*</span>
               </label>
-              <input type="email" id="email" class="form-control" formControlName="email" placeholder="exemplo@email.com" [class.is-invalid]="errors['email'] || (userForm.get('email')?.invalid && userForm.get('email')?.touched)" />
-              
+              <input
+                type="email"
+                id="email"
+                class="form-control"
+                formControlName="email"
+                placeholder="exemplo@email.com"
+                [class.is-invalid]="errors['email'] || (userForm.get('email')?.invalid && userForm.get('email')?.touched)" />
+
               <div *ngIf="errors['email'] || (userForm.get('email')?.invalid && userForm.get('email')?.touched)" class="text-danger mt-1">
                 <small *ngIf="userForm.get('email')?.errors?.['required']" class="d-block">O e-mail é obrigatório</small>
                 <small *ngIf="userForm.get('email')?.errors?.['email']" class="d-block">O e-mail informado não é válido</small>
@@ -68,48 +79,54 @@
               </div>
             </div>
           </div>
+        </div>
 
+        <div class="row d-flex flex-grow-1 min-h-0">
           <!-- Assinatura -->
-          <div class="col-lg-8 mb-3">
-            <div class="form-group mb-0">
+          <div class="col-lg-8 mb-3 d-flex flex-column">
+            <div class="form-group mb-0 d-flex flex-column flex-grow-1 min-h-0">
               <label for="signature" class="form-label">Assinatura</label>
               <quill-editor
                 formControlName="signature"
                 [modules]="quillModules"
                 placeholder="Sua assinatura de email..."
-                [style]="{ height: '150px' }"></quill-editor>
+                [style]="{ flex: '1 1 auto', 'min-height': '150px', display: 'flex', 'flex-direction': 'column' }"></quill-editor>
             </div>
           </div>
 
           <!-- Grupo de acesso -->
-          <div class="col-lg-4 mb-3">
-            <div class="form-group mb-0">
+          <div class="col-lg-4 mb-3 d-flex flex-column">
+            <div class="form-group mb-0 d-flex flex-column flex-grow-1 min-h-0">
               <label class="form-label">
-                Grupo de acesso <span class="text-danger">*</span>
+                Grupo de acesso
+                <span class="text-danger">*</span>
               </label>
-              <div class="card" [ngClass]="{ 'border-danger': errors['roles'] || (userForm.get('roles')?.invalid && userForm.get('roles')?.touched) }">
-                <div class="card-body py-2" style="max-height: 150px; overflow-y: auto;">
+              <div class="card d-flex flex-column flex-grow-1 min-h-0" [ngClass]="{ 'border-danger': errors['roles'] || (userForm.get('roles')?.invalid && userForm.get('roles')?.touched) }">
+                <div class="card-body py-2 flex-grow-1 overflow-auto" style="min-height: 150px">
                   <div *ngIf="isLoader" class="text-center py-4">
                     <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
                     <small class="d-block mt-2 text-muted">Carregando...</small>
                   </div>
                   <ng-container *ngIf="!isLoader">
                     <div class="form-check" *ngFor="let role of roles">
-                      <input class="form-check-input cursor-pointer" type="checkbox"
-                             [id]="'role_' + role.id"
-                             [checked]="hasRole(role.id)"
-                             (change)="onRoleChange($event, role.id)">
+                      <input
+                        class="form-check-input cursor-pointer"
+                        type="checkbox"
+                        [id]="'role_' + role.id"
+                        [checked]="hasRole(role.id)"
+                        (change)="onRoleChange($event, role.id)" />
                       <label class="form-check-label text-muted cursor-pointer" [for]="'role_' + role.id">
                         {{ role.name }}
                       </label>
                     </div>
                     <div *ngIf="roles.length === 0" class="text-muted small mt-1">
-                      <i class="fas fa-info-circle me-1"></i> Nenhum grupo disponível.
+                      <i class="fas fa-info-circle me-1"></i>
+                      Nenhum grupo disponível.
                     </div>
                   </ng-container>
                 </div>
               </div>
-              
+
               <div *ngIf="errors['roles'] || (userForm.get('roles')?.invalid && userForm.get('roles')?.touched)" class="text-danger mt-1">
                 <small *ngIf="userForm.get('roles')?.errors?.['required']" class="d-block">Selecione pelo menos um grupo de acesso</small>
                 <small *ngFor="let err of errors['roles']" class="d-block">{{ err }}</small>
@@ -119,11 +136,13 @@
         </div>
         <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
           <button type="button" class="btn btn-outline-secondary" (click)="closeModal()" [disabled]="processing">
-            <i class="fas fa-times me-1"></i> Cancelar
+            <i class="fas fa-times me-1"></i>
+            Cancelar
           </button>
           <button type="submit" class="btn btn-primary shadow-sm" [disabled]="processing">
             <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-            <i *ngIf="!processing" class="fas fa-save me-1"></i> Salvar
+            <i *ngIf="!processing" class="fas fa-save me-1"></i>
+            Salvar
           </button>
         </div>
       </form>
@@ -135,10 +154,12 @@
         <div class="card-body">
           <div class="d-flex align-items-center justify-content-between mb-4">
             <h5 class="card-title mb-0 text-secondary font-weight-bold">
-              <i class="fas fa-users me-2"></i> Lista de Usuários
+              <i class="fas fa-users me-2"></i>
+              Lista de Usuários
             </h5>
             <button class="btn btn-primary btn-sm shadow-sm" (click)="openModal()" [disabled]="processing">
-              <i class="fas fa-plus me-1"></i> Novo Usuário
+              <i class="fas fa-plus me-1"></i>
+              Novo Usuário
             </button>
           </div>
 
@@ -209,7 +230,7 @@
                     </th>
                     <th scope="col" (click)="sortBy('email_verified_at')" style="cursor: pointer; text-align: center">
                       <div class="d-flex align-items-center justify-content-center">
-                        Situação acesso
+                        Primeiro Acesso
                         <i
                           class="fas fa-sort ms-2 text-muted"
                           [ngClass]="{
@@ -245,43 +266,44 @@
                     </td>
                     <td class="text-end">
                       <div class="d-flex justify-content-end gap-2 flex-wrap">
-                        <button class="btn btn-sm btn-info text-white shadow-sm" (click)="edit(user)" title="Editar">
-                          <i class="fas fa-edit me-1"></i>
-                          Editar
+                        <button class="btn btn-info text-white shadow-sm btn-action" (click)="edit(user)" data-tooltip="Editar Usuário">
+                          <i class="fas fa-edit"></i>
                         </button>
 
-                        <button type="button" class="btn btn-sm btn-primary shadow-sm" (click)="openRolesModal(user)" title="Ver detalhes dos grupos de acesso">
-                          <i class="fas fa-shield-alt me-1"></i>
-                          Grupos
+                        <button
+                          type="button"
+                          class="btn btn-primary shadow-sm btn-action"
+                          (click)="openRolesModal(user)"
+                          data-tooltip="Ver detalhes dos grupos de acesso">
+                          <i class="fas fa-shield-alt"></i>
                         </button>
 
-                        <button *ngIf="!user.active" class="btn btn-sm btn-success shadow-sm" (click)="activate(user.id)" title="Ativar">
-                          <i class="fas fa-check me-1"></i>
-                          Ativar
+                        <button *ngIf="!user.active" class="btn btn-success shadow-sm btn-action" (click)="activate(user.id)" data-tooltip="Ativar Usuário">
+                          <i class="fas fa-check"></i>
                         </button>
 
                         <app-confirm-modal
                           *ngIf="user.active"
-                          [btnClass]="'btn btn-sm btn-warning shadow-sm'"
+                          [btnClass]="'btn btn-warning shadow-sm btn-action'"
                           [modalTitle]="'Inativar Usuário'"
                           [message]="'Tem certeza que deseja inativar o usuário ' + user.name + '?'"
                           [okButtonLabel]="'Confirmar'"
+                          [tooltip]="'Inativar Usuário'"
                           (confirm)="deactivate(user.id)">
                           <span modal-button>
-                            <i class="fas fa-ban me-1"></i>
-                            Inativar
+                            <i class="fas fa-ban"></i>
                           </span>
                         </app-confirm-modal>
 
                         <app-confirm-modal
-                          [btnClass]="'btn btn-sm btn-danger shadow-sm'"
+                          [btnClass]="'btn btn-danger shadow-sm btn-action'"
                           [modalTitle]="'Excluir Usuário'"
                           [message]="'Ação irreversível! Deseja realmente excluir o usuário ' + user.name + '?'"
                           [okButtonLabel]="'Excluir'"
+                          [tooltip]="'Excluir Usuário'"
                           (confirm)="deleteUser(user.id)">
                           <span modal-button>
-                            <i class="fas fa-trash me-1"></i>
-                            Excluir
+                            <i class="fas fa-trash"></i>
                           </span>
                         </app-confirm-modal>
                       </div>
@@ -312,29 +334,28 @@
 
 <!-- Modais de Grupos (Renderizados no final da página para evitar problemas de z-index) -->
 <ng-container *ngFor="let user of users">
-  <app-modal
-    [show]="showRolesModalId === user.id"
-    (close)="closeRolesModal()"
-    [title]="'Grupos: ' + user.name"
-    icon="fa-users-cog"
-    size="md">
-    <ul class="list-group list-group-flush mb-3">
-      <li class="list-group-item d-flex justify-content-between align-items-center py-3" *ngFor="let role of user.roles">
-        <span class="text-sm font-weight-bold">{{ role.name }}</span>
-        <app-confirm-modal
-          [btnClass]="'btn btn-sm btn-danger shadow-sm'"
-          [modalTitle]="'Remover Grupo'"
-          [message]="'Deseja remover o grupo ' + role.name + ' do usuário ' + user.name + '?'"
-          [okButtonLabel]="'Remover'"
-          (confirm)="removeRole(user.id, role.id)">
-          <span modal-button>
-            <i class="fas fa-trash me-1"></i>
-            Remover
-          </span>
-        </app-confirm-modal>
-      </li>
-      <li *ngIf="!user.roles || user.roles.length === 0" class="list-group-item text-center py-4 text-muted">Nenhum grupo atribuído.</li>
-    </ul>
+  <app-modal [show]="showRolesModalId === user.id" (close)="closeRolesModal()" [title]="'Grupos: ' + user.name" icon="fa-users-cog" size="md">
+    <div class="flex-grow-1 overflow-auto mb-3" style="min-height: 200px;">
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item d-flex justify-content-between align-items-center py-3" *ngFor="let role of user.roles">
+          <span class="text-sm font-weight-bold">{{ role.name }}</span>
+          <div>
+            <app-confirm-modal
+              [btnClass]="'btn btn-danger shadow-sm btn-action'"
+              [modalTitle]="'Remover Grupo'"
+              [message]="'Deseja remover o grupo ' + role.name + ' do usuário ' + user.name + '?'"
+              [okButtonLabel]="'Remover'"
+              [tooltip]="'Remover Grupo'"
+              (confirm)="removeRole(user.id, role.id)">
+              <span modal-button>
+                <i class="fas fa-trash"></i>
+              </span>
+            </app-confirm-modal>
+          </div>
+        </li>
+        <li *ngIf="!user.roles || user.roles.length === 0" class="list-group-item text-center py-4 text-muted">Nenhum grupo atribuído.</li>
+      </ul>
+    </div>
     <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
       <button type="button" class="btn btn-secondary shadow-sm" (click)="closeRolesModal()">Fechar</button>
     </div>

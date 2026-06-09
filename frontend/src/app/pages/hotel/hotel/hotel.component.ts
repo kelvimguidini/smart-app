@@ -6,6 +6,7 @@ import { CityService, City } from '../../../services/city.service';
 import { AuthenticatedLayoutComponent } from '../../../shared/layouts/authenticated-layout/authenticated-layout.component';
 import { DatatableComponent } from '../../../shared/components/datatable/datatable.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { ToastService } from '../../../services/toast.service';
 import { AutocompleteComponent } from '../../../shared/components/autocomplete/autocomplete.component';
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
@@ -19,6 +20,7 @@ import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
     AuthenticatedLayoutComponent,
     DatatableComponent,
     ConfirmModalComponent,
+    ModalComponent,
     AutocompleteComponent,
     NgxMaskDirective,
   ],

@@ -145,16 +145,16 @@
                       <td (click)="toggleEventDetails(event)">{{ event.date_final | date:'dd/MM/yyyy' }}</td>
                       <td class="text-end">
                         <div class="d-flex justify-content-end gap-2">
-                          <button (click)="openViewModal(event); $event.stopPropagation()" class="btn btn-secondary text-white shadow-sm btn-action" title="Visualizar Evento">
+                          <button (click)="openViewModal(event); $event.stopPropagation()" class="btn btn-secondary text-white shadow-sm btn-action" data-tooltip="Visualizar Evento">
                             <i class="fas fa-eye"></i>
                           </button>
-                          <button (click)="openSaleModal(event); $event.stopPropagation()" class="btn btn-warning text-dark shadow-sm btn-action" title="Número da Venda">
+                          <button (click)="openSaleModal(event); $event.stopPropagation()" class="btn btn-warning text-dark shadow-sm btn-action" data-tooltip="Número da Venda">
                             <i class="fas fa-tag"></i>
                           </button>
-                          <button *ngIf="hasPermission('show_history')" (click)="openHistoryModal(event); $event.stopPropagation()" class="btn btn-info text-white shadow-sm btn-action" title="Histórico de Alterações">
+                          <button *ngIf="hasPermission('show_history')" (click)="openHistoryModal(event); $event.stopPropagation()" class="btn btn-info text-white shadow-sm btn-action" data-tooltip="Histórico de Alterações">
                             <i class="fas fa-history"></i>
                           </button>
-                          <a *ngIf="hasPermission('event_admin')" [routerLink]="['/event', event.id]" class="btn btn-primary text-white shadow-sm btn-action" title="Editar Evento">
+                          <a *ngIf="hasPermission('event_admin')" [routerLink]="['/event', event.id]" class="btn btn-primary text-white shadow-sm btn-action" data-tooltip="Editar Evento">
                             <i class="fas fa-edit"></i>
                           </a>
                           <app-confirm-modal
@@ -163,6 +163,7 @@
                             [modalTitle]="'Excluir Evento'"
                             [message]="'Ação irreversível! Deseja realmente excluir o evento ' + event.name + ' e todos os seus vínculos?'"
                             [okButtonLabel]="'Excluir'"
+                            [tooltip]="'Excluir Evento'"
                             (confirm)="deleteEvent(event.id)">
                             <span modal-button><i class="fas fa-trash"></i></span>
                           </app-confirm-modal>

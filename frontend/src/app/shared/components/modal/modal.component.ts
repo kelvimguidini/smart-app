@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, ElementRef, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ElementRef, OnInit, AfterViewInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 
@@ -9,7 +9,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
   templateUrl: './modal.component.html',
   styleUrls: ['./modal.component.scss']
 })
-export class ModalComponent implements OnInit, OnDestroy {
+export class ModalComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() show: boolean = false;
   @Input() title: string = '';
   @Input() icon: string = ''; // e.g. 'fa-hotel' or 'fas fa-hotel'
@@ -23,7 +23,15 @@ export class ModalComponent implements OnInit, OnDestroy {
   constructor() {}
 
   ngOnInit() {
-    if (this.modalContainer && this.modalContainer.nativeElement) {
+    this.appendToBody();
+  }
+
+  ngAfterViewInit() {
+    this.appendToBody();
+  }
+
+  private appendToBody() {
+    if (this.modalContainer && this.modalContainer.nativeElement && this.modalContainer.nativeElement.parentNode !== document.body) {
       document.body.appendChild(this.modalContainer.nativeElement);
     }
   }

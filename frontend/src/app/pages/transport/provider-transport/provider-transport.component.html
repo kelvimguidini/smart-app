@@ -7,240 +7,221 @@
 
   <div class="row position-relative">
     <!-- Modal de Cadastro/Edição -->
-    <div class="modal fade" 
-         [class.show]="showModal" 
-         [style.display]="showModal ? 'block' : 'none'" 
-         [style.background]="showModal ? 'rgba(0,0,0,0.5)' : ''" 
-         tabindex="-1" 
-         role="dialog" 
-         aria-labelledby="providerTransModalLabel" 
-         aria-hidden="true">
-      <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content border-0 shadow-lg rounded-3xl animate-in">
-          <div class="modal-header bg-light">
-            <h5 class="modal-title font-weight-bold text-primary" id="providerTransModalLabel">
-              <i class="fas fa-edit me-2"></i>{{ inEdition > 0 ? 'Editar Fornecedor de Transporte' : 'Cadastrar Novo Fornecedor de Transporte' }}
-            </h5>
-            <button type="button" class="btn-close" (click)="closeModal()" aria-label="Fechar" [disabled]="processing"></button>
-          </div>
-          <form (ngSubmit)="submit()">
-            <div class="modal-body p-4">
-              <div class="row align-items-start">
+    <app-modal [show]="showModal" (close)="closeModal()" [title]="inEdition > 0 ? 'Editar Fornecedor de Transporte' : 'Cadastrar Novo Fornecedor de Transporte'" icon="fa-edit" size="lg">
+      <form (ngSubmit)="submit()" class="d-flex flex-column flex-grow-1 min-h-0">
+        <div class="row align-items-start">
 
-                <!-- Nome -->
-                <div class="col-lg-6 mb-3">
-                  <div class="form-group mb-0">
-                    <label for="name" class="form-label">Nome: <span class="text-danger">*</span></label>
-                    <input 
-                      type="text" 
-                      id="name" 
-                      class="form-control" 
-                      [class.is-invalid]="errors['name']"
-                      [(ngModel)]="form.name" 
-                      name="name" 
-                      placeholder="Ex: Fornecedor Transporte ABC"
-                      required 
-                      autofocus>
-                    
-                    <div *ngIf="errors['name']" class="text-danger mt-1">
-                      <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Município (Autocomplete) -->
-                <div class="col-lg-6 mb-3">
-                  <app-autocomplete
-                    id="city"
-                    label="Cidade"
-                    placeholder="Digite para buscar a cidade..."
-                    [required]="true"
-                    [searchFn]="searchCities"
-                    [displayFn]="displayCity"
-                    valueField="id"
-                    [initialText]="selectedCityName"
-                    [(ngModel)]="form.city_id"
-                    name="city"
-                    [errors]="errors['city_id']">
-                  </app-autocomplete>
-                </div>
-
-                <!-- Contato -->
-                <div class="col-lg-6 mb-3">
-                  <div class="form-group mb-0">
-                    <label for="contact" class="form-label">Contato: <span class="text-danger">*</span></label>
-                    <input 
-                      type="text" 
-                      id="contact" 
-                      class="form-control" 
-                      [class.is-invalid]="errors['contact']"
-                      [(ngModel)]="form.contact" 
-                      name="contact" 
-                      placeholder="Ex: João Silva"
-                      required>
-                    
-                    <div *ngIf="errors['contact']" class="text-danger mt-1">
-                      <small *ngFor="let err of errors['contact']" class="d-block">{{ err }}</small>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Telefone -->
-                <div class="col-lg-6 mb-3">
-                  <div class="form-group mb-0">
-                    <label for="phone" class="form-label">Telefone: <span class="text-danger">*</span></label>
-                    <input 
-                      type="text" 
-                      id="phone" 
-                      class="form-control" 
-                      [class.is-invalid]="errors['phone']"
-                      [(ngModel)]="form.phone" 
-                      name="phone" 
-                      placeholder="Ex: (11) 99999-9999"
-                      mask="(00) 0000-00009"
-                      [dropSpecialCharacters]="false"
-                      required>
-                    
-                    <div *ngIf="errors['phone']" class="text-danger mt-1">
-                      <small *ngFor="let err of errors['phone']" class="d-block">{{ err }}</small>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- E-mail -->
-                <div class="col-lg-8 mb-3">
-                  <div class="form-group mb-0">
-                    <label for="email" class="form-label">E-mail: <span class="text-danger">*</span></label>
-                    <input 
-                      type="email" 
-                      id="email" 
-                      class="form-control" 
-                      [class.is-invalid]="errors['email']"
-                      [(ngModel)]="form.email" 
-                      name="email" 
-                      placeholder="exemplo@email.com"
-                      required>
-                    
-                    <div *ngIf="errors['email']" class="text-danger mt-1">
-                      <small *ngFor="let err of errors['email']" class="d-block">{{ err }}</small>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Nacional Toggle -->
-                <div class="col-lg-4 mb-3">
-                  <label class="form-label d-block">Nacional?</label>
-                  <div class="form-switch mt-2">
-                    <input class="form-check-input cursor-pointer" type="checkbox" id="national" [(ngModel)]="form.national" name="national" />
-                    <label class="form-check-label cursor-pointer text-muted ms-2" for="national">{{ form.national ? 'Sim' : 'Não' }}</label>
-                  </div>
-                </div>
-
-                <!-- Separador -->
-                <div class="col-12 mb-3">
-                  <hr class="my-1">
-                  <small class="text-muted">Informações Fiscais (opcional)</small>
-                </div>
-
-                <!-- ISS (%) -->
-                <div class="col-lg-4 mb-3">
-                  <div class="form-group mb-0">
-                    <label for="iss_percent" class="form-label">ISS (%):</label>
-                    <input 
-                      type="number" 
-                      id="iss_percent" 
-                      class="form-control" 
-                      [class.is-invalid]="errors['iss_percent']"
-                      [(ngModel)]="form.iss_percent" 
-                      name="iss_percent" 
-                      placeholder="Ex: 5.00"
-                      min="0" 
-                      max="100"
-                      step="0.01">
-                    
-                    <div *ngIf="errors['iss_percent']" class="text-danger mt-1">
-                      <small *ngFor="let err of errors['iss_percent']" class="d-block">{{ err }}</small>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Serviço (%) -->
-                <div class="col-lg-4 mb-3">
-                  <div class="form-group mb-0">
-                    <label for="service_percent" class="form-label">Serviço (%):</label>
-                    <input 
-                      type="number" 
-                      id="service_percent" 
-                      class="form-control" 
-                      [class.is-invalid]="errors['service_percent']"
-                      [(ngModel)]="form.service_percent" 
-                      name="service_percent" 
-                      placeholder="Ex: 10.00"
-                      min="0" 
-                      max="100"
-                      step="0.01">
-                    
-                    <div *ngIf="errors['service_percent']" class="text-danger mt-1">
-                      <small *ngFor="let err of errors['service_percent']" class="d-block">{{ err }}</small>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- IVA (%) -->
-                <div class="col-lg-4 mb-3">
-                  <div class="form-group mb-0">
-                    <label for="iva_percent" class="form-label">IVA (%):</label>
-                    <input 
-                      type="number" 
-                      id="iva_percent" 
-                      class="form-control" 
-                      [class.is-invalid]="errors['iva_percent']"
-                      [(ngModel)]="form.iva_percent" 
-                      name="iva_percent" 
-                      placeholder="Ex: 21.00"
-                      min="0" 
-                      max="100"
-                      step="0.01">
-                    
-                    <div *ngIf="errors['iva_percent']" class="text-danger mt-1">
-                      <small *ngFor="let err of errors['iva_percent']" class="d-block">{{ err }}</small>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Forma de Pagamento -->
-                <div class="col-lg-12 mb-3">
-                  <div class="form-group mb-0">
-                    <label for="payment_method" class="form-label">Forma de Pagamento:</label>
-                    <input 
-                      type="text" 
-                      id="payment_method" 
-                      class="form-control" 
-                      [class.is-invalid]="errors['payment_method']"
-                      [(ngModel)]="form.payment_method" 
-                      name="payment_method" 
-                      placeholder="Ex: Transferência Bancária, Boleto...">
-                    
-                    <div *ngIf="errors['payment_method']" class="text-danger mt-1">
-                      <small *ngFor="let err of errors['payment_method']" class="d-block">{{ err }}</small>
-                    </div>
-                  </div>
-                </div>
+          <!-- Nome -->
+          <div class="col-lg-6 mb-3">
+            <div class="form-group mb-0">
+              <label for="name" class="form-label">Nome: <span class="text-danger">*</span></label>
+              <input 
+                type="text" 
+                id="name" 
+                class="form-control" 
+                [class.is-invalid]="errors['name']"
+                [(ngModel)]="form.name" 
+                name="name" 
+                placeholder="Ex: Fornecedor Transporte ABC"
+                required 
+                autofocus>
+              
+              <div *ngIf="errors['name']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
               </div>
             </div>
-            <div class="modal-footer bg-light border-0">
-              <button type="button" class="btn btn-outline-secondary" (click)="closeModal()" [disabled]="processing">
-                <i class="fas fa-times me-1"></i> Cancelar
-              </button>
-              <button type="submit" class="btn btn-primary shadow-sm" [disabled]="processing">
-                <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                <i *ngIf="!processing" class="fas fa-save me-1"></i> Salvar
-              </button>
+          </div>
+
+          <!-- Município (Autocomplete) -->
+          <div class="col-lg-6 mb-3">
+            <app-autocomplete
+              id="city"
+              label="Cidade"
+              placeholder="Digite para buscar a cidade..."
+              [required]="true"
+              [searchFn]="searchCities"
+              [displayFn]="displayCity"
+              valueField="id"
+              [initialText]="selectedCityName"
+              [(ngModel)]="form.city_id"
+              name="city"
+              [errors]="errors['city_id']">
+            </app-autocomplete>
+          </div>
+
+          <!-- Contato -->
+          <div class="col-lg-6 mb-3">
+            <div class="form-group mb-0">
+              <label for="contact" class="form-label">Contato: <span class="text-danger">*</span></label>
+              <input 
+                type="text" 
+                id="contact" 
+                class="form-control" 
+                [class.is-invalid]="errors['contact']"
+                [(ngModel)]="form.contact" 
+                name="contact" 
+                placeholder="Ex: João Silva"
+                required>
+              
+              <div *ngIf="errors['contact']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['contact']" class="d-block">{{ err }}</small>
+              </div>
             </div>
-          </form>
+          </div>
+
+          <!-- Telefone -->
+          <div class="col-lg-6 mb-3">
+            <div class="form-group mb-0">
+              <label for="phone" class="form-label">Telefone: <span class="text-danger">*</span></label>
+              <input 
+                type="text" 
+                id="phone" 
+                class="form-control" 
+                [class.is-invalid]="errors['phone']"
+                [(ngModel)]="form.phone" 
+                name="phone" 
+                placeholder="Ex: (11) 99999-9999"
+                mask="(00) 0000-00009"
+                [dropSpecialCharacters]="false"
+                required>
+              
+              <div *ngIf="errors['phone']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['phone']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- E-mail -->
+          <div class="col-lg-8 mb-3">
+            <div class="form-group mb-0">
+              <label for="email" class="form-label">E-mail: <span class="text-danger">*</span></label>
+              <input 
+                type="email" 
+                id="email" 
+                class="form-control" 
+                [class.is-invalid]="errors['email']"
+                [(ngModel)]="form.email" 
+                name="email" 
+                placeholder="exemplo@email.com"
+                required>
+              
+              <div *ngIf="errors['email']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['email']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nacional Toggle -->
+          <div class="col-lg-4 mb-3">
+            <label class="form-label d-block">Nacional?</label>
+            <div class="form-switch mt-2">
+              <input class="form-check-input cursor-pointer" type="checkbox" id="national" [(ngModel)]="form.national" name="national" />
+              <label class="form-check-label cursor-pointer text-muted ms-2" for="national">{{ form.national ? 'Sim' : 'Não' }}</label>
+            </div>
+          </div>
+
+          <!-- Separador -->
+          <div class="col-12 mb-3">
+            <hr class="my-1">
+            <small class="text-muted">Informações Fiscais (opcional)</small>
+          </div>
+
+          <!-- ISS (%) -->
+          <div class="col-lg-4 mb-3">
+            <div class="form-group mb-0">
+              <label for="iss_percent" class="form-label">ISS (%):</label>
+              <input 
+                type="number" 
+                id="iss_percent" 
+                class="form-control" 
+                [class.is-invalid]="errors['iss_percent']"
+                [(ngModel)]="form.iss_percent" 
+                name="iss_percent" 
+                placeholder="Ex: 5.00"
+                min="0" 
+                max="100"
+                step="0.01">
+              
+              <div *ngIf="errors['iss_percent']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['iss_percent']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Serviço (%) -->
+          <div class="col-lg-4 mb-3">
+            <div class="form-group mb-0">
+              <label for="service_percent" class="form-label">Serviço (%):</label>
+              <input 
+                type="number" 
+                id="service_percent" 
+                class="form-control" 
+                [class.is-invalid]="errors['service_percent']"
+                [(ngModel)]="form.service_percent" 
+                name="service_percent" 
+                placeholder="Ex: 10.00"
+                min="0" 
+                max="100"
+                step="0.01">
+              
+              <div *ngIf="errors['service_percent']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['service_percent']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- IVA (%) -->
+          <div class="col-lg-4 mb-3">
+            <div class="form-group mb-0">
+              <label for="iva_percent" class="form-label">IVA (%):</label>
+              <input 
+                type="number" 
+                id="iva_percent" 
+                class="form-control" 
+                [class.is-invalid]="errors['iva_percent']"
+                [(ngModel)]="form.iva_percent" 
+                name="iva_percent" 
+                placeholder="Ex: 21.00"
+                min="0" 
+                max="100"
+                step="0.01">
+              
+              <div *ngIf="errors['iva_percent']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['iva_percent']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Forma de Pagamento -->
+          <div class="col-lg-12 mb-3">
+            <div class="form-group mb-0">
+              <label for="payment_method" class="form-label">Forma de Pagamento:</label>
+              <input 
+                type="text" 
+                id="payment_method" 
+                class="form-control" 
+                [class.is-invalid]="errors['payment_method']"
+                [(ngModel)]="form.payment_method" 
+                name="payment_method" 
+                placeholder="Ex: Transferência Bancária, Boleto...">
+              
+              <div *ngIf="errors['payment_method']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['payment_method']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+        <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeModal()" [disabled]="processing">
+            <i class="fas fa-times me-1"></i> Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary shadow-sm" [disabled]="processing">
+            <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            <i *ngIf="!processing" class="fas fa-save me-1"></i> Salvar
+          </button>
+        </div>
+      </form>
+    </app-modal>
 
     <!-- Table Section -->
     <div class="col-lg-12 animate-in" style="animation-delay: 0.2s;">
@@ -313,34 +294,36 @@
                     <td class="text-end">
                       <div class="d-flex justify-content-end gap-2 flex-wrap">
                         <!-- Editar -->
-                        <button class="btn btn-sm btn-info text-white shadow-sm" (click)="edit(provider)" title="Editar">
-                          <i class="fas fa-edit me-1"></i> Editar
+                        <button class="btn btn-info text-white shadow-sm btn-action" (click)="edit(provider)" data-tooltip="Editar Fornecedor">
+                          <i class="fas fa-edit"></i>
                         </button>
 
                         <!-- Ativar -->
-                        <button *ngIf="!provider.active" class="btn btn-sm btn-success shadow-sm" (click)="activateProvider(provider.id)" title="Ativar">
-                          <i class="fas fa-check me-1"></i> Ativar
+                        <button *ngIf="!provider.active" class="btn btn-success shadow-sm btn-action" (click)="activateProvider(provider.id)" data-tooltip="Ativar Fornecedor">
+                          <i class="fas fa-check"></i>
                         </button>
 
                         <!-- Inativar -->
                         <app-confirm-modal 
                           *ngIf="provider.active"
-                          [btnClass]="'btn btn-sm btn-warning shadow-sm'" 
+                          [btnClass]="'btn btn-warning shadow-sm btn-action'" 
                           [modalTitle]="'Inativar Fornecedor'" 
                           [message]="'Tem certeza que deseja inativar o fornecedor ' + provider.name + '?'"
                           [okButtonLabel]="'Confirmar'"
+                          [tooltip]="'Inativar Fornecedor'"
                           (confirm)="deactivateProvider(provider.id)">
-                          <span modal-button><i class="fas fa-ban me-1"></i> Inativar</span>
+                          <span modal-button><i class="fas fa-ban"></i></span>
                         </app-confirm-modal>
 
                         <!-- Deletar -->
                         <app-confirm-modal 
-                          [btnClass]="'btn btn-sm btn-danger shadow-sm'" 
+                          [btnClass]="'btn btn-danger shadow-sm btn-action'" 
                           [modalTitle]="'Excluir Fornecedor'" 
                           [message]="'Ação irreversível! Deseja realmente excluir o fornecedor ' + provider.name + '?'"
                           [okButtonLabel]="'Excluir'"
+                          [tooltip]="'Excluir Fornecedor'"
                           (confirm)="deleteProvider(provider.id)">
-                          <span modal-button><i class="fas fa-trash me-1"></i> Excluir</span>
+                          <span modal-button><i class="fas fa-trash"></i></span>
                         </app-confirm-modal>
                       </div>
                     </td>

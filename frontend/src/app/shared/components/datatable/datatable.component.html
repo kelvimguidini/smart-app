@@ -20,7 +20,17 @@
         <div class="col-sm-12 col-md-6">
             <div class="d-flex justify-content-md-end align-items-center mt-2 mt-md-0">
                 <label class="me-2 mb-0 small text-muted">Pesquisar:</label>
-                <input type="search" class="form-control form-control-sm w-auto" [(ngModel)]="searchQuery" (input)="onSearchInput()" placeholder="Buscar...">
+                <div class="input-group input-group-sm w-auto" style="max-width: 250px;">
+                    <input type="search" 
+                           class="form-control" 
+                           [(ngModel)]="searchQuery" 
+                           (keydown.enter)="triggerSearch()" 
+                           (search)="onSearchClear()"
+                           placeholder="Buscar...">
+                    <button class="btn btn-primary" type="button" (click)="triggerSearch()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
