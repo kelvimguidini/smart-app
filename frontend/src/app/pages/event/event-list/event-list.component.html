@@ -145,9 +145,9 @@
                       <td (click)="toggleEventDetails(event)">{{ event.date_final | date:'dd/MM/yyyy' }}</td>
                       <td class="text-end">
                         <div class="d-flex justify-content-end gap-2">
-                          <button (click)="openViewModal(event); $event.stopPropagation()" class="btn btn-secondary text-white shadow-sm btn-action" data-tooltip="Visualizar Evento">
+                          <a [routerLink]="['/event', event.id]" [queryParams]="{ view: 'true' }" class="btn btn-secondary text-white shadow-sm btn-action d-inline-flex align-items-center justify-content-center" data-tooltip="Visualizar Evento" (click)="$event.stopPropagation()">
                             <i class="fas fa-eye"></i>
-                          </button>
+                          </a>
                           <button (click)="openSaleModal(event); $event.stopPropagation()" class="btn btn-warning text-dark shadow-sm btn-action" data-tooltip="Número da Venda">
                             <i class="fas fa-tag"></i>
                           </button>
@@ -197,9 +197,11 @@
                                   <td>
                                     <span class="badge" [ngClass]="{
                                       'bg-primary': prov.status === 'dating_with_customer',
-                                      'bg-warning text-dark': prov.status === 'requested',
-                                      'bg-success': prov.status === 'Approved',
-                                      'bg-danger': prov.status === 'Cancelled'
+                                      'bg-success': prov.status === 'Approved' || prov.status === 'approved_by_manager',
+                                      'bg-danger': prov.status === 'Cancelled',
+                                      'bg-warning text-dark': prov.status === 'requested' || prov.status === 'provider_requested' || prov.status === 'change_request',
+                                      'bg-info text-white': prov.status === 'provider_responsed' || prov.status === 'sent_to_customer',
+                                      'bg-secondary': ['created', 'briefing', 'sent_maneger', 'add_information', 'added_information'].includes(prov.status) || !prov.status
                                     }">
                                       {{ getStatusLabel(prov.status) }}
                                     </span>

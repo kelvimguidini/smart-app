@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Gate;
 use App\Domains\Providers\Services\ProviderServiceInterface;
 use App\Domains\Providers\Repositories\ProviderRepositoryInterface;
@@ -157,6 +156,21 @@ class ProviderController extends Controller
         if ($request->download == "true") return $this->handleDownload($request, 2);
 
         $this->providerService->sendDocument($request->all(), Auth::user()->id, 2);
+        return redirect()->back()->with('flash', ['message' => 'E-mail enviado com sucesso!', 'type' => 'success']);
+    }
+
+    public function createLink(Request $request, \App\Domains\Budgets\Services\BudgetServiceInterface $budgetService)
+    {
+        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator') && !Gate::allows('land_operator')) {
+            abort(403);
+        }
+
+        try {
+            $budgetService->sendBudgetLink($request->all(), Auth::user()->id);
+        } catch (Exception $e) {
+            return redirect()->back()->with('flash', ['message' => 'Erro ao enviar e-mail: ' . $e->getMessage(), 'type' => 'danger']);
+        }
+
         return redirect()->back()->with('flash', ['message' => 'E-mail enviado com sucesso!', 'type' => 'success']);
     }
 

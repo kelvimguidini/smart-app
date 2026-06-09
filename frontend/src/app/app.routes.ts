@@ -34,6 +34,7 @@ import { BrokerTransComponent } from './pages/transport/broker-trans/broker-tran
 import { ProviderTransportComponent } from './pages/transport/provider-transport/provider-transport.component';
 import { EventListComponent } from './pages/event/event-list/event-list.component';
 import { EventCreateComponent } from './pages/event/event-create/event-create.component';
+import { BudgetComponent } from './pages/event/budget/budget.component';
 
 import { authGuard } from './guards/auth.guard';
 import { guestGuard } from './guards/guest.guard';
@@ -76,6 +77,9 @@ export const routes: Routes = [
   { path: 'customer', component: CustomersComponent, canActivate: [authGuard], title: 'Clientes - SmartApp' },
   { path: 'crd', component: CrdsComponent, canActivate: [authGuard], title: 'CRDs - SmartApp' },
   { path: 'confirm-password', component: ConfirmPasswordComponent, canActivate: [authGuard], title: 'Confirmar Senha - SmartApp' },
+  { path: 'budget', component: BudgetComponent, title: 'Orçamento - SmartApp' },
+  { path: 'budget/:token', component: BudgetComponent, title: 'Orçamento - SmartApp' },
+  { path: 'budget/:token/:prove/:user', component: BudgetComponent, title: 'Orçamento - SmartApp' },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: '**', redirectTo: 'dashboard' }
 ];

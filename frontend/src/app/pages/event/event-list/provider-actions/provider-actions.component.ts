@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EventService } from '../../../../services/event.service';
 import { AuthService } from '../../../../services/auth.service';
+import { ToastService } from '../../../../services/toast.service';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 
 @Component({
@@ -15,6 +16,7 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
 export class ProviderActionsComponent {
   private readonly eventService = inject(EventService);
   private readonly authService = inject(AuthService);
+  private readonly toastService = inject(ToastService);
 
   @Input() event: any;
   @Input() prov: any;
@@ -212,15 +214,42 @@ export class ProviderActionsComponent {
     return `${window.location.origin}/budget?token=${token}`;
   }
 
+  baixarPdfAssincrono(downloadUrl: string, filename: string, shouldRefresh: boolean = false) {
+    this.toastService.info('Gerando o PDF do documento, por favor aguarde...');
+    this.isLoader = true;
+
+    this.eventService.downloadPdf(downloadUrl).subscribe({
+      next: (blob) => {
+        const a = document.createElement('a');
+        const objectUrl = URL.createObjectURL(blob);
+        a.href = objectUrl;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(objectUrl);
+        
+        this.isLoader = false;
+        this.toastService.success('Download concluído com sucesso!');
+        if (shouldRefresh) {
+          this.refresh.emit();
+        }
+      },
+      error: (err) => {
+        console.error('Erro ao baixar PDF:', err);
+        this.isLoader = false;
+        this.toastService.error('Erro ao gerar o PDF. Tente novamente.');
+      }
+    });
+  }
+
   createLink() {
     const token = this.prov.token_budget || this.generatedToken;
 
     if (!this.sendEmailLink) {
-      // Direct PDF Download
+      // Direct PDF Download (Async)
       const downloadUrl = `${this.eventService.getApiUrl()}/create-link/true/${this.prov.id}/${this.event.id}/${token}/${this.prov.table}`;
-      window.open(downloadUrl, '_blank');
+      const filename = `Link_Orcamento_ID${this.event.id}_${this.prov.name || 'Fornecedor'}.pdf`;
       this.showBudgetLinkModal = false;
-      setTimeout(() => this.refresh.emit(), 1500);
+      this.baixarPdfAssincrono(downloadUrl, filename, true);
     } else {
       // Send Email
       this.isLoader = true;
@@ -283,11 +312,11 @@ export class ProviderActionsComponent {
 
   sendProposal() {
     if (!this.sendEmail) {
-      // Direct Download
+      // Direct Download (Async)
       const downloadUrl = `${this.eventService.getApiUrl()}/proposal-hotel/true/${this.prov.id}/${this.event.id}/${this.prov.table}`;
-      window.open(downloadUrl, '_blank');
+      const filename = `Proposta_ID${this.event.id}_${this.prov.name || 'Fornecedor'}.pdf`;
       this.showProposalModal = false;
-      setTimeout(() => this.refresh.emit(), 1500);
+      this.baixarPdfAssincrono(downloadUrl, filename, false);
     } else {
       this.isLoader = true;
       const payload = {
@@ -325,11 +354,11 @@ export class ProviderActionsComponent {
 
   sendProposalWithoutValues() {
     if (!this.sendEmailWithoutValues) {
-      // Direct Download
+      // Direct Download (Async)
       const downloadUrl = `${this.eventService.getApiUrl()}/proposal-hotel-without-values/true/${this.prov.id}/${this.event.id}/${this.prov.table}`;
-      window.open(downloadUrl, '_blank');
+      const filename = `Proposta_Sem_Valores_ID${this.event.id}_${this.prov.name || 'Fornecedor'}.pdf`;
       this.showProposalWithoutValuesModal = false;
-      setTimeout(() => this.refresh.emit(), 1500);
+      this.baixarPdfAssincrono(downloadUrl, filename, false);
     } else {
       this.isLoader = true;
       const payload = {
@@ -367,11 +396,11 @@ export class ProviderActionsComponent {
 
   sendInvoice() {
     if (!this.sendEmailInvoice) {
-      // Direct Download
+      // Direct Download (Async)
       const downloadUrl = `${this.eventService.getApiUrl()}/invoice/true/${this.prov.id}/${this.event.id}/${this.prov.table}`;
-      window.open(downloadUrl, '_blank');
+      const filename = `Faturamento_ID${this.event.id}_${this.prov.name || 'Fornecedor'}.pdf`;
       this.showInvoiceModal = false;
-      setTimeout(() => this.refresh.emit(), 1500);
+      this.baixarPdfAssincrono(downloadUrl, filename, false);
     } else {
       this.isLoader = true;
       const payload = {

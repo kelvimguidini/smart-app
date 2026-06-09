@@ -208,11 +208,17 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   searchCities = (term: string) => this.cityService.searchCities(term);
   displayCity = (city: any) => (city ? `${city.name} - ${city.states ? city.states : city.country}` : '');
 
+  isReadOnly = false;
+
   ngOnInit() {
     this.route.params.subscribe((params) => {
       this.eventId = params['id'] ? parseInt(params['id']) : 0;
       this.activeTab = params['tab'] ? parseInt(params['tab']) : 0;
       this.loadInitialData();
+    });
+
+    this.route.queryParams.subscribe((queryParams) => {
+      this.isReadOnly = queryParams['view'] === 'true' || queryParams['view'] === true;
     });
   }
 

@@ -75,7 +75,8 @@ class StatusHistoryController extends Controller
                 'body' => $request->messageLink ? urldecode($request->messageLink) : "",
                 'hasAttachment' => false,
                 'signature' => $user->signature ?? "",
-                'subject' => $sub
+                'subject' => $sub,
+                'senderEmail' => $user->email ?? null,
             ];
             
             $send = Mail::to(explode(";", $request->emailsLink));

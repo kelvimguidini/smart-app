@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 class EmailVerificationNotificationController extends Controller
 {

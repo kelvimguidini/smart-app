@@ -125,7 +125,8 @@ class DefaultProviderService implements ProviderServiceInterface
             'body' => $requestData['message'] ? urldecode($requestData['message']) : "",
             'hasAttachment' => true,
             'signature' => $user->signature ?? "",
-            'subject' => $subject
+            'subject' => $subject,
+            'senderEmail' => $user->email ?? null,
         ];
 
         $cc = ($requestData['copyMe'] ?? false) == "true" ? $user->email : null;

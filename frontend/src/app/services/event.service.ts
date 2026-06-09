@@ -162,6 +162,10 @@ export class EventService {
     return this.http.post<any>(`${this.apiUrl}/budget-prove`, data);
   }
 
+  downloadPdf(url: string): Observable<Blob> {
+    return this.http.get(url, { responseType: 'blob' });
+  }
+
   getApiUrl(): string {
     return this.apiUrl;
   }

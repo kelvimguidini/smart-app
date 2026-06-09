@@ -1,18 +1,13 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\BudgetController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
-use App\Http\Controllers\Auth\CustomerController;
-use App\Http\Controllers\Auth\CrdController;
 use App\Http\Controllers\Auth\HomeController;
 use App\Http\Controllers\Auth\ProviderController;
 use App\Http\Controllers\Auth\StatusHistoryController;
-use App\Http\Controllers\Auth\CityController;
 use App\Http\Controllers\Auth\ProposalHistoryController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 
 Route::middleware(['auth', 'cors'])->group(function () {
@@ -120,23 +115,6 @@ Route::middleware(['auth', 'cors'])->group(function () {
     })->name('crd');
 
 
-
-    Route::get('city', [CityController::class, 'create'])
-        ->name('city');
-
-    Route::post('city-save', [CityController::class, 'store'])
-        ->name('city-save');
-
-    Route::delete('city-delete', [CityController::class, 'delete'])
-        ->name('city-delete');
-
-
-    Route::get('cities', [CityController::class, 'searchCities'])
-        ->name('cities');
-
-
-
-    // Apto routes migrated to api.php (Angular)
 
     Route::get('category', function (Request $request) {
         $path = base_path('public/angular.html');
@@ -325,13 +303,11 @@ Route::middleware(['auth', 'cors'])->group(function () {
         ->name('hotel-event-save');
 
     //ORÇAMENTO
-    Route::post('budget-prove', [BudgetController::class, 'prove'])
-        ->name('budget-prove');
 
-    Route::get('create-link/{download}/{provider_id}/{event_id}/{link}/{type}', [BudgetController::class, 'createLink'])
+    Route::get('create-link/{download}/{provider_id}/{event_id}/{link}/{type}', [ProviderController::class, 'createLink'])
         ->name('create-link');
 
-    Route::post('create-link-email', [BudgetController::class, 'createLink'])
+    Route::post('create-link-email', [ProviderController::class, 'createLink'])
         ->name('create-link-email');
 
     Route::get('proposal-hotel/{download}/{provider_id}/{event_id}/{type}', [ProviderController::class, 'proposalPdf'])
@@ -368,18 +344,6 @@ Route::middleware(['auth', 'cors'])->group(function () {
         ->name('event-status-send-email');
 
     //FIM status
-
-
-    Route::put('/customers/activate/{id}', [CustomerController::class, 'activateM'])->name('customers-activate');
-    Route::put('/customers/deactivate/{id}', [CustomerController::class, 'deactivateM'])->name('customers-deactivate');
-
-
-
-    Route::put('/crds/activate/{id}', [CrdController::class, 'activateM'])->name('crds-activate');
-    Route::put('/crds/deactivate/{id}', [CrdController::class, 'deactivateM'])->name('crds-deactivate');
-
-    Route::put('/cities/activate/{id}', [CityController::class, 'activateM'])->name('cities-activate');
-    Route::put('/cities/deactivate/{id}', [CityController::class, 'deactivateM'])->name('cities-deactivate');
 
 
     Route::post('/update-provider-order', [ProviderController::class, 'updateOrder'])->name('update-provider-order');

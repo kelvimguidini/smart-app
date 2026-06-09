@@ -342,7 +342,7 @@ export class EventListComponent implements OnInit, AfterViewInit {
     });
 
     event.event_abs?.forEach((current: any) => {
-      if (!groups.some((g) => g.id === current.ab?.id)) {
+      if (!groups.some((g) => g.type === 'A&B' && g.id === current.ab?.id)) {
         groups.push({
           id: current.ab?.id,
           name: current.ab?.name,
@@ -362,7 +362,7 @@ export class EventListComponent implements OnInit, AfterViewInit {
     });
 
     event.event_halls?.forEach((current: any) => {
-      if (!groups.some((g) => g.id === current.hall?.id)) {
+      if (!groups.some((g) => g.type === 'Salão' && g.id === current.hall?.id)) {
         groups.push({
           id: current.hall?.id,
           name: current.hall?.name,
@@ -382,7 +382,7 @@ export class EventListComponent implements OnInit, AfterViewInit {
     });
 
     event.event_adds?.forEach((current: any) => {
-      if (!groups.some((g) => g.id === current.add?.id)) {
+      if (!groups.some((g) => g.type === 'Serviço Adicional' && g.id === current.add?.id)) {
         groups.push({
           id: current.add?.id,
           name: current.add?.name,

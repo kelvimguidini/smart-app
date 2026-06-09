@@ -10,6 +10,7 @@
     type="button"
     class="btn btn-success text-white shadow-sm btn-action animate-in"
     title="Follow UP"
+    data-tooltip="Follow UP"
     (click)="editStatus()">
     <i class="fas fa-arrows-alt-v"></i>
   </button>
@@ -21,6 +22,7 @@
     class="btn text-white shadow-sm btn-action animate-in"
     [ngClass]="prov.sended_mail_link ? 'btn-danger' : 'btn-secondary'"
     title="Criar link Orçamento"
+    data-tooltip="Criar link Orçamento"
     (click)="openBudgetLinkModal()">
     <i class="fas fa-link"></i>
   </button>
@@ -31,6 +33,7 @@
     type="button"
     class="btn btn-info text-white shadow-sm btn-action animate-in"
     title="Avaliar Orçamento"
+    data-tooltip="Avaliar Orçamento"
     (click)="openEvaluationLink()">
     <i class="fas fa-comments-dollar"></i>
   </button>
@@ -41,6 +44,7 @@
     type="button"
     class="btn btn-info text-white shadow-sm btn-action animate-in"
     title="Ver avaliação de orçamento"
+    data-tooltip="Ver avaliação de orçamento"
     (click)="openEvaluationDetailsModal()">
     <i class="fas fa-eye"></i>
   </button>
@@ -50,29 +54,32 @@
     *ngIf="prov && prov.providerBudget && hasPermission('event_admin') && (prov.status === 'dating_with_customer' || prov.status === 'approved_by_manager' || prov.status === 'sent_to_customer')"
     type="button"
     class="btn text-white shadow-sm btn-action animate-in"
-    [ngClass]="prov.sended_mail ? 'btn-danger' : 'btn-secondary'"
-    title="Proposta"
+    [ngClass]="prov.sended_mail ? 'btn-danger' : 'btn-primary'"
+    title="Proposta (Com Valores)"
+    data-tooltip="Proposta (Com Valores)"
     (click)="openProposalModal()">
-    <i class="fas" [ngClass]="prov.sended_mail ? 'fa-exclamation-triangle' : 'fa-file-pdf'"></i>
+    <i class="fas" [ngClass]="prov.sended_mail ? 'fa-exclamation-triangle' : 'fa-file-invoice-dollar'"></i>
   </button>
 
   <!-- 6. Proposta (Sem Valores) -->
   <button
-    *ngIf="prov && prov.providerBudget && hasPermission('event_admin') && ['created', 'briefing', 'provider_requested', 'provider_responsed', 'sent_maneger', 'add_information', 'added_information'].includes(prov.status)"
+    *ngIf="prov && prov.providerBudget && hasPermission('event_admin') && ['created', 'briefing', 'provider_requested', 'provider_responsed', 'sent_maneger', 'add_information', 'added_information', 'change_request'].includes(prov.status)"
     type="button"
     class="btn text-white shadow-sm btn-action animate-in"
-    [ngClass]="prov.sended_mail ? 'btn-warning text-dark' : 'btn-secondary'"
+    [ngClass]="prov.sended_mail ? 'btn-danger' : 'btn-warning text-dark'"
     title="Proposta (Sem Valores)"
+    data-tooltip="Proposta (Sem Valores)"
     (click)="openProposalWithoutValuesModal()">
-    <i class="fas" [ngClass]="prov.sended_mail ? 'fa-exclamation-triangle' : 'fa-file-invoice'"></i>
+    <i class="fas" [ngClass]="prov.sended_mail ? 'fa-exclamation-triangle' : 'fa-file-alt'"></i>
   </button>
 
   <!-- 7. Faturamento -->
   <button
     *ngIf="hasPermission('event_admin') && prov.status === 'dating_with_customer'"
     type="button"
-    class="btn btn-secondary text-white shadow-sm btn-action animate-in"
+    class="btn btn-info text-white shadow-sm btn-action animate-in"
     title="Faturamento"
+    data-tooltip="Faturamento"
     (click)="openInvoiceModal()">
     <i class="fas fa-receipt"></i>
   </button>

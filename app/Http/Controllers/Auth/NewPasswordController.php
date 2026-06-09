@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
-use Inertia\Inertia;
 
 class NewPasswordController extends Controller
 {

@@ -23,6 +23,11 @@ use Illuminate\Support\Facades\Route;
 Route::post('login', [AuthController::class, 'login']);
 Route::get('events', [EventApiController::class, 'index'])->middleware('auth:api');
 
+// Rotas públicas do Orçamento (acesso externo via link)
+Route::get('budget', [\App\Http\Controllers\Api\BudgetApiController::class, 'show']);
+Route::post('budget-save', [\App\Http\Controllers\Api\BudgetApiController::class, 'store']);
+Route::post('budget-prove', [\App\Http\Controllers\Api\BudgetApiController::class, 'prove']);
+
 /**
  * Rotas internas para o SPA Angular
  */

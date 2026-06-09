@@ -66,9 +66,12 @@ class DefaultBudgetService implements BudgetServiceInterface
         
         if (($requestData['linkEmail'] ?? false) == "true" || ($requestData['linkEmail'] ?? false) == "1") {
             $link = route('budget', ['token' => $requestData['link']]);
-            $msg .= "<div style='text-align: center;'>
-                        <a href='{$link}' style='display: inline-block; padding: 10px 20px; border-radius: 5px; color: #fff; background-color: #007bff; text-decoration: none;'>Abrir o formulário</a>
-                        <p style='font-size: 12px; margin-top: 10px;'>URL: {$link}</p>
+            $msg .= "<div style='text-align: center; margin: 32px 0;'>
+                        <a href='{$link}' style='display: inline-block; padding: 12px 28px; border-radius: 12px; color: #ffffff; background-color: #4f46e5; font-weight: 700; text-decoration: none; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); font-size: 15px;'>Abrir o formulário</a>
+                        <p style='font-size: 12px; color: #94a3b8; margin-top: 16px; margin-bottom: 0;'>
+                            Se o botão acima não funcionar, copie e cole o link abaixo no seu navegador:<br>
+                            <a href='{$link}' style='color: #4f46e5; text-decoration: underline; word-break: break-all; font-family: monospace; font-size: 11px; display: inline-block; margin-top: 6px;'>{$link}</a>
+                        </p>
                     </div>";
         }
 
@@ -76,7 +79,8 @@ class DefaultBudgetService implements BudgetServiceInterface
             'body' => $msg,
             'hasAttachment' => ($requestData['attachment'] ?? false) == "true",
             'signature' => $user->signature ?? "",
-            'subject' => "Orçamento de fornecedor"
+            'subject' => "Orçamento de fornecedor",
+            'senderEmail' => $user->email ?? null,
         ];
 
         $cc = ($requestData['copyMe'] ?? false) == "true" ? $user->email : null;

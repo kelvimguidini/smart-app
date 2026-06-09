@@ -21,11 +21,11 @@ class EloquentEventRepository implements EventRepositoryInterface
 
         $query = Event::with([
             'crd', "eventLocals", 'customer',
-            'event_hotels.hotel', 'event_hotels.status_his', 'event_hotels.currency',
-            'event_abs.ab', 'event_abs.status_his', 'event_abs.currency',
-            'event_halls.hall', 'event_halls.status_his', 'event_halls.currency',
-            'event_adds.add', 'event_adds.status_his', 'event_adds.currency',
-            'event_transports.transport.city', 'event_transports.status_his', 'event_transports.currency'
+            'event_hotels.hotel.city', 'event_hotels.status_his', 'event_hotels.currency', 'event_hotels.providerBudget',
+            'event_abs.ab.city', 'event_abs.status_his', 'event_abs.currency', 'event_abs.providerBudget',
+            'event_halls.hall.city', 'event_halls.status_his', 'event_halls.currency', 'event_halls.providerBudget',
+            'event_adds.add.city', 'event_adds.status_his', 'event_adds.currency', 'event_adds.providerBudget',
+            'event_transports.transport.city', 'event_transports.status_his', 'event_transports.currency', 'event_transports.providerBudget'
         ]);
 
         if (Gate::allows('event_admin')) {

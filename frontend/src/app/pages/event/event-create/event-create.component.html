@@ -13,7 +13,7 @@
     <div class="d-sm-flex align-items-center justify-content-between mb-4 animate-in">
       <h1 class="h3 mb-0 text-gray-800">
         <i class="fa fa-calendar-check me-2 text-primary"></i>
-        {{ eventId ? 'Editar Evento: ' + (event?.name || '') : 'Cadastro Inicial' }}
+        {{ isReadOnly ? 'Visualizar Evento: ' + (event?.name || '') : (eventId ? 'Editar Evento: ' + (event?.name || '') : 'Cadastro Inicial') }}
       </h1>
       <a routerLink="/event-list" class="btn btn-secondary btn-sm shadow-sm">
         <i class="fas fa-arrow-left me-1"></i>
@@ -36,8 +36,8 @@
           <a
             class="nav-link"
             [class.active]="activeTab === 1"
-            [class.disabled]="!event || (!hasPermission('hotel_operator') && !hasPermission('event_admin'))"
-            (click)="event && (hasPermission('hotel_operator') || hasPermission('event_admin')) && (activeTab = 1)"
+            [class.disabled]="!event || (!isReadOnly && !hasPermission('hotel_operator') && !hasPermission('event_admin'))"
+            (click)="event && (isReadOnly || hasPermission('hotel_operator') || hasPermission('event_admin')) && (activeTab = 1)"
             style="cursor: pointer">
             <i class="fas fa-hotel me-1"></i>
             Hotel
@@ -47,8 +47,8 @@
           <a
             class="nav-link"
             [class.active]="activeTab === 2"
-            [class.disabled]="!event || (!hasPermission('hotel_operator') && !hasPermission('event_admin'))"
-            (click)="event && (hasPermission('hotel_operator') || hasPermission('event_admin')) && (activeTab = 2)"
+            [class.disabled]="!event || (!isReadOnly && !hasPermission('hotel_operator') && !hasPermission('event_admin'))"
+            (click)="event && (isReadOnly || hasPermission('hotel_operator') || hasPermission('event_admin')) && (activeTab = 2)"
             style="cursor: pointer">
             <i class="fas fa-utensils me-1"></i>
             A&B
@@ -58,8 +58,8 @@
           <a
             class="nav-link"
             [class.active]="activeTab === 3"
-            [class.disabled]="!event || (!hasPermission('hotel_operator') && !hasPermission('event_admin'))"
-            (click)="event && (hasPermission('hotel_operator') || hasPermission('event_admin')) && (activeTab = 3)"
+            [class.disabled]="!event || (!isReadOnly && !hasPermission('hotel_operator') && !hasPermission('event_admin'))"
+            (click)="event && (isReadOnly || hasPermission('hotel_operator') || hasPermission('event_admin')) && (activeTab = 3)"
             style="cursor: pointer">
             <i class="fas fa-door-open me-1"></i>
             Salões
@@ -69,8 +69,8 @@
           <a
             class="nav-link"
             [class.active]="activeTab === 4"
-            [class.disabled]="!event || (!hasPermission('hotel_operator') && !hasPermission('event_admin'))"
-            (click)="event && (hasPermission('hotel_operator') || hasPermission('event_admin')) && (activeTab = 4)"
+            [class.disabled]="!event || (!isReadOnly && !hasPermission('hotel_operator') && !hasPermission('event_admin'))"
+            (click)="event && (isReadOnly || hasPermission('hotel_operator') || hasPermission('event_admin')) && (activeTab = 4)"
             style="cursor: pointer">
             <i class="fas fa-concierge-bell me-1"></i>
             Adicionais
@@ -80,8 +80,8 @@
           <a
             class="nav-link"
             [class.active]="activeTab === 5"
-            [class.disabled]="!event || (!hasPermission('land_operator') && !hasPermission('event_admin'))"
-            (click)="event && (hasPermission('land_operator') || hasPermission('event_admin')) && (activeTab = 5)"
+            [class.disabled]="!event || (!isReadOnly && !hasPermission('land_operator') && !hasPermission('event_admin'))"
+            (click)="event && (isReadOnly || hasPermission('land_operator') || hasPermission('event_admin')) && (activeTab = 5)"
             style="cursor: pointer">
             <i class="fas fa-bus me-1"></i>
             Transporte
@@ -99,7 +99,8 @@
       <div [class.d-none]="activeTab !== 0" class="card shadow-sm border-left-primary mb-4 animate-in">
         <div class="card-body">
           <form (ngSubmit)="saveBasic()">
-            <div class="row">
+            <fieldset [disabled]="isReadOnly" class="border-0 p-0 m-0">
+              <div class="row">
               <!-- Coluna 1 -->
               <div class="col-lg-4">
                 <div class="form-group mb-3">
@@ -145,13 +146,13 @@
                       <label [for]="'city-' + i" class="form-label small font-weight-bold">Cidade:</label>
                       <input [id]="'city-' + i" type="text" class="form-control form-control-sm" [(ngModel)]="country.cidade" name="city_{{ i }}" required />
                     </div>
-                    <button *ngIf="basicForm.countries.length > 1" type="button" (click)="removeCountry(i)" class="btn btn-sm btn-outline-danger mt-1">
+                    <button *ngIf="basicForm.countries.length > 1 && !isReadOnly" type="button" (click)="removeCountry(i)" class="btn btn-sm btn-outline-danger mt-1">
                       <i class="fas fa-trash me-1"></i>
                       Remover Local
                     </button>
                   </div>
 
-                  <button type="button" (click)="addCountry()" class="btn btn-sm btn-info w-100 mt-2">
+                  <button *ngIf="!isReadOnly" type="button" (click)="addCountry()" class="btn btn-sm btn-info w-100 mt-2">
                     <i class="fas fa-plus me-1"></i>
                     Adicionar Local
                   </button>
@@ -314,7 +315,8 @@
               </div>
             </div>
 
-            <div class="d-flex justify-content-end gap-2 mt-4">
+            </fieldset>
+            <div class="d-flex justify-content-end gap-2 mt-4" *ngIf="!isReadOnly">
               <button type="submit" class="btn btn-primary px-4 shadow-sm" [disabled]="processing">
                 <span *ngIf="processing" class="spinner-border spinner-border-sm me-1"></span>
                 <i class="fas fa-save me-1"></i>
@@ -386,6 +388,7 @@
 
             <!-- Vincular Fornecedor button -->
             <button
+              *ngIf="!isReadOnly"
               type="button"
               class="btn btn-sm btn-success shadow-sm"
               (click)="
@@ -431,10 +434,12 @@
                   </span>
                 </h6>
               </div>
-              <div class="d-flex gap-2">
+              <div class="d-flex gap-2" *ngIf="!isReadOnly">
                 <button
                   type="button"
                   class="btn btn-sm btn-outline-info"
+                  title="Editar Cadastro do Fornecedor"
+                  data-tooltip="Editar Cadastro do Fornecedor"
                   (click)="
                     openAddProviderLink(
                       activeTab === 1 ? 'hotel' : activeTab === 2 ? 'ab' : activeTab === 3 ? 'hall' : activeTab === 4 ? 'add' : 'transport',
@@ -447,6 +452,8 @@
                 <button
                   type="button"
                   class="btn btn-sm btn-outline-success"
+                  title="Adicionar Nova Tarifa/Opção"
+                  data-tooltip="Adicionar Nova Tarifa/Opção"
                   (click)="
                     openAddOpt(activeTab === 1 ? 'hotel' : activeTab === 2 ? 'ab' : activeTab === 3 ? 'hall' : activeTab === 4 ? 'add' : 'transport', item.id)
                   ">
@@ -462,6 +469,7 @@
                     ' do evento?'
                   "
                   [okButtonLabel]="'Remover'"
+                  [tooltip]="'Excluir Vínculo do Fornecedor'"
                   (confirm)="
                     deleteProviderLink(
                       activeTab === 1 ? 'hotel' : activeTab === 2 ? 'ab' : activeTab === 3 ? 'hall' : activeTab === 4 ? 'add' : 'transport',
@@ -527,7 +535,7 @@
                         <th class="bg-light text-primary" *ngIf="activeTab === 1 || activeTab === 2">Tx. Tur Clt</th>
                         <th class="bg-light text-primary" *ngIf="activeTab === 1 || activeTab === 2">Tx. Tur Cst</th>
                       </ng-container>
-                      <th scope="col" style="width: 100px">Ações</th>
+                      <th scope="col" style="width: 100px" *ngIf="!isReadOnly">Ações</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -538,7 +546,7 @@
                       ">
                       <td
                         [attr.colspan]="
-                          activeTab === 1
+                          (activeTab === 1
                             ? showDetailsHotel
                               ? 30
                               : 20
@@ -558,7 +566,7 @@
                                             : showDetailsTransport
                                   )
                                 ? 28
-                                : 18
+                                : 18) - (isReadOnly ? 1 : 0)
                         "
                         class="py-4 text-muted">
                         <i class="fas fa-info-circle me-1"></i>
@@ -692,11 +700,13 @@
                       </ng-container>
 
                       <!-- Action Buttons -->
-                      <td>
+                      <td *ngIf="!isReadOnly">
                         <div class="d-flex justify-content-center gap-1">
                           <button
                             type="button"
                             class="btn btn-circle btn-sm btn-info text-white"
+                            title="Editar Tarifa"
+                            data-tooltip="Editar Tarifa"
                             [disabled]="statusBlockEdit(item)"
                             (click)="
                               openAddOpt(
@@ -710,6 +720,8 @@
                           <button
                             type="button"
                             class="btn btn-circle btn-sm btn-secondary text-white"
+                            title="Clonar Tarifa"
+                            data-tooltip="Clonar Tarifa"
                             [disabled]="statusBlockEdit(item)"
                             (click)="
                               openAddOpt(
@@ -726,6 +738,7 @@
                             [modalTitle]="'Remover Tarifa'"
                             [message]="'Deseja realmente remover esta tarifa?'"
                             [okButtonLabel]="'Remover'"
+                            [tooltip]="'Excluir Tarifa'"
                             (confirm)="
                               deleteOpt(
                                 activeTab === 1 ? 'hotel' : activeTab === 2 ? 'ab' : activeTab === 3 ? 'hall' : activeTab === 4 ? 'add' : 'transport',
@@ -805,7 +818,7 @@
                           {{ formatCurrency(sumTaxes(item, 'sc', activeTab === 2), item.currency?.sigla) }}
                         </td>
                       </ng-container>
-                      <td></td>
+                      <td *ngIf="!isReadOnly"></td>
                     </tr>
 
                     <!-- Internal Observations Row -->
@@ -841,7 +854,7 @@
                         ">
                         <td [attr.colspan]="activeTab === 1 || activeTab === 2 ? 8 : 6"></td>
                       </ng-container>
-                      <td></td>
+                      <td *ngIf="!isReadOnly"></td>
                     </tr>
 
                     <!-- Customer Observations Row -->
@@ -877,7 +890,7 @@
                         ">
                         <td [attr.colspan]="activeTab === 1 || activeTab === 2 ? 8 : 6"></td>
                       </ng-container>
-                      <td></td>
+                      <td *ngIf="!isReadOnly"></td>
                     </tr>
                   </tbody>
                 </table>
