@@ -3,12 +3,12 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class PasswordConfirmationTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     public function test_confirm_password_screen_can_be_rendered()
     {
@@ -27,8 +27,8 @@ class PasswordConfirmationTest extends TestCase
             'password' => 'password',
         ]);
 
-        $response->assertRedirect();
-        $response->assertSessionHasNoErrors();
+        $response->assertStatus(200);
+        $response->assertJson(['message' => 'Password confirmed']);
     }
 
     public function test_password_is_not_confirmed_with_invalid_password()
@@ -39,6 +39,8 @@ class PasswordConfirmationTest extends TestCase
             'password' => 'wrong-password',
         ]);
 
-        $response->assertSessionHasErrors();
+        // O projeto agora retorna JSON com status 422 para erros de validação
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['password']);
     }
 }

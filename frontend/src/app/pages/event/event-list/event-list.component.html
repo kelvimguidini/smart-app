@@ -1,0 +1,504 @@
+<app-authenticated-layout>
+  <ng-container header>
+    <div class="d-sm-flex align-items-center justify-content-between mb-4 animate-in">
+      <h1 class="h3 mb-0 text-gray-800">
+        <i class="fa fa-calendar-check me-2 text-primary"></i>
+        Eventos
+      </h1>
+      <a routerLink="/event" class="btn btn-primary btn-sm shadow-sm">
+        <i class="fas fa-plus me-1"></i>
+        Novo Evento
+      </a>
+    </div>
+  </ng-container>
+
+  <div class="row">
+    <!-- Filtros de Busca -->
+    <div class="col-lg-12 mb-4 animate-in" style="animation-delay: 0.1s">
+      <div class="card shadow-sm border-left-secondary">
+        <div class="card-header bg-white py-3">
+          <h6 class="m-0 font-weight-bold text-secondary">
+            <i class="fas fa-filter me-1"></i>
+            Filtros de Pesquisa
+          </h6>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="onSearch()">
+            <div class="row align-items-end">
+              <!-- Período (Range) -->
+              <div class="col-md-6 mb-3">
+                <label for="dateRange" class="form-label small font-weight-bold">Período (Início - Fim):</label>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text bg-light"><i class="fas fa-calendar-alt text-primary"></i></span>
+                  <input
+                    type="text"
+                    #dateRangePicker
+                    id="dateRange"
+                    class="form-control form-control-sm bg-white"
+                    placeholder="Selecione o período de início e fim..."
+                    readonly />
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    (click)="clearDateRange()"
+                    style="border: 1px solid #d1d3e2; border-left: none">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Cidade -->
+              <div class="col-md-3 mb-3">
+                <label for="city" class="form-label small font-weight-bold">Cidade:</label>
+                <input type="text" id="city" class="form-control form-control-sm" [(ngModel)]="filters.city" name="city" placeholder="Ex: São Paulo" />
+              </div>
+
+              <!-- Consultor -->
+              <div class="col-md-3 mb-3">
+                <label for="consultant" class="form-label small font-weight-bold">Consultor:</label>
+                <select id="consultant" class="form-select form-select-sm" [(ngModel)]="filters.consultant" name="consultant">
+                  <option value="">Todos</option>
+                  <option *ngFor="let option of users" [value]="option.id">{{ option.name }}</option>
+                </select>
+              </div>
+
+              <!-- Cliente -->
+              <div class="col-md-3 mb-3">
+                <label for="client" class="form-label small font-weight-bold">Cliente:</label>
+                <select id="client" class="form-select form-select-sm" [(ngModel)]="filters.client" name="client">
+                  <option value="">Todos</option>
+                  <option *ngFor="let option of customers" [value]="option.id">{{ option.name }}</option>
+                </select>
+              </div>
+
+              <!-- Status Hotel -->
+              <div class="col-md-3 mb-3">
+                <label for="status" class="form-label small font-weight-bold">Status do Fornecedor:</label>
+                <select id="status" class="form-select form-select-sm" [(ngModel)]="filters.status" name="status">
+                  <option value="">Todos</option>
+                  <option *ngFor="let key of allStatusKeys" [value]="key">{{ allStatus[key]?.label }}</option>
+                </select>
+              </div>
+
+              <!-- Código Zendesk -->
+              <div class="col-md-3 mb-3">
+                <label for="eventCode" class="form-label small font-weight-bold">Código do Zendesk:</label>
+                <input
+                  type="text"
+                  id="eventCode"
+                  class="form-control form-control-sm"
+                  [(ngModel)]="filters.eventCode"
+                  name="eventCode"
+                  placeholder="Ex: ZK1234" />
+              </div>
+
+              <!-- Botão Filtrar -->
+              <div class="col-md-3 mb-3 text-end">
+                <button type="submit" class="btn btn-secondary btn-sm shadow-sm w-100" [disabled]="isLoader">
+                  <i class="fas fa-search me-1"></i>
+                  Filtrar Resultados
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabela de Eventos -->
+    <div class="col-lg-12 animate-in" style="animation-delay: 0.2s">
+      <div class="card shadow-sm border-left-primary">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-4">
+            <h5 class="card-title mb-0 text-primary font-weight-bold">
+              <i class="fas fa-list me-2"></i>
+              Lista de Eventos
+            </h5>
+          </div>
+
+          <app-datatable [pagination]="pagination" [loading]="isLoader" (pageChange)="onPageChange($event)" (perPageChange)="onPerPageChange($event)">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle" width="100%" cellspacing="0">
+                <thead class="table-light">
+                  <tr>
+                    <th scope="col" style="width: 80px; cursor: pointer" (click)="toggleSort('id')">
+                      #
+                      <i class="fas ms-1" [ngClass]="getSortIcon('id')"></i>
+                    </th>
+                    <th scope="col" style="cursor: pointer" (click)="toggleSort('customer_name')">
+                      Cliente
+                      <i class="fas ms-1" [ngClass]="getSortIcon('customer_name')"></i>
+                    </th>
+                    <th scope="col" style="cursor: pointer" (click)="toggleSort('name')">
+                      Nome do Evento
+                      <i class="fas ms-1" [ngClass]="getSortIcon('name')"></i>
+                    </th>
+                    <th scope="col" style="cursor: pointer" (click)="toggleSort('code')">
+                      Código Zendesk
+                      <i class="fas ms-1" [ngClass]="getSortIcon('code')"></i>
+                    </th>
+                    <th scope="col" style="cursor: pointer" (click)="toggleSort('date')">
+                      Data Início
+                      <i class="fas ms-1" [ngClass]="getSortIcon('date')"></i>
+                    </th>
+                    <th scope="col" style="cursor: pointer" (click)="toggleSort('date_final')">
+                      Data Fim
+                      <i class="fas ms-1" [ngClass]="getSortIcon('date_final')"></i>
+                    </th>
+                    <th scope="col" class="text-end" style="width: 280px">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <ng-container *ngFor="let event of events">
+                    <!-- Linha Principal do Evento -->
+                    <tr class="cursor-pointer table-row-hover" [class.table-primary]="expandedEventId === event.id">
+                      <td (click)="toggleEventDetails(event)" class="font-weight-bold">
+                        <i class="fas" [ngClass]="expandedEventId === event.id ? 'fa-chevron-down text-primary' : 'fa-chevron-right text-muted'"></i>
+                        {{ event.id }}
+                      </td>
+                      <td (click)="toggleEventDetails(event)">{{ event.customer?.name || '-' }}</td>
+                      <td (click)="toggleEventDetails(event)">
+                        <span class="font-weight-bold text-dark">{{ event.name }}</span>
+                      </td>
+                      <td (click)="toggleEventDetails(event)">
+                        <code>{{ event.code }}</code>
+                      </td>
+                      <td (click)="toggleEventDetails(event)">{{ event.date | date: 'dd/MM/yyyy' }}</td>
+                      <td (click)="toggleEventDetails(event)">{{ event.date_final | date: 'dd/MM/yyyy' }}</td>
+                      <td class="text-end">
+                        <div class="d-flex justify-content-end gap-2">
+                          <a
+                            [routerLink]="['/event', event.id]"
+                            [queryParams]="{ view: 'true' }"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="btn btn-secondary text-white shadow-sm btn-action d-inline-flex align-items-center justify-content-center"
+                            data-tooltip="Visualizar Evento"
+                            (click)="$event.stopPropagation()">
+                            <i class="fas fa-eye"></i>
+                          </a>
+                          <button
+                            (click)="openSaleModal(event); $event.stopPropagation()"
+                            class="btn btn-warning text-dark shadow-sm btn-action"
+                            data-tooltip="Número da Venda">
+                            <i class="fas fa-tag"></i>
+                          </button>
+                          <button
+                            *ngIf="hasPermission('show_history')"
+                            (click)="openHistoryModal(event); $event.stopPropagation()"
+                            class="btn btn-info text-white shadow-sm btn-action"
+                            data-tooltip="Histórico de Alterações">
+                            <i class="fas fa-history"></i>
+                          </button>
+                          <a
+                            *ngIf="hasPermission('event_admin')"
+                            [routerLink]="['/event', event.id]"
+                            class="btn btn-primary text-white shadow-sm btn-action"
+                            data-tooltip="Editar Evento">
+                            <i class="fas fa-edit"></i>
+                          </a>
+                          <app-confirm-modal
+                            *ngIf="hasPermission('event_admin')"
+                            [btnClass]="'btn btn-danger text-white shadow-sm btn-action'"
+                            [modalTitle]="'Excluir Evento'"
+                            [message]="'Ação irreversível! Deseja realmente excluir o evento ' + event.name + ' e todos os seus vínculos?'"
+                            [okButtonLabel]="'Excluir'"
+                            [tooltip]="'Excluir Evento'"
+                            (confirm)="deleteEvent(event.id)">
+                            <span modal-button><i class="fas fa-trash"></i></span>
+                          </app-confirm-modal>
+                        </div>
+                      </td>
+                    </tr>
+
+                    <!-- Linha de Detalhes Expandida (Providers Vinculados) -->
+                    <tr *ngIf="expandedEventId === event.id">
+                      <td colspan="7" class="p-0 border-0">
+                        <div class="expanded-providers-box p-4 bg-light border-bottom animate-in">
+                          <h6 class="font-weight-bold text-secondary mb-3">
+                            <i class="fas fa-hotel me-1 text-primary"></i>
+                            Fornecedores Vinculados neste Evento
+                          </h6>
+                          <div class="table-responsive bg-white rounded shadow-sm">
+                            <table class="table table-sm table-borderless align-middle mb-0">
+                              <thead class="table-secondary">
+                                <tr>
+                                  <th scope="col" class="ps-3">Tipo</th>
+                                  <th scope="col">Fornecedor</th>
+                                  <th scope="col">Cidade</th>
+                                  <th scope="col">Status Cotação</th>
+                                  <th scope="col" class="text-end pe-3">Ações rápidas</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr *ngFor="let prov of expandedProviders">
+                                  <td class="ps-3">
+                                    <span class="badge bg-secondary">{{ prov.type }}</span>
+                                  </td>
+                                  <td class="font-weight-bold text-dark">{{ prov.name }}</td>
+                                  <td>{{ prov.city?.name || '-' }}</td>
+                                  <td>
+                                    <span
+                                      class="badge"
+                                      [ngClass]="{
+                                        'bg-primary': prov.status === 'dating_with_customer',
+                                        'bg-success': prov.status === 'Approved' || prov.status === 'approved_by_manager',
+                                        'bg-danger': prov.status === 'Cancelled',
+                                        'bg-warning text-dark':
+                                          prov.status === 'requested' || prov.status === 'provider_requested' || prov.status === 'change_request',
+                                        'bg-info text-white': prov.status === 'provider_responsed' || prov.status === 'sent_to_customer',
+                                        'bg-secondary':
+                                          ['created', 'briefing', 'sent_maneger', 'add_information', 'added_information'].includes(prov.status) || !prov.status,
+                                      }">
+                                      {{ getStatusLabel(prov.status) }}
+                                    </span>
+                                  </td>
+                                  <td class="text-end pe-3">
+                                    <app-provider-actions
+                                      [event]="event"
+                                      [prov]="prov"
+                                      [allStatus]="allStatus"
+                                      (refresh)="loadEvents(pagination.current_page)"></app-provider-actions>
+                                  </td>
+                                </tr>
+                                <tr *ngIf="expandedProviders.length === 0">
+                                  <td colspan="5" class="text-center py-4 text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Nenhum fornecedor vinculado a este evento.
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </ng-container>
+
+                  <!-- Placeholders de carregamento -->
+                  <tr *ngFor="let i of [1, 2, 3, 4, 5].slice(0, isLoader ? 5 : 0)">
+                    <td colspan="7" class="text-center py-3">
+                      <div class="placeholder-glow">
+                        <span class="placeholder col-12 rounded"></span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- Sem resultados -->
+                  <tr *ngIf="events.length === 0 && !isLoader">
+                    <td colspan="7" class="text-center py-5 text-muted">
+                      <i class="fas fa-folder-open fa-3x mb-3 d-block opacity-25"></i>
+                      Nenhum evento encontrado no sistema.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </app-datatable>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- MODAL: VISUALIZAR EVENTO -->
+  <app-modal [show]="showViewModal" (close)="closeViewModal()" [title]="'Visualizar Evento: ' + (selectedEvent?.name || '')" icon="fa-eye" size="lg">
+    <div class="card border-left-primary py-3 mb-4" *ngIf="selectedEvent">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-lg-4">
+            <div class="form-group mb-3">
+              <label class="font-weight-bold small text-muted">Nome do Evento:</label>
+              <div class="form-control-plaintext font-weight-bold text-dark">{{ selectedEvent.name }}</div>
+            </div>
+            <div class="form-group mb-3">
+              <label class="font-weight-bold small text-muted">Código Zendesk:</label>
+              <div class="form-control-plaintext">
+                <code>{{ selectedEvent.code }}</code>
+              </div>
+            </div>
+            <div class="form-group mb-3">
+              <label class="font-weight-bold small text-muted">Solicitante:</label>
+              <div class="form-control-plaintext">{{ selectedEvent.requester }}</div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="form-group mb-3">
+              <label class="font-weight-bold small text-muted">Empresa / Cliente:</label>
+              <div class="form-control-plaintext">{{ selectedEvent.customer?.name || '-' }}</div>
+            </div>
+            <div class="form-group mb-3">
+              <label class="font-weight-bold small text-muted">Setor:</label>
+              <div class="form-control-plaintext">{{ selectedEvent.sector }}</div>
+            </div>
+            <div class="form-group mb-3">
+              <label class="font-weight-bold small text-muted">Base de Pax:</label>
+              <div class="form-control-plaintext">{{ selectedEvent.pax_base }}</div>
+            </div>
+            <div class="form-group mb-3">
+              <label class="font-weight-bold small text-muted">Centro de Custo:</label>
+              <div class="form-control-plaintext">{{ selectedEvent.cost_center }}</div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="form-group mb-3">
+              <label class="font-weight-bold small text-muted">Período (Início):</label>
+              <div class="form-control-plaintext">{{ selectedEvent.date | date: 'dd/MM/yyyy' }}</div>
+            </div>
+            <div class="form-group mb-3">
+              <label class="font-weight-bold small text-muted">Período (Fim):</label>
+              <div class="form-control-plaintext">{{ selectedEvent.date_final | date: 'dd/MM/yyyy' }}</div>
+            </div>
+            <div class="form-group mb-3">
+              <label class="font-weight-bold small text-muted">CRD:</label>
+              <div class="form-control-plaintext">{{ selectedEvent.crd?.number ? selectedEvent.crd.name + ' - ' + selectedEvent.crd.number : '-' }}</div>
+            </div>
+            <div class="form-group mb-3">
+              <label class="font-weight-bold small text-muted">Valor Faturamento (Nº Venda):</label>
+              <div class="form-control-plaintext">{{ selectedEvent.valor_faturamento || '-' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mt-3 border-top pt-3" *ngIf="selectedEvent.event_locals && selectedEvent.event_locals.length > 0">
+          <div class="col-12">
+            <h6 class="font-weight-bold text-primary mb-3">
+              <i class="fas fa-map-marker-alt me-1"></i>
+              Locais do Evento
+            </h6>
+            <div class="d-flex flex-wrap gap-3">
+              <div *ngFor="let loc of selectedEvent.event_locals" class="p-2 border rounded bg-white">
+                <span class="font-weight-bold">{{ loc.cidade }}</span>
+                -
+                <span>{{ loc.pais }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
+      <button type="button" class="btn btn-secondary shadow-sm" (click)="closeViewModal()">Fechar</button>
+    </div>
+  </app-modal>
+
+  <!-- MODAL: NÚMERO DA VENDA -->
+  <app-modal [show]="showSaleModal" (close)="closeSaleModal()" title="Número da Venda" icon="fa-tag" size="md">
+    <div class="form-group mb-3" *ngIf="selectedEvent">
+      <label for="vlFaturamento" class="form-label font-weight-bold">Número da Venda:</label>
+      <input type="number" id="vlFaturamento" class="form-control" [(ngModel)]="faturamentoValue" name="vlFaturamento" />
+    </div>
+    <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
+      <button type="button" class="btn btn-secondary shadow-sm" (click)="closeSaleModal()">Cancelar</button>
+      <button type="button" class="btn btn-success shadow-sm" (click)="saveFaturamento()" [disabled]="isLoader">
+        <span *ngIf="isLoader" class="spinner-border spinner-border-sm me-1"></span>
+        Confirmar
+      </button>
+    </div>
+  </app-modal>
+
+  <!-- MODAL: HISTÓRICO DE ALTERAÇÕES -->
+  <app-modal
+    [show]="showHistoryModal"
+    (close)="closeHistoryModal()"
+    [title]="'Histórico de Alterações: ' + (selectedEvent?.name || '')"
+    icon="fa-history"
+    size="lg">
+    <div *ngIf="loadingHistory" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Carregando histórico...</span>
+      </div>
+      <div class="mt-2 text-muted">Carregando histórico...</div>
+    </div>
+
+    <div *ngIf="!loadingHistory && selectedEvent">
+      <div *ngIf="historyList.length > 0" class="table-responsive" style="max-height: 400px; overflow-y: auto">
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Usuário</th>
+              <th>Data</th>
+              <th>Aba</th>
+              <th>Ação</th>
+              <th class="text-end">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container *ngFor="let item of displayedHistoryList; let idx = index">
+              <tr>
+                <td>{{ item.user?.name || 'Desconhecido' }}</td>
+                <td>{{ formatDate(item.created_at, true) }}</td>
+                <td>
+                  <span class="badge bg-secondary">{{ tableLabels[item.table_name] || item.table_name }}</span>
+                </td>
+                <td>
+                  <span [class]="badgeClass(item.action)">
+                    {{ actionLabel(item.action) }}
+                  </span>
+                </td>
+                <td class="text-end">
+                  <div class="d-flex justify-content-end gap-2">
+                    <button *ngIf="item.action === 'updated'" class="btn btn-sm btn-outline-info py-0 px-2" (click)="toggleHistoryDetails(item)">
+                      <i class="fas" [ngClass]="item.showDetails ? 'fa-eye-slash' : 'fa-eye'"></i>
+                      {{ item.showDetails ? 'Ocultar' : 'Ver' }}
+                    </button>
+                    <button
+                      *ngIf="item.action === 'deleted' && !item.restored"
+                      class="btn btn-sm btn-outline-success py-0 px-2"
+                      (click)="restoreHistoryItem(item)"
+                      [disabled]="restoringHistory">
+                      <i class="fas" [ngClass]="restoringHistory ? 'fa-spinner fa-spin' : 'fa-undo'"></i>
+                      Recuperar
+                    </button>
+                    <span *ngIf="item.action === 'deleted' && item.restored" class="badge bg-success">
+                      Recuperado em {{ formatDate(item.restored_at, true) }}
+                    </span>
+                  </div>
+                </td>
+              </tr>
+              <!-- Details row for updated diffs -->
+              <tr *ngIf="item.showDetails">
+                <td colspan="5" class="bg-light p-3">
+                  <div class="d-flex flex-wrap gap-2">
+                    <div *ngFor="let diff of item.diffs" class="p-2 border rounded bg-white small d-flex align-items-center gap-2">
+                      <span class="font-weight-bold">{{ diff.field }}:</span>
+                      <span class="text-danger text-decoration-line-through">{{ diff.old }}</span>
+                      <span class="text-muted">→</span>
+                      <span class="text-success font-weight-bold">{{ diff.new }}</span>
+                    </div>
+                    <div *ngIf="item.diffs?.length === 0" class="text-muted small">Nenhuma alteração relevante detectada.</div>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginação Histórico -->
+      <div *ngIf="totalHistoryPages > 1" class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+        <span class="small text-muted">
+          Mostrando {{ (historyPagination.page - 1) * historyPagination.perPage + 1 }} a
+          {{ mathMin(historyPagination.page * historyPagination.perPage, historyList.length) }} de {{ historyList.length }} registros
+        </span>
+        <div class="btn-group btn-group-sm">
+          <button class="btn btn-outline-secondary" [disabled]="historyPagination.page === 1" (click)="prevHistoryPage()">
+            <i class="fas fa-chevron-left"></i>
+            Anterior
+          </button>
+          <button class="btn btn-outline-secondary" disabled>Página {{ historyPagination.page }} de {{ totalHistoryPages }}</button>
+          <button class="btn btn-outline-secondary" [disabled]="historyPagination.page === totalHistoryPages" (click)="nextHistoryPage()">
+            Próximo
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="historyList.length === 0" class="alert alert-info py-4 text-center">
+        <i class="fas fa-info-circle me-1"></i>
+        Nenhuma alteração registrada para este evento.
+      </div>
+    </div>
+    <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
+      <button type="button" class="btn btn-secondary shadow-sm" (click)="closeHistoryModal()">Fechar</button>
+    </div>
+  </app-modal>
+</app-authenticated-layout>

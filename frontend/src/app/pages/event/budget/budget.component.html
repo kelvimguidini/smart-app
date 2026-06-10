@@ -1,0 +1,450 @@
+<!-- OVERLAY FLASH MESSAGE -->
+<div *ngIf="flash && flash.show" class="fixed-overlay d-flex justify-content-center align-items-center">
+  <div class="custom-modal-card p-4 rounded shadow bg-white border border-2 text-center" [ngClass]="{
+    'border-success text-success': flash.type === 'success',
+    'border-danger text-danger': flash.type === 'error' || flash.type === 'danger',
+    'border-warning text-warning': flash.type === 'warning'
+  }">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="m-0 font-weight-bold">Aprovação de Orçamento</h5>
+      <button type="button" class="btn-close" (click)="flash.show = false"></button>
+    </div>
+    <div class="modal-body text-dark py-2">
+      <p class="mb-4">{{ flash.message }}</p>
+    </div>
+    <div class="text-end">
+      <button type="button" class="btn btn-sm" [ngClass]="{
+        'btn-success': flash.type === 'success',
+        'btn-danger': flash.type === 'error' || flash.type === 'danger',
+        'btn-warning text-dark': flash.type === 'warning'
+      }" (click)="flash.show = false">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-light bg-white mb-4 shadow-sm py-2">
+  <div class="container-fluid d-flex justify-content-center">
+    <a class="navbar-brand py-1" href="/">
+      <img src="logo.png" alt="4BTS Logo" style="max-height: 55px;" />
+    </a>
+  </div>
+</nav>
+
+<!-- LOADER -->
+<div *ngIf="isLoading" class="d-flex flex-column justify-content-center align-items-center" style="min-height: 60vh;">
+  <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+    <span class="visually-hidden">Carregando...</span>
+  </div>
+  <p class="text-muted mt-3 font-weight-bold">Carregando dados do orçamento...</p>
+</div>
+
+<!-- INVALID TOKEN STATE -->
+<div *ngIf="!isLoading && !tokenValid" class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5 text-center">
+      <div class="card shadow border-0 bg-white p-4">
+        <div class="card-body">
+          <div class="text-danger mb-4">
+            <i class="fas fa-exclamation-triangle fa-4x"></i>
+          </div>
+          <h4 class="font-weight-bold text-danger mb-3">Link Inválido</h4>
+          <p class="text-muted mb-0">A URL inserida não é válida ou já expirou. Por favor, verifique se a URL está correta e tente novamente ou entre em contato com o suporte.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VALID TOKEN STATE -->
+<div *ngIf="!isLoading && tokenValid" class="container py-2 pb-5">
+  <!-- Informational Card -->
+  <div class="card shadow-sm border-0 bg-white mb-4 p-4">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h3 class="font-weight-bold text-dark mb-1">{{ event.name }}</h3>
+        <p class="text-muted mb-0">
+          <i class="fas fa-hotel me-2"></i> Fornecedor: <strong class="text-primary">{{ providerName }}</strong> 
+          <span *ngIf="providerCity"> ({{ providerCity }})</span>
+        </p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <span class="badge bg-secondary p-2 px-3 fs-6">Código: {{ event.code }}</span>
+      </div>
+    </div>
+  </div>
+
+  <form (ngSubmit)="submit()">
+    <!-- HOSPEDAGEM TABLE -->
+    <div class="card shadow-sm border-0 bg-white mb-4 overflow-hidden" *ngIf="eventHotel && eventHotel.event_hotels_opt && eventHotel.event_hotels_opt.length > 0">
+      <div class="card-header bg-primary text-white py-3">
+        <h5 class="mb-0 font-weight-bold"><i class="fas fa-bed me-2"></i> Hospedagem</h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Regime</th>
+              <th>Propósito</th>
+              <th>Categoria</th>
+              <th>Apartamento</th>
+              <th>Entrada</th>
+              <th>Saída</th>
+              <th>Qtd</th>
+              <th>Noites</th>
+              <th style="width: 130px;">Comissão %</th>
+              <th style="width: 200px;">Valor</th>
+              <th>Observação</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of eventHotel.event_hotels_opt; let i = index">
+              <td class="font-weight-bold text-dark">{{ item.regime?.name }}</td>
+              <td>{{ item.purpose?.name }}</td>
+              <td>{{ item.category_hotel?.name }}</td>
+              <td>{{ item.apto_hotel?.name }}</td>
+              <td>{{ item.in | date:'dd/MM/yyyy' }}</td>
+              <td>{{ item.out | date:'dd/MM/yyyy' }}</td>
+              <td class="font-weight-bold text-dark">{{ item.count }}</td>
+              <td>{{ daysBetween(item.in, item.out) }}</td>
+              <td>
+                <input type="number" [(ngModel)]="comissionsHotel[i]" [name]="'comissionsHotel_' + i" [disabled]="prove" class="form-control form-control-sm" min="0" max="100" />
+              </td>
+              <td>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text">{{ symbol }}</span>
+                  <input type="text" [(ngModel)]="valuesHotel[i]" [name]="'valuesHotel_' + i" [disabled]="prove" class="form-control form-control-sm" mask="separator.2" thousandSeparator="." decimalMarker="," />
+                </div>
+              </td>
+              <td>
+                <input type="text" [(ngModel)]="commentsHotel[i]" [name]="'commentsHotel_' + i" [disabled]="prove" class="form-control form-control-sm" />
+              </td>
+            </tr>
+          </tbody>
+          <tfoot class="bg-light border-top-0">
+            <tr>
+              <td colspan="4" class="py-3 border-0">
+                <div class="row align-items-center mb-2">
+                  <div class="col-6 text-end">
+                    <label class="font-weight-bold small">Taxa de Serviço (%):</label>
+                  </div>
+                  <div class="col-6">
+                    <input type="number" [(ngModel)]="hostingFeeHotel" name="hostingFeeHotel" [disabled]="prove" class="form-control form-control-sm w-75" />
+                  </div>
+                </div>
+                <div class="row align-items-center mb-2">
+                  <div class="col-6 text-end">
+                    <label class="font-weight-bold small">Taxa de ISS (%):</label>
+                  </div>
+                  <div class="col-6">
+                    <input type="number" [(ngModel)]="ISSFeeHotel" name="ISSFeeHotel" [disabled]="prove" class="form-control form-control-sm w-75" />
+                  </div>
+                </div>
+                <div class="row align-items-center">
+                  <div class="col-6 text-end">
+                    <label class="font-weight-bold small">Taxa IVA (%):</label>
+                  </div>
+                  <div class="col-6">
+                    <input type="number" [(ngModel)]="IVAFeeHotel" name="IVAFeeHotel" [disabled]="prove" class="form-control form-control-sm w-75" />
+                  </div>
+                </div>
+              </td>
+              <td colspan="7" class="py-3 border-0">
+                <label class="font-weight-bold small d-block mb-1">Observação Geral:</label>
+                <textarea [(ngModel)]="commentHotel" name="commentHotel" [disabled]="prove" class="form-control form-control-sm" rows="4" placeholder="Digite observações sobre a hospedagem..."></textarea>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- ALIMENTOS E BEBIDAS TABLE -->
+    <div class="card shadow-sm border-0 bg-white mb-4 overflow-hidden" *ngIf="eventAb && eventAb.event_ab_opts && eventAb.event_ab_opts.length > 0">
+      <div class="card-header bg-primary text-white py-3">
+        <h5 class="mb-0 font-weight-bold"><i class="fas fa-utensils me-2"></i> Alimentos & Bebidas</h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Serviço</th>
+              <th>Tipo Serviço</th>
+              <th>Local</th>
+              <th>De</th>
+              <th>Até</th>
+              <th>Qtd</th>
+              <th>Noites</th>
+              <th style="width: 130px;">Comissão %</th>
+              <th style="width: 200px;">Valor</th>
+              <th>Observação</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of eventAb.event_ab_opts; let i = index">
+              <td class="font-weight-bold text-dark">{{ item.service?.name }}</td>
+              <td>{{ item.service_type?.name }}</td>
+              <td>{{ item.local?.name }}</td>
+              <td>{{ item.in | date:'dd/MM/yyyy' }}</td>
+              <td>{{ item.out | date:'dd/MM/yyyy' }}</td>
+              <td class="font-weight-bold text-dark">{{ item.count }}</td>
+              <td>{{ daysBetween1(item.in, item.out) }}</td>
+              <td>
+                <input type="number" [(ngModel)]="comissionsAb[i]" [name]="'comissionsAb_' + i" [disabled]="prove" class="form-control form-control-sm" min="0" max="100" />
+              </td>
+              <td>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text">{{ symbol }}</span>
+                  <input type="text" [(ngModel)]="valuesAb[i]" [name]="'valuesAb_' + i" [disabled]="prove" class="form-control form-control-sm" mask="separator.2" thousandSeparator="." decimalMarker="," />
+                </div>
+              </td>
+              <td>
+                <input type="text" [(ngModel)]="commentsAb[i]" [name]="'commentsAb_' + i" [disabled]="prove" class="form-control form-control-sm" />
+              </td>
+            </tr>
+          </tbody>
+          <tfoot class="bg-light border-top-0">
+            <tr>
+              <td colspan="4" class="py-3 border-0">
+                <div class="row align-items-center mb-2">
+                  <div class="col-6 text-end">
+                    <label class="font-weight-bold small">Taxa de Serviço (%):</label>
+                  </div>
+                  <div class="col-6">
+                    <input type="number" [(ngModel)]="hostingFeeAb" name="hostingFeeAb" [disabled]="prove" class="form-control form-control-sm w-75" />
+                  </div>
+                </div>
+                <div class="row align-items-center mb-2">
+                  <div class="col-6 text-end">
+                    <label class="font-weight-bold small">Taxa de ISS (%):</label>
+                  </div>
+                  <div class="col-6">
+                    <input type="number" [(ngModel)]="ISSFeeAb" name="ISSFeeAb" [disabled]="prove" class="form-control form-control-sm w-75" />
+                  </div>
+                </div>
+                <div class="row align-items-center">
+                  <div class="col-6 text-end">
+                    <label class="font-weight-bold small">Taxa IVA (%):</label>
+                  </div>
+                  <div class="col-6">
+                    <input type="number" [(ngModel)]="IVAFeeAb" name="IVAFeeAb" [disabled]="prove" class="form-control form-control-sm w-75" />
+                  </div>
+                </div>
+              </td>
+              <td colspan="6" class="py-3 border-0">
+                <label class="font-weight-bold small d-block mb-1">Observação Geral:</label>
+                <textarea [(ngModel)]="commentAb" name="commentAb" [disabled]="prove" class="form-control form-control-sm" rows="4" placeholder="Digite observações sobre alimentos e bebidas..."></textarea>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- SALÕES TABLE -->
+    <div class="card shadow-sm border-0 bg-white mb-4 overflow-hidden" *ngIf="eventHall && eventHall.event_hall_opts && eventHall.event_hall_opts.length > 0">
+      <div class="card-header bg-primary text-white py-3">
+        <h5 class="mb-0 font-weight-bold"><i class="fas fa-door-open me-2"></i> Salões</h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Nome</th>
+              <th>Finalidade</th>
+              <th>M2</th>
+              <th>De</th>
+              <th>Até</th>
+              <th>Qtd</th>
+              <th>Noites</th>
+              <th style="width: 130px;">Comissão %</th>
+              <th style="width: 200px;">Valor</th>
+              <th>Observação</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of eventHall.event_hall_opts; let i = index">
+              <td class="font-weight-bold text-dark">{{ item.name }}</td>
+              <td>{{ item.purpose?.name }}</td>
+              <td>{{ item.m2 }}</td>
+              <td>{{ item.in | date:'dd/MM/yyyy' }}</td>
+              <td>{{ item.out | date:'dd/MM/yyyy' }}</td>
+              <td class="font-weight-bold text-dark">{{ item.count }}</td>
+              <td>{{ daysBetween(item.in, item.out) }}</td>
+              <td>
+                <input type="number" [(ngModel)]="comissionsHall[i]" [name]="'comissionsHall_' + i" [disabled]="prove" class="form-control form-control-sm" min="0" max="100" />
+              </td>
+              <td>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text">{{ symbol }}</span>
+                  <input type="text" [(ngModel)]="valuesHall[i]" [name]="'valuesHall_' + i" [disabled]="prove" class="form-control form-control-sm" mask="separator.2" thousandSeparator="." decimalMarker="," />
+                </div>
+              </td>
+              <td>
+                <input type="text" [(ngModel)]="commentsHall[i]" [name]="'commentsHall_' + i" [disabled]="prove" class="form-control form-control-sm" />
+              </td>
+            </tr>
+          </tbody>
+          <tfoot class="bg-light border-top-0">
+            <tr>
+              <td colspan="4" class="py-3 border-0">
+                <div class="row align-items-center mb-2">
+                  <div class="col-6 text-end">
+                    <label class="font-weight-bold small">Taxa de Salão (%):</label>
+                  </div>
+                  <div class="col-6">
+                    <input type="number" [(ngModel)]="hostingFeeHall" name="hostingFeeHall" [disabled]="prove" class="form-control form-control-sm w-75" />
+                  </div>
+                </div>
+                <div class="row align-items-center mb-2">
+                  <div class="col-6 text-end">
+                    <label class="font-weight-bold small">Taxa de ISS (%):</label>
+                  </div>
+                  <div class="col-6">
+                    <input type="number" [(ngModel)]="ISSFeeHall" name="ISSFeeHall" [disabled]="prove" class="form-control form-control-sm w-75" />
+                  </div>
+                </div>
+                <div class="row align-items-center">
+                  <div class="col-6 text-end">
+                    <label class="font-weight-bold small">Taxa IVA (%):</label>
+                  </div>
+                  <div class="col-6">
+                    <input type="number" [(ngModel)]="IVAFeeHall" name="IVAFeeHall" [disabled]="prove" class="form-control form-control-sm w-75" />
+                  </div>
+                </div>
+              </td>
+              <td colspan="6" class="py-3 border-0">
+                <label class="font-weight-bold small d-block mb-1">Observação Geral:</label>
+                <textarea [(ngModel)]="commentHall" name="commentHall" [disabled]="prove" class="form-control form-control-sm" rows="4" placeholder="Digite observações sobre os salões..."></textarea>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- ADICIONAIS TABLE -->
+    <div class="card shadow-sm border-0 bg-white mb-4 overflow-hidden" *ngIf="eventAdd && eventAdd.event_add_opts && eventAdd.event_add_opts.length > 0">
+      <div class="card-header bg-primary text-white py-3">
+        <h5 class="mb-0 font-weight-bold"><i class="fas fa-plus-circle me-2"></i> Adicionais</h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Serviço</th>
+              <th>Medida</th>
+              <th>Frequência</th>
+              <th>De</th>
+              <th>Até</th>
+              <th>Qtd</th>
+              <th>Noites</th>
+              <th style="width: 130px;">Comissão %</th>
+              <th style="width: 200px;">Valor</th>
+              <th>Observação</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of eventAdd.event_add_opts; let i = index">
+              <td class="font-weight-bold text-dark">{{ item.service?.name }}</td>
+              <td>{{ item.measure?.name }}</td>
+              <td>{{ item.frequency?.name }}</td>
+              <td>{{ item.in | date:'dd/MM/yyyy' }}</td>
+              <td>{{ item.out | date:'dd/MM/yyyy' }}</td>
+              <td class="font-weight-bold text-dark">{{ item.count }}</td>
+              <td>{{ daysBetween(item.in, item.out) }}</td>
+              <td>
+                <input type="number" [(ngModel)]="comissionsAdd[i]" [name]="'comissionsAdd_' + i" [disabled]="prove" class="form-control form-control-sm" min="0" max="100" />
+              </td>
+              <td>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text">{{ symbol }}</span>
+                  <input type="text" [(ngModel)]="valuesAdd[i]" [name]="'valuesAdd_' + i" [disabled]="prove" class="form-control form-control-sm" mask="separator.2" thousandSeparator="." decimalMarker="," />
+                </div>
+              </td>
+              <td>
+                <input type="text" [(ngModel)]="commentsAdd[i]" [name]="'commentsAdd_' + i" [disabled]="prove" class="form-control form-control-sm" />
+              </td>
+            </tr>
+          </tbody>
+          <tfoot class="bg-light border-top-0">
+            <tr>
+              <td colspan="4" class="py-3 border-0">
+                <div class="row align-items-center mb-2">
+                  <div class="col-6 text-end">
+                    <label class="font-weight-bold small">Taxa de Adicionais (%):</label>
+                  </div>
+                  <div class="col-6">
+                    <input type="number" [(ngModel)]="hostingFeeAdd" name="hostingFeeAdd" [disabled]="prove" class="form-control form-control-sm w-75" />
+                  </div>
+                </div>
+                <div class="row align-items-center mb-2">
+                  <div class="col-6 text-end">
+                    <label class="font-weight-bold small">Taxa de ISS (%):</label>
+                  </div>
+                  <div class="col-6">
+                    <input type="number" [(ngModel)]="ISSFeeAdd" name="ISSFeeAdd" [disabled]="prove" class="form-control form-control-sm w-75" />
+                  </div>
+                </div>
+                <div class="row align-items-center">
+                  <div class="col-6 text-end">
+                    <label class="font-weight-bold small">Taxa IVA (%):</label>
+                  </div>
+                  <div class="col-6">
+                    <input type="number" [(ngModel)]="IVAFeeAdd" name="IVAFeeAdd" [disabled]="prove" class="form-control form-control-sm w-75" />
+                  </div>
+                </div>
+              </td>
+              <td colspan="6" class="py-3 border-0">
+                <label class="font-weight-bold small d-block mb-1">Observação Geral:</label>
+                <textarea [(ngModel)]="commentAdd" name="commentAdd" [disabled]="prove" class="form-control form-control-sm" rows="4" placeholder="Digite observações sobre os adicionais..."></textarea>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- SUBMIT AND APPROVAL BUTTONS -->
+    <div class="d-flex justify-content-end align-items-center gap-3 mt-4">
+      <div *ngIf="tokenEvaluated" class="alert alert-warning flex-grow-1 mb-0 py-2">
+        <i class="fas fa-exclamation-triangle me-2"></i> Esse item já foi validado pelo gestor. Por favor, entre em contato direto com ele caso precise alterar alguma informação.
+      </div>
+
+      <!-- Save Button -->
+      <button type="submit" *ngIf="!prove && !tokenEvaluated" class="btn btn-primary px-4 py-2 shadow-sm font-weight-bold" [disabled]="isProcessing">
+        <span *ngIf="isProcessing" class="spinner-border spinner-border-sm me-2"></span>
+        Salvar Orçamento
+      </button>
+
+      <!-- Approve/Reject Buttons -->
+      <button type="button" *ngIf="prove && user > 0 && !tokenEvaluated" (click)="submitProve(1)" class="btn btn-success px-4 py-2 shadow-sm font-weight-bold" [disabled]="isProcessingProve">
+        <span *ngIf="isProcessingProve" class="spinner-border spinner-border-sm me-2"></span>
+        Aprovar
+      </button>
+      <button type="button" *ngIf="prove && user > 0 && !tokenEvaluated" (click)="submitProve(2)" class="btn btn-danger px-4 py-2 shadow-sm font-weight-bold" [disabled]="isProcessingProve">
+        <span *ngIf="isProcessingProve" class="spinner-border spinner-border-sm me-2"></span>
+        Reprovar
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- FOOTER -->
+<footer class="bg-dark text-white py-4 mt-5">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-5 mb-3 mb-md-0">
+        <p class="mb-1 small">Avenida das Américas, 3434 - Bloco 5 - Grupo 520</p>
+        <p class="mb-0 small">Barra da Tijuca - Rio de Janeiro - 22.640-102</p>
+      </div>
+      <div class="col-md-5 mb-3 mb-md-0 text-md-center">
+        <p class="mb-1 small">Tel.: (+55 21) 2025-7900</p>
+        <p class="mb-0 small">www.4BTS.com.br</p>
+      </div>
+      <div class="col-md-2 text-md-end">
+        <img src="logo.png" alt="4BTS Logo" style="max-height: 40px;" />
+      </div>
+    </div>
+  </div>
+</footer>

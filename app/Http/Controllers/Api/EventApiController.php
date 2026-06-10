@@ -2,20 +2,68 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Middleware\Constants;
-use App\Models\Customer;
+use App\Http\Controllers\Controller;
+use App\Models\Constants;
+use Exception;
 use Illuminate\Http\Request;
-use App\Models\Event;
-use App\Models\User;
-use Carbon\Carbon;
-use DateTime;
-use Illuminate\Support\Facades\DB;
-use SimpleXMLElement;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
+use App\Domains\Events\Services\EventServiceInterface;
+use App\Domains\Events\Services\EventApiServiceInterface;
+use App\Domains\Events\Repositories\EventRepositoryInterface;
+use App\Domains\Hotels\Repositories\EventHotelRepositoryInterface;
+use App\Domains\FoodBeverage\Repositories\EventABRepositoryInterface;
+use App\Domains\Halls\Repositories\EventHallRepositoryInterface;
+use App\Domains\Additions\Repositories\EventAddRepositoryInterface;
+use App\Domains\Transports\Repositories\EventTransportRepositoryInterface;
+use App\Domains\Customers\Repositories\CustomerRepositoryInterface;
+use App\Domains\Providers\Repositories\ProviderRepositoryInterface;
+use App\Domains\Shared\Repositories\LookupRepositoryInterface;
+use App\Domains\Auth\Repositories\UserRepositoryInterface;
+use App\Http\Middleware\Constants as MiddlewareConstants;
 
-class EventApiController extends BaseApiController
+class EventApiController extends Controller
 {
-    private  $clientesIncluidos = [];
-    private $fornecedoresIncluidos = [];
+    protected $eventService;
+    protected $eventRepository;
+    protected $eventHotelRepository;
+    protected $eventABRepository;
+    protected $eventHallRepository;
+    protected $eventAddRepository;
+    protected $eventTransportRepository;
+    protected $customerRepository;
+    protected $providerRepository;
+    protected $lookupRepository;
+    protected $userRepository;
+    protected $eventApiService;
+
+    public function __construct(
+        EventServiceInterface $eventService,
+        EventRepositoryInterface $eventRepository,
+        EventHotelRepositoryInterface $eventHotelRepository,
+        EventABRepositoryInterface $eventABRepository,
+        EventHallRepositoryInterface $eventHallRepository,
+        EventAddRepositoryInterface $eventAddRepository,
+        EventTransportRepositoryInterface $eventTransportRepository,
+        CustomerRepositoryInterface $customerRepository,
+        ProviderRepositoryInterface $providerRepository,
+        LookupRepositoryInterface $lookupRepository,
+        UserRepositoryInterface $userRepository,
+        EventApiServiceInterface $eventApiService
+    ) {
+        $this->eventService = $eventService;
+        $this->eventRepository = $eventRepository;
+        $this->eventHotelRepository = $eventHotelRepository;
+        $this->eventABRepository = $eventABRepository;
+        $this->eventHallRepository = $eventHallRepository;
+        $this->eventAddRepository = $eventAddRepository;
+        $this->eventTransportRepository = $eventTransportRepository;
+        $this->customerRepository = $customerRepository;
+        $this->providerRepository = $providerRepository;
+        $this->lookupRepository = $lookupRepository;
+        $this->userRepository = $userRepository;
+        $this->eventApiService = $eventApiService;
+    }
 
     /**
      * @OA\Get(
@@ -63,687 +111,239 @@ class EventApiController extends BaseApiController
             'end_date'   => 'required|date|after_or_equal:start_date',
         ]);
 
-        $start_date = Carbon::parse($request->start_date, 'America/Sao_Paulo')->startOfDay()->timezone('UTC');
-        $end_date   = Carbon::parse($request->end_date, 'America/Sao_Paulo')->endOfDay()->timezone('UTC');
+        $xmlString = $this->eventApiService->generateXmlPayload($request->start_date, $request->end_date);
 
-        $eventos = $this->exportarXmlModeloOficial($start_date, $end_date) ?? [];
-
-        $xml = new SimpleXMLElement('<intagi/>');
-        $xml->addChild('versaolayout', 'V4.4');
-        $clientes = $xml->addChild('clientes');
-        $fornecedores = $xml->addChild('fornecedores');
-        $vendas = $xml->addChild('vendas');
-
-        foreach ($eventos as $evento) {
-            // $this->clientesXML($evento->customer?->id, $clientes);
-
-            $tipos = [
-                [
-                    'rel' => 'event_hotels',
-                    'id' => 'hotel',
-                    'tipoProvider' => 'hotel',
-                    'fornecedor' => fn($item) => $item->hotel,
-                    'model' => \App\Models\Provider::class,
-                    'tipoctarec' => '01/0019',
-                    'tipoctapag' => '01/0002',
-                ],
-                [
-                    'rel' => 'event_abs',
-                    'id' => 'ab',
-                    'tipoProvider' => 'ab',
-                    'fornecedor' => fn($item) => $item->ab,
-                    'model' => \App\Models\Provider::class,
-                    'tipoctarec' => fn($item) => $item->ab->national ? '04/0002' : '04/0001',
-                    'tipoctapag' => fn($item) => $item->ab->national ? '24/0002' : '24/0001',
-                ],
-                [
-                    'rel' => 'event_halls',
-                    'id' => 'salao',
-                    'tipoProvider' => 'hall',
-                    'fornecedor' => fn($item) => $item->hall,
-                    'model' => \App\Models\Provider::class,
-                    'tipoctarec' => '01/0019',
-                    'tipoctapag' => '01/0002',
-                ],
-                [
-                    'rel' => 'event_transports',
-                    'id' => 'transp',
-                    'tipoProvider' => 'transport',
-                    'fornecedor' => fn($item) => $item->transport,
-                    'model' => \App\Models\ProviderTransport::class,
-                    'tipoctarec' => '02/0016',
-                    'tipoctapag' => '02/0013',
-                ],
-                [
-                    'rel' => 'event_adds',
-                    'id' => 'servicos',
-                    'tipoProvider' => 'add',
-                    'fornecedor' => fn($item) => $item->add,
-                    'model' => \App\Models\ProviderServices::class,
-                    'tipoctarec' => '01/0019',
-                    'tipoctapag' => '01/0002',
-                ],
-            ];
-
-            foreach ($tipos as $tipo) {
-                foreach ($evento->{$tipo['rel']} as $item) {
-                    // $fornecedor = $tipo['fornecedor']($item);
-                    // $this->fornecedoresXML($fornecedor->id, $fornecedores, $tipo['model']);
-                    $this->vendasXML($evento, $item, $vendas, $tipo);
-                }
-            }
-        }
-
-        return response($xml->asXML(), 200)
+        return response($xmlString, 200)
             ->header('Content-Type', 'application/xml');
     }
 
-    private function clientesXML($clienteId, $xml)
+    /**
+     * GET /api/events
+     * Paginated & filtered list of events for the Angular UI
+     */
+    public function listEvents(Request $request)
     {
-        if ($clienteId === null) {
-            return; // sem cliente neste evento
+        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        // Se cliente ainda não foi incluído
-        if (!isset($this->clientesIncluidos[$clienteId])) {
+        $perPage = $request->input('per_page', 10);
+        $events = $this->eventRepository->list($request, $perPage);
 
-            // Buscar os dados do cliente no banco
-            $cliente = Customer::find($clienteId);
-
-            if ($cliente) {
-
-                // Adiciona cliente no XML
-                $clienteXml = $xml->addChild('cliente');
-
-                $clienteXml->addChild('idcliente', htmlspecialchars($cliente->codestur ?? $cliente->id));
-                $clienteXml->addChild('cnpjcpf', htmlspecialchars($cliente->document));
-                $clienteXml->addChild('razaonome', htmlspecialchars($cliente->name));
-                $clienteXml->addChild('nomefantasia', htmlspecialchars($cliente->name));
-
-                $documento = preg_replace('/\D/', '', $cliente->document);
-                $tipoPessoa = strlen($documento) === 14 ? 'PJ' : 'PF';
-                $clienteXml->addChild('tipopessoa', htmlspecialchars($tipoPessoa));
-
-
-                if (!empty($cliente->email)) {
-                    $clienteXml->addChild('email', htmlspecialchars($cliente->email));
-                }
-
-                if (!empty($cliente->phone)) {
-                    $telefone = preg_replace('/\D/', '', $cliente->phone);
-                    $clienteXml->addChild('telefone', htmlspecialchars($telefone));
-                }
-
-
-                // Marca cliente como incluído
-                $this->clientesIncluidos[$clienteId] = true;
-            }
-        }
-    }
-
-    private function vendasXML($evento, $fornecedor, $xml, $tipo)
-    {
-        $venda = $xml->addChild('venda');
-        $venda->addChild('origem', 'SMART4BTS');
-        $venda->addChild('idvenda', htmlspecialchars($evento->id . '-' . $fornecedor->id . '-' . $tipo['id']));
-        $venda->addChild('idvendapai', htmlspecialchars($evento->code));
-        $venda->addChild('tipoproduto', $tipo['rel'] == 'event_hotels' ? 'HOTEL' : 'DIVERSOS');
-        $national = $fornecedor->{$tipo['tipoProvider']}->national;
-
-        switch ($tipo['rel']) {
-            case 'event_hotels':
-                $idProduto = $national ? 'HOTN' : 'HOTI';
-                break;
-            case 'event_abs':
-                $idProduto = $national ? 'A&amp;BN' : 'A&amp;BI';
-                break;
-            case 'event_halls':
-                $idProduto = $national ? 'SL' : 'LOC';
-                break;
-            default:
-                $idProduto = $national ? 'DIVN' : 'DIVI';
-                break;
-        }
-        $venda->addChild('idproduto', htmlspecialchars($idProduto));
-
-        $venda->addChild('clasproduto', htmlspecialchars($national ? 'NACIONAL' : 'INTERNACIONAL'));
-
-        $venda->addChild(
-            'idpromotor',
-            htmlspecialchars(
-                $fornecedor->table == 'event_transport'
-                    ? $evento->land_operator
-                    : ($evento->hotel_operator ?? '')
-            )
-        );
-        $venda->addChild('idemissor', htmlspecialchars($fornecedor->table == 'event_transport'
-            ? $evento->landOperator?->codigo_stur
-            : ($evento->hotelOperator?->codigo_stur ?? '')));
-
-
-        $venda->addChild('dtemissao', htmlspecialchars(Carbon::parse($evento->date)->format('d/m/Y')));
-        $venda->addChild('idcliente', htmlspecialchars($evento->customer?->codestur ?? $evento->customer?->id ?? ''));
-        $venda->addChild('idoperador', htmlspecialchars($fornecedor?->broker?->name ?? ''));
-        $venda->addChild('idfornecedor', htmlspecialchars($tipo['fornecedor']($fornecedor)->codestur ?? $tipo['fornecedor']($fornecedor)->id ?? ''));
-        $venda->addChild('formrec', '2');
-
-        $venda->addChild('vencrec', htmlspecialchars(Carbon::parse($fornecedor->deadline_date)->format('d/m/Y')));
-        $venda->addChild('centrocustocli', htmlspecialchars($evento->cost_center ?? ''));
-        $venda->addChild('setorcli', htmlspecialchars($evento->sector ?? ''));
-        $venda->addChild('filialagencia', htmlspecialchars($evento->crd?->number ?? ''));
-        $venda->addChild('centrocusto', htmlspecialchars($evento->crd?->number ?? ''));
-
-        $venda->addChild('solicitante', htmlspecialchars($evento->requester ?? ''));
-
-        if (isset($fornecedor->status_his)) {
-            $aprovado = collect($fornecedor->status_his)->last(function ($item) {
-                return $item->status === 'approved_by_manager';
-            });
-
-            $venda->addChild('autorizadopor', htmlspecialchars($aprovado->user->name ?? ''));
-            $venda->addChild('matriculaautorizador', htmlspecialchars($aprovado->id ?? ''));
-            $dataAutorizacao = '';
-            $horaAutorizacao = '';
-            if (!empty($aprovado?->created_at)) {
-                $carbon = Carbon::parse($aprovado->created_at);
-                $dataAutorizacao = $carbon->format('d/m/Y');
-                $horaAutorizacao = $carbon->format('H:i');
-            }
-            $venda->addChild('dataautorizacao', htmlspecialchars($dataAutorizacao));
-            $venda->addChild('horaautorizacao', htmlspecialchars($horaAutorizacao));
-        }
-
-        $venda->addChild('projetocodigo', htmlspecialchars($evento->code ?? ''));
-        $venda->addChild('projetonome', htmlspecialchars(mb_substr($evento->name ?? '', 0, 30)));
-
-        $tipoCtarec = $tipo['tipoctarec'];
-        $tipoCtapag = $tipo['tipoctapag'];
-
-        // Se for uma função, executa. Se já for string, usa direto.
-        if (is_callable($tipoCtarec)) {
-            $tipoCtarec = $tipoCtarec($fornecedor);
-        }
-        if (is_callable($tipoCtapag)) {
-            $tipoCtapag = $tipoCtapag($fornecedor);
-        }
-
-        // Garante que são strings antes de adicionar ao XML
-        $venda->addChild('tipoctarec', htmlspecialchars((string) ($tipoCtarec ?? '')));
-        $venda->addChild('tipoctapag', htmlspecialchars((string) ($tipoCtapag ?? '')));
-
-        $venda->addChild('formpagto', 2); //FATURADO
-
-
-
-        $movimentosXml = $venda->addChild('movimentos');
-
-        foreach ($fornecedor->eventHotelsOpt ?? $fornecedor->eventAbOpts ?? $fornecedor->eventHallOpts ?? $fornecedor->eventAddOpts ?? $fornecedor->eventTransportOpts ?? [] as $opt) {
-
-            switch ($tipo['rel']) {
-                case 'event_hotels':
-                    $this->movimentoHotelariaXML($opt, $fornecedor, $evento, $movimentosXml);
-                    break;
-                default:
-                    $this->movimentoDiversosXML($opt, $fornecedor, $evento, $movimentosXml, $tipo['rel']);
-                    break;
-            }
-        }
-    }
-
-    private function movimentoDiversosXML($opt, $fornecedor, $evento, $movimentoXml, $tipo)
-    {
-        $movimento = $movimentoXml->addChild('diversos');
-        $stringNome = '';
-        switch ($tipo) {
-            case 'event_transports':
-                $movimento->addChild('descricao', 'TRANSPORTES');
-                $stringNome = 'TRANSPORTES';
-                break;
-            case 'event_adds':
-                $movimento->addChild('descricao', 'ADICIONAIS');
-                $stringNome = 'ADICIONAIS';
-                break;
-            case 'event_abs':
-                $movimento->addChild('descricao', 'ALIMENTOS E BEBIDAS');
-                $stringNome = 'ALIMENTOS E BEBIDAS';
-                break;
-            case 'event_halls':
-                $movimento->addChild('descricao', 'SALOES E EVENTOS');
-                $stringNome = 'SALOES E EVENTOS';
-                break;
-            default:
-                $movimento->addChild('descricao', htmlspecialchars($fornecedor->customer_observation  ?? ''));
-                break;
-        }
-
-        $nomeCortado = mb_substr($evento->name ?? '', 0, 40 - mb_strlen($stringNome));
-        $movimento->addChild('pax', htmlspecialchars($nomeCortado . ' - ' . $stringNome));
-        $movimento->addChild('tipo', 'ADT');
-        $movimento->addChild('matricula', '');
-        $movimento->addChild('moeda', htmlspecialchars($fornecedor->currency?->sigla ?? ''));
-        $movimento->addChild('cambio', htmlspecialchars($evento->exchange_rate ?? '1'));
-        $movimento->addChild('cambiofornecedor', htmlspecialchars($opt->cambiofornecedor ?? ''));
-        $in = Carbon::parse($opt->in);
-        $out = Carbon::parse($opt->out);
-        $movimento->addChild('checkin', htmlspecialchars($in->format('d/m/Y') ?? ''));
-        $movimento->addChild('checkout', htmlspecialchars($out->format('d/m/Y') ?? ''));
-
-        $qtdDayle = $opt->count * $this->daysBetween1($opt->in, $opt->out);
-
-        $movimento->addChild('comisrecforvalor', htmlspecialchars(($opt->received_proposal * $qtdDayle * $opt->kickback) / 100 ?? ''));
-
-        // $movimento->addChild('descpagclivalor', htmlspecialchars($opt->received_proposal * $qtdDayle ?? ''));
-        $movimento->addChild('observacao', htmlspecialchars($fornecedor->internal_observation  ?? ''));
-
-        $totais = $this->computeTotals($evento, $fornecedor, $opt);
-
-
-        $movimento->addChild('taxaservico',  htmlspecialchars($totais['diaria_taxas'] * $qtdDayle ?? ''));
-        $movimento->addChild('taxaservicofor', htmlspecialchars($totais['diaria_taxas'] * $qtdDayle ?? ''));
-
-        $movimento->addChild('valordiaria', htmlspecialchars($totais['diaria'] ?? ''));
-        $movimento->addChild('valordiariabalcao', htmlspecialchars($totais['diaria'] ?? ''));
-        $movimento->addChild('valordiariafornecedor', htmlspecialchars($totais['diaria_fornecedor'] ?? ''));
-        $movimento->addChild('qtdservico', htmlspecialchars($qtdDayle > 0 ? $qtdDayle : '1'));
-
-        if (isset($fornecedor->status_his)) {
-            // $aprovado = collect($fornecedor->status_his)->last(function ($item) {
-            //     return $item->status === 'approved_by_manager';
-            // });
-
-            $movimento->addChild('confirmadopor', '');
-            $movimento->addChild('dataconfirmacao', '');
-            $movimento->addChild('numconfirmacao', '');
-        }
-    }
-
-    private function movimentoHotelariaXML($opt, $fornecedor, $evento, $movimentoXml)
-    {
-        $movimento = $movimentoXml->addChild('hotelaria');
-        $movimento->addChild('pax', htmlspecialchars(mb_substr($evento->name ?? '', 0, 40)));
-        $movimento->addChild('tipo', 'ADT');
-        $movimento->addChild('motivoviagem', '');
-        $movimento->addChild('moeda', htmlspecialchars($fornecedor->currency?->sigla ?? ''));
-        $movimento->addChild('cambio', htmlspecialchars($evento->exchange_rate ?? '1'));
-        $in = Carbon::parse($opt->in);
-        $out = Carbon::parse($opt->out);
-        $movimento->addChild('checkin', htmlspecialchars($in->format('d/m/Y') ?? ''));
-        $movimento->addChild('checkout', htmlspecialchars($out->format('d/m/Y') ?? ''));
-
-        $qtdDayle = $opt->count * $this->daysBetween($opt->in, $opt->out);
-        $movimento->addChild('comisrecforvalor', htmlspecialchars(($opt->received_proposal * $qtdDayle * $opt->kickback) / 100 ?? ''));
-        // $movimento->addChild('descpagclivalor', htmlspecialchars($opt->received_proposal * $qtdDayle ?? ''));
-        $movimento->addChild('observacao', htmlspecialchars($fornecedor->internal_observation  ?? ''));
-        $movimento->addChild('observacao2', htmlspecialchars($fornecedor->customer_observation  ?? ''));
-        $movimento->addChild('categapto', htmlspecialchars($opt->category_hotel?->name ?? ''));
-
-        $movimento->addChild('regime', htmlspecialchars($opt->regime?->name ?? ''));
-
-        // Aptos
-        $aptos = $movimento->addChild('aptos');
-
-        $aptoXml = $aptos->addChild('apto');
-
-        $tipoApto = strtoupper($opt->apto_hotel?->name ?? '');
-        $tiposReconhecidos = ['SGL', 'DBL', 'TPL', 'QPL'];
-
-        if ($tipoApto === 'TWIN') {
-            $tipoApto = 'DBL';
-        } elseif (!in_array($tipoApto, $tiposReconhecidos)) {
-            $tipoApto = 'DBL'; // ou escolha um padrão, se preferir
-        }
-
-        $aptoXml->addChild('tipoapto', htmlspecialchars($tipoApto));
-
-        $totais = $this->computeTotals($evento, $fornecedor, $opt);
-
-
-        $movimento->addChild('taxaservico', htmlspecialchars($totais['diaria_taxas'] * $qtdDayle ?? ''));
-
-        $aptoXml->addChild('valordiaria', htmlspecialchars($totais['diaria'] ?? ''));
-        $aptoXml->addChild('valordiariabalcao', htmlspecialchars($totais['diaria'] ?? ''));
-        $aptoXml->addChild('valordiariafornecedor', htmlspecialchars($totais['diaria_fornecedor'] ?? ''));
-        $aptoXml->addChild('qtddiaria', htmlspecialchars($qtdDayle ?? ''));
-
-        if (isset($fornecedor->status_his)) {
-
-            $movimento->addChild('confirmadopor', '');
-            $movimento->addChild('dataconfirmacao', '');
-            $movimento->addChild('numconfirmacao', '');
-        }
-    }
-
-    private function fornecedoresXML($fornecedorId, $xml, $modelClass = \App\Models\Provider::class)
-    {
-        if ($fornecedorId === null) {
-            return; // sem fornecedor neste item
-        }
-
-        if (!isset($this->fornecedoresIncluidos[$fornecedorId])) {
-            // Buscar o fornecedor no model informado
-            $fornecedor = $modelClass::with('city')->find($fornecedorId);
-
-            if ($fornecedor) {
-                $fornecedorXml = $xml->addChild('fornecedor');
-                $fornecedorXml->addChild('idfornecedor', htmlspecialchars($fornecedor->codestur ?? $fornecedor->id));
-                $fornecedorXml->addChild('razaonome', htmlspecialchars($fornecedor->name ?? ''));
-                $fornecedorXml->addChild('nomefantasia', htmlspecialchars($fornecedor->fantasy_name ?? $fornecedor->name ?? ''));
-
-                $fornecedorXml->addChild('tipopessoa', 'PJ');
-                if ($modelClass === \App\Models\ProviderTransport::class) {
-                    $tipoFornec = 'TRANSP';
-                } elseif ($modelClass === \App\Models\ProviderServices::class) {
-                    $tipoFornec = 'DIV';
-                } else {
-                    $tipoFornec = 'HOT';
-                }
-                $fornecedorXml->addChild('tipofornec', htmlspecialchars($tipoFornec));
-
-
-                if (!empty($fornecedor->email)) {
-                    $fornecedorXml->addChild('email', htmlspecialchars($fornecedor->email));
-                }
-                if (!empty($fornecedor->phone)) {
-                    $telefone = preg_replace('/\D/', '', $fornecedor->phone);
-                    $fornecedorXml->addChild('telefone', htmlspecialchars($telefone));
-                }
-
-                if ($fornecedor->city) {
-                    $fornecedorXml->addChild('cidade', htmlspecialchars(mb_substr($fornecedor->city->name ?? '', 0, 20)));
-                    $fornecedorXml->addChild('pais', htmlspecialchars(mb_substr($fornecedor->city->country ?? '', 0, 20)));
-                    $fornecedorXml->addChild('estadosigla', htmlspecialchars(mb_substr($fornecedor->city->states ?? '', 0, 2)));
-                    $estadoNome = '';
-                    foreach (Constants::UFS as $estado) {
-                        if ($estado['uf'] === ($fornecedor->city->states ?? '')) {
-                            $estadoNome = $estado['name'];
-                            break;
-                        }
-                    }
-                    $fornecedorXml->addChild('estadonome', htmlspecialchars(mb_substr($estadoNome, 0, 20)));
-                } else {
-                    $fornecedorXml->addChild('cidade', '');
-                    $fornecedorXml->addChild('pais', '');
-                    $fornecedorXml->addChild('estadosigla', '');
-                    $fornecedorXml->addChild('estadonome', '');
-                }
-
-                $this->fornecedoresIncluidos[$fornecedorId] = true;
-            }
-        }
-    }
-
-    private function exportarXmlModeloOficial($start_date, $end_date)
-    {
-        $eventos = Event::with([
-            'customer',
-            'crd',
-            'hotelOperator',
-            'landOperator',
-            // Hotéis
-            'event_hotels.hotel',
-            'event_hotels.eventHotelsOpt' => fn($q) => $q->orderBy('order', 'asc')->orderby('in'),
-            'event_hotels.eventHotelsOpt.regime',
-            'event_hotels.eventHotelsOpt.apto_hotel',
-            'event_hotels.eventHotelsOpt.category_hotel',
-            'event_hotels.currency',
-            'event_hotels.status_his.user',
-
-            // ABs
-            'event_abs.ab',
-            'event_abs.eventAbOpts' => fn($q) => $q->orderBy('order', 'asc')->orderby('in'),
-            'event_abs.eventAbOpts.Local',
-            'event_abs.eventAbOpts.service_type',
-            'event_abs.currency',
-            'event_abs.status_his.user',
-
-            // Halls
-            'event_halls.hall',
-            'event_halls.eventHallOpts' => fn($q) => $q->orderBy('order', 'asc')->orderby('in'),
-            'event_halls.eventHallOpts.purpose',
-            'event_halls.currency',
-            'event_halls.status_his.user',
-
-            // Adicionais
-            'event_adds.add',
-            'event_adds.eventAddOpts' => fn($q) => $q->orderBy('order', 'asc')->orderby('in'),
-            'event_adds.eventAddOpts.measure',
-            'event_adds.eventAddOpts.service',
-            'event_adds.currency',
-            'event_adds.status_his.user',
-
-            // Transportes
-            'event_transports.transport',
-            'event_transports.eventTransportOpts' => fn($q) => $q->orderBy('order', 'asc')->orderby('in'),
-            'event_transports.eventTransportOpts.brand',
-            'event_transports.eventTransportOpts.vehicle',
-            'event_transports.eventTransportOpts.model',
-            'event_transports.currency',
-            'event_transports.status_his.user',
-        ])
-            ->where(function ($query) use ($start_date, $end_date) {
-                $query->whereHas('event_hotels', function ($q) use ($start_date, $end_date) {
-                    $q->whereExists(function ($sub) use ($start_date, $end_date) {
-                        $sub->select(DB::raw(1))
-                            ->from('status_history')
-                            ->whereColumn('status_history.table_id', 'event_hotel.id')
-                            ->where('status_history.table', 'event_hotels')
-                            ->where('status_history.status', 'dating_with_customer')
-                            ->whereBetween('status_history.created_at', [$start_date, $end_date]);
-                    });
-                })->orWhereHas('event_abs', function ($q) use ($start_date, $end_date) {
-                    $q->whereExists(function ($sub) use ($start_date, $end_date) {
-                        $sub->select(DB::raw(1))
-                            ->from('status_history')
-                            ->whereColumn('status_history.table_id', 'event_ab.id')
-                            ->where('status_history.table', 'event_abs')
-                            ->where('status_history.status', 'dating_with_customer')
-                            ->whereBetween('status_history.created_at', [$start_date, $end_date]);
-                    });
-                })->orWhereHas('event_halls', function ($q) use ($start_date, $end_date) {
-                    $q->whereExists(function ($sub) use ($start_date, $end_date) {
-                        $sub->select(DB::raw(1))
-                            ->from('status_history')
-                            ->whereColumn('status_history.table_id', 'event_hall.id')
-                            ->where('status_history.table', 'event_halls')
-                            ->where('status_history.status', 'dating_with_customer')
-                            ->whereBetween('status_history.created_at', [$start_date, $end_date]);
-                    });
-                })->orWhereHas('event_adds', function ($q) use ($start_date, $end_date) {
-                    $q->whereExists(function ($sub) use ($start_date, $end_date) {
-                        $sub->select(DB::raw(1))
-                            ->from('status_history')
-                            ->whereColumn('status_history.table_id', 'event_add.id')
-                            ->whereIn('status_history.table', ['event_adds', 'EventAdds'])
-                            ->where('status_history.status', 'dating_with_customer')
-                            ->whereBetween('status_history.created_at', [$start_date, $end_date]);
-                    });
-                })->orWhereHas('event_transports', function ($q) use ($start_date, $end_date) {
-                    $q->whereExists(function ($sub) use ($start_date, $end_date) {
-                        $sub->select(DB::raw(1))
-                            ->from('status_history')
-                            ->whereColumn('status_history.table_id', 'event_transport.id')
-                            ->where('status_history.table', 'event_transports')
-                            ->where('status_history.status', 'dating_with_customer')
-                            ->whereBetween('status_history.created_at', [$start_date, $end_date]);
-                    });
-                });
-            })
-            ->get();
-
-        // Filtrar os itens de cada evento conforme a data
-        foreach ($eventos as $evento) {
-            // Filtra event_hotels
-            if (isset($evento->event_hotels)) {
-                $evento->event_hotels = $evento->event_hotels->filter(function ($item) use ($start_date, $end_date) {
-                    return $item->status_his->contains(function ($status) use ($start_date, $end_date) {
-                        return $status->status === 'dating_with_customer'
-                            && $status->created_at >= $start_date
-                            && $status->created_at <= $end_date;
-                    });
-                })->values();
-            }
-            // Filtra event_abs
-            if (isset($evento->event_abs) && !isset($evento->event_hotels)) {
-                $evento->event_abs = collect($evento->event_abs)->filter(function ($item) use ($start_date, $end_date) {
-                    return isset($item->status_his) && collect($item->status_his)->contains(function ($status) use ($start_date, $end_date) {
-                        return $status->status === 'dating_with_customer'
-                            && $status->created_at >= $start_date
-                            && $status->created_at <= $end_date;
-                    });
-                })->values();
-            }
-            // Repita para event_halls, event_adds, event_transports...
-            if (isset($evento->event_halls) && !isset($evento->event_hotels)) {
-                $evento->event_halls = $evento->event_halls->filter(function ($item) use ($start_date, $end_date) {
-                    return $item->status_his->contains(function ($status) use ($start_date, $end_date) {
-                        return $status->status === 'dating_with_customer'
-                            && $status->created_at >= $start_date
-                            && $status->created_at <= $end_date;
-                    });
-                })->values();
-            }
-            if (isset($evento->event_adds)) {
-                $evento->event_adds = $evento->event_adds->filter(function ($item) use ($start_date, $end_date) {
-                    return $item->status_his->contains(function ($status) use ($start_date, $end_date) {
-                        return $status->status === 'dating_with_customer'
-                            && $status->created_at >= $start_date
-                            && $status->created_at <= $end_date;
-                    });
-                })->values();
-            }
-            if (isset($evento->event_transports)) {
-                $evento->event_transports = $evento->event_transports->filter(function ($item) use ($start_date, $end_date) {
-                    return $item->status_his->contains(function ($status) use ($start_date, $end_date) {
-                        return $status->status === 'dating_with_customer'
-                            && $status->created_at >= $start_date
-                            && $status->created_at <= $end_date;
-                    });
-                })->values();
-            }
-        }
-
-        return $eventos;
-    }
-
-    private function unitSale($opt)
-    {
-        if ($opt->received_proposal_percent == 0) {
-            return $opt->received_proposal;
-        }
-
-        return ceil($opt->received_proposal / $opt->received_proposal_percent);
-    }
-
-    private function sumTotal($rate, $taxes, $qtdDayle)
-    {
-        return (($rate + $taxes) * $qtdDayle);
-    }
-
-    private function sumTaxesProvider($eventP, $opt)
-    {
-        return (($this->unitSale($opt) * $eventP->iss_percent) / 100)
-            + (($this->unitSale($opt) * $eventP->service_percent) / 100)
-            + (($this->unitSale($opt) * $eventP->iva_percent) / 100)
-            + (($this->unitSale($opt) * $eventP->service_charge) / 100);
-    }
-
-    private function daysBetween($date1, $date2)
-    {
-        // Convert both dates to DateTime objects
-        $date1 = new DateTime($date1);
-        $date2 = new DateTime($date2);
-
-        // Set both dates to the start of the day (00:00:00)
-        $date1->setTime(0, 0, 0);
-        $date2->setTime(0, 0, 0);
-
-        // Calculate the difference in days
-        $interval = $date1->diff($date2);
-
-        // Return the absolute value of the difference in days
-        return ceil($interval->days);
-    }
-    private function daysBetween1($date1, $date2)
-    {
-        // Convert both dates to DateTime objects
-        $date1 = new DateTime($date1);
-        $date2 = new DateTime($date2);
-
-        // Set both dates to the start of the day (00:00:00)
-        $date1->setTime(0, 0, 0);
-        $date2->setTime(0, 0, 0);
-
-        // Calculate the difference in days
-        $interval = $date1->diff($date2);
-
-        // Return the absolute value of the difference in days
-        return ceil($interval->days) + 1;
+        return response()->json($events);
     }
 
     /**
-     * Calcula totais (custo/venda) para um fornecedor em um evento.
-     *
+     * GET /api/events/{id}/edit-data
+     * Gathers all necessary dropdown lookups and the event details (if id > 0)
+     * in a single performant payload.
      */
-    private function computeTotals($evento, $fornecedor, $item): array
+    public function getEditData(Request $request, $id = 0)
     {
-        $sumHotelSale = 0; // soma das vendas (base)
-        $sumTotalHotelCost = 0; // custo + taxas (por item)
-        $sumTotalHotelSale = 0; // venda + taxas (por item)
+        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
 
-        // coleta possíveis coleções de opts (inclui opt 0)
-        // $optCollections = [
-        //     $fornecedor->eventHotelsOpt ?? null,
-        //     $fornecedor->eventAbOpts ?? null,
-        //     $fornecedor->eventHallOpts ?? null,
-        //     $fornecedor->eventAddOpts ?? null,
-        //     $fornecedor->eventTransportOpts ?? null,
-        // ];
+        $event = null;
+        $eventHotels = [];
+        $eventABs = [];
+        $eventHalls = [];
+        $eventAdds = [];
+        $eventTransports = [];
+        $selectedHotel = null;
+        $selectedAB = null;
+        $selectedHall = null;
+        $selectedAdd = null;
+        $selectedTransport = null;
 
-        // percorre cada coleção (se existir)
-        // foreach ($optCollections as $coll) {
-        //     if (empty($coll)) continue;
-        //     foreach ($coll as $item) {
+        if ($id > 0) {
+            $event = $this->eventRepository->findWithLocals($id);
+            if (!$event) {
+                return response()->json(['message' => 'Evento não encontrado.'], 404);
+            }
+            $eventHotels = $this->eventHotelRepository->getByEvent($id);
+            $eventABs = $this->eventABRepository->getByEvent($id);
+            $eventHalls = $this->eventHallRepository->getByEvent($id);
+            $eventAdds = $this->eventAddRepository->getByEvent($id);
+            $eventTransports = $this->eventTransportRepository->getByEvent($id);
 
-        // taxes sobre venda (usa unidade de venda)
-        $taxes = $this->sumTaxesProvider($fornecedor, $item);
+            // Tab detail requests (ehotel/tab query params)
+            if ($request->has('ehotel') && $request->has('tab')) {
+                $tab = (int)$request->tab;
+                $ehotelId = (int)$request->ehotel;
+                switch ($tab) {
+                    case 1:
+                        $selectedHotel = $this->eventHotelRepository->findWithDetails($ehotelId);
+                        break;
+                    case 2:
+                        $selectedAB = $this->eventABRepository->findWithDetails($ehotelId);
+                        break;
+                    case 3:
+                        $selectedHall = $this->eventHallRepository->findWithDetails($ehotelId);
+                        break;
+                    case 4:
+                        $selectedAdd = $this->eventAddRepository->findWithDetails($ehotelId);
+                        break;
+                    case 5:
+                        $selectedTransport = $this->eventTransportRepository->findWithDetails($ehotelId);
+                        break;
+                }
+            }
+        }
 
-        // taxes sobre custo (usa valor recebido/fornecedor)
-        $taxesCost = $this->sumTaxesProviderCost($fornecedor, $item);
+        $payload = [
+            'event' => $event,
+            'customers' => $this->customerRepository->all(),
+            'crds' => $this->customerRepository->allCrdsWithCustomer(),
+            'users' => $this->userRepository->allNonApi(),
+            'providers' => $this->providerRepository->allWithCity(),
+            'providersService' => $this->providerRepository->allServicesWithCity(),
+            'providersTransport' => $this->providerRepository->allTransportWithCity(),
+            'brokers' => $this->lookupRepository->getAllBrokers(),
+            'currencies' => $this->lookupRepository->getAllCurrencies(),
+            'regimes' => $this->lookupRepository->getAllRegimes(),
+            'purposes' => $this->lookupRepository->getAllPurposes(),
+            'services' => $this->lookupRepository->getAllServices(),
+            'servicesType' => $this->lookupRepository->getAllServiceTypes(),
+            'locals' => $this->lookupRepository->getAllLocals(),
+            'allStatus' => MiddlewareConstants::STATUS,
+            'eventHotels' => $eventHotels,
+            'eventABs' => $eventABs,
+            'eventHalls' => $eventHalls,
+            'eventAdds' => $eventAdds,
+            'eventTransports' => $eventTransports,
+            'catsHotel' => $this->lookupRepository->getAllCategories(),
+            'aptosHotel' => $this->lookupRepository->getAllAptos(),
+            'brokersT' => $this->lookupRepository->getAllBrokerTransports(),
+            'vehicles' => $this->lookupRepository->getAllVehicles(),
+            'models' => $this->lookupRepository->getAllCarModels(),
+            'servicesT' => $this->lookupRepository->getAllTransportServices(),
+            'brands' => $this->lookupRepository->getAllBrands(),
+            'servicesHall' => $this->lookupRepository->getAllServiceHalls(),
+            'purposesHall' => $this->lookupRepository->getAllPurposeHalls(),
+            'servicesAdd' => $this->lookupRepository->getAllServiceAdds(),
+            'frequencies' => $this->lookupRepository->getAllFrequencies(),
+            'measures' => $this->lookupRepository->getAllMeasures(),
 
-        $sumHotelSale += $this->unitSale($item);
-
-        // soma total por item (base + taxas)
-        $sumTotalHotelCost += $this->sumTotal($item->received_proposal ?? 0, $taxesCost, 1);
-        $sumTotalHotelSale += $this->sumTotal($this->unitSale($item), $taxes, 1);
-        //     }
-        // }
-
-        // determina IOF: pega o maior IOF disponível entre fornecedor e evento (se existirem)
-        $iofs = [];
-        if (isset($fornecedor->iof) && $fornecedor->iof > 0) $iofs[] = $fornecedor->iof;
-        if (isset($evento->iof) && $evento->iof > 0) $iofs[] = $evento->iof;
-        $percIOF = count($iofs) ? max($iofs) : 0;
-
-        // aplica IOF e taxa 4bts (taxa 4bts só para venda)
-        $sumTotalHotelSaleTaxasSemTaxa4bts = ((($sumTotalHotelSale * $percIOF) / 100) + $sumTotalHotelSale);
-        $sumTotalHotelSaleTaxa4bts = $sumTotalHotelSaleTaxasSemTaxa4bts * ($fornecedor->taxa_4bts / 100);
-        $sumTotalHotelCostTaxa = ((($sumTotalHotelCost * $percIOF) / 100) + $sumTotalHotelCost);
-
-        return [
-            'diaria_fornecedor' => round($sumTotalHotelCostTaxa, 2),
-            'diaria' => round($sumTotalHotelSaleTaxasSemTaxa4bts, 2),
-            'diaria_taxas' => round($sumTotalHotelSaleTaxa4bts, 2),
+            // Sub-elements requested
+            'selectedHotel' => $selectedHotel,
+            'selectedAB' => $selectedAB,
+            'selectedHall' => $selectedHall,
+            'selectedAdd' => $selectedAdd,
+            'selectedTransport' => $selectedTransport,
         ];
+
+        return response()->json($payload);
     }
 
     /**
-     * Taxes calculadas sobre custos (usa received_proposal como base)
+     * POST /api/events
+     * Handles creating and updating event details.
      */
-    private function sumTaxesProviderCost($eventP, $opt)
+    public function store(Request $request)
     {
-        return (($opt->received_proposal ?? 0) * ($eventP->iss_percent ?? 0) / 100)
-            + (($opt->received_proposal ?? 0) * ($eventP->service_percent ?? 0) / 100)
-            + (($opt->received_proposal ?? 0) * ($eventP->iva_percent ?? 0) / 100)
-            + (($opt->received_proposal ?? 0) * ($eventP->service_charge ?? 0) / 100);
+        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'date' => $request->has('id') && $request->id > 0 ? 'sometimes|date' : 'required|date',
+            'date_final' => $request->has('id') && $request->id > 0 ? 'sometimes|date|after_or_equal:date' : 'required|date|after_or_equal:date',
+        ]);
+
+        try {
+            $eventId = $request->id > 0 ? $request->id : null;
+            $data = $request->all();
+
+            // Map paxBase to pax_base if provided in frontend camelCase
+            if ($request->has('paxBase')) {
+                $data['pax_base'] = $request->paxBase;
+            }
+            if ($request->has('cc')) {
+                $data['cost_center'] = $request->cc;
+            }
+            if ($request->has('customer')) {
+                $data['customer_id'] = $request->customer;
+            }
+
+            $event = $this->eventService->store($data, $eventId);
+
+            // Dynamically save event locations (countries/cities) sent by the Angular app
+            if ($request->has('countries')) {
+                $event->eventLocals()->delete();
+                foreach ($request->countries as $country) {
+                    if (!empty($country['pais']) || !empty($country['cidade'])) {
+                        $event->eventLocals()->create([
+                            'pais' => $country['pais'] ?? '',
+                            'cidade' => $country['cidade'] ?? '',
+                        ]);
+                    }
+                }
+            }
+
+            return response()->json([
+                'message' => 'Evento salvo com sucesso!',
+                'event' => $event
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['message' => 'Erro ao salvar evento.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * DELETE /api/events/{id}
+     * Deletes an event and its related tables.
+     */
+    public function destroy($id)
+    {
+        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        try {
+            $this->eventService->delete($id);
+            return response()->json(['message' => 'Evento apagado com sucesso!']);
+        } catch (Exception $e) {
+            return response()->json(['message' => 'Erro ao apagar evento.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * POST /api/events/save-exchange-rate
+     * Saves exchange rates on an event.
+     */
+    public function saveExchangeRate(Request $request)
+    {
+        $request->validate([
+            'event_id' => 'required|integer',
+            'exchange_rates' => 'required|array'
+        ]);
+
+        try {
+            $this->eventRepository->update($request->event_id, ['exchange_rates' => $request->exchange_rates], []);
+            return response()->json(['message' => 'Taxas de câmbio salvas com sucesso!']);
+        } catch (Exception $e) {
+            return response()->json(['message' => 'Erro ao salvar taxas.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * POST /api/events/save-vl-faturamento
+     * Saves value of billing/faturamento.
+     */
+    public function saveValorFaturamento(Request $request)
+    {
+        $request->validate([
+            'event_id' => 'required|integer',
+            'vl_faturamento' => 'required|numeric'
+        ]);
+
+        try {
+            $this->eventRepository->update($request->event_id, ['valor_faturamento' => $request->vl_faturamento], []);
+            return response()->json(['message' => 'Valor de faturamento salvo com sucesso!']);
+        } catch (Exception $e) {
+            return response()->json(['message' => 'Erro ao salvar faturamento.', 'error' => $e->getMessage()], 500);
+        }
     }
 }

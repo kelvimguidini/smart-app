@@ -15,10 +15,10 @@ export class ToastService {
     const toast: ToastMessage = { message, type };
     this.toasts.update(current => [...current, toast]);
 
-    // Auto-remove after 5 seconds
+    // Auto-remove after 10 seconds
     setTimeout(() => {
       this.remove(toast);
-    }, 5000);
+    }, 10000);
   }
 
   remove(toast: ToastMessage) {

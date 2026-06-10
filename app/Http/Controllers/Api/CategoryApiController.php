@@ -3,12 +3,19 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Category;
+use App\Domains\Shared\Services\CategoryServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class CategoryApiController extends Controller
 {
+    protected $categoryService;
+
+    public function __construct(CategoryServiceInterface $categoryService)
+    {
+        $this->categoryService = $categoryService;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -20,28 +27,10 @@ class CategoryApiController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $query = Category::withoutGlobalScope('active');
+        $filters = $request->only(['search', 'sort_column', 'sort_direction']);
+        $perPage = $request->get('per_page', 10);
 
-        // Search
-        if ($request->has('search') && !empty($request->search)) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
-
-        // Sorting
-        $sortColumn = $request->get('sort_column', 'id');
-        $sortDirection = $request->get('sort_direction', 'desc');
-        
-        // Allowed columns for sorting
-        $allowedColumns = ['id', 'name', 'active'];
-        if (in_array($sortColumn, $allowedColumns)) {
-            $query->orderBy($sortColumn, $sortDirection);
-        } else {
-            $query->orderBy('id', 'desc');
-        }
-
-        // Pagination
-        $perPage = $request->get('per_page', 20);
-        $categories = $query->paginate($perPage);
+        $categories = $this->categoryService->list($filters, $perPage);
 
         return response()->json($categories);
     }
@@ -64,16 +53,10 @@ class CategoryApiController extends Controller
 
         try {
             if ($request->id > 0) {
-                $category = Category::withoutGlobalScope('active')->findOrFail($request->id);
-                $category->name = $request->name;
-                $category->save();
-                
+                $category = $this->categoryService->update($request->id, $request->only('name'));
                 return response()->json(['message' => 'Registro atualizado com sucesso', 'data' => $category]);
             } else {
-                $category = Category::create([
-                    'name' => $request->name
-                ]);
-                
+                $category = $this->categoryService->create($request->only('name'));
                 return response()->json(['message' => 'Registro salvo com sucesso', 'data' => $category]);
             }
         } catch (\Exception $e) {
@@ -94,8 +77,7 @@ class CategoryApiController extends Controller
         }
 
         try {
-            $category = Category::withoutGlobalScope('active')->findOrFail($id);
-            $category->delete();
+            $this->categoryService->delete($id);
             return response()->json(['message' => 'Registro apagado com sucesso!']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao apagar o registro', 'error' => $e->getMessage()], 500);
@@ -115,8 +97,7 @@ class CategoryApiController extends Controller
         }
 
         try {
-            $category = Category::withoutGlobalScope('active')->findOrFail($id);
-            $category->activate();
+            $this->categoryService->activate($id);
             return response()->json(['message' => 'Registro ativado com sucesso!']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao ativar o registro', 'error' => $e->getMessage()], 500);
@@ -136,8 +117,7 @@ class CategoryApiController extends Controller
         }
 
         try {
-            $category = Category::withoutGlobalScope('active')->findOrFail($id);
-            $category->deactivate();
+            $this->categoryService->deactivate($id);
             return response()->json(['message' => 'Registro inativado com sucesso.']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao inativar o registro', 'error' => $e->getMessage()], 500);

@@ -3,41 +3,41 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Role;
+use App\Domains\Shared\Services\RoleServiceInterface;
 use App\Models\Permission;
-use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\JsonResponse;
 
 class RoleApiController extends Controller
 {
+    protected RoleServiceInterface $roleService;
+
+    public function __construct(RoleServiceInterface $roleService)
+    {
+        $this->roleService = $roleService;
+    }
+
     /**
-     * Obter lista de roles e permissões disponíveis (formato JSON)
+     * Obter lista de roles e permissões disponíveis (formato JSON paginado)
      *
      * @return JsonResponse
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         if (!Gate::allows('role_admin')) {
             return response()->json(['message' => 'Não autorizado'], 403);
         }
 
-        try {
-            $roles = Role::with('permissions')->get();
-            $permissionList = Permission::all();
+        $params = $request->only(['page', 'per_page', 'search', 'sort_column', 'sort_direction', 'active']);
+        
+        $roles = $this->roleService->getPaginatedRoles($params, $params['per_page'] ?? 10);
+        $permissionList = Permission::all();
 
-            return response()->json([
-                'roles' => $roles,
-                'permissionList' => $permissionList,
-            ], 200);
-        } catch (Exception $e) {
-            return response()->json([
-                'message' => 'Erro ao carregar grupos de acesso',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'roles' => $roles,
+            'permissionList' => $permissionList,
+        ], 200);
     }
 
     /**
@@ -52,57 +52,22 @@ class RoleApiController extends Controller
             return response()->json(['message' => 'Não autorizado'], 403);
         }
 
-        // Validação
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'permissions' => 'required|array|min:1',
             'permissions.*' => 'string|exists:permission,name',
-            'id' => 'integer|min:0'
+            'id' => 'integer|min:0',
+            'active' => 'boolean'
         ]);
 
         try {
-            $roleId = $request->input('id', 0);
-
-            if ($roleId > 0) {
-                // Atualizar role existente
-                $role = Role::findOrFail($roleId);
-                $role->name = $validated['name'];
-                $role->active = $request->input('active', true);
-                $role->save();
-            } else {
-                // Criar nova role
-                $role = Role::create([
-                    'name' => $validated['name'],
-                    'active' => true
-                ]);
-            }
-
-            // Remover permissões antigas
-            DB::table('role_permission')
-                ->where('role_id', $role->id)
-                ->delete();
-
-            // Adicionar novas permissões
-            foreach ($validated['permissions'] as $permissionName) {
-                $permission = Permission::where('name', $permissionName)->first();
-                if ($permission) {
-                    DB::table('role_permission')->insert([
-                        'permission_id' => $permission->id,
-                        'role_id' => $role->id
-                    ]);
-                }
-            }
+            $role = $this->roleService->saveRole($validated);
 
             return response()->json([
                 'message' => 'Grupo de acesso salvo com sucesso',
-                'role' => $role->load('permissions')
+                'role' => $role
             ], 200);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'message' => 'Erro de validação',
-                'errors' => $e->errors()
-            ], 422);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Erro ao salvar grupo de acesso',
                 'error' => $e->getMessage()
@@ -123,17 +88,16 @@ class RoleApiController extends Controller
         }
 
         $validated = $request->validate([
-            'id' => 'required|integer|exists:role,id'
+            'id' => 'required|integer|exists:roles,id'
         ]);
 
         try {
-            $role = Role::findOrFail($validated['id']);
-            $role->delete();
+            $this->roleService->deleteRole($validated['id']);
 
             return response()->json([
                 'message' => 'Grupo de acesso deletado com sucesso'
             ], 200);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Erro ao deletar grupo de acesso',
                 'error' => $e->getMessage()
@@ -154,20 +118,17 @@ class RoleApiController extends Controller
         }
 
         $validated = $request->validate([
-            'role_id' => 'required|integer|exists:role,id',
+            'role_id' => 'required|integer|exists:roles,id',
             'permission_id' => 'required|integer|exists:permission,id'
         ]);
 
         try {
-            DB::table('role_permission')
-                ->where('role_id', $validated['role_id'])
-                ->where('permission_id', $validated['permission_id'])
-                ->delete();
+            $this->roleService->removePermission($validated['role_id'], $validated['permission_id']);
 
             return response()->json([
                 'message' => 'Permissão removida com sucesso'
             ], 200);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Erro ao remover permissão',
                 'error' => $e->getMessage()

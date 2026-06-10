@@ -1,8 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-datatable',
@@ -14,7 +12,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 export class DatatableComponent implements OnInit, OnDestroy {
   @Input() pagination: any = {
     current_page: 1,
-    per_page: 20,
+    per_page: 10,
     total: 0,
     last_page: 1,
     from: 0,
@@ -28,24 +26,19 @@ export class DatatableComponent implements OnInit, OnDestroy {
   @Output() perPageChange = new EventEmitter<number>();
 
   searchQuery: string = '';
-  private searchSubject = new Subject<string>();
-  private searchSubscription?: Subscription;
 
-  ngOnInit(): void {
-    this.searchSubscription = this.searchSubject.pipe(
-      debounceTime(500),
-      distinctUntilChanged()
-    ).subscribe(value => {
-      this.search.emit(value);
-    });
+  ngOnInit(): void {}
+
+  ngOnDestroy(): void {}
+
+  triggerSearch(): void {
+    this.search.emit(this.searchQuery);
   }
 
-  ngOnDestroy(): void {
-    this.searchSubscription?.unsubscribe();
-  }
-
-  onSearchInput(): void {
-    this.searchSubject.next(this.searchQuery);
+  onSearchClear(): void {
+    if (!this.searchQuery) {
+      this.triggerSearch();
+    }
   }
 
   onPageClick(page: number | string): void {

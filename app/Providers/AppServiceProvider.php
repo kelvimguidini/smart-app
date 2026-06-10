@@ -14,6 +14,179 @@ use App\Models\EventHotelOpt;
 use App\Models\EventTransport;
 use App\Models\EventTransportOpt;
 use App\Observers\GenericHistoryObserver;
+use App\Domains\Events\Repositories\EventRepositoryInterface;
+use App\Domains\Events\Repositories\EloquentEventRepository;
+use App\Domains\Budgets\Repositories\ProviderBudgetRepositoryInterface;
+use App\Domains\Budgets\Repositories\EloquentProviderBudgetRepository;
+use App\Domains\Dashboard\Repositories\DashboardRepositoryInterface;
+use App\Domains\Dashboard\Repositories\EloquentDashboardRepository;
+use App\Domains\Hotels\Repositories\EventHotelRepositoryInterface;
+use App\Domains\Hotels\Repositories\EloquentEventHotelRepository;
+use App\Domains\FoodBeverage\Repositories\EventABRepositoryInterface;
+use App\Domains\FoodBeverage\Repositories\EloquentEventABRepository;
+use App\Domains\FoodBeverage\Repositories\EventABOptRepositoryInterface;
+use App\Domains\FoodBeverage\Repositories\EloquentEventABOptRepository;
+use App\Domains\Halls\Repositories\EventHallRepositoryInterface;
+use App\Domains\Halls\Repositories\EloquentEventHallRepository;
+use App\Domains\Halls\Repositories\EventHallOptRepositoryInterface;
+use App\Domains\Halls\Repositories\EloquentEventHallOptRepository;
+use App\Domains\Additions\Repositories\EventAddRepositoryInterface;
+use App\Domains\Additions\Repositories\EloquentEventAddRepository;
+use App\Domains\Additions\Repositories\EventAddOptRepositoryInterface;
+use App\Domains\Additions\Repositories\EloquentEventAddOptRepository;
+use App\Domains\Transports\Repositories\EventTransportRepositoryInterface;
+use App\Domains\Transports\Repositories\EloquentEventTransportRepository;
+use App\Domains\Transports\Repositories\EventTransportOptRepositoryInterface;
+use App\Domains\Transports\Repositories\EloquentEventTransportOptRepository;
+use App\Domains\Customers\Repositories\CustomerRepositoryInterface;
+use App\Domains\Customers\Repositories\EloquentCustomerRepository;
+use App\Domains\Providers\Repositories\ProviderRepositoryInterface;
+use App\Domains\Providers\Repositories\EloquentProviderRepository;
+use App\Domains\Hotels\Repositories\EventHotelOptRepositoryInterface;
+use App\Domains\Hotels\Repositories\EloquentEventHotelOptRepository;
+use App\Domains\Hotels\Repositories\AptoRepositoryInterface;
+use App\Domains\Hotels\Repositories\EloquentAptoRepository;
+use App\Domains\Auth\Repositories\UserRepositoryInterface;
+use App\Domains\Auth\Repositories\EloquentUserRepository;
+use App\Domains\Auth\Repositories\RoleRepositoryInterface;
+use App\Domains\Auth\Repositories\EloquentRoleRepository;
+use App\Domains\Shared\Repositories\LookupRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentLookupRepository;
+use App\Domains\Shared\Repositories\CityRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentCityRepository;
+use App\Domains\Shared\Repositories\StatusHistoryRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentStatusHistoryRepository;
+use App\Domains\Events\Services\EventServiceInterface;
+use App\Domains\Events\Services\DefaultEventService;
+use App\Domains\Budgets\Services\BudgetServiceInterface;
+use App\Domains\Budgets\Services\DefaultBudgetService;
+use App\Domains\Shared\Services\NotificationServiceInterface;
+use App\Domains\Shared\Services\DefaultNotificationService;
+use App\Domains\Providers\Services\ProviderServiceInterface;
+use App\Domains\Providers\Services\DefaultProviderService;
+use App\Domains\Auth\Services\AuthServiceInterface;
+use App\Domains\Auth\Services\DefaultAuthService;
+
+use App\Domains\Auth\Repositories\AuthApiRepositoryInterface;
+use App\Domains\Auth\Repositories\EloquentAuthApiRepository;
+use App\Domains\Auth\Services\AuthApiServiceInterface;
+use App\Domains\Auth\Services\DefaultAuthApiService;
+
+use App\Domains\Events\Repositories\EventApiRepositoryInterface;
+use App\Domains\Events\Repositories\EloquentEventApiRepository;
+use App\Domains\Events\Services\EventApiServiceInterface;
+use App\Domains\Events\Services\DefaultEventApiService;
+
+
+// New Repositories and Services
+use App\Domains\Shared\Repositories\BrokerRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentBrokerRepository;
+use App\Domains\Shared\Services\BrokerServiceInterface;
+use App\Domains\Shared\Services\DefaultBrokerService;
+
+use App\Domains\Shared\Repositories\ProposalHistoryRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentProposalHistoryRepository;
+
+use App\Domains\Shared\Repositories\CategoryRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentCategoryRepository;
+use App\Domains\Shared\Services\CategoryServiceInterface;
+use App\Domains\Shared\Services\DefaultCategoryService;
+
+use App\Domains\Shared\Repositories\PurposeRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentPurposeRepository;
+use App\Domains\Shared\Services\PurposeServiceInterface;
+use App\Domains\Shared\Services\DefaultPurposeService;
+
+use App\Domains\Shared\Repositories\ServiceTypeRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentServiceTypeRepository;
+use App\Domains\Shared\Services\ServiceTypeServiceInterface;
+use App\Domains\Shared\Services\DefaultServiceTypeService;
+
+use App\Domains\Shared\Repositories\RegimeRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentRegimeRepository;
+use App\Domains\Shared\Services\RegimeServiceInterface;
+use App\Domains\Shared\Services\DefaultRegimeService;
+
+use App\Domains\Shared\Services\CityServiceInterface;
+use App\Domains\Shared\Services\DefaultCityService;
+
+use App\Domains\Hotels\Services\AptoServiceInterface;
+use App\Domains\Hotels\Services\DefaultAptoService;
+
+use App\Domains\Shared\Repositories\ServiceRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentServiceRepository;
+use App\Domains\Shared\Services\ServiceServiceInterface;
+use App\Domains\Shared\Services\DefaultServiceService;
+
+use App\Domains\Shared\Repositories\LocalRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentLocalRepository;
+use App\Domains\Shared\Services\LocalServiceInterface;
+use App\Domains\Shared\Services\DefaultLocalService;
+
+use App\Domains\Shared\Repositories\ServiceHallRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentServiceHallRepository;
+use App\Domains\Shared\Services\ServiceHallServiceInterface;
+use App\Domains\Shared\Services\DefaultServiceHallService;
+
+use App\Domains\Shared\Repositories\PurposeHallRepositoryInterface;
+use App\Domains\Shared\Repositories\RoleRepositoryInterface as SharedRoleRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentRoleRepository as SharedEloquentRoleRepository;
+use App\Domains\Shared\Repositories\EloquentPurposeHallRepository;
+use App\Domains\Shared\Services\PurposeHallServiceInterface;
+use App\Domains\Shared\Services\RoleServiceInterface;
+use App\Domains\Shared\Services\DefaultRoleService;
+use App\Domains\Shared\Services\DefaultPurposeHallService;
+
+use App\Domains\Shared\Repositories\ServiceAddRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentServiceAddRepository;
+use App\Domains\Shared\Services\ServiceAddServiceInterface;
+use App\Domains\Shared\Services\DefaultServiceAddService;
+
+use App\Domains\Providers\Repositories\ProviderServiceRepositoryInterface;
+use App\Domains\Providers\Repositories\EloquentProviderServiceRepository;
+use App\Domains\Providers\Services\ProviderServiceServiceInterface;
+use App\Domains\Providers\Services\DefaultProviderServiceService;
+
+use App\Domains\Shared\Repositories\MeasureRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentMeasureRepository;
+use App\Domains\Shared\Services\MeasureServiceInterface;
+use App\Domains\Shared\Services\DefaultMeasureService;
+
+use App\Domains\Shared\Repositories\FrequencyRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentFrequencyRepository;
+use App\Domains\Shared\Services\FrequencyServiceInterface;
+use App\Domains\Shared\Services\DefaultFrequencyService;
+
+use App\Domains\Shared\Repositories\BrandRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentBrandRepository;
+use App\Domains\Shared\Services\BrandServiceInterface;
+use App\Domains\Shared\Services\DefaultBrandService;
+
+use App\Domains\Shared\Repositories\CarModelRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentCarModelRepository;
+use App\Domains\Shared\Services\CarModelServiceInterface;
+use App\Domains\Shared\Services\DefaultCarModelService;
+
+use App\Domains\Shared\Repositories\VehicleRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentVehicleRepository;
+use App\Domains\Shared\Services\VehicleServiceInterface;
+use App\Domains\Shared\Services\DefaultVehicleService;
+
+use App\Domains\Shared\Repositories\TransportServiceRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentTransportServiceRepository;
+use App\Domains\Shared\Services\TransportServiceServiceInterface;
+use App\Domains\Shared\Services\DefaultTransportServiceService;
+
+use App\Domains\Shared\Repositories\BrokerTransportRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentBrokerTransportRepository;
+use App\Domains\Shared\Services\BrokerTransportServiceInterface;
+use App\Domains\Shared\Services\DefaultBrokerTransportService;
+
+use App\Domains\Shared\Repositories\ProviderTransportRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentProviderTransportRepository;
+use App\Domains\Shared\Services\ProviderTransportServiceInterface;
+use App\Domains\Shared\Services\DefaultProviderTransportService;
+
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -27,7 +200,92 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->bind(EventRepositoryInterface::class, EloquentEventRepository::class);
+        $this->app->bind(ProviderBudgetRepositoryInterface::class, EloquentProviderBudgetRepository::class);
+        $this->app->bind(StatusHistoryRepositoryInterface::class, EloquentStatusHistoryRepository::class);
+        $this->app->bind(EventHotelRepositoryInterface::class, EloquentEventHotelRepository::class);
+        $this->app->bind(EventABRepositoryInterface::class, EloquentEventABRepository::class);
+        $this->app->bind(EventABOptRepositoryInterface::class, EloquentEventABOptRepository::class);
+        $this->app->bind(EventHallRepositoryInterface::class, EloquentEventHallRepository::class);
+        $this->app->bind(EventHallOptRepositoryInterface::class, EloquentEventHallOptRepository::class);
+        $this->app->bind(EventAddRepositoryInterface::class, EloquentEventAddRepository::class);
+        $this->app->bind(EventAddOptRepositoryInterface::class, EloquentEventAddOptRepository::class);
+        $this->app->bind(EventTransportRepositoryInterface::class, EloquentEventTransportRepository::class);
+        $this->app->bind(EventTransportOptRepositoryInterface::class, EloquentEventTransportOptRepository::class);
+        $this->app->bind(CustomerRepositoryInterface::class, EloquentCustomerRepository::class);
+        $this->app->bind(ProviderRepositoryInterface::class, EloquentProviderRepository::class);
+        $this->app->bind(LookupRepositoryInterface::class, EloquentLookupRepository::class);
+        $this->app->bind(EventHotelOptRepositoryInterface::class, EloquentEventHotelOptRepository::class);
+        $this->app->bind(AptoRepositoryInterface::class, EloquentAptoRepository::class);
+        $this->app->bind(DashboardRepositoryInterface::class, EloquentDashboardRepository::class);
+
+        // Services
+        $this->app->bind(EventServiceInterface::class, DefaultEventService::class);
+        $this->app->bind(BudgetServiceInterface::class, DefaultBudgetService::class);
+        $this->app->bind(NotificationServiceInterface::class, DefaultNotificationService::class);
+        $this->app->bind(ProviderServiceInterface::class, DefaultProviderService::class);
+        $this->app->bind(AuthServiceInterface::class, DefaultAuthService::class);
+
+        $this->app->bind(UserRepositoryInterface::class, EloquentUserRepository::class);
+        $this->app->bind(RoleRepositoryInterface::class, EloquentRoleRepository::class);
+        $this->app->bind(EventRepositoryInterface::class, EloquentEventRepository::class);
+        $this->app->bind(StatusHistoryRepositoryInterface::class, EloquentStatusHistoryRepository::class);
+
+        // New Repositories
+        $this->app->bind(BrokerRepositoryInterface::class, EloquentBrokerRepository::class);
+        $this->app->bind(CategoryRepositoryInterface::class, EloquentCategoryRepository::class);
+        $this->app->bind(PurposeRepositoryInterface::class, EloquentPurposeRepository::class);
+        $this->app->bind(ServiceTypeRepositoryInterface::class, EloquentServiceTypeRepository::class);
+        $this->app->bind(RegimeRepositoryInterface::class, EloquentRegimeRepository::class);
+        $this->app->bind(CityRepositoryInterface::class, EloquentCityRepository::class);
+        $this->app->bind(ProposalHistoryRepositoryInterface::class, EloquentProposalHistoryRepository::class);
+        $this->app->bind(ServiceRepositoryInterface::class, EloquentServiceRepository::class);
+        $this->app->bind(LocalRepositoryInterface::class, EloquentLocalRepository::class);
+        $this->app->bind(ServiceHallRepositoryInterface::class, EloquentServiceHallRepository::class);
+        $this->app->bind(PurposeHallRepositoryInterface::class, EloquentPurposeHallRepository::class);
+        $this->app->bind(SharedRoleRepositoryInterface::class, SharedEloquentRoleRepository::class);
+
+        $this->app->bind(ServiceAddRepositoryInterface::class, EloquentServiceAddRepository::class);
+        $this->app->bind(ProviderServiceRepositoryInterface::class, EloquentProviderServiceRepository::class);
+        $this->app->bind(MeasureRepositoryInterface::class, EloquentMeasureRepository::class);
+        $this->app->bind(FrequencyRepositoryInterface::class, EloquentFrequencyRepository::class);
+        $this->app->bind(BrandRepositoryInterface::class, EloquentBrandRepository::class);
+        $this->app->bind(CarModelRepositoryInterface::class, EloquentCarModelRepository::class);
+        $this->app->bind(VehicleRepositoryInterface::class, EloquentVehicleRepository::class);
+        $this->app->bind(TransportServiceRepositoryInterface::class, EloquentTransportServiceRepository::class);
+        $this->app->bind(BrokerTransportRepositoryInterface::class, EloquentBrokerTransportRepository::class);
+        $this->app->bind(ProviderTransportRepositoryInterface::class, EloquentProviderTransportRepository::class);
+
+        // New Services
+        $this->app->bind(BrokerServiceInterface::class, DefaultBrokerService::class);
+        $this->app->bind(CategoryServiceInterface::class, DefaultCategoryService::class);
+        $this->app->bind(PurposeServiceInterface::class, DefaultPurposeService::class);
+        $this->app->bind(ServiceTypeServiceInterface::class, DefaultServiceTypeService::class);
+        $this->app->bind(RegimeServiceInterface::class, DefaultRegimeService::class);
+        $this->app->bind(CityServiceInterface::class, DefaultCityService::class);
+        $this->app->bind(AptoServiceInterface::class, DefaultAptoService::class);
+        $this->app->bind(ServiceServiceInterface::class, DefaultServiceService::class);
+        $this->app->bind(LocalServiceInterface::class, DefaultLocalService::class);
+        $this->app->bind(ServiceHallServiceInterface::class, DefaultServiceHallService::class);
+        $this->app->bind(PurposeHallServiceInterface::class, DefaultPurposeHallService::class);
+        $this->app->bind(RoleServiceInterface::class, DefaultRoleService::class);
+        
+        $this->app->bind(ServiceAddServiceInterface::class, DefaultServiceAddService::class);
+        $this->app->bind(ProviderServiceServiceInterface::class, DefaultProviderServiceService::class);
+        $this->app->bind(MeasureServiceInterface::class, DefaultMeasureService::class);
+        $this->app->bind(FrequencyServiceInterface::class, DefaultFrequencyService::class);
+        $this->app->bind(BrandServiceInterface::class, DefaultBrandService::class);
+        $this->app->bind(CarModelServiceInterface::class, DefaultCarModelService::class);
+        $this->app->bind(VehicleServiceInterface::class, DefaultVehicleService::class);
+        $this->app->bind(TransportServiceServiceInterface::class, DefaultTransportServiceService::class);
+        $this->app->bind(BrokerTransportServiceInterface::class, DefaultBrokerTransportService::class);
+        $this->app->bind(ProviderTransportServiceInterface::class, DefaultProviderTransportService::class);
+        
+        // API Terceiros Services & Repositories
+        $this->app->bind(AuthApiRepositoryInterface::class, EloquentAuthApiRepository::class);
+        $this->app->bind(AuthApiServiceInterface::class, DefaultAuthApiService::class);
+        $this->app->bind(EventApiRepositoryInterface::class, EloquentEventApiRepository::class);
+        $this->app->bind(EventApiServiceInterface::class, DefaultEventApiService::class);
     }
 
     /**
@@ -51,3 +309,5 @@ class AppServiceProvider extends ServiceProvider
         EventTransportOpt::observe(GenericHistoryObserver::class);
     }
 }
+
+

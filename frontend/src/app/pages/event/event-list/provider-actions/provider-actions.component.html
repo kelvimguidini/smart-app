@@ -1,0 +1,426 @@
+<div class="d-flex justify-content-end gap-2 align-items-center">
+  <!-- Spinner local de processamento -->
+  <div *ngIf="isLoader" class="spinner-border spinner-border-sm text-primary me-2" role="status">
+    <span class="visually-hidden">Carregando...</span>
+  </div>
+
+  <!-- 1. Follow UP -->
+  <button
+    *ngIf="hasPermission('status_level_1') || hasPermission('status_level_2')"
+    type="button"
+    class="btn btn-success text-white shadow-sm btn-action animate-in"
+    title="Follow UP"
+    data-tooltip="Follow UP"
+    (click)="editStatus()">
+    <i class="fas fa-arrows-alt-v"></i>
+  </button>
+
+  <!-- 2. Criar link Orçamento (oculto temporariamente) -->
+  <!-- <button
+    *ngIf="!prov.isTransport"
+    type="button"
+    class="btn btn-secondary text-white shadow-sm btn-action animate-in"
+    title="Criar link Orçamento"
+    data-tooltip="Criar link Orçamento"
+    (click)="openBudgetLinkModal()">
+    <i class="fas fa-link"></i>
+  </button> -->
+
+  <!-- 3. Avaliar Orçamento -->
+  <button
+    *ngIf="prov && !prov.isTransport && prov.providerBudget && prov.providerBudget[0] && !prov.providerBudget[0].evaluated && hasPermission('prove_budget_hotel')"
+    type="button"
+    class="btn btn-info text-white shadow-sm btn-action animate-in"
+    title="Avaliar Orçamento"
+    data-tooltip="Avaliar Orçamento"
+    (click)="openEvaluationLink()">
+    <i class="fas fa-comments-dollar"></i>
+  </button>
+
+  <!-- 4. Ver (Orçamento Avaliado) -->
+  <button
+    *ngIf="prov && !prov.isTransport && prov.providerBudget && prov.providerBudget[0] && prov.providerBudget[0].evaluated"
+    type="button"
+    class="btn btn-info text-white shadow-sm btn-action animate-in"
+    title="Ver avaliação de orçamento"
+    data-tooltip="Ver avaliação de orçamento"
+    (click)="openEvaluationDetailsModal()">
+    <i class="fas fa-eye"></i>
+  </button>
+
+  <!-- 5. Proposta -->
+  <button
+    *ngIf="prov && prov.providerBudget && hasPermission('event_admin') && (prov.status === 'dating_with_customer' || prov.status === 'approved_by_manager' || prov.status === 'sent_to_customer')"
+    type="button"
+    class="btn btn-primary text-white shadow-sm btn-action animate-in"
+    title="Proposta (Com Valores)"
+    data-tooltip="Proposta (Com Valores)"
+    (click)="openProposalModal()">
+    <i class="fas fa-file-invoice-dollar"></i>
+  </button>
+
+  <!-- 6. Proposta (Sem Valores) -->
+  <button
+    *ngIf="prov && prov.providerBudget && hasPermission('event_admin') && ['created', 'briefing', 'provider_requested', 'provider_responsed', 'sent_maneger', 'add_information', 'added_information', 'change_request'].includes(prov.status)"
+    type="button"
+    class="btn btn-warning text-dark shadow-sm btn-action animate-in"
+    title="Proposta (Sem Valores)"
+    data-tooltip="Proposta (Sem Valores)"
+    (click)="openProposalWithoutValuesModal()">
+    <i class="fas fa-file-contract"></i>
+  </button>
+
+  <!-- 7. Faturamento -->
+  <button
+    *ngIf="hasPermission('event_admin') && prov.status === 'dating_with_customer'"
+    type="button"
+    class="btn btn-info text-white shadow-sm btn-action animate-in"
+    title="Faturamento"
+    data-tooltip="Faturamento"
+    (click)="openInvoiceModal()">
+    <i class="fas fa-receipt"></i>
+  </button>
+</div>
+
+<!-- ================= MODALS ================= -->
+
+<!-- MODAL: FOLLOW UP -->
+<app-modal
+  [show]="showFollowUpModal"
+  (close)="showFollowUpModal = false"
+  title="Follow UP"
+  icon="fa-arrows-alt-v"
+  size="lg">
+  <div class="row" *ngIf="showFollowUpModal">
+    <div class="col-md-6 border-end">
+      <div class="form-group mb-3">
+        <label class="form-label font-weight-bold">Status:</label>
+        <select class="form-select" [(ngModel)]="formStatus.status_hotel">
+          <option value="">.::Selecione::.</option>
+          <option *ngFor="let opt of statusOptions" [value]="opt.key">{{ opt.label }}</option>
+        </select>
+      </div>
+      <div class="form-group mb-3">
+        <label class="form-label font-weight-bold">Observação:</label>
+        <textarea class="form-control" rows="4" [(ngModel)]="formStatus.observation_hotel" placeholder="Digite uma observação..."></textarea>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card border-left-success py-2 px-3 mb-3 bg-white shadow-sm">
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" id="notifyStatusEmail" [(ngModel)]="formStatus.notify" />
+          <label class="form-check-label font-weight-bold" for="notifyStatusEmail">Avisar Por E-mail</label>
+        </div>
+        
+        <div *ngIf="formStatus.notify" class="animate-in mt-2">
+          <div class="form-group mb-2">
+            <label class="form-label font-weight-bold small mb-1">Enviar para:</label>
+            <input type="text" class="form-control form-control-sm" [(ngModel)]="formStatus.emailsLink" placeholder="exemplo@4bts.com.br; outro@4bts.com.br" />
+            <small class="text-muted d-block mt-1">Separe os e-mails com ; (ponto e vírgula)</small>
+          </div>
+          
+          <div class="form-group mb-2">
+            <label class="form-label font-weight-bold small mb-1">Mensagem:</label>
+            <textarea class="form-control form-control-sm" rows="3" [(ngModel)]="formStatus.messageLink" placeholder="Texto opcional..."></textarea>
+          </div>
+          
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="copyMeStatus" [(ngModel)]="formStatus.copyMeLink" />
+            <label class="form-check-label small" for="copyMeStatus">Enviar cópia para mim</label>
+          </div>
+          
+          <button type="button" class="btn btn-sm btn-primary w-100 mt-2" [disabled]="isSending" (click)="sendEmailNoChangeStatus()">
+            <span *ngIf="isSending" class="spinner-border spinner-border-sm me-1" role="status"></span>
+            {{ isSending ? 'Enviando...' : 'Enviar e-mail sem tramitar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4" *ngIf="hasPermission('status_historico') && history.length > 0">
+    <div class="col-12 border-top pt-3">
+      <h6 class="font-weight-bold text-secondary mb-3"><i class="fas fa-history me-1"></i> Histórico de Status</h6>
+      <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+        <table class="table table-sm table-striped align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Data</th>
+              <th>Status</th>
+              <th>Alterado Por</th>
+              <th>Observação</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of history">
+              <td>{{ item.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>
+                <span class="badge bg-secondary">{{ getStatusLabel(item.status) }}</span>
+              </td>
+              <td>{{ item.user?.name || '-' }}</td>
+              <td class="text-break">{{ item.observation || '-' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top mt-3">
+    <button type="button" class="btn btn-secondary shadow-sm" [disabled]="isSending" (click)="showFollowUpModal = false">Cancelar</button>
+    <button type="button" class="btn btn-primary shadow-sm" [disabled]="isSending" (click)="saveStatus()">
+      <span *ngIf="isSending" class="spinner-border spinner-border-sm me-1" role="status"></span>
+      {{ isSending ? 'Tramitando...' : 'Tramitar' }}
+    </button>
+  </div>
+</app-modal>
+
+<!-- MODAL: CRIAR LINK ORÇAMENTO -->
+<app-modal
+  [show]="showBudgetLinkModal"
+  (close)="showBudgetLinkModal = false"
+  title="Link para orçamento"
+  icon="fa-link"
+  size="md">
+  <div class="alert alert-danger py-2" role="alert" *ngIf="prov.token_budget">
+    <div class="font-weight-bold small mb-1">
+      <i class="fas fa-exclamation-circle me-1"></i> Já foi criado <span *ngIf="prov.sended_mail_link">e enviado</span> um link para preenchimento do orçamento:
+    </div>
+    <code class="d-block text-break bg-white p-2 rounded border my-1">{{ getBudgetUrl(prov.token_budget) }}</code>
+    <div class="small text-dark">Você pode baixar o PDF ou enviar por e-mail <span *ngIf="prov.sended_mail_link">novamente</span>!</div>
+  </div>
+
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" id="sendEmailLink" [(ngModel)]="sendEmailLink" />
+    <label class="form-check-label font-weight-bold" for="sendEmailLink">Enviar E-mail</label>
+  </div>
+
+  <div *ngIf="sendEmailLink" class="bg-white p-3 border rounded mb-3 animate-in">
+    <div class="form-group mb-3">
+      <label class="form-label font-weight-bold small mb-1">Enviar para:</label>
+      <input type="text" class="form-control" [(ngModel)]="emailsLink" placeholder="exemplo@fornecedor.com; outro@fornecedor.com" />
+      <small class="text-muted d-block mt-1">Separe os e-mails com ; (ponto e vírgula)</small>
+    </div>
+
+    <div class="form-group mb-3">
+      <label class="form-label font-weight-bold small mb-1">Mensagem:</label>
+      <textarea class="form-control" rows="3" [(ngModel)]="messageLink" placeholder="Texto opcional..."></textarea>
+    </div>
+
+    <div class="form-check mb-2">
+      <input class="form-check-input" type="checkbox" id="copyMeLink" [(ngModel)]="copyMeLink" />
+      <label class="form-check-label small" for="copyMeLink">Enviar cópia para mim</label>
+    </div>
+
+    <div class="form-check mb-2">
+      <input class="form-check-input" type="checkbox" id="attachmentLink" [(ngModel)]="attachmentLink" />
+      <label class="form-check-label small" for="attachmentLink">Enviar PDF junto com o e-mail (anexo)</label>
+    </div>
+
+    <div class="form-check mb-2">
+      <input class="form-check-input" type="checkbox" id="linkEmail" [(ngModel)]="linkEmail" />
+      <label class="form-check-label small" for="linkEmail">Enviar link no e-mail</label>
+    </div>
+  </div>
+
+  <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
+    <button type="button" class="btn btn-secondary shadow-sm" [disabled]="isSending" (click)="showBudgetLinkModal = false">Cancelar</button>
+    <button type="button" class="btn btn-primary shadow-sm" [disabled]="isSending" (click)="createLink()">
+      <span *ngIf="isSending" class="spinner-border spinner-border-sm me-1" role="status"></span>
+      <ng-container *ngIf="!isSending">{{ sendEmailLink ? 'Enviar link por e-mail' : 'Baixar PDF' }}</ng-container>
+      <ng-container *ngIf="isSending">{{ sendEmailLink ? 'Enviando...' : 'Gerando PDF...' }}</ng-container>
+    </button>
+  </div>
+</app-modal>
+
+<!-- MODAL: VER AVALIAÇÃO DO ORÇAMENTO -->
+<app-modal
+  [show]="showEvaluationModal"
+  (close)="showEvaluationModal = false"
+  title="Aprovação do orçamento do fornecedor"
+  icon="fa-comments-dollar"
+  size="md">
+  <div class="row" *ngIf="prov.providerBudget && prov.providerBudget[0]">
+    <div class="col-12">
+      <div class="card border-left-info py-3 px-4 mb-3 bg-white shadow-sm">
+        <h6 class="font-weight-bold text-primary mb-3"><i class="fas fa-info-circle me-1"></i> Dados de Aprovação</h6>
+        <p class="mb-2">
+          <strong>Aprovado: </strong>
+          <span class="badge" [ngClass]="prov.providerBudget[0].approved ? 'bg-success' : 'bg-danger'">
+            {{ prov.providerBudget[0].approved ? 'Sim' : 'Não' }}
+          </span>
+        </p>
+        <p class="mb-2"><strong>Usuário: </strong> {{ prov.providerBudget[0].user?.name || '-' }}</p>
+        <p class="mb-2"><strong>Data: </strong> {{ prov.providerBudget[0].approval_date | date:'dd/MM/yyyy' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-between gap-2 border-top">
+    <button type="button" class="btn btn-outline-primary shadow-sm btn-sm" (click)="openVerLink()">
+      <i class="fas fa-external-link-alt me-1"></i> Abrir Orçamento no Servidor
+    </button>
+    <button type="button" class="btn btn-secondary shadow-sm btn-sm" (click)="showEvaluationModal = false">Fechar</button>
+  </div>
+</app-modal>
+
+<!-- MODAL: PROPOSTA -->
+<app-modal
+  [show]="showProposalModal"
+  (close)="showProposalModal = false"
+  title="Envio de Proposta"
+  icon="fa-file-invoice-dollar"
+  size="md">
+  <div class="alert alert-danger py-2" role="alert" *ngIf="prov.sended_mail">
+    <i class="fas fa-exclamation-triangle me-1"></i> Já foi enviado um e-mail com essa proposta!
+  </div>
+
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" id="sendEmailProposal" [(ngModel)]="sendEmail" />
+    <label class="form-check-label font-weight-bold" for="sendEmailProposal">Enviar E-mail</label>
+  </div>
+
+  <div *ngIf="sendEmail" class="bg-white p-3 border rounded mb-3 animate-in">
+    <div class="form-group mb-3">
+      <label class="form-label font-weight-bold small mb-1">Enviar para:</label>
+      <input type="text" class="form-control" [(ngModel)]="emails" placeholder="exemplo@cliente.com; outro@cliente.com" />
+      <small class="text-muted d-block mt-1">Separe os e-mails com ; (ponto e vírgula)</small>
+    </div>
+
+    <div class="form-group mb-3">
+      <label class="form-label font-weight-bold small mb-1">Mensagem:</label>
+      <textarea class="form-control" rows="3" [(ngModel)]="message" placeholder="Texto opcional..."></textarea>
+    </div>
+
+    <div class="form-check mb-2">
+      <input class="form-check-input" type="checkbox" id="copyMeProposal" [(ngModel)]="copyMe" />
+      <label class="form-check-label small" for="copyMeProposal">Enviar cópia para mim</label>
+    </div>
+  </div>
+
+  <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
+    <button type="button" class="btn btn-secondary shadow-sm" [disabled]="isSending" (click)="showProposalModal = false">Cancelar</button>
+    <button type="button" class="btn shadow-sm" [ngClass]="sendEmail ? 'btn-primary' : 'btn-success'" [disabled]="isSending" (click)="sendProposal()">
+      <span *ngIf="isSending" class="spinner-border spinner-border-sm me-1" role="status"></span>
+      <ng-container *ngIf="!isSending">{{ sendEmail ? 'Enviar Proposta' : 'Baixar PDF' }}</ng-container>
+      <ng-container *ngIf="isSending">{{ sendEmail ? 'Enviando...' : 'Gerando PDF...' }}</ng-container>
+    </button>
+  </div>
+</app-modal>
+
+<!-- MODAL: PROPOSTA SEM VALORES -->
+<app-modal
+  [show]="showProposalWithoutValuesModal"
+  (close)="showProposalWithoutValuesModal = false"
+  title="Envio de Proposta (Sem Valores)"
+  icon="fa-file-contract"
+  size="md">
+  <div class="alert alert-danger py-2" role="alert" *ngIf="prov.sended_mail">
+    <i class="fas fa-exclamation-triangle me-1"></i> Já foi enviado um e-mail com essa proposta!
+  </div>
+
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" id="sendEmailProposalWOV" [(ngModel)]="sendEmailWithoutValues" />
+    <label class="form-check-label font-weight-bold" for="sendEmailProposalWOV">Enviar E-mail</label>
+  </div>
+
+  <div *ngIf="sendEmailWithoutValues" class="bg-white p-3 border rounded mb-3 animate-in">
+    <div class="form-group mb-3">
+      <label class="form-label font-weight-bold small mb-1">Enviar para:</label>
+      <input type="text" class="form-control" [(ngModel)]="emailsWithoutValues" placeholder="exemplo@cliente.com; outro@cliente.com" />
+      <small class="text-muted d-block mt-1">Separe os e-mails com ; (ponto e vírgula)</small>
+    </div>
+
+    <div class="form-group mb-3">
+      <label class="form-label font-weight-bold small mb-1">Mensagem:</label>
+      <textarea class="form-control" rows="3" [(ngModel)]="messageWithoutValues" placeholder="Texto opcional..."></textarea>
+    </div>
+
+    <div class="form-check mb-2">
+      <input class="form-check-input" type="checkbox" id="copyMeProposalWOV" [(ngModel)]="copyMeWithoutValues" />
+      <label class="form-check-label small" for="copyMeProposalWOV">Enviar cópia para mim</label>
+    </div>
+  </div>
+
+  <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
+    <button type="button" class="btn btn-secondary shadow-sm" [disabled]="isSending" (click)="showProposalWithoutValuesModal = false">Cancelar</button>
+    <button type="button" class="btn shadow-sm" [ngClass]="sendEmailWithoutValues ? 'btn-primary' : 'btn-success'" [disabled]="isSending" (click)="sendProposalWithoutValues()">
+      <span *ngIf="isSending" class="spinner-border spinner-border-sm me-1" role="status"></span>
+      <ng-container *ngIf="!isSending">{{ sendEmailWithoutValues ? 'Enviar Proposta' : 'Baixar PDF' }}</ng-container>
+      <ng-container *ngIf="isSending">{{ sendEmailWithoutValues ? 'Enviando...' : 'Gerando PDF...' }}</ng-container>
+    </button>
+  </div>
+</app-modal>
+
+<!-- MODAL: FATURAMENTO -->
+<app-modal
+  [show]="showInvoiceModal"
+  (close)="showInvoiceModal = false"
+  title="Faturamento"
+  icon="fa-receipt"
+  size="md">
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" id="sendEmailInvoice" [(ngModel)]="sendEmailInvoice" />
+    <label class="form-check-label font-weight-bold" for="sendEmailInvoice">Enviar E-mail</label>
+  </div>
+
+  <div *ngIf="sendEmailInvoice" class="bg-white p-3 border rounded mb-3 animate-in">
+    <div class="form-group mb-3">
+      <label class="form-label font-weight-bold small mb-1">Enviar para:</label>
+      <input type="text" class="form-control" [(ngModel)]="emailsInvoice" placeholder="exemplo@cliente.com; outro@cliente.com" />
+      <small class="text-muted d-block mt-1">Separe os e-mails com ; (ponto e vírgula)</small>
+    </div>
+
+    <div class="form-group mb-3">
+      <label class="form-label font-weight-bold small mb-1">Mensagem:</label>
+      <textarea class="form-control" rows="3" [(ngModel)]="messageInvoice" placeholder="Texto opcional..."></textarea>
+    </div>
+
+    <div class="form-check mb-2">
+      <input class="form-check-input" type="checkbox" id="copyMeInvoice" [(ngModel)]="copyMeInvoice" />
+      <label class="form-check-label small" for="copyMeInvoice">Enviar cópia para mim</label>
+    </div>
+  </div>
+
+  <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
+    <button type="button" class="btn btn-secondary shadow-sm" [disabled]="isSending" (click)="showInvoiceModal = false">Cancelar</button>
+    <button type="button" class="btn shadow-sm" [ngClass]="sendEmailInvoice ? 'btn-primary' : 'btn-success'" [disabled]="isSending" (click)="sendInvoice()">
+      <span *ngIf="isSending" class="spinner-border spinner-border-sm me-1" role="status"></span>
+      <ng-container *ngIf="!isSending">{{ sendEmailInvoice ? 'Enviar Faturamento' : 'Baixar PDF' }}</ng-container>
+      <ng-container *ngIf="isSending">{{ sendEmailInvoice ? 'Enviando...' : 'Gerando PDF...' }}</ng-container>
+    </button>
+  </div>
+</app-modal>
+
+<!-- MODAL: IFRAME ORÇAMENTO / AVALIAÇÃO -->
+<app-modal
+  [show]="showBudgetFrameModal"
+  (close)="closeBudgetFrameModal()"
+  [title]="budgetFrameTitle"
+  icon="fa-comments-dollar"
+  size="xl">
+  
+  <div class="w-100 position-relative" style="height: 75vh; min-height: 500px;">
+    <!-- Spinner de carregamento do iframe -->
+    <div *ngIf="isIframeLoading" class="position-absolute top-50 start-50 translate-middle d-flex flex-column align-items-center">
+      <div class="spinner-border text-primary mb-2" role="status">
+        <span class="visually-hidden">Carregando...</span>
+      </div>
+      <span class="text-muted small">Carregando orçamento...</span>
+    </div>
+    
+    <iframe
+      *ngIf="budgetFrameUrl"
+      [src]="budgetFrameUrl"
+      class="w-100 h-100 border-0 rounded animate-in"
+      (load)="onIframeLoad()">
+    </iframe>
+  </div>
+
+  <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-between gap-2 border-top">
+    <button type="button" class="btn btn-outline-secondary shadow-sm btn-sm" (click)="openBudgetFrameExternal()">
+      <i class="fas fa-external-link-alt me-1"></i> Abrir em nova guia
+    </button>
+    <button type="button" class="btn btn-secondary shadow-sm btn-sm" (click)="closeBudgetFrameModal()">Fechar</button>
+  </div>
+</app-modal>

@@ -2,8 +2,8 @@
 
     <!-- Sidebar - Brand -->
     <a class="sidebar-brand d-flex align-items-center justify-content-center" routerLink="/dashboard">
-        <div class="sidebar-brand-icon rotate-n-15">
-            <i class="fas fa-laugh-wink"></i>
+        <div class="sidebar-brand-icon">
+            <i class="fas fa-building"></i>
         </div>
         <div class="sidebar-brand-text mx-3">SmartApp</div>
     </a>
@@ -14,10 +14,10 @@
     <ng-container *ngFor="let menuItem of menuItems; let i = index">
         <li *ngIf="canShowMenu(menuItem)" class="nav-item" [class.active]="menuItem.active">
             
-            <hr *ngIf="menuItem.divider" class="sidebar-divider d-none d-md-block">
+            <hr *ngIf="menuItem.divider" class="sidebar-divider d-none d-md-block opacity-25">
 
             <!-- Nav Item -->
-            <a *ngIf="menuItem.isItem" class="nav-link" [routerLink]="menuItem.link" routerLinkActive="active">
+            <a *ngIf="menuItem.isItem" class="nav-link" [routerLink]="menuItem.link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
                 <i [class]="menuItem.icon || 'fa-solid fa-check'"></i>
                 <span>{{ menuItem.name }}</span>
             </a>
@@ -34,7 +34,7 @@
             </a>
             
             <div *ngIf="!menuItem.isItem" class="collapse" [class.show]="!menuItem.collapsed" style="visibility: inherit">
-                <div class="bg-white py-2 collapse-inner rounded">
+                <div class="bg-white py-2 collapse-inner rounded shadow-lg">
                     <h6 class="collapse-header">{{ menuItem.collapseHeader }}:</h6>
                     <ng-container *ngFor="let subMenuItem of menuItem.subMenu">
                         <!-- Angular Link -->
@@ -60,11 +60,11 @@
     </ng-container>
 
     <!-- Divider -->
-    <hr class="sidebar-divider d-none d-md-block">
+    <hr class="sidebar-divider d-none d-md-block opacity-25 mt-3">
 
     <!-- Sidebar Toggler (Sidebar) -->
-    <div class="text-center d-none d-md-inline">
-        <button class="rounded-circle border-0" id="sidebarToggle" (click)="toggleSidebar.emit()"></button>
+    <div class="text-center d-none d-md-inline pt-4">
+        <button class="rounded-circle border-0 shadow-sm" id="sidebarToggle" (click)="toggleSidebar.emit()"></button>
     </div>
 
 </ul>

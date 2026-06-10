@@ -3,12 +3,19 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Apto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use App\Domains\Hotels\Services\AptoServiceInterface;
 
 class AptoApiController extends Controller
 {
+    protected $aptoService;
+
+    public function __construct(AptoServiceInterface $aptoService)
+    {
+        $this->aptoService = $aptoService;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -20,28 +27,10 @@ class AptoApiController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $query = Apto::withoutGlobalScope('active');
-
-        // Search
-        if ($request->has('search') && !empty($request->search)) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
-
-        // Sorting
-        $sortColumn = $request->get('sort_column', 'id');
-        $sortDirection = $request->get('sort_direction', 'desc');
+        $filters = $request->only(['search', 'sort_column', 'sort_direction']);
+        $perPage = $request->get('per_page', 10);
         
-        // Allowed columns for sorting
-        $allowedColumns = ['id', 'name', 'active'];
-        if (in_array($sortColumn, $allowedColumns)) {
-            $query->orderBy($sortColumn, $sortDirection);
-        } else {
-            $query->orderBy('id', 'desc');
-        }
-
-        // Pagination
-        $perPage = $request->get('per_page', 20);
-        $aptos = $query->paginate($perPage);
+        $aptos = $this->aptoService->list($filters, $perPage);
 
         return response()->json($aptos);
     }
@@ -64,16 +53,10 @@ class AptoApiController extends Controller
 
         try {
             if ($request->id > 0) {
-                $apto = Apto::withoutGlobalScope('active')->findOrFail($request->id);
-                $apto->name = $request->name;
-                $apto->save();
-                
+                $apto = $this->aptoService->update($request->id, $request->only('name'));
                 return response()->json(['message' => 'Registro atualizado com sucesso', 'data' => $apto]);
             } else {
-                $apto = Apto::create([
-                    'name' => $request->name
-                ]);
-                
+                $apto = $this->aptoService->create($request->only('name'));
                 return response()->json(['message' => 'Registro salvo com sucesso', 'data' => $apto]);
             }
         } catch (\Exception $e) {
@@ -94,8 +77,7 @@ class AptoApiController extends Controller
         }
 
         try {
-            $apto = Apto::withoutGlobalScope('active')->findOrFail($id);
-            $apto->delete();
+            $this->aptoService->delete($id);
             return response()->json(['message' => 'Registro apagado com sucesso!']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao apagar o registro', 'error' => $e->getMessage()], 500);
@@ -115,8 +97,7 @@ class AptoApiController extends Controller
         }
 
         try {
-            $apto = Apto::withoutGlobalScope('active')->findOrFail($id);
-            $apto->activate();
+            $this->aptoService->activate($id);
             return response()->json(['message' => 'Registro ativado com sucesso!']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao ativar o registro', 'error' => $e->getMessage()], 500);
@@ -136,8 +117,7 @@ class AptoApiController extends Controller
         }
 
         try {
-            $apto = Apto::withoutGlobalScope('active')->findOrFail($id);
-            $apto->deactivate();
+            $this->aptoService->deactivate($id);
             return response()->json(['message' => 'Registro inativado com sucesso.']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao inativar o registro', 'error' => $e->getMessage()], 500);

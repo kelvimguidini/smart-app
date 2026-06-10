@@ -35,5 +35,15 @@
 
 </div>
 
+<!-- Global Logout Overlay -->
+<div *ngIf="authService.isLoggingOut()" 
+    class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white/80 backdrop-blur-md animate-in fade-in duration-300">
+    <div class="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center border border-gray-100">
+        <div class="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+        <h3 class="text-xl font-bold text-gray-800">Saindo do Sistema</h3>
+        <p class="text-gray-500 mt-2">Encerrando sua sessão com segurança...</p>
+    </div>
+</div>
+
 <!-- Toast for global messages -->
 <app-toast></app-toast>

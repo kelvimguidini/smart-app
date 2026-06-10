@@ -3,9 +3,17 @@
 namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
+use App\Domains\Auth\Services\AuthApiServiceInterface;
 
 class AuthController extends BaseApiController
 {
+    protected AuthApiServiceInterface $authApiService;
+
+    public function __construct(AuthApiServiceInterface $authApiService)
+    {
+        $this->authApiService = $authApiService;
+    }
+
     /**
      * @OA\Post(
      *     path="/api/login",
@@ -29,8 +37,8 @@ class AuthController extends BaseApiController
      *         )
      *     ),
      *     @OA\Response(
-     *         response=400,
-     *         description="Bad Request",
+     *         response=401,
+     *         description="Unauthorized",
      *     )
      * )
      */
@@ -38,20 +46,12 @@ class AuthController extends BaseApiController
     {
         $credentials = $request->only(['email', 'password']);
 
-        $user = \App\Models\User::where('email', $credentials['email'])->first();
+        $tokenData = $this->authApiService->authenticate($credentials);
 
-        if (!$user || !$user->is_api_user) {
+        if (!$tokenData) {
             return $this->errorResponse('Unauthorized', 401);
         }
 
-        if (!$token = auth('api')->attempt($credentials)) {
-            return $this->errorResponse('Unauthorized', 401);
-        }
-
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60
-        ]);
+        return response()->json($tokenData);
     }
 }

@@ -1,0 +1,317 @@
+<app-authenticated-layout title="Broker">
+  <ng-container header>
+    <div class="d-sm-flex align-items-center justify-content-between mb-4 animate-in">
+      <h1 class="h3 mb-0 text-gray-800">Gerenciamento de Broker</h1>
+    </div>
+  </ng-container>
+
+  <div class="row position-relative">
+    <!-- Modal de Cadastro/Edição -->
+    <app-modal [show]="showModal" (close)="closeModal()" [title]="inEdition > 0 ? 'Editar Broker' : 'Cadastrar Novo Broker'" icon="fa-edit" size="lg">
+      <form (ngSubmit)="submit()">
+        <div class="row align-items-start">
+          <!-- Nome -->
+          <div class="col-lg-6 mb-3">
+            <div class="form-group mb-0">
+              <label for="name" class="form-label">
+                Nome:
+                <span class="text-danger">*</span>
+              </label>
+              <input
+                type="text"
+                id="name"
+                class="form-control"
+                [class.is-invalid]="errors['name']"
+                [(ngModel)]="form.name"
+                name="name"
+                placeholder="Ex: Broker"
+                required
+                autofocus />
+
+              <div *ngIf="errors['name']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cidade (Autocomplete) -->
+          <div class="col-lg-6 mb-3">
+            <app-autocomplete
+              id="city"
+              label="Cidade"
+              placeholder="Digite para buscar a cidade..."
+              [required]="true"
+              [searchFn]="searchCities"
+              [displayFn]="displayCity"
+              valueField="id"
+              [initialText]="selectedCityName"
+              [(ngModel)]="form.city_id"
+              name="city"
+              [errors]="errors['city_id']"></app-autocomplete>
+          </div>
+
+          <!-- Contato -->
+          <div class="col-lg-6 mb-3">
+            <div class="form-group mb-0">
+              <label for="contact" class="form-label">
+                Contato:
+                <span class="text-danger">*</span>
+              </label>
+              <input
+                type="text"
+                id="contact"
+                class="form-control"
+                [class.is-invalid]="errors['contact']"
+                [(ngModel)]="form.contact"
+                name="contact"
+                placeholder="Ex: João Silva"
+                required />
+
+              <div *ngIf="errors['contact']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['contact']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Telefone -->
+          <div class="col-lg-6 mb-3">
+            <div class="form-group mb-0">
+              <label for="phone" class="form-label">
+                Telefone:
+                <span class="text-danger">*</span>
+              </label>
+              <input
+                type="text"
+                id="phone"
+                class="form-control"
+                [class.is-invalid]="errors['phone']"
+                [(ngModel)]="form.phone"
+                name="phone"
+                placeholder="Ex: (11) 99999-9999"
+                mask="(00) 0000-00009"
+                [dropSpecialCharacters]="false"
+                required />
+
+              <div *ngIf="errors['phone']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['phone']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- E-mail -->
+          <div class="col-lg-8 mb-3">
+            <div class="form-group mb-0">
+              <label for="email" class="form-label">
+                E-mail:
+                <span class="text-danger">*</span>
+              </label>
+              <input
+                type="email"
+                id="email"
+                class="form-control"
+                [class.is-invalid]="errors['email']"
+                [(ngModel)]="form.email"
+                name="email"
+                placeholder="exemplo@email.com"
+                required />
+
+              <div *ngIf="errors['email']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['email']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nacional Radios -->
+          <div class="col-lg-4 mb-3">
+            <label class="form-label d-block">Nacional?</label>
+            <div class="form-switch mt-2">
+              <input class="form-check-input cursor-pointer" type="checkbox" id="national" [(ngModel)]="form.national" name="national" />
+              <label class="form-check-label cursor-pointer text-muted ms-2" for="national">{{ form.national ? 'Sim' : 'Não' }}</label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeModal()" [disabled]="processing">
+            <i class="fas fa-times me-1"></i>
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary shadow-sm" [disabled]="processing">
+            <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            <i *ngIf="!processing" class="fas fa-save me-1"></i>
+            Salvar
+          </button>
+        </div>
+      </form>
+    </app-modal>
+
+    <!-- Table Section -->
+    <div class="col-lg-12 animate-in" style="animation-delay: 0.2s">
+      <div class="card mb-4 border-left-secondary">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-4">
+            <h5 class="card-title mb-0 text-secondary font-weight-bold">
+              <i class="fas fa-list me-2"></i>
+              Lista de Brokers
+            </h5>
+            <button class="btn btn-primary btn-sm shadow-sm" (click)="openModal()" [disabled]="processing">
+              <i class="fas fa-plus me-1"></i>
+              Novo Broker
+            </button>
+          </div>
+
+          <app-datatable
+            [pagination]="pagination"
+            [loading]="isLoader"
+            (search)="onSearch($event)"
+            (pageChange)="onPageChange($event)"
+            (perPageChange)="onPerPageChange($event)">
+            <div class="table-responsive">
+              <table class="table table-hover" width="100%" cellspacing="0">
+                <thead class="table-light">
+                  <tr>
+                    <th scope="col" (click)="sortBy('id')" style="cursor: pointer; width: 80px">
+                      <div class="d-flex align-items-center">
+                        ID
+                        <i
+                          class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'id' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'id' && sortDirection === 'desc',
+                          }"></i>
+                      </div>
+                    </th>
+                    <th scope="col" (click)="sortBy('name')" style="cursor: pointer">
+                      <div class="d-flex align-items-center">
+                        Nome
+                        <i
+                          class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'name' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'name' && sortDirection === 'desc',
+                          }"></i>
+                      </div>
+                    </th>
+                    <th scope="col">Cidade</th>
+                    <th scope="col" (click)="sortBy('contact')" style="cursor: pointer">
+                      <div class="d-flex align-items-center">
+                        Contato
+                        <i
+                          class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'contact' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'contact' && sortDirection === 'desc',
+                          }"></i>
+                      </div>
+                    </th>
+                    <th scope="col" (click)="sortBy('phone')" style="cursor: pointer">
+                      <div class="d-flex align-items-center">
+                        Telefone
+                        <i
+                          class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'phone' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'phone' && sortDirection === 'desc',
+                          }"></i>
+                      </div>
+                    </th>
+                    <th scope="col" (click)="sortBy('email')" style="cursor: pointer">
+                      <div class="d-flex align-items-center">
+                        E-mail
+                        <i
+                          class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'email' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'email' && sortDirection === 'desc',
+                          }"></i>
+                      </div>
+                    </th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col" class="text-end">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let broker of brokers" [class.table-info]="isBrokerInEdition(broker.id)">
+                    <th scope="row" class="font-weight-bold">{{ broker.id }}</th>
+                    <td>
+                      <span [class.text-muted]="!broker.active">{{ broker.name }}</span>
+                      <span *ngIf="!broker.active" class="badge bg-light text-muted ms-2">Inativo</span>
+                    </td>
+                    <td>
+                      <span [class.text-muted]="!broker.active">
+                        {{ broker.city ? broker.city.name + ' - ' + (broker.city.states ? broker.city.states : broker.city.country) : '-' }}
+                      </span>
+                    </td>
+                    <td>
+                      <span [class.text-muted]="!broker.active">{{ broker.contact }}</span>
+                    </td>
+                    <td>
+                      <span [class.text-muted]="!broker.active">{{ broker.phone }}</span>
+                    </td>
+                    <td>
+                      <span [class.text-muted]="!broker.active">{{ broker.email }}</span>
+                    </td>
+                    <td>
+                      <span [class.text-muted]="!broker.active">{{ broker.national ? 'Nacional' : 'Internacional' }}</span>
+                    </td>
+                    <td class="text-end">
+                      <div class="d-flex justify-content-end gap-2 flex-wrap">
+                        <!-- Editar -->
+                        <button class="btn btn-info text-white shadow-sm btn-action" (click)="edit(broker)" data-tooltip="Editar Broker">
+                          <i class="fas fa-edit"></i>
+                        </button>
+
+                        <!-- Ativar/Inativar -->
+                        <button
+                          *ngIf="!broker.active"
+                          class="btn btn-success shadow-sm btn-action"
+                          (click)="activateBroker(broker.id)"
+                          data-tooltip="Ativar Broker">
+                          <i class="fas fa-check"></i>
+                        </button>
+
+                        <app-confirm-modal
+                          *ngIf="broker.active"
+                          [btnClass]="'btn btn-warning shadow-sm btn-action'"
+                          [modalTitle]="'Inativar Broker'"
+                          [message]="'Tem certeza que deseja inativar o broker ' + broker.name + '?'"
+                          [okButtonLabel]="'Confirmar'"
+                          [tooltip]="'Inativar Broker'"
+                          (confirm)="deactivateBroker(broker.id)">
+                          <span modal-button><i class="fas fa-ban"></i></span>
+                        </app-confirm-modal>
+
+                        <!-- Deletar -->
+                        <app-confirm-modal
+                          [btnClass]="'btn btn-danger shadow-sm btn-action'"
+                          [modalTitle]="'Excluir Broker'"
+                          [message]="'Ação irreversível! Deseja realmente excluir o broker ' + broker.name + '?'"
+                          [okButtonLabel]="'Excluir'"
+                          [tooltip]="'Excluir Broker'"
+                          (confirm)="deleteBroker(broker.id)">
+                          <span modal-button><i class="fas fa-trash"></i></span>
+                        </app-confirm-modal>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr *ngFor="let i of [1, 2, 3, 4, 5].slice(0, isLoader ? 5 : 0)">
+                    <td colspan="8" class="text-center py-3">
+                      <div class="placeholder-glow">
+                        <span class="placeholder col-12 rounded"></span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr *ngIf="brokers.length === 0 && !isLoader">
+                    <td colspan="8" class="text-center py-5 text-muted">
+                      <i class="fas fa-folder-open fa-3x mb-3 d-block opacity-25"></i>
+                      Nenhum broker encontrado.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </app-datatable>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-authenticated-layout>

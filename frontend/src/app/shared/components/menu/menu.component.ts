@@ -1,6 +1,7 @@
-import { Component, computed, inject, signal, input, output } from '@angular/core';
+import { Component, computed, inject, signal, input, output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, NavigationEnd, RouterLink, RouterLinkActive } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { AuthService } from '../../../services/auth.service';
 
 interface SubMenuItem {
@@ -29,14 +30,45 @@ interface MenuItem {
   templateUrl: './menu.component.html',
   styleUrls: ['./menu.component.scss']
 })
-export class MenuComponent {
+export class MenuComponent implements OnInit {
   private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
   
   isToggled = input<boolean>(false);
   toggleSidebar = output<void>();
 
   menuTitle = 'SmartApp';
   userPermissions = computed(() => this.authService.user()?.permissions || []);
+
+  constructor() {
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      this.checkActiveMenu(event.urlAfterRedirects);
+    });
+  }
+
+  ngOnInit() {
+    this.checkActiveMenu(this.router.url);
+  }
+
+  checkActiveMenu(url: string) {
+    const urlWithoutParams = url.split('?')[0];
+    
+    this.menuItems.forEach(item => {
+      if (!item.isItem && item.subMenu) {
+        const isActive = item.subMenu.some(sub => {
+          return urlWithoutParams === sub.link || urlWithoutParams.startsWith(sub.link + '/');
+        });
+        if (isActive) {
+          item.collapsed = false;
+        } else {
+          // Garante que menus inativos comecem fechados para evitar dois abertos
+          item.collapsed = true;
+        }
+      }
+    });
+  }
 
   menuItems: MenuItem[] = [
     {
@@ -178,7 +210,14 @@ export class MenuComponent {
 
   isAngularRoute(link: string | undefined): boolean {
     if (!link) return false;
-    const angularRoutes = ['/dashboard', '/apto', '/regime', '/category'];
+    const angularRoutes = [
+      '/dashboard', '/apto', '/regime', '/category', '/purpose', 
+      '/service-type', '/broker', '/role', '/hotel', '/service', 
+      '/local', '/service-hall', '/purpose-hall', '/measure',
+      '/frequency', '/service-add', '/provider-service', '/brand',
+      '/car-model', '/vehicle', '/transport-service', '/broker-trans', '/provider-transport',
+      '/event', '/event-list'
+    ];
     return angularRoutes.includes(link);
   }
 }

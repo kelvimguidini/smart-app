@@ -1,0 +1,245 @@
+<app-authenticated-layout>
+  <ng-container header>
+    <div class="d-sm-flex align-items-center justify-content-between mb-4 animate-in">
+      <h1 class="h3 mb-0 text-gray-800">Gerenciamento de Clientes</h1>
+    </div>
+  </ng-container>
+
+  <div class="row position-relative">
+    <!-- Modal de Cadastro/Edição -->
+    <app-modal [show]="showModal" (close)="closeModal()" [title]="inEdition > 0 ? 'Editar Cliente' : 'Cadastrar Novo Cliente'" icon="fa-edit" size="lg">
+      <form (ngSubmit)="save()" class="d-flex flex-column flex-grow-1 min-h-0">
+        <!-- Seção de Preview do Cliente -->
+        <div class="d-flex flex-column align-items-center justify-content-center mb-4 pb-3 border-bottom text-center animate-in">
+          <div class="position-relative mb-2">
+            <!-- Se tem imagem (URL da API ou local preview) -->
+            <div *ngIf="currentLogoUrl" class="avatar-preview-container shadow-sm rounded-circle border p-1 bg-white" style="width: 90px; height: 90px;">
+              <img [src]="currentLogoUrl" alt="Logo" class="rounded-circle w-100 h-100" style="object-fit: cover;">
+            </div>
+            <!-- Se não tem imagem (Mostra iniciais com a cor selecionada) -->
+            <div *ngIf="!currentLogoUrl" class="avatar-preview-container shadow-sm rounded-circle text-white fw-bold d-flex align-items-center justify-content-center border-0 p-1" [style.background-color]="form.color || '#6c757d'" style="width: 90px; height: 90px; font-size: 2.2rem; line-height: 1;">
+              {{ (form.name ? form.name.charAt(0) : 'C') | uppercase }}
+            </div>
+          </div>
+          <h6 class="font-weight-bold text-gray-900 mb-0 mt-2">{{ form.name || 'Novo Cliente' }}</h6>
+          <span class="text-xs text-muted">{{ form.email || 'Sem e-mail cadastrado' }}</span>
+        </div>
+
+        <div class="row">
+          <!-- Nome -->
+          <div class="col-lg-6 mb-3">
+            <div class="form-group mb-0">
+              <label for="name" class="form-label">Nome/Razão Social <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="name" [(ngModel)]="form.name" name="name" required placeholder="Nome do Cliente" autofocus [class.is-invalid]="errors['name']" />
+              
+              <div *ngIf="errors['name']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Documento -->
+          <div class="col-lg-6 mb-3">
+            <div class="form-group mb-0">
+              <label for="document" class="form-label">CNPJ/Documento</label>
+              <input type="text" class="form-control" id="document" [(ngModel)]="form.document" name="document" placeholder="Ex: 00.000.000/0000-00" mask="000.000.000-00||00.000.000/0000-00" [class.is-invalid]="errors['document']" />
+              
+              <div *ngIf="errors['document']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['document']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- E-mail -->
+          <div class="col-lg-5 mb-3">
+            <div class="form-group mb-0">
+              <label for="email" class="form-label">E-mail</label>
+              <input type="email" class="form-control" id="email" [(ngModel)]="form.email" name="email" placeholder="contato@cliente.com" [class.is-invalid]="errors['email']" />
+              
+              <div *ngIf="errors['email']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['email']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Telefone -->
+          <div class="col-lg-5 mb-3">
+            <div class="form-group mb-0">
+              <label for="phone" class="form-label">Telefone</label>
+              <input type="text" class="form-control" id="phone" [(ngModel)]="form.phone" name="phone" placeholder="(00) 0000-0000" mask="(00) 0000-00009" [class.is-invalid]="errors['phone']" />
+              
+              <div *ngIf="errors['phone']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['phone']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cor -->
+          <div class="col-lg-2 mb-3">
+            <div class="form-group mb-0">
+              <label for="color" class="form-label">Cor</label>
+              <input type="color" class="form-control form-control-color w-100" id="color" [(ngModel)]="form.color" name="color" title="Escolha uma cor">
+            </div>
+          </div>
+
+          <!-- Responsável pela Autorização -->
+          <div class="col-lg-6 mb-3">
+            <div class="form-group mb-0">
+              <label for="responsibleAuthorizing" class="form-label">Responsável pela Autorização</label>
+              <input type="text" class="form-control" id="responsibleAuthorizing" [(ngModel)]="form.responsibleAuthorizing" name="responsibleAuthorizing" placeholder="Nome do responsável" [class.is-invalid]="errors['responsibleAuthorizing']" />
+              
+              <div *ngIf="errors['responsibleAuthorizing']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['responsibleAuthorizing']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Logo -->
+          <div class="col-lg-6 mb-3">
+            <div class="form-group mb-0">
+              <label for="logoFile" class="form-label">Logo</label>
+              <input class="form-control" type="file" id="logoFile" (change)="onFileChange($event)" accept="image/*">
+              <small class="text-muted d-block mt-1">Imagens no formato PNG, JPG ou GIF.</small>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeModal()" [disabled]="processing">
+            <i class="fas fa-times me-1"></i> Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary shadow-sm" [disabled]="processing">
+            <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            <i *ngIf="!processing" class="fas fa-save me-1"></i> Salvar
+          </button>
+        </div>
+      </form>
+    </app-modal>
+
+    <!-- Table Section -->
+    <div class="col-lg-12 animate-in" style="animation-delay: 0.2s">
+      <div class="card mb-4 border-left-secondary">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-4">
+            <h5 class="card-title mb-0 text-secondary font-weight-bold">
+              <i class="fas fa-list me-2"></i> Lista de Clientes
+            </h5>
+            <button class="btn btn-primary btn-sm shadow-sm" (click)="openModal()" [disabled]="processing">
+              <i class="fas fa-plus me-1"></i> Novo Cliente
+            </button>
+          </div>
+
+          <app-datatable
+            [pagination]="{ current_page: currentPage, last_page: lastPage, total: totalItems, per_page: perPage, from: ((currentPage - 1) * perPage) + 1, to: ((currentPage - 1) * perPage) + customers.length }"
+            [loading]="isLoader"
+            (pageChange)="onPageChange($event)"
+            (search)="onSearch($event)">
+            
+            <div class="table-responsive">
+              <table class="table table-hover" width="100%" cellspacing="0">
+                <thead class="table-light">
+                  <tr>
+                    <th scope="col" (click)="onSort({column: 'id', direction: sortDirection === 'asc' ? 'desc' : 'asc'})" style="cursor: pointer; width: 80px;">
+                      <div class="d-flex align-items-center">
+                        ID
+                        <i class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'id' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'id' && sortDirection === 'desc'
+                          }"></i>
+                      </div>
+                    </th>
+                    <th scope="col" (click)="onSort({column: 'name', direction: sortDirection === 'asc' ? 'desc' : 'asc'})" style="cursor: pointer">
+                      <div class="d-flex align-items-center">
+                        Nome
+                        <i class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'name' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'name' && sortDirection === 'desc'
+                          }"></i>
+                      </div>
+                    </th>
+                    <th scope="col" (click)="onSort({column: 'document', direction: sortDirection === 'asc' ? 'desc' : 'asc'})" style="cursor: pointer">
+                      <div class="d-flex align-items-center">
+                        Documento
+                        <i class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'document' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'document' && sortDirection === 'desc'
+                          }"></i>
+                      </div>
+                    </th>
+                    <th scope="col" (click)="onSort({column: 'phone', direction: sortDirection === 'asc' ? 'desc' : 'asc'})" style="cursor: pointer">
+                      <div class="d-flex align-items-center">
+                        Telefone
+                        <i class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'phone' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'phone' && sortDirection === 'desc'
+                          }"></i>
+                      </div>
+                    </th>
+
+                    <th scope="col" class="text-end">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let customer of customers" [class.table-info]="inEdition === customer.id">
+                    <th scope="row" class="font-weight-bold">{{ customer.id }}</th>
+                    <td>
+                      <span [class.text-muted]="!customer.active">{{ customer.name }}</span>
+                      <span *ngIf="!customer.active" class="badge bg-light text-muted ms-2 border">Inativo</span>
+                    </td>
+                    <td>
+                      <span [class.text-muted]="!customer.active">{{ customer.document || '-' }}</span>
+                    </td>
+                    <td>
+                      <span [class.text-muted]="!customer.active">{{ customer.phone || '-' }}</span>
+                    </td>
+
+                    <td class="text-end">
+                      <div class="d-flex justify-content-end gap-2 flex-wrap">
+                        <button class="btn btn-info text-white shadow-sm btn-action" (click)="edit(customer)" data-tooltip="Editar Cliente">
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        
+                        <button *ngIf="!customer.active" class="btn btn-success shadow-sm btn-action" (click)="activate(customer.id)" data-tooltip="Ativar Cliente">
+                          <i class="fas fa-check"></i>
+                        </button>
+
+                        <app-confirm-modal 
+                          *ngIf="customer.active"
+                          [btnClass]="'btn btn-warning shadow-sm btn-action'" 
+                          [modalTitle]="'Inativar Cliente'" 
+                          [message]="'Tem certeza que deseja inativar o cliente ' + customer.name + '?'"
+                          [okButtonLabel]="'Confirmar'"
+                          [tooltip]="'Inativar Cliente'"
+                          (confirm)="deactivate(customer.id)">
+                          <span modal-button><i class="fas fa-ban"></i></span>
+                        </app-confirm-modal>
+
+                        <app-confirm-modal 
+                          [btnClass]="'btn btn-danger shadow-sm btn-action'" 
+                          [modalTitle]="'Excluir Cliente'" 
+                          [message]="'Ação irreversível! Deseja realmente excluir o cliente ' + customer.name + '?'"
+                          [okButtonLabel]="'Excluir'"
+                          [tooltip]="'Excluir Cliente'"
+                          (confirm)="deleteCustomer(customer.id)">
+                          <span modal-button><i class="fas fa-trash"></i></span>
+                        </app-confirm-modal>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr *ngIf="customers.length === 0">
+                    <td colspan="5" class="text-center py-5 text-muted">
+                      Nenhum cliente encontrado.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </app-datatable>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-authenticated-layout>

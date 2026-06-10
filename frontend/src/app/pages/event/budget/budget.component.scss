@@ -1,0 +1,44 @@
+.fixed-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+}
+
+.custom-modal-card {
+  max-width: 450px;
+  width: 90%;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  animation: modalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.bg-light-success {
+  background-color: #d1e7dd !important;
+}
+
+.bg-light-danger {
+  background-color: #f8d7da !important;
+}
+
+.bg-light-warning {
+  background-color: #fff3cd !important;
+}
+
+.navbar {
+  border-bottom: 2px solid #eaecf4;
+}

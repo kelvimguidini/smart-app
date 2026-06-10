@@ -51,11 +51,17 @@ class Handler extends ExceptionHandler
 
     protected function unauthenticated($request, AuthenticationException $exception)
     {
-        if ($request->expectsJson()) {
+        // Se for requisição do Inertia antigo, força o redirecionamento via header 409
+        if ($request->header('X-Inertia')) {
+            return response('', 409)->header('X-Inertia-Location', route('login'));
+        }
+
+        // Se for Angular/API (espera JSON ou se for um PUT/POST/DELETE)
+        if ($request->expectsJson() || $request->wantsJson() || !$request->isMethod('GET')) {
             return response()->json(['message' => 'Não autenticado.'], 401);
         }
 
-        // Evita redirecionamento para login em APIs
+        // Navegação normal via URL no browser
         return redirect()->guest(route('login'));
     }
 

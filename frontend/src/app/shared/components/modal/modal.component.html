@@ -1,0 +1,18 @@
+<div #modalContainer>
+  <div *ngIf="show" class="modal-backdrop-blur">
+    <div class="modal-dialog" [class]="size ? 'modal-' + size : ''" cdkDrag cdkDragBoundary=".modal-backdrop-blur">
+      <div class="modal-content shadow rounded-xl border-0">
+        <div class="modal-header bg-primary text-white py-3 px-4" cdkDragHandle>
+          <h5 class="modal-title font-weight-bold d-flex align-items-center">
+            <i *ngIf="icon" class="fas me-2" [ngClass]="icon"></i>
+            <span>{{ title }}</span>
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="closeModal()"></button>
+        </div>
+        <div class="modal-body p-4 bg-light">
+          <ng-content></ng-content>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

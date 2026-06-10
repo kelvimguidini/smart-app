@@ -2,9 +2,9 @@ import { ApplicationConfig, provideZoneChangeDetection, APP_INITIALIZER } from '
 import { APP_BASE_HREF } from '@angular/common';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideEnvironmentNgxMask } from 'ngx-mask';
 
 import { routes } from './app.routes';
-import { loadingInterceptor } from './interceptors/loading.interceptor';
 import { authInterceptor } from './interceptors/auth.interceptor';
 import { AuthService } from './services/auth.service';
 
@@ -18,8 +18,9 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(
-      withInterceptors([loadingInterceptor, authInterceptor])
+      withInterceptors([authInterceptor])
     ),
+    provideEnvironmentNgxMask(),
     AuthService,
     {
       provide: APP_INITIALIZER,

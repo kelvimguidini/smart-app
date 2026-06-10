@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\BudgetController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
@@ -68,11 +67,15 @@ Route::middleware(['guest', 'cors'])->group(function () {
 
 Route::middleware(['cors'])->group(function () {
 
-    Route::get('budget/{token}/{prove?}/{user?}', [BudgetController::class, 'budget'])
-        ->name('budget');
+    Route::get('budget', function () {
+        $path = base_path('public/angular.html');
+        return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
+    })->name('budget');
 
-    Route::post('budget-save', [BudgetController::class, 'store'])
-        ->name('budget-save');
+    Route::get('budget/{token}/{prove?}/{user?}', function () {
+        $path = base_path('public/angular.html');
+        return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
+    });
 
     Route::get('new-event/{params}', function ($params) {
         $paramsCript = Crypt::decryptString($params);
