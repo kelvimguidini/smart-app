@@ -40,9 +40,12 @@ export class HotelComponent implements OnInit {
   showModal = false;
 
   pagination = {
-    currentPage: 1,
-    perPage: 10,
-    totalItems: 0,
+    current_page: 1,
+    per_page: 10,
+    total: 0,
+    last_page: 1,
+    from: 0,
+    to: 0,
   };
 
   searchTerm = '';
@@ -99,8 +102,8 @@ export class HotelComponent implements OnInit {
   loadProviders(): void {
     this.isLoader = true;
     const params = {
-      page: this.pagination.currentPage,
-      per_page: this.pagination.perPage,
+      page: this.pagination.current_page,
+      per_page: this.pagination.per_page,
       search: this.searchTerm,
       sort_column: this.sortColumn,
       sort_direction: this.sortDirection,
@@ -110,9 +113,12 @@ export class HotelComponent implements OnInit {
     this.providerService.getProviders(params).subscribe({
       next: (response) => {
         this.providers = response.data;
-        this.pagination.currentPage = response.current_page;
-        this.pagination.totalItems = response.total;
-        this.pagination.perPage = response.per_page;
+        this.pagination.current_page = response.current_page;
+        this.pagination.total = response.total;
+        this.pagination.per_page = response.per_page;
+        this.pagination.last_page = response.last_page;
+        this.pagination.from = response.from;
+        this.pagination.to = response.to;
         this.isLoader = false;
       },
       error: () => {
@@ -124,18 +130,18 @@ export class HotelComponent implements OnInit {
 
   onSearch(term: string): void {
     this.searchTerm = term;
-    this.pagination.currentPage = 1;
+    this.pagination.current_page = 1;
     this.loadProviders();
   }
 
   onPageChange(page: number): void {
-    this.pagination.currentPage = page;
+    this.pagination.current_page = page;
     this.loadProviders();
   }
 
   onPerPageChange(perPage: number): void {
-    this.pagination.perPage = perPage;
-    this.pagination.currentPage = 1;
+    this.pagination.per_page = perPage;
+    this.pagination.current_page = 1;
     this.loadProviders();
   }
 

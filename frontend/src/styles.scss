@@ -541,11 +541,9 @@ quill-editor {
 }
 
 // Prevent clipping of tooltips by overflow containers (tables, modal bodies, etc.)
-.table-responsive:has([data-tooltip]:hover),
 .modal-body:has([data-tooltip]:hover),
 .overflow-auto:has([data-tooltip]:hover),
 .overflow-hidden:has([data-tooltip]:hover),
-.overflow-x-auto:has([data-tooltip]:hover),
 .overflow-y-auto:has([data-tooltip]:hover) {
   overflow: visible !important;
 }

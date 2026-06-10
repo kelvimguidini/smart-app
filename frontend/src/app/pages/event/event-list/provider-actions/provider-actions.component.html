@@ -15,17 +15,16 @@
     <i class="fas fa-arrows-alt-v"></i>
   </button>
 
-  <!-- 2. Criar link Orçamento -->
-  <button
+  <!-- 2. Criar link Orçamento (oculto temporariamente) -->
+  <!-- <button
     *ngIf="!prov.isTransport"
     type="button"
-    class="btn text-white shadow-sm btn-action animate-in"
-    [ngClass]="prov.sended_mail_link ? 'btn-danger' : 'btn-secondary'"
+    class="btn btn-secondary text-white shadow-sm btn-action animate-in"
     title="Criar link Orçamento"
     data-tooltip="Criar link Orçamento"
     (click)="openBudgetLinkModal()">
     <i class="fas fa-link"></i>
-  </button>
+  </button> -->
 
   <!-- 3. Avaliar Orçamento -->
   <button
@@ -53,24 +52,22 @@
   <button
     *ngIf="prov && prov.providerBudget && hasPermission('event_admin') && (prov.status === 'dating_with_customer' || prov.status === 'approved_by_manager' || prov.status === 'sent_to_customer')"
     type="button"
-    class="btn text-white shadow-sm btn-action animate-in"
-    [ngClass]="prov.sended_mail ? 'btn-danger' : 'btn-primary'"
+    class="btn btn-primary text-white shadow-sm btn-action animate-in"
     title="Proposta (Com Valores)"
     data-tooltip="Proposta (Com Valores)"
     (click)="openProposalModal()">
-    <i class="fas" [ngClass]="prov.sended_mail ? 'fa-exclamation-triangle' : 'fa-file-invoice-dollar'"></i>
+    <i class="fas fa-file-invoice-dollar"></i>
   </button>
 
   <!-- 6. Proposta (Sem Valores) -->
   <button
     *ngIf="prov && prov.providerBudget && hasPermission('event_admin') && ['created', 'briefing', 'provider_requested', 'provider_responsed', 'sent_maneger', 'add_information', 'added_information', 'change_request'].includes(prov.status)"
     type="button"
-    class="btn text-white shadow-sm btn-action animate-in"
-    [ngClass]="prov.sended_mail ? 'btn-danger' : 'btn-warning text-dark'"
+    class="btn btn-warning text-dark shadow-sm btn-action animate-in"
     title="Proposta (Sem Valores)"
     data-tooltip="Proposta (Sem Valores)"
     (click)="openProposalWithoutValuesModal()">
-    <i class="fas" [ngClass]="prov.sended_mail ? 'fa-exclamation-triangle' : 'fa-file-alt'"></i>
+    <i class="fas fa-file-contract"></i>
   </button>
 
   <!-- 7. Faturamento -->
@@ -132,8 +129,9 @@
             <label class="form-check-label small" for="copyMeStatus">Enviar cópia para mim</label>
           </div>
           
-          <button type="button" class="btn btn-sm btn-primary w-100 mt-2" (click)="sendEmailNoChangeStatus()">
-            Enviar e-mail sem tramitar
+          <button type="button" class="btn btn-sm btn-primary w-100 mt-2" [disabled]="isSending" (click)="sendEmailNoChangeStatus()">
+            <span *ngIf="isSending" class="spinner-border spinner-border-sm me-1" role="status"></span>
+            {{ isSending ? 'Enviando...' : 'Enviar e-mail sem tramitar' }}
           </button>
         </div>
       </div>
@@ -169,8 +167,11 @@
   </div>
 
   <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top mt-3">
-    <button type="button" class="btn btn-secondary shadow-sm" (click)="showFollowUpModal = false">Cancelar</button>
-    <button type="button" class="btn btn-primary shadow-sm" (click)="saveStatus()">Tramitar</button>
+    <button type="button" class="btn btn-secondary shadow-sm" [disabled]="isSending" (click)="showFollowUpModal = false">Cancelar</button>
+    <button type="button" class="btn btn-primary shadow-sm" [disabled]="isSending" (click)="saveStatus()">
+      <span *ngIf="isSending" class="spinner-border spinner-border-sm me-1" role="status"></span>
+      {{ isSending ? 'Tramitando...' : 'Tramitar' }}
+    </button>
   </div>
 </app-modal>
 
@@ -223,9 +224,11 @@
   </div>
 
   <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
-    <button type="button" class="btn btn-secondary shadow-sm" (click)="showBudgetLinkModal = false">Cancelar</button>
-    <button type="button" class="btn btn-primary shadow-sm" (click)="createLink()">
-      {{ sendEmailLink ? 'Enviar link por e-mail' : 'Baixar PDF' }}
+    <button type="button" class="btn btn-secondary shadow-sm" [disabled]="isSending" (click)="showBudgetLinkModal = false">Cancelar</button>
+    <button type="button" class="btn btn-primary shadow-sm" [disabled]="isSending" (click)="createLink()">
+      <span *ngIf="isSending" class="spinner-border spinner-border-sm me-1" role="status"></span>
+      <ng-container *ngIf="!isSending">{{ sendEmailLink ? 'Enviar link por e-mail' : 'Baixar PDF' }}</ng-container>
+      <ng-container *ngIf="isSending">{{ sendEmailLink ? 'Enviando...' : 'Gerando PDF...' }}</ng-container>
     </button>
   </div>
 </app-modal>
@@ -266,7 +269,7 @@
   [show]="showProposalModal"
   (close)="showProposalModal = false"
   title="Envio de Proposta"
-  icon="fa-file-pdf"
+  icon="fa-file-invoice-dollar"
   size="md">
   <div class="alert alert-danger py-2" role="alert" *ngIf="prov.sended_mail">
     <i class="fas fa-exclamation-triangle me-1"></i> Já foi enviado um e-mail com essa proposta!
@@ -296,9 +299,11 @@
   </div>
 
   <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
-    <button type="button" class="btn btn-secondary shadow-sm" (click)="showProposalModal = false">Cancelar</button>
-    <button type="button" class="btn shadow-sm" [ngClass]="sendEmail ? 'btn-primary' : 'btn-success'" (click)="sendProposal()">
-      {{ sendEmail ? 'Enviar Proposta' : 'Baixar PDF' }}
+    <button type="button" class="btn btn-secondary shadow-sm" [disabled]="isSending" (click)="showProposalModal = false">Cancelar</button>
+    <button type="button" class="btn shadow-sm" [ngClass]="sendEmail ? 'btn-primary' : 'btn-success'" [disabled]="isSending" (click)="sendProposal()">
+      <span *ngIf="isSending" class="spinner-border spinner-border-sm me-1" role="status"></span>
+      <ng-container *ngIf="!isSending">{{ sendEmail ? 'Enviar Proposta' : 'Baixar PDF' }}</ng-container>
+      <ng-container *ngIf="isSending">{{ sendEmail ? 'Enviando...' : 'Gerando PDF...' }}</ng-container>
     </button>
   </div>
 </app-modal>
@@ -308,7 +313,7 @@
   [show]="showProposalWithoutValuesModal"
   (close)="showProposalWithoutValuesModal = false"
   title="Envio de Proposta (Sem Valores)"
-  icon="fa-file-invoice"
+  icon="fa-file-contract"
   size="md">
   <div class="alert alert-danger py-2" role="alert" *ngIf="prov.sended_mail">
     <i class="fas fa-exclamation-triangle me-1"></i> Já foi enviado um e-mail com essa proposta!
@@ -338,9 +343,11 @@
   </div>
 
   <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
-    <button type="button" class="btn btn-secondary shadow-sm" (click)="showProposalWithoutValuesModal = false">Cancelar</button>
-    <button type="button" class="btn shadow-sm" [ngClass]="sendEmailWithoutValues ? 'btn-primary' : 'btn-success'" (click)="sendProposalWithoutValues()">
-      {{ sendEmailWithoutValues ? 'Enviar Proposta' : 'Baixar PDF' }}
+    <button type="button" class="btn btn-secondary shadow-sm" [disabled]="isSending" (click)="showProposalWithoutValuesModal = false">Cancelar</button>
+    <button type="button" class="btn shadow-sm" [ngClass]="sendEmailWithoutValues ? 'btn-primary' : 'btn-success'" [disabled]="isSending" (click)="sendProposalWithoutValues()">
+      <span *ngIf="isSending" class="spinner-border spinner-border-sm me-1" role="status"></span>
+      <ng-container *ngIf="!isSending">{{ sendEmailWithoutValues ? 'Enviar Proposta' : 'Baixar PDF' }}</ng-container>
+      <ng-container *ngIf="isSending">{{ sendEmailWithoutValues ? 'Enviando...' : 'Gerando PDF...' }}</ng-container>
     </button>
   </div>
 </app-modal>
@@ -376,9 +383,44 @@
   </div>
 
   <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
-    <button type="button" class="btn btn-secondary shadow-sm" (click)="showInvoiceModal = false">Cancelar</button>
-    <button type="button" class="btn shadow-sm" [ngClass]="sendEmailInvoice ? 'btn-primary' : 'btn-success'" (click)="sendInvoice()">
-      {{ sendEmailInvoice ? 'Enviar Faturamento' : 'Baixar PDF' }}
+    <button type="button" class="btn btn-secondary shadow-sm" [disabled]="isSending" (click)="showInvoiceModal = false">Cancelar</button>
+    <button type="button" class="btn shadow-sm" [ngClass]="sendEmailInvoice ? 'btn-primary' : 'btn-success'" [disabled]="isSending" (click)="sendInvoice()">
+      <span *ngIf="isSending" class="spinner-border spinner-border-sm me-1" role="status"></span>
+      <ng-container *ngIf="!isSending">{{ sendEmailInvoice ? 'Enviar Faturamento' : 'Baixar PDF' }}</ng-container>
+      <ng-container *ngIf="isSending">{{ sendEmailInvoice ? 'Enviando...' : 'Gerando PDF...' }}</ng-container>
     </button>
+  </div>
+</app-modal>
+
+<!-- MODAL: IFRAME ORÇAMENTO / AVALIAÇÃO -->
+<app-modal
+  [show]="showBudgetFrameModal"
+  (close)="closeBudgetFrameModal()"
+  [title]="budgetFrameTitle"
+  icon="fa-comments-dollar"
+  size="xl">
+  
+  <div class="w-100 position-relative" style="height: 75vh; min-height: 500px;">
+    <!-- Spinner de carregamento do iframe -->
+    <div *ngIf="isIframeLoading" class="position-absolute top-50 start-50 translate-middle d-flex flex-column align-items-center">
+      <div class="spinner-border text-primary mb-2" role="status">
+        <span class="visually-hidden">Carregando...</span>
+      </div>
+      <span class="text-muted small">Carregando orçamento...</span>
+    </div>
+    
+    <iframe
+      *ngIf="budgetFrameUrl"
+      [src]="budgetFrameUrl"
+      class="w-100 h-100 border-0 rounded animate-in"
+      (load)="onIframeLoad()">
+    </iframe>
+  </div>
+
+  <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-between gap-2 border-top">
+    <button type="button" class="btn btn-outline-secondary shadow-sm btn-sm" (click)="openBudgetFrameExternal()">
+      <i class="fas fa-external-link-alt me-1"></i> Abrir em nova guia
+    </button>
+    <button type="button" class="btn btn-secondary shadow-sm btn-sm" (click)="closeBudgetFrameModal()">Fechar</button>
   </div>
 </app-modal>

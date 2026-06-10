@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { EventService } from '../../../../services/event.service';
 import { AuthService } from '../../../../services/auth.service';
 import { ToastService } from '../../../../services/toast.service';
@@ -17,6 +18,7 @@ export class ProviderActionsComponent {
   private readonly eventService = inject(EventService);
   private readonly authService = inject(AuthService);
   private readonly toastService = inject(ToastService);
+  private readonly sanitizer = inject(DomSanitizer);
 
   @Input() event: any;
   @Input() prov: any;
@@ -25,6 +27,7 @@ export class ProviderActionsComponent {
   @Output() refresh = new EventEmitter<void>();
 
   isLoader = false;
+  isSending = false;
 
   // Modals Visibility
   showFollowUpModal = false;
@@ -33,6 +36,11 @@ export class ProviderActionsComponent {
   showProposalModal = false;
   showProposalWithoutValuesModal = false;
   showInvoiceModal = false;
+  showBudgetFrameModal = false;
+  budgetFrameUrl: SafeResourceUrl | null = null;
+  budgetFrameTitle = 'Orçamento';
+  rawBudgetFrameUrl = '';
+  isIframeLoading = false;
 
   // Follow UP Form State
   formStatus = {
@@ -139,7 +147,7 @@ export class ProviderActionsComponent {
       alert("Por favor, selecione um status de hotel válido.");
       return;
     }
-    this.isLoader = true;
+    this.isSending = true;
 
     const msg = (this.formStatus.messageLink || '') + `<br><br>
       <p><b>Evento:</b> <span style="color: #333;">${this.event.name}</span></p>
@@ -157,19 +165,21 @@ export class ProviderActionsComponent {
 
     this.eventService.saveEventStatus(payload).subscribe({
       next: () => {
-        this.isLoader = false;
+        this.isSending = false;
         this.showFollowUpModal = false;
+        this.toastService.success('Status alterado com sucesso!');
         this.refresh.emit();
       },
       error: (err) => {
         console.error('Erro ao tramitar status:', err);
-        this.isLoader = false;
+        this.isSending = false;
+        this.toastService.error('Erro ao alterar o status. Tente novamente.');
       }
     });
   }
 
   sendEmailNoChangeStatus() {
-    this.isLoader = true;
+    this.isSending = true;
 
     const msg = (this.formStatus.messageLink || '') + `<br><br>
       <p><b>Evento:</b> <span style="color: #333;">${this.event.name}</span></p>
@@ -187,13 +197,15 @@ export class ProviderActionsComponent {
 
     this.eventService.sendEventStatusEmail(payload).subscribe({
       next: () => {
-        this.isLoader = false;
+        this.isSending = false;
         this.showFollowUpModal = false;
+        this.toastService.success('E-mail enviado com sucesso!');
         this.refresh.emit();
       },
       error: (err) => {
         console.error('Erro ao enviar e-mail sem tramitar:', err);
-        this.isLoader = false;
+        this.isSending = false;
+        this.toastService.error('Erro ao enviar o e-mail. Tente novamente.');
       }
     });
   }
@@ -218,27 +230,25 @@ export class ProviderActionsComponent {
     this.toastService.info('Gerando o PDF do documento, por favor aguarde...');
     this.isLoader = true;
 
-    this.eventService.downloadPdf(downloadUrl).subscribe({
-      next: (blob) => {
-        const a = document.createElement('a');
-        const objectUrl = URL.createObjectURL(blob);
-        a.href = objectUrl;
-        a.download = filename;
-        a.click();
-        URL.revokeObjectURL(objectUrl);
-        
-        this.isLoader = false;
-        this.toastService.success('Download concluído com sucesso!');
-        if (shouldRefresh) {
-          this.refresh.emit();
-        }
-      },
-      error: (err) => {
-        console.error('Erro ao baixar PDF:', err);
-        this.isLoader = false;
-        this.toastService.error('Erro ao gerar o PDF. Tente novamente.');
+    // Abre o PDF diretamente no navegador — o backend usa sessão (cookie), então
+    // não precisa do HttpClient (que sobrescreve o Accept header via interceptor).
+    // O navegador dispara o download nativamente com autenticação via cookie.
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    // Feedback após abrir (não há callback real pois é abertura de janela)
+    setTimeout(() => {
+      this.isLoader = false;
+      this.toastService.success('PDF aberto com sucesso!');
+      if (shouldRefresh) {
+        this.refresh.emit();
       }
-    });
+    }, 1500);
   }
 
   createLink() {
@@ -252,7 +262,7 @@ export class ProviderActionsComponent {
       this.baixarPdfAssincrono(downloadUrl, filename, true);
     } else {
       // Send Email
-      this.isLoader = true;
+      this.isSending = true;
       const payload = {
         download: false,
         provider_id: this.prov.id,
@@ -268,14 +278,15 @@ export class ProviderActionsComponent {
 
       this.eventService.sendBudgetLinkEmail(payload).subscribe({
         next: () => {
-          this.isLoader = false;
+          this.isSending = false;
           this.showBudgetLinkModal = false;
           alert(`Link gerado com sucesso! Link: ${this.getBudgetUrl(token)}`);
           this.refresh.emit();
         },
         error: (err) => {
           console.error('Erro ao enviar link por e-mail:', err);
-          this.isLoader = false;
+          this.isSending = false;
+          this.toastService.error('Erro ao enviar link por e-mail. Tente novamente.');
         }
       });
     }
@@ -284,21 +295,42 @@ export class ProviderActionsComponent {
   // 3. BUDGET EVALUATION ACTIONS (Aprovar / Recusar)
   getEvaluationUrl(prove: boolean): string {
     const userParam = prove ? `&user=${this.authService.user()?.id || 0}` : '';
-    return `${this.eventService.getApiUrl()}/budget?token=${this.prov.token_budget}&prove=true${userParam}`;
+    return `${window.location.origin}/budget?token=${this.prov.token_budget}&prove=true${userParam}`;
   }
 
   openEvaluationLink() {
-    const url = this.getEvaluationUrl(true);
-    window.open(url, '_blank');
+    this.openBudgetFrame(true, 'Avaliar Orçamento');
   }
 
   openVerLink() {
-    const url = this.getEvaluationUrl(false);
-    window.open(url, '_blank');
+    this.showEvaluationModal = false;
+    this.openBudgetFrame(false, 'Visualizar Orçamento');
   }
 
   openEvaluationDetailsModal() {
     this.showEvaluationModal = true;
+  }
+
+  openBudgetFrame(prove: boolean, title: string) {
+    this.rawBudgetFrameUrl = this.getEvaluationUrl(prove);
+    this.budgetFrameUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.rawBudgetFrameUrl);
+    this.budgetFrameTitle = title;
+    this.isIframeLoading = true;
+    this.showBudgetFrameModal = true;
+  }
+
+  onIframeLoad() {
+    this.isIframeLoading = false;
+  }
+
+  openBudgetFrameExternal() {
+    window.open(this.rawBudgetFrameUrl, '_blank');
+  }
+
+  closeBudgetFrameModal() {
+    this.showBudgetFrameModal = false;
+    this.budgetFrameUrl = null;
+    this.refresh.emit();
   }
 
   // 4. PROPOSAL ACTIONS
@@ -318,7 +350,7 @@ export class ProviderActionsComponent {
       this.showProposalModal = false;
       this.baixarPdfAssincrono(downloadUrl, filename, false);
     } else {
-      this.isLoader = true;
+      this.isSending = true;
       const payload = {
         download: false,
         provider_id: this.prov.id,
@@ -331,13 +363,15 @@ export class ProviderActionsComponent {
 
       this.eventService.sendProposalEmail(payload).subscribe({
         next: () => {
-          this.isLoader = false;
+          this.isSending = false;
           this.showProposalModal = false;
+          this.toastService.success('Proposta enviada por e-mail com sucesso!');
           this.refresh.emit();
         },
         error: (err) => {
           console.error('Erro ao enviar proposta por e-mail:', err);
-          this.isLoader = false;
+          this.isSending = false;
+          this.toastService.error('Erro ao enviar a proposta. Tente novamente.');
         }
       });
     }
@@ -360,7 +394,7 @@ export class ProviderActionsComponent {
       this.showProposalWithoutValuesModal = false;
       this.baixarPdfAssincrono(downloadUrl, filename, false);
     } else {
-      this.isLoader = true;
+      this.isSending = true;
       const payload = {
         download: false,
         provider_id: this.prov.id,
@@ -373,13 +407,15 @@ export class ProviderActionsComponent {
 
       this.eventService.sendProposalWithoutValuesEmail(payload).subscribe({
         next: () => {
-          this.isLoader = false;
+          this.isSending = false;
           this.showProposalWithoutValuesModal = false;
+          this.toastService.success('Proposta sem valores enviada por e-mail com sucesso!');
           this.refresh.emit();
         },
         error: (err) => {
           console.error('Erro ao enviar proposta sem valores por e-mail:', err);
-          this.isLoader = false;
+          this.isSending = false;
+          this.toastService.error('Erro ao enviar a proposta. Tente novamente.');
         }
       });
     }
@@ -402,7 +438,7 @@ export class ProviderActionsComponent {
       this.showInvoiceModal = false;
       this.baixarPdfAssincrono(downloadUrl, filename, false);
     } else {
-      this.isLoader = true;
+      this.isSending = true;
       const payload = {
         download: false,
         provider_id: this.prov.id,
@@ -415,13 +451,15 @@ export class ProviderActionsComponent {
 
       this.eventService.sendInvoiceEmail(payload).subscribe({
         next: () => {
-          this.isLoader = false;
+          this.isSending = false;
           this.showInvoiceModal = false;
+          this.toastService.success('Faturamento enviado por e-mail com sucesso!');
           this.refresh.emit();
         },
         error: (err) => {
           console.error('Erro ao enviar faturamento por e-mail:', err);
-          this.isLoader = false;
+          this.isSending = false;
+          this.toastService.error('Erro ao enviar o faturamento. Tente novamente.');
         }
       });
     }

@@ -603,6 +603,9 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         kickback: editItem.kickback || 0,
         received_proposal: editItem.received_proposal || 0,
         received_proposal_percent: editItem.received_proposal_percent || 100,
+        compare_trivago: editItem.compare_trivago || 0,
+        compare_website_htl: editItem.compare_website_htl || 0,
+        compare_omnibess: editItem.compare_omnibess || 0,
       };
     } else {
       this.optForm = {
@@ -627,6 +630,9 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         kickback: 0,
         received_proposal: 0,
         received_proposal_percent: 100,
+        compare_trivago: 0,
+        compare_website_htl: 0,
+        compare_omnibess: 0,
       };
 
       // Set first values based on type defaults
@@ -931,6 +937,11 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       return status === 'dating_with_customer' || status === 'Cancelled';
     }
     return false;
+  }
+
+  sumCompare(item: any, field: string): number {
+    if (!item || !item.event_hotels_opt) return 0;
+    return item.event_hotels_opt.reduce((sum: number, opt: any) => sum + parseFloat(opt[field] || 0), 0);
   }
 
   hasPermission(role: string): boolean {
