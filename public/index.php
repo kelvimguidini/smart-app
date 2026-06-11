@@ -5,11 +5,8 @@ use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
-// Ajuste para rodar na subpasta /antigo
-$_SERVER['REQUEST_URI'] = str_replace('/antigo', '', $_SERVER['REQUEST_URI'] ?? '');
-if($_SERVER['REQUEST_URI'] === '' || $_SERVER['REQUEST_URI'] === false) {
-    $_SERVER['REQUEST_URI'] = '/';
-}
+// Ajuste para rodar na subpasta /antigo corretamente (corrige roteamento e geração de URLs/redirects)
+$_SERVER['SCRIPT_NAME'] = '/antigo/index.php';
 
 /*
 |--------------------------------------------------------------------------
