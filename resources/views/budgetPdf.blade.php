@@ -391,7 +391,14 @@ if ($transportEvent != null) {
                     </div>
                 </div>
                 <div class="right">
-                    <img src="{{ public_path($event->customer->logo) }}" style="max-width: 175px; max-height: 175px;" alt="{{ $event->customer->name}}">
+                    @if($event->customer && $event->customer->logo && $event->customer->logo !== '0')
+                        <?php
+                            $customerLogoPath = storage_path('app/public/' . str_replace('/storage/', '', $event->customer->logo));
+                        ?>
+                        @if(file_exists($customerLogoPath))
+                            <img src="{{ $customerLogoPath }}" style="max-width: 175px; max-height: 175px;" alt="{{ $event->customer->name}}">
+                        @endif
+                    @endif
                 </div>
             </header>
 

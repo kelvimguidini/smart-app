@@ -512,7 +512,14 @@ function quebraTexto($texto, $limite = 40)
 
                         </td>
                         <td class="right">
-                            <img src="{{ public_path($event->customer->logo) }}" style="max-width: 100px; max-height: 100px;" alt="{{ $event->customer->name }}">
+                            @if($event->customer && $event->customer->logo && $event->customer->logo !== '0')
+                                <?php
+                                    $customerLogoPath = storage_path('app/public/' . str_replace('/storage/', '', $event->customer->logo));
+                                ?>
+                                @if(file_exists($customerLogoPath))
+                                    <img src="{{ $customerLogoPath }}" style="max-width: 100px; max-height: 100px;" alt="{{ $event->customer->name }}">
+                                @endif
+                            @endif
                         </td>
                     </tr>
                 </table>
