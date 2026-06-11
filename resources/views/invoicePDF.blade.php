@@ -421,7 +421,7 @@ function quebraTexto($texto, $limite = 40)
                                 <div class="title">TICKET N° {{ $event != null ? $event->code : '' }}</div>
                             </div>
                             <div>
-                                <img style="width: 150px;" src="{{ asset('/storage/logos/logo.png') }}" alt="4BTS">
+                                <img style="width: 150px;" src="{{ public_path('/storage/logos/logo.png') }}" alt="4BTS">
                             </div>
                         </td>
                         <td class="center">
@@ -487,7 +487,7 @@ function quebraTexto($texto, $limite = 40)
                             @endif
                         </td>
                         <td class="right">
-                            <img src="{{ asset($event->customer->logo) }}" style="max-width: 100px; max-height: 100px;" alt="{{ $event->customer->name }}">
+                            <img src="{{ public_path($event->customer->logo) }}" style="max-width: 100px; max-height: 100px;" alt="{{ $event->customer->name }}">
                         </td>
                     </tr>
                 </table>
