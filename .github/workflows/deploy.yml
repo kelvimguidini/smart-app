@@ -1,0 +1,69 @@
+name: Deploy via FTP Antigo
+
+on:
+  push:
+    branches:
+      - backup-master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Setup PHP (PHP 8.1)
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+
+      - name: Install PHP dependencies
+        run: composer install --no-dev --prefer-dist
+
+      # - name: Run Angular Tests
+      #   run: npm run test:frontend
+
+      - name: Build All Frontends (Legacy Vue + New Angular)
+        run: |
+          npm install --legacy-peer-deps
+          npm run build
+
+      # - name: Run Migrations
+      #   env:
+      #     APP_ENV: production
+      #     APP_KEY: ${{ secrets.APP_KEY }}
+      #     DB_CONNECTION: mysql
+      #     DB_HOST: ${{ secrets.DB_HOST }}
+      #     DB_PORT: ${{ secrets.DB_PORT }}
+      #     DB_DATABASE: ${{ secrets.DB_DATABASE }}
+      #     DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      #     DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      #   run: php artisan migrate --force
+
+      - name: Upload Files via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 2121
+          protocol: ftps
+          timeout: 30000
+          local-dir: ./
+          server-dir: /www/antigo/ # Certifique-se de que o diretório termina com "/"
+          exclude: |
+            **/.git*
+            **/node_modules/**
+            **/tests/**
+            **/storage/**
+            **/vendor/**
+            **/public/storage/**
+            **vite.config.js**
+            **.env**
+            **nginx.conf**
