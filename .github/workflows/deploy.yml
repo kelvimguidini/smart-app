@@ -62,7 +62,6 @@ jobs:
             **/node_modules/**
             **/tests/**
             **/storage/**
-            **/vendor/**
             **/public/storage/**
             **/frontend/**
             **vite.config.js**
