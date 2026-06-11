@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use App\Domains\Customers\Repositories\CustomerRepositoryInterface;
-use App\Models\Crd;
+use App\Models\CRD;
 
 class CrdApiController extends Controller
 {
@@ -31,7 +31,7 @@ class CrdApiController extends Controller
         $perPage = $request->get('per_page', 10);
         $search = $request->get('search', '');
 
-        $query = Crd::with('customer')->withoutGlobalScope('active');
+        $query = CRD::with('customer')->withoutGlobalScope('active');
 
         if (!empty($search)) {
             $query->where('name', 'like', '%' . $search . '%')
