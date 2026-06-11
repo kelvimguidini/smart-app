@@ -64,6 +64,7 @@ jobs:
             **/storage/**
             **/vendor/**
             **/public/storage/**
+            **/frontend/**
             **vite.config.js**
             **.env**
             **nginx.conf**
