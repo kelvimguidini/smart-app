@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: '' // Em produção, usa URLs relativas
+  apiUrl: '/antigo' // Prefix API requests with the subdirectory path in production
 };
