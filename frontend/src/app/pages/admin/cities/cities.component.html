@@ -1,0 +1,197 @@
+<app-authenticated-layout>
+  <ng-container header>
+    <div class="d-sm-flex align-items-center justify-content-between mb-4 animate-in">
+      <h1 class="h3 mb-0 text-gray-800">Gerenciamento de Cidades</h1>
+    </div>
+  </ng-container>
+
+  <div class="row position-relative">
+    <!-- Modal de Cadastro/Edição -->
+    <app-modal [show]="showModal" (close)="closeModal()" [title]="inEdition > 0 ? 'Editar Cidade' : 'Cadastrar Nova Cidade'" icon="fa-edit" size="md">
+      <form (ngSubmit)="save()" class="d-flex flex-column flex-grow-1 min-h-0">
+        <div class="row">
+          <!-- Nome da Cidade -->
+          <div class="col-lg-12 mb-3">
+            <div class="form-group mb-0">
+              <label for="name" class="form-label">
+                Nome da Cidade
+                <span class="text-danger">*</span>
+              </label>
+              <input type="text" class="form-control" id="name" [(ngModel)]="form.name" name="name" required placeholder="Ex: São Paulo, New York" autofocus [class.is-invalid]="errors['name']" />
+              
+              <div *ngIf="errors['name']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Estado / Província -->
+          <div class="col-lg-6 mb-3">
+            <div class="form-group mb-0">
+              <label for="states" class="form-label">
+                Estado / Província
+              </label>
+              <input type="text" class="form-control" id="states" [(ngModel)]="form.states" name="states" placeholder="Ex: SP, NY" [class.is-invalid]="errors['states']" />
+              
+              <div *ngIf="errors['states']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['states']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- País -->
+          <div class="col-lg-6 mb-3">
+            <div class="form-group mb-0">
+              <label for="country" class="form-label">
+                País
+                <span class="text-danger">*</span>
+              </label>
+              <input type="text" class="form-control" id="country" [(ngModel)]="form.country" name="country" required placeholder="Ex: Brasil, USA" [class.is-invalid]="errors['country']" />
+              
+              <div *ngIf="errors['country']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['country']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeModal()" [disabled]="processing">
+            <i class="fas fa-times me-1"></i> Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary shadow-sm" [disabled]="processing">
+            <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            <i *ngIf="!processing" class="fas fa-save me-1"></i> Salvar
+          </button>
+        </div>
+      </form>
+    </app-modal>
+
+    <!-- Table Section -->
+    <div class="col-lg-12 animate-in" style="animation-delay: 0.2s">
+      <div class="card mb-4 border-left-secondary">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-4">
+            <h5 class="card-title mb-0 text-secondary font-weight-bold">
+              <i class="fas fa-list me-2"></i> Lista de Cidades
+            </h5>
+            <button class="btn btn-primary btn-sm shadow-sm" (click)="openModal()" [disabled]="processing">
+              <i class="fas fa-plus me-1"></i> Nova Cidade
+            </button>
+          </div>
+
+          <app-datatable
+            [pagination]="{ current_page: currentPage, last_page: lastPage, total: totalItems, per_page: perPage, from: ((currentPage - 1) * perPage) + 1, to: ((currentPage - 1) * perPage) + cities.length }"
+            [loading]="isLoader"
+            (pageChange)="onPageChange($event)"
+            (search)="onSearch($event)">
+            
+            <div class="table-responsive">
+              <table class="table table-hover" width="100%" cellspacing="0">
+                <thead class="table-light">
+                  <tr>
+                    <th scope="col" (click)="onSort({column: 'id', direction: sortDirection === 'asc' ? 'desc' : 'asc'})" style="cursor: pointer; width: 80px;">
+                      <div class="d-flex align-items-center">
+                        ID
+                        <i class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'id' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'id' && sortDirection === 'desc'
+                          }"></i>
+                      </div>
+                    </th>
+                    <th scope="col" (click)="onSort({column: 'name', direction: sortDirection === 'asc' ? 'desc' : 'asc'})" style="cursor: pointer">
+                      <div class="d-flex align-items-center">
+                        Nome
+                        <i class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'name' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'name' && sortDirection === 'desc'
+                          }"></i>
+                      </div>
+                    </th>
+                    <th scope="col" (click)="onSort({column: 'states', direction: sortDirection === 'asc' ? 'desc' : 'asc'})" style="cursor: pointer">
+                      <div class="d-flex align-items-center">
+                        Estado / Província
+                        <i class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'states' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'states' && sortDirection === 'desc'
+                          }"></i>
+                      </div>
+                    </th>
+                    <th scope="col" (click)="onSort({column: 'country', direction: sortDirection === 'asc' ? 'desc' : 'asc'})" style="cursor: pointer">
+                      <div class="d-flex align-items-center">
+                        País
+                        <i class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'country' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'country' && sortDirection === 'desc'
+                          }"></i>
+                      </div>
+                    </th>
+                    <th scope="col" class="text-end">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let city of cities" [class.table-info]="inEdition === city.id">
+                    <th scope="row" class="font-weight-bold">{{ city.id }}</th>
+                    <td>
+                      <span [class.text-muted]="!city.active">{{ city.name }}</span>
+                      <span *ngIf="!city.active" class="badge bg-light text-muted ms-2 border">Inativo</span>
+                    </td>
+                    <td>
+                      <span [class.text-muted]="!city.active">{{ city.states || '-' }}</span>
+                    </td>
+                    <td>
+                      <span [class.text-muted]="!city.active">{{ city.country || '-' }}</span>
+                    </td>
+                    <td class="text-end">
+                      <div class="d-flex justify-content-end gap-2 flex-wrap">
+                        <!-- Editar -->
+                        <button class="btn btn-info text-white shadow-sm btn-action" (click)="edit(city)" data-tooltip="Editar Cidade">
+                          <i class="fas fa-edit"></i>
+                        </button>
+
+                        <!-- Ativar/Inativar -->
+                        <button *ngIf="!city.active" class="btn btn-success shadow-sm btn-action" (click)="activate(city.id)" data-tooltip="Ativar Cidade">
+                          <i class="fas fa-check"></i>
+                        </button>
+
+                        <app-confirm-modal 
+                          *ngIf="city.active"
+                          [btnClass]="'btn btn-warning shadow-sm btn-action'" 
+                          [modalTitle]="'Inativar Cidade'" 
+                          [message]="'Tem certeza que deseja inativar a cidade ' + city.name + '?'"
+                          [okButtonLabel]="'Confirmar'"
+                          [tooltip]="'Inativar Cidade'"
+                          (confirm)="deactivate(city.id)">
+                          <span modal-button><i class="fas fa-ban"></i></span>
+                        </app-confirm-modal>
+
+                        <!-- Excluir -->
+                        <app-confirm-modal 
+                          [btnClass]="'btn btn-danger shadow-sm btn-action'" 
+                          [modalTitle]="'Excluir Cidade'" 
+                          [message]="'Ação irreversível! Deseja realmente excluir a cidade ' + city.name + '?'"
+                          [okButtonLabel]="'Excluir'"
+                          [tooltip]="'Excluir Cidade'"
+                          (confirm)="deleteCity(city.id)">
+                          <span modal-button><i class="fas fa-trash"></i></span>
+                        </app-confirm-modal>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr *ngIf="cities.length === 0">
+                    <td colspan="5" class="text-center py-5 text-muted">
+                      Nenhuma cidade encontrada.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </app-datatable>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-authenticated-layout>

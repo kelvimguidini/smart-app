@@ -114,6 +114,17 @@ Route::middleware(['auth', 'cors'])->group(function () {
         abort(404);
     })->name('crd');
 
+    Route::get('city', function (Request $request) {
+        $path = base_path('public/angular.html');
+        if (file_exists($path)) {
+            if ($request->header('X-Inertia')) {
+                return response('', 409)->header('X-Inertia-Location', $request->fullUrl());
+            }
+            return response(file_get_contents($path) ?: '', 200, ['Content-Type' => 'text/html']);
+        }
+        abort(404);
+    })->name('city');
+
 
 
     Route::get('category', function (Request $request) {

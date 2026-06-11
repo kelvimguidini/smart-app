@@ -761,7 +761,7 @@ if ($transportEvent != null) {
                         </div>
                     </div>
                     <div class="right" style="transform: initial;">
-                        <img style="width: 150px;" src="{{ public_path('/storage/logos/logo.png') }}" alt="4BTS">
+                        <img style="width: 150px;" src="{{ public_path('logo.png') }}" alt="4BTS">
                         <p>www.4BTS.com.br</p>
                     </div>
                 </div>

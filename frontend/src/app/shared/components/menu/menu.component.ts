@@ -216,7 +216,7 @@ export class MenuComponent implements OnInit {
       '/local', '/service-hall', '/purpose-hall', '/measure',
       '/frequency', '/service-add', '/provider-service', '/brand',
       '/car-model', '/vehicle', '/transport-service', '/broker-trans', '/provider-transport',
-      '/event', '/event-list'
+      '/event', '/event-list', '/currency', '/customer', '/crd', '/city'
     ];
     return angularRoutes.includes(link);
   }

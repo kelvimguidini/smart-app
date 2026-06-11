@@ -26,6 +26,7 @@ import { ProviderServiceComponent } from './pages/adds/provider-service/provider
 import { CurrenciesComponent } from './pages/admin/currencies/currencies.component';
 import { CustomersComponent } from './pages/admin/customers/customers.component';
 import { CrdsComponent } from './pages/admin/crds/crds.component';
+import { CitiesComponent } from './pages/admin/cities/cities.component';
 import { BrandComponent } from './pages/transport/brand/brand.component';
 import { CarModelComponent } from './pages/transport/car-model/car-model.component';
 import { VehicleComponent } from './pages/transport/vehicle/vehicle.component';
@@ -76,6 +77,7 @@ export const routes: Routes = [
   { path: 'event/:id/:tab', component: EventCreateComponent, canActivate: [authGuard], title: 'Editar Evento - SmartApp' },
   { path: 'customer', component: CustomersComponent, canActivate: [authGuard], title: 'Clientes - SmartApp' },
   { path: 'crd', component: CrdsComponent, canActivate: [authGuard], title: 'CRDs - SmartApp' },
+  { path: 'city', component: CitiesComponent, canActivate: [authGuard], title: 'Cidades - SmartApp' },
   { path: 'confirm-password', component: ConfirmPasswordComponent, canActivate: [authGuard], title: 'Confirmar Senha - SmartApp' },
   { path: 'budget', component: BudgetComponent, title: 'Orçamento - SmartApp' },
   { path: 'budget/:token', component: BudgetComponent, title: 'Orçamento - SmartApp' },
