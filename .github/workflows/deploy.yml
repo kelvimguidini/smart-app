@@ -3,7 +3,7 @@ name: Deploy via FTP
 on:
   push:
     branches:
-      - master
+      - backup-master
 
 jobs:
   deploy:
@@ -56,7 +56,7 @@ jobs:
           protocol: ftps
           timeout: 30000
           local-dir: ./
-          server-dir: /www/ # Certifique-se de que o diretório termina com "/"
+          server-dir: /www/antigo/ # Certifique-se de que o diretório termina com "/"
           exclude: |
             **/.git*
             **/node_modules/**
