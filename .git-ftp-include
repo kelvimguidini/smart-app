@@ -1,0 +1,11 @@
+!public/angular.html
+!public/browser/
+!public/build/
+!public/main-*.js
+!public/polyfills-*.js
+!public/runtime-*.js
+!public/styles-*.css
+!public/3rdpartylicenses.txt
+!public/prerendered-routes.json
+!public/chunk-*.js
+!public/media/
