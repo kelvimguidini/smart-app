@@ -25,7 +25,7 @@
               "base": "../public",
               "browser": ""
             },
-            "baseHref": "/",
+            "baseHref": "/antigo/",
             "deleteOutputPath": false,
             "index": {
               "input": "src/index.html",
