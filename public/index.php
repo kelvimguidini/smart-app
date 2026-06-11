@@ -7,6 +7,7 @@ define('LARAVEL_START', microtime(true));
 
 // Ajuste para rodar na subpasta /antigo corretamente (corrige roteamento e geração de URLs/redirects)
 $_SERVER['SCRIPT_NAME'] = '/antigo/index.php';
+$_SERVER['PHP_SELF'] = '/antigo/index.php';
 
 /*
 |--------------------------------------------------------------------------
@@ -46,6 +47,11 @@ require __DIR__.'/../vendor/autoload.php';
 */
 
 $app = require_once __DIR__.'/../bootstrap/app.php';
+
+// Forçar o URL base para o subfolder /antigo (garante que redirect('/') vá para /antigo/)
+$app->booted(function () {
+    url()->forceRootUrl(rtrim(config('app.url'), '/') . '/antigo');
+});
 
 $kernel = $app->make(Kernel::class);
 
