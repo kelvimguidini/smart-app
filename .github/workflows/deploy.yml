@@ -32,7 +32,7 @@ jobs:
       - name: Build All Frontends (Legacy Vue + New Angular)
         run: |
           npm install --legacy-peer-deps
-          npm run build
+          npm run build -- --base-href=/antigo/ --deploy-url=/antigo/
 
       # - name: Run Migrations
       #   env:
@@ -56,7 +56,7 @@ jobs:
           protocol: ftps
           timeout: 30000
           local-dir: ./
-          server-dir: /www/ # Certifique-se de que o diretório termina com "/"
+          server-dir: /www/antigo/
           exclude: |
             **/.git*
             **/node_modules/**
