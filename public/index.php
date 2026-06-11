@@ -5,6 +5,12 @@ use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
+// Ajuste para rodar na subpasta /antigo
+$_SERVER['REQUEST_URI'] = str_replace('/antigo', '', $_SERVER['REQUEST_URI'] ?? '');
+if($_SERVER['REQUEST_URI'] === '' || $_SERVER['REQUEST_URI'] === false) {
+    $_SERVER['REQUEST_URI'] = '/';
+}
+
 /*
 |--------------------------------------------------------------------------
 | Check If The Application Is Under Maintenance
