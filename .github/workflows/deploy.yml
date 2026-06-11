@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
 
       - name: Install Node.js
         uses: actions/setup-node@v3
@@ -46,6 +48,32 @@ jobs:
       #     DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       #   run: php artisan migrate --force
 
+      - name: Check for composer changes
+        id: changed-composer
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            composer.json
+            composer.lock
+
+      - name: Set FTP Exclude List
+        id: set-exclude
+        run: |
+          echo "EXCLUDE_LIST<<EOF" >> $GITHUB_ENV
+          echo "**/.git*" >> $GITHUB_ENV
+          echo "**/node_modules/**" >> $GITHUB_ENV
+          echo "**/tests/**" >> $GITHUB_ENV
+          echo "**/storage/**" >> $GITHUB_ENV
+          echo "**/public/storage/**" >> $GITHUB_ENV
+          echo "**/frontend/**" >> $GITHUB_ENV
+          echo "**vite.config.js**" >> $GITHUB_ENV
+          echo "**.env**" >> $GITHUB_ENV
+          echo "**nginx.conf**" >> $GITHUB_ENV
+          if [ "${{ steps.changed-composer.outputs.any_changed }}" == "false" ]; then
+            echo "**/vendor/**" >> $GITHUB_ENV
+          fi
+          echo "EOF" >> $GITHUB_ENV
+
       - name: Upload Files via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -57,13 +85,4 @@ jobs:
           timeout: 30000
           local-dir: ./
           server-dir: /www/
-          exclude: |
-            **/.git*
-            **/node_modules/**
-            **/tests/**
-            **/storage/**
-            **/public/storage/**
-            **/frontend/**
-            **vite.config.js**
-            **.env**
-            **nginx.conf**
+          exclude: ${{ env.EXCLUDE_LIST }}
