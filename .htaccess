@@ -1,6 +1,10 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteBase /antigo/
 
+    # Ignora se já estiver dentro da pasta public do sistema antigo
     RewriteCond %{REQUEST_URI} !^/antigo/public/
+    
+    # Redireciona o tráfego interno da pasta /antigo para /antigo/public/
     RewriteRule ^(.*)$ public/$1 [L,QSA]
 </IfModule>
