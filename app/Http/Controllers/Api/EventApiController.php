@@ -287,6 +287,8 @@ class EventApiController extends Controller
                 'message' => 'Evento salvo com sucesso!',
                 'event' => $event
             ]);
+        } catch (\App\Exceptions\UniqueNameException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
         } catch (Exception $e) {
             return response()->json(['message' => 'Erro ao salvar evento.', 'error' => $e->getMessage()], 500);
         }

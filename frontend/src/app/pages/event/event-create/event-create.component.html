@@ -892,7 +892,7 @@
                     <!-- Total / Summary Row (Other tabs) -->
                     <tr class="table-subheader" *ngIf="activeTab !== 1">
                       <td class="sticky-col font-weight-bold text-start">Diária Média:</td>
-                      <td class="sticky-col font-weight-bold text-end">{{ formatCurrency(average(item, activeTab === 2), item.currency?.sigla) }}</td>
+                      <td class="font-weight-bold text-end" [class.sticky-col]="activeTab === 1">{{ formatCurrency(average(item, activeTab === 2), item.currency?.sigla) }}</td>
                       <td
                         [attr.colspan]="activeTab === 5 ? 3 : activeTab === 2 || activeTab === 4 ? 2 : 1"
                         *ngIf="activeTab === 2 || activeTab === 3 || activeTab === 4 || activeTab === 5"></td>

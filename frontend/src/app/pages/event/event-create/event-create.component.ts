@@ -451,7 +451,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         this.processing = false;
         if (err.status === 422) {
           this.errors = err.error.errors || {};
-          this.toastService.error('Erro de validação, verifique os campos.');
+          this.toastService.error(err.error?.message || 'Erro de validação, verifique os campos.');
         } else {
           this.toastService.error(err.error?.message || 'Erro ao salvar os dados básicos.');
         }
@@ -702,22 +702,35 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     switch (this.optFormType) {
       case 'hotel':
         payload.event_hotel_id = this.optForm.parent_id;
+        payload.broker = this.optForm.broker_id;
+        payload.regime = this.optForm.regime_id;
+        payload.purpose = this.optForm.purpose_id;
         obs = this.eventService.saveHotelOpt(payload);
         break;
       case 'ab':
         payload.event_ab_id = this.optForm.parent_id;
+        payload.broker = this.optForm.broker_id;
         obs = this.eventService.saveABOpt(payload);
         break;
       case 'hall':
         payload.event_hall_id = this.optForm.parent_id;
+        payload.broker = this.optForm.broker_id;
         obs = this.eventService.saveHallOpt(payload);
         break;
       case 'add':
         payload.event_add_id = this.optForm.parent_id;
+        payload.frequency = this.optForm.frequency_id;
+        payload.measure = this.optForm.measure_id;
+        payload.service = this.optForm.service_id;
         obs = this.eventService.saveAddOpt(payload);
         break;
       case 'transport':
         payload.event_transport_id = this.optForm.parent_id;
+        payload.broker = this.optForm.broker_id;
+        payload.vehicle = this.optForm.vehicle_id;
+        payload.model = this.optForm.car_model_id;
+        payload.service = this.optForm.service_id;
+        payload.brand = this.optForm.brand_id;
         obs = this.eventService.saveTransportOpt(payload);
         break;
     }
@@ -733,6 +746,16 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         this.processing = false;
         if (err.status === 422) {
           this.errors = err.error.errors || {};
+          // Map backend validator keys to frontend property names for error visual cues
+          if (this.errors.broker) this.errors.broker_id = this.errors.broker;
+          if (this.errors.regime) this.errors.regime_id = this.errors.regime;
+          if (this.errors.purpose) this.errors.purpose_id = this.errors.purpose;
+          if (this.errors.vehicle) this.errors.vehicle_id = this.errors.vehicle;
+          if (this.errors.model) this.errors.car_model_id = this.errors.model;
+          if (this.errors.service) this.errors.service_id = this.errors.service;
+          if (this.errors.brand) this.errors.brand_id = this.errors.brand;
+          if (this.errors.frequency) this.errors.frequency_id = this.errors.frequency;
+          if (this.errors.measure) this.errors.measure_id = this.errors.measure;
         } else {
           this.toastService.error(err.error?.message || 'Erro ao salvar tarifa.');
         }
