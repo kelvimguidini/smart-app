@@ -74,7 +74,9 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   frequencies: any[] = [];
   measures: any[] = [];
   allStatus: any = {};
-  customerMetadata: any[] = [];
+  customerRequesters: any[] = [];
+  customerSectors: any[] = [];
+  customerCostCenters: any[] = [];
   requestersFiltered: any[] = [];
   sectorsFiltered: any[] = [];
   costCentersFiltered: any[] = [];
@@ -316,7 +318,9 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         this.frequencies = res.frequencies || [];
         this.measures = res.measures || [];
         this.allStatus = res.allStatus || {};
-        this.customerMetadata = res.customerMetadata || [];
+        this.customerRequesters = res.customerRequesters || [];
+        this.customerSectors = res.customerSectors || [];
+        this.customerCostCenters = res.customerCostCenters || [];
 
         if (res.event) {
           this.event = res.event;
@@ -389,6 +393,18 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     this.filterMetadata(customerId);
   }
 
+  checkCustomerSelected(event?: Event) {
+    if (!this.basicForm.customer) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      this.toastService.warning('Por favor, selecione primeiro a Empresa / Cliente.');
+      return false;
+    }
+    return true;
+  }
+
   filterMetadata(customerId: any) {
     console.log('filterMetadata: filtering for customerId =', customerId);
     if (customerId === null || customerId === undefined || customerId === '') {
@@ -398,11 +414,21 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       return;
     }
     const targetId = Number(customerId);
-    const clientMetadata = this.customerMetadata.filter(m => Number(m.customer_id) === targetId);
 
-    this.requestersFiltered = clientMetadata.filter(m => m.type === 'requester');
-    this.sectorsFiltered = clientMetadata.filter(m => m.type === 'sector');
-    this.costCentersFiltered = clientMetadata.filter(m => m.type === 'cost_center');
+    this.requestersFiltered = this.customerRequesters.filter(r => Number(r.customer_id) === targetId);
+    this.sectorsFiltered = this.customerSectors.filter(s => Number(s.customer_id) === targetId);
+    this.costCentersFiltered = this.customerCostCenters.filter(cc => Number(cc.customer_id) === targetId);
+
+    // Preserve existing event values if they are not in the auxiliary metadata tables
+    if (this.basicForm.requester && !this.requestersFiltered.some(r => r.name === this.basicForm.requester)) {
+      this.requestersFiltered.push({ name: this.basicForm.requester });
+    }
+    if (this.basicForm.sector && !this.sectorsFiltered.some(s => s.name === this.basicForm.sector)) {
+      this.sectorsFiltered.push({ name: this.basicForm.sector });
+    }
+    if (this.basicForm.cc && !this.costCentersFiltered.some(cc => cc.name === this.basicForm.cc)) {
+      this.costCentersFiltered.push({ name: this.basicForm.cc });
+    }
   }
 
   filterCrds(customerId: any) {
@@ -420,6 +446,14 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       console.log(`Checking CRD ID ${c.id}: c.customer_id (${c.customer_id}) == customerId (${customerId}) -> Match: ${match}`);
       return match;
     });
+
+    // Preserve existing CRD value if it is not in the filtered list
+    if (this.basicForm.crd_id && !this.crdsFiltered.some(c => c.id === this.basicForm.crd_id)) {
+      const existingCrd = this.crds.find(c => c.id === this.basicForm.crd_id);
+      if (existingCrd) {
+        this.crdsFiltered.push(existingCrd);
+      }
+    }
     console.log('filterCrds: filtered result =', this.crdsFiltered);
   }
 

@@ -2,28 +2,27 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { CrdService, Crd } from '../../../services/crd.service';
+import { CustomerRequesterService, CustomerRequester } from '../../../services/customer-requester.service';
 import { CustomerService, Customer } from '../../../services/customer.service';
 import { AuthenticatedLayoutComponent } from '../../../shared/layouts/authenticated-layout/authenticated-layout.component';
 import { DatatableComponent } from '../../../shared/components/datatable/datatable.component';
 import { ToastService } from '../../../services/toast.service';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
-import { NgxMaskDirective } from 'ngx-mask';
 
 @Component({
-  selector: 'app-crds',
+  selector: 'app-customer-requester',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive, AuthenticatedLayoutComponent, DatatableComponent, ConfirmModalComponent, NgxMaskDirective, ModalComponent],
-  templateUrl: './crds.component.html',
-  styleUrls: ['./crds.component.scss'],
+  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive, AuthenticatedLayoutComponent, DatatableComponent, ConfirmModalComponent, ModalComponent],
+  templateUrl: './customer-requester.component.html',
+  styleUrls: ['./customer-requester.component.scss'],
 })
-export class CrdsComponent implements OnInit {
-  private readonly crdService = inject(CrdService);
+export class CustomerRequesterComponent implements OnInit {
+  private readonly requesterService = inject(CustomerRequesterService);
   private readonly customerService = inject(CustomerService);
   private readonly toastr = inject(ToastService);
 
-  crds: Crd[] = [];
+  requesters: CustomerRequester[] = [];
   customers: Customer[] = [];
 
   // Pagination and Filtering
@@ -39,12 +38,10 @@ export class CrdsComponent implements OnInit {
   form: {
     id: number;
     name: string;
-    number: string;
     customer_id: number;
   } = {
     id: 0,
     name: '',
-    number: '',
     customer_id: 0,
   };
 
@@ -55,11 +52,11 @@ export class CrdsComponent implements OnInit {
   errors: any = {};
 
   ngOnInit(): void {
-    this.loadCrds();
+    this.loadRequesters();
     this.loadCustomers();
   }
 
-  loadCrds(): void {
+  loadRequesters(): void {
     this.isLoader = true;
     const params = {
       page: this.currentPage,
@@ -69,16 +66,16 @@ export class CrdsComponent implements OnInit {
       sort_direction: this.sortDirection,
     };
 
-    this.crdService.getCrds(params).subscribe({
+    this.requesterService.getRequesters(params).subscribe({
       next: (response) => {
-        this.crds = response.data;
+        this.requesters = response.data;
         this.currentPage = response.current_page;
         this.lastPage = response.last_page;
         this.totalItems = response.total;
         this.isLoader = false;
       },
       error: (err: any) => {
-        this.toastr.error('Erro ao carregar CRDs');
+        this.toastr.error('Erro ao carregar solicitantes');
         this.isLoader = false;
         console.error(err);
       },
@@ -86,7 +83,6 @@ export class CrdsComponent implements OnInit {
   }
 
   loadCustomers(): void {
-    // Carregar todos os clientes para o select (limitando a 100 para simplificar, ou backend deve suportar list sem paginação)
     this.customerService.getCustomers({ per_page: 500 }).subscribe({
       next: (res) => {
         this.customers = res.data;
@@ -98,19 +94,19 @@ export class CrdsComponent implements OnInit {
   // Datatable Events
   onPageChange(page: number): void {
     this.currentPage = page;
-    this.loadCrds();
+    this.loadRequesters();
   }
 
   onSearch(term: string): void {
     this.searchTerm = term;
     this.currentPage = 1;
-    this.loadCrds();
+    this.loadRequesters();
   }
 
   onSort(event: { column: string; direction: string }): void {
     this.sortColumn = event.column;
     this.sortDirection = event.direction;
-    this.loadCrds();
+    this.loadRequesters();
   }
 
   // Form Actions
@@ -129,20 +125,18 @@ export class CrdsComponent implements OnInit {
     this.form = {
       id: 0,
       name: '',
-      number: '',
       customer_id: 0,
     };
     this.processing = false;
     this.errors = {};
   }
 
-  edit(crd: Crd): void {
-    this.inEdition = crd.id;
+  edit(item: CustomerRequester): void {
+    this.inEdition = item.id;
     this.form = {
-      id: crd.id,
-      name: crd.name,
-      number: crd.number,
-      customer_id: crd.customer_id,
+      id: item.id,
+      name: item.name,
+      customer_id: item.customer_id,
     };
     this.errors = {};
     this.showModal = true;
@@ -153,12 +147,6 @@ export class CrdsComponent implements OnInit {
 
     if (!this.form.name || this.form.name.trim() === '') {
       this.errors.name = ['O nome é obrigatório'];
-    }
-
-    if (!this.form.number || this.form.number.trim() === '') {
-      this.errors.number = ['O número é obrigatório'];
-    } else if (this.form.number.replace(/\D/g, '').length !== 14) {
-      this.errors.number = ['O número do CRD deve conter exatamente 14 dígitos'];
     }
 
     if (!this.form.customer_id || this.form.customer_id <= 0) {
@@ -175,34 +163,33 @@ export class CrdsComponent implements OnInit {
 
     this.processing = true;
 
-    this.crdService.saveCrd(this.form).subscribe({
+    this.requesterService.saveRequester(this.form).subscribe({
       next: (res) => {
-        this.toastr.success(res.message || 'CRD salvo com sucesso');
+        this.toastr.success(res.message || 'Solicitante salvo com sucesso');
         this.closeModal();
-        this.loadCrds();
+        this.loadRequesters();
       },
       error: (err: any) => {
         this.processing = false;
         if (err.status === 422) {
           this.errors = err.error.errors || {};
         } else {
-          this.toastr.error('Erro ao salvar CRD');
+          this.toastr.error('Erro ao salvar solicitante');
         }
         console.error(err);
       },
     });
   }
 
-  // Action Actions
   activate(id: number): void {
     this.processing = true;
-    this.crdService.activateCrd(id).subscribe({
+    this.requesterService.activateRequester(id).subscribe({
       next: () => {
-        this.toastr.success('CRD ativado com sucesso');
-        this.loadCrds();
+        this.toastr.success('Solicitante ativado com sucesso');
+        this.loadRequesters();
       },
       error: (err: any) => {
-        this.toastr.error('Erro ao ativar CRD');
+        this.toastr.error('Erro ao ativar solicitante');
         this.processing = false;
       },
     });
@@ -210,27 +197,27 @@ export class CrdsComponent implements OnInit {
 
   deactivate(id: number): void {
     this.processing = true;
-    this.crdService.deactivateCrd(id).subscribe({
+    this.requesterService.deactivateRequester(id).subscribe({
       next: () => {
-        this.toastr.success('CRD inativado com sucesso');
-        this.loadCrds();
+        this.toastr.success('Solicitante inativado com sucesso');
+        this.loadRequesters();
       },
       error: (err: any) => {
-        this.toastr.error('Erro ao inativar CRD');
+        this.toastr.error('Erro ao inativar solicitante');
         this.processing = false;
       },
     });
   }
 
-  deleteCrd(id: number): void {
+  deleteItem(id: number): void {
     this.processing = true;
-    this.crdService.deleteCrd(id).subscribe({
+    this.requesterService.deleteRequester(id).subscribe({
       next: () => {
-        this.toastr.success('CRD apagado com sucesso');
-        this.loadCrds();
+        this.toastr.success('Solicitante apagado com sucesso');
+        this.loadRequesters();
       },
       error: (err: any) => {
-        this.toastr.error('Erro ao apagar CRD');
+        this.toastr.error('Erro ao apagar solicitante');
         this.processing = false;
       },
     });

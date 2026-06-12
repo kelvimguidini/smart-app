@@ -3,20 +3,19 @@
 namespace App\Models;
 
 use App\Traits\Activatable;
+use App\Traits\UniqueNameTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class CustomerMetadata extends Model
+class CustomerCostCenter extends Model
 {
     use SoftDeletes;
+    use UniqueNameTrait;
     use Activatable;
 
-    protected $fillable = ['customer_id', 'type', 'value', 'active'];
-    protected $table = 'customer_metadata';
+    protected $fillable = ['name', 'customer_id', 'active'];
+    protected $table = 'customer_cost_centers';
 
-    /**
-     * Relationship with Customer.
-     */
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id', 'id');

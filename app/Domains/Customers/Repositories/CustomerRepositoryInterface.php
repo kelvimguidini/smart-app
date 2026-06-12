@@ -22,10 +22,21 @@ interface CustomerRepositoryInterface
     public function deleteCrd(int $id): bool;
     public function activateCrd(int $id): bool;
     public function deactivateCrd(int $id): bool;
-    public function allMetadataWithCustomer(): Collection;
-    public function allMetadataWithInactive(): Collection;
-    public function saveMetadata(array $data, ?int $id = null): \App\Models\CustomerMetadata;
-    public function deleteMetadata(int $id): bool;
-    public function activateMetadata(int $id): bool;
-    public function deactivateMetadata(int $id): bool;
+    public function allRequestersWithInactive(): Collection;
+    public function saveRequester(array $data, ?int $id = null): \App\Models\CustomerRequester;
+    public function deleteRequester(int $id): bool;
+    public function activateRequester(int $id): bool;
+    public function deactivateRequester(int $id): bool;
+
+    public function allSectorsWithInactive(): Collection;
+    public function saveSector(array $data, ?int $id = null): \App\Models\CustomerSector;
+    public function deleteSector(int $id): bool;
+    public function activateSector(int $id): bool;
+    public function deactivateSector(int $id): bool;
+
+    public function allCostCentersWithInactive(): Collection;
+    public function saveCostCenter(array $data, ?int $id = null): \App\Models\CustomerCostCenter;
+    public function deleteCostCenter(int $id): bool;
+    public function activateCostCenter(int $id): bool;
+    public function deactivateCostCenter(int $id): bool;
 }

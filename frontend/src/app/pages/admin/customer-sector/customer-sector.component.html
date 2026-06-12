@@ -10,20 +10,20 @@
         <a class="nav-link" routerLink="/customer-requester" routerLinkActive="active">Solicitantes</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" routerLink="/customer-sector" routerLinkActive="active">Setores</a>
+        <a class="nav-link active" routerLink="/customer-sector" routerLinkActive="active">Setores</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" routerLink="/customer-cost-center" routerLinkActive="active">Centros de Custo</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link active" routerLink="/crd" routerLinkActive="active">CRDs</a>
+        <a class="nav-link" routerLink="/crd" routerLinkActive="active">CRDs</a>
       </li>
     </ul>
   </ng-container>
 
   <div class="row position-relative">
     <!-- Modal de Cadastro/Edição -->
-    <app-modal [show]="showModal" (close)="closeModal()" [title]="inEdition > 0 ? 'Editar CRD' : 'Cadastrar Novo CRD'" icon="fa-edit" size="md">
+    <app-modal [show]="showModal" (close)="closeModal()" [title]="inEdition > 0 ? 'Editar Setor' : 'Cadastrar Novo Setor'" icon="fa-edit" size="md">
       <form (ngSubmit)="save()" class="d-flex flex-column flex-grow-1 min-h-0">
         <div class="row">
           <!-- Nome -->
@@ -32,7 +32,7 @@
               <label for="name" class="form-label">
                 Nome <span class="text-danger">*</span>
               </label>
-              <input type="text" class="form-control" id="name" [(ngModel)]="form.name" name="name" required placeholder="Nome do CRD" autofocus [class.is-invalid]="errors['name']" />
+              <input type="text" class="form-control" id="name" [(ngModel)]="form.name" name="name" required placeholder="Nome do Setor" autofocus [class.is-invalid]="errors['name']" />
               
               <div *ngIf="errors['name']" class="text-danger mt-1">
                 <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
@@ -40,22 +40,8 @@
             </div>
           </div>
 
-          <!-- Número -->
-          <div class="col-lg-6 mb-3">
-            <div class="form-group mb-0">
-              <label for="number" class="form-label">
-                Número <span class="text-danger">*</span>
-              </label>
-              <input type="text" class="form-control" id="number" [(ngModel)]="form.number" name="number" required placeholder="Ex: 99.999.9999.99999" mask="00.000.0000.00000" [dropSpecialCharacters]="false" [class.is-invalid]="errors['number']" />
-              
-              <div *ngIf="errors['number']" class="text-danger mt-1">
-                <small *ngFor="let err of errors['number']" class="d-block">{{ err }}</small>
-              </div>
-            </div>
-          </div>
-
           <!-- Cliente -->
-          <div class="col-lg-6 mb-3">
+          <div class="col-lg-12 mb-3">
             <div class="form-group mb-0">
               <label for="customer_id" class="form-label">
                 Cliente <span class="text-danger">*</span>
@@ -87,17 +73,17 @@
     <div class="col-lg-12 animate-in" style="animation-delay: 0.2s">
       <div class="card mb-4 border-left-secondary">
         <div class="card-body">
-          <div class="d-flex align-items-center justify-content-between mb-4">
+          <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
             <h5 class="card-title mb-0 text-secondary font-weight-bold">
-              <i class="fas fa-list me-2"></i> Lista de CRDs
+              <i class="fas fa-list me-2"></i> Lista de Setores de Clientes
             </h5>
-            <button class="btn btn-primary btn-sm shadow-sm" (click)="openModal()" [disabled]="processing">
-              <i class="fas fa-plus me-1"></i> Novo CRD
+            <button type="button" class="btn btn-primary shadow-sm" (click)="openModal()" [disabled]="processing">
+              <i class="fas fa-plus me-1"></i> Novo Setor
             </button>
           </div>
 
           <app-datatable
-            [pagination]="{ current_page: currentPage, last_page: lastPage, total: totalItems, per_page: perPage, from: ((currentPage - 1) * perPage) + 1, to: ((currentPage - 1) * perPage) + crds.length }"
+            [pagination]="{ current_page: currentPage, last_page: lastPage, total: totalItems, per_page: perPage, from: ((currentPage - 1) * perPage) + 1, to: ((currentPage - 1) * perPage) + sectors.length }"
             [loading]="isLoader"
             (pageChange)="onPageChange($event)"
             (search)="onSearch($event)">
@@ -118,7 +104,7 @@
                     </th>
                     <th scope="col" (click)="onSort({column: 'name', direction: sortDirection === 'asc' ? 'desc' : 'asc'})" style="cursor: pointer">
                       <div class="d-flex align-items-center">
-                        Nome
+                        Nome Setor
                         <i class="fas fa-sort ms-2 text-muted"
                           [ngClass]="{
                             'fa-sort-up text-primary': sortColumn === 'name' && sortDirection === 'asc',
@@ -126,76 +112,63 @@
                           }"></i>
                       </div>
                     </th>
-                    <th scope="col" (click)="onSort({column: 'number', direction: sortDirection === 'asc' ? 'desc' : 'asc'})" style="cursor: pointer">
-                      <div class="d-flex align-items-center">
-                        Número
-                        <i class="fas fa-sort ms-2 text-muted"
-                          [ngClass]="{
-                            'fa-sort-up text-primary': sortColumn === 'number' && sortDirection === 'asc',
-                            'fa-sort-down text-primary': sortColumn === 'number' && sortDirection === 'desc'
-                          }"></i>
-                      </div>
-                    </th>
                     <th scope="col">
                       <div class="d-flex align-items-center">
-                        Cliente
+                        Empresa / Cliente
                       </div>
                     </th>
                     <th scope="col" class="text-end">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let crd of crds" [class.table-info]="inEdition === crd.id">
-                    <th scope="row" class="font-weight-bold">{{ crd.id }}</th>
+                  <tr *ngFor="let item of sectors" [class.table-info]="inEdition === item.id">
+                    <th scope="row" class="font-weight-bold">{{ item.id }}</th>
                     <td>
-                      <span [class.text-muted]="!crd.active">{{ crd.name }}</span>
-                      <span *ngIf="!crd.active" class="badge bg-light text-muted ms-2 border">Inativo</span>
+                      <span [class.text-muted]="!item.active">{{ item.name }}</span>
+                      <span *ngIf="!item.active" class="badge bg-light text-muted ms-2 border">Inativo</span>
                     </td>
                     <td>
-                      <span [class.text-muted]="!crd.active">{{ crd.number }}</span>
-                    </td>
-                    <td>
-                      <span [class.text-muted]="!crd.active">{{ crd.customer?.name || '-' }}</span>
+                      <span [class.text-muted]="!item.active">{{ item.customer?.name || '-' }}</span>
                     </td>
                     <td class="text-end">
                       <div class="d-flex justify-content-end gap-2 flex-wrap">
                         <!-- Editar -->
-                        <button class="btn btn-info text-white shadow-sm btn-action" (click)="edit(crd)" data-tooltip="Editar CRD">
+                        <button class="btn btn-info text-white shadow-sm btn-action" (click)="edit(item)" title="Editar">
                           <i class="fas fa-edit"></i>
                         </button>
-
+                        
                         <!-- Ativar/Inativar -->
-                        <button *ngIf="!crd.active" class="btn btn-success shadow-sm btn-action" (click)="activate(crd.id)" data-tooltip="Ativar CRD">
+                        <button *ngIf="!item.active" class="btn btn-success shadow-sm btn-action" (click)="activate(item.id)" title="Ativar">
                           <i class="fas fa-check"></i>
                         </button>
-
+                        
                         <app-confirm-modal 
-                          *ngIf="crd.active"
+                          *ngIf="item.active"
                           [btnClass]="'btn btn-warning shadow-sm btn-action'" 
-                          [modalTitle]="'Inativar CRD'" 
-                          [message]="'Tem certeza que deseja inativar o CRD ' + crd.name + '?'"
+                          [modalTitle]="'Inativar Setor'" 
+                          [message]="'Tem certeza que deseja inativar o setor \'' + item.name + '\'?'"
                           [okButtonLabel]="'Confirmar'"
-                          [tooltip]="'Inativar CRD'"
-                          (confirm)="deactivate(crd.id)">
+                          [tooltip]="'Inativar'"
+                          (confirm)="deactivate(item.id)">
                           <span modal-button><i class="fas fa-ban"></i></span>
                         </app-confirm-modal>
-
+                        
                         <!-- Excluir -->
                         <app-confirm-modal 
                           [btnClass]="'btn btn-danger shadow-sm btn-action'" 
-                          [modalTitle]="'Excluir CRD'" 
-                          [message]="'Ação irreversível! Deseja realmente excluir o CRD ' + crd.name + '?'"
+                          [modalTitle]="'Excluir Setor'" 
+                          [message]="'Ação irreversível! Deseja realmente excluir o setor \'' + item.name + '\'?'"
                           [okButtonLabel]="'Excluir'"
-                          [tooltip]="'Excluir CRD'"
-                          (confirm)="deleteCrd(crd.id)">
+                          [tooltip]="'Excluir'"
+                          (confirm)="deleteItem(item.id)">
                           <span modal-button><i class="fas fa-trash"></i></span>
                         </app-confirm-modal>
                       </div>
                     </td>
                   </tr>
-                  <tr *ngIf="crds.length === 0">
-                    <td colspan="5" class="text-center py-5 text-muted">
-                      Nenhum CRD encontrado.
+                  <tr *ngIf="sectors.length === 0">
+                    <td colspan="4" class="text-center py-5 text-muted">
+                      Nenhum setor encontrado.
                     </td>
                   </tr>
                 </tbody>

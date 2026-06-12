@@ -90,12 +90,26 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/customers/activate/{id}', [\App\Http\Controllers\Api\CustomerApiController::class, 'activateItem']);
     Route::put('/customers/deactivate/{id}', [\App\Http\Controllers\Api\CustomerApiController::class, 'deactivateItem']);
 
-    // Customer Metadata CRUD
-    Route::get('customer-metadata', [\App\Http\Controllers\Api\CustomerMetadataApiController::class, 'index']);
-    Route::post('customer-metadata', [\App\Http\Controllers\Api\CustomerMetadataApiController::class, 'store']);
-    Route::delete('customer-metadata/{id}', [\App\Http\Controllers\Api\CustomerMetadataApiController::class, 'destroy']);
-    Route::put('customer-metadata/activate/{id}', [\App\Http\Controllers\Api\CustomerMetadataApiController::class, 'activateItem']);
-    Route::put('customer-metadata/deactivate/{id}', [\App\Http\Controllers\Api\CustomerMetadataApiController::class, 'deactivateItem']);
+    // Customer Requesters CRUD
+    Route::get('customer-requesters', [\App\Http\Controllers\Api\CustomerRequesterApiController::class, 'index']);
+    Route::post('customer-requesters', [\App\Http\Controllers\Api\CustomerRequesterApiController::class, 'store']);
+    Route::delete('customer-requesters/{id}', [\App\Http\Controllers\Api\CustomerRequesterApiController::class, 'destroy']);
+    Route::put('customer-requesters/activate/{id}', [\App\Http\Controllers\Api\CustomerRequesterApiController::class, 'activateItem']);
+    Route::put('customer-requesters/deactivate/{id}', [\App\Http\Controllers\Api\CustomerRequesterApiController::class, 'deactivateItem']);
+
+    // Customer Sectors CRUD
+    Route::get('customer-sectors', [\App\Http\Controllers\Api\CustomerSectorApiController::class, 'index']);
+    Route::post('customer-sectors', [\App\Http\Controllers\Api\CustomerSectorApiController::class, 'store']);
+    Route::delete('customer-sectors/{id}', [\App\Http\Controllers\Api\CustomerSectorApiController::class, 'destroy']);
+    Route::put('customer-sectors/activate/{id}', [\App\Http\Controllers\Api\CustomerSectorApiController::class, 'activateItem']);
+    Route::put('customer-sectors/deactivate/{id}', [\App\Http\Controllers\Api\CustomerSectorApiController::class, 'deactivateItem']);
+
+    // Customer Cost Centers CRUD
+    Route::get('customer-cost-centers', [\App\Http\Controllers\Api\CustomerCostCenterApiController::class, 'index']);
+    Route::post('customer-cost-centers', [\App\Http\Controllers\Api\CustomerCostCenterApiController::class, 'store']);
+    Route::delete('customer-cost-centers/{id}', [\App\Http\Controllers\Api\CustomerCostCenterApiController::class, 'destroy']);
+    Route::put('customer-cost-centers/activate/{id}', [\App\Http\Controllers\Api\CustomerCostCenterApiController::class, 'activateItem']);
+    Route::put('customer-cost-centers/deactivate/{id}', [\App\Http\Controllers\Api\CustomerCostCenterApiController::class, 'deactivateItem']);
 
     // CRDs
     Route::get('/crds', [\App\Http\Controllers\Api\CrdApiController::class, 'index']);

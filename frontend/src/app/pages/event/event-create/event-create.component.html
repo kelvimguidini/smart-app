@@ -165,26 +165,7 @@
 
                 <!-- Coluna 2 -->
                 <div class="col-lg-4">
-                  <div class="form-group mb-3">
-                    <label for="requester" class="form-label font-weight-bold">
-                      Solicitante:
-                      <span class="text-danger">*</span>
-                    </label>
-                    <select
-                      id="requester"
-                      class="form-select"
-                      [class.is-invalid]="errors.requester"
-                      [(ngModel)]="basicForm.requester"
-                      name="requester"
-                      required>
-                      <option value="">.:: Selecione ::.</option>
-                      <option *ngFor="let option of requestersFiltered" [value]="option.value">{{ option.value }}</option>
-                    </select>
-                    <div *ngIf="errors.requester" class="text-danger mt-1">
-                      <small *ngFor="let err of errors.requester" class="d-block">{{ err }}</small>
-                    </div>
-                  </div>
-
+                  <!-- Empresa / Cliente -->
                   <div class="form-group mb-3">
                     <label for="customer" class="form-label font-weight-bold">
                       Empresa / Cliente:
@@ -206,6 +187,29 @@
                     </div>
                   </div>
 
+                  <!-- Solicitante -->
+                  <div class="form-group mb-3">
+                    <label for="requester" class="form-label font-weight-bold">
+                      Solicitante:
+                      <span class="text-danger">*</span>
+                    </label>
+                    <select
+                      id="requester"
+                      class="form-select"
+                      [class.is-invalid]="errors.requester"
+                      [(ngModel)]="basicForm.requester"
+                      (mousedown)="checkCustomerSelected($event)"
+                      name="requester"
+                      required>
+                      <option value="">.:: Selecione ::.</option>
+                      <option *ngFor="let option of requestersFiltered" [value]="option.name">{{ option.name }}</option>
+                    </select>
+                    <div *ngIf="errors.requester" class="text-danger mt-1">
+                      <small *ngFor="let err of errors.requester" class="d-block">{{ err }}</small>
+                    </div>
+                  </div>
+
+                  <!-- Setor -->
                   <div class="form-group mb-3">
                     <label for="sector" class="form-label font-weight-bold">
                       Setor:
@@ -216,16 +220,40 @@
                       class="form-select"
                       [class.is-invalid]="errors.sector"
                       [(ngModel)]="basicForm.sector"
+                      (mousedown)="checkCustomerSelected($event)"
                       name="sector"
                       required>
                       <option value="">.:: Selecione ::.</option>
-                      <option *ngFor="let option of sectorsFiltered" [value]="option.value">{{ option.value }}</option>
+                      <option *ngFor="let option of sectorsFiltered" [value]="option.name">{{ option.name }}</option>
                     </select>
                     <div *ngIf="errors.sector" class="text-danger mt-1">
                       <small *ngFor="let err of errors.sector" class="d-block">{{ err }}</small>
                     </div>
                   </div>
 
+                  <!-- Centro de Custo -->
+                  <div class="form-group mb-3">
+                    <label for="cc" class="form-label font-weight-bold">
+                      Centro de Custo:
+                      <span class="text-danger">*</span>
+                    </label>
+                    <select
+                      id="cc"
+                      class="form-select"
+                      [class.is-invalid]="errors.cc"
+                      [(ngModel)]="basicForm.cc"
+                      (mousedown)="checkCustomerSelected($event)"
+                      name="cc"
+                      required>
+                      <option value="">.:: Selecione ::.</option>
+                      <option *ngFor="let option of costCentersFiltered" [value]="option.name">{{ option.name }}</option>
+                    </select>
+                    <div *ngIf="errors.cc" class="text-danger mt-1">
+                      <small *ngFor="let err of errors.cc" class="d-block">{{ err }}</small>
+                    </div>
+                  </div>
+
+                  <!-- Base de Pax -->
                   <div class="form-group mb-3">
                     <label for="paxBase" class="form-label font-weight-bold">
                       Base de Pax:
@@ -241,26 +269,6 @@
                       required />
                     <div *ngIf="errors.paxBase" class="text-danger mt-1">
                       <small *ngFor="let err of errors.paxBase" class="d-block">{{ err }}</small>
-                    </div>
-                  </div>
-
-                  <div class="form-group mb-3">
-                    <label for="cc" class="form-label font-weight-bold">
-                      Centro de Custo:
-                      <span class="text-danger">*</span>
-                    </label>
-                    <select
-                      id="cc"
-                      class="form-select"
-                      [class.is-invalid]="errors.cc"
-                      [(ngModel)]="basicForm.cc"
-                      name="cc"
-                      required>
-                      <option value="">.:: Selecione ::.</option>
-                      <option *ngFor="let option of costCentersFiltered" [value]="option.value">{{ option.value }}</option>
-                    </select>
-                    <div *ngIf="errors.cc" class="text-danger mt-1">
-                      <small *ngFor="let err of errors.cc" class="d-block">{{ err }}</small>
                     </div>
                   </div>
                 </div>
@@ -297,7 +305,7 @@
                       CRD:
                       <span class="text-danger">*</span>
                     </label>
-                    <select id="crd_id" class="form-select" [class.is-invalid]="errors.crd_id" [(ngModel)]="basicForm.crd_id" name="crd_id" required>
+                    <select id="crd_id" class="form-select" [class.is-invalid]="errors.crd_id" [(ngModel)]="basicForm.crd_id" (mousedown)="checkCustomerSelected($event)" name="crd_id" required>
                       <option value="">.:: Selecione ::.</option>
                       <option *ngFor="let option of crdsFiltered" [ngValue]="option.id">{{ option.name }} - {{ option.number }}</option>
                     </select>

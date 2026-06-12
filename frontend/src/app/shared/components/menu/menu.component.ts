@@ -163,7 +163,9 @@ export class MenuComponent implements OnInit {
       subMenu: [
         { link: '/currency', name: 'Moeda', role: 'currency_admin' },
         { link: '/customer', name: 'Clientes', role: 'customer_admin' },
-        { link: '/customer-metadata', name: 'Metadados Cliente', role: 'customer_metadata_admin' },
+        { link: '/customer-requester', name: 'Solicitantes', role: 'customer_requester_admin' },
+        { link: '/customer-sector', name: 'Setores', role: 'customer_sector_admin' },
+        { link: '/customer-cost-center', name: 'Centros de Custo', role: 'customer_cost_center_admin' },
         { link: '/crd', name: 'CRD\'s', role: 'crd_admin' },
         { link: '/city', name: 'Cidade', role: 'city_admin' },
       ]
@@ -217,7 +219,7 @@ export class MenuComponent implements OnInit {
       '/local', '/service-hall', '/purpose-hall', '/measure',
       '/frequency', '/service-add', '/provider-service', '/brand',
       '/car-model', '/vehicle', '/transport-service', '/broker-trans', '/provider-transport',
-      '/event', '/event-list', '/currency', '/customer', '/customer-metadata', '/crd', '/city'
+      '/event', '/event-list', '/currency', '/customer', '/customer-requester', '/customer-sector', '/customer-cost-center', '/crd', '/city'
     ];
     return angularRoutes.includes(link);
   }

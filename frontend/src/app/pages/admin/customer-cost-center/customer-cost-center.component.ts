@@ -1,7 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CustomerMetadataService, CustomerMetadata } from '../../../services/customer-metadata.service';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { CustomerCostCenterService, CustomerCostCenter } from '../../../services/customer-cost-center.service';
 import { CustomerService, Customer } from '../../../services/customer.service';
 import { AuthenticatedLayoutComponent } from '../../../shared/layouts/authenticated-layout/authenticated-layout.component';
 import { DatatableComponent } from '../../../shared/components/datatable/datatable.component';
@@ -10,18 +11,18 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 
 @Component({
-  selector: 'app-customer-metadata',
+  selector: 'app-customer-cost-center',
   standalone: true,
-  imports: [CommonModule, FormsModule, AuthenticatedLayoutComponent, DatatableComponent, ConfirmModalComponent, ModalComponent],
-  templateUrl: './customer-metadata.component.html',
-  styleUrls: ['./customer-metadata.component.scss'],
+  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive, AuthenticatedLayoutComponent, DatatableComponent, ConfirmModalComponent, ModalComponent],
+  templateUrl: './customer-cost-center.component.html',
+  styleUrls: ['./customer-cost-center.component.scss'],
 })
-export class CustomerMetadataComponent implements OnInit {
-  private readonly metadataService = inject(CustomerMetadataService);
+export class CustomerCostCenterComponent implements OnInit {
+  private readonly costCenterService = inject(CustomerCostCenterService);
   private readonly customerService = inject(CustomerService);
   private readonly toastr = inject(ToastService);
 
-  metadataList: CustomerMetadata[] = [];
+  costCenters: CustomerCostCenter[] = [];
   customers: Customer[] = [];
 
   // Pagination and Filtering
@@ -30,19 +31,18 @@ export class CustomerMetadataComponent implements OnInit {
   totalItems = 0;
   perPage = 10;
   searchTerm = '';
-  sortColumn = 'value';
+  sortColumn = 'name';
   sortDirection = 'asc';
 
-  // Filters
-  filterCustomer = '';
-  filterType = '';
-
   // Form State
-  form = {
+  form: {
+    id: number;
+    name: string;
+    customer_id: number;
+  } = {
     id: 0,
+    name: '',
     customer_id: 0,
-    type: 'requester' as 'requester' | 'sector' | 'cost_center',
-    value: '',
   };
 
   inEdition = 0;
@@ -51,18 +51,12 @@ export class CustomerMetadataComponent implements OnInit {
   showModal = false;
   errors: any = {};
 
-  typeLabels: { [key: string]: string } = {
-    requester: 'Solicitante',
-    sector: 'Setor',
-    cost_center: 'Centro de Custo',
-  };
-
   ngOnInit(): void {
-    this.loadMetadata();
+    this.loadCostCenters();
     this.loadCustomers();
   }
 
-  loadMetadata(): void {
+  loadCostCenters(): void {
     this.isLoader = true;
     const params = {
       page: this.currentPage,
@@ -70,20 +64,18 @@ export class CustomerMetadataComponent implements OnInit {
       search: this.searchTerm,
       sort_column: this.sortColumn,
       sort_direction: this.sortDirection,
-      customer_id: this.filterCustomer,
-      type: this.filterType,
     };
 
-    this.metadataService.getMetadataList(params).subscribe({
+    this.costCenterService.getCostCenters(params).subscribe({
       next: (response) => {
-        this.metadataList = response.data;
+        this.costCenters = response.data;
         this.currentPage = response.current_page;
         this.lastPage = response.last_page;
         this.totalItems = response.total;
         this.isLoader = false;
       },
       error: (err: any) => {
-        this.toastr.error('Erro ao carregar metadados');
+        this.toastr.error('Erro ao carregar centros de custo');
         this.isLoader = false;
         console.error(err);
       },
@@ -99,27 +91,22 @@ export class CustomerMetadataComponent implements OnInit {
     });
   }
 
-  onFilterChange(): void {
-    this.currentPage = 1;
-    this.loadMetadata();
-  }
-
   // Datatable Events
   onPageChange(page: number): void {
     this.currentPage = page;
-    this.loadMetadata();
+    this.loadCostCenters();
   }
 
   onSearch(term: string): void {
     this.searchTerm = term;
     this.currentPage = 1;
-    this.loadMetadata();
+    this.loadCostCenters();
   }
 
   onSort(event: { column: string; direction: string }): void {
     this.sortColumn = event.column;
     this.sortDirection = event.direction;
-    this.loadMetadata();
+    this.loadCostCenters();
   }
 
   // Form Actions
@@ -137,21 +124,19 @@ export class CustomerMetadataComponent implements OnInit {
     this.inEdition = 0;
     this.form = {
       id: 0,
-      customer_id: this.customers[0]?.id || 0,
-      type: 'requester',
-      value: '',
+      name: '',
+      customer_id: 0,
     };
     this.processing = false;
     this.errors = {};
   }
 
-  edit(meta: CustomerMetadata): void {
-    this.inEdition = meta.id;
+  edit(item: CustomerCostCenter): void {
+    this.inEdition = item.id;
     this.form = {
-      id: meta.id,
-      customer_id: meta.customer_id,
-      type: meta.type,
-      value: meta.value,
+      id: item.id,
+      name: item.name,
+      customer_id: item.customer_id,
     };
     this.errors = {};
     this.showModal = true;
@@ -160,16 +145,12 @@ export class CustomerMetadataComponent implements OnInit {
   private validateForm(): boolean {
     this.errors = {};
 
-    if (!this.form.value || this.form.value.trim() === '') {
-      this.errors.value = ['O valor é obrigatório'];
+    if (!this.form.name || this.form.name.trim() === '') {
+      this.errors.name = ['O centro de custo é obrigatório'];
     }
 
     if (!this.form.customer_id || this.form.customer_id <= 0) {
       this.errors.customer_id = ['O cliente é obrigatório'];
-    }
-
-    if (!this.form.type) {
-      this.errors.type = ['O tipo é obrigatório'];
     }
 
     return Object.keys(this.errors).length === 0;
@@ -182,37 +163,33 @@ export class CustomerMetadataComponent implements OnInit {
 
     this.processing = true;
 
-    this.metadataService.saveMetadata(this.form).subscribe({
+    this.costCenterService.saveCostCenter(this.form).subscribe({
       next: (res) => {
-        this.toastr.success(res.message || 'Registro salvo com sucesso');
+        this.toastr.success(res.message || 'Centro de custo salvo com sucesso');
         this.closeModal();
-        this.loadMetadata();
+        this.loadCostCenters();
       },
       error: (err: any) => {
         this.processing = false;
         if (err.status === 422) {
           this.errors = err.error.errors || {};
-          if (err.error.message) {
-            this.toastr.error(err.error.message);
-          }
         } else {
-          this.toastr.error('Erro ao salvar registro');
+          this.toastr.error('Erro ao salvar centro de custo');
         }
         console.error(err);
       },
     });
   }
 
-  // Activation Actions
   activate(id: number): void {
     this.processing = true;
-    this.metadataService.activateMetadata(id).subscribe({
+    this.costCenterService.activateCostCenter(id).subscribe({
       next: () => {
-        this.toastr.success('Registro ativado com sucesso');
-        this.loadMetadata();
+        this.toastr.success('Centro de custo ativado com sucesso');
+        this.loadCostCenters();
       },
       error: (err: any) => {
-        this.toastr.error('Erro ao ativar registro');
+        this.toastr.error('Erro ao ativar centro de custo');
         this.processing = false;
       },
     });
@@ -220,27 +197,27 @@ export class CustomerMetadataComponent implements OnInit {
 
   deactivate(id: number): void {
     this.processing = true;
-    this.metadataService.deactivateMetadata(id).subscribe({
+    this.costCenterService.deactivateCostCenter(id).subscribe({
       next: () => {
-        this.toastr.success('Registro inativado com sucesso');
-        this.loadMetadata();
+        this.toastr.success('Centro de custo inativado com sucesso');
+        this.loadCostCenters();
       },
       error: (err: any) => {
-        this.toastr.error('Erro ao inativar registro');
+        this.toastr.error('Erro ao inativar centro de custo');
         this.processing = false;
       },
     });
   }
 
-  deleteMetadata(id: number): void {
+  deleteItem(id: number): void {
     this.processing = true;
-    this.metadataService.deleteMetadata(id).subscribe({
+    this.costCenterService.deleteCostCenter(id).subscribe({
       next: () => {
-        this.toastr.success('Registro apagado com sucesso');
-        this.loadMetadata();
+        this.toastr.success('Centro de custo apagado com sucesso');
+        this.loadCostCenters();
       },
       error: (err: any) => {
-        this.toastr.error('Erro ao apagar registro');
+        this.toastr.error('Erro ao apagar centro de custo');
         this.processing = false;
       },
     });

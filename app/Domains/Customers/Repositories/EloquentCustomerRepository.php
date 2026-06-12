@@ -86,36 +86,87 @@ class EloquentCustomerRepository implements CustomerRepositoryInterface
         return CRD::withoutGlobalScope('active')->findOrFail($id)->deactivate();
     }
 
-    public function allMetadataWithCustomer(): Collection
+    public function allRequestersWithInactive(): Collection
     {
-        return \App\Models\CustomerMetadata::with('customer')->get();
+        return \App\Models\CustomerRequester::with('customer')->withoutGlobalScope('active')->get();
     }
 
-    public function allMetadataWithInactive(): Collection
+    public function saveRequester(array $data, ?int $id = null): \App\Models\CustomerRequester
     {
-        return \App\Models\CustomerMetadata::with('customer')->withoutGlobalScope('active')->get();
-    }
-
-    public function saveMetadata(array $data, ?int $id = null): \App\Models\CustomerMetadata
-    {
-        $item = $id ? \App\Models\CustomerMetadata::withoutGlobalScope('active')->findOrFail($id) : new \App\Models\CustomerMetadata();
+        $item = $id ? \App\Models\CustomerRequester::withoutGlobalScope('active')->findOrFail($id) : new \App\Models\CustomerRequester();
         $item->fill($data);
         $item->save();
         return $item;
     }
 
-    public function deleteMetadata(int $id): bool
+    public function deleteRequester(int $id): bool
     {
-        return \App\Models\CustomerMetadata::withoutGlobalScope('active')->findOrFail($id)->delete();
+        return \App\Models\CustomerRequester::withoutGlobalScope('active')->findOrFail($id)->delete();
     }
 
-    public function activateMetadata(int $id): bool
+    public function activateRequester(int $id): bool
     {
-        return \App\Models\CustomerMetadata::withoutGlobalScope('active')->findOrFail($id)->activate();
+        return \App\Models\CustomerRequester::withoutGlobalScope('active')->findOrFail($id)->activate();
     }
 
-    public function deactivateMetadata(int $id): bool
+    public function deactivateRequester(int $id): bool
     {
-        return \App\Models\CustomerMetadata::withoutGlobalScope('active')->findOrFail($id)->deactivate();
+        return \App\Models\CustomerRequester::withoutGlobalScope('active')->findOrFail($id)->deactivate();
+    }
+
+    public function allSectorsWithInactive(): Collection
+    {
+        return \App\Models\CustomerSector::with('customer')->withoutGlobalScope('active')->get();
+    }
+
+    public function saveSector(array $data, ?int $id = null): \App\Models\CustomerSector
+    {
+        $item = $id ? \App\Models\CustomerSector::withoutGlobalScope('active')->findOrFail($id) : new \App\Models\CustomerSector();
+        $item->fill($data);
+        $item->save();
+        return $item;
+    }
+
+    public function deleteSector(int $id): bool
+    {
+        return \App\Models\CustomerSector::withoutGlobalScope('active')->findOrFail($id)->delete();
+    }
+
+    public function activateSector(int $id): bool
+    {
+        return \App\Models\CustomerSector::withoutGlobalScope('active')->findOrFail($id)->activate();
+    }
+
+    public function deactivateSector(int $id): bool
+    {
+        return \App\Models\CustomerSector::withoutGlobalScope('active')->findOrFail($id)->deactivate();
+    }
+
+    public function allCostCentersWithInactive(): Collection
+    {
+        return \App\Models\CustomerCostCenter::with('customer')->withoutGlobalScope('active')->get();
+    }
+
+    public function saveCostCenter(array $data, ?int $id = null): \App\Models\CustomerCostCenter
+    {
+        $item = $id ? \App\Models\CustomerCostCenter::withoutGlobalScope('active')->findOrFail($id) : new \App\Models\CustomerCostCenter();
+        $item->fill($data);
+        $item->save();
+        return $item;
+    }
+
+    public function deleteCostCenter(int $id): bool
+    {
+        return \App\Models\CustomerCostCenter::withoutGlobalScope('active')->findOrFail($id)->delete();
+    }
+
+    public function activateCostCenter(int $id): bool
+    {
+        return \App\Models\CustomerCostCenter::withoutGlobalScope('active')->findOrFail($id)->activate();
+    }
+
+    public function deactivateCostCenter(int $id): bool
+    {
+        return \App\Models\CustomerCostCenter::withoutGlobalScope('active')->findOrFail($id)->deactivate();
     }
 }
