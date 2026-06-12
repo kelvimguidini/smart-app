@@ -47,6 +47,8 @@ class CityApiController extends Controller
 
         $perPage = $request->get('per_page', 10);
         $search = $request->get('search', '');
+        $sortColumn = $request->get('sort_column', 'name');
+        $sortDirection = $request->get('sort_direction', 'asc');
 
         $query = City::withoutGlobalScope('active');
 
@@ -54,6 +56,14 @@ class CityApiController extends Controller
             $query->where('name', 'like', '%' . $search . '%')
                   ->orWhere('states', 'like', '%' . $search . '%')
                   ->orWhere('country', 'like', '%' . $search . '%');
+        }
+
+        // Apply sorting safely
+        $allowedColumns = ['id', 'name', 'states', 'country'];
+        if (in_array($sortColumn, $allowedColumns)) {
+            $query->orderBy($sortColumn, $sortDirection === 'desc' ? 'desc' : 'asc');
+        } else {
+            $query->orderBy('name', 'asc');
         }
 
         $cities = $query->paginate($perPage);

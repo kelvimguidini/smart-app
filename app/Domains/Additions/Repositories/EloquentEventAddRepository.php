@@ -26,12 +26,32 @@ class EloquentEventAddRepository implements EventAddRepositoryInterface
 
     public function findWithDetails(int $id): ?EventAdd
     {
-        return EventAdd::with(['add', 'currency', 'eventAddOpts'])->find($id);
+        return EventAdd::with([
+            'eventAddOpts' => function ($q) {
+                $q->orderBy('order', 'asc')->orderBy('in');
+            },
+            'eventAddOpts.service',
+            'eventAddOpts.measure',
+            'eventAddOpts.frequency',
+            'add.city',
+            'currency',
+            'event'
+        ])->find($id);
     }
 
     public function getByEvent(int $eventId): Collection
     {
-        return EventAdd::where('event_id', $eventId)->with('add')->get();
+        return EventAdd::with([
+            'eventAddOpts' => function ($q) {
+                $q->orderBy('order', 'asc')->orderBy('in');
+            },
+            'eventAddOpts.service',
+            'eventAddOpts.measure',
+            'eventAddOpts.frequency',
+            'add.city',
+            'currency',
+            'event'
+        ])->where('event_id', '=', $eventId)->get();
     }
 
     public function getIdsByEvent(int $eventId): array

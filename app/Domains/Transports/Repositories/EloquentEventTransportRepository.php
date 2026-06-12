@@ -26,7 +26,19 @@ class EloquentEventTransportRepository implements EventTransportRepositoryInterf
 
     public function getByEvent(int $eventId): Collection
     {
-        return EventTransport::where('event_id', $eventId)->with('transport')->get();
+        return EventTransport::with([
+            'eventTransportOpts' => function ($q) {
+                $q->orderBy('order', 'asc')->orderBy('in');
+            },
+            'eventTransportOpts.broker',
+            'eventTransportOpts.vehicle',
+            'eventTransportOpts.car_model',
+            'eventTransportOpts.brand',
+            'eventTransportOpts.service',
+            'transport.city',
+            'currency',
+            'event'
+        ])->where('event_id', '=', $eventId)->get();
     }
 
     public function find(int $id): ?EventTransport
@@ -36,7 +48,19 @@ class EloquentEventTransportRepository implements EventTransportRepositoryInterf
 
     public function findWithDetails(int $id): ?EventTransport
     {
-        return EventTransport::with(['transport', 'currency', 'eventTransportOpts'])->find($id);
+        return EventTransport::with([
+            'eventTransportOpts' => function ($q) {
+                $q->orderBy('order', 'asc')->orderBy('in');
+            },
+            'eventTransportOpts.broker',
+            'eventTransportOpts.vehicle',
+            'eventTransportOpts.car_model',
+            'eventTransportOpts.brand',
+            'eventTransportOpts.service',
+            'transport.city',
+            'currency',
+            'event'
+        ])->find($id);
     }
 
     public function saveEventTransport(array $data, ?int $id = null): EventTransport

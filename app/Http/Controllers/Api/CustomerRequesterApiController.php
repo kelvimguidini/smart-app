@@ -25,11 +25,21 @@ class CustomerRequesterApiController extends Controller
 
         $perPage = $request->get('per_page', 10);
         $search = $request->get('search', '');
+        $sortColumn = $request->get('sort_column', 'name');
+        $sortDirection = $request->get('sort_direction', 'asc');
 
         $query = CustomerRequester::with('customer')->withoutGlobalScope('active');
 
         if (!empty($search)) {
             $query->where('name', 'like', '%' . $search . '%');
+        }
+
+        // Apply sorting safely
+        $allowedColumns = ['id', 'name'];
+        if (in_array($sortColumn, $allowedColumns)) {
+            $query->orderBy($sortColumn, $sortDirection === 'desc' ? 'desc' : 'asc');
+        } else {
+            $query->orderBy('name', 'asc');
         }
 
         $items = $query->paginate($perPage);

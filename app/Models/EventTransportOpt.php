@@ -26,6 +26,7 @@ class EventTransportOpt extends Model
         'order',
     ];
     protected $table = 'event_transport_opt';
+    protected $appends = ['car_model_id'];
 
     /**
      * The primary key associated with the table.
@@ -110,6 +111,16 @@ class EventTransportOpt extends Model
     public function model()
     {
         return $this->hasOne(CarModel::class, 'id', 'model_id');
+    }
+
+    public function car_model()
+    {
+        return $this->hasOne(CarModel::class, 'id', 'model_id');
+    }
+
+    public function getCarModelIdAttribute()
+    {
+        return $this->model_id;
     }
 
     public function service()
