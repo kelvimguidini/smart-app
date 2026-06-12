@@ -17,6 +17,11 @@ class City extends Model
     protected $fillable = ['name', 'states', 'country', 'active'];
     protected $table = 'city';
 
+    public function uniqueNameColumns(): array
+    {
+        return ['states', 'country'];
+    }
+
     /**
      * The primary key associated with the table.
      *

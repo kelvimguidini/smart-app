@@ -91,6 +91,8 @@ class CityApiController extends Controller
                 $city = $this->lookupRepository->saveCity($data);
                 return response()->json(['message' => 'Registro salvo com sucesso', 'data' => $city]);
             }
+        } catch (\App\Exceptions\UniqueNameException $e) {
+            return response()->json(['message' => 'Já existe uma cidade cadastrada com este nome para o mesmo estado e país!'], 422);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao salvar o registro', 'error' => $e->getMessage()], 500);
         }

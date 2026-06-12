@@ -20,6 +20,17 @@ trait UniqueNameTrait
                 ->where('name', $name)
                 ->where('id', '!=', $id);
 
+            if (method_exists($model, 'uniqueNameColumns')) {
+                foreach ($model->uniqueNameColumns() as $column) {
+                    $val = $model->getAttribute($column);
+                    if (is_null($val)) {
+                        $query->whereNull($column);
+                    } else {
+                        $query->where($column, $val);
+                    }
+                }
+            }
+
             // Se o model utilizar SoftDeletes, desconsidera registros excluídos logicamente do teste de unicidade
             if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses_recursive(static::class))) {
                 $query->whereNull($model->getDeletedAtColumn());
