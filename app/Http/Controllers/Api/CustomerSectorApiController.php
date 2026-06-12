@@ -61,6 +61,8 @@ class CustomerSectorApiController extends Controller
                 $item = $this->customerRepository->saveSector($data);
                 return response()->json(['message' => 'Registro salvo com sucesso', 'data' => $item]);
             }
+        } catch (\App\Exceptions\UniqueNameException $e) {
+            return response()->json(['message' => 'Já existe um setor cadastrado com este nome para esta empresa!'], 422);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao salvar o registro', 'error' => $e->getMessage()], 500);
         }

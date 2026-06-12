@@ -61,6 +61,8 @@ class CustomerRequesterApiController extends Controller
                 $item = $this->customerRepository->saveRequester($data);
                 return response()->json(['message' => 'Registro salvo com sucesso', 'data' => $item]);
             }
+        } catch (\App\Exceptions\UniqueNameException $e) {
+            return response()->json(['message' => 'Já existe um solicitante cadastrado com este nome para esta empresa!'], 422);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao salvar o registro', 'error' => $e->getMessage()], 500);
         }

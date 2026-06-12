@@ -155,7 +155,20 @@
             <tr *ngFor="let item of history">
               <td>{{ item.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
               <td>
-                <span class="badge bg-secondary">{{ getStatusLabel(item.status) }}</span>
+                <span
+                  class="badge"
+                  [ngClass]="{
+                    'bg-primary': item.status === 'dating_with_customer',
+                    'bg-success': item.status === 'Approved' || item.status === 'approved_by_manager',
+                    'bg-danger': item.status === 'Cancelled',
+                    'bg-warning text-dark':
+                      item.status === 'requested' || item.status === 'provider_requested' || item.status === 'change_request',
+                    'bg-info text-white': item.status === 'provider_responsed' || item.status === 'sent_to_customer',
+                    'bg-secondary':
+                      ['created', 'briefing', 'sent_maneger', 'add_information', 'added_information'].includes(item.status) || !item.status,
+                  }">
+                  {{ getStatusLabel(item.status) }}
+                </span>
               </td>
               <td>{{ item.user?.name || '-' }}</td>
               <td class="text-break">{{ item.observation || '-' }}</td>

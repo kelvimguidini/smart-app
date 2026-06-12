@@ -20,4 +20,9 @@ class CustomerCostCenter extends Model
     {
         return $this->belongsTo(Customer::class, 'customer_id', 'id');
     }
+
+    public function uniqueNameColumns(): array
+    {
+        return ['customer_id'];
+    }
 }

@@ -74,6 +74,8 @@ class CrdApiController extends Controller
                 $crd = $this->customerRepository->saveCrd($data);
                 return response()->json(['message' => 'Registro salvo com sucesso', 'data' => $crd]);
             }
+        } catch (\App\Exceptions\UniqueNameException $e) {
+            return response()->json(['message' => 'Já existe um CRD cadastrado com este nome para esta empresa!'], 422);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao salvar o registro', 'error' => $e->getMessage()], 500);
         }

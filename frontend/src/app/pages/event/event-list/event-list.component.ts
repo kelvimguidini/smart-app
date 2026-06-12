@@ -285,6 +285,15 @@ export class EventListComponent implements OnInit, AfterViewInit {
           from: res.from,
           to: res.to,
         };
+        if (this.expandedEventId !== null) {
+          const expandedEvent = this.events.find(e => e.id === this.expandedEventId);
+          if (expandedEvent) {
+            this.expandedProviders = this.getProvidersByEvent(expandedEvent);
+          } else {
+            this.expandedEventId = null;
+            this.expandedProviders = [];
+          }
+        }
         this.isLoader = false;
       },
       error: (err) => {

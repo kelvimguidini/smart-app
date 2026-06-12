@@ -61,6 +61,8 @@ class CustomerCostCenterApiController extends Controller
                 $item = $this->customerRepository->saveCostCenter($data);
                 return response()->json(['message' => 'Registro salvo com sucesso', 'data' => $item]);
             }
+        } catch (\App\Exceptions\UniqueNameException $e) {
+            return response()->json(['message' => 'Já existe um centro de custo cadastrado com este nome para esta empresa!'], 422);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Erro ao salvar o registro', 'error' => $e->getMessage()], 500);
         }
