@@ -207,6 +207,7 @@ class EventApiController extends Controller
             'servicesType' => $this->lookupRepository->getAllServiceTypes(),
             'locals' => $this->lookupRepository->getAllLocals(),
             'allStatus' => MiddlewareConstants::STATUS,
+            'customerMetadata' => \App\Models\CustomerMetadata::active()->get(),
             'eventHotels' => $eventHotels,
             'eventABs' => $eventABs,
             'eventHalls' => $eventHalls,

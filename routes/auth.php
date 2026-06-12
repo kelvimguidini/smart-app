@@ -229,7 +229,8 @@ Route::middleware(['auth', 'cors'])->group(function () {
         'transport-service',
         'broker-trans',
         'provider-transport',
-        'currency'
+        'currency',
+        'customer-metadata'
     ];
 
     foreach ($angularRoutes as $route) {

@@ -51,7 +51,11 @@ class StatusHistoryController extends Controller
         } catch (Exception $e) {
             throw $e;
         }
-        return redirect()->back()->with('flash', ['message' => 'Registro salvo com sucesso', 'type' => 'success']);
+
+        return response()->json([
+            'message' => 'Registro salvo com sucesso',
+            'type' => 'success'
+        ]);
     }
 
     public function sendMail(Request $request)
@@ -63,7 +67,11 @@ class StatusHistoryController extends Controller
         } catch (Exception $e) {
             throw $e;
         }
-        return redirect()->back()->with('flash', ['message' => 'Email enviado!', 'type' => 'success']);
+
+        return response()->json([
+            'message' => 'Email enviado!',
+            'type' => 'success'
+        ]);
     }
 
     private function notify(Request $request)
@@ -78,10 +86,10 @@ class StatusHistoryController extends Controller
                 'subject' => $sub,
                 'senderEmail' => $user->email ?? null,
             ];
-            
+
             $send = Mail::to(explode(";", $request->emailsLink));
             if ($request->copyMeLink == "true") $send->cc($user->email);
-            
+
             $send->send(new PdfEmail(null, '', $emailData, $sub));
 
             DB::table('email_log')->insert([

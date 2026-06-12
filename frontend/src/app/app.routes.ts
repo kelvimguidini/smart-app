@@ -27,6 +27,7 @@ import { CurrenciesComponent } from './pages/admin/currencies/currencies.compone
 import { CustomersComponent } from './pages/admin/customers/customers.component';
 import { CrdsComponent } from './pages/admin/crds/crds.component';
 import { CitiesComponent } from './pages/admin/cities/cities.component';
+import { CustomerMetadataComponent } from './pages/admin/customer-metadata/customer-metadata.component';
 import { BrandComponent } from './pages/transport/brand/brand.component';
 import { CarModelComponent } from './pages/transport/car-model/car-model.component';
 import { VehicleComponent } from './pages/transport/vehicle/vehicle.component';
@@ -76,6 +77,7 @@ export const routes: Routes = [
   { path: 'event/:id', component: EventCreateComponent, canActivate: [authGuard], title: 'Editar Evento - SmartApp' },
   { path: 'event/:id/:tab', component: EventCreateComponent, canActivate: [authGuard], title: 'Editar Evento - SmartApp' },
   { path: 'customer', component: CustomersComponent, canActivate: [authGuard], title: 'Clientes - SmartApp' },
+  { path: 'customer-metadata', component: CustomerMetadataComponent, canActivate: [authGuard], title: 'Metadados Cliente - SmartApp' },
   { path: 'crd', component: CrdsComponent, canActivate: [authGuard], title: 'CRDs - SmartApp' },
   { path: 'city', component: CitiesComponent, canActivate: [authGuard], title: 'Cidades - SmartApp' },
   { path: 'confirm-password', component: ConfirmPasswordComponent, canActivate: [authGuard], title: 'Confirmar Senha - SmartApp' },

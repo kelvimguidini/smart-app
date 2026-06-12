@@ -22,4 +22,10 @@ interface CustomerRepositoryInterface
     public function deleteCrd(int $id): bool;
     public function activateCrd(int $id): bool;
     public function deactivateCrd(int $id): bool;
+    public function allMetadataWithCustomer(): Collection;
+    public function allMetadataWithInactive(): Collection;
+    public function saveMetadata(array $data, ?int $id = null): \App\Models\CustomerMetadata;
+    public function deleteMetadata(int $id): bool;
+    public function activateMetadata(int $id): bool;
+    public function deactivateMetadata(int $id): bool;
 }

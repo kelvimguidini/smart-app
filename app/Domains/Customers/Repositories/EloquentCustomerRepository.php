@@ -85,4 +85,37 @@ class EloquentCustomerRepository implements CustomerRepositoryInterface
     {
         return CRD::withoutGlobalScope('active')->findOrFail($id)->deactivate();
     }
+
+    public function allMetadataWithCustomer(): Collection
+    {
+        return \App\Models\CustomerMetadata::with('customer')->get();
+    }
+
+    public function allMetadataWithInactive(): Collection
+    {
+        return \App\Models\CustomerMetadata::with('customer')->withoutGlobalScope('active')->get();
+    }
+
+    public function saveMetadata(array $data, ?int $id = null): \App\Models\CustomerMetadata
+    {
+        $item = $id ? \App\Models\CustomerMetadata::withoutGlobalScope('active')->findOrFail($id) : new \App\Models\CustomerMetadata();
+        $item->fill($data);
+        $item->save();
+        return $item;
+    }
+
+    public function deleteMetadata(int $id): bool
+    {
+        return \App\Models\CustomerMetadata::withoutGlobalScope('active')->findOrFail($id)->delete();
+    }
+
+    public function activateMetadata(int $id): bool
+    {
+        return \App\Models\CustomerMetadata::withoutGlobalScope('active')->findOrFail($id)->activate();
+    }
+
+    public function deactivateMetadata(int $id): bool
+    {
+        return \App\Models\CustomerMetadata::withoutGlobalScope('active')->findOrFail($id)->deactivate();
+    }
 }

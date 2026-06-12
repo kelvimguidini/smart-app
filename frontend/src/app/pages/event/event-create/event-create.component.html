@@ -170,14 +170,16 @@
                       Solicitante:
                       <span class="text-danger">*</span>
                     </label>
-                    <input
-                      type="text"
+                    <select
                       id="requester"
-                      class="form-control"
+                      class="form-select"
                       [class.is-invalid]="errors.requester"
                       [(ngModel)]="basicForm.requester"
                       name="requester"
-                      required />
+                      required>
+                      <option value="">.:: Selecione ::.</option>
+                      <option *ngFor="let option of requestersFiltered" [value]="option.value">{{ option.value }}</option>
+                    </select>
                     <div *ngIf="errors.requester" class="text-danger mt-1">
                       <small *ngFor="let err of errors.requester" class="d-block">{{ err }}</small>
                     </div>
@@ -209,14 +211,16 @@
                       Setor:
                       <span class="text-danger">*</span>
                     </label>
-                    <input
-                      type="text"
+                    <select
                       id="sector"
-                      class="form-control"
+                      class="form-select"
                       [class.is-invalid]="errors.sector"
                       [(ngModel)]="basicForm.sector"
                       name="sector"
-                      required />
+                      required>
+                      <option value="">.:: Selecione ::.</option>
+                      <option *ngFor="let option of sectorsFiltered" [value]="option.value">{{ option.value }}</option>
+                    </select>
                     <div *ngIf="errors.sector" class="text-danger mt-1">
                       <small *ngFor="let err of errors.sector" class="d-block">{{ err }}</small>
                     </div>
@@ -245,7 +249,16 @@
                       Centro de Custo:
                       <span class="text-danger">*</span>
                     </label>
-                    <input type="number" id="cc" class="form-control" [class.is-invalid]="errors.cc" [(ngModel)]="basicForm.cc" name="cc" required />
+                    <select
+                      id="cc"
+                      class="form-select"
+                      [class.is-invalid]="errors.cc"
+                      [(ngModel)]="basicForm.cc"
+                      name="cc"
+                      required>
+                      <option value="">.:: Selecione ::.</option>
+                      <option *ngFor="let option of costCentersFiltered" [value]="option.value">{{ option.value }}</option>
+                    </select>
                     <div *ngIf="errors.cc" class="text-danger mt-1">
                       <small *ngFor="let err of errors.cc" class="d-block">{{ err }}</small>
                     </div>

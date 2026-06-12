@@ -74,6 +74,10 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   frequencies: any[] = [];
   measures: any[] = [];
   allStatus: any = {};
+  customerMetadata: any[] = [];
+  requestersFiltered: any[] = [];
+  sectorsFiltered: any[] = [];
+  costCentersFiltered: any[] = [];
 
   // Form State - Tab 0: Básico
   basicForm = {
@@ -312,6 +316,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         this.frequencies = res.frequencies || [];
         this.measures = res.measures || [];
         this.allStatus = res.allStatus || {};
+        this.customerMetadata = res.customerMetadata || [];
 
         if (res.event) {
           this.event = res.event;
@@ -353,6 +358,9 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
           // Filter CRDs
           this.filterCrds(this.basicForm.customer);
 
+          // Filter Metadata
+          this.filterMetadata(this.basicForm.customer);
+
           // Provider lists
           this.eventHotels = res.eventHotels || [];
           this.eventABs = res.eventABs || [];
@@ -374,7 +382,27 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   // --- TAB 0: BÁSICO ---
   onCustomerChange(customerId: any) {
     this.basicForm.crd_id = '';
+    this.basicForm.requester = '';
+    this.basicForm.sector = '';
+    this.basicForm.cc = '';
     this.filterCrds(customerId);
+    this.filterMetadata(customerId);
+  }
+
+  filterMetadata(customerId: any) {
+    console.log('filterMetadata: filtering for customerId =', customerId);
+    if (customerId === null || customerId === undefined || customerId === '') {
+      this.requestersFiltered = [];
+      this.sectorsFiltered = [];
+      this.costCentersFiltered = [];
+      return;
+    }
+    const targetId = Number(customerId);
+    const clientMetadata = this.customerMetadata.filter(m => Number(m.customer_id) === targetId);
+
+    this.requestersFiltered = clientMetadata.filter(m => m.type === 'requester');
+    this.sectorsFiltered = clientMetadata.filter(m => m.type === 'sector');
+    this.costCentersFiltered = clientMetadata.filter(m => m.type === 'cost_center');
   }
 
   filterCrds(customerId: any) {

@@ -90,6 +90,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/customers/activate/{id}', [\App\Http\Controllers\Api\CustomerApiController::class, 'activateItem']);
     Route::put('/customers/deactivate/{id}', [\App\Http\Controllers\Api\CustomerApiController::class, 'deactivateItem']);
 
+    // Customer Metadata CRUD
+    Route::get('customer-metadata', [\App\Http\Controllers\Api\CustomerMetadataApiController::class, 'index']);
+    Route::post('customer-metadata', [\App\Http\Controllers\Api\CustomerMetadataApiController::class, 'store']);
+    Route::delete('customer-metadata/{id}', [\App\Http\Controllers\Api\CustomerMetadataApiController::class, 'destroy']);
+    Route::put('customer-metadata/activate/{id}', [\App\Http\Controllers\Api\CustomerMetadataApiController::class, 'activateItem']);
+    Route::put('customer-metadata/deactivate/{id}', [\App\Http\Controllers\Api\CustomerMetadataApiController::class, 'deactivateItem']);
+
     // CRDs
     Route::get('/crds', [\App\Http\Controllers\Api\CrdApiController::class, 'index']);
     Route::post('/crds', [\App\Http\Controllers\Api\CrdApiController::class, 'store']);

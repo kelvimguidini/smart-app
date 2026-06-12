@@ -136,6 +136,14 @@ class ProviderController extends Controller
         }
 
         $this->providerService->sendDocument($request->all(), Auth::user()->id, 1);
+
+        if ($request->wantsJson() || $request->expectsJson()) {
+            return response()->json([
+                'message' => 'E-mail enviado com sucesso!',
+                'type' => 'success'
+            ]);
+        }
+
         return redirect()->back()->with('flash', ['message' => 'E-mail enviado com sucesso!', 'type' => 'success']);
     }
 
@@ -146,6 +154,14 @@ class ProviderController extends Controller
         if ($request->download == "true") return $this->handleDownload($request, 3);
 
         $this->providerService->sendDocument($request->all(), Auth::user()->id, 3);
+
+        if ($request->wantsJson() || $request->expectsJson()) {
+            return response()->json([
+                'message' => 'E-mail enviado com sucesso!',
+                'type' => 'success'
+            ]);
+        }
+
         return redirect()->back()->with('flash', ['message' => 'E-mail enviado com sucesso!', 'type' => 'success']);
     }
 
@@ -156,6 +172,14 @@ class ProviderController extends Controller
         if ($request->download == "true") return $this->handleDownload($request, 2);
 
         $this->providerService->sendDocument($request->all(), Auth::user()->id, 2);
+
+        if ($request->wantsJson() || $request->expectsJson()) {
+            return response()->json([
+                'message' => 'E-mail enviado com sucesso!',
+                'type' => 'success'
+            ]);
+        }
+
         return redirect()->back()->with('flash', ['message' => 'E-mail enviado com sucesso!', 'type' => 'success']);
     }
 
@@ -168,7 +192,20 @@ class ProviderController extends Controller
         try {
             $budgetService->sendBudgetLink($request->all(), Auth::user()->id);
         } catch (Exception $e) {
+            if ($request->wantsJson() || $request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Erro ao enviar e-mail: ' . $e->getMessage(),
+                    'type' => 'danger'
+                ], 500);
+            }
             return redirect()->back()->with('flash', ['message' => 'Erro ao enviar e-mail: ' . $e->getMessage(), 'type' => 'danger']);
+        }
+
+        if ($request->wantsJson() || $request->expectsJson()) {
+            return response()->json([
+                'message' => 'E-mail enviado com sucesso!',
+                'type' => 'success'
+            ]);
         }
 
         return redirect()->back()->with('flash', ['message' => 'E-mail enviado com sucesso!', 'type' => 'success']);
