@@ -230,7 +230,8 @@ export class BudgetComponent implements OnInit {
     const one = truncateToDate(date1).getTime();
     const two = truncateToDate(date2).getTime();
     const difference = Math.abs(one - two);
-    return Math.ceil(difference / (1000 * 60 * 60 * 24));
+    const days = Math.ceil(difference / (1000 * 60 * 60 * 24));
+    return days === 0 ? 1 : days;
   }
 
   daysBetween1(date1: any, date2: any): number {
@@ -243,7 +244,8 @@ export class BudgetComponent implements OnInit {
     const one = truncateToDate(date1).getTime();
     const two = truncateToDate(date2).getTime();
     const difference = Math.abs(one - two);
-    return Math.ceil(difference / (1000 * 60 * 60 * 24)) + 1;
+    const result = Math.ceil(difference / (1000 * 60 * 60 * 24)) + 1;
+    return result === 0 ? 1 : result;
   }
 
   submit() {

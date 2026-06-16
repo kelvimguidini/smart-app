@@ -143,6 +143,7 @@ class EventTransportApiController extends Controller
             'received_proposal_percent' => 'nullable|numeric',
             'kickback' => 'nullable|numeric',
             'count' => 'nullable|numeric',
+            'observation' => 'nullable|string',
         ]);
 
         try {

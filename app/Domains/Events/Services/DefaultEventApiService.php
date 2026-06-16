@@ -463,7 +463,8 @@ class DefaultEventApiService implements EventApiServiceInterface
         $interval = $date1->diff($date2);
 
         // Return the absolute value of the difference in days
-        return ceil($interval->days);
+        $days = ceil($interval->days);
+        return $days == 0 ? 1 : $days;
     }
     
     private function daysBetween1($date1, $date2)
@@ -480,7 +481,8 @@ class DefaultEventApiService implements EventApiServiceInterface
         $interval = $date1->diff($date2);
 
         // Return the absolute value of the difference in days
-        return ceil($interval->days) + 1;
+        $days = ceil($interval->days) + 1;
+        return $days == 0 ? 1 : $days;
     }
 
     /**
