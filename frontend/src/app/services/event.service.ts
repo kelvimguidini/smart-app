@@ -120,6 +120,31 @@ export class EventService {
     return this.http.delete<any>(`${this.apiUrl}/api/event-transports/opts/${id}`);
   }
 
+  // 6.5. AIRFARE ENDPOINTS
+  saveEventAirfare(data: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/api/event-airfares`, data);
+  }
+
+  deleteEventAirfare(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/api/event-airfares/${id}`);
+  }
+
+  saveAirfareOpt(data: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/api/event-airfares/opts`, data);
+  }
+
+  deleteAirfareOpt(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/api/event-airfares/opts/${id}`);
+  }
+
+  saveAirfarePassenger(data: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/api/event-airfares/passengers`, data);
+  }
+
+  deleteAirfarePassenger(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/api/event-airfares/passengers/${id}`);
+  }
+
   // 7. EVENT HISTORY ENDPOINTS
   getHistory(eventId: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/api/events/history/${eventId}`);

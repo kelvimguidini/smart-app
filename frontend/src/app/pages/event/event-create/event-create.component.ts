@@ -43,7 +43,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
 
   // Active state
   eventId: number = 0;
-  activeTab: number = 0; // 0 = Básico, 1 = Hotel, 2 = A&B, 3 = Salões, 4 = Adicionais, 5 = Transporte
+  activeTab: number = 0; // 0 = Básico, 1 = Hotel, 2 = A&B, 3 = Salões, 4 = Adicionais, 5 = Transporte, 6 = Aéreo
   event: any = null;
 
   // Master dropdown lookup data
@@ -54,6 +54,10 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   providers: any[] = [];
   providersService: any[] = [];
   providersTransport: any[] = [];
+  providersAirfare: any[] = [];
+  airlines: any[] = [];
+  baggages: any[] = [];
+  cabins: any[] = [];
   brokers: any[] = [];
   currencies: any[] = [];
   regimes: any[] = [];
@@ -106,6 +110,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   eventHalls: any[] = [];
   eventAdds: any[] = [];
   eventTransports: any[] = [];
+  eventAirfares: any[] = [];
 
   // Tab View Options
   showDetailsHotel = false;
@@ -113,6 +118,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   showDetailsHall = false;
   showDetailsAdd = false;
   showDetailsTransport = false;
+  showDetailsAirfare = false;
 
   // Form State - Provider Links (vincular)
   providerLinkForm: any = {
@@ -129,7 +135,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     customer_observation: '',
   };
   showProviderLinkForm = false;
-  providerLinkType: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' = 'hotel';
+  providerLinkType: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' | 'airfare' = 'hotel';
   selectedProviderName = '';
 
   searchProviders = (term: string): Observable<any[]> => {
@@ -141,6 +147,8 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       sourceList = this.providersService;
     } else if (this.providerLinkType === 'transport') {
       sourceList = this.providersTransport;
+    } else if (this.providerLinkType === 'airfare') {
+      sourceList = this.providersAirfare;
     }
     const filtered = sourceList.filter(p => 
       (p.name && p.name.toLowerCase().includes(termLower)) || 
@@ -172,6 +180,8 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       found = this.providersService.find(p => p.id === providerId);
     } else if (this.providerLinkType === 'transport') {
       found = this.providersTransport.find(p => p.id === providerId);
+    } else if (this.providerLinkType === 'airfare') {
+      found = this.providersAirfare.find(p => p.id === providerId);
     }
     
     if (found) {
@@ -206,9 +216,33 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     kickback: 0,
     received_proposal: 0,
     received_proposal_percent: 100,
+
+    // Airfare-specific fields
+    outbound_airline_id: '',
+    outbound_flight_number: '',
+    outbound_class: '',
+    outbound_date: '',
+    outbound_origin: '',
+    outbound_destination: '',
+    outbound_departure_time: '',
+    outbound_arrival_time: '',
+    outbound_connection_details: '',
+    inbound_airline_id: '',
+    inbound_flight_number: '',
+    inbound_class: '',
+    inbound_date: '',
+    inbound_origin: '',
+    inbound_destination: '',
+    inbound_departure_time: '',
+    inbound_arrival_time: '',
+    inbound_connection_details: '',
+    baggage_id: '',
+    cabin_id: '',
+    observation: '',
+    status: '',
   };
   showOptForm = false;
-  optFormType: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' = 'hotel';
+  optFormType: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' | 'airfare' = 'hotel';
 
   // Autocomplete Functions
   searchCities = (term: string) => this.cityService.searchCities(term);
@@ -298,6 +332,10 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         this.providers = res.providers || [];
         this.providersService = res.providersService || [];
         this.providersTransport = res.providersTransport || [];
+        this.providersAirfare = res.providersAirfare || [];
+        this.airlines = res.airlines || [];
+        this.baggages = res.baggages || [];
+        this.cabins = res.cabins || [];
         this.brokers = res.brokers || [];
         this.currencies = res.currencies || [];
         this.regimes = res.regimes || [];
@@ -371,6 +409,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
           this.eventHalls = res.eventHalls || [];
           this.eventAdds = res.eventAdds || [];
           this.eventTransports = res.eventTransports || [];
+          this.eventAirfares = res.eventAirfares || [];
         }
 
         this.isLoader = false;
@@ -502,12 +541,12 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     return 'Indefinido';
   }
 
-  openAddProviderLink(type: 'hotel' | 'ab' | 'hall' | 'add' | 'transport', editItem: any = null) {
+  openAddProviderLink(type: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' | 'airfare', editItem: any = null) {
     this.providerLinkType = type;
     this.errors = {};
 
     if (editItem) {
-      const pId = editItem.hotel_id || editItem.ab_id || editItem.hall_id || editItem.add_id || editItem.transport_id;
+      const pId = editItem.hotel_id || editItem.ab_id || editItem.hall_id || editItem.add_id || editItem.transport_id || editItem.airfare_id;
       this.providerLinkForm = {
         id: editItem.id,
         provider_id: pId,
@@ -529,6 +568,8 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         found = this.providersService.find(p => p.id === pId);
       } else if (type === 'transport') {
         found = this.providersTransport.find(p => p.id === pId);
+      } else if (type === 'airfare') {
+        found = this.providersAirfare.find(p => p.id === pId);
       }
       this.selectedProviderName = found ? this.displayProvider(found) : '';
     } else {
@@ -583,6 +624,9 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       case 'transport':
         obs = this.eventService.saveEventTransport(payload);
         break;
+      case 'airfare':
+        obs = this.eventService.saveEventAirfare(payload);
+        break;
     }
 
     obs.subscribe({
@@ -603,7 +647,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     });
   }
 
-  deleteProviderLink(type: 'hotel' | 'ab' | 'hall' | 'add' | 'transport', id: number) {
+  deleteProviderLink(type: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' | 'airfare', id: number) {
     this.isLoader = true;
     let obs: Observable<any>;
     switch (type) {
@@ -622,6 +666,9 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       case 'transport':
         obs = this.eventService.deleteEventTransport(id);
         break;
+      case 'airfare':
+        obs = this.eventService.deleteEventAirfare(id);
+        break;
     }
 
     obs.subscribe({
@@ -638,7 +685,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   }
 
   // --- PROVIDER OPTIONS (DETALHES / TARIFAS) ---
-  openAddOpt(type: 'hotel' | 'ab' | 'hall' | 'add' | 'transport', parentId: number, editItem: any = null, isDuplicate = false) {
+  openAddOpt(type: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' | 'airfare', parentId: number, editItem: any = null, isDuplicate = false) {
     this.optFormType = type;
     this.errors = {};
 
@@ -668,6 +715,30 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         compare_trivago: editItem.compare_trivago || 0,
         compare_website_htl: editItem.compare_website_htl || 0,
         compare_omnibess: editItem.compare_omnibess || 0,
+
+        // Airfare fields
+        outbound_airline_id: editItem.outbound_airline_id || '',
+        outbound_flight_number: editItem.outbound_flight_number || '',
+        outbound_class: editItem.outbound_class || '',
+        outbound_date: editItem.outbound_date ? editItem.outbound_date.split('T')[0] : '',
+        outbound_origin: editItem.outbound_origin || '',
+        outbound_destination: editItem.outbound_destination || '',
+        outbound_departure_time: editItem.outbound_departure_time || '',
+        outbound_arrival_time: editItem.outbound_arrival_time || '',
+        outbound_connection_details: editItem.outbound_connection_details || '',
+        inbound_airline_id: editItem.inbound_airline_id || '',
+        inbound_flight_number: editItem.inbound_flight_number || '',
+        inbound_class: editItem.inbound_class || '',
+        inbound_date: editItem.inbound_date ? editItem.inbound_date.split('T')[0] : '',
+        inbound_origin: editItem.inbound_origin || '',
+        inbound_destination: editItem.inbound_destination || '',
+        inbound_departure_time: editItem.inbound_departure_time || '',
+        inbound_arrival_time: editItem.inbound_arrival_time || '',
+        inbound_connection_details: editItem.inbound_connection_details || '',
+        baggage_id: editItem.baggage_id || '',
+        cabin_id: editItem.cabin_id || '',
+        observation: editItem.observation || '',
+        status: editItem.status || '',
       };
     } else {
       this.optForm = {
@@ -695,6 +766,30 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         compare_trivago: 0,
         compare_website_htl: 0,
         compare_omnibess: 0,
+
+        // Airfare defaults
+        outbound_airline_id: '',
+        outbound_flight_number: '',
+        outbound_class: '',
+        outbound_date: '',
+        outbound_origin: '',
+        outbound_destination: '',
+        outbound_departure_time: '',
+        outbound_arrival_time: '',
+        outbound_connection_details: '',
+        inbound_airline_id: '',
+        inbound_flight_number: '',
+        inbound_class: '',
+        inbound_date: '',
+        inbound_origin: '',
+        inbound_destination: '',
+        inbound_departure_time: '',
+        inbound_arrival_time: '',
+        inbound_connection_details: '',
+        baggage_id: '',
+        cabin_id: '',
+        observation: '',
+        status: '',
       };
 
       // Set first values based on type defaults
@@ -715,6 +810,15 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         this.optForm.car_model_id = this.models[0]?.id || '';
         this.optForm.brand_id = this.brands[0]?.id || '';
         this.optForm.broker_id = this.brokersT[0]?.id || '';
+      } else if (type === 'airfare') {
+        this.optForm.outbound_airline_id = this.airlines[0]?.id || '';
+        this.optForm.inbound_airline_id = this.airlines[0]?.id || '';
+        this.optForm.baggage_id = this.baggages[0]?.id || '';
+        this.optForm.cabin_id = this.cabins[0]?.id || '';
+        this.optForm.currency_id = this.currencies[0]?.id || '';
+        this.optForm.outbound_date = this.basicForm.date || '';
+        this.optForm.inbound_date = this.basicForm.date_final || '';
+        this.optForm.status = 'created';
       }
     }
 
@@ -767,6 +871,15 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         payload.brand = this.optForm.brand_id;
         obs = this.eventService.saveTransportOpt(payload);
         break;
+      case 'airfare':
+        payload.event_airfare_id = this.optForm.parent_id;
+        payload.outbound_airline_id = this.optForm.outbound_airline_id;
+        payload.inbound_airline_id = this.optForm.inbound_airline_id;
+        payload.baggage = this.optForm.baggage_id;
+        payload.cabin = this.optForm.cabin_id;
+        payload.currency = this.optForm.currency_id;
+        obs = this.eventService.saveAirfareOpt(payload);
+        break;
     }
 
     obs.subscribe({
@@ -790,6 +903,8 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
           if (this.errors.brand) this.errors.brand_id = this.errors.brand;
           if (this.errors.frequency) this.errors.frequency_id = this.errors.frequency;
           if (this.errors.measure) this.errors.measure_id = this.errors.measure;
+          if (this.errors.baggage) this.errors.baggage_id = this.errors.baggage;
+          if (this.errors.cabin) this.errors.cabin_id = this.errors.cabin;
         } else {
           this.toastService.error(err.error?.message || 'Erro ao salvar tarifa.');
         }
@@ -797,7 +912,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     });
   }
 
-  deleteOpt(type: 'hotel' | 'ab' | 'hall' | 'add' | 'transport', id: number) {
+  deleteOpt(type: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' | 'airfare', id: number) {
     this.isLoader = true;
     let obs: Observable<any>;
     switch (type) {
@@ -815,6 +930,9 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         break;
       case 'transport':
         obs = this.eventService.deleteTransportOpt(id);
+        break;
+      case 'airfare':
+        obs = this.eventService.deleteAirfareOpt(id);
         break;
     }
 
@@ -867,9 +985,13 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       provider.event_hall_opts ||
       provider.event_add_opts ||
       provider.event_transport_opts ||
+      provider.eventAirfareOpts ||
+      provider.event_airfare_opts ||
       [];
     for (const opt of opts) {
-      sum += parseFloat(opt.count || 0) * this.daysBetween(opt.in, opt.out, isAB);
+      const dateIn = opt.in || opt.outbound_date;
+      const dateOut = opt.out || opt.inbound_date;
+      sum += parseFloat(opt.count || 0) * this.daysBetween(dateIn, dateOut, isAB);
     }
     return sum;
   }
@@ -881,6 +1003,8 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       provider.event_hall_opts ||
       provider.event_add_opts ||
       provider.event_transport_opts ||
+      provider.eventAirfareOpts ||
+      provider.event_airfare_opts ||
       [];
     if (opts.length === 0) return 0;
 
@@ -899,6 +1023,8 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       provider.event_hall_opts ||
       provider.event_add_opts ||
       provider.event_transport_opts ||
+      provider.eventAirfareOpts ||
+      provider.event_airfare_opts ||
       [];
     for (const opt of opts) {
       sum += parseFloat(opt.count || 0);
@@ -914,9 +1040,13 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       provider.event_hall_opts ||
       provider.event_add_opts ||
       provider.event_transport_opts ||
+      provider.eventAirfareOpts ||
+      provider.event_airfare_opts ||
       [];
     for (const opt of opts) {
-      sum += this.daysBetween(opt.in, opt.out, isAB);
+      const dateIn = opt.in || opt.outbound_date;
+      const dateOut = opt.out || opt.inbound_date;
+      sum += this.daysBetween(dateIn, dateOut, isAB);
     }
     return sum;
   }
@@ -929,9 +1059,14 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       provider.event_hall_opts ||
       provider.event_add_opts ||
       provider.event_transport_opts ||
+      provider.eventAirfareOpts ||
+      provider.event_airfare_opts ||
       [];
     for (const opt of opts) {
-      sum += this.unitSale(opt) * this.daysBetween(opt.in, opt.out, isAB) * parseFloat(opt.count || 0);
+      const dateIn = opt.in || opt.outbound_date;
+      const dateOut = opt.out || opt.inbound_date;
+      const multiplyDays = (provider.eventAirfareOpts || provider.event_airfare_opts) ? 1 : this.daysBetween(dateIn, dateOut, isAB);
+      sum += this.unitSale(opt) * (multiplyDays || 1) * parseFloat(opt.count || 0);
     }
     return sum;
   }
@@ -944,9 +1079,14 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       provider.event_hall_opts ||
       provider.event_add_opts ||
       provider.event_transport_opts ||
+      provider.eventAirfareOpts ||
+      provider.event_airfare_opts ||
       [];
     for (const opt of opts) {
-      sum += this.unitCost(opt) * this.daysBetween(opt.in, opt.out, isAB) * parseFloat(opt.count || 0);
+      const dateIn = opt.in || opt.outbound_date;
+      const dateOut = opt.out || opt.inbound_date;
+      const multiplyDays = (provider.eventAirfareOpts || provider.event_airfare_opts) ? 1 : this.daysBetween(dateIn, dateOut, isAB);
+      sum += this.unitCost(opt) * (multiplyDays || 1) * parseFloat(opt.count || 0);
     }
     return sum;
   }
@@ -959,25 +1099,29 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       provider.event_hall_opts ||
       provider.event_add_opts ||
       provider.event_transport_opts ||
+      provider.eventAirfareOpts ||
+      provider.event_airfare_opts ||
       [];
 
     for (const opt of opts) {
-      const days = this.daysBetween(opt.in, opt.out, isAB);
+      const dateIn = opt.in || opt.outbound_date;
+      const dateOut = opt.out || opt.inbound_date;
+      const multiplyDays = (provider.eventAirfareOpts || provider.event_airfare_opts) ? 1 : this.daysBetween(dateIn, dateOut, isAB);
       const count = parseFloat(opt.count || 0);
       const sale = this.unitSale(opt);
 
       switch (taxType) {
         case 'iss':
-          sum += ((sale * parseFloat(provider.iss_percent || 0)) / 100) * days * count;
+          sum += ((sale * parseFloat(provider.iss_percent || 0)) / 100) * multiplyDays * count;
           break;
         case 'serv':
-          sum += ((sale * parseFloat(provider.service_percent || 0)) / 100) * days * count;
+          sum += ((sale * parseFloat(provider.service_percent || 0)) / 100) * multiplyDays * count;
           break;
         case 'iva':
-          sum += ((sale * parseFloat(provider.iva_percent || 0)) / 100) * days * count;
+          sum += ((sale * parseFloat(provider.iva_percent || 0)) / 100) * multiplyDays * count;
           break;
         case 'sc':
-          sum += parseFloat(provider.service_charge || 0) * days * count;
+          sum += parseFloat(provider.service_charge || 0) * multiplyDays * count;
           break;
       }
     }
@@ -985,7 +1129,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   }
 
   // --- VIEW DETAILS BUTTON MECHANICS ---
-  toggleDetails(tabName: 'hotel' | 'ab' | 'hall' | 'add' | 'transport') {
+  toggleDetails(tabName: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' | 'airfare') {
     switch (tabName) {
       case 'hotel':
         this.showDetailsHotel = !this.showDetailsHotel;
@@ -1001,6 +1145,9 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         break;
       case 'transport':
         this.showDetailsTransport = !this.showDetailsTransport;
+        break;
+      case 'airfare':
+        this.showDetailsAirfare = !this.showDetailsAirfare;
         break;
     }
   }
@@ -1032,4 +1179,117 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   hasPermission(role: string): boolean {
     return this.authService.user()?.permissions?.some((p: any) => p.name === role) || false;
   }
+
+  // --- PASSENGER (FICHA DE VOO) METHODS ---
+  passengerForm = {
+    id: 0,
+    parent_id: 0,
+    name: '',
+    document: '',
+    passport_validity: '',
+    birth_date: '',
+    outbound_date: '',
+    outbound_origin: '',
+    outbound_destination: '',
+    outbound_departure: '',
+    outbound_arrival: '',
+    inbound_date: '',
+    inbound_origin: '',
+    inbound_destination: '',
+    inbound_departure: '',
+    inbound_arrival: ''
+  };
+  showPassengerForm = false;
+
+  openAddPassenger(parentAirfareId: number, editItem: any = null) {
+    this.errors = {};
+    if (editItem) {
+      this.passengerForm = {
+        id: editItem.id,
+        parent_id: parentAirfareId,
+        name: editItem.name || '',
+        document: editItem.document || '',
+        passport_validity: editItem.passport_validity ? editItem.passport_validity.split('T')[0] : '',
+        birth_date: editItem.birth_date ? editItem.birth_date.split('T')[0] : '',
+        outbound_date: editItem.outbound_date ? editItem.outbound_date.split('T')[0] : '',
+        outbound_origin: editItem.outbound_origin || '',
+        outbound_destination: editItem.outbound_destination || '',
+        outbound_departure: editItem.outbound_departure || '',
+        outbound_arrival: editItem.outbound_arrival || '',
+        inbound_date: editItem.inbound_date ? editItem.inbound_date.split('T')[0] : '',
+        inbound_origin: editItem.inbound_origin || '',
+        inbound_destination: editItem.inbound_destination || '',
+        inbound_departure: editItem.inbound_departure || '',
+        inbound_arrival: editItem.inbound_arrival || ''
+      };
+    } else {
+      this.passengerForm = {
+        id: 0,
+        parent_id: parentAirfareId,
+        name: '',
+        document: '',
+        passport_validity: '',
+        birth_date: '',
+        outbound_date: this.basicForm.date || '',
+        outbound_origin: '',
+        outbound_destination: '',
+        outbound_departure: '',
+        outbound_arrival: '',
+        inbound_date: this.basicForm.date_final || '',
+        inbound_origin: '',
+        inbound_destination: '',
+        inbound_departure: '',
+        inbound_arrival: ''
+      };
+    }
+    this.showPassengerForm = true;
+  }
+
+  closePassengerForm() {
+    this.showPassengerForm = false;
+    this.errors = {};
+  }
+
+  savePassenger() {
+    this.processing = true;
+    this.errors = {};
+    
+    const payload = {
+      ...this.passengerForm,
+      event_airfare_id: this.passengerForm.parent_id
+    };
+
+    this.eventService.saveAirfarePassenger(payload).subscribe({
+      next: (res) => {
+        this.processing = false;
+        this.toastService.success(res.message || 'Passageiro salvo com sucesso!');
+        this.closePassengerForm();
+        this.loadInitialData();
+      },
+      error: (err: HttpErrorResponse) => {
+        this.processing = false;
+        if (err.status === 422) {
+          this.errors = err.error.errors || {};
+        } else {
+          this.toastService.error(err.error?.message || 'Erro ao salvar passageiro.');
+        }
+      }
+    });
+  }
+
+  deletePassenger(id: number) {
+    this.isLoader = true;
+    this.eventService.deleteAirfarePassenger(id).subscribe({
+      next: (res) => {
+        this.toastService.success('Passageiro removido com sucesso!');
+        this.loadInitialData();
+      },
+      error: (err) => {
+        this.toastService.error('Erro ao remover passageiro.');
+        console.error(err);
+        this.isLoader = false;
+      }
+    });
+  }
+}
 }

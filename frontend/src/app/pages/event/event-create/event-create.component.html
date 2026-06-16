@@ -87,6 +87,17 @@
             Transporte
           </a>
         </li>
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            [class.active]="activeTab === 6"
+            [class.disabled]="!event || (!isReadOnly && !hasPermission('air_operator') && !hasPermission('event_admin'))"
+            (click)="event && (isReadOnly || hasPermission('air_operator') || hasPermission('event_admin')) && (activeTab = 6)"
+            style="cursor: pointer">
+            <i class="fas fa-plane me-1"></i>
+            Aéreo
+          </a>
+        </li>
       </ul>
     </div>
   </div>
@@ -352,7 +363,7 @@
       </div>
 
       <!-- ==================== PROVIDER TAB WRAPPERS (1 TO 5) ==================== -->
-      <div *ngIf="activeTab > 0" class="animate-in">
+      <div *ngIf="activeTab > 0 && activeTab < 6" class="animate-in">
         <!-- Tab Content Header Actions -->
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h5 class="m-0 font-weight-bold text-primary">
@@ -1031,16 +1042,384 @@
           </div>
         </ng-container>
 
+        </div>
+      </div>
+
+      <!-- ==================== PROVIDER TAB WRAPPER (AÉREO - TAB 6) ==================== -->
+      <div *ngIf="activeTab === 6" class="animate-in">
+        <!-- Tab Content Header Actions -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="m-0 font-weight-bold text-primary">
+            <i class="fas fa-plane me-1"></i>
+            Fornecedores Aéreos Vinculados
+          </h5>
+
+          <div class="d-flex gap-2">
+            <!-- View Details Toggle Button -->
+            <button
+              type="button"
+              class="btn btn-sm btn-info text-white shadow-sm"
+              (click)="toggleDetails('airfare')">
+              <i class="fas" [ngClass]="showDetailsAirfare ? 'fa-eye-slash' : 'fa-eye'"></i>
+              {{ showDetailsAirfare ? ' Ocultar Detalhes' : ' Exibir Detalhes' }}
+            </button>
+
+            <!-- Vincular Fornecedor button -->
+            <button
+              *ngIf="!isReadOnly"
+              type="button"
+              class="btn btn-sm btn-success shadow-sm"
+              (click)="openAddProviderLink('airfare')">
+              <i class="fas fa-plus me-1"></i>
+              Vincular Novo Fornecedor
+            </button>
+          </div>
+        </div>
+
+        <!-- Linked Providers Loop -->
+        <ng-container *ngFor="let item of eventAirfares; let provIdx = index">
+          <div class="card card-provider-group mb-4 shadow-sm">
+            <div class="card-header bg-light py-3 d-sm-flex align-items-center justify-content-between">
+              <div>
+                <h6 class="m-0 font-weight-bold text-primary">
+                  Fornecedor {{ provIdx + 1 }}: {{ item.provider?.name }}
+                  <span
+                    class="badge ms-2"
+                    [ngClass]="item.provider?.national ? 'bg-success' : 'bg-info'">
+                    {{ item.provider?.national ? 'Nacional' : 'Internacional' }}
+                  </span>
+                </h6>
+              </div>
+              <div class="d-flex gap-2" *ngIf="!isReadOnly">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-info"
+                  title="Editar Cadastro do Fornecedor"
+                  (click)="openAddProviderLink('airfare', item)">
+                  <i class="fas fa-edit me-1"></i>
+                  Editar Cadastro
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-success"
+                  title="Adicionar Opção de Voo"
+                  (click)="openAddOpt('airfare', item.id)">
+                  <i class="fas fa-plus me-1"></i>
+                  Adicionar Tarifa
+                </button>
+                <app-confirm-modal
+                  [btnClass]="'btn btn-sm btn-outline-danger'"
+                  [modalTitle]="'Remover Vínculo'"
+                  [message]="'Tem certeza de que deseja remover ' + (item.provider?.name || 'este fornecedor') + ' do evento?'"
+                  [okButtonLabel]="'Remover'"
+                  (confirm)="deleteProviderLink('airfare', item.id)">
+                  <span modal-button>
+                    <i class="fas fa-trash"></i>
+                    Excluir Vínculo
+                  </span>
+                </app-confirm-modal>
+              </div>
+            </div>
+
+            <div class="card-body p-3">
+              <!-- Summary Table -->
+              <div class="table-responsive mb-3">
+                <table class="table table-bordered align-middle mb-0 bg-white shadow-sm" style="font-size: 0.9rem;">
+                  <thead class="bg-light text-dark">
+                    <tr>
+                      <th>Contato</th>
+                      <th>E-mail</th>
+                      <th>Telefone</th>
+                      <th>Moeda</th>
+                      <th>ISS (%)</th>
+                      <th>Taxa 4BTS (%)</th>
+                      <th>Total Custo</th>
+                      <th>Total Venda</th>
+                      <th>Margem (%)</th>
+                      <th>Val. Faturamento (Custo)</th>
+                      <th>Val. Faturamento (Venda)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>{{ item.provider?.contact || '-' }}</td>
+                      <td>{{ item.provider?.email || '-' }}</td>
+                      <td>{{ item.provider?.phone || '-' }}</td>
+                      <td>{{ item.currency?.sigla || '-' }}</td>
+                      <td>{{ item.iss_percent || 0 }}%</td>
+                      <td>{{ item.taxa_4bts || 0 }}%</td>
+                      <td class="font-weight-bold text-warning">{{ formatCurrency(sumCost(item), item.currency?.sigla) }}</td>
+                      <td class="font-weight-bold text-success">{{ formatCurrency(sumSale(item), item.currency?.sigla) }}</td>
+                      <td class="font-weight-bold">
+                        {{ sumSale(item) > 0 ? ((1 - sumCost(item) / sumSale(item)) * 100 | number: '1.2-2') : '0.00' }}%
+                      </td>
+                      <td class="font-weight-bold text-warning bg-warning-light">
+                        {{ formatCurrency(sumCost(item) + sumTaxes(item, 'iss'), item.currency?.sigla) }}
+                      </td>
+                      <td class="font-weight-bold text-success bg-success-light">
+                        {{ formatCurrency(sumSale(item) + sumTaxes(item, 'iss'), item.currency?.sigla) }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Options Table -->
+              <div class="mb-4">
+                <h6 class="font-weight-bold text-primary mb-2">
+                  <i class="fas fa-plane-departure me-1"></i>
+                  Cotações/Opções de Voo
+                </h6>
+                <div class="table-responsive">
+                  <table class="table table-bordered table-striped align-middle mb-0 table-tariffs" style="min-width: 1200px">
+                    <thead class="table-dark">
+                      <tr>
+                        <th colspan="7" class="text-center font-weight-bold border-bottom-0 bg-primary">Ida (Outbound)</th>
+                        <th colspan="7" class="text-center font-weight-bold border-bottom-0 bg-info">Volta (Inbound)</th>
+                        <th colspan="5" class="text-center font-weight-bold border-bottom-0 bg-success">Dados Financeiros e Regras</th>
+                        <ng-container *ngIf="showDetailsAirfare">
+                          <th colspan="6" class="text-center font-weight-bold border-bottom-0 bg-secondary">Detalhes Adicionais</th>
+                        </ng-container>
+                        <th rowspan="2" class="align-middle text-center" *ngIf="!isReadOnly">Ações</th>
+                      </tr>
+                      <tr>
+                        <!-- Ida -->
+                        <th>Cia</th>
+                        <th>Voo</th>
+                        <th>Classe</th>
+                        <th>Data</th>
+                        <th>Origem</th>
+                        <th>Destino</th>
+                        <th>Dep/Arr</th>
+                        <!-- Volta -->
+                        <th>Cia</th>
+                        <th>Voo</th>
+                        <th>Classe</th>
+                        <th>Data</th>
+                        <th>Origem</th>
+                        <th>Destino</th>
+                        <th>Dep/Arr</th>
+                        <!-- Fin & Regras -->
+                        <th>Qtd/Pax</th>
+                        <th>Custo Unit.</th>
+                        <th>Total Custo</th>
+                        <th>Venda Unit.</th>
+                        <th>Total Venda</th>
+                        <!-- Details -->
+                        <ng-container *ngIf="showDetailsAirfare">
+                          <th>Cabine</th>
+                          <th>Bagagem</th>
+                          <th>Prop. Rec. (%)</th>
+                          <th>Kickback (%)</th>
+                          <th>Comp. Site</th>
+                          <th>Comp. Cliente</th>
+                        </ng-container>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <!-- Empty list placeholder -->
+                      <tr *ngIf="(!item.eventAirfareOpts || item.eventAirfareOpts.length === 0) && (!item.event_airfare_opts || item.event_airfare_opts.length === 0)">
+                        <td [attr.colspan]="showDetailsAirfare ? 26 : 20" class="py-4 text-muted text-center">
+                          <i class="fas fa-info-circle me-1"></i>
+                          Nenhuma tarifa ou detalhe cadastrado para este fornecedor.
+                        </td>
+                      </tr>
+
+                      <!-- Options Loop -->
+                      <tr *ngFor="let opt of item.eventAirfareOpts || item.event_airfare_opts">
+                        <!-- Ida -->
+                        <td>{{ opt.outbound_airline?.name || '-' }}</td>
+                        <td>{{ opt.outbound_flight_number || '-' }}</td>
+                        <td>{{ opt.outbound_class || '-' }}</td>
+                        <td>{{ opt.outbound_date | date: 'dd/MM/yyyy' }}</td>
+                        <td>{{ opt.outbound_origin || '-' }}</td>
+                        <td>{{ opt.outbound_destination || '-' }}</td>
+                        <td>{{ opt.outbound_departure_time || '-' }} / {{ opt.outbound_arrival_time || '-' }}</td>
+
+                        <!-- Volta -->
+                        <td>{{ opt.inbound_airline?.name || '-' }}</td>
+                        <td>{{ opt.inbound_flight_number || '-' }}</td>
+                        <td>{{ opt.inbound_class || '-' }}</td>
+                        <td>{{ opt.inbound_date | date: 'dd/MM/yyyy' }}</td>
+                        <td>{{ opt.inbound_origin || '-' }}</td>
+                        <td>{{ opt.inbound_destination || '-' }}</td>
+                        <td>{{ opt.inbound_departure_time || '-' }} / {{ opt.inbound_arrival_time || '-' }}</td>
+
+                        <!-- Fin & Regras -->
+                        <td class="text-center">{{ opt.count || 0 }}</td>
+                        <td class="text-end">{{ formatCurrency(unitCost(opt), item.currency?.sigla) }}</td>
+                        <td class="bg-warning-solid font-weight-bold text-end">
+                          {{ formatCurrency(unitCost(opt) * opt.count, item.currency?.sigla) }}
+                        </td>
+                        <td class="text-end">{{ formatCurrency(unitSale(opt), item.currency?.sigla) }}</td>
+                        <td class="bg-success-solid font-weight-bold text-end">
+                          {{ formatCurrency(unitSale(opt) * opt.count, item.currency?.sigla) }}
+                        </td>
+
+                        <!-- Details -->
+                        <ng-container *ngIf="showDetailsAirfare">
+                          <td>{{ opt.cabin?.name || '-' }}</td>
+                          <td>{{ opt.baggage?.name || '-' }}</td>
+                          <td class="text-center">{{ opt.received_proposal_percent }}%</td>
+                          <td class="text-center">{{ opt.kickback }}%</td>
+                          <td class="text-end">{{ formatCurrency(opt.compare_website || 0, item.currency?.sigla) }}</td>
+                          <td class="text-end">{{ formatCurrency(opt.compare_client || 0, item.currency?.sigla) }}</td>
+                        </ng-container>
+
+                        <td class="text-center">
+                          <span class="badge" [ngClass]="{
+                            'bg-secondary': opt.status === 'created' || !opt.status,
+                            'bg-warning': opt.status === 'pending',
+                            'bg-success': opt.status === 'confirmed',
+                            'bg-danger': opt.status === 'cancelled'
+                          }">
+                            {{
+                              opt.status === 'created' ? 'Criado' :
+                              opt.status === 'pending' ? 'Pendente' :
+                              opt.status === 'confirmed' ? 'Confirmado' :
+                              opt.status === 'cancelled' ? 'Cancelado' : (opt.status || 'Criado')
+                            }}
+                          </span>
+                        </td>
+
+                        <!-- Action Buttons -->
+                        <td *ngIf="!isReadOnly">
+                          <div class="d-flex justify-content-center gap-1">
+                            <button
+                              type="button"
+                              class="btn btn-info text-white shadow-sm btn-action btn-sm"
+                              title="Editar Tarifa"
+                              [disabled]="statusBlockEdit(item)"
+                              (click)="openAddOpt('airfare', item.id, opt)">
+                              <i class="fas fa-edit"></i>
+                            </button>
+                            <button
+                              type="button"
+                              class="btn btn-secondary text-white shadow-sm btn-action btn-sm"
+                              title="Clonar Tarifa"
+                              [disabled]="statusBlockEdit(item)"
+                              (click)="openAddOpt('airfare', item.id, opt, true)">
+                              <i class="fas fa-clone"></i>
+                            </button>
+                            <app-confirm-modal
+                              [btnClass]="'btn btn-danger text-white shadow-sm btn-action btn-sm'"
+                              [modalTitle]="'Remover Tarifa'"
+                              [message]="'Deseja realmente remover esta tarifa?'"
+                              [okButtonLabel]="'Remover'"
+                              (confirm)="deleteOpt('airfare', opt.id)">
+                              <span modal-button><i class="fas fa-trash"></i></span>
+                            </app-confirm-modal>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Ficha de Voo (Passageiros) Section -->
+              <div class="mt-4 border-top pt-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h6 class="font-weight-bold text-primary mb-0">
+                    <i class="fas fa-users me-1"></i>
+                    Ficha de Voo (Lista de Passageiros)
+                  </h6>
+                  <button
+                    *ngIf="!isReadOnly"
+                    type="button"
+                    class="btn btn-sm btn-success shadow-sm"
+                    (click)="openAddPassenger(item.id)">
+                    <i class="fas fa-user-plus me-1"></i>
+                    Adicionar Passageiro
+                  </button>
+                </div>
+                
+                <div class="table-responsive">
+                  <table class="table table-bordered table-hover align-middle mb-0 bg-white" style="min-width: 1200px; font-size: 0.9rem;">
+                    <thead class="table-secondary text-dark">
+                      <tr>
+                        <th rowspan="2" class="align-middle text-start">Nome Completo</th>
+                        <th rowspan="2" class="align-middle text-center">Documento</th>
+                        <th rowspan="2" class="align-middle text-center">Nascimento</th>
+                        <th rowspan="2" class="align-middle text-center">Val. Passaporte</th>
+                        <th colspan="4" class="text-center bg-primary text-white font-weight-bold">Ida (Outbound)</th>
+                        <th colspan="4" class="text-center bg-info text-white font-weight-bold">Volta (Inbound)</th>
+                        <th rowspan="2" class="align-middle text-center" style="width: 100px" *ngIf="!isReadOnly">Ações</th>
+                      </tr>
+                      <tr>
+                        <th>Data</th>
+                        <th>Origem</th>
+                        <th>Destino</th>
+                        <th>Horário (Dep/Arr)</th>
+                        <th>Data</th>
+                        <th>Origem</th>
+                        <th>Destino</th>
+                        <th>Horário (Dep/Arr)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngIf="!item.passengers || item.passengers.length === 0">
+                        <td colspan="13" class="py-3 text-muted text-center">
+                          Nenhum passageiro cadastrado para este voo.
+                        </td>
+                      </tr>
+                      <tr *ngFor="let pax of item.passengers">
+                        <td class="font-weight-bold text-dark text-start">{{ pax.name }}</td>
+                        <td class="text-center">{{ pax.document || '-' }}</td>
+                        <td class="text-center">{{ pax.birth_date | date: 'dd/MM/yyyy' }}</td>
+                        <td class="text-center">{{ pax.passport_validity | date: 'dd/MM/yyyy' }}</td>
+                        
+                        <!-- Outbound -->
+                        <td class="text-center">{{ pax.outbound_date | date: 'dd/MM/yyyy' }}</td>
+                        <td>{{ pax.outbound_origin || '-' }}</td>
+                        <td>{{ pax.outbound_destination || '-' }}</td>
+                        <td class="text-center">
+                          {{ pax.outbound_departure || '-' }} <span *ngIf="pax.outbound_departure && pax.outbound_arrival">/</span> {{ pax.outbound_arrival || '-' }}
+                        </td>
+                        
+                        <!-- Inbound -->
+                        <td class="text-center">{{ pax.inbound_date | date: 'dd/MM/yyyy' }}</td>
+                        <td>{{ pax.inbound_origin || '-' }}</td>
+                        <td>{{ pax.inbound_destination || '-' }}</td>
+                        <td class="text-center">
+                          {{ pax.inbound_departure || '-' }} <span *ngIf="pax.inbound_departure && pax.inbound_arrival">/</span> {{ pax.inbound_arrival || '-' }}
+                        </td>
+
+                        <!-- Passenger Actions -->
+                        <td *ngIf="!isReadOnly">
+                          <div class="d-flex justify-content-center gap-1">
+                            <button
+                              type="button"
+                              class="btn btn-outline-info btn-sm btn-action"
+                              title="Editar Passageiro"
+                              (click)="openAddPassenger(item.id, pax)">
+                              <i class="fas fa-edit"></i>
+                            </button>
+                            <app-confirm-modal
+                              [btnClass]="'btn btn-outline-danger btn-sm btn-action'"
+                              [modalTitle]="'Remover Passageiro'"
+                              [message]="'Tem certeza de que deseja remover o passageiro ' + pax.name + '?'"
+                              [okButtonLabel]="'Remover'"
+                              (confirm)="deletePassenger(pax.id)">
+                              <span modal-button><i class="fas fa-trash"></i></span>
+                            </app-confirm-modal>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
         <!-- Empty Page State -->
-        <div
-          *ngIf="
-            (activeTab === 1 ? eventHotels : activeTab === 2 ? eventABs : activeTab === 3 ? eventHalls : activeTab === 4 ? eventAdds : eventTransports)
-              ?.length === 0
-          "
-          class="alert alert-secondary py-5 text-center shadow-sm">
+        <div *ngIf="eventAirfares?.length === 0" class="alert alert-secondary py-5 text-center shadow-sm">
           <i class="fas fa-folder-open fa-3x mb-3 text-muted"></i>
-          <h5 class="text-secondary font-weight-bold">Nenhum fornecedor vinculado</h5>
-          <p class="text-muted mb-0">Use o botão no topo para vincular um fornecedor a este evento.</p>
+          <h5 class="text-secondary font-weight-bold">Nenhum fornecedor aéreo vinculado</h5>
+          <p class="text-muted mb-0">Use o botão no topo para vincular um fornecedor aéreo a este evento.</p>
         </div>
       </div>
     </div>
@@ -1062,7 +1441,9 @@
             ? 'fa-door-open'
             : providerLinkType === 'add'
               ? 'fa-concierge-bell'
-              : 'fa-bus'
+              : providerLinkType === 'transport'
+                ? 'fa-bus'
+                : 'fa-plane'
     ">
     <form (ngSubmit)="saveProviderLink()">
       <div class="row">
@@ -1194,7 +1575,7 @@
     <form (ngSubmit)="saveOpt()">
       <div class="row">
         <!-- BROKER (except tab 4) -->
-        <div class="col-md-6 form-group mb-3" *ngIf="optFormType !== 'add'">
+        <div class="col-md-6 form-group mb-3" *ngIf="optFormType !== 'add' && optFormType !== 'airfare'">
           <label for="broker_id" class="form-label font-weight-bold">
             Broker:
             <span class="text-danger">*</span>
@@ -1254,7 +1635,7 @@
         </div>
 
         <!-- SERVIÇOS (A&B, Salões, Adicionais, Transporte) -->
-        <div class="col-md-6 form-group mb-3" *ngIf="optFormType !== 'hotel'">
+        <div class="col-md-6 form-group mb-3" *ngIf="optFormType !== 'hotel' && optFormType !== 'airfare'">
           <label for="service_id" class="form-label font-weight-bold">
             Serviço/Trecho:
             <span class="text-danger">*</span>
@@ -1350,7 +1731,7 @@
         </div>
 
         <!-- DATAS IN / OUT -->
-        <div class="col-md-6 form-group mb-3">
+        <div class="col-md-6 form-group mb-3" *ngIf="optFormType !== 'airfare'">
           <label for="opt_in" class="form-label font-weight-bold">
             Data Entrada (IN):
             <span class="text-danger">*</span>
@@ -1361,7 +1742,7 @@
           </div>
         </div>
 
-        <div class="col-md-6 form-group mb-3">
+        <div class="col-md-6 form-group mb-3" *ngIf="optFormType !== 'airfare'">
           <label for="opt_out" class="form-label font-weight-bold">
             Data Saída (OUT):
             <span class="text-danger">*</span>
@@ -1371,6 +1752,149 @@
             <small *ngFor="let err of errors.out" class="d-block">{{ err }}</small>
           </div>
         </div>
+
+        <!-- AIRFARE-SPECIFIC FIELDS -->
+        <ng-container *ngIf="optFormType === 'airfare'">
+          <!-- Section title: Ida -->
+          <div class="col-12">
+            <h6 class="font-weight-bold text-primary border-bottom pb-2 mb-3">
+              <i class="fas fa-plane-departure me-1"></i> Detalhes do Voo de Ida (Outbound)
+            </h6>
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="outbound_airline_id" class="form-label font-weight-bold">Companhia Aérea (Ida):</label>
+            <select id="outbound_airline_id" class="form-select" [(ngModel)]="optForm.outbound_airline_id" name="outbound_airline_id">
+              <option value="">.:: Selecione ::.</option>
+              <option *ngFor="let option of airlines" [value]="option.id">{{ option.name }}</option>
+            </select>
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="outbound_flight_number" class="form-label font-weight-bold">Número do Voo (Ida):</label>
+            <input type="text" id="outbound_flight_number" class="form-control" [(ngModel)]="optForm.outbound_flight_number" name="outbound_flight_number" />
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="outbound_class" class="form-label font-weight-bold">Classe (Ida):</label>
+            <input type="text" id="outbound_class" class="form-control" [(ngModel)]="optForm.outbound_class" name="outbound_class" placeholder="Ex: Econômica, Executiva" />
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="outbound_date" class="form-label font-weight-bold">Data da Ida:</label>
+            <input type="date" id="outbound_date" class="form-control" [(ngModel)]="optForm.outbound_date" name="outbound_date" />
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="outbound_origin" class="form-label font-weight-bold">Origem (Ida):</label>
+            <input type="text" id="outbound_origin" class="form-control" [(ngModel)]="optForm.outbound_origin" name="outbound_origin" placeholder="Ex: GRU" />
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="outbound_destination" class="form-label font-weight-bold">Destino (Ida):</label>
+            <input type="text" id="outbound_destination" class="form-control" [(ngModel)]="optForm.outbound_destination" name="outbound_destination" placeholder="Ex: MIA" />
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="outbound_departure_time" class="form-label font-weight-bold">Horário Partida (Ida):</label>
+            <input type="text" id="outbound_departure_time" class="form-control" [(ngModel)]="optForm.outbound_departure_time" name="outbound_departure_time" placeholder="Ex: 14:30" />
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="outbound_arrival_time" class="form-label font-weight-bold">Horário Chegada (Ida):</label>
+            <input type="text" id="outbound_arrival_time" class="form-control" [(ngModel)]="optForm.outbound_arrival_time" name="outbound_arrival_time" placeholder="Ex: 22:15" />
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="outbound_connection_details" class="form-label font-weight-bold">Conexões/Detalhes (Ida):</label>
+            <input type="text" id="outbound_connection_details" class="form-control" [(ngModel)]="optForm.outbound_connection_details" name="outbound_connection_details" placeholder="Ex: Direto, 1 parada" />
+          </div>
+
+          <!-- Section title: Volta -->
+          <div class="col-12 mt-2">
+            <h6 class="font-weight-bold text-primary border-bottom pb-2 mb-3">
+              <i class="fas fa-plane-arrival me-1"></i> Detalhes do Voo de Volta (Inbound)
+            </h6>
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="inbound_airline_id" class="form-label font-weight-bold">Companhia Aérea (Volta):</label>
+            <select id="inbound_airline_id" class="form-select" [(ngModel)]="optForm.inbound_airline_id" name="inbound_airline_id">
+              <option value="">.:: Selecione ::.</option>
+              <option *ngFor="let option of airlines" [value]="option.id">{{ option.name }}</option>
+            </select>
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="inbound_flight_number" class="form-label font-weight-bold">Número do Voo (Volta):</label>
+            <input type="text" id="inbound_flight_number" class="form-control" [(ngModel)]="optForm.inbound_flight_number" name="inbound_flight_number" />
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="inbound_class" class="form-label font-weight-bold">Classe (Volta):</label>
+            <input type="text" id="inbound_class" class="form-control" [(ngModel)]="optForm.inbound_class" name="inbound_class" placeholder="Ex: Econômica, Executiva" />
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="inbound_date" class="form-label font-weight-bold">Data da Volta:</label>
+            <input type="date" id="inbound_date" class="form-control" [(ngModel)]="optForm.inbound_date" name="inbound_date" />
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="inbound_origin" class="form-label font-weight-bold">Origem (Volta):</label>
+            <input type="text" id="inbound_origin" class="form-control" [(ngModel)]="optForm.inbound_origin" name="inbound_origin" placeholder="Ex: MIA" />
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="inbound_destination" class="form-label font-weight-bold">Destino (Volta):</label>
+            <input type="text" id="inbound_destination" class="form-control" [(ngModel)]="optForm.inbound_destination" name="inbound_destination" placeholder="Ex: GRU" />
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="inbound_departure_time" class="form-label font-weight-bold">Horário Partida (Volta):</label>
+            <input type="text" id="inbound_departure_time" class="form-control" [(ngModel)]="optForm.inbound_departure_time" name="inbound_departure_time" placeholder="Ex: 23:30" />
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="inbound_arrival_time" class="form-label font-weight-bold">Horário Chegada (Volta):</label>
+            <input type="text" id="inbound_arrival_time" class="form-control" [(ngModel)]="optForm.inbound_arrival_time" name="inbound_arrival_time" placeholder="Ex: 06:45" />
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="inbound_connection_details" class="form-label font-weight-bold">Conexões/Detalhes (Volta):</label>
+            <input type="text" id="inbound_connection_details" class="form-control" [(ngModel)]="optForm.inbound_connection_details" name="inbound_connection_details" placeholder="Ex: Direto, 1 parada" />
+          </div>
+
+          <!-- Rules and comparison -->
+          <div class="col-12 mt-2">
+            <h6 class="font-weight-bold text-primary border-bottom pb-2 mb-3">
+              <i class="fas fa-cog me-1"></i> Regras e Comparativos
+            </h6>
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="baggage_id" class="form-label font-weight-bold">Bagagem:</label>
+            <select id="baggage_id" class="form-select" [(ngModel)]="optForm.baggage_id" name="baggage_id">
+              <option value="">.:: Selecione ::.</option>
+              <option *ngFor="let option of baggages" [value]="option.id">{{ option.name }}</option>
+            </select>
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="cabin_id" class="form-label font-weight-bold">Cabine:</label>
+            <select id="cabin_id" class="form-select" [(ngModel)]="optForm.cabin_id" name="cabin_id">
+              <option value="">.:: Selecione ::.</option>
+              <option *ngFor="let option of cabins" [value]="option.id">{{ option.name }}</option>
+            </select>
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="opt_currency_id" class="form-label font-weight-bold">Moeda:</label>
+            <select id="opt_currency_id" class="form-select" [(ngModel)]="optForm.currency_id" name="currency_id">
+              <option *ngFor="let option of currencies" [value]="option.id">{{ option.name }} ({{ option.sigla }})</option>
+            </select>
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="compare_website" class="form-label font-weight-bold">Comparação Website:</label>
+            <input type="number" step="0.01" id="compare_website" class="form-control" [(ngModel)]="optForm.compare_website" name="compare_website" />
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="compare_client" class="form-label font-weight-bold">Comparação Cliente:</label>
+            <input type="number" step="0.01" id="compare_client" class="form-control" [(ngModel)]="optForm.compare_client" name="compare_client" />
+          </div>
+          <div class="col-md-4 form-group mb-3">
+            <label for="status" class="form-label font-weight-bold">Status da Cotação:</label>
+            <select id="status" class="form-select" [(ngModel)]="optForm.status" name="status">
+              <option value="created">Criado</option>
+              <option value="pending">Pendente</option>
+              <option value="confirmed">Confirmado</option>
+              <option value="cancelled">Cancelado</option>
+            </select>
+          </div>
+          <div class="col-12 form-group mb-3">
+            <label for="observation" class="form-label font-weight-bold">Observações:</label>
+            <textarea id="observation" rows="2" class="form-control" [(ngModel)]="optForm.observation" name="observation"></textarea>
+          </div>
+        </ng-container>
 
         <!-- QUANTIDADE, COMISSÃO / KICKBACK -->
         <div class="col-md-6 form-group mb-3">
@@ -1457,6 +1981,104 @@
           <span *ngIf="processing" class="spinner-border spinner-border-sm me-1"></span>
           <i class="fas fa-save me-1"></i>
           Salvar Detalhe
+        </button>
+      </div>
+    </form>
+  </app-modal>
+
+  <!-- MODAL 3: ADICIONAR/EDITAR PASSAGEIRO -->
+  <app-modal [show]="showPassengerForm" (close)="closePassengerForm()" [title]="passengerForm.id ? 'Editar Passageiro' : 'Adicionar Novo Passageiro'" icon="fa-user">
+    <form (ngSubmit)="savePassenger()">
+      <div class="row">
+        <div class="col-12">
+          <h6 class="font-weight-bold text-primary border-bottom pb-2 mb-3">
+            <i class="fas fa-user me-1"></i> Dados Pessoais do Passageiro
+          </h6>
+        </div>
+        <div class="col-md-6 form-group mb-3">
+          <label for="pax_name" class="form-label font-weight-bold">
+            Nome Completo:
+            <span class="text-danger">*</span>
+          </label>
+          <input type="text" id="pax_name" class="form-control" [class.is-invalid]="errors.name" [(ngModel)]="passengerForm.name" name="name" required />
+          <div *ngIf="errors.name" class="text-danger mt-1">
+            <small *ngFor="let err of errors.name" class="d-block">{{ err }}</small>
+          </div>
+        </div>
+        <div class="col-md-6 form-group mb-3">
+          <label for="pax_document" class="form-label font-weight-bold">Documento (RG/CPF/Passaporte):</label>
+          <input type="text" id="pax_document" class="form-control" [(ngModel)]="passengerForm.document" name="document" />
+        </div>
+        <div class="col-md-6 form-group mb-3">
+          <label for="pax_birth_date" class="form-label font-weight-bold">Data de Nascimento:</label>
+          <input type="date" id="pax_birth_date" class="form-control" [(ngModel)]="passengerForm.birth_date" name="birth_date" />
+        </div>
+        <div class="col-md-6 form-group mb-3">
+          <label for="pax_passport_validity" class="form-label font-weight-bold">Validade Passaporte:</label>
+          <input type="date" id="pax_passport_validity" class="form-control" [(ngModel)]="passengerForm.passport_validity" name="passport_validity" />
+        </div>
+
+        <!-- Outbound Segment -->
+        <div class="col-12 mt-2">
+          <h6 class="font-weight-bold text-primary border-bottom pb-2 mb-3">
+            <i class="fas fa-plane-departure me-1"></i> Percurso do Voo de Ida (Outbound)
+          </h6>
+        </div>
+        <div class="col-md-6 form-group mb-3">
+          <label for="pax_outbound_date" class="form-label font-weight-bold">Data da Ida:</label>
+          <input type="date" id="pax_outbound_date" class="form-control" [(ngModel)]="passengerForm.outbound_date" name="outbound_date" />
+        </div>
+        <div class="col-md-3 form-group mb-3">
+          <label for="pax_outbound_origin" class="form-label font-weight-bold">Origem:</label>
+          <input type="text" id="pax_outbound_origin" class="form-control" [(ngModel)]="passengerForm.outbound_origin" name="outbound_origin" placeholder="Ex: GRU" />
+        </div>
+        <div class="col-md-3 form-group mb-3">
+          <label for="pax_outbound_destination" class="form-label font-weight-bold">Destino:</label>
+          <input type="text" id="pax_outbound_destination" class="form-control" [(ngModel)]="passengerForm.outbound_destination" name="outbound_destination" placeholder="Ex: MIA" />
+        </div>
+        <div class="col-md-6 form-group mb-3">
+          <label for="pax_outbound_departure" class="form-label font-weight-bold">Horário de Partida:</label>
+          <input type="text" id="pax_outbound_departure" class="form-control" [(ngModel)]="passengerForm.outbound_departure" name="outbound_departure" placeholder="Ex: 14:30" />
+        </div>
+        <div class="col-md-6 form-group mb-3">
+          <label for="pax_outbound_arrival" class="form-label font-weight-bold">Horário de Chegada:</label>
+          <input type="text" id="pax_outbound_arrival" class="form-control" [(ngModel)]="passengerForm.outbound_arrival" name="outbound_arrival" placeholder="Ex: 22:15" />
+        </div>
+
+        <!-- Inbound Segment -->
+        <div class="col-12 mt-2">
+          <h6 class="font-weight-bold text-primary border-bottom pb-2 mb-3">
+            <i class="fas fa-plane-arrival me-1"></i> Percurso do Voo de Volta (Inbound)
+          </h6>
+        </div>
+        <div class="col-md-6 form-group mb-3">
+          <label for="pax_inbound_date" class="form-label font-weight-bold">Data da Volta:</label>
+          <input type="date" id="pax_inbound_date" class="form-control" [(ngModel)]="passengerForm.inbound_date" name="inbound_date" />
+        </div>
+        <div class="col-md-3 form-group mb-3">
+          <label for="pax_inbound_origin" class="form-label font-weight-bold">Origem:</label>
+          <input type="text" id="pax_inbound_origin" class="form-control" [(ngModel)]="passengerForm.inbound_origin" name="inbound_origin" placeholder="Ex: MIA" />
+        </div>
+        <div class="col-md-3 form-group mb-3">
+          <label for="pax_inbound_destination" class="form-label font-weight-bold">Destino:</label>
+          <input type="text" id="pax_inbound_destination" class="form-control" [(ngModel)]="passengerForm.inbound_destination" name="inbound_destination" placeholder="Ex: GRU" />
+        </div>
+        <div class="col-md-6 form-group mb-3">
+          <label for="pax_inbound_departure" class="form-label font-weight-bold">Horário de Partida:</label>
+          <input type="text" id="pax_inbound_departure" class="form-control" [(ngModel)]="passengerForm.inbound_departure" name="inbound_departure" placeholder="Ex: 23:30" />
+        </div>
+        <div class="col-md-6 form-group mb-3">
+          <label for="pax_inbound_arrival" class="form-label font-weight-bold">Horário de Chegada:</label>
+          <input type="text" id="pax_inbound_arrival" class="form-control" [(ngModel)]="passengerForm.inbound_arrival" name="inbound_arrival" placeholder="Ex: 06:45" />
+        </div>
+      </div>
+
+      <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
+        <button type="button" class="btn btn-secondary shadow-sm" (click)="closePassengerForm()">Cancelar</button>
+        <button type="submit" class="btn btn-success shadow-sm" [disabled]="processing">
+          <span *ngIf="processing" class="spinner-border spinner-border-sm me-1"></span>
+          <i class="fas fa-save me-1"></i>
+          Salvar Passageiro
         </button>
       </div>
     </form>

@@ -250,6 +250,31 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('provider-transports/{id}/activate', [\App\Http\Controllers\Api\ProviderTransportApiController::class, 'activateItem']);
     Route::put('provider-transports/{id}/deactivate', [\App\Http\Controllers\Api\ProviderTransportApiController::class, 'deactivateItem']);
 
+    // Rotas Auxiliares de Aéreo
+    Route::get('airfare-airlines', [\App\Http\Controllers\Api\AirfareAirlineApiController::class, 'index']);
+    Route::post('airfare-airlines', [\App\Http\Controllers\Api\AirfareAirlineApiController::class, 'store']);
+    Route::delete('airfare-airlines/{id}', [\App\Http\Controllers\Api\AirfareAirlineApiController::class, 'destroy']);
+    Route::put('airfare-airlines/{id}/activate', [\App\Http\Controllers\Api\AirfareAirlineApiController::class, 'activateItem']);
+    Route::put('airfare-airlines/{id}/deactivate', [\App\Http\Controllers\Api\AirfareAirlineApiController::class, 'deactivateItem']);
+
+    Route::get('airfare-baggages', [\App\Http\Controllers\Api\AirfareBaggageApiController::class, 'index']);
+    Route::post('airfare-baggages', [\App\Http\Controllers\Api\AirfareBaggageApiController::class, 'store']);
+    Route::delete('airfare-baggages/{id}', [\App\Http\Controllers\Api\AirfareBaggageApiController::class, 'destroy']);
+    Route::put('airfare-baggages/{id}/activate', [\App\Http\Controllers\Api\AirfareBaggageApiController::class, 'activateItem']);
+    Route::put('airfare-baggages/{id}/deactivate', [\App\Http\Controllers\Api\AirfareBaggageApiController::class, 'deactivateItem']);
+
+    Route::get('airfare-cabins', [\App\Http\Controllers\Api\AirfareCabinApiController::class, 'index']);
+    Route::post('airfare-cabins', [\App\Http\Controllers\Api\AirfareCabinApiController::class, 'store']);
+    Route::delete('airfare-cabins/{id}', [\App\Http\Controllers\Api\AirfareCabinApiController::class, 'destroy']);
+    Route::put('airfare-cabins/{id}/activate', [\App\Http\Controllers\Api\AirfareCabinApiController::class, 'activateItem']);
+    Route::put('airfare-cabins/{id}/deactivate', [\App\Http\Controllers\Api\AirfareCabinApiController::class, 'deactivateItem']);
+
+    Route::get('provider-airfares', [\App\Http\Controllers\Api\ProviderAirfareApiController::class, 'index']);
+    Route::post('provider-airfares', [\App\Http\Controllers\Api\ProviderAirfareApiController::class, 'store']);
+    Route::delete('provider-airfares/{id}', [\App\Http\Controllers\Api\ProviderAirfareApiController::class, 'destroy']);
+    Route::put('provider-airfares/{id}/activate', [\App\Http\Controllers\Api\ProviderAirfareApiController::class, 'activateItem']);
+    Route::put('provider-airfares/{id}/deactivate', [\App\Http\Controllers\Api\ProviderAirfareApiController::class, 'deactivateItem']);
+
     // Rotas de Eventos (Angular SPA)
     Route::get('events/list', [\App\Http\Controllers\Api\EventApiController::class, 'listEvents']);
     Route::get('events/{id}/edit-data', [\App\Http\Controllers\Api\EventApiController::class, 'getEditData']);
@@ -291,6 +316,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('event-transports/opts', [\App\Http\Controllers\Api\EventTransportApiController::class, 'storeOpt']);
     Route::delete('event-transports/opts/{id}', [\App\Http\Controllers\Api\EventTransportApiController::class, 'destroyOpt']);
 
+    // 6. Aéreo
+    Route::post('event-airfares', [\App\Http\Controllers\Api\EventAirfareApiController::class, 'store']);
+    Route::delete('event-airfares/{id}', [\App\Http\Controllers\Api\EventAirfareApiController::class, 'destroy']);
+    Route::post('event-airfares/opts', [\App\Http\Controllers\Api\EventAirfareApiController::class, 'storeOpt']);
+    Route::delete('event-airfares/opts/{id}', [\App\Http\Controllers\Api\EventAirfareApiController::class, 'destroyOpt']);
+    Route::post('event-airfares/passengers', [\App\Http\Controllers\Api\EventAirfareApiController::class, 'storePassenger']);
+    Route::delete('event-airfares/passengers/{id}', [\App\Http\Controllers\Api\EventAirfareApiController::class, 'destroyPassenger']);
 });
 
 

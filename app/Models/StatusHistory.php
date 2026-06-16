@@ -64,6 +64,10 @@ class StatusHistory extends Model
             $checks = [
                 ['table' => 'event_transports', 'model' => EventTransport::class, 'col' => 'transport_id'],
             ];
+        } elseif ($type === 'airfare') {
+            $checks = [
+                ['table' => 'event_airfares', 'model' => EventAirfare::class, 'col' => 'airfare_id'],
+            ];
         }
 
         foreach ($checks as $check) {
@@ -113,5 +117,11 @@ class StatusHistory extends Model
     {
         return $this->belongsTo(EventTransport::class, 'table_id', 'id')
             ->where('table', 'event_transports');
+    }
+
+    public function eventAirfare()
+    {
+        return $this->belongsTo(EventAirfare::class, 'table_id', 'id')
+            ->where('table', 'event_airfares');
     }
 }

@@ -136,6 +136,26 @@ class GenericHistoryObserver
                 'model' => \App\Models\ServiceType::class,
                 'field' => 'name'
             ],
+            'airfare_id' => [
+                'model' => \App\Models\ProviderAirfare::class,
+                'field' => 'name'
+            ],
+            'outbound_airline_id' => [
+                'model' => \App\Models\AirfareAirline::class,
+                'field' => 'name'
+            ],
+            'inbound_airline_id' => [
+                'model' => \App\Models\AirfareAirline::class,
+                'field' => 'name'
+            ],
+            'baggage_id' => [
+                'model' => \App\Models\AirfareBaggage::class,
+                'field' => 'name'
+            ],
+            'cabin_id' => [
+                'model' => \App\Models\AirfareCabin::class,
+                'field' => 'name'
+            ],
 
         ];
 

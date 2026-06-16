@@ -21,6 +21,10 @@ use App\Domains\Providers\Repositories\ProviderRepositoryInterface;
 use App\Domains\Shared\Repositories\LookupRepositoryInterface;
 use App\Domains\Auth\Repositories\UserRepositoryInterface;
 use App\Http\Middleware\Constants as MiddlewareConstants;
+use App\Domains\Airfares\Repositories\EventAirfareRepositoryInterface;
+use App\Domains\Shared\Repositories\AirfareAirlineRepositoryInterface;
+use App\Domains\Shared\Repositories\AirfareBaggageRepositoryInterface;
+use App\Domains\Shared\Repositories\AirfareCabinRepositoryInterface;
 
 class EventApiController extends Controller
 {
@@ -36,6 +40,10 @@ class EventApiController extends Controller
     protected $lookupRepository;
     protected $userRepository;
     protected $eventApiService;
+    protected $eventAirfareRepository;
+    protected $airlineRepository;
+    protected $baggageRepository;
+    protected $cabinRepository;
 
     public function __construct(
         EventServiceInterface $eventService,
@@ -49,7 +57,11 @@ class EventApiController extends Controller
         ProviderRepositoryInterface $providerRepository,
         LookupRepositoryInterface $lookupRepository,
         UserRepositoryInterface $userRepository,
-        EventApiServiceInterface $eventApiService
+        EventApiServiceInterface $eventApiService,
+        EventAirfareRepositoryInterface $eventAirfareRepository,
+        AirfareAirlineRepositoryInterface $airlineRepository,
+        AirfareBaggageRepositoryInterface $baggageRepository,
+        AirfareCabinRepositoryInterface $cabinRepository
     ) {
         $this->eventService = $eventService;
         $this->eventRepository = $eventRepository;
@@ -63,6 +75,10 @@ class EventApiController extends Controller
         $this->lookupRepository = $lookupRepository;
         $this->userRepository = $userRepository;
         $this->eventApiService = $eventApiService;
+        $this->eventAirfareRepository = $eventAirfareRepository;
+        $this->airlineRepository = $airlineRepository;
+        $this->baggageRepository = $baggageRepository;
+        $this->cabinRepository = $cabinRepository;
     }
 
     /**
@@ -144,17 +160,18 @@ class EventApiController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $event = null;
         $eventHotels = [];
         $eventABs = [];
         $eventHalls = [];
         $eventAdds = [];
         $eventTransports = [];
+        $eventAirfares = [];
         $selectedHotel = null;
         $selectedAB = null;
         $selectedHall = null;
         $selectedAdd = null;
         $selectedTransport = null;
+        $selectedAirfare = null;
 
         if ($id > 0) {
             $event = $this->eventRepository->findWithLocals($id);
@@ -166,6 +183,7 @@ class EventApiController extends Controller
             $eventHalls = $this->eventHallRepository->getByEvent($id);
             $eventAdds = $this->eventAddRepository->getByEvent($id);
             $eventTransports = $this->eventTransportRepository->getByEvent($id);
+            $eventAirfares = $this->eventAirfareRepository->getByEvent($id);
 
             // Tab detail requests (ehotel/tab query params)
             if ($request->has('ehotel') && $request->has('tab')) {
@@ -187,6 +205,9 @@ class EventApiController extends Controller
                     case 5:
                         $selectedTransport = $this->eventTransportRepository->findWithDetails($ehotelId);
                         break;
+                    case 6:
+                        $selectedAirfare = $this->eventAirfareRepository->findWithDetails($ehotelId);
+                        break;
                 }
             }
         }
@@ -199,6 +220,7 @@ class EventApiController extends Controller
             'providers' => $this->providerRepository->allWithCity(),
             'providersService' => $this->providerRepository->allServicesWithCity(),
             'providersTransport' => $this->providerRepository->allTransportWithCity(),
+            'providersAirfare' => $this->providerRepository->allAirfareWithCity(),
             'brokers' => $this->lookupRepository->getAllBrokers(),
             'currencies' => $this->lookupRepository->getAllCurrencies(),
             'regimes' => $this->lookupRepository->getAllRegimes(),
@@ -215,6 +237,7 @@ class EventApiController extends Controller
             'eventHalls' => $eventHalls,
             'eventAdds' => $eventAdds,
             'eventTransports' => $eventTransports,
+            'eventAirfares' => $eventAirfares,
             'catsHotel' => $this->lookupRepository->getAllCategories(),
             'aptosHotel' => $this->lookupRepository->getAllAptos(),
             'brokersT' => $this->lookupRepository->getAllBrokerTransports(),
@@ -227,6 +250,9 @@ class EventApiController extends Controller
             'servicesAdd' => $this->lookupRepository->getAllServiceAdds(),
             'frequencies' => $this->lookupRepository->getAllFrequencies(),
             'measures' => $this->lookupRepository->getAllMeasures(),
+            'airlines' => $this->airlineRepository->all(),
+            'baggages' => $this->baggageRepository->all(),
+            'cabins' => $this->cabinRepository->all(),
 
             // Sub-elements requested
             'selectedHotel' => $selectedHotel,
@@ -234,6 +260,7 @@ class EventApiController extends Controller
             'selectedHall' => $selectedHall,
             'selectedAdd' => $selectedAdd,
             'selectedTransport' => $selectedTransport,
+            'selectedAirfare' => $selectedAirfare,
         ];
 
         return response()->json($payload);
