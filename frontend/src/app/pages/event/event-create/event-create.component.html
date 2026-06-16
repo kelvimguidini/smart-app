@@ -1973,6 +1973,17 @@
             <input type="number" step="0.01" id="compare_omnibess" class="form-control" [(ngModel)]="optForm.compare_omnibess" name="compare_omnibess" />
           </div>
         </ng-container>
+
+        <!-- OBSERVAÇÃO (transporte only) -->
+        <div class="col-md-12 form-group mb-3" *ngIf="optFormType === 'transport'">
+          <label for="opt_observation" class="form-label font-weight-bold">Observações:</label>
+          <textarea
+            id="opt_observation"
+            rows="2"
+            class="form-control"
+            [(ngModel)]="optForm.observation"
+            name="observation"></textarea>
+        </div>
       </div>
 
       <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">

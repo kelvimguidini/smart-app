@@ -715,6 +715,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         compare_trivago: editItem.compare_trivago || 0,
         compare_website_htl: editItem.compare_website_htl || 0,
         compare_omnibess: editItem.compare_omnibess || 0,
+        observation: editItem.observation || '',
 
         // Airfare fields
         outbound_airline_id: editItem.outbound_airline_id || '',
@@ -766,6 +767,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         compare_trivago: 0,
         compare_website_htl: 0,
         compare_omnibess: 0,
+        observation: '',
 
         // Airfare defaults
         outbound_airline_id: '',
@@ -961,7 +963,8 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     const difference = Math.abs(d1.getTime() - d2.getTime());
     const days = Math.ceil(difference / (1000 * 60 * 60 * 24));
 
-    return includeLastDay ? days + 1 : days;
+    const result = includeLastDay ? days + 1 : days;
+    return result === 0 ? 1 : result;
   }
 
   unitCost(opt: any): number {
