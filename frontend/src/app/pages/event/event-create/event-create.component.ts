@@ -738,7 +738,6 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         inbound_connection_details: editItem.inbound_connection_details || '',
         baggage_id: editItem.baggage_id || '',
         cabin_id: editItem.cabin_id || '',
-        observation: editItem.observation || '',
         status: editItem.status || '',
       };
     } else {
@@ -790,7 +789,6 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         inbound_connection_details: '',
         baggage_id: '',
         cabin_id: '',
-        observation: '',
         status: '',
       };
 
@@ -1294,5 +1292,4 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       }
     });
   }
-}
 }

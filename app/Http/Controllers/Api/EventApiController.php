@@ -160,6 +160,7 @@ class EventApiController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
+        $event = null;
         $eventHotels = [];
         $eventABs = [];
         $eventHalls = [];

@@ -30,16 +30,16 @@
           <div class="form-group col-md-6 mb-3">
             <label class="form-label">Cidade: <span class="text-danger">*</span></label>
             <app-autocomplete
+              id="city"
+              placeholder="Pesquisar cidade..."
+              [required]="true"
               [searchFn]="searchCities"
               [displayFn]="displayCity"
-              placeholder="Pesquisar cidade..."
-              [class.is-invalid]="errors['city_id']"
-              [initialValue]="selectedCityName"
-              (selected)="form.city_id = $event?.id">
-            </app-autocomplete>
-            <div *ngIf="errors['city_id']" class="text-danger mt-1">
-              <small *ngFor="let err of errors['city_id']" class="d-block">{{ err }}</small>
-            </div>
+              valueField="id"
+              [initialText]="selectedCityName"
+              [(ngModel)]="form.city_id"
+              name="city"
+              [errors]="errors['city_id']"></app-autocomplete>
           </div>
         </div>
 
