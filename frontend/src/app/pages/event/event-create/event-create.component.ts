@@ -946,7 +946,8 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     const cost = this.unitCost(opt);
     const percent = parseFloat(opt.received_proposal_percent || 0);
     if (percent > 0) {
-      return Math.ceil(cost / percent);
+      const factor = percent > 2 ? percent / 100 : percent;
+      return Math.ceil(cost / factor);
     }
     return cost;
   }

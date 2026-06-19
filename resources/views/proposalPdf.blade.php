@@ -1,7 +1,7 @@
 <?php
 $props = [
-    'event' => $event,
-    'provider' => $provider,
+    'event' => $event ?? null,
+    'provider' => $provider ?? null,
     'primaryColor' => '#000000',
     'secondaryColor' => '#FFFFFF',
     'accentColor' => '#FF0000'
@@ -55,11 +55,13 @@ function formatCurrency($value, $symbol = '')
 
 function unitSale($opt)
 {
-    if ($opt['received_proposal_percent'] == 0) {
+    $percent = floatval($opt['received_proposal_percent']);
+    if ($percent == 0) {
         return $opt['received_proposal'];
     }
 
-    return ceil($opt['received_proposal'] / $opt['received_proposal_percent']);
+    $factor = $percent > 2 ? $percent / 100 : $percent;
+    return ceil($opt['received_proposal'] / $factor);
 }
 
 function sumTaxesProvider($eventP, $opt)
@@ -133,7 +135,11 @@ $hallEvent  = null;
 $addEvent  = null;
 $transportEvent = null;
 
-if ($provider != null) {
+$event = $event ?? null;
+$provider = $provider ?? null;
+$table = $table ?? null;
+
+if ($provider != null && $event != null && $table != null) {
     if ($table == 'event_hotels' || $table == 'event_abs' || $table == 'event_halls') {
         $hotelEvent = $event->event_hotels->firstWhere('hotel_id', $provider->id);
     }
@@ -475,7 +481,11 @@ function quebraTexto($texto, $limite = 40)
                                 <div class="title">PROPOSTA N° {{ $event != null ? $event->code : '' }}</div>
                             </div>
                             <div>
-                                <img style="width: 150px;" src="{{ public_path('logo.png') }}" alt="4BTS">
+                                @if (extension_loaded('gd'))
+                                    <img style="width: 150px;" src="{{ public_path('logo.png') }}" alt="4BTS">
+                                @else
+                                    <span style="font-weight: bold; font-size: 16px; color: #e9540d;">4BTS</span>
+                                @endif
                             </div>
                         </td>
                         <td class="center">
@@ -514,7 +524,11 @@ function quebraTexto($texto, $limite = 40)
 
                         </td>
                         <td class="right">
-                            <img src="{{ public_path($event->customer->logo) }}" style="max-width: 100px; max-height: 100px;" alt="{{ $event->customer->name }}">
+                            @if (extension_loaded('gd') && $event != null && $event->customer != null)
+                                <img src="{{ public_path($event->customer->logo) }}" style="max-width: 100px; max-height: 100px;" alt="{{ $event->customer->name }}">
+                            @elseif ($event != null && $event->customer != null)
+                                <span style="font-weight: bold; font-size: 14px; color: #fff;">{{ $event->customer->name }}</span>
+                            @endif
                         </td>
                     </tr>
                 </table>

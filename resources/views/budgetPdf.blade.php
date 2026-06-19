@@ -1,4 +1,7 @@
 <?php
+$event = $event ?? null;
+$provider = $provider ?? null;
+
 $props = [
     'event' => $event,
     'provider' => $provider,
@@ -50,11 +53,13 @@ function formatCurrency($value, $symbol = 'BRL')
 
 function unitSale($opt)
 {
-    if ($opt['received_proposal_percent'] == 0) {
+    $percent = floatval($opt['received_proposal_percent']);
+    if ($percent == 0) {
         return $opt['received_proposal'];
     }
 
-    return ceil($opt['received_proposal'] / $opt['received_proposal_percent']);
+    $factor = $percent > 2 ? $percent / 100 : $percent;
+    return ceil($opt['received_proposal'] / $factor);
 }
 
 function sumTaxesProvider($eventP, $opt)
@@ -111,7 +116,7 @@ $hallEvent  = null;
 $addEvent  = null;
 $transportEvent = null;
 
-if ($provider != null) {
+if ($provider != null && $event != null) {
     $hotelEvent = $event->event_hotels->firstWhere('hotel_id', $provider->id);
     $abEvent = $event->event_abs->firstWhere('ab_id', $provider->id);
     $hallEvent = $event->event_halls->firstWhere('hall_id', $provider->id);
@@ -384,16 +389,20 @@ if ($transportEvent != null) {
 
                     <div class="event-info">
                         <div class="line">
-                            <p>De: <span class="event-data">{{date("d/m/Y", strtotime($event->date)) }}</span></p>
-                            <p>Até: <span class="event-data">{{date("d/m/Y", strtotime($event->date_final)) }}</span></p>
+                            <p>De: <span class="event-data">{{ $event != null ? date("d/m/Y", strtotime($event->date)) : '' }}</span></p>
+                            <p>Até: <span class="event-data">{{ $event != null ? date("d/m/Y", strtotime($event->date_final)) : '' }}</span></p>
                         </div>
                         <div class="line">
-                            <p>Evento: <span class="event-data">{{ $event->name }}</p>
+                            <p>Evento: <span class="event-data">{{ $event != null ? $event->name : '' }}</p>
                         </div>
                     </div>
                 </div>
                 <div class="right">
-                    <img src="{{ public_path($event->customer->logo) }}" style="max-width: 175px; max-height: 175px;" alt="{{ $event->customer->name}}">
+                    @if (extension_loaded('gd') && $event != null && $event->customer != null)
+                        <img src="{{ public_path($event->customer->logo) }}" style="max-width: 175px; max-height: 175px;" alt="{{ $event->customer->name }}">
+                    @elseif ($event != null && $event->customer != null)
+                        <span style="font-weight: bold; font-size: 14px;">{{ $event->customer->name }}</span>
+                    @endif
                 </div>
             </header>
 
@@ -763,7 +772,11 @@ if ($transportEvent != null) {
                         </div>
                     </div>
                     <div class="right" style="transform: initial;">
-                        <img style="width: 150px;" src="{{ public_path('logo.png') }}" alt="4BTS">
+                        @if (extension_loaded('gd'))
+                            <img style="width: 150px;" src="{{ public_path('logo.png') }}" alt="4BTS">
+                        @else
+                            <span style="font-weight: bold; font-size: 16px; color: #e9540d;">4BTS</span>
+                        @endif
                         <p>www.4BTS.com.br</p>
                     </div>
                 </div>

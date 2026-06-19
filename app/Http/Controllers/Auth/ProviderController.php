@@ -189,6 +189,20 @@ class ProviderController extends Controller
             abort(403);
         }
 
+        if ($request->download == "true") {
+            $data = $this->eventRepository->getProposalData($request->event_id, $request->provider_id, $request->type);
+            $options = new \Dompdf\Options();
+            $options->set('isRemoteEnabled', true);
+            $options->set('chroot', base_path('public'));
+            $pdf = new \Dompdf\Dompdf($options);
+            $html = view('budgetPdf', ['event' => $data['eventDataBase'], 'provider' => $data['providerDataBase']])->render();
+            $pdf->loadHtml($html);
+            $pdf->setPaper('A4', 'portrait');
+            $pdf->render();
+            $filename = "ID{$request->event_id} - " . ($data['providerDataBase']->name ?? '') . " - Orcamento.pdf";
+            return $pdf->stream($filename);
+        }
+
         try {
             $budgetService->sendBudgetLink($request->all(), Auth::user()->id);
         } catch (Exception $e) {

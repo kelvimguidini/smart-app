@@ -429,11 +429,13 @@ class DefaultEventApiService implements EventApiServiceInterface
 
     private function unitSale($opt)
     {
-        if ($opt->received_proposal_percent == 0) {
+        $percent = floatval($opt->received_proposal_percent);
+        if ($percent == 0) {
             return $opt->received_proposal;
         }
 
-        return ceil($opt->received_proposal / $opt->received_proposal_percent);
+        $factor = $percent > 2 ? $percent / 100 : $percent;
+        return ceil($opt->received_proposal / $factor);
     }
 
     private function sumTotal($rate, $taxes, $qtdDayle)

@@ -1,11 +1,14 @@
 <?php
 $props = [
-    'event' => $event,
-    'provider' => $provider,
+    'event' => $event ?? null,
+    'provider' => $provider ?? null,
     'primaryColor' => '#000000',
     'secondaryColor' => '#FFFFFF',
     'accentColor' => '#FF0000'
 ];
+$event = $event ?? null;
+$provider = $provider ?? null;
+$table = $table ?? null;
 function daysBetween($date1, $date2)
 {
     // Convert both dates to DateTime objects
@@ -55,11 +58,13 @@ function formatCurrency($value, $symbol = '')
 
 function unitSale($opt)
 {
-    if ($opt['received_proposal_percent'] == 0) {
+    $percent = floatval($opt['received_proposal_percent']);
+    if ($percent == 0) {
         return $opt['received_proposal'];
     }
 
-    return ceil($opt['received_proposal'] / $opt['received_proposal_percent']);
+    $factor = $percent > 2 ? $percent / 100 : $percent;
+    return ceil($opt['received_proposal'] / $factor);
 }
 
 function sumTaxesProvider($eventP, $opt)
@@ -133,7 +138,7 @@ $hallEvent  = null;
 $addEvent  = null;
 $transportEvent = null;
 
-if ($provider != null) {
+if ($provider != null && $event != null && $table != null) {
     if ($table == 'event_hotels' || $table == 'event_abs' || $table == 'event_halls') {
         $hotelEvent = $event->event_hotels->firstWhere('hotel_id', $provider->id);
     }
@@ -475,7 +480,11 @@ function quebraTexto($texto, $limite = 40)
                                 <div class="title">PROPOSTA N° {{ $event != null ? $event->code : '' }}</div>
                             </div>
                             <div>
-                                <img style="width: 150px;" src="{{ public_path('logo.png') }}" alt="4BTS">
+                                @if (extension_loaded('gd'))
+                                    <img style="width: 150px;" src="{{ public_path('logo.png') }}" alt="4BTS">
+                                @else
+                                    <span style="font-weight: bold; font-size: 16px; color: #e9540d;">4BTS</span>
+                                @endif
                             </div>
                         </td>
                         <td class="center">
@@ -514,7 +523,11 @@ function quebraTexto($texto, $limite = 40)
 
                         </td>
                         <td class="right">
-                            <img src="{{ public_path($event->customer->logo) }}" style="max-width: 100px; max-height: 100px;" alt="{{ $event->customer->name }}">
+                            @if (extension_loaded('gd') && $event != null && $event->customer != null)
+                                <img src="{{ public_path($event->customer->logo) }}" style="max-width: 100px; max-height: 100px;" alt="{{ $event->customer->name }}">
+                            @elseif ($event != null && $event->customer != null)
+                                <span style="font-weight: bold; font-size: 14px; color: #fff;">{{ $event->customer->name }}</span>
+                            @endif
                         </td>
                     </tr>
                 </table>
@@ -537,7 +550,7 @@ function quebraTexto($texto, $limite = 40)
                                 <th>Categoria</th>
 
                                 <th>Diárias</th>
-                                
+
                             </tr>
                         </thead>
                         <tbody>
@@ -554,7 +567,7 @@ function quebraTexto($texto, $limite = 40)
                                 <td>{{ $item->category_hotel->name }}</td>
 
                                 <td>{{ daysBetween($item->in, $item->out) }}</td>
-                                
+
                             </tr>
                             @endforeach
                         </tbody>
@@ -566,7 +579,8 @@ function quebraTexto($texto, $limite = 40)
                                     <b>Check-in:</b> {{ $hotelEvent->checkin_time }} - {{ $hotelEvent->checkin_time_end }} <br>
                                     <b>Check-out:</b> {{ $hotelEvent->checkout_time }} - {{ $hotelEvent->checkout_time_end }}
                                 </td>
-                                <td><b>Prazo</b></td><td>{{ $hotelEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($hotelEvent->deadline_date)) }}</td>
+                                <td><b>Prazo</b></td>
+                                <td>{{ $hotelEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($hotelEvent->deadline_date)) }}</td>
                             </tr>
                         </tfoot>
 
@@ -589,7 +603,7 @@ function quebraTexto($texto, $limite = 40)
                                 <th>Até</th>
                                 <th>Qtd</th>
                                 <th>Diárias</th>
-                                
+
                             </tr>
                         </thead>
                         <tbody>
@@ -605,11 +619,18 @@ function quebraTexto($texto, $limite = 40)
                                 </td>
                                 <td>{{ daysBetween1($item->in, $item->out) }}</td>
 
-                                
+
                             </tr>
                             @endforeach
                         </tbody>
-                        <tfoot class="table-footer"><tr style="background-color: #ffe0b1"><td colspan="1"><b>Comentários:</b></td><td colspan="3">{{ $abEvent->customer_observation }}</td><td><b>Prazo</b></td><td>{{ $abEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($abEvent->deadline_date)) }}</td></tr></tfoot>
+                        <tfoot class="table-footer">
+                            <tr style="background-color: #ffe0b1">
+                                <td colspan="1"><b>Comentários:</b></td>
+                                <td colspan="3">{{ $abEvent->customer_observation }}</td>
+                                <td><b>Prazo</b></td>
+                                <td>{{ $abEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($abEvent->deadline_date)) }}</td>
+                            </tr>
+                        </tfoot>
 
                     </table>
                 </div>
@@ -631,7 +652,7 @@ function quebraTexto($texto, $limite = 40)
                                 <th>Até</th>
                                 <th>Qtd</th>
                                 <th>Diárias</th>
-                                
+
                             </tr>
                         </thead>
                         <tbody>
@@ -648,11 +669,18 @@ function quebraTexto($texto, $limite = 40)
                                 </td>
                                 <td>{{ daysBetween1($item->in, $item->out) }}</td>
 
-                                
+
                             </tr>
                             @endforeach
                         </tbody>
-                        <tfoot class="table-footer"><tr style="background-color: #ffe0b1"><td colspan="1"><b>Comentários:</b></td><td colspan="4">{{ $hallEvent->customer_observation }}</td><td><b>Prazo</b></td><td>{{ $hallEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($hallEvent->deadline_date)) }}</td></tr></tfoot>
+                        <tfoot class="table-footer">
+                            <tr style="background-color: #ffe0b1">
+                                <td colspan="1"><b>Comentários:</b></td>
+                                <td colspan="4">{{ $hallEvent->customer_observation }}</td>
+                                <td><b>Prazo</b></td>
+                                <td>{{ $hallEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($hallEvent->deadline_date)) }}</td>
+                            </tr>
+                        </tfoot>
 
                     </table>
                 </div>
@@ -674,7 +702,7 @@ function quebraTexto($texto, $limite = 40)
                                 <th>Até</th>
                                 <th>Qtd</th>
                                 <th>Diárias</th>
-                                
+
                             </tr>
                         </thead>
                         <tbody>
@@ -691,11 +719,18 @@ function quebraTexto($texto, $limite = 40)
                                 </td>
                                 <td>{{ daysBetween1($item->in, $item->out) }}</td>
 
-                                
+
                             </tr>
                             @endforeach
                         </tbody>
-                        <tfoot class="table-footer"><tr style="background-color: #ffe0b1"><td colspan="1"><b>Comentários:</b></td><td colspan="4">{{ $addEvent->customer_observation }}</td><td><b>Prazo</b></td><td>{{ $addEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($addEvent->deadline_date)) }}</td></tr></tfoot>
+                        <tfoot class="table-footer">
+                            <tr style="background-color: #ffe0b1">
+                                <td colspan="1"><b>Comentários:</b></td>
+                                <td colspan="4">{{ $addEvent->customer_observation }}</td>
+                                <td><b>Prazo</b></td>
+                                <td>{{ $addEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($addEvent->deadline_date)) }}</td>
+                            </tr>
+                        </tfoot>
 
                     </table>
                 </div>
@@ -719,7 +754,7 @@ function quebraTexto($texto, $limite = 40)
                                 <th>Até</th>
                                 <th>Qtd</th>
                                 <th>Diárias</th>
-                                
+
                             </tr>
                         </thead>
                         <tbody>
@@ -738,11 +773,18 @@ function quebraTexto($texto, $limite = 40)
                                 </td>
                                 <td>{{ daysBetween1($item->in, $item->out) }}</td>
 
-                                
+
                             </tr>
                             @endforeach
                         </tbody>
-                        <tfoot class="table-footer"><tr style="background-color: #ffe0b1"><td colspan="1"><b>Comentários:</b></td><td colspan="5">{{ $transportEvent->customer_observation }}</td><td><b>Prazo</b></td><td>{{ $transportEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($transportEvent->deadline_date)) }}</td></tr></tfoot>
+                        <tfoot class="table-footer">
+                            <tr style="background-color: #ffe0b1">
+                                <td colspan="1"><b>Comentários:</b></td>
+                                <td colspan="5">{{ $transportEvent->customer_observation }}</td>
+                                <td><b>Prazo</b></td>
+                                <td>{{ $transportEvent->deadline_date === null ? "--" : date("d/m/Y", strtotime($transportEvent->deadline_date)) }}</td>
+                            </tr>
+                        </tfoot>
 
                     </table>
                 </div>
@@ -764,7 +806,10 @@ function quebraTexto($texto, $limite = 40)
                                 RESUMO DA PROPOSTA
                             </th>
                         </tr>
-                        <tr style="background-color: #e9540d; color: rgb(250, 249, 249);"><th>Serviços</th><th colspan="2" style="text-align: left;">Totais de:</th></tr>
+                        <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
+                            <th>Serviços</th>
+                            <th colspan="2" style="text-align: left;">Totais de:</th>
+                        </tr>
                     </thead>
                     <tbody>
                         @if($hotelEvent != null && $hotelEvent->eventHotelsOpt != null && count($hotelEvent->eventHotelsOpt) > 0)
@@ -772,7 +817,7 @@ function quebraTexto($texto, $limite = 40)
                             <td>Hospedagem</td>
                             <td>Rooms Night</td>
                             <td>{{ $sumQtdDayles}}</td>
-                            
+
                         </tr>
                         <?php $strip = !$strip; ?>
                         @endif
@@ -782,7 +827,7 @@ function quebraTexto($texto, $limite = 40)
                             <td>Alimentos & Bebidas</td>
                             <td>Refeições</td>
                             <td>{{ $sumABQtdDayles }}</td>
-                            
+
                         </tr>
                         <?php $strip = !$strip; ?>
                         @endif
@@ -793,7 +838,7 @@ function quebraTexto($texto, $limite = 40)
                             <td>Salões e eventos</td>
                             <td>Serviços</td>
                             <td>{{ $sumHallQtdDayles }}</td>
-                            
+
                         </tr>
                         <?php $strip = !$strip; ?>
                         @endif
@@ -804,7 +849,7 @@ function quebraTexto($texto, $limite = 40)
                             <td>Adicionais</td>
                             <td>Serviços</td>
                             <td>{{ $sumAddQtdDayles }}</td>
-                            
+
                         </tr>
                         <?php $strip = !$strip; ?>
                         @endif
@@ -814,12 +859,12 @@ function quebraTexto($texto, $limite = 40)
                             <td>Transportes</td>
                             <td>Veículos</td>
                             <td>{{ $sumTransportQtdDayles}}</td>
-                            
+
                         </tr>
                         <?php $strip = !$strip; ?>
                         @endif
                     </tbody>
-                    
+
                 </table>
             </div>
 
