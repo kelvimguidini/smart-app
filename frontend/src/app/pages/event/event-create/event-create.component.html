@@ -1350,23 +1350,27 @@
         </div>
 
         <!-- DATAS IN / OUT -->
-        <div class="col-md-6 form-group mb-3">
-          <label for="opt_in" class="form-label font-weight-bold">
-            Data Entrada (IN):
+        <!-- DATAS IN / OUT (Flatpickr Range Picker) -->
+        <div class="col-md-12 form-group mb-3">
+          <label for="opt_date_range" class="form-label font-weight-bold">
+            Período (Entrada - Saída):
             <span class="text-danger">*</span>
           </label>
-          <input type="date" id="opt_in" class="form-control" [class.is-invalid]="errors.in" [(ngModel)]="optForm.in" name="in" required />
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="fas fa-calendar-alt text-primary"></i></span>
+            <input
+              type="text"
+              #optDateRangePicker
+              id="opt_date_range"
+              class="form-control bg-white"
+              [class.is-invalid]="errors.in || errors.out"
+              placeholder="Selecione o período..."
+              readonly
+              required />
+          </div>
           <div *ngIf="errors.in" class="text-danger mt-1">
             <small *ngFor="let err of errors.in" class="d-block">{{ err }}</small>
           </div>
-        </div>
-
-        <div class="col-md-6 form-group mb-3">
-          <label for="opt_out" class="form-label font-weight-bold">
-            Data Saída (OUT):
-            <span class="text-danger">*</span>
-          </label>
-          <input type="date" id="opt_out" class="form-control" [class.is-invalid]="errors.out" [(ngModel)]="optForm.out" name="out" required />
           <div *ngIf="errors.out" class="text-danger mt-1">
             <small *ngFor="let err of errors.out" class="d-block">{{ err }}</small>
           </div>

@@ -38,6 +38,14 @@ class EloquentEventHotelRepository implements EventHotelRepositoryInterface
     /**
      * @inheritDoc
      */
+    public function find(int $id): ?EventHotel
+    {
+        return EventHotel::find($id);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function findWithDetails(int $id): ?EventHotel
     {
         return EventHotel::with([

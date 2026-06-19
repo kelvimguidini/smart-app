@@ -20,6 +20,14 @@ interface EventHotelRepositoryInterface
     public function updateByEventAndProvider(int $eventId, int $providerId, array $data): bool;
 
     /**
+     * Busca um EventHotel pelo ID.
+     *
+     * @param int $id
+     * @return EventHotel|null
+     */
+    public function find(int $id): ?EventHotel;
+
+    /**
      * Lista todos os EventHotels vinculados a um evento.
      *
      * @param int $eventId

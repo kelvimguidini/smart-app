@@ -89,7 +89,11 @@ export class CrdsComponent implements OnInit {
     // Carregar todos os clientes para o select (limitando a 100 para simplificar, ou backend deve suportar list sem paginação)
     this.customerService.getCustomers({ per_page: 500 }).subscribe({
       next: (res) => {
-        this.customers = res.data;
+        this.customers = (res.data || []).sort((a: any, b: any) => {
+          const nameA = a.name || '';
+          const nameB = b.name || '';
+          return nameA.localeCompare(nameB, 'pt-BR');
+        });
       },
       error: (err: any) => console.error(err),
     });

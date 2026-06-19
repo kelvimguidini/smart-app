@@ -33,12 +33,32 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   @ViewChild('dateRangePicker') dateRangePickerElement!: ElementRef;
   private flatpickrInstance: any;
 
+  private optFlatpickrInstance: any;
+
+  @ViewChild('optDateRangePicker') set optDateRangePicker(element: ElementRef) {
+    if (element) {
+      this.initOptFlatpickr(element.nativeElement);
+    } else if (this.optFlatpickrInstance) {
+      this.optFlatpickrInstance.destroy();
+      this.optFlatpickrInstance = null;
+    }
+  }
+
   isLoader = false;
   processing = false;
   errors: any = {};
 
   parseFloat(value: any): number {
     return parseFloat(value || 0);
+  }
+
+  sortByName<T>(list: T[], key: string = 'name'): T[] {
+    if (!list || list.length === 0) return [];
+    return [...list].sort((a: any, b: any) => {
+      const valA = String(a[key] || '');
+      const valB = String(b[key] || '');
+      return valA.localeCompare(valB, 'pt-BR');
+    });
   }
 
   // Active state
@@ -291,36 +311,36 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     this.eventService.getEditData(this.eventId).subscribe({
       next: (res) => {
         console.log('loadInitialData: edit-data API response =', res);
-        // Load master lists
-        this.customers = res.customers || [];
-        this.crds = res.crds || [];
-        this.users = res.users || [];
-        this.providers = res.providers || [];
-        this.providersService = res.providersService || [];
-        this.providersTransport = res.providersTransport || [];
-        this.brokers = res.brokers || [];
-        this.currencies = res.currencies || [];
-        this.regimes = res.regimes || [];
-        this.purposes = res.purposes || [];
-        this.services = res.services || [];
-        this.servicesType = res.servicesType || [];
-        this.locals = res.locals || [];
-        this.catsHotel = res.catsHotel || [];
-        this.aptosHotel = res.aptosHotel || [];
-        this.brokersT = res.brokersT || [];
-        this.vehicles = res.vehicles || [];
-        this.models = res.models || [];
-        this.servicesT = res.servicesT || [];
-        this.brands = res.brands || [];
-        this.servicesHall = res.servicesHall || [];
-        this.purposesHall = res.purposesHall || [];
-        this.servicesAdd = res.servicesAdd || [];
-        this.frequencies = res.frequencies || [];
-        this.measures = res.measures || [];
+        // Load master lists sorted alphabetically
+        this.customers = this.sortByName(res.customers || []);
+        this.crds = this.sortByName(res.crds || []);
+        this.users = this.sortByName(res.users || []);
+        this.providers = this.sortByName(res.providers || []);
+        this.providersService = this.sortByName(res.providersService || []);
+        this.providersTransport = this.sortByName(res.providersTransport || []);
+        this.brokers = this.sortByName(res.brokers || []);
+        this.currencies = this.sortByName(res.currencies || []);
+        this.regimes = this.sortByName(res.regimes || []);
+        this.purposes = this.sortByName(res.purposes || []);
+        this.services = this.sortByName(res.services || []);
+        this.servicesType = this.sortByName(res.servicesType || []);
+        this.locals = this.sortByName(res.locals || []);
+        this.catsHotel = this.sortByName(res.catsHotel || []);
+        this.aptosHotel = this.sortByName(res.aptosHotel || []);
+        this.brokersT = this.sortByName(res.brokersT || []);
+        this.vehicles = this.sortByName(res.vehicles || []);
+        this.models = this.sortByName(res.models || []);
+        this.servicesT = this.sortByName(res.servicesT || []);
+        this.brands = this.sortByName(res.brands || []);
+        this.servicesHall = this.sortByName(res.servicesHall || []);
+        this.purposesHall = this.sortByName(res.purposesHall || []);
+        this.servicesAdd = this.sortByName(res.servicesAdd || []);
+        this.frequencies = this.sortByName(res.frequencies || []);
+        this.measures = this.sortByName(res.measures || []);
         this.allStatus = res.allStatus || {};
-        this.customerRequesters = res.customerRequesters || [];
-        this.customerSectors = res.customerSectors || [];
-        this.customerCostCenters = res.customerCostCenters || [];
+        this.customerRequesters = this.sortByName(res.customerRequesters || []);
+        this.customerSectors = this.sortByName(res.customerSectors || []);
+        this.customerCostCenters = this.sortByName(res.customerCostCenters || []);
 
         if (res.event) {
           this.event = res.event;
@@ -429,6 +449,11 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     if (this.basicForm.cc && !this.costCentersFiltered.some(cc => cc.name === this.basicForm.cc)) {
       this.costCentersFiltered.push({ name: this.basicForm.cc });
     }
+
+    // Sort alphabetically
+    this.requestersFiltered = this.sortByName(this.requestersFiltered);
+    this.sectorsFiltered = this.sortByName(this.sectorsFiltered);
+    this.costCentersFiltered = this.sortByName(this.costCentersFiltered);
   }
 
   filterCrds(customerId: any) {
@@ -454,6 +479,8 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         this.crdsFiltered.push(existingCrd);
       }
     }
+    // Sort alphabetically
+    this.crdsFiltered = this.sortByName(this.crdsFiltered);
     console.log('filterCrds: filtered result =', this.crdsFiltered);
   }
 
@@ -726,6 +753,68 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   closeOptForm() {
     this.showOptForm = false;
     this.errors = {};
+    if (this.optFlatpickrInstance) {
+      this.optFlatpickrInstance.destroy();
+      this.optFlatpickrInstance = null;
+    }
+  }
+
+  formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  initOptFlatpickr(element: any) {
+    if (this.optFlatpickrInstance) {
+      this.optFlatpickrInstance.destroy();
+    }
+    this.optFlatpickrInstance = flatpickr(element, {
+      mode: 'range',
+      dateFormat: 'Y-m-d',
+      altInput: true,
+      altFormat: 'd/m/Y',
+      defaultDate: this.optForm.in && this.optForm.out ? [this.optForm.in, this.optForm.out] : undefined,
+      locale: this.getFlatpickrLocale(),
+      onChange: (selectedDates) => {
+        if (selectedDates.length === 2) {
+          this.optForm.in = this.formatDate(selectedDates[0]);
+          this.optForm.out = this.formatDate(selectedDates[1]);
+        } else {
+          this.optForm.in = '';
+          this.optForm.out = '';
+        }
+      },
+    });
+  }
+
+  getFlatpickrLocale(): any {
+    return {
+      firstDayOfWeek: 1,
+      weekdays: {
+        shorthand: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+        longhand: ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'],
+      },
+      months: {
+        shorthand: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+        longhand: [
+          'Janeiro',
+          'Fevereiro',
+          'Março',
+          'Abril',
+          'Maio',
+          'Junho',
+          'Julho',
+          'Agosto',
+          'Setembro',
+          'Outubro',
+          'Novembro',
+          'Dezembro',
+        ],
+      },
+      rangeSeparator: ' até ',
+    } as any;
   }
 
   saveOpt() {
