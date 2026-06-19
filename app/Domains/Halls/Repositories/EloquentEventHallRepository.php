@@ -26,6 +26,11 @@ class EloquentEventHallRepository implements EventHallRepositoryInterface
             ->update($data) > 0;
     }
 
+    public function find(int $id): ?EventHall
+    {
+        return EventHall::find($id);
+    }
+
     public function findWithDetails(int $id): ?EventHall
     {
         return EventHall::with([
