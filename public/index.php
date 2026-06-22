@@ -1,10 +1,5 @@
 <?php
 
-// HABILITA EXIBIÇÃO DE ERROS COMPLETA
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 header('X-SmartApp-Version: antigo');
 
 // Normalizar REQUEST_URI se contiver /public/ devido à reescrita do .htaccess do Apache
@@ -15,15 +10,6 @@ if (isset($_SERVER['REQUEST_URI'])) {
         $_SERVER['REQUEST_URI'] = '/antigo/';
     }
 }
-
-// ==========================================
-// CHECKPOINT 1: Início absoluto do arquivo
-// Descomente a linha abaixo para testar
-echo "1. Entrou no index.php do antigo";
-// die();
-// ==========================================
-
-
 
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
@@ -48,18 +34,7 @@ if (file_exists($maintenance = __DIR__ . '/../storage/framework/maintenance.php'
     require $maintenance;
 }
 
-// ==========================================
-// CHECKPOINT 2: Antes do autoload.php
-echo "2. Vai carregar autoload.php";
-// die();
-// ==========================================
 require __DIR__ . '/../vendor/autoload.php';
-
-// ==========================================
-// CHECKPOINT 3: Autoload carregado com sucesso
-echo "3. Autoload carregado";
-// die();
-// ==========================================
 
 /*
 |--------------------------------------------------------------------------
@@ -74,49 +49,15 @@ echo "3. Autoload carregado";
 
 $app = require_once __DIR__ . '/../bootstrap/app.php';
 
-// ==========================================
-// CHECKPOINT 4: App carregado (IoC instanciado)
-echo "4. Instanciou App Laravel";
-// die();
-// ==========================================
-
 // Forçar o URL base para o subfolder /antigo (garante que redirect('/') vá para /antigo/)
 $app->booted(function () {
-    // ==========================================
-    // CHECKPOINT 5: Bootstrap completo e executando boot
-    echo "5. Executou booted callback";
-    // die();
-    // ==========================================
     url()->forceRootUrl(rtrim(config('app.url'), '/') . '/antigo');
 });
 
 $kernel = $app->make(Kernel::class);
 
-// ==========================================
-// CHECKPOINT 6: Kernel instanciado, pronto para tratar a request
-echo "6. Kernel instanciado. Tentando tratar request.";
-// die();
-// ==========================================
+$response = $kernel->handle(
+    $request = Request::capture()
+)->send();
 
-$request = Request::capture();
-$response = $kernel->handle($request);
-
-// ==========================================
-// INSPECÇÃO DA RESPOSTA DO LARAVEL
-// ==========================================
-echo "<h2>Resposta do Laravel obtida!</h2>";
-echo "Status Code: " . $response->getStatusCode() . "<br>";
-
-if (method_exists($response, 'getTargetUrl')) {
-    echo "Redirecionando para: " . htmlspecialchars($response->getTargetUrl()) . "<br>";
-} else {
-    echo "Tipo da classe de resposta: " . get_class($response) . "<br>";
-    echo "Conteúdo (primeiros 1000 caracteres):<br>";
-    echo "<pre>" . htmlspecialchars(substr($response->getContent(), 0, 1000)) . "</pre>";
-}
-die();
-
-$response->send();
 $kernel->terminate($request, $response);
-die();
-// ==========================================
