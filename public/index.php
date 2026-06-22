@@ -51,7 +51,11 @@ $app = require_once __DIR__ . '/../bootstrap/app.php';
 
 // Forçar o URL base para o subfolder /antigo (garante que redirect('/') vá para /antigo/)
 $app->booted(function () {
-    url()->forceRootUrl(rtrim(config('app.url'), '/') . '/antigo');
+    $url = config('app.url');
+    if (strpos($url, '/antigo') === false) {
+        $url = rtrim($url, '/') . '/antigo';
+    }
+    url()->forceRootUrl($url);
 });
 
 $kernel = $app->make(Kernel::class);
