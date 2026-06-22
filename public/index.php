@@ -19,7 +19,8 @@ if (isset($_SERVER['REQUEST_URI'])) {
 // ==========================================
 // CHECKPOINT 1: Início absoluto do arquivo
 // Descomente a linha abaixo para testar
-// echo "1. Entrou no index.php do antigo"; die();
+echo "1. Entrou no index.php do antigo";
+die();
 // ==========================================
 
 
@@ -55,7 +56,8 @@ require __DIR__ . '/../vendor/autoload.php';
 
 // ==========================================
 // CHECKPOINT 3: Autoload carregado com sucesso
-// echo "3. Autoload carregado"; die();
+echo "3. Autoload carregado";
+die();
 // ==========================================
 
 /*
@@ -73,14 +75,16 @@ $app = require_once __DIR__ . '/../bootstrap/app.php';
 
 // ==========================================
 // CHECKPOINT 4: App carregado (IoC instanciado)
-// echo "4. Instanciou App Laravel"; die();
+echo "4. Instanciou App Laravel";
+die();
 // ==========================================
 
 // Forçar o URL base para o subfolder /antigo (garante que redirect('/') vá para /antigo/)
 $app->booted(function () {
     // ==========================================
     // CHECKPOINT 5: Bootstrap completo e executando boot
-    // echo "5. Executou booted callback"; die();
+    echo "5. Executou booted callback";
+    die();
     // ==========================================
     url()->forceRootUrl(rtrim(config('app.url'), '/') . '/antigo');
 });
@@ -89,7 +93,8 @@ $kernel = $app->make(Kernel::class);
 
 // ==========================================
 // CHECKPOINT 6: Kernel instanciado, pronto para tratar a request
-// echo "6. Kernel instanciado. Tentando tratar request."; die();
+echo "6. Kernel instanciado. Tentando tratar request.";
+die();
 // ==========================================
 
 $response = $kernel->handle(
