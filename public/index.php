@@ -95,11 +95,20 @@ $kernel = $app->make(Kernel::class);
 // ==========================================
 // CHECKPOINT 6: Kernel instanciado, pronto para tratar a request
 echo "6. Kernel instanciado. Tentando tratar request.";
-die();
+// die();
 // ==========================================
 
 $response = $kernel->handle(
     $request = Request::capture()
 )->send();
+// ==========================================
+// CHECKPOINT 6: Kernel instanciado, pronto para tratar a request
+echo "7. Kernel instanciado. Tentando tratar request.";
+// ==========================================
 
 $kernel->terminate($request, $response);
+// ==========================================
+// CHECKPOINT 6: Kernel instanciado, pronto para tratar a request
+echo "8. Kernel instanciado. Tentando tratar request.";
+die();
+// ==========================================
