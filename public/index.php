@@ -20,7 +20,7 @@ if (isset($_SERVER['REQUEST_URI'])) {
 // CHECKPOINT 1: Início absoluto do arquivo
 // Descomente a linha abaixo para testar
 echo "1. Entrou no index.php do antigo";
-die();
+// die();
 // ==========================================
 
 
@@ -50,7 +50,8 @@ if (file_exists($maintenance = __DIR__ . '/../storage/framework/maintenance.php'
 
 // ==========================================
 // CHECKPOINT 2: Antes do autoload.php
-// echo "2. Vai carregar autoload.php"; die();
+echo "2. Vai carregar autoload.php";
+die();
 // ==========================================
 require __DIR__ . '/../vendor/autoload.php';
 
