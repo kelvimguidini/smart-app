@@ -98,17 +98,25 @@ echo "6. Kernel instanciado. Tentando tratar request.";
 // die();
 // ==========================================
 
-$response = $kernel->handle(
-    $request = Request::capture()
-)->send();
-// ==========================================
-// CHECKPOINT 6: Kernel instanciado, pronto para tratar a request
-echo "7. Kernel instanciado. Tentando tratar request.";
-// ==========================================
+$request = Request::capture();
+$response = $kernel->handle($request);
 
-$kernel->terminate($request, $response);
 // ==========================================
-// CHECKPOINT 6: Kernel instanciado, pronto para tratar a request
-echo "8. Kernel instanciado. Tentando tratar request.";
+// INSPECÇÃO DA RESPOSTA DO LARAVEL
+// ==========================================
+echo "<h2>Resposta do Laravel obtida!</h2>";
+echo "Status Code: " . $response->getStatusCode() . "<br>";
+
+if (method_exists($response, 'getTargetUrl')) {
+    echo "Redirecionando para: " . htmlspecialchars($response->getTargetUrl()) . "<br>";
+} else {
+    echo "Tipo da classe de resposta: " . get_class($response) . "<br>";
+    echo "Conteúdo (primeiros 1000 caracteres):<br>";
+    echo "<pre>" . htmlspecialchars(substr($response->getContent(), 0, 1000)) . "</pre>";
+}
+die();
+
+$response->send();
+$kernel->terminate($request, $response);
 die();
 // ==========================================
