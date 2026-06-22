@@ -2,6 +2,13 @@
 
 header('X-SmartApp-Version: antigo');
 
+// DEBUG DE ROTEAMENTO (TEMPORÁRIO)
+echo "<h1>Conexao com o index.php do antigo bem-sucedida!</h1>";
+echo "URI requisitada: " . $_SERVER['REQUEST_URI'] . "<br>";
+echo "Script Name: " . $_SERVER['SCRIPT_NAME'] . "<br>";
+echo "PHP Self: " . $_SERVER['PHP_SELF'] . "<br>";
+die();
+
 
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
