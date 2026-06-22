@@ -1,12 +1,26 @@
 <?php
 
+// HABILITA EXIBIÇÃO DE ERROS COMPLETA
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 header('X-SmartApp-Version: antigo');
 
-// DEBUG DE ROTEAMENTO (TEMPORÁRIO)
-echo "<h1>Conexao com o index.php do antigo bem-sucedida!</h1>";
-echo "URI requisitada: " . $_SERVER['REQUEST_URI'] . "<br>";
-echo "Script Name: " . $_SERVER['SCRIPT_NAME'] . "<br>";
-echo "PHP Self: " . $_SERVER['PHP_SELF'] . "<br>";
+// Normalizar REQUEST_URI se contiver /public/ devido à reescrita do .htaccess do Apache
+if (isset($_SERVER['REQUEST_URI'])) {
+    if (strpos($_SERVER['REQUEST_URI'], '/antigo/public/') === 0) {
+        $_SERVER['REQUEST_URI'] = str_replace('/antigo/public/', '/antigo/', $_SERVER['REQUEST_URI']);
+    } elseif ($_SERVER['REQUEST_URI'] === '/antigo/public') {
+        $_SERVER['REQUEST_URI'] = '/antigo/';
+    }
+}
+
+// ==========================================
+// CHECKPOINT 1: Início absoluto do arquivo
+// Descomente a linha abaixo para testar
+// echo "1. Entrou no index.php do antigo"; die();
+// ==========================================
 
 
 
@@ -33,17 +47,16 @@ if (file_exists($maintenance = __DIR__ . '/../storage/framework/maintenance.php'
     require $maintenance;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Register The Auto Loader
-|--------------------------------------------------------------------------
-|
-| Composer provides a convenient, automatically generated class loader for
-| this package. We just need to utilize it! We'll simply require it into
-| the script here so we don't need to manually load our classes.
-|
-*/
+// ==========================================
+// CHECKPOINT 2: Antes do autoload.php
+// echo "2. Vai carregar autoload.php"; die();
+// ==========================================
 require __DIR__ . '/../vendor/autoload.php';
+
+// ==========================================
+// CHECKPOINT 3: Autoload carregado com sucesso
+// echo "3. Autoload carregado"; die();
+// ==========================================
 
 /*
 |--------------------------------------------------------------------------
@@ -58,12 +71,26 @@ require __DIR__ . '/../vendor/autoload.php';
 
 $app = require_once __DIR__ . '/../bootstrap/app.php';
 
+// ==========================================
+// CHECKPOINT 4: App carregado (IoC instanciado)
+// echo "4. Instanciou App Laravel"; die();
+// ==========================================
+
 // Forçar o URL base para o subfolder /antigo (garante que redirect('/') vá para /antigo/)
 $app->booted(function () {
+    // ==========================================
+    // CHECKPOINT 5: Bootstrap completo e executando boot
+    // echo "5. Executou booted callback"; die();
+    // ==========================================
     url()->forceRootUrl(rtrim(config('app.url'), '/') . '/antigo');
 });
 
 $kernel = $app->make(Kernel::class);
+
+// ==========================================
+// CHECKPOINT 6: Kernel instanciado, pronto para tratar a request
+// echo "6. Kernel instanciado. Tentando tratar request."; die();
+// ==========================================
 
 $response = $kernel->handle(
     $request = Request::capture()
