@@ -52,8 +52,8 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          port: 2121
-          protocol: ftps
+          port: 21
+          protocol: ftp
           timeout: 30000
           local-dir: ./
           server-dir: /www/antigo/ # Certifique-se de que o diretório termina com "/"
