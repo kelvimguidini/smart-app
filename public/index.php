@@ -7,7 +7,7 @@ echo "<h1>Conexao com o index.php do antigo bem-sucedida!</h1>";
 echo "URI requisitada: " . $_SERVER['REQUEST_URI'] . "<br>";
 echo "Script Name: " . $_SERVER['SCRIPT_NAME'] . "<br>";
 echo "PHP Self: " . $_SERVER['PHP_SELF'] . "<br>";
-die();
+
 
 
 use Illuminate\Contracts\Http\Kernel;
@@ -29,7 +29,7 @@ $_SERVER['PHP_SELF'] = '/antigo/index.php';
 | instead of starting the framework, which could cause an error.
 |
 */
-if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
+if (file_exists($maintenance = __DIR__ . '/../storage/framework/maintenance.php')) {
     require $maintenance;
 }
 
@@ -43,7 +43,7 @@ if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php'))
 | the script here so we don't need to manually load our classes.
 |
 */
-require __DIR__.'/../vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 /*
 |--------------------------------------------------------------------------
@@ -56,7 +56,7 @@ require __DIR__.'/../vendor/autoload.php';
 |
 */
 
-$app = require_once __DIR__.'/../bootstrap/app.php';
+$app = require_once __DIR__ . '/../bootstrap/app.php';
 
 // Forçar o URL base para o subfolder /antigo (garante que redirect('/') vá para /antigo/)
 $app->booted(function () {
