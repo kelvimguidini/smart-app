@@ -77,7 +77,7 @@ $app = require_once __DIR__ . '/../bootstrap/app.php';
 // ==========================================
 // CHECKPOINT 4: App carregado (IoC instanciado)
 echo "4. Instanciou App Laravel";
-die();
+// die();
 // ==========================================
 
 // Forçar o URL base para o subfolder /antigo (garante que redirect('/') vá para /antigo/)
@@ -85,7 +85,7 @@ $app->booted(function () {
     // ==========================================
     // CHECKPOINT 5: Bootstrap completo e executando boot
     echo "5. Executou booted callback";
-    die();
+    // die();
     // ==========================================
     url()->forceRootUrl(rtrim(config('app.url'), '/') . '/antigo');
 });
