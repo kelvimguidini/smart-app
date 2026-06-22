@@ -51,14 +51,14 @@ if (file_exists($maintenance = __DIR__ . '/../storage/framework/maintenance.php'
 // ==========================================
 // CHECKPOINT 2: Antes do autoload.php
 echo "2. Vai carregar autoload.php";
-die();
+// die();
 // ==========================================
 require __DIR__ . '/../vendor/autoload.php';
 
 // ==========================================
 // CHECKPOINT 3: Autoload carregado com sucesso
 echo "3. Autoload carregado";
-die();
+// die();
 // ==========================================
 
 /*
