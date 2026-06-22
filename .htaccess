@@ -2,13 +2,9 @@
     RewriteEngine On
     RewriteBase /antigo/
 
-    # Se for a raiz do antigo, vai direto para index.php (evita redirecionamento de diretório que expõe /public)
-    RewriteRule ^$ public/index.php [L]
+    # Se a requisição já é para a pasta public/, para o processamento
+    RewriteRule ^public/ - [L]
 
-    # Se não for um arquivo existente dentro da pasta public, manda pro index.php
-    RewriteCond %{DOCUMENT_ROOT}/antigo/public/$1 !-f
-    RewriteRule ^(.*)$ public/index.php [L,QSA]
-
-    # Se for um arquivo existente, serve da pasta public
+    # Redireciona todas as requisições para a subpasta public/
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
