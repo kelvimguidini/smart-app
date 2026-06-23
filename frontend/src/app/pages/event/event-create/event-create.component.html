@@ -1104,6 +1104,7 @@
             class="form-select"
             [class.is-invalid]="errors.currency_id"
             [(ngModel)]="providerLinkForm.currency_id"
+            (ngModelChange)="onCurrencyChange($event)"
             name="currency_id"
             required>
             <option value="">.:: Selecione ::.</option>
@@ -1117,17 +1118,35 @@
         <!-- Inputs Percentuais -->
         <div class="col-md-3 form-group mb-3">
           <label for="iss_percent" class="form-label font-weight-bold">ISS (%):</label>
-          <input type="number" step="0.01" id="iss_percent" class="form-control" [(ngModel)]="providerLinkForm.iss_percent" name="iss_percent" />
+          <input
+            type="text"
+            id="iss_percent"
+            class="form-control"
+            [value]="formatMoney(providerLinkForm.iss_percent)"
+            (input)="onPercentInput($event, 'iss_percent', 'providerLinkForm')"
+            name="iss_percent" />
         </div>
 
         <div class="col-md-3 form-group mb-3">
           <label for="service_percent" class="form-label font-weight-bold">Serviço (%):</label>
-          <input type="number" step="0.01" id="service_percent" class="form-control" [(ngModel)]="providerLinkForm.service_percent" name="service_percent" />
+          <input
+            type="text"
+            id="service_percent"
+            class="form-control"
+            [value]="formatMoney(providerLinkForm.service_percent)"
+            (input)="onPercentInput($event, 'service_percent', 'providerLinkForm')"
+            name="service_percent" />
         </div>
 
         <div class="col-md-3 form-group mb-3">
           <label for="iva_percent" class="form-label font-weight-bold">IVA (%):</label>
-          <input type="number" step="0.01" id="iva_percent" class="form-control" [(ngModel)]="providerLinkForm.iva_percent" name="iva_percent" />
+          <input
+            type="text"
+            id="iva_percent"
+            class="form-control"
+            [value]="formatMoney(providerLinkForm.iva_percent)"
+            (input)="onPercentInput($event, 'iva_percent', 'providerLinkForm')"
+            name="iva_percent" />
         </div>
 
         <div class="col-md-3 form-group mb-3">
@@ -1136,12 +1155,12 @@
             <span class="text-danger">*</span>
           </label>
           <input
-            type="number"
-            step="0.01"
+            type="text"
             id="taxa_4bts"
             class="form-control"
             [class.is-invalid]="errors.taxa_4bts"
-            [(ngModel)]="providerLinkForm.taxa_4bts"
+            [value]="formatMoney(providerLinkForm.taxa_4bts)"
+            (input)="onPercentInput($event, 'taxa_4bts', 'providerLinkForm')"
             name="taxa_4bts"
             required />
           <div *ngIf="errors.taxa_4bts" class="text-danger mt-1">
@@ -1188,7 +1207,17 @@
         <!-- IOF -->
         <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-3' : 'col-md-4'" class="form-group mb-3">
           <label for="iof" class="form-label font-weight-bold">IOF (%):</label>
-          <input type="number" step="0.01" id="iof" class="form-control" [(ngModel)]="providerLinkForm.iof" name="iof" />
+          <input
+            type="text"
+            id="iof"
+            class="form-control"
+            [class.is-invalid]="errors.iof"
+            [value]="formatMoney(providerLinkForm.iof)"
+            (input)="onPercentInput($event, 'iof', 'providerLinkForm')"
+            name="iof" />
+          <div *ngIf="errors.iof" class="text-danger mt-1">
+            <small *ngFor="let err of errors.iof" class="d-block">{{ err }}</small>
+          </div>
         </div>
 
         <!-- Observações -->
@@ -1298,10 +1327,13 @@
             Broker:
             <span class="text-danger">*</span>
           </label>
-          <select id="broker_id" class="form-select" [(ngModel)]="optForm.broker_id" name="broker_id" required>
+          <select id="broker_id" class="form-select" [class.is-invalid]="errors.broker || errors.broker_id" [(ngModel)]="optForm.broker_id" name="broker_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of optFormType === 'transport' ? brokersT : brokers" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.broker || errors.broker_id" class="text-danger mt-1">
+            <small *ngFor="let err of (errors.broker || errors.broker_id)" class="d-block">{{ err }}</small>
+          </div>
         </div>
 
         <!-- REGIME (hotel only) -->
@@ -1310,10 +1342,13 @@
             Regime:
             <span class="text-danger">*</span>
           </label>
-          <select id="regime_id" class="form-select" [(ngModel)]="optForm.regime_id" name="regime_id" required>
+          <select id="regime_id" class="form-select" [class.is-invalid]="errors.regime || errors.regime_id" [(ngModel)]="optForm.regime_id" name="regime_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of regimes" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.regime || errors.regime_id" class="text-danger mt-1">
+            <small *ngFor="let err of (errors.regime || errors.regime_id)" class="d-block">{{ err }}</small>
+          </div>
         </div>
 
         <!-- PROPÓSITO (hotel/hall only) -->
@@ -1322,10 +1357,13 @@
             Propósito:
             <span class="text-danger">*</span>
           </label>
-          <select id="purpose_id" class="form-select" [(ngModel)]="optForm.purpose_id" name="purpose_id" required>
+          <select id="purpose_id" class="form-select" [class.is-invalid]="errors.purpose || errors.purpose_id" [(ngModel)]="optForm.purpose_id" name="purpose_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of optFormType === 'hall' ? purposesHall : purposes" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.purpose || errors.purpose_id" class="text-danger mt-1">
+            <small *ngFor="let err of (errors.purpose || errors.purpose_id)" class="d-block">{{ err }}</small>
+          </div>
         </div>
 
         <!-- CATEGORIA APTO (hotel only) -->
@@ -1334,10 +1372,13 @@
             Categoria Apto:
             <span class="text-danger">*</span>
           </label>
-          <select id="category_id" class="form-select" [(ngModel)]="optForm.category_id" name="category_id" required>
+          <select id="category_id" class="form-select" [class.is-invalid]="errors.category_id || errors.category" [(ngModel)]="optForm.category_id" name="category_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of catsHotel" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.category_id || errors.category" class="text-danger mt-1">
+            <small *ngFor="let err of (errors.category_id || errors.category)" class="d-block">{{ err }}</small>
+          </div>
         </div>
 
         <!-- TIPO APTO (hotel only) -->
@@ -1346,10 +1387,13 @@
             Tipo Apto:
             <span class="text-danger">*</span>
           </label>
-          <select id="apto_id" class="form-select" [(ngModel)]="optForm.apto_id" name="apto_id" required>
+          <select id="apto_id" class="form-select" [class.is-invalid]="errors.apto_id || errors.apto" [(ngModel)]="optForm.apto_id" name="apto_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of aptosHotel" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.apto_id || errors.apto" class="text-danger mt-1">
+            <small *ngFor="let err of (errors.apto_id || errors.apto)" class="d-block">{{ err }}</small>
+          </div>
         </div>
 
         <!-- SERVIÇOS (A&B, Salões, Adicionais, Transporte) -->
@@ -1358,7 +1402,7 @@
             Serviço/Trecho:
             <span class="text-danger">*</span>
           </label>
-          <select id="service_id" class="form-select" [(ngModel)]="optForm.service_id" name="service_id" required>
+          <select id="service_id" class="form-select" [class.is-invalid]="errors.service || errors.service_id" [(ngModel)]="optForm.service_id" name="service_id" required>
             <option value="">.:: Selecione ::.</option>
             <option
               *ngFor="let option of optFormType === 'ab' ? services : optFormType === 'hall' ? servicesHall : optFormType === 'add' ? servicesAdd : servicesT"
@@ -1366,6 +1410,9 @@
               {{ option.name }}
             </option>
           </select>
+          <div *ngIf="errors.service || errors.service_id" class="text-danger mt-1">
+            <small *ngFor="let err of (errors.service || errors.service_id)" class="d-block">{{ err }}</small>
+          </div>
         </div>
 
         <!-- TIPO SERVIÇO (A&B only) -->
@@ -1374,10 +1421,13 @@
             Tipo de Serviço:
             <span class="text-danger">*</span>
           </label>
-          <select id="service_type_id" class="form-select" [(ngModel)]="optForm.service_type_id" name="service_type_id" required>
+          <select id="service_type_id" class="form-select" [class.is-invalid]="errors.service_type_id" [(ngModel)]="optForm.service_type_id" name="service_type_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of servicesType" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.service_type_id" class="text-danger mt-1">
+            <small *ngFor="let err of errors.service_type_id" class="d-block">{{ err }}</small>
+          </div>
         </div>
 
         <!-- LOCAL (A&B only) -->
@@ -1386,10 +1436,13 @@
             Local:
             <span class="text-danger">*</span>
           </label>
-          <select id="local_id" class="form-select" [(ngModel)]="optForm.local_id" name="local_id" required>
+          <select id="local_id" class="form-select" [class.is-invalid]="errors.local_id" [(ngModel)]="optForm.local_id" name="local_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of locals" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.local_id" class="text-danger mt-1">
+            <small *ngFor="let err of errors.local_id" class="d-block">{{ err }}</small>
+          </div>
         </div>
 
         <!-- FREQUENCIA (Adicionais only) -->
@@ -1398,10 +1451,13 @@
             Frequência:
             <span class="text-danger">*</span>
           </label>
-          <select id="frequency_id" class="form-select" [(ngModel)]="optForm.frequency_id" name="frequency_id" required>
+          <select id="frequency_id" class="form-select" [class.is-invalid]="errors.frequency || errors.frequency_id" [(ngModel)]="optForm.frequency_id" name="frequency_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of frequencies" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.frequency || errors.frequency_id" class="text-danger mt-1">
+            <small *ngFor="let err of (errors.frequency || errors.frequency_id)" class="d-block">{{ err }}</small>
+          </div>
         </div>
 
         <!-- MEDIDA (Adicionais only) -->
@@ -1410,10 +1466,13 @@
             Medida:
             <span class="text-danger">*</span>
           </label>
-          <select id="measure_id" class="form-select" [(ngModel)]="optForm.measure_id" name="measure_id" required>
+          <select id="measure_id" class="form-select" [class.is-invalid]="errors.measure || errors.measure_id" [(ngModel)]="optForm.measure_id" name="measure_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of measures" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.measure || errors.measure_id" class="text-danger mt-1">
+            <small *ngFor="let err of (errors.measure || errors.measure_id)" class="d-block">{{ err }}</small>
+          </div>
         </div>
 
         <!-- VEICULO, MODELO, MARCA (Transporte only) -->
@@ -1422,30 +1481,39 @@
             Tipo Veículo:
             <span class="text-danger">*</span>
           </label>
-          <select id="vehicle_id" class="form-select" [(ngModel)]="optForm.vehicle_id" name="vehicle_id" required>
+          <select id="vehicle_id" class="form-select" [class.is-invalid]="errors.vehicle || errors.vehicle_id" [(ngModel)]="optForm.vehicle_id" name="vehicle_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of vehicles" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.vehicle || errors.vehicle_id" class="text-danger mt-1">
+            <small *ngFor="let err of (errors.vehicle || errors.vehicle_id)" class="d-block">{{ err }}</small>
+          </div>
         </div>
         <div class="col-md-4 form-group mb-3" *ngIf="optFormType === 'transport'">
           <label for="car_model_id" class="form-label font-weight-bold">
             Modelo Veículo:
             <span class="text-danger">*</span>
           </label>
-          <select id="car_model_id" class="form-select" [(ngModel)]="optForm.car_model_id" name="car_model_id" required>
+          <select id="car_model_id" class="form-select" [class.is-invalid]="errors.model || errors.car_model_id" [(ngModel)]="optForm.car_model_id" name="car_model_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of models" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.model || errors.car_model_id" class="text-danger mt-1">
+            <small *ngFor="let err of (errors.model || errors.car_model_id)" class="d-block">{{ err }}</small>
+          </div>
         </div>
         <div class="col-md-4 form-group mb-3" *ngIf="optFormType === 'transport'">
           <label for="brand_id" class="form-label font-weight-bold">
             Marca Veículo:
             <span class="text-danger">*</span>
           </label>
-          <select id="brand_id" class="form-select" [(ngModel)]="optForm.brand_id" name="brand_id" required>
+          <select id="brand_id" class="form-select" [class.is-invalid]="errors.brand || errors.brand_id" [(ngModel)]="optForm.brand_id" name="brand_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of brands" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.brand || errors.brand_id" class="text-danger mt-1">
+            <small *ngFor="let err of (errors.brand || errors.brand_id)" class="d-block">{{ err }}</small>
+          </div>
         </div>
 
         <!-- DATAS IN / OUT -->
@@ -1489,7 +1557,13 @@
 
         <div class="col-md-6 form-group mb-3">
           <label for="kickback" class="form-label font-weight-bold">Comissão / Kickback (%):</label>
-          <input type="number" step="0.1" id="kickback" class="form-control" [(ngModel)]="optForm.kickback" name="kickback" />
+          <input
+            type="text"
+            id="kickback"
+            class="form-control"
+            [value]="formatMoney(optForm.kickback)"
+            (input)="onPercentInput($event, 'kickback', 'optForm')"
+            name="kickback" />
         </div>
 
         <!-- PROPOSTA RECEBIDA (COST), PROPOSAL PERCENT, ORDEM -->
@@ -1523,12 +1597,12 @@
             <span class="text-danger">*</span>
           </label>
           <input
-            type="number"
-            step="0.01"
+            type="text"
             id="received_proposal_percent"
             class="form-control"
             [class.is-invalid]="errors.received_proposal_percent"
-            [(ngModel)]="optForm.received_proposal_percent"
+            [value]="formatMoney(optForm.received_proposal_percent)"
+            (input)="onPercentInput($event, 'received_proposal_percent', 'optForm')"
             name="received_proposal_percent"
             required />
           <div *ngIf="errors.received_proposal_percent" class="text-danger mt-1">
@@ -1550,21 +1624,48 @@
         <ng-container *ngIf="optFormType === 'hotel'">
           <div class="col-md-4 form-group mb-3">
             <label for="compare_trivago" class="form-label font-weight-bold">Comparação Trivago:</label>
-            <input type="number" step="0.01" id="compare_trivago" class="form-control" [(ngModel)]="optForm.compare_trivago" name="compare_trivago" />
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted font-weight-bold" *ngIf="getOptCurrencySymbol()">
+                {{ getOptCurrencySymbol() }}
+              </span>
+              <input
+                type="text"
+                id="compare_trivago"
+                class="form-control"
+                [value]="formatMoney(optForm.compare_trivago)"
+                (input)="onMoneyInput($event, 'compare_trivago', 'optForm')"
+                name="compare_trivago" />
+            </div>
           </div>
           <div class="col-md-4 form-group mb-3">
             <label for="compare_website_htl" class="form-label font-weight-bold">Comparação Website HTL:</label>
-            <input
-              type="number"
-              step="0.01"
-              id="compare_website_htl"
-              class="form-control"
-              [(ngModel)]="optForm.compare_website_htl"
-              name="compare_website_htl" />
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted font-weight-bold" *ngIf="getOptCurrencySymbol()">
+                {{ getOptCurrencySymbol() }}
+              </span>
+              <input
+                type="text"
+                id="compare_website_htl"
+                class="form-control"
+                [value]="formatMoney(optForm.compare_website_htl)"
+                (input)="onMoneyInput($event, 'compare_website_htl', 'optForm')"
+                name="compare_website_htl" />
+            </div>
           </div>
           <div class="col-md-4 form-group mb-3">
             <label for="compare_omnibess" class="form-label font-weight-bold">Comparação Omnibess:</label>
-            <input type="number" step="0.01" id="compare_omnibess" class="form-control" [(ngModel)]="optForm.compare_omnibess" name="compare_omnibess" />
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted font-weight-bold" *ngIf="getOptCurrencySymbol()">
+                {{ getOptCurrencySymbol() }}
+              </span>
+              <input
+                type="text"
+                id="compare_omnibess"
+                class="form-control"
+                [value]="formatMoney(optForm.compare_omnibess)"
+                (input)="onMoneyInput($event, 'compare_omnibess', 'optForm')"
+                name="compare_omnibess" />
+            </div>
           </div>
         </ng-container>
 

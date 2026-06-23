@@ -35,13 +35,24 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   private flatpickrInstance: any;
 
   private optFlatpickrInstance: any;
+  private optFlatpickrElement: any = null;
 
   @ViewChild('optDateRangePicker') set optDateRangePicker(element: ElementRef) {
     if (element) {
-      this.initOptFlatpickr(element.nativeElement);
-    } else if (this.optFlatpickrInstance) {
-      this.optFlatpickrInstance.destroy();
-      this.optFlatpickrInstance = null;
+      if (element.nativeElement !== this.optFlatpickrElement) {
+        this.optFlatpickrElement = element.nativeElement;
+        setTimeout(() => {
+          if (element.nativeElement === this.optFlatpickrElement) {
+            this.initOptFlatpickr(element.nativeElement);
+          }
+        });
+      }
+    } else {
+      if (this.optFlatpickrInstance) {
+        this.optFlatpickrInstance.destroy();
+        this.optFlatpickrInstance = null;
+      }
+      this.optFlatpickrElement = null;
     }
   }
 
@@ -281,6 +292,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       dateFormat: 'Y-m-d',
       altInput: true,
       altFormat: 'd/m/Y',
+      disableMobile: true,
       defaultDate: this.basicForm.date && this.basicForm.date_final ? [this.basicForm.date, this.basicForm.date_final] : undefined,
       locale: {
         firstDayOfWeek: 1,
@@ -325,12 +337,25 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
           };
           this.basicForm.date = formatDate(selectedDates[0]);
           this.basicForm.date_final = formatDate(selectedDates[1]);
-        } else {
+        } else if (selectedDates.length === 0) {
           this.basicForm.date = '';
           this.basicForm.date_final = '';
         }
       },
+      onClose: (selectedDates) => {
+        if (selectedDates.length !== 2) {
+          if (this.basicForm.date && this.basicForm.date_final) {
+            this.flatpickrInstance.setDate([this.basicForm.date, this.basicForm.date_final]);
+          } else {
+            this.flatpickrInstance.clear();
+          }
+        }
+      },
     });
+
+    if (this.basicForm.date && this.basicForm.date_final) {
+      this.flatpickrInstance.setDate([this.basicForm.date, this.basicForm.date_final]);
+    }
   }
 
   loadInitialData() {
@@ -386,8 +411,12 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
           if (res.event.date_final) {
             this.basicForm.date_final = res.event.date_final.split('T')[0];
           }
-          if (this.flatpickrInstance && this.basicForm.date && this.basicForm.date_final) {
-            this.flatpickrInstance.setDate([this.basicForm.date, this.basicForm.date_final]);
+          if (this.flatpickrInstance) {
+            if (this.basicForm.date && this.basicForm.date_final) {
+              this.flatpickrInstance.setDate([this.basicForm.date, this.basicForm.date_final]);
+            } else {
+              this.flatpickrInstance.clear();
+            }
           }
 
           this.basicForm.crd_id = res.event.crd_id || '';
@@ -621,6 +650,30 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     event.target.value = this.formatMoney(parsed);
   }
 
+  onPercentInput(event: any, field: string, form: 'providerLinkForm' | 'optForm') {
+    const raw = event.target.value;
+    const clean = raw.replace(/\D/g, '');
+    if (!clean) {
+      if (form === 'providerLinkForm') {
+        this.providerLinkForm[field] = 0;
+      } else {
+        this.optForm[field] = 0;
+      }
+      event.target.value = '0,00';
+      return;
+    }
+    let parsed = parseFloat(clean) / 100;
+    if (parsed > 100) {
+      parsed = 100;
+    }
+    if (form === 'providerLinkForm') {
+      this.providerLinkForm[field] = parsed;
+    } else {
+      this.optForm[field] = parsed;
+    }
+    event.target.value = this.formatMoney(parsed);
+  }
+
   openAddProviderLink(type: 'hotel' | 'ab' | 'hall' | 'add' | 'transport', editItem: any = null) {
     this.providerLinkType = type;
     this.errors = {};
@@ -671,7 +724,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       this.providerLinkForm = {
         id: 0,
         provider_id: '',
-        currency_id: this.currencies[0]?.id || '',
+        currency_id: '',
         iss_percent: 0,
         service_percent: 0,
         iva_percent: 0,
@@ -699,9 +752,59 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     this.errors = {};
   }
 
+  onCurrencyChange(currencyId: any) {
+    if (!currencyId) return;
+    const currency = this.currencies.find(c => Number(c.id) === Number(currencyId));
+    if (currency) {
+      if (currency.sigla !== 'BRL') {
+        if (!this.providerLinkForm.iof || Number(this.providerLinkForm.iof) === 0) {
+          this.providerLinkForm.iof = 3.5;
+        }
+      } else {
+        this.providerLinkForm.iof = 0;
+      }
+    }
+  }
+
   saveProviderLink() {
     this.processing = true;
     this.errors = {};
+
+    let hasErrors = false;
+
+    if (!this.providerLinkForm.provider_id) {
+      this.errors.provider_id = ['O campo fornecedor é obrigatório.'];
+      hasErrors = true;
+    }
+
+    if (!this.providerLinkForm.currency_id) {
+      this.errors.currency_id = ['O campo moeda é obrigatório.'];
+      hasErrors = true;
+    }
+
+    if (
+      this.providerLinkForm.taxa_4bts === null ||
+      this.providerLinkForm.taxa_4bts === undefined ||
+      this.providerLinkForm.taxa_4bts === ''
+    ) {
+      this.errors.taxa_4bts = ['O campo taxa 4BTS é obrigatório.'];
+      hasErrors = true;
+    }
+
+    const selectedCurrency = this.currencies.find(c => Number(c.id) === Number(this.providerLinkForm.currency_id));
+    if (selectedCurrency && selectedCurrency.sigla !== 'BRL') {
+      const iofVal = Number(this.providerLinkForm.iof || 0);
+      if (iofVal <= 0) {
+        this.errors.iof = ['O IOF não pode ser zero ou menor para moedas estrangeiras.'];
+        hasErrors = true;
+      }
+    }
+
+    if (hasErrors) {
+      this.processing = false;
+      this.toastService.error('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
 
     if (this.providerLinkType === 'hotel' && !this.providerLinkForm.change_hotel_times) {
       const found = this.providers.find(p => p.id === this.providerLinkForm.provider_id);
@@ -802,8 +905,8 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         broker_id: editItem.broker_id || '',
         regime_id: editItem.regime_id || '',
         purpose_id: editItem.purpose_id || '',
-        category_id: editItem.category_id || '',
-        apto_id: editItem.apto_id || '',
+        category_id: editItem.category_hotel_id || editItem.category_id || '',
+        apto_id: editItem.apto_hotel_id || editItem.apto_id || '',
         service_id: editItem.service_id || '',
         service_type_id: editItem.service_type_id || '',
         local_id: editItem.local_id || '',
@@ -812,8 +915,8 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         vehicle_id: editItem.vehicle_id || '',
         car_model_id: editItem.car_model_id || '',
         brand_id: editItem.brand_id || '',
-        in: editItem.in ? editItem.in.split('T')[0] : '',
-        out: editItem.out ? editItem.out.split('T')[0] : '',
+        in: editItem.in ? editItem.in.substring(0, 10) : '',
+        out: editItem.out ? editItem.out.substring(0, 10) : '',
         count: editItem.count || 1,
         kickback: editItem.kickback || 0,
         received_proposal: editItem.received_proposal || 0,
@@ -828,11 +931,11 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       this.optForm = {
         id: 0,
         parent_id: parentId,
-        broker_id: this.brokers[0]?.id || '',
-        regime_id: this.regimes[0]?.id || '',
-        purpose_id: this.purposes[0]?.id || '',
-        category_id: this.catsHotel[0]?.id || '',
-        apto_id: this.aptosHotel[0]?.id || '',
+        broker_id: '',
+        regime_id: '',
+        purpose_id: '',
+        category_id: '',
+        apto_id: '',
         service_id: '',
         service_type_id: '',
         local_id: '',
@@ -853,29 +956,16 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         observation: '',
         order: 0,
       };
-
-      // Set first values based on type defaults
-      if (type === 'ab') {
-        this.optForm.service_id = this.services[0]?.id || '';
-        this.optForm.service_type_id = this.servicesType[0]?.id || '';
-        this.optForm.local_id = this.locals[0]?.id || '';
-      } else if (type === 'hall') {
-        this.optForm.service_id = this.servicesHall[0]?.id || '';
-        this.optForm.purpose_id = this.purposesHall[0]?.id || '';
-      } else if (type === 'add') {
-        this.optForm.service_id = this.servicesAdd[0]?.id || '';
-        this.optForm.frequency_id = this.frequencies[0]?.id || '';
-        this.optForm.measure_id = this.measures[0]?.id || '';
-      } else if (type === 'transport') {
-        this.optForm.service_id = this.servicesT[0]?.id || '';
-        this.optForm.vehicle_id = this.vehicles[0]?.id || '';
-        this.optForm.car_model_id = this.models[0]?.id || '';
-        this.optForm.brand_id = this.brands[0]?.id || '';
-        this.optForm.broker_id = this.brokersT[0]?.id || '';
-      }
     }
 
     this.showOptForm = true;
+    if (this.optFlatpickrInstance) {
+      if (this.optForm.in && this.optForm.out) {
+        this.optFlatpickrInstance.setDate([this.optForm.in, this.optForm.out]);
+      } else {
+        this.optFlatpickrInstance.clear();
+      }
+    }
   }
 
   closeOptForm() {
@@ -903,15 +993,25 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       dateFormat: 'Y-m-d',
       altInput: true,
       altFormat: 'd/m/Y',
+      disableMobile: true,
       defaultDate: this.optForm.in && this.optForm.out ? [this.optForm.in, this.optForm.out] : undefined,
       locale: this.getFlatpickrLocale(),
       onChange: (selectedDates) => {
         if (selectedDates.length === 2) {
           this.optForm.in = this.formatDate(selectedDates[0]);
           this.optForm.out = this.formatDate(selectedDates[1]);
-        } else {
+        } else if (selectedDates.length === 0) {
           this.optForm.in = '';
           this.optForm.out = '';
+        }
+      },
+      onClose: (selectedDates) => {
+        if (selectedDates.length !== 2) {
+          if (this.optForm.in && this.optForm.out) {
+            this.optFlatpickrInstance.setDate([this.optForm.in, this.optForm.out]);
+          } else {
+            this.optFlatpickrInstance.clear();
+          }
         }
       },
     });
@@ -948,6 +1048,100 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   saveOpt() {
     this.processing = true;
     this.errors = {};
+
+    let hasErrors = false;
+
+    // Period validation
+    if (!this.optForm.in || !this.optForm.out) {
+      if (!this.optForm.in) this.errors.in = ['O campo de entrada é obrigatório.'];
+      if (!this.optForm.out) this.errors.out = ['O campo de saída é obrigatório.'];
+      hasErrors = true;
+    } else {
+      const dateIn = new Date(this.optForm.in);
+      const dateOut = new Date(this.optForm.out);
+      if (dateOut < dateIn) {
+        this.errors.out = ['A data de saída deve ser igual ou posterior à data de entrada.'];
+        hasErrors = true;
+      }
+    }
+
+    // Count validation
+    if (this.optForm.count === null || this.optForm.count === undefined || this.optForm.count === '') {
+      this.errors.count = ['O campo quantidade é obrigatório.'];
+      hasErrors = true;
+    } else if (Number(this.optForm.count) <= 0) {
+      this.errors.count = ['A quantidade deve ser maior que zero.'];
+      hasErrors = true;
+    }
+
+    // Received proposal validation
+    if (this.optForm.received_proposal === null || this.optForm.received_proposal === undefined || this.optForm.received_proposal === '') {
+      this.errors.received_proposal = ['O campo proposta recebida é obrigatório.'];
+      hasErrors = true;
+    }
+
+    // Markup percentage validation
+    if (this.optForm.received_proposal_percent === null || this.optForm.received_proposal_percent === undefined || this.optForm.received_proposal_percent === '') {
+      this.errors.received_proposal_percent = ['O campo markup divisor é obrigatório.'];
+      hasErrors = true;
+    } else {
+      const markupVal = Number(this.optForm.received_proposal_percent);
+      if (isNaN(markupVal) || markupVal <= 0 || markupVal > 100) {
+        this.errors.received_proposal_percent = ['O markup divisor deve ser maior que 0% e no máximo 100%.'];
+        hasErrors = true;
+      }
+    }
+
+    // Dynamic select validations
+    switch (this.optFormType) {
+      case 'hotel':
+        if (!this.optForm.broker_id) { this.errors.broker_id = ['O campo broker é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.regime_id) { this.errors.regime_id = ['O campo regime é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.purpose_id) { this.errors.purpose_id = ['O campo propósito é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.category_id) { this.errors.category_id = ['O campo categoria apto é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.apto_id) { this.errors.apto_id = ['O campo tipo apto é obrigatório.']; hasErrors = true; }
+        break;
+      case 'ab':
+        if (!this.optForm.broker_id) { this.errors.broker_id = ['O campo broker é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.service_id) { this.errors.service_id = ['O campo serviço é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.service_type_id) { this.errors.service_type_id = ['O campo tipo de serviço é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.local_id) { this.errors.local_id = ['O campo local é obrigatório.']; hasErrors = true; }
+        break;
+      case 'hall':
+        if (!this.optForm.broker_id) { this.errors.broker_id = ['O campo broker é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.purpose_id) { this.errors.purpose_id = ['O campo propósito é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.service_id) { this.errors.service_id = ['O campo serviço é obrigatório.']; hasErrors = true; }
+        break;
+      case 'add':
+        if (!this.optForm.frequency_id) { this.errors.frequency_id = ['O campo frequência é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.measure_id) { this.errors.measure_id = ['O campo medida é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.service_id) { this.errors.service_id = ['O campo serviço é obrigatório.']; hasErrors = true; }
+        break;
+      case 'transport':
+        if (!this.optForm.broker_id) { this.errors.broker_id = ['O campo broker é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.service_id) { this.errors.service_id = ['O campo serviço/trecho é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.vehicle_id) { this.errors.vehicle_id = ['O campo tipo veículo é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.car_model_id) { this.errors.car_model_id = ['O campo modelo veículo é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.brand_id) { this.errors.brand_id = ['O campo marca veículo é obrigatório.']; hasErrors = true; }
+        break;
+    }
+
+    if (hasErrors) {
+      this.processing = false;
+      // Map frontend keys to backend keys for visual error cues consistency in HTML
+      if (this.errors.broker_id) this.errors.broker = this.errors.broker_id;
+      if (this.errors.regime_id) this.errors.regime = this.errors.regime_id;
+      if (this.errors.purpose_id) this.errors.purpose = this.errors.purpose_id;
+      if (this.errors.vehicle_id) this.errors.vehicle = this.errors.vehicle_id;
+      if (this.errors.car_model_id) this.errors.model = this.errors.car_model_id;
+      if (this.errors.service_id) this.errors.service = this.errors.service_id;
+      if (this.errors.brand_id) this.errors.brand = this.errors.brand_id;
+      if (this.errors.frequency_id) this.errors.frequency = this.errors.frequency_id;
+      if (this.errors.measure_id) this.errors.measure = this.errors.measure_id;
+
+      this.toastService.error('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
 
     let payload: any = { ...this.optForm };
     let obs: Observable<any>;

@@ -6,27 +6,37 @@ export interface ToastMessage {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ToastService {
   toasts = signal<ToastMessage[]>([]);
 
   show(message: string, type: 'success' | 'danger' | 'warning' | 'info' = 'info') {
     const toast: ToastMessage = { message, type };
-    this.toasts.update(current => [...current, toast]);
+    this.toasts.update((current) => [...current, toast]);
 
-    // Auto-remove after 10 seconds
-    setTimeout(() => {
-      this.remove(toast);
-    }, 10000);
+    // Auto-remove non-danger toasts after 10 seconds
+    // if (type !== 'danger') {
+    //   setTimeout(() => {
+    //     this.remove(toast);
+    //   }, 10000);
+    // }
   }
 
   remove(toast: ToastMessage) {
-    this.toasts.update(current => current.filter(t => t !== toast));
+    this.toasts.update((current) => current.filter((t) => t !== toast));
   }
 
-  success(message: string) { this.show(message, 'success'); }
-  error(message: string) { this.show(message, 'danger'); }
-  warning(message: string) { this.show(message, 'warning'); }
-  info(message: string) { this.show(message, 'info'); }
+  success(message: string) {
+    this.show(message, 'success');
+  }
+  error(message: string) {
+    this.show(message, 'danger');
+  }
+  warning(message: string) {
+    this.show(message, 'warning');
+  }
+  info(message: string) {
+    this.show(message, 'info');
+  }
 }

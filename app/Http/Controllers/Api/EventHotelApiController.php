@@ -50,6 +50,16 @@ class EventHotelApiController extends Controller
             'taxa_4bts' => 'required|numeric|min:0|max:100',
         ]);
 
+        $currency = \App\Models\Currency::find($request->currency);
+        if ($currency && $currency->sigla !== 'BRL') {
+            $request->validate([
+                'iof' => 'required|numeric|gt:0',
+            ], [
+                'iof.required' => 'O IOF é obrigatório para moedas estrangeiras.',
+                'iof.gt' => 'O IOF não pode ser zero ou menor para moedas estrangeiras.',
+            ]);
+        }
+
         try {
             $user = $this->userRepository->find(Auth::user()->id);
             if ($request->id > 0) {
