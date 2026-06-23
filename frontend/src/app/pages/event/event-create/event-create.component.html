@@ -481,6 +481,19 @@
                 </button>
                 <button
                   type="button"
+                  class="btn btn-sm btn-outline-primary"
+                  title="Alterar Markup de Todas as Tarifas"
+                  (click)="
+                    updateMarkupBulk(
+                      item,
+                      activeTab === 1 ? 'hotel' : activeTab === 2 ? 'ab' : activeTab === 3 ? 'hall' : activeTab === 4 ? 'add' : 'transport'
+                    )
+                  ">
+                  <i class="fas fa-percentage me-1"></i>
+                  Editar Markup Geral
+                </button>
+                <button
+                  type="button"
                   class="btn btn-sm btn-outline-success"
                   title="Adicionar Nova Tarifa/Opção"
                   (click)="
@@ -552,7 +565,7 @@
                       </ng-container>
 
                       <!-- Comparativo Column (Grouped, only when activeTab === 1) -->
-                      <th colspan="3" class="bg-secondary text-white text-center font-weight-bold border-bottom-0" *ngIf="activeTab === 1">Comparativo</th>
+                      <th colspan="3" class="bg-secondary text-white text-center font-weight-bold border-bottom-0" *ngIf="activeTab === 1 && showDetailsHotel">Comparativo</th>
 
                       <!-- Actions Column -->
                       <th rowspan="2" class="align-middle text-center bg-light text-dark font-weight-bold" style="width: 100px" *ngIf="!isReadOnly">Ações</th>
@@ -612,7 +625,7 @@
                       </ng-container>
 
                       <!-- Comparativo Columns -->
-                      <ng-container *ngIf="activeTab === 1">
+                      <ng-container *ngIf="activeTab === 1 && showDetailsHotel">
                         <th class="bg-secondary text-white text-end">Trivago</th>
                         <th class="bg-secondary text-white text-end">Website HTL</th>
                         <th class="bg-secondary text-white text-end">Omnibess</th>
@@ -644,7 +657,7 @@
                               ? 8
                               : 6
                             : 0) +
-                          (activeTab === 1 ? 3 : 0) +
+                          (activeTab === 1 && showDetailsHotel ? 3 : 0) +
                           (isReadOnly ? 0 : 1)
                         "
                         class="py-4 text-muted">
@@ -679,8 +692,8 @@
 
                       <td class="text-center">{{ opt.in | date: 'dd/MM/yyyy' }}</td>
                       <td class="text-center">{{ opt.out | date: 'dd/MM/yyyy' }}</td>
-                      <td class="text-center">{{ opt.count || 0 }}</td>
-                      <td class="text-center">{{ daysBetween(opt.in, opt.out, activeTab === 2) }}</td>
+                      <td class="text-center">{{ (opt.count || 0) | number:'1.0-0' }}</td>
+                      <td class="text-center">{{ daysBetween(opt.in, opt.out, activeTab === 2) | number:'1.0-0' }}</td>
 
                       <!-- Sale and Cost Calculations -->
                       <td class="bg-success-light text-success font-weight-bold text-center">{{ opt.kickback }}%</td>
@@ -780,7 +793,7 @@
                       </ng-container>
 
                       <!-- Comparativo Values -->
-                      <ng-container *ngIf="activeTab === 1">
+                      <ng-container *ngIf="activeTab === 1 && showDetailsHotel">
                         <td class="bg-compare text-end font-weight-bold">{{ formatCurrency(opt.compare_trivago || 0, item.currency?.sigla) }}</td>
                         <td class="bg-compare text-end font-weight-bold">{{ formatCurrency(opt.compare_website_htl || 0, item.currency?.sigla) }}</td>
                         <td class="bg-compare text-end font-weight-bold">{{ formatCurrency(opt.compare_omnibess || 0, item.currency?.sigla) }}</td>
@@ -847,10 +860,10 @@
                       <td></td>
                       <!-- Propósito -->
                       <td class="font-weight-bold text-start">Room Nights:</td>
-                      <td class="font-weight-bold text-center">{{ roomNights(item, false) }}</td>
+                      <td class="font-weight-bold text-center">{{ roomNights(item, false) | number:'1.0-0' }}</td>
                       <td class="font-weight-bold text-start"># Aptos:</td>
-                      <td class="text-center font-weight-bold">{{ sumCount(item) }}</td>
-                      <td class="text-center font-weight-bold">{{ sumNts(item, false) }}</td>
+                      <td class="text-center font-weight-bold">{{ sumCount(item) | number:'1.0-0' }}</td>
+                      <td class="text-center font-weight-bold">{{ sumNts(item, false) | number:'1.0-0' }}</td>
                       <td></td>
                       <!-- NTS spacer -->
                       <td class="bg-success-solid font-weight-bold text-end">Total venda:</td>
@@ -891,15 +904,17 @@
                       </ng-container>
 
                       <!-- Comparativo Sum Columns -->
-                      <td class="bg-secondary text-white text-end font-weight-bold">
-                        {{ formatCurrency(sumCompare(item, 'compare_trivago'), item.currency?.sigla) }}
-                      </td>
-                      <td class="bg-secondary text-white text-end font-weight-bold">
-                        {{ formatCurrency(sumCompare(item, 'compare_website_htl'), item.currency?.sigla) }}
-                      </td>
-                      <td class="bg-secondary text-white text-end font-weight-bold">
-                        {{ formatCurrency(sumCompare(item, 'compare_omnibess'), item.currency?.sigla) }}
-                      </td>
+                      <ng-container *ngIf="activeTab === 1 && showDetailsHotel">
+                        <td class="bg-secondary text-white text-end font-weight-bold">
+                          {{ formatCurrency(sumCompare(item, 'compare_trivago'), item.currency?.sigla) }}
+                        </td>
+                        <td class="bg-secondary text-white text-end font-weight-bold">
+                          {{ formatCurrency(sumCompare(item, 'compare_website_htl'), item.currency?.sigla) }}
+                        </td>
+                        <td class="bg-secondary text-white text-end font-weight-bold">
+                          {{ formatCurrency(sumCompare(item, 'compare_omnibess'), item.currency?.sigla) }}
+                        </td>
+                      </ng-container>
 
                       <td *ngIf="!isReadOnly"></td>
                     </tr>
@@ -915,10 +930,10 @@
                         *ngIf="activeTab === 2 || activeTab === 3 || activeTab === 4 || activeTab === 5"></td>
 
                       <td class="font-weight-bold text-start">Room Nights:</td>
-                      <td class="font-weight-bold text-center">{{ roomNights(item, activeTab === 2) }}</td>
+                      <td class="font-weight-bold text-center">{{ roomNights(item, activeTab === 2) | number:'1.0-0' }}</td>
                       <td class="font-weight-bold text-start"># Qtd:</td>
-                      <td class="text-center font-weight-bold">{{ sumCount(item) }}</td>
-                      <td class="text-center font-weight-bold">{{ sumNts(item, activeTab === 2) }}</td>
+                      <td class="text-center font-weight-bold">{{ sumCount(item) | number:'1.0-0' }}</td>
+                      <td class="text-center font-weight-bold">{{ sumNts(item, activeTab === 2) | number:'1.0-0' }}</td>
 
                       <td class="bg-success-solid font-weight-bold text-end">Total Venda:</td>
                       <td class="bg-success-solid font-weight-bold text-end">{{ formatCurrency(sumSale(item, activeTab === 2), item.currency?.sigla) }}</td>
@@ -990,7 +1005,7 @@
                           activeTab === 1
                             ? showDetailsHotel
                               ? 13
-                              : 5
+                              : 2
                             : (activeTab === 2 ? showDetailsAB : activeTab === 3 ? showDetailsHall : activeTab === 4 ? showDetailsAdd : showDetailsTransport)
                               ? activeTab === 2
                                 ? 10
@@ -1024,7 +1039,7 @@
                           activeTab === 1
                             ? showDetailsHotel
                               ? 13
-                              : 5
+                              : 2
                             : (activeTab === 2 ? showDetailsAB : activeTab === 3 ? showDetailsHall : activeTab === 4 ? showDetailsAdd : showDetailsTransport)
                               ? activeTab === 2
                                 ? 10
@@ -1122,7 +1137,7 @@
             type="text"
             id="iss_percent"
             class="form-control"
-            [value]="formatMoney(providerLinkForm.iss_percent)"
+            [value]="formatPercent(providerLinkForm.iss_percent)"
             (input)="onPercentInput($event, 'iss_percent', 'providerLinkForm')"
             name="iss_percent" />
         </div>
@@ -1133,7 +1148,7 @@
             type="text"
             id="service_percent"
             class="form-control"
-            [value]="formatMoney(providerLinkForm.service_percent)"
+            [value]="formatPercent(providerLinkForm.service_percent)"
             (input)="onPercentInput($event, 'service_percent', 'providerLinkForm')"
             name="service_percent" />
         </div>
@@ -1144,7 +1159,7 @@
             type="text"
             id="iva_percent"
             class="form-control"
-            [value]="formatMoney(providerLinkForm.iva_percent)"
+            [value]="formatPercent(providerLinkForm.iva_percent)"
             (input)="onPercentInput($event, 'iva_percent', 'providerLinkForm')"
             name="iva_percent" />
         </div>
@@ -1159,7 +1174,7 @@
             id="taxa_4bts"
             class="form-control"
             [class.is-invalid]="errors.taxa_4bts"
-            [value]="formatMoney(providerLinkForm.taxa_4bts)"
+            [value]="formatPercent(providerLinkForm.taxa_4bts)"
             (input)="onPercentInput($event, 'taxa_4bts', 'providerLinkForm')"
             name="taxa_4bts"
             required />
@@ -1212,7 +1227,7 @@
             id="iof"
             class="form-control"
             [class.is-invalid]="errors.iof"
-            [value]="formatMoney(providerLinkForm.iof)"
+            [value]="formatPercent(providerLinkForm.iof)"
             (input)="onPercentInput($event, 'iof', 'providerLinkForm')"
             name="iof" />
           <div *ngIf="errors.iof" class="text-danger mt-1">
@@ -1549,7 +1564,7 @@
             Quantidade:
             <span class="text-danger">*</span>
           </label>
-          <input type="number" id="count" class="form-control" [class.is-invalid]="errors.count" [(ngModel)]="optForm.count" name="count" required />
+          <input type="number" step="1" id="count" class="form-control" [class.is-invalid]="errors.count" [(ngModel)]="optForm.count" name="count" required />
           <div *ngIf="errors.count" class="text-danger mt-1">
             <small *ngFor="let err of errors.count" class="d-block">{{ err }}</small>
           </div>
@@ -1561,7 +1576,7 @@
             type="text"
             id="kickback"
             class="form-control"
-            [value]="formatMoney(optForm.kickback)"
+            [value]="formatPercent(optForm.kickback)"
             (input)="onPercentInput($event, 'kickback', 'optForm')"
             name="kickback" />
         </div>
@@ -1601,7 +1616,7 @@
             id="received_proposal_percent"
             class="form-control"
             [class.is-invalid]="errors.received_proposal_percent"
-            [value]="formatMoney(optForm.received_proposal_percent)"
+            [value]="formatPercent(optForm.received_proposal_percent)"
             (input)="onPercentInput($event, 'received_proposal_percent', 'optForm')"
             name="received_proposal_percent"
             required />
@@ -1682,6 +1697,41 @@
           <span *ngIf="processing" class="spinner-border spinner-border-sm me-1"></span>
           <i class="fas fa-save me-1"></i>
           Salvar Detalhe
+        </button>
+      </div>
+    </form>
+  </app-modal>
+
+  <!-- MODAL 3: EDITAR MARKUP EM MASSA -->
+  <app-modal
+    [show]="showMarkupForm"
+    (close)="closeMarkupForm()"
+    title="Editar Markup Geral"
+    icon="fa-percentage">
+    <form (ngSubmit)="confirmMarkupBulk()">
+      <div class="row">
+        <div class="col-md-12 form-group mb-3">
+          <label for="bulk_markup" class="form-label font-weight-bold">
+            Markup divisor (%) para todas as tarifas:
+            <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            id="bulk_markup"
+            class="form-control"
+            [value]="formatPercent(bulkMarkupValue)"
+            (input)="onPercentInput($event, 'bulkMarkupValue', 'bulkForm')"
+            name="bulk_markup"
+            required />
+        </div>
+      </div>
+
+      <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
+        <button type="button" class="btn btn-secondary shadow-sm" (click)="closeMarkupForm()">Cancelar</button>
+        <button type="submit" class="btn btn-success shadow-sm" [disabled]="processing">
+          <span *ngIf="processing" class="spinner-border spinner-border-sm me-1"></span>
+          <i class="fas fa-save me-1"></i>
+          Confirmar Atualização
         </button>
       </div>
     </form>
