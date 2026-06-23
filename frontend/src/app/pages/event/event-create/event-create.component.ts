@@ -13,12 +13,13 @@ import { AutocompleteComponent } from '../../../shared/components/autocomplete/a
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { AuthenticatedLayoutComponent } from '../../../shared/layouts/authenticated-layout/authenticated-layout.component';
+import { NgxMaskDirective } from 'ngx-mask';
 import flatpickr from 'flatpickr';
 
 @Component({
   selector: 'app-event-create',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, AuthenticatedLayoutComponent, AutocompleteComponent, ConfirmModalComponent, ModalComponent],
+  imports: [CommonModule, FormsModule, RouterLink, AuthenticatedLayoutComponent, AutocompleteComponent, ConfirmModalComponent, ModalComponent, NgxMaskDirective],
   templateUrl: './event-create.component.html',
   styleUrls: ['./event-create.component.scss'],
 })
@@ -134,7 +135,6 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   showDetailsAdd = false;
   showDetailsTransport = false;
 
-  // Form State - Provider Links (vincular)
   providerLinkForm: any = {
     id: 0,
     provider_id: '',
@@ -147,6 +147,13 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     payment_method: '',
     internal_observation: '',
     customer_observation: '',
+    invoice: false,
+    iof: 0,
+    change_hotel_times: false,
+    checkin_time: '',
+    checkin_time_end: '',
+    checkout_time: '',
+    checkout_time_end: '',
   };
   showProviderLinkForm = false;
   providerLinkType: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' = 'hotel';
@@ -200,10 +207,29 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       this.providerLinkForm.service_percent = found.service_percent || 0;
       this.providerLinkForm.iva_percent = found.iva_percent || 0;
       this.providerLinkForm.payment_method = this.normalizePaymentMethod(found.payment_method);
+      if (this.providerLinkType === 'hotel') {
+        if (!this.providerLinkForm.change_hotel_times) {
+          this.providerLinkForm.checkin_time = found.checkin_time || '';
+          this.providerLinkForm.checkin_time_end = found.checkin_time_end || '';
+          this.providerLinkForm.checkout_time = found.checkout_time || '';
+          this.providerLinkForm.checkout_time_end = found.checkout_time_end || '';
+        }
+      }
     }
   }
 
-  // Form State - Provider Options (detalhes/tarifas)
+  onChangeHotelTimesToggle() {
+    if (!this.providerLinkForm.change_hotel_times) {
+      const found = this.providers.find(p => p.id === this.providerLinkForm.provider_id);
+      if (found) {
+        this.providerLinkForm.checkin_time = found.checkin_time || '';
+        this.providerLinkForm.checkin_time_end = found.checkin_time_end || '';
+        this.providerLinkForm.checkout_time = found.checkout_time || '';
+        this.providerLinkForm.checkout_time_end = found.checkout_time_end || '';
+      }
+    }
+  }
+
   optForm: any = {
     id: 0,
     parent_id: 0, // e.g. event_hotel_id, event_ab_id, etc.
@@ -226,6 +252,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     kickback: 0,
     received_proposal: 0,
     received_proposal_percent: 100,
+    order: 0,
   };
   showOptForm = false;
   optFormType: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' = 'hotel';
@@ -529,12 +556,97 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     return 'Indefinido';
   }
 
+  getSelectedCurrencySymbol(): string {
+    const cId = this.providerLinkForm.currency_id;
+    if (!cId) return '';
+    const found = this.currencies.find(c => Number(c.id) === Number(cId));
+    return found ? (found.symbol || found.sigla || '') : '';
+  }
+
+  getOptCurrencySymbol(): string {
+    const parentId = this.optForm.parent_id;
+    if (!parentId) return '';
+    let foundParent: any = null;
+    switch (this.optFormType) {
+      case 'hotel':
+        foundParent = this.eventHotels.find(h => h.id === parentId);
+        break;
+      case 'ab':
+        foundParent = this.eventABs.find(ab => ab.id === parentId);
+        break;
+      case 'hall':
+        foundParent = this.eventHalls.find(h => h.id === parentId);
+        break;
+      case 'add':
+        foundParent = this.eventAdds.find(a => a.id === parentId);
+        break;
+      case 'transport':
+        foundParent = this.eventTransports.find(t => t.id === parentId);
+        break;
+    }
+    if (foundParent) {
+      const cId = foundParent.currency_id;
+      if (cId) {
+        const foundCurr = this.currencies.find(c => Number(c.id) === Number(cId));
+        return foundCurr ? (foundCurr.symbol || foundCurr.sigla || '') : '';
+      }
+    }
+    return '';
+  }
+
+  formatMoney(value: any): string {
+    const num = parseFloat(value);
+    if (isNaN(num)) return '0,00';
+    return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  onMoneyInput(event: any, field: string, form: 'providerLinkForm' | 'optForm') {
+    const raw = event.target.value;
+    const clean = raw.replace(/\D/g, '');
+    if (!clean) {
+      if (form === 'providerLinkForm') {
+        this.providerLinkForm[field] = 0;
+      } else {
+        this.optForm[field] = 0;
+      }
+      event.target.value = '0,00';
+      return;
+    }
+    const parsed = parseFloat(clean) / 100;
+    if (form === 'providerLinkForm') {
+      this.providerLinkForm[field] = parsed;
+    } else {
+      this.optForm[field] = parsed;
+    }
+    event.target.value = this.formatMoney(parsed);
+  }
+
   openAddProviderLink(type: 'hotel' | 'ab' | 'hall' | 'add' | 'transport', editItem: any = null) {
     this.providerLinkType = type;
     this.errors = {};
 
     if (editItem) {
       const pId = editItem.hotel_id || editItem.ab_id || editItem.hall_id || editItem.add_id || editItem.transport_id;
+      // Find matching provider and display name
+      let found: any = null;
+      if (type === 'hotel' || type === 'ab') {
+        found = this.providers.find(p => p.id === pId);
+      } else if (type === 'add') {
+        found = this.providersService.find(p => p.id === pId);
+      } else if (type === 'transport') {
+        found = this.providersTransport.find(p => p.id === pId);
+      }
+      this.selectedProviderName = found ? this.displayProvider(found) : '';
+
+      let isDifferent = false;
+      if (type === 'hotel' && found) {
+        isDifferent =
+          (editItem.checkin_time || '') !== (found.checkin_time || '') ||
+          (editItem.checkin_time_end || '') !== (found.checkin_time_end || '') ||
+          (editItem.checkout_time || '') !== (found.checkout_time || '') ||
+          (editItem.checkout_time_end || '') !== (found.checkout_time_end || '');
+      }
+
       this.providerLinkForm = {
         id: editItem.id,
         provider_id: pId,
@@ -547,17 +659,14 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         payment_method: this.normalizePaymentMethod(editItem.payment_method),
         internal_observation: editItem.internal_observation || '',
         customer_observation: editItem.customer_observation || '',
+        invoice: editItem.invoice !== undefined ? !!editItem.invoice : false,
+        iof: editItem.iof || 0,
+        change_hotel_times: isDifferent,
+        checkin_time: editItem.checkin_time || '',
+        checkin_time_end: editItem.checkin_time_end || '',
+        checkout_time: editItem.checkout_time || '',
+        checkout_time_end: editItem.checkout_time_end || '',
       };
-      // Find matching provider and display name
-      let found: any = null;
-      if (type === 'hotel' || type === 'ab') {
-        found = this.providers.find(p => p.id === pId);
-      } else if (type === 'add') {
-        found = this.providersService.find(p => p.id === pId);
-      } else if (type === 'transport') {
-        found = this.providersTransport.find(p => p.id === pId);
-      }
-      this.selectedProviderName = found ? this.displayProvider(found) : '';
     } else {
       this.providerLinkForm = {
         id: 0,
@@ -571,6 +680,13 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         payment_method: 'Indefinido',
         internal_observation: '',
         customer_observation: '',
+        invoice: false,
+        iof: 0,
+        change_hotel_times: false,
+        checkin_time: '',
+        checkin_time_end: '',
+        checkout_time: '',
+        checkout_time_end: '',
       };
       this.selectedProviderName = '';
     }
@@ -586,6 +702,16 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   saveProviderLink() {
     this.processing = true;
     this.errors = {};
+
+    if (this.providerLinkType === 'hotel' && !this.providerLinkForm.change_hotel_times) {
+      const found = this.providers.find(p => p.id === this.providerLinkForm.provider_id);
+      if (found) {
+        this.providerLinkForm.checkin_time = found.checkin_time || '';
+        this.providerLinkForm.checkin_time_end = found.checkin_time_end || '';
+        this.providerLinkForm.checkout_time = found.checkout_time || '';
+        this.providerLinkForm.checkout_time_end = found.checkout_time_end || '';
+      }
+    }
 
     const payload = {
       ...this.providerLinkForm,
@@ -696,6 +822,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         compare_website_htl: editItem.compare_website_htl || 0,
         compare_omnibess: editItem.compare_omnibess || 0,
         observation: editItem.observation || '',
+        order: editItem.order || 0,
       };
     } else {
       this.optForm = {
@@ -724,6 +851,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         compare_website_htl: 0,
         compare_omnibess: 0,
         observation: '',
+        order: 0,
       };
 
       // Set first values based on type defaults

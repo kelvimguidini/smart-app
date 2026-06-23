@@ -305,7 +305,14 @@
                       CRD:
                       <span class="text-danger">*</span>
                     </label>
-                    <select id="crd_id" class="form-select" [class.is-invalid]="errors.crd_id" [(ngModel)]="basicForm.crd_id" (mousedown)="checkCustomerSelected($event)" name="crd_id" required>
+                    <select
+                      id="crd_id"
+                      class="form-select"
+                      [class.is-invalid]="errors.crd_id"
+                      [(ngModel)]="basicForm.crd_id"
+                      (mousedown)="checkCustomerSelected($event)"
+                      name="crd_id"
+                      required>
                       <option value="">.:: Selecione ::.</option>
                       <option *ngFor="let option of crdsFiltered" [ngValue]="option.id">{{ option.name }} - {{ option.number }}</option>
                     </select>
@@ -900,7 +907,9 @@
                     <!-- Total / Summary Row (Other tabs) -->
                     <tr class="table-subheader" *ngIf="activeTab !== 1">
                       <td class="sticky-col font-weight-bold text-start">Diária Média:</td>
-                      <td class="font-weight-bold text-end" [class.sticky-col]="activeTab === 1">{{ formatCurrency(average(item, activeTab === 2), item.currency?.sigla) }}</td>
+                      <td class="font-weight-bold text-end" [class.sticky-col]="activeTab === 1">
+                        {{ formatCurrency(average(item, activeTab === 2), item.currency?.sigla) }}
+                      </td>
                       <td
                         [attr.colspan]="activeTab === 5 ? 3 : activeTab === 2 || activeTab === 4 ? 2 : 1"
                         *ngIf="activeTab === 2 || activeTab === 3 || activeTab === 4 || activeTab === 5"></td>
@@ -1141,19 +1150,45 @@
         </div>
 
         <!-- Service Charge (Turismo) - Hotel/AB only -->
-        <div class="col-md-6 form-group mb-3" *ngIf="providerLinkType === 'hotel' || providerLinkType === 'ab'">
-          <label for="service_charge" class="form-label font-weight-bold">Taxa Serviço Diária/Turismo:</label>
-          <input type="number" step="0.01" id="service_charge" class="form-control" [(ngModel)]="providerLinkForm.service_charge" name="service_charge" />
+        <div class="col-md-3 form-group mb-3" *ngIf="providerLinkType === 'hotel' || providerLinkType === 'ab'">
+          <label for="service_charge" class="form-label font-weight-bold">Taxa Turismo:</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light text-muted font-weight-bold" *ngIf="getSelectedCurrencySymbol()">
+              {{ getSelectedCurrencySymbol() }}
+            </span>
+            <input
+              type="text"
+              id="service_charge"
+              class="form-control"
+              [value]="formatMoney(providerLinkForm.service_charge)"
+              (input)="onMoneyInput($event, 'service_charge', 'providerLinkForm')"
+              name="service_charge" />
+          </div>
         </div>
 
         <!-- Forma de Pagamento -->
-        <div class="col-md-6 form-group mb-3" [ngClass]="providerLinkType !== 'hotel' && providerLinkType !== 'ab' ? 'col-md-12' : 'col-md-6'">
+        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-3' : 'col-md-4'" class="form-group mb-3">
           <label for="payment_method" class="form-label font-weight-bold">Forma de Pagamento:</label>
           <select id="payment_method" class="form-select" [(ngModel)]="providerLinkForm.payment_method" name="payment_method">
             <option value="Indefinido">Indefinido</option>
             <option value="Dinheiro">Dinheiro</option>
             <option value="Cartão">Cartão</option>
           </select>
+        </div>
+
+        <!-- Nota Fiscal -->
+        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-3' : 'col-md-4'" class="form-group mb-3">
+          <label for="invoice" class="form-label font-weight-bold">Nota Fiscal:</label>
+          <select id="invoice" class="form-select" [(ngModel)]="providerLinkForm.invoice" name="invoice">
+            <option [ngValue]="true">Sim</option>
+            <option [ngValue]="false">Não</option>
+          </select>
+        </div>
+
+        <!-- IOF -->
+        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-3' : 'col-md-4'" class="form-group mb-3">
+          <label for="iof" class="form-label font-weight-bold">IOF (%):</label>
+          <input type="number" step="0.01" id="iof" class="form-control" [(ngModel)]="providerLinkForm.iof" name="iof" />
         </div>
 
         <!-- Observações -->
@@ -1175,6 +1210,70 @@
             class="form-control"
             [(ngModel)]="providerLinkForm.customer_observation"
             name="customer_observation"></textarea>
+        </div>
+
+        <!-- Check-in/Check-out Times - Hotel only -->
+        <div class="col-md-12 mb-3" *ngIf="providerLinkType === 'hotel'">
+          <div class="card p-3 bg-light border border-secondary border-opacity-10 shadow-sm">
+            <div class="row align-items-center">
+              <div class="col-md-4 form-check mb-0 d-flex align-items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="change_hotel_times"
+                  class="form-check-input mt-0"
+                  [(ngModel)]="providerLinkForm.change_hotel_times"
+                  (ngModelChange)="onChangeHotelTimesToggle()"
+                  name="change_hotel_times" />
+                <label for="change_hotel_times" class="form-check-label font-weight-bold text-dark mb-0">
+                  Alterar horários padrão do hotel?
+                </label>
+              </div>
+              
+              <div class="col-md-2 form-group mb-0">
+                <label for="checkin_time" class="form-label font-weight-bold text-secondary mb-1" style="font-size: 0.85rem;">Check-in Início:</label>
+                <input
+                  type="time"
+                  id="checkin_time"
+                  class="form-control"
+                  [(ngModel)]="providerLinkForm.checkin_time"
+                  name="checkin_time"
+                  [disabled]="!providerLinkForm.change_hotel_times" />
+              </div>
+
+              <div class="col-md-2 form-group mb-0">
+                <label for="checkin_time_end" class="form-label font-weight-bold text-secondary mb-1" style="font-size: 0.85rem;">Check-in Fim:</label>
+                <input
+                  type="time"
+                  id="checkin_time_end"
+                  class="form-control"
+                  [(ngModel)]="providerLinkForm.checkin_time_end"
+                  name="checkin_time_end"
+                  [disabled]="!providerLinkForm.change_hotel_times" />
+              </div>
+
+              <div class="col-md-2 form-group mb-0">
+                <label for="checkout_time" class="form-label font-weight-bold text-secondary mb-1" style="font-size: 0.85rem;">Check-out Início:</label>
+                <input
+                  type="time"
+                  id="checkout_time"
+                  class="form-control"
+                  [(ngModel)]="providerLinkForm.checkout_time"
+                  name="checkout_time"
+                  [disabled]="!providerLinkForm.change_hotel_times" />
+              </div>
+
+              <div class="col-md-2 form-group mb-0">
+                <label for="checkout_time_end" class="form-label font-weight-bold text-secondary mb-1" style="font-size: 0.85rem;">Check-out Fim:</label>
+                <input
+                  type="time"
+                  id="checkout_time_end"
+                  class="form-control"
+                  [(ngModel)]="providerLinkForm.checkout_time_end"
+                  name="checkout_time_end"
+                  [disabled]="!providerLinkForm.change_hotel_times" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1393,27 +1492,32 @@
           <input type="number" step="0.1" id="kickback" class="form-control" [(ngModel)]="optForm.kickback" name="kickback" />
         </div>
 
-        <!-- PROPOSTA RECEBIDA (COST), PROPOSAL PERCENT -->
-        <div class="col-md-6 form-group mb-3">
+        <!-- PROPOSTA RECEBIDA (COST), PROPOSAL PERCENT, ORDEM -->
+        <div class="col-md-4 form-group mb-3">
           <label for="received_proposal" class="form-label font-weight-bold">
             Proposta Recebida (Custo Unit.):
             <span class="text-danger">*</span>
           </label>
-          <input
-            type="number"
-            step="0.01"
-            id="received_proposal"
-            class="form-control"
-            [class.is-invalid]="errors.received_proposal"
-            [(ngModel)]="optForm.received_proposal"
-            name="received_proposal"
-            required />
+          <div class="input-group">
+            <span class="input-group-text bg-light text-muted font-weight-bold" *ngIf="getOptCurrencySymbol()">
+              {{ getOptCurrencySymbol() }}
+            </span>
+            <input
+              type="text"
+              id="received_proposal"
+              class="form-control"
+              [class.is-invalid]="errors.received_proposal"
+              [value]="formatMoney(optForm.received_proposal)"
+              (input)="onMoneyInput($event, 'received_proposal', 'optForm')"
+              name="received_proposal"
+              required />
+          </div>
           <div *ngIf="errors.received_proposal" class="text-danger mt-1">
             <small *ngFor="let err of errors.received_proposal" class="d-block">{{ err }}</small>
           </div>
         </div>
 
-        <div class="col-md-6 form-group mb-3">
+        <div class="col-md-4 form-group mb-3">
           <label for="received_proposal_percent" class="form-label font-weight-bold">
             Markup divisor (%):
             <span class="text-danger">*</span>
@@ -1430,6 +1534,16 @@
           <div *ngIf="errors.received_proposal_percent" class="text-danger mt-1">
             <small *ngFor="let err of errors.received_proposal_percent" class="d-block">{{ err }}</small>
           </div>
+        </div>
+
+        <div class="col-md-4 form-group mb-3">
+          <label for="opt_order" class="form-label font-weight-bold">Ordem:</label>
+          <input
+            type="number"
+            id="opt_order"
+            class="form-control"
+            [(ngModel)]="optForm.order"
+            name="order" />
         </div>
 
         <!-- COMPARATIVOS (hotel only) -->
@@ -1457,12 +1571,7 @@
         <!-- OBSERVAÇÃO (transporte only) -->
         <div class="col-md-12 form-group mb-3" *ngIf="optFormType === 'transport'">
           <label for="opt_observation" class="form-label font-weight-bold">Observações:</label>
-          <textarea
-            id="opt_observation"
-            rows="2"
-            class="form-control"
-            [(ngModel)]="optForm.observation"
-            name="observation"></textarea>
+          <textarea id="opt_observation" rows="2" class="form-control" [(ngModel)]="optForm.observation" name="observation"></textarea>
         </div>
       </div>
 

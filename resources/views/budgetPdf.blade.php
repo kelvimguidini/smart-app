@@ -58,8 +58,7 @@ function unitSale($opt)
         return $opt['received_proposal'];
     }
 
-    $factor = $percent > 2 ? $percent / 100 : $percent;
-    return ceil($opt['received_proposal'] / $factor);
+    return ceil($opt['received_proposal'] / $percent);
 }
 
 function sumTaxesProvider($eventP, $opt)
