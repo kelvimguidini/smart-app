@@ -1,12 +1,11 @@
 import { Component, inject, ElementRef, HostListener, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss']
 })
@@ -14,6 +13,7 @@ export class NavbarComponent {
   authService = inject(AuthService);
   el = inject(ElementRef);
   user = this.authService.user;
+  private readonly document = inject(DOCUMENT);
 
   toggleSidebar = output<void>();
 
@@ -34,5 +34,16 @@ export class NavbarComponent {
 
   public logout() {
     this.authService.logout();
+  }
+
+  resolveExternalLink(link: string | undefined): string {
+    if (!link) return '';
+    if (link.startsWith('http://') || link.startsWith('https://')) {
+      return link;
+    }
+    const base = this.document.querySelector('base')?.getAttribute('href') || '/';
+    const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
+    const cleanLink = link.startsWith('/') ? link : '/' + link;
+    return cleanBase + cleanLink;
   }
 }

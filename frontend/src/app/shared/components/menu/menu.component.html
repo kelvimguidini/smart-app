@@ -49,7 +49,7 @@
                         <!-- Vue Link (Full Page Reload) -->
                         <a *ngIf="hasPermission(subMenuItem.role) && !isAngularRoute(subMenuItem.link)" 
                            class="collapse-item" 
-                           [href]="subMenuItem.link"
+                           [href]="resolveExternalLink(subMenuItem.link)"
                            [class.active]="subMenuItem.active">
                             {{ subMenuItem.name }}
                         </a>

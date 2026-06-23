@@ -7,7 +7,7 @@
 
     <!-- Logo placeholder or search -->
     <div class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 mw-100 d-flex align-items-center" style="overflow: hidden;">
-        <img src="/logo.png" style="max-height: 120px; object-fit: contain;" alt="Logo">
+        <img src="logo.png" style="max-height: 120px; object-fit: contain;" alt="Logo">
     </div>
 
     <!-- Topbar Navbar -->
@@ -24,7 +24,7 @@
             </a>
             <!-- Dropdown - User Information -->
             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" [class.show]="isUserMenuOpen" aria-labelledby="userDropdown" style="right: 0; left: auto;">
-                <a class="dropdown-item" routerLink="/profile">
+                <a class="dropdown-item" [href]="resolveExternalLink('/profile')">
                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                     Perfil
                 </a>

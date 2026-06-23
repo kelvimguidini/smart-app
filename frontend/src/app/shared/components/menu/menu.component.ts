@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 
@@ -31,6 +31,7 @@ interface MenuItem {
 })
 export class MenuComponent {
   private readonly authService = inject(AuthService);
+  private readonly document = inject(DOCUMENT);
   
   isToggled = input<boolean>(false);
   toggleSidebar = output<void>();
@@ -180,5 +181,16 @@ export class MenuComponent {
     if (!link) return false;
     const angularRoutes = ['/dashboard', '/apto', '/regime', '/category'];
     return angularRoutes.includes(link);
+  }
+
+  resolveExternalLink(link: string | undefined): string {
+    if (!link) return '';
+    if (link.startsWith('http://') || link.startsWith('https://')) {
+      return link;
+    }
+    const base = this.document.querySelector('base')?.getAttribute('href') || '/';
+    const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
+    const cleanLink = link.startsWith('/') ? link : '/' + link;
+    return cleanBase + cleanLink;
   }
 }
