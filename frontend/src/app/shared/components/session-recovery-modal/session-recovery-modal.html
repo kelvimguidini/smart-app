@@ -1,0 +1,97 @@
+<app-modal
+  [show]="recoveryService.isOpen()"
+  title="Sessão Expirada"
+  icon="fa-lock"
+  size="md"
+  (close)="onCancel()"
+>
+  <div class="p-2">
+    <div class="text-center mb-4">
+      <div class="d-inline-flex align-items-center justify-content-center bg-warning-light text-warning rounded-circle p-3 mb-3" style="width: 64px; height: 64px;">
+        <i class="fas fa-exclamation-triangle fa-2x"></i>
+      </div>
+      <h5 class="text-dark font-weight-bold">Sua sessão expirou</h5>
+      <p class="text-muted small">
+        Por questões de segurança, sua sessão expirou por inatividade. 
+        Digite sua senha abaixo para continuar sem perder o trabalho realizado nesta página.
+      </p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #recoveryForm="ngForm">
+      <!-- Email Field (Disabled if cached user, editable otherwise) -->
+      <div class="mb-3">
+        <label for="recovery-email" class="form-label text-secondary small font-weight-bold">E-mail</label>
+        <div class="input-group">
+          <span class="input-group-text bg-white border-end-0 text-muted">
+            <i class="fas fa-envelope"></i>
+          </span>
+          <input
+            type="email"
+            id="recovery-email"
+            name="email"
+            class="form-control border-start-0 ps-0 bg-light"
+            [(ngModel)]="form.email"
+            [disabled]="!!authService.user()"
+            required
+            placeholder="seuemail@exemplo.com"
+          />
+        </div>
+      </div>
+
+      <!-- Password Field -->
+      <div class="mb-3">
+        <label for="recovery-password" class="form-label text-secondary small font-weight-bold">Senha</label>
+        <div class="input-group">
+          <span class="input-group-text bg-white border-end-0 text-muted">
+            <i class="fas fa-key"></i>
+          </span>
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            id="recovery-password"
+            name="password"
+            class="form-control border-start-0 border-end-0 ps-0"
+            [(ngModel)]="form.password"
+            required
+            placeholder="Digite sua senha"
+            [disabled]="processing"
+            autocomplete="current-password"
+          />
+          <button
+            type="button"
+            class="input-group-text bg-white border-start-0 text-muted cursor-pointer"
+            (click)="togglePasswordVisibility()"
+            [disabled]="processing"
+          >
+            <i class="fas" [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" class="alert alert-danger d-flex align-items-center p-2 small mb-3 rounded-lg border-0 shadow-sm" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <div>{{ errorMessage }}</div>
+      </div>
+
+      <!-- Actions -->
+      <div class="d-flex justify-content-between align-items-center mt-4 pt-2 border-top">
+        <button
+          type="button"
+          class="btn btn-outline-secondary px-4 py-2 text-sm"
+          (click)="onCancel()"
+          [disabled]="processing"
+        >
+          Sair / Fazer Logout
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary px-4 py-2 d-flex align-items-center text-sm"
+          [disabled]="processing || !recoveryForm.form.valid"
+        >
+          <span *ngIf="processing" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          <span>{{ processing ? 'Restaurando...' : 'Reautenticar' }}</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</app-modal>

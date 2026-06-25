@@ -1071,7 +1071,7 @@ export class EventCreateComponent implements OnInit {
         brand_id: editItem.brand_id || '',
         in: editItem.in ? editItem.in.substring(0, 10) : '',
         out: editItem.out ? editItem.out.substring(0, 10) : '',
-        count: editItem.count || 1,
+        count: editItem.count ? Math.round(parseFloat(editItem.count)) : 1,
         kickback: editItem.kickback || 0,
         received_proposal: editItem.received_proposal || 0,
         received_proposal_percent: editItem.received_proposal_percent || 100,

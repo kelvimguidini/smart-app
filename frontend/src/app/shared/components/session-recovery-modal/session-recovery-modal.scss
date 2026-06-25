@@ -1,0 +1,10 @@
+:host ::ng-deep {
+  .modal-backdrop-blur {
+    // Force the session recovery modal to appear on top of all other modals (default is 1050)
+    z-index: 9999 !important;
+  }
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
