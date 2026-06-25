@@ -35,7 +35,8 @@ export class DatatableComponent implements OnInit, OnDestroy {
     this.search.emit(this.searchQuery);
   }
 
-  onSearchClear(): void {
+  onSearchClear(event: Event): void {
+    event.stopPropagation();
     if (!this.searchQuery) {
       this.triggerSearch();
     }
