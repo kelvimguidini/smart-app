@@ -11,6 +11,7 @@ use App\Domains\Transports\Repositories\EventTransportRepositoryInterface;
 use App\Domains\Transports\Repositories\EventTransportOptRepositoryInterface;
 use App\Domains\Auth\Repositories\UserRepositoryInterface;
 use App\Domains\Shared\Repositories\StatusHistoryRepositoryInterface;
+use App\Models\StatusHistory;
 
 class EventTransportApiController extends Controller
 {
@@ -158,8 +159,12 @@ class EventTransportApiController extends Controller
 
         try {
             $user = $this->userRepository->find(Auth::user()->id);
-            if (!$user->getPermissions()->contains('name', 'status_level_2')) {
-                if ($this->statusHistoryRepository->isBlockedTableRecord('event_transports', $request->event_transport_id)) {
+            $hasLevel2Permission = $user->getPermissions()->contains('name', 'status_level_2');
+            $hasLevel1Permission = $user->getPermissions()->contains('name', 'status_level_1');
+
+            if (!$hasLevel2Permission) {
+                $currentStatus = $this->statusHistoryRepository->latestStatusForTable('event_transports', $request->event_transport_id);
+                if ($currentStatus && !StatusHistory::canUserEditStatus($currentStatus, $hasLevel2Permission, $hasLevel1Permission)) {
                     return response()->json(['message' => 'Esse registro não pode ser atualizado devido ao status atual!'], 422);
                 }
 
@@ -216,8 +221,12 @@ class EventTransportApiController extends Controller
 
             $eventTransport = $opt->event_transport;
             $user = $this->userRepository->find(Auth::user()->id);
-            if (!$user->getPermissions()->contains('name', 'status_level_2')) {
-                if ($this->statusHistoryRepository->isBlockedTableRecord('event_transports', $eventTransport->id)) {
+            $hasLevel2Permission = $user->getPermissions()->contains('name', 'status_level_2');
+            $hasLevel1Permission = $user->getPermissions()->contains('name', 'status_level_1');
+
+            if (!$hasLevel2Permission) {
+                $currentStatus = $this->statusHistoryRepository->latestStatusForTable('event_transports', $eventTransport->id);
+                if ($currentStatus && !StatusHistory::canUserEditStatus($currentStatus, $hasLevel2Permission, $hasLevel1Permission)) {
                     return response()->json(['message' => 'Esse registro não pode ser apagado devido ao status atual!'], 422);
                 }
 

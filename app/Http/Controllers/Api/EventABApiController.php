@@ -11,6 +11,7 @@ use App\Domains\FoodBeverage\Repositories\EventABRepositoryInterface;
 use App\Domains\FoodBeverage\Repositories\EventABOptRepositoryInterface;
 use App\Domains\Auth\Repositories\UserRepositoryInterface;
 use App\Domains\Shared\Repositories\StatusHistoryRepositoryInterface;
+use App\Models\StatusHistory;
 
 class EventABApiController extends Controller
 {
@@ -156,8 +157,12 @@ class EventABApiController extends Controller
 
         try {
             $user = $this->userRepository->find(Auth::user()->id);
-            if (!$user->getPermissions()->contains('name', 'status_level_2')) {
-                if ($this->statusHistoryRepository->isBlockedTableRecord('event_abs', $request->event_ab_id)) {
+            $hasLevel2Permission = $user->getPermissions()->contains('name', 'status_level_2');
+            $hasLevel1Permission = $user->getPermissions()->contains('name', 'status_level_1');
+
+            if (!$hasLevel2Permission) {
+                $currentStatus = $this->statusHistoryRepository->latestStatusForTable('event_abs', $request->event_ab_id);
+                if ($currentStatus && !StatusHistory::canUserEditStatus($currentStatus, $hasLevel2Permission, $hasLevel1Permission)) {
                     return response()->json(['message' => 'Esse registro não pode ser atualizado devido ao status atual!'], 422);
                 }
 
@@ -212,8 +217,12 @@ class EventABApiController extends Controller
 
             $eventAB = $opt->event_ab;
             $user = $this->userRepository->find(Auth::user()->id);
-            if (!$user->getPermissions()->contains('name', 'status_level_2')) {
-                if ($this->statusHistoryRepository->isBlockedTableRecord('event_abs', $eventAB->id)) {
+            $hasLevel2Permission = $user->getPermissions()->contains('name', 'status_level_2');
+            $hasLevel1Permission = $user->getPermissions()->contains('name', 'status_level_1');
+
+            if (!$hasLevel2Permission) {
+                $currentStatus = $this->statusHistoryRepository->latestStatusForTable('event_abs', $eventAB->id);
+                if ($currentStatus && !StatusHistory::canUserEditStatus($currentStatus, $hasLevel2Permission, $hasLevel1Permission)) {
                     return response()->json(['message' => 'Esse registro não pode ser apagado devido ao status atual!'], 422);
                 }
 

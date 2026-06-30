@@ -261,7 +261,7 @@ export class EventCreateComponent implements OnInit {
     count: 1,
     kickback: 0,
     received_proposal: 0,
-    received_proposal_percent: 100,
+    received_proposal_percent: 0.8,
     order: 0,
   };
   showOptForm = false;
@@ -1074,7 +1074,7 @@ export class EventCreateComponent implements OnInit {
         count: editItem.count ? Math.round(parseFloat(editItem.count)) : 1,
         kickback: editItem.kickback || 0,
         received_proposal: editItem.received_proposal || 0,
-        received_proposal_percent: editItem.received_proposal_percent || 100,
+        received_proposal_percent: editItem.received_proposal_percent || 0.8,
         compare_trivago: editItem.compare_trivago || 0,
         compare_website_htl: editItem.compare_website_htl || 0,
         compare_omnibess: editItem.compare_omnibess || 0,
@@ -1103,7 +1103,7 @@ export class EventCreateComponent implements OnInit {
         count: 1,
         kickback: 0,
         received_proposal: 0,
-        received_proposal_percent: 100,
+        received_proposal_percent: 0.8,
         compare_trivago: 0,
         compare_website_htl: 0,
         compare_omnibess: 0,
@@ -1248,12 +1248,12 @@ export class EventCreateComponent implements OnInit {
 
     // Markup percentage validation
     if (this.optForm.received_proposal_percent === null || this.optForm.received_proposal_percent === undefined || this.optForm.received_proposal_percent === '') {
-      this.errors.received_proposal_percent = ['O campo markup divisor é obrigatório.'];
+      this.errors.received_proposal_percent = ['O campo markup é obrigatório.'];
       hasErrors = true;
     } else {
       const markupVal = Number(this.optForm.received_proposal_percent);
       if (isNaN(markupVal) || markupVal <= 0 || markupVal > 100) {
-        this.errors.received_proposal_percent = ['O markup divisor deve ser maior que 0% e no máximo 100%.'];
+        this.errors.received_proposal_percent = ['O markup deve ser maior que 0% e no máximo 100%.'];
         hasErrors = true;
       }
     }
@@ -1403,7 +1403,8 @@ export class EventCreateComponent implements OnInit {
         this.loadInitialData();
       },
       error: (err) => {
-        this.toastService.error('Erro ao remover opção.');
+        const message = err?.error?.message || err?.message || 'Erro ao remover opção.';
+        this.toastService.error(message);
         console.error(err);
         this.isLoader = false;
       },

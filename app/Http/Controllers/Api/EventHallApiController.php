@@ -11,6 +11,7 @@ use App\Domains\Halls\Repositories\EventHallRepositoryInterface;
 use App\Domains\Halls\Repositories\EventHallOptRepositoryInterface;
 use App\Domains\Auth\Repositories\UserRepositoryInterface;
 use App\Domains\Shared\Repositories\StatusHistoryRepositoryInterface;
+use App\Models\StatusHistory;
 
 class EventHallApiController extends Controller
 {
@@ -155,8 +156,12 @@ class EventHallApiController extends Controller
 
         try {
             $user = $this->userRepository->find(Auth::user()->id);
-            if (!$user->getPermissions()->contains('name', 'status_level_2')) {
-                if ($this->statusHistoryRepository->isBlockedTableRecord('event_halls', $request->event_hall_id)) {
+            $hasLevel2Permission = $user->getPermissions()->contains('name', 'status_level_2');
+            $hasLevel1Permission = $user->getPermissions()->contains('name', 'status_level_1');
+
+            if (!$hasLevel2Permission) {
+                $currentStatus = $this->statusHistoryRepository->latestStatusForTable('event_halls', $request->event_hall_id);
+                if ($currentStatus && !StatusHistory::canUserEditStatus($currentStatus, $hasLevel2Permission, $hasLevel1Permission)) {
                     return response()->json(['message' => 'Esse registro não pode ser atualizado devido ao status atual!'], 422);
                 }
 
@@ -210,8 +215,12 @@ class EventHallApiController extends Controller
 
             $eventHall = $opt->event_hall;
             $user = $this->userRepository->find(Auth::user()->id);
-            if (!$user->getPermissions()->contains('name', 'status_level_2')) {
-                if ($this->statusHistoryRepository->isBlockedTableRecord('event_halls', $eventHall->id)) {
+            $hasLevel2Permission = $user->getPermissions()->contains('name', 'status_level_2');
+            $hasLevel1Permission = $user->getPermissions()->contains('name', 'status_level_1');
+
+            if (!$hasLevel2Permission) {
+                $currentStatus = $this->statusHistoryRepository->latestStatusForTable('event_halls', $eventHall->id);
+                if ($currentStatus && !StatusHistory::canUserEditStatus($currentStatus, $hasLevel2Permission, $hasLevel1Permission)) {
                     return response()->json(['message' => 'Esse registro não pode ser apagado devido ao status atual!'], 422);
                 }
 

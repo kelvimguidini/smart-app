@@ -42,6 +42,31 @@ class StatusHistory extends Model
         return $status !== null && in_array($status, self::BLOCKED_STATUSES, true);
     }
 
+    public static function canUserEditStatus(?string $status, bool $hasLevel2Permission, bool $hasLevel1Permission): bool
+    {
+        if ($hasLevel2Permission) {
+            return true;
+        }
+
+        if ($status === null) {
+            return true;
+        }
+
+        $statusConfig = \App\Http\Middleware\Constants::STATUS[$status] ?? null;
+        $statusLevel = $statusConfig['level'] ?? null;
+
+        if ($statusLevel === 2) {
+            return false;
+        }
+
+        return $hasLevel1Permission || $statusLevel === 1;
+    }
+
+    public static function latestStatusForTable(string $table, $tableId): ?string
+    {
+        return self::latestFor($table, $tableId)?->status;
+    }
+
     public static function isBlockedTableRecord(string $table, $tableId): bool
     {
         return self::isBlockedStatus(self::latestFor($table, $tableId)?->status);

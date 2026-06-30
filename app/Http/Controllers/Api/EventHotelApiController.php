@@ -161,8 +161,12 @@ class EventHotelApiController extends Controller
 
         try {
             $user = $this->userRepository->find(Auth::user()->id);
-            if (!$user->getPermissions()->contains('name', 'status_level_2')) {
-                if ($this->statusHistoryRepository->isBlockedTableRecord('event_hotels', $request->event_hotel_id)) {
+            $hasLevel2Permission = $user->getPermissions()->contains('name', 'status_level_2');
+            $hasLevel1Permission = $user->getPermissions()->contains('name', 'status_level_1');
+
+            if (!$hasLevel2Permission) {
+                $currentStatus = $this->statusHistoryRepository->latestStatusForTable('event_hotels', $request->event_hotel_id);
+                if ($currentStatus && !StatusHistory::canUserEditStatus($currentStatus, $hasLevel2Permission, $hasLevel1Permission)) {
                     return response()->json(['message' => 'Esse registro não pode ser atualizado devido ao status atual!'], 422);
                 }
 
@@ -222,8 +226,12 @@ class EventHotelApiController extends Controller
 
             $eventHotel = $opt->event_hotel;
             $user = $this->userRepository->find(Auth::user()->id);
-            if (!$user->getPermissions()->contains('name', 'status_level_2')) {
-                if ($this->statusHistoryRepository->isBlockedTableRecord('event_hotels', $eventHotel->id)) {
+            $hasLevel2Permission = $user->getPermissions()->contains('name', 'status_level_2');
+            $hasLevel1Permission = $user->getPermissions()->contains('name', 'status_level_1');
+
+            if (!$hasLevel2Permission) {
+                $currentStatus = $this->statusHistoryRepository->latestStatusForTable('event_hotels', $eventHotel->id);
+                if ($currentStatus && !StatusHistory::canUserEditStatus($currentStatus, $hasLevel2Permission, $hasLevel1Permission)) {
                     return response()->json(['message' => 'Esse registro não pode ser apagado devido ao status atual!'], 422);
                 }
 
