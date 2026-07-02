@@ -15,12 +15,10 @@ export class ToastService {
     const toast: ToastMessage = { message, type };
     this.toasts.update((current) => [...current, toast]);
 
-    // Auto-remove non-danger toasts after 10 seconds
-    // if (type !== 'danger') {
-    //   setTimeout(() => {
-    //     this.remove(toast);
-    //   }, 10000);
-    // }
+    // Auto-remove toasts after 30 seconds
+    setTimeout(() => {
+      this.remove(toast);
+    }, 30000);
   }
 
   remove(toast: ToastMessage) {

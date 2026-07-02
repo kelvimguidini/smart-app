@@ -242,7 +242,14 @@ class ProviderController extends Controller
         $pdf->setPaper('A4', 'portrait');
         $pdf->render();
 
-        $filename = "ID{$request->event_id} - " . ($data['providerDataBase']->name ?? '') . " - Documento.pdf";
+        $filenamePrefix = "Proposta";
+        if ($type === 2) {
+            $filenamePrefix = "Faturamento";
+        } elseif ($type === 3) {
+            $filenamePrefix = "Proposta_sem_valores";
+        }
+
+        $filename = "ID{$request->event_id} - " . ($data['providerDataBase']->name ?? '') . " - {$filenamePrefix}.pdf";
         return $pdf->stream($filename);
     }
 }
