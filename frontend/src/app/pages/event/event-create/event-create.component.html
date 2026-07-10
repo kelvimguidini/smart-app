@@ -1235,6 +1235,21 @@
           </div>
         </div>
 
+        <!-- Prazo -->
+        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-3' : 'col-md-4'" class="form-group mb-3">
+          <label for="deadline_date" class="form-label font-weight-bold">Prazo:</label>
+          <input
+            type="date"
+            id="deadline_date"
+            class="form-control"
+            [class.is-invalid]="errors.deadline_date"
+            [(ngModel)]="providerLinkForm.deadline_date"
+            name="deadline_date" />
+          <div *ngIf="errors.deadline_date" class="text-danger mt-1">
+            <small *ngFor="let err of errors.deadline_date" class="d-block">{{ err }}</small>
+          </div>
+        </div>
+
         <!-- Observações -->
         <div class="col-md-12 form-group mb-3">
           <label for="internal_observation" class="form-label font-weight-bold">Observação Interna:</label>

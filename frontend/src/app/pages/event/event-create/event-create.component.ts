@@ -164,6 +164,7 @@ export class EventCreateComponent implements OnInit {
     checkin_time_end: '',
     checkout_time: '',
     checkout_time_end: '',
+    deadline_date: '',
   };
   showProviderLinkForm = false;
   providerLinkType: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' = 'hotel';
@@ -735,6 +736,7 @@ export class EventCreateComponent implements OnInit {
         checkin_time_end: editItem.checkin_time_end || '',
         checkout_time: editItem.checkout_time || '',
         checkout_time_end: editItem.checkout_time_end || '',
+        deadline_date: editItem.deadline_date || '',
       };
     } else {
       this.providerLinkForm = {
@@ -756,6 +758,7 @@ export class EventCreateComponent implements OnInit {
         checkin_time_end: '',
         checkout_time: '',
         checkout_time_end: '',
+        deadline_date: '',
       };
       this.selectedProviderName = '';
     }
