@@ -44,6 +44,8 @@ class EloquentEventApiRepository implements EventApiRepositoryInterface
             'event_halls.hall',
             'event_halls.eventHallOpts' => fn($q) => $q->orderBy('order', 'asc')->orderby('in'),
             'event_halls.eventHallOpts.purpose',
+            'event_halls.eventHallOpts.service',
+            'event_halls.eventHallOpts.broker',
             'event_halls.currency',
             'event_halls.status_his.user',
 

@@ -180,8 +180,8 @@ export class EventCreateComponent implements OnInit {
     } else if (this.providerLinkType === 'transport') {
       sourceList = this.providersTransport;
     }
-    const filtered = sourceList.filter(p => 
-      (p.name && p.name.toLowerCase().includes(termLower)) || 
+    const filtered = sourceList.filter(p =>
+      (p.name && p.name.toLowerCase().includes(termLower)) ||
       (p.city && (
         (p.city.name && p.city.name.toLowerCase().includes(termLower)) ||
         (p.city.states && p.city.states.toLowerCase().includes(termLower)) ||
@@ -211,7 +211,7 @@ export class EventCreateComponent implements OnInit {
     } else if (this.providerLinkType === 'transport') {
       found = this.providersTransport.find(p => p.id === providerId);
     }
-    
+
     if (found) {
       this.providerLinkForm.taxa_4bts = found.taxa_4bts || 0;
       this.providerLinkForm.iss_percent = found.iss_percent || 0;
@@ -264,6 +264,9 @@ export class EventCreateComponent implements OnInit {
     received_proposal: 0,
     received_proposal_percent: 0.8,
     order: 0,
+    name: '',
+    m2: '',
+    pax: '',
   };
   showOptForm = false;
   optFormType: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' = 'hotel';
@@ -736,7 +739,7 @@ export class EventCreateComponent implements OnInit {
         checkin_time_end: editItem.checkin_time_end || '',
         checkout_time: editItem.checkout_time || '',
         checkout_time_end: editItem.checkout_time_end || '',
-        deadline_date: editItem.deadline_date || '',
+        deadline_date: editItem.deadline_date ? editItem.deadline_date.split('T')[0] : '',
       };
     } else {
       this.providerLinkForm = {
@@ -1083,6 +1086,9 @@ export class EventCreateComponent implements OnInit {
         compare_omnibess: editItem.compare_omnibess || 0,
         observation: editItem.observation || '',
         order: editItem.order || 0,
+        name: editItem.name || '',
+        m2: editItem.m2 || '',
+        pax: editItem.pax || '',
       };
     } else {
       this.optForm = {
@@ -1112,6 +1118,9 @@ export class EventCreateComponent implements OnInit {
         compare_omnibess: 0,
         observation: '',
         order: 0,
+        name: '',
+        m2: '',
+        pax: '',
       };
     }
 
@@ -1331,6 +1340,9 @@ export class EventCreateComponent implements OnInit {
       case 'hall':
         payload.event_hall_id = this.optForm.parent_id;
         payload.broker = this.optForm.broker_id;
+        payload.name = this.optForm.name;
+        payload.m2 = this.optForm.m2;
+        payload.pax = this.optForm.pax;
         obs = this.eventService.saveHallOpt(payload);
         break;
       case 'add':
@@ -1444,7 +1456,7 @@ export class EventCreateComponent implements OnInit {
     return cost;
   }
 
-  roomNights(provider: any, isAB = false): number {
+  roomNights(provider: any, includeLastDay = false): number {
     let sum = 0;
     const opts =
       provider.event_hotels_opt ||
@@ -1454,12 +1466,14 @@ export class EventCreateComponent implements OnInit {
       provider.event_transport_opts ||
       [];
     for (const opt of opts) {
-      sum += parseFloat(opt.count || 0) * this.daysBetween(opt.in, opt.out, isAB);
+      const dateIn = opt.in || opt.outbound_date;
+      const dateOut = opt.out || opt.inbound_date;
+      sum += parseFloat(opt.count || 0) * this.daysBetween(dateIn, dateOut, includeLastDay);
     }
     return sum;
   }
 
-  average(provider: any, isAB = false): number {
+  average(provider: any, includeLastDay = false): number {
     const opts =
       provider.event_hotels_opt ||
       provider.event_ab_opts ||
@@ -1491,7 +1505,7 @@ export class EventCreateComponent implements OnInit {
     return sum;
   }
 
-  sumNts(provider: any, isAB = false): number {
+  sumNts(provider: any, includeLastDay = false): number {
     let sum = 0;
     const opts =
       provider.event_hotels_opt ||
@@ -1501,12 +1515,14 @@ export class EventCreateComponent implements OnInit {
       provider.event_transport_opts ||
       [];
     for (const opt of opts) {
-      sum += this.daysBetween(opt.in, opt.out, isAB);
+      const dateIn = opt.in || opt.outbound_date;
+      const dateOut = opt.out || opt.inbound_date;
+      sum += this.daysBetween(dateIn, dateOut, includeLastDay);
     }
     return sum;
   }
 
-  sumSale(provider: any, isAB = false): number {
+  sumSale(provider: any, includeLastDay = false): number {
     let sum = 0;
     const opts =
       provider.event_hotels_opt ||
@@ -1516,12 +1532,15 @@ export class EventCreateComponent implements OnInit {
       provider.event_transport_opts ||
       [];
     for (const opt of opts) {
-      sum += this.unitSale(opt) * this.daysBetween(opt.in, opt.out, isAB) * parseFloat(opt.count || 0);
+      const dateIn = opt.in || opt.outbound_date;
+      const dateOut = opt.out || opt.inbound_date;
+      const multiplyDays = (provider.eventAirfareOpts || provider.event_airfare_opts) ? 1 : this.daysBetween(dateIn, dateOut, includeLastDay);
+      sum += this.unitSale(opt) * (multiplyDays || 1) * parseFloat(opt.count || 0);
     }
     return sum;
   }
 
-  sumCost(provider: any, isAB = false): number {
+  sumCost(provider: any, includeLastDay = false): number {
     let sum = 0;
     const opts =
       provider.event_hotels_opt ||
@@ -1531,12 +1550,15 @@ export class EventCreateComponent implements OnInit {
       provider.event_transport_opts ||
       [];
     for (const opt of opts) {
-      sum += this.unitCost(opt) * this.daysBetween(opt.in, opt.out, isAB) * parseFloat(opt.count || 0);
+      const dateIn = opt.in || opt.outbound_date;
+      const dateOut = opt.out || opt.inbound_date;
+      const multiplyDays = (provider.eventAirfareOpts || provider.event_airfare_opts) ? 1 : this.daysBetween(dateIn, dateOut, includeLastDay);
+      sum += this.unitCost(opt) * (multiplyDays || 1) * parseFloat(opt.count || 0);
     }
     return sum;
   }
 
-  sumTaxes(provider: any, taxType: 'iss' | 'serv' | 'iva' | 'sc', isAB = false): number {
+  sumTaxes(provider: any, taxType: 'iss' | 'serv' | 'iva' | 'sc', includeLastDay = false): number {
     let sum = 0;
     const opts =
       provider.event_hotels_opt ||
@@ -1547,7 +1569,11 @@ export class EventCreateComponent implements OnInit {
       [];
 
     for (const opt of opts) {
-      const days = this.daysBetween(opt.in, opt.out, isAB);
+      const dateIn = opt.in || opt.outbound_date;
+      const dateOut = opt.out || opt.inbound_date;
+      const days = this.daysBetween(opt.in, opt.out, includeLastDay);
+      // const multiplyDays = (provider.eventAirfareOpts || provider.event_airfare_opts) ? 1 : this.daysBetween(dateIn, dateOut, includeLastDay);
+
       const count = parseFloat(opt.count || 0);
       const sale = this.unitSale(opt);
 

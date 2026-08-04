@@ -270,7 +270,7 @@
               <td>{{ item.in | date:'dd/MM/yyyy' }}</td>
               <td>{{ item.out | date:'dd/MM/yyyy' }}</td>
               <td class="font-weight-bold text-dark">{{ item.count }}</td>
-              <td>{{ daysBetween(item.in, item.out) }}</td>
+              <td>{{ daysBetween1(item.in, item.out) }}</td>
               <td>
                 <input type="number" [(ngModel)]="comissionsHall[i]" [name]="'comissionsHall_' + i" [disabled]="prove" class="form-control form-control-sm" min="0" max="100" />
               </td>
@@ -352,7 +352,7 @@
               <td>{{ item.in | date:'dd/MM/yyyy' }}</td>
               <td>{{ item.out | date:'dd/MM/yyyy' }}</td>
               <td class="font-weight-bold text-dark">{{ item.count }}</td>
-              <td>{{ daysBetween(item.in, item.out) }}</td>
+              <td>{{ daysBetween1(item.in, item.out) }}</td>
               <td>
                 <input type="number" [(ngModel)]="comissionsAdd[i]" [name]="'comissionsAdd_' + i" [disabled]="prove" class="form-control form-control-sm" min="0" max="100" />
               </td>

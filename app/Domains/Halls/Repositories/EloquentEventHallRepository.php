@@ -37,6 +37,9 @@ class EloquentEventHallRepository implements EventHallRepositoryInterface
             'eventHallOpts' => function ($q) {
                 $q->orderBy('order', 'asc')->orderby('in');
             },
+            'eventHallOpts.broker',
+            'eventHallOpts.service',
+            'eventHallOpts.purpose',
             'hall.city',
             'currency',
             'event',

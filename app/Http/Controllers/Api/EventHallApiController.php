@@ -152,6 +152,9 @@ class EventHallApiController extends Controller
             'received_proposal_percent' => 'nullable|numeric',
             'kickback' => 'nullable|numeric',
             'count' => 'nullable|numeric',
+            'name' => 'nullable|string|max:255',
+            'm2' => 'nullable|string|max:50',
+            'pax' => 'nullable|string|max:50',
         ]);
 
         try {
@@ -182,6 +185,9 @@ class EventHallApiController extends Controller
                 'received_proposal' => $request->received_proposal,
                 'kickback' => $request->kickback,
                 'count' => $request->count,
+                'name' => $request->name,
+                'm2' => $request->m2,
+                'pax' => $request->pax,
                 'order' => $request->order ?? 0,
             ];
 

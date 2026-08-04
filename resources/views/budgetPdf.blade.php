@@ -399,9 +399,9 @@ if ($transportEvent != null) {
                 </div>
                 <div class="right">
                     @if (extension_loaded('gd') && $event != null && $event->customer != null)
-                        <img src="{{ public_path($event->customer->logo) }}" style="max-width: 175px; max-height: 175px;" alt="{{ $event->customer->name }}">
+                    <img src="{{ public_path($event->customer->logo) }}" style="max-width: 175px; max-height: 175px;" alt="{{ $event->customer->name }}">
                     @elseif ($event != null && $event->customer != null)
-                        <span style="font-weight: bold; font-size: 14px;">{{ $event->customer->name }}</span>
+                    <span style="font-weight: bold; font-size: 14px;">{{ $event->customer->name }}</span>
                     @endif
                 </div>
             </header>
@@ -461,7 +461,8 @@ if ($transportEvent != null) {
                             </td>
                             <td style="padding: 0.75rem; border: 1px solid gray; padding: 10px 3px;"></td>
                             <td style="padding: 0.75rem; text-align: left; vertical-align: top; border: 1px solid gray; padding: 10px 3px;" colspan="7" rowspan="3">
-                                <label style="font-weight: bold;">Observação:</label>
+                                <label style="font-weight: bold;">Prazo:</label> {{ empty($hotelEvent->deadline_date) || $hotelEvent->deadline_date === '0000-00-00' ? "--" : date("d/m/Y", strtotime($hotelEvent->deadline_date)) }}<br>
+                                <label style="font-weight: bold;">Observação:</label> {{ $hotelEvent->customer_observation }}
                             </td>
                         </tr>
                         <tr>
@@ -527,7 +528,8 @@ if ($transportEvent != null) {
                             </td>
                             <td style="padding: 0.75rem; border: 1px solid gray; padding: 10px 3px;"></td>
                             <td style="padding: 0.75rem; text-align: left; vertical-align: top; border: 1px solid gray; padding: 10px 3px;" colspan="7" rowspan="3">
-                                <label style="font-weight: bold;">Observação:</label>
+                                <label style="font-weight: bold;">Prazo:</label> {{ empty($abEvent->deadline_date) || $abEvent->deadline_date === '0000-00-00' ? "--" : date("d/m/Y", strtotime($abEvent->deadline_date)) }}<br>
+                                <label style="font-weight: bold;">Observação:</label> {{ $abEvent->customer_observation }}
                             </td>
                         </tr>
                         <tr>
@@ -594,7 +596,8 @@ if ($transportEvent != null) {
                             </td>
                             <td style="padding: 0.75rem; border: 1px solid gray; padding: 10px 3px;"></td>
                             <td style="padding: 0.75rem; text-align: left; vertical-align: top; border: 1px solid gray; padding: 10px 3px;" colspan="6" rowspan="3">
-                                <label style="font-weight: bold;">Observação:</label>
+                                <label style="font-weight: bold;">Prazo:</label> {{ empty($hallEvent->deadline_date) || $hallEvent->deadline_date === '0000-00-00' ? "--" : date("d/m/Y", strtotime($hallEvent->deadline_date)) }}<br>
+                                <label style="font-weight: bold;">Observação:</label> {{ $hallEvent->customer_observation }}
                             </td>
                         </tr>
                         <tr>
@@ -661,7 +664,8 @@ if ($transportEvent != null) {
                             </td>
                             <td style="padding: 0.75rem; border: 1px solid gray; padding: 10px 3px;"></td>
                             <td style="padding: 0.75rem; text-align: left; vertical-align: top; border: 1px solid gray; padding: 10px 3px;" colspan="6" rowspan="3">
-                                <label style="font-weight: bold;">Observação:</label>
+                                <label style="font-weight: bold;">Prazo:</label> {{ empty($addEvent->deadline_date) || $addEvent->deadline_date === '0000-00-00' ? "--" : date("d/m/Y", strtotime($addEvent->deadline_date)) }}<br>
+                                <label style="font-weight: bold;">Observação:</label> {{ $addEvent->customer_observation }}
                             </td>
                         </tr>
                         <tr>
@@ -727,7 +731,8 @@ if ($transportEvent != null) {
                             </td>
                             <td style="padding: 0.75rem; border: 1px solid gray; padding: 10px 3px;"></td>
                             <td style="padding: 0.75rem; text-align: left; vertical-align: top; border: 1px solid gray; padding: 10px 3px;" colspan="6" rowspan="3">
-                                <label style="font-weight: bold;">Observação:</label>
+                                <label style="font-weight: bold;">Prazo:</label> {{ empty($transportEvent->deadline_date) || $transportEvent->deadline_date === '0000-00-00' ? "--" : date("d/m/Y", strtotime($transportEvent->deadline_date)) }}<br>
+                                <label style="font-weight: bold;">Observação:</label> {{ $transportEvent->customer_observation }}
                             </td>
                         </tr>
                         <tr>
@@ -773,9 +778,9 @@ if ($transportEvent != null) {
                     </div>
                     <div class="right" style="transform: initial;">
                         @if (extension_loaded('gd'))
-                            <img style="width: 150px;" src="{{ public_path('logo.png') }}" alt="4BTS">
+                        <img style="width: 150px;" src="{{ public_path('logo.png') }}" alt="4BTS">
                         @else
-                            <span style="font-weight: bold; font-size: 16px; color: #e9540d;">4BTS</span>
+                        <span style="font-weight: bold; font-size: 16px; color: #e9540d;">4BTS</span>
                         @endif
                         <p>www.4BTS.com.br</p>
                     </div>

@@ -577,6 +577,9 @@
                       <th scope="col" class="sticky-col text-start" *ngIf="activeTab !== 1">Serviço/Detalhe</th>
                       <th scope="col" class="sticky-col text-start" [class.sticky-col]="activeTab === 1">Broker</th>
                       <th scope="col" class="text-start" [class.sticky-col]="activeTab === 1" *ngIf="activeTab === 1">Regime</th>
+                      <th scope="col" class="text-start" *ngIf="activeTab === 3">Nome Salão</th>
+                      <th scope="col" class="text-start" *ngIf="activeTab === 3">Metragem</th>
+                      <th scope="col" class="text-start" *ngIf="activeTab === 3">Pax</th>
                       <th scope="col" class="text-start" *ngIf="activeTab === 1 || activeTab === 3">Propósito</th>
                       <th scope="col" class="text-start" *ngIf="activeTab === 1">CAT.</th>
                       <th scope="col" class="text-start" *ngIf="activeTab === 1">APTO</th>
@@ -640,7 +643,7 @@
                       ">
                       <td
                         [attr.colspan]="
-                          (activeTab === 1 || activeTab === 5 ? 10 : activeTab === 2 || activeTab === 4 ? 9 : 8) +
+                          (activeTab === 1 || activeTab === 5 ? 10 : activeTab === 3 ? 11 : activeTab === 2 || activeTab === 4 ? 9 : 8) +
                           6 +
                           ((
                             activeTab === 1
@@ -679,6 +682,9 @@
 
                       <!-- Tab Specific Columns -->
                       <td class="text-start" [class.sticky-col]="activeTab === 1" *ngIf="activeTab === 1">{{ opt.regime?.name || '-' }}</td>
+                      <td class="text-start" *ngIf="activeTab === 3">{{ opt.name || '-' }}</td>
+                      <td class="text-start" *ngIf="activeTab === 3">{{ opt.m2 || '-' }}</td>
+                      <td class="text-start" *ngIf="activeTab === 3">{{ opt.pax || '-' }}</td>
                       <td class="text-start" *ngIf="activeTab === 1 || activeTab === 3">{{ opt.purpose?.name || '-' }}</td>
                       <td class="text-start" *ngIf="activeTab === 1">{{ opt.category_hotel?.name || opt.category?.name || '-' }}</td>
                       <td class="text-start" *ngIf="activeTab === 1">{{ opt.apto_hotel?.name || opt.apto?.name || '-' }}</td>
@@ -692,8 +698,8 @@
 
                       <td class="text-center">{{ opt.in | date: 'dd/MM/yyyy' }}</td>
                       <td class="text-center">{{ opt.out | date: 'dd/MM/yyyy' }}</td>
-                      <td class="text-center">{{ (opt.count || 0) | number:'1.0-0' }}</td>
-                      <td class="text-center">{{ daysBetween(opt.in, opt.out, activeTab === 2) | number:'1.0-0' }}</td>
+                      <td class="text-center">{{ (opt.count || 0) | number:'1.0-0'}}</td>
+                      <td class="text-center">{{ daysBetween(opt.in, opt.out, activeTab !== 1) | number:'1.0-0'}}</td>
 
                       <!-- Sale and Cost Calculations -->
                       <td class="bg-success-light text-success font-weight-bold text-center">{{ opt.kickback }}%</td>
@@ -701,14 +707,14 @@
                         {{ formatCurrency(unitSale(opt), item.currency?.sigla) }}
                       </td>
                       <td class="bg-success-solid font-weight-bold text-end">
-                        {{ formatCurrency(unitSale(opt) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count, item.currency?.sigla) }}
+                        {{ formatCurrency(unitSale(opt) * daysBetween(opt.in, opt.out, activeTab !== 1) * opt.count, item.currency?.sigla) }}
                       </td>
 
                       <td class="bg-warning-light text-dark font-weight-bold text-end">
                         {{ formatCurrency(unitCost(opt), item.currency?.sigla) }}
                       </td>
                       <td class="bg-warning-solid font-weight-bold text-end">
-                        {{ formatCurrency(unitCost(opt) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count, item.currency?.sigla) }}
+                        {{ formatCurrency(unitCost(opt) * daysBetween(opt.in, opt.out, activeTab !== 1) * opt.count, item.currency?.sigla) }}
                       </td>
                       <td class="text-end">{{ formatCurrency(opt.received_proposal || 0, item.currency?.sigla) }}</td>
                       <td class="text-center">{{ opt.received_proposal_percent }}%</td>
@@ -729,7 +735,7 @@
                         <td class="bg-light-tax text-primary font-weight-bold text-end">
                           {{
                             formatCurrency(
-                              ((unitSale(opt) * parseFloat(item.iss_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count,
+                              ((unitSale(opt) * parseFloat(item.iss_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab !== 1) * opt.count,
                               item.currency?.sigla
                             )
                           }}
@@ -737,7 +743,7 @@
                         <td class="bg-light-tax text-primary text-end">
                           {{
                             formatCurrency(
-                              ((unitCost(opt) * parseFloat(item.iss_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count,
+                              ((unitCost(opt) * parseFloat(item.iss_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab !== 1) * opt.count,
                               item.currency?.sigla
                             )
                           }}
@@ -745,7 +751,7 @@
                         <td class="bg-light-tax text-primary font-weight-bold text-end">
                           {{
                             formatCurrency(
-                              ((unitSale(opt) * parseFloat(item.service_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count,
+                              ((unitSale(opt) * parseFloat(item.service_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab !== 1) * opt.count,
                               item.currency?.sigla
                             )
                           }}
@@ -753,7 +759,7 @@
                         <td class="bg-light-tax text-primary text-end">
                           {{
                             formatCurrency(
-                              ((unitCost(opt) * parseFloat(item.service_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count,
+                              ((unitCost(opt) * parseFloat(item.service_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab !== 1) * opt.count,
                               item.currency?.sigla
                             )
                           }}
@@ -761,7 +767,7 @@
                         <td class="bg-light-tax text-primary font-weight-bold text-end">
                           {{
                             formatCurrency(
-                              ((unitSale(opt) * parseFloat(item.iva_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count,
+                              ((unitSale(opt) * parseFloat(item.iva_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab !== 1) * opt.count,
                               item.currency?.sigla
                             )
                           }}
@@ -769,7 +775,7 @@
                         <td class="bg-light-tax text-primary text-end">
                           {{
                             formatCurrency(
-                              ((unitCost(opt) * parseFloat(item.iva_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count,
+                              ((unitCost(opt) * parseFloat(item.iva_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab !== 1) * opt.count,
                               item.currency?.sigla
                             )
                           }}
@@ -777,7 +783,7 @@
                         <td class="bg-light-tax text-primary font-weight-bold text-end" *ngIf="activeTab === 1 || activeTab === 2">
                           {{
                             formatCurrency(
-                              parseFloat(item.service_charge || 0) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count,
+                              parseFloat(item.service_charge || 0) * daysBetween(opt.in, opt.out, activeTab !== 1) * opt.count,
                               item.currency?.sigla
                             )
                           }}
@@ -785,7 +791,7 @@
                         <td class="bg-light-tax text-primary text-end" *ngIf="activeTab === 1 || activeTab === 2">
                           {{
                             formatCurrency(
-                              parseFloat(item.service_charge || 0) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count,
+                              parseFloat(item.service_charge || 0) * daysBetween(opt.in, opt.out, activeTab !== 1) * opt.count,
                               item.currency?.sigla
                             )
                           }}
@@ -926,7 +932,7 @@
                         {{ formatCurrency(average(item, activeTab === 2), item.currency?.sigla) }}
                       </td>
                       <td
-                        [attr.colspan]="activeTab === 5 ? 3 : activeTab === 2 || activeTab === 4 ? 2 : 1"
+                        [attr.colspan]="activeTab === 5 ? 3 : activeTab === 3 ? 4 : activeTab === 2 || activeTab === 4 ? 2 : 1"
                         *ngIf="activeTab === 2 || activeTab === 3 || activeTab === 4 || activeTab === 5"></td>
 
                       <td class="font-weight-bold text-start">Room Nights:</td>
@@ -936,16 +942,16 @@
                       <td class="text-center font-weight-bold">{{ sumNts(item, activeTab === 2) | number:'1.0-0' }}</td>
 
                       <td class="bg-success-solid font-weight-bold text-end">Total Venda:</td>
-                      <td class="bg-success-solid font-weight-bold text-end">{{ formatCurrency(sumSale(item, activeTab === 2), item.currency?.sigla) }}</td>
+                      <td class="bg-success-solid font-weight-bold text-end">{{ formatCurrency(sumSale(item, activeTab !== 1), item.currency?.sigla) }}</td>
 
                       <td class="bg-warning-solid font-weight-bold text-end">Total Custo:</td>
-                      <td class="bg-warning-solid font-weight-bold text-end">{{ formatCurrency(sumCost(item, activeTab === 2), item.currency?.sigla) }}</td>
+                      <td class="bg-warning-solid font-weight-bold text-end">{{ formatCurrency(sumCost(item, activeTab !== 1), item.currency?.sigla) }}</td>
 
                       <td class="font-weight-bold text-end">Margem %</td>
                       <td class="font-weight-bold text-center">
                         {{
-                          sumSale(item, activeTab === 2) > 0
-                            ? ((1 - sumCost(item, activeTab === 2) / sumSale(item, activeTab === 2)) * 100 | number: '1.2-2')
+                          sumSale(item, activeTab !== 1) > 0
+                            ? ((1 - sumCost(item, activeTab !== 1) / sumSale(item, activeTab !== 1)) * 100 | number: '1.2-2')
                             : '0.00'
                         }}%
                       </td>
@@ -954,28 +960,28 @@
                       <ng-container
                         *ngIf="activeTab === 2 ? showDetailsAB : activeTab === 3 ? showDetailsHall : activeTab === 4 ? showDetailsAdd : showDetailsTransport">
                         <td class="bg-light-tax text-primary font-weight-bold text-end">
-                          {{ formatCurrency(sumTaxes(item, 'iss', activeTab === 2), item.currency?.sigla) }}
+                          {{ formatCurrency(sumTaxes(item, 'iss', activeTab !== 1), item.currency?.sigla) }}
                         </td>
                         <td class="bg-light-tax text-primary font-weight-bold text-end">
-                          {{ formatCurrency((sumCost(item, activeTab === 2) * parseFloat(item.iss_percent || 0)) / 100, item.currency?.sigla) }}
+                          {{ formatCurrency((sumCost(item, activeTab !== 1) * parseFloat(item.iss_percent || 0)) / 100, item.currency?.sigla) }}
                         </td>
                         <td class="bg-light-tax text-primary font-weight-bold text-end">
-                          {{ formatCurrency(sumTaxes(item, 'serv', activeTab === 2), item.currency?.sigla) }}
+                          {{ formatCurrency(sumTaxes(item, 'serv', activeTab !== 1), item.currency?.sigla) }}
                         </td>
                         <td class="bg-light-tax text-primary font-weight-bold text-end">
-                          {{ formatCurrency((sumCost(item, activeTab === 2) * parseFloat(item.service_percent || 0)) / 100, item.currency?.sigla) }}
+                          {{ formatCurrency((sumCost(item, activeTab !== 1) * parseFloat(item.service_percent || 0)) / 100, item.currency?.sigla) }}
                         </td>
                         <td class="bg-light-tax text-primary font-weight-bold text-end">
-                          {{ formatCurrency(sumTaxes(item, 'iva', activeTab === 2), item.currency?.sigla) }}
+                          {{ formatCurrency(sumTaxes(item, 'iva', activeTab !== 1), item.currency?.sigla) }}
                         </td>
                         <td class="bg-light-tax text-primary font-weight-bold text-end">
-                          {{ formatCurrency((sumCost(item, activeTab === 2) * parseFloat(item.iva_percent || 0)) / 100, item.currency?.sigla) }}
+                          {{ formatCurrency((sumCost(item, activeTab !== 1) * parseFloat(item.iva_percent || 0)) / 100, item.currency?.sigla) }}
                         </td>
                         <td class="bg-light-tax text-primary font-weight-bold text-end" *ngIf="activeTab === 2">
-                          {{ formatCurrency(sumTaxes(item, 'sc', activeTab === 2), item.currency?.sigla) }}
+                          {{ formatCurrency(sumTaxes(item, 'sc', true), item.currency?.sigla) }}
                         </td>
                         <td class="bg-light-tax text-primary font-weight-bold text-end" *ngIf="activeTab === 2">
-                          {{ formatCurrency(sumTaxes(item, 'sc', activeTab === 2), item.currency?.sigla) }}
+                          {{ formatCurrency(sumTaxes(item, 'sc', true), item.currency?.sigla) }}
                         </td>
                       </ng-container>
                       <td *ngIf="!isReadOnly"></td>
@@ -984,18 +990,18 @@
                     <!-- Internal Observations Row -->
                     <tr class="observation-row">
                       <td class="sticky-col text-start font-weight-bold" colspan="2">OBSERVAÇÃO INTERNA:</td>
-                      <td class="text-start text-dark" [attr.colspan]="activeTab === 1 || activeTab === 5 ? 8 : activeTab === 2 || activeTab === 4 ? 7 : 6">
+                      <td class="text-start text-dark" [attr.colspan]="activeTab === 1 || activeTab === 5 ? 8 : activeTab === 3 ? 9 : activeTab === 2 || activeTab === 4 ? 7 : 6">
                         {{ item.internal_observation || '-' }}
                       </td>
                       <td colspan="2" class="font-weight-bold text-end">Faturamento Venda:</td>
                       <td colspan="2" class="bg-success-solid font-weight-bold text-end">
                         {{
                           formatCurrency(
-                            sumSale(item, activeTab === 2) +
-                              sumTaxes(item, 'iss', activeTab === 2) +
-                              sumTaxes(item, 'serv', activeTab === 2) +
-                              sumTaxes(item, 'iva', activeTab === 2) +
-                              sumTaxes(item, 'sc', activeTab === 2),
+                            sumSale(item, activeTab !== 1) +
+                              sumTaxes(item, 'iss', activeTab !== 1) +
+                              sumTaxes(item, 'serv', activeTab !== 1) +
+                              sumTaxes(item, 'iva', activeTab !== 1) +
+                              sumTaxes(item, 'sc', activeTab !== 1),
                             item.currency?.sigla
                           )
                         }}
@@ -1018,18 +1024,18 @@
                     <!-- Customer Observations Row -->
                     <tr class="observation-row">
                       <td class="sticky-col text-start font-weight-bold" colspan="2">OBSERVAÇÃO CLIENTE:</td>
-                      <td class="text-start text-dark" [attr.colspan]="activeTab === 1 || activeTab === 5 ? 8 : activeTab === 2 || activeTab === 4 ? 7 : 6">
+                      <td class="text-start text-dark" [attr.colspan]="activeTab === 1 || activeTab === 5 ? 8 : activeTab === 3 ? 9 : activeTab === 2 || activeTab === 4 ? 7 : 6">
                         {{ item.customer_observation || '-' }}
                       </td>
                       <td colspan="2" class="font-weight-bold text-end">Faturamento Custo:</td>
                       <td colspan="2" class="bg-warning-solid font-weight-bold text-end">
                         {{
                           formatCurrency(
-                            sumCost(item, activeTab === 2) +
-                              (sumCost(item, activeTab === 2) * parseFloat(item.iss_percent || 0)) / 100 +
-                              (sumCost(item, activeTab === 2) * parseFloat(item.service_percent || 0)) / 100 +
-                              (sumCost(item, activeTab === 2) * parseFloat(item.iva_percent || 0)) / 100 +
-                              sumTaxes(item, 'sc', activeTab === 2),
+                            sumCost(item, activeTab !== 1) +
+                              (sumCost(item, activeTab !== 1) * parseFloat(item.iss_percent || 0)) / 100 +
+                              (sumCost(item, activeTab !== 1) * parseFloat(item.service_percent || 0)) / 100 +
+                              (sumCost(item, activeTab !== 1) * parseFloat(item.iva_percent || 0)) / 100 +
+                              sumTaxes(item, 'sc', activeTab !== 1),
                             item.currency?.sigla
                           )
                         }}
@@ -1040,6 +1046,27 @@
                             ? showDetailsHotel
                               ? 13
                               : 2
+                            : (activeTab === 2 ? showDetailsAB : activeTab === 3 ? showDetailsHall : activeTab === 4 ? showDetailsAdd : showDetailsTransport)
+                              ? activeTab === 2
+                                ? 10
+                                : 8
+                              : 2
+                        "></td>
+                      <td *ngIf="!isReadOnly"></td>
+                    </tr>
+
+                    <!-- Prazo / Deadline Row -->
+                    <tr class="observation-row">
+                      <td class="sticky-col text-start font-weight-bold" colspan="2">PRAZO / DATA LIMITE:</td>
+                      <td class="text-start text-dark" [attr.colspan]="(activeTab === 1 || activeTab === 5 ? 8 : activeTab === 3 ? 9 : activeTab === 2 || activeTab === 4 ? 7 : 6) + 4">
+                        {{ (item.deadline_date | date: 'dd/MM/yyyy') || '-' }}
+                      </td>
+                      <td
+                        [attr.colspan]="
+                          activeTab === 1
+                            ? showDetailsHotel
+                              ? 13
+                              : 5
                             : (activeTab === 2 ? showDetailsAB : activeTab === 3 ? showDetailsHall : activeTab === 4 ? showDetailsAdd : showDetailsTransport)
                               ? activeTab === 2
                                 ? 10
@@ -1287,7 +1314,7 @@
                   Alterar horários padrão do hotel?
                 </label>
               </div>
-              
+
               <div class="col-md-2 form-group mb-0">
                 <label for="checkin_time" class="form-label font-weight-bold text-secondary mb-1" style="font-size: 0.85rem;">Check-in Início:</label>
                 <input
@@ -1394,6 +1421,28 @@
           <div *ngIf="errors.purpose || errors.purpose_id" class="text-danger mt-1">
             <small *ngFor="let err of (errors.purpose || errors.purpose_id)" class="d-block">{{ err }}</small>
           </div>
+        </div>
+
+        <!-- NOME SALÃO, METRAGEM, PAX (hall only) -->
+        <div class="col-md-6 form-group mb-3" *ngIf="optFormType === 'hall'">
+          <label for="hall_name" class="form-label font-weight-bold">
+            Nome do Salão:
+          </label>
+          <input type="text" id="hall_name" class="form-control" [(ngModel)]="optForm.name" name="name" placeholder="Ex: Salão Copacabana" />
+        </div>
+
+        <div class="col-md-3 form-group mb-3" *ngIf="optFormType === 'hall'">
+          <label for="hall_m2" class="form-label font-weight-bold">
+            Metragem (m²):
+          </label>
+          <input type="text" id="hall_m2" class="form-control" [(ngModel)]="optForm.m2" name="m2" placeholder="Ex: 150" />
+        </div>
+
+        <div class="col-md-3 form-group mb-3" *ngIf="optFormType === 'hall'">
+          <label for="hall_pax" class="form-label font-weight-bold">
+            Qtd. Pax:
+          </label>
+          <input type="text" id="hall_pax" class="form-control" [(ngModel)]="optForm.pax" name="pax" placeholder="Ex: 100" />
         </div>
 
         <!-- CATEGORIA APTO (hotel only) -->
