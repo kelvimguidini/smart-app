@@ -19,6 +19,11 @@ class EloquentStatusHistoryRepository implements StatusHistoryRepositoryInterfac
             ->get();
     }
 
+    public function latestStatusForTable(string $table, int $id): ?string
+    {
+        return StatusHistory::latestStatusForTable($table, $id);
+    }
+
     public function isBlockedTableRecord(string $table, int $id): bool
     {
         return StatusHistory::isBlockedTableRecord($table, $id);

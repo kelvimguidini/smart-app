@@ -120,7 +120,8 @@ export class ProviderActionsComponent {
             const matchesLevel = (status.level === 1 && hasLevel1) || (status.level === 2 && hasLevel2);
             return isAllowedFlow && matchesLevel;
           })
-          .map(([key, status]: [string, any]) => ({ key, label: status.label }));
+          .map(([key, status]: [string, any]) => ({ key, label: status.label }))
+          .sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'));
 
         this.formStatus.table = this.prov.table;
         this.formStatus.table_id = this.prov.table_id;

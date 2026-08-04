@@ -26,6 +26,11 @@ class EloquentEventABRepository implements EventABRepositoryInterface
             ->update($data);
     }
 
+    public function find(int $id): ?EventAB
+    {
+        return EventAB::find($id);
+    }
+
     public function findWithDetails(int $id): ?EventAB
     {
         return EventAB::with([

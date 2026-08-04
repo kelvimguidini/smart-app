@@ -26,12 +26,20 @@ class EloquentEventHallRepository implements EventHallRepositoryInterface
             ->update($data) > 0;
     }
 
+    public function find(int $id): ?EventHall
+    {
+        return EventHall::find($id);
+    }
+
     public function findWithDetails(int $id): ?EventHall
     {
         return EventHall::with([
             'eventHallOpts' => function ($q) {
                 $q->orderBy('order', 'asc')->orderby('in');
             },
+            'eventHallOpts.broker',
+            'eventHallOpts.service',
+            'eventHallOpts.purpose',
             'hall.city',
             'currency',
             'event',

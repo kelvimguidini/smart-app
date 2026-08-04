@@ -1,9 +1,9 @@
-import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, inject } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, of, forkJoin } from 'rxjs';
 
 import { EventService } from '../../../services/event.service';
 import { AuthService } from '../../../services/auth.service';
@@ -13,16 +13,17 @@ import { AutocompleteComponent } from '../../../shared/components/autocomplete/a
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { AuthenticatedLayoutComponent } from '../../../shared/layouts/authenticated-layout/authenticated-layout.component';
+import { NgxMaskDirective } from 'ngx-mask';
 import flatpickr from 'flatpickr';
 
 @Component({
   selector: 'app-event-create',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, AuthenticatedLayoutComponent, AutocompleteComponent, ConfirmModalComponent, ModalComponent],
+  imports: [CommonModule, FormsModule, RouterLink, AuthenticatedLayoutComponent, AutocompleteComponent, ConfirmModalComponent, ModalComponent, NgxMaskDirective],
   templateUrl: './event-create.component.html',
   styleUrls: ['./event-create.component.scss'],
 })
-export class EventCreateComponent implements OnInit, AfterViewInit {
+export class EventCreateComponent implements OnInit {
   private readonly eventService = inject(EventService);
   private readonly authService = inject(AuthService);
   private readonly cityService = inject(CityService);
@@ -30,8 +31,29 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
-  @ViewChild('dateRangePicker') dateRangePickerElement!: ElementRef;
   private flatpickrInstance: any;
+  private flatpickrElement: any = null;
+
+  @ViewChild('dateRangePicker') set dateRangePicker(element: ElementRef) {
+    if (element) {
+      if (element.nativeElement !== this.flatpickrElement) {
+        this.flatpickrElement = element.nativeElement;
+        setTimeout(() => {
+          if (element.nativeElement === this.flatpickrElement) {
+            this.initFlatpickr(element.nativeElement);
+          }
+        });
+      }
+    } else {
+      if (this.flatpickrInstance) {
+        this.flatpickrInstance.destroy();
+        this.flatpickrInstance = null;
+      }
+      this.flatpickrElement = null;
+    }
+  }
+
+  private optFlatpickrInstance: any;
 
   isLoader = false;
   processing = false;
@@ -39,6 +61,15 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
 
   parseFloat(value: any): number {
     return parseFloat(value || 0);
+  }
+
+  sortByName<T>(list: T[], key: string = 'name'): T[] {
+    if (!list || list.length === 0) return [];
+    return [...list].sort((a: any, b: any) => {
+      const valA = String(a[key] || '');
+      const valB = String(b[key] || '');
+      return valA.localeCompare(valB, 'pt-BR');
+    });
   }
 
   // Active state
@@ -120,7 +151,6 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   showDetailsTransport = false;
   showDetailsAirfare = false;
 
-  // Form State - Provider Links (vincular)
   providerLinkForm: any = {
     id: 0,
     provider_id: '',
@@ -133,6 +163,14 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     payment_method: '',
     internal_observation: '',
     customer_observation: '',
+    invoice: false,
+    iof: 0,
+    change_hotel_times: false,
+    checkin_time: '',
+    checkin_time_end: '',
+    checkout_time: '',
+    checkout_time_end: '',
+    deadline_date: '',
   };
   showProviderLinkForm = false;
   providerLinkType: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' | 'airfare' = 'hotel';
@@ -141,7 +179,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   searchProviders = (term: string): Observable<any[]> => {
     const termLower = term.toLowerCase();
     let sourceList: any[] = [];
-    if (this.providerLinkType === 'hotel' || this.providerLinkType === 'ab') {
+    if (this.providerLinkType === 'hotel' || this.providerLinkType === 'ab' || this.providerLinkType === 'hall') {
       sourceList = this.providers;
     } else if (this.providerLinkType === 'add') {
       sourceList = this.providersService;
@@ -150,8 +188,8 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     } else if (this.providerLinkType === 'airfare') {
       sourceList = this.providersAirfare;
     }
-    const filtered = sourceList.filter(p => 
-      (p.name && p.name.toLowerCase().includes(termLower)) || 
+    const filtered = sourceList.filter(p =>
+      (p.name && p.name.toLowerCase().includes(termLower)) ||
       (p.city && (
         (p.city.name && p.city.name.toLowerCase().includes(termLower)) ||
         (p.city.states && p.city.states.toLowerCase().includes(termLower)) ||
@@ -174,7 +212,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   onProviderChange(providerId: any) {
     if (!providerId) return;
     let found: any = null;
-    if (this.providerLinkType === 'hotel' || this.providerLinkType === 'ab') {
+    if (this.providerLinkType === 'hotel' || this.providerLinkType === 'ab' || this.providerLinkType === 'hall') {
       found = this.providers.find(p => p.id === providerId);
     } else if (this.providerLinkType === 'add') {
       found = this.providersService.find(p => p.id === providerId);
@@ -183,17 +221,36 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     } else if (this.providerLinkType === 'airfare') {
       found = this.providersAirfare.find(p => p.id === providerId);
     }
-    
+
     if (found) {
       this.providerLinkForm.taxa_4bts = found.taxa_4bts || 0;
       this.providerLinkForm.iss_percent = found.iss_percent || 0;
       this.providerLinkForm.service_percent = found.service_percent || 0;
       this.providerLinkForm.iva_percent = found.iva_percent || 0;
       this.providerLinkForm.payment_method = this.normalizePaymentMethod(found.payment_method);
+      if (this.providerLinkType === 'hotel') {
+        if (!this.providerLinkForm.change_hotel_times) {
+          this.providerLinkForm.checkin_time = found.checkin_time || '';
+          this.providerLinkForm.checkin_time_end = found.checkin_time_end || '';
+          this.providerLinkForm.checkout_time = found.checkout_time || '';
+          this.providerLinkForm.checkout_time_end = found.checkout_time_end || '';
+        }
+      }
     }
   }
 
-  // Form State - Provider Options (detalhes/tarifas)
+  onChangeHotelTimesToggle() {
+    if (!this.providerLinkForm.change_hotel_times) {
+      const found = this.providers.find(p => p.id === this.providerLinkForm.provider_id);
+      if (found) {
+        this.providerLinkForm.checkin_time = found.checkin_time || '';
+        this.providerLinkForm.checkin_time_end = found.checkin_time_end || '';
+        this.providerLinkForm.checkout_time = found.checkout_time || '';
+        this.providerLinkForm.checkout_time_end = found.checkout_time_end || '';
+      }
+    }
+  }
+
   optForm: any = {
     id: 0,
     parent_id: 0, // e.g. event_hotel_id, event_ab_id, etc.
@@ -215,7 +272,11 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     count: 1,
     kickback: 0,
     received_proposal: 0,
-    received_proposal_percent: 100,
+    received_proposal_percent: 0.8,
+    order: 0,
+    name: '',
+    m2: '',
+    pax: '',
 
     // Airfare-specific fields
     outbound_airline_id: '',
@@ -242,6 +303,11 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     status: '',
   };
   showOptForm = false;
+  optFormType: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' = 'hotel';
+  showMarkupForm = false;
+  bulkMarkupValue = 100.00;
+  bulkMarkupTargetItem: any = null;
+  bulkMarkupTargetType: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' = 'hotel';
   optFormType: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' | 'airfare' = 'hotel';
 
   // Autocomplete Functions
@@ -262,12 +328,16 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     });
   }
 
-  ngAfterViewInit() {
-    this.flatpickrInstance = flatpickr(this.dateRangePickerElement.nativeElement, {
+  initFlatpickr(element: any) {
+    if (this.flatpickrInstance) {
+      this.flatpickrInstance.destroy();
+    }
+    this.flatpickrInstance = flatpickr(element, {
       mode: 'range',
       dateFormat: 'Y-m-d',
       altInput: true,
       altFormat: 'd/m/Y',
+      disableMobile: true,
       defaultDate: this.basicForm.date && this.basicForm.date_final ? [this.basicForm.date, this.basicForm.date_final] : undefined,
       locale: {
         firstDayOfWeek: 1,
@@ -312,12 +382,25 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
           };
           this.basicForm.date = formatDate(selectedDates[0]);
           this.basicForm.date_final = formatDate(selectedDates[1]);
-        } else {
+        } else if (selectedDates.length === 0) {
           this.basicForm.date = '';
           this.basicForm.date_final = '';
         }
       },
+      onClose: (selectedDates) => {
+        if (selectedDates.length !== 2) {
+          if (this.basicForm.date && this.basicForm.date_final) {
+            this.flatpickrInstance.setDate([this.basicForm.date, this.basicForm.date_final]);
+          } else {
+            this.flatpickrInstance.clear();
+          }
+        }
+      },
     });
+
+    if (this.basicForm.date && this.basicForm.date_final) {
+      this.flatpickrInstance.setDate([this.basicForm.date, this.basicForm.date_final]);
+    }
   }
 
   loadInitialData() {
@@ -326,39 +409,37 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       next: (res) => {
         console.log('loadInitialData: edit-data API response =', res);
         // Load master lists
-        this.customers = res.customers || [];
-        this.crds = res.crds || [];
-        this.users = res.users || [];
-        this.providers = res.providers || [];
-        this.providersService = res.providersService || [];
-        this.providersTransport = res.providersTransport || [];
-        this.providersAirfare = res.providersAirfare || [];
-        this.airlines = res.airlines || [];
-        this.baggages = res.baggages || [];
-        this.cabins = res.cabins || [];
-        this.brokers = res.brokers || [];
-        this.currencies = res.currencies || [];
-        this.regimes = res.regimes || [];
-        this.purposes = res.purposes || [];
-        this.services = res.services || [];
-        this.servicesType = res.servicesType || [];
-        this.locals = res.locals || [];
-        this.catsHotel = res.catsHotel || [];
-        this.aptosHotel = res.aptosHotel || [];
-        this.brokersT = res.brokersT || [];
-        this.vehicles = res.vehicles || [];
-        this.models = res.models || [];
-        this.servicesT = res.servicesT || [];
-        this.brands = res.brands || [];
-        this.servicesHall = res.servicesHall || [];
-        this.purposesHall = res.purposesHall || [];
-        this.servicesAdd = res.servicesAdd || [];
-        this.frequencies = res.frequencies || [];
-        this.measures = res.measures || [];
+
+        // Load master lists sorted alphabetically
+        this.customers = this.sortByName(res.customers || []);
+        this.crds = this.sortByName(res.crds || []);
+        this.users = this.sortByName(res.users || []);
+        this.providers = this.sortByName(res.providers || []);
+        this.providersService = this.sortByName(res.providersService || []);
+        this.providersTransport = this.sortByName(res.providersTransport || []);
+        this.brokers = this.sortByName(res.brokers || []);
+        this.currencies = this.sortByName(res.currencies || []);
+        this.regimes = this.sortByName(res.regimes || []);
+        this.purposes = this.sortByName(res.purposes || []);
+        this.services = this.sortByName(res.services || []);
+        this.servicesType = this.sortByName(res.servicesType || []);
+        this.locals = this.sortByName(res.locals || []);
+        this.catsHotel = this.sortByName(res.catsHotel || []);
+        this.aptosHotel = this.sortByName(res.aptosHotel || []);
+        this.brokersT = this.sortByName(res.brokersT || []);
+        this.vehicles = this.sortByName(res.vehicles || []);
+        this.models = this.sortByName(res.models || []);
+        this.servicesT = this.sortByName(res.servicesT || []);
+        this.brands = this.sortByName(res.brands || []);
+        this.servicesHall = this.sortByName(res.servicesHall || []);
+        this.purposesHall = this.sortByName(res.purposesHall || []);
+        this.servicesAdd = this.sortByName(res.servicesAdd || []);
+        this.frequencies = this.sortByName(res.frequencies || []);
+        this.measures = this.sortByName(res.measures || []);
         this.allStatus = res.allStatus || {};
-        this.customerRequesters = res.customerRequesters || [];
-        this.customerSectors = res.customerSectors || [];
-        this.customerCostCenters = res.customerCostCenters || [];
+        this.customerRequesters = this.sortByName(res.customerRequesters || []);
+        this.customerSectors = this.sortByName(res.customerSectors || []);
+        this.customerCostCenters = this.sortByName(res.customerCostCenters || []);
 
         if (res.event) {
           this.event = res.event;
@@ -377,8 +458,12 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
           if (res.event.date_final) {
             this.basicForm.date_final = res.event.date_final.split('T')[0];
           }
-          if (this.flatpickrInstance && this.basicForm.date && this.basicForm.date_final) {
-            this.flatpickrInstance.setDate([this.basicForm.date, this.basicForm.date_final]);
+          if (this.flatpickrInstance) {
+            if (this.basicForm.date && this.basicForm.date_final) {
+              this.flatpickrInstance.setDate([this.basicForm.date, this.basicForm.date_final]);
+            } else {
+              this.flatpickrInstance.clear();
+            }
           }
 
           this.basicForm.crd_id = res.event.crd_id || '';
@@ -468,6 +553,11 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     if (this.basicForm.cc && !this.costCentersFiltered.some(cc => cc.name === this.basicForm.cc)) {
       this.costCentersFiltered.push({ name: this.basicForm.cc });
     }
+
+    // Sort alphabetically
+    this.requestersFiltered = this.sortByName(this.requestersFiltered);
+    this.sectorsFiltered = this.sortByName(this.sectorsFiltered);
+    this.costCentersFiltered = this.sortByName(this.costCentersFiltered);
   }
 
   filterCrds(customerId: any) {
@@ -493,6 +583,8 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         this.crdsFiltered.push(existingCrd);
       }
     }
+    // Sort alphabetically
+    this.crdsFiltered = this.sortByName(this.crdsFiltered);
     console.log('filterCrds: filtered result =', this.crdsFiltered);
   }
 
@@ -541,11 +633,32 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     return 'Indefinido';
   }
 
-  openAddProviderLink(type: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' | 'airfare', editItem: any = null) {
+  openAddProviderLink(type: 'hotel' | 'ab' | 'hall' | 'add' | 'transport', editItem: any = null) {
     this.providerLinkType = type;
     this.errors = {};
 
     if (editItem) {
+      const pId = editItem.hotel_id || editItem.ab_id || editItem.hall_id || editItem.add_id || editItem.transport_id;
+      // Find matching provider and display name
+      let found: any = null;
+      if (type === 'hotel' || type === 'ab' || type === 'hall') {
+        found = this.providers.find(p => p.id === pId);
+      } else if (type === 'add') {
+        found = this.providersService.find(p => p.id === pId);
+      } else if (type === 'transport') {
+        found = this.providersTransport.find(p => p.id === pId);
+      }
+      this.selectedProviderName = found ? this.displayProvider(found) : '';
+
+      let isDifferent = false;
+      if (type === 'hotel' && found) {
+        isDifferent =
+          (editItem.checkin_time || '') !== (found.checkin_time || '') ||
+          (editItem.checkin_time_end || '') !== (found.checkin_time_end || '') ||
+          (editItem.checkout_time || '') !== (found.checkout_time || '') ||
+          (editItem.checkout_time_end || '') !== (found.checkout_time_end || '');
+      }
+
       const pId = editItem.hotel_id || editItem.ab_id || editItem.hall_id || editItem.add_id || editItem.transport_id || editItem.airfare_id;
       this.providerLinkForm = {
         id: editItem.id,
@@ -559,6 +672,15 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         payment_method: this.normalizePaymentMethod(editItem.payment_method),
         internal_observation: editItem.internal_observation || '',
         customer_observation: editItem.customer_observation || '',
+        invoice: editItem.invoice !== undefined ? !!editItem.invoice : false,
+        iof: editItem.iof || 0,
+        change_hotel_times: isDifferent,
+        checkin_time: editItem.checkin_time || '',
+        checkin_time_end: editItem.checkin_time_end || '',
+        checkout_time: editItem.checkout_time || '',
+        checkout_time_end: editItem.checkout_time_end || '',
+        deadline_date: editItem.deadline_date ? editItem.deadline_date.split('T')[0] : '',
+      };
       };
       // Find matching provider and display name
       let found: any = null;
@@ -576,7 +698,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       this.providerLinkForm = {
         id: 0,
         provider_id: '',
-        currency_id: this.currencies[0]?.id || '',
+        currency_id: '',
         iss_percent: 0,
         service_percent: 0,
         iva_percent: 0,
@@ -585,6 +707,14 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         payment_method: 'Indefinido',
         internal_observation: '',
         customer_observation: '',
+        invoice: false,
+        iof: 0,
+        change_hotel_times: false,
+        checkin_time: '',
+        checkin_time_end: '',
+        checkout_time: '',
+        checkout_time_end: '',
+        deadline_date: '',
       };
       this.selectedProviderName = '';
     }
@@ -597,9 +727,69 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     this.errors = {};
   }
 
+  onCurrencyChange(currencyId: any) {
+    if (!currencyId) return;
+    const currency = this.currencies.find(c => Number(c.id) === Number(currencyId));
+    if (currency) {
+      if (currency.sigla !== 'BRL') {
+        if (!this.providerLinkForm.iof || Number(this.providerLinkForm.iof) === 0) {
+          this.providerLinkForm.iof = 3.5;
+        }
+      } else {
+        this.providerLinkForm.iof = 0;
+      }
+    }
+  }
+
   saveProviderLink() {
     this.processing = true;
     this.errors = {};
+
+    let hasErrors = false;
+
+    if (!this.providerLinkForm.provider_id) {
+      this.errors.provider_id = ['O campo fornecedor é obrigatório.'];
+      hasErrors = true;
+    }
+
+    if (!this.providerLinkForm.currency_id) {
+      this.errors.currency_id = ['O campo moeda é obrigatório.'];
+      hasErrors = true;
+    }
+
+    if (
+      this.providerLinkForm.taxa_4bts === null ||
+      this.providerLinkForm.taxa_4bts === undefined ||
+      this.providerLinkForm.taxa_4bts === ''
+    ) {
+      this.errors.taxa_4bts = ['O campo taxa 4BTS é obrigatório.'];
+      hasErrors = true;
+    }
+
+    const selectedCurrency = this.currencies.find(c => Number(c.id) === Number(this.providerLinkForm.currency_id));
+    if (selectedCurrency && selectedCurrency.sigla !== 'BRL') {
+      const iofVal = Number(this.providerLinkForm.iof || 0);
+      if (iofVal <= 0) {
+        this.errors.iof = ['O IOF não pode ser zero ou menor para moedas estrangeiras.'];
+        hasErrors = true;
+      }
+    }
+
+    if (hasErrors) {
+      this.processing = false;
+      this.toastService.error('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+
+    if (this.providerLinkType === 'hotel' && !this.providerLinkForm.change_hotel_times) {
+      const found = this.providers.find(p => p.id === this.providerLinkForm.provider_id);
+      if (found) {
+        this.providerLinkForm.checkin_time = found.checkin_time || '';
+        this.providerLinkForm.checkin_time_end = found.checkin_time_end || '';
+        this.providerLinkForm.checkout_time = found.checkout_time || '';
+        this.providerLinkForm.checkout_time_end = found.checkout_time_end || '';
+      }
+    }
 
     const payload = {
       ...this.providerLinkForm,
@@ -684,6 +874,144 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     });
   }
 
+  updateMarkupBulk(item: any, type: 'hotel' | 'ab' | 'hall' | 'add' | 'transport') {
+    // Get the options array first to check if they have any options
+    let options: any[] = [];
+    switch (type) {
+      case 'hotel': options = item.event_hotels_opt || []; break;
+      case 'ab': options = item.event_ab_opts || []; break;
+      case 'hall': options = item.event_hall_opts || []; break;
+      case 'add': options = item.event_add_opts || []; break;
+      case 'transport': options = item.event_transport_opts || []; break;
+    }
+
+    if (options.length === 0) {
+      this.toastService.warning('Este fornecedor não possui tarifas cadastradas.');
+      return;
+    }
+
+    this.bulkMarkupTargetItem = item;
+    this.bulkMarkupTargetType = type;
+    this.bulkMarkupValue = options[0].received_proposal_percent !== undefined
+      ? options[0].received_proposal_percent
+      : 100.00;
+
+    this.showMarkupForm = true;
+  }
+
+  closeMarkupForm() {
+    this.showMarkupForm = false;
+    this.bulkMarkupTargetItem = null;
+  }
+
+  confirmMarkupBulk() {
+    if (!this.bulkMarkupTargetItem) return;
+    const item = this.bulkMarkupTargetItem;
+    const type = this.bulkMarkupTargetType;
+    const parsedPercent = this.bulkMarkupValue;
+
+    if (parsedPercent <= 0 || parsedPercent > 100) {
+      this.toastService.error('O markup divisor deve ser maior que 0% e no máximo 100%.');
+      return;
+    }
+
+    let options: any[] = [];
+    switch (type) {
+      case 'hotel': options = item.event_hotels_opt || []; break;
+      case 'ab': options = item.event_ab_opts || []; break;
+      case 'hall': options = item.event_hall_opts || []; break;
+      case 'add': options = item.event_add_opts || []; break;
+      case 'transport': options = item.event_transport_opts || []; break;
+    }
+
+    this.processing = true;
+    this.isLoader = true;
+    const requests: Observable<any>[] = [];
+
+    options.forEach(opt => {
+      let payload: any = {
+        id: opt.id,
+        parent_id: item.id,
+        broker_id: opt.broker_id,
+        regime_id: opt.regime_id,
+        purpose_id: opt.purpose_id,
+        category_id: opt.category_hotel_id || opt.category_id,
+        apto_id: opt.apto_hotel_id || opt.apto_id,
+        service_id: opt.service_id,
+        service_type_id: opt.service_type_id,
+        local_id: opt.local_id,
+        frequency_id: opt.frequency_id,
+        measure_id: opt.measure_id,
+        vehicle_id: opt.vehicle_id,
+        car_model_id: opt.car_model_id,
+        brand_id: opt.brand_id,
+        in: opt.in ? opt.in.substring(0, 10) : '',
+        out: opt.out ? opt.out.substring(0, 10) : '',
+        count: opt.count,
+        kickback: opt.kickback,
+        received_proposal: opt.received_proposal,
+        received_proposal_percent: parsedPercent,
+        compare_trivago: opt.compare_trivago,
+        compare_website_htl: opt.compare_website_htl,
+        compare_omnibess: opt.compare_omnibess,
+        observation: opt.observation,
+        order: opt.order || 0
+      };
+
+      switch (type) {
+        case 'hotel':
+          payload.event_hotel_id = item.id;
+          payload.broker = opt.broker_id;
+          payload.regime = opt.regime_id;
+          payload.purpose = opt.purpose_id;
+          requests.push(this.eventService.saveHotelOpt(payload));
+          break;
+        case 'ab':
+          payload.event_ab_id = item.id;
+          payload.broker = opt.broker_id;
+          requests.push(this.eventService.saveABOpt(payload));
+          break;
+        case 'hall':
+          payload.event_hall_id = item.id;
+          payload.broker = opt.broker_id;
+          requests.push(this.eventService.saveHallOpt(payload));
+          break;
+        case 'add':
+          payload.event_add_id = item.id;
+          payload.frequency = opt.frequency_id;
+          payload.measure = opt.measure_id;
+          payload.service = opt.service_id;
+          requests.push(this.eventService.saveAddOpt(payload));
+          break;
+        case 'transport':
+          payload.event_transport_id = item.id;
+          payload.broker = opt.broker_id;
+          payload.vehicle = opt.vehicle_id;
+          payload.model = opt.car_model_id;
+          payload.service = opt.service_id;
+          payload.brand = opt.brand_id;
+          requests.push(this.eventService.saveTransportOpt(payload));
+          break;
+      }
+    });
+
+    forkJoin(requests).subscribe({
+      next: () => {
+        this.isLoader = false;
+        this.processing = false;
+        this.toastService.success('Markup de todas as tarifas atualizado com sucesso!');
+        this.closeMarkupForm();
+        this.loadInitialData();
+      },
+      error: (err) => {
+        this.isLoader = false;
+        this.processing = false;
+        this.toastService.error('Erro ao atualizar o markup de algumas tarifas.');
+        console.error(err);
+      }
+    });
+  }
+
   // --- PROVIDER OPTIONS (DETALHES / TARIFAS) ---
   openAddOpt(type: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' | 'airfare', parentId: number, editItem: any = null, isDuplicate = false) {
     this.optFormType = type;
@@ -696,8 +1024,8 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         broker_id: editItem.broker_id || '',
         regime_id: editItem.regime_id || '',
         purpose_id: editItem.purpose_id || '',
-        category_id: editItem.category_id || '',
-        apto_id: editItem.apto_id || '',
+        category_id: editItem.category_hotel_id || editItem.category_id || '',
+        apto_id: editItem.apto_hotel_id || editItem.apto_id || '',
         service_id: editItem.service_id || '',
         service_type_id: editItem.service_type_id || '',
         local_id: editItem.local_id || '',
@@ -706,16 +1034,20 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         vehicle_id: editItem.vehicle_id || '',
         car_model_id: editItem.car_model_id || '',
         brand_id: editItem.brand_id || '',
-        in: editItem.in ? editItem.in.split('T')[0] : '',
-        out: editItem.out ? editItem.out.split('T')[0] : '',
-        count: editItem.count || 1,
+        in: editItem.in ? editItem.in.substring(0, 10) : '',
+        out: editItem.out ? editItem.out.substring(0, 10) : '',
+        count: editItem.count ? Math.round(parseFloat(editItem.count)) : 1,
         kickback: editItem.kickback || 0,
         received_proposal: editItem.received_proposal || 0,
-        received_proposal_percent: editItem.received_proposal_percent || 100,
+        received_proposal_percent: editItem.received_proposal_percent || 0.8,
         compare_trivago: editItem.compare_trivago || 0,
         compare_website_htl: editItem.compare_website_htl || 0,
         compare_omnibess: editItem.compare_omnibess || 0,
         observation: editItem.observation || '',
+        order: editItem.order || 0,
+        name: editItem.name || '',
+        m2: editItem.m2 || '',
+        pax: editItem.pax || '',
 
         // Airfare fields
         outbound_airline_id: editItem.outbound_airline_id || '',
@@ -744,11 +1076,11 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       this.optForm = {
         id: 0,
         parent_id: parentId,
-        broker_id: this.brokers[0]?.id || '',
-        regime_id: this.regimes[0]?.id || '',
-        purpose_id: this.purposes[0]?.id || '',
-        category_id: this.catsHotel[0]?.id || '',
-        apto_id: this.aptosHotel[0]?.id || '',
+        broker_id: '',
+        regime_id: '',
+        purpose_id: '',
+        category_id: '',
+        apto_id: '',
         service_id: '',
         service_type_id: '',
         local_id: '',
@@ -757,16 +1089,20 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         vehicle_id: '',
         car_model_id: '',
         brand_id: '',
-        in: this.basicForm.date || '',
-        out: this.basicForm.date_final || '',
+        in: '',
+        out: '',
         count: 1,
         kickback: 0,
         received_proposal: 0,
-        received_proposal_percent: 100,
+        received_proposal_percent: 0.8,
         compare_trivago: 0,
         compare_website_htl: 0,
         compare_omnibess: 0,
         observation: '',
+        order: 0,
+        name: '',
+        m2: '',
+        pax: '',
 
         // Airfare defaults
         outbound_airline_id: '',
@@ -823,16 +1159,201 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     }
 
     this.showOptForm = true;
+    setTimeout(() => {
+      const element = document.getElementById('opt_date_range');
+      if (element) {
+        this.initOptFlatpickr(element);
+      }
+    });
   }
 
   closeOptForm() {
     this.showOptForm = false;
     this.errors = {};
+    if (this.optFlatpickrInstance) {
+      this.optFlatpickrInstance.clear(false);
+      this.optFlatpickrInstance.destroy();
+      this.optFlatpickrInstance = null;
+    }
+  }
+
+  formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  initOptFlatpickr(element: any) {
+    if (this.optFlatpickrInstance) {
+      this.optFlatpickrInstance.destroy();
+    }
+    this.optFlatpickrInstance = flatpickr(element, {
+      mode: 'range',
+      dateFormat: 'Y-m-d',
+      altInput: true,
+      altFormat: 'd/m/Y',
+      disableMobile: true,
+      defaultDate: this.optForm.in && this.optForm.out ? [this.optForm.in, this.optForm.out] : undefined,
+      locale: this.getFlatpickrLocale(),
+      onChange: (selectedDates) => {
+        if (selectedDates.length === 2) {
+          this.optForm.in = this.formatDate(selectedDates[0]);
+          this.optForm.out = this.formatDate(selectedDates[1]);
+        } else if (selectedDates.length === 0) {
+          this.optForm.in = '';
+          this.optForm.out = '';
+        }
+      },
+      onClose: (selectedDates) => {
+        if (selectedDates.length !== 2) {
+          if (this.optForm.in && this.optForm.out) {
+            this.optFlatpickrInstance.setDate([this.optForm.in, this.optForm.out]);
+          } else {
+            this.optFlatpickrInstance.clear();
+          }
+        }
+      },
+    });
+
+    if (this.optForm.in && this.optForm.out) {
+      this.optFlatpickrInstance.setDate([this.optForm.in, this.optForm.out], false);
+    } else {
+      this.optFlatpickrInstance.clear(false);
+    }
+  }
+
+  getFlatpickrLocale(): any {
+    return {
+      firstDayOfWeek: 1,
+      weekdays: {
+        shorthand: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+        longhand: ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'],
+      },
+      months: {
+        shorthand: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+        longhand: [
+          'Janeiro',
+          'Fevereiro',
+          'Março',
+          'Abril',
+          'Maio',
+          'Junho',
+          'Julho',
+          'Agosto',
+          'Setembro',
+          'Outubro',
+          'Novembro',
+          'Dezembro',
+        ],
+      },
+      rangeSeparator: ' até ',
+    } as any;
   }
 
   saveOpt() {
     this.processing = true;
     this.errors = {};
+
+    let hasErrors = false;
+
+    // Period validation
+    if (!this.optForm.in || !this.optForm.out) {
+      if (!this.optForm.in) this.errors.in = ['O campo de entrada é obrigatório.'];
+      if (!this.optForm.out) this.errors.out = ['O campo de saída é obrigatório.'];
+      hasErrors = true;
+    } else {
+      const dateIn = new Date(this.optForm.in);
+      const dateOut = new Date(this.optForm.out);
+      if (dateOut < dateIn) {
+        this.errors.out = ['A data de saída deve ser igual ou posterior à data de entrada.'];
+        hasErrors = true;
+      }
+    }
+
+    // Count validation
+    if (this.optForm.count === null || this.optForm.count === undefined || this.optForm.count === '') {
+      this.errors.count = ['O campo quantidade é obrigatório.'];
+      hasErrors = true;
+    } else {
+      const countVal = Number(this.optForm.count);
+      if (isNaN(countVal) || countVal <= 0) {
+        this.errors.count = ['A quantidade deve ser maior que zero.'];
+        hasErrors = true;
+      } else if (countVal % 1 !== 0) {
+        this.errors.count = ['A quantidade deve ser um número inteiro (sem frações).'];
+        hasErrors = true;
+      }
+    }
+
+    // Received proposal validation
+    if (this.optForm.received_proposal === null || this.optForm.received_proposal === undefined || this.optForm.received_proposal === '') {
+      this.errors.received_proposal = ['O campo proposta recebida é obrigatório.'];
+      hasErrors = true;
+    }
+
+    // Markup percentage validation
+    if (this.optForm.received_proposal_percent === null || this.optForm.received_proposal_percent === undefined || this.optForm.received_proposal_percent === '') {
+      this.errors.received_proposal_percent = ['O campo markup é obrigatório.'];
+      hasErrors = true;
+    } else {
+      const markupVal = Number(this.optForm.received_proposal_percent);
+      if (isNaN(markupVal) || markupVal <= 0 || markupVal > 100) {
+        this.errors.received_proposal_percent = ['O markup deve ser maior que 0% e no máximo 100%.'];
+        hasErrors = true;
+      }
+    }
+
+    // Dynamic select validations
+    switch (this.optFormType) {
+      case 'hotel':
+        if (!this.optForm.broker_id) { this.errors.broker_id = ['O campo broker é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.regime_id) { this.errors.regime_id = ['O campo regime é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.purpose_id) { this.errors.purpose_id = ['O campo propósito é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.category_id) { this.errors.category_id = ['O campo categoria apto é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.apto_id) { this.errors.apto_id = ['O campo tipo apto é obrigatório.']; hasErrors = true; }
+        break;
+      case 'ab':
+        if (!this.optForm.broker_id) { this.errors.broker_id = ['O campo broker é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.service_id) { this.errors.service_id = ['O campo serviço é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.service_type_id) { this.errors.service_type_id = ['O campo tipo de serviço é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.local_id) { this.errors.local_id = ['O campo local é obrigatório.']; hasErrors = true; }
+        break;
+      case 'hall':
+        if (!this.optForm.broker_id) { this.errors.broker_id = ['O campo broker é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.purpose_id) { this.errors.purpose_id = ['O campo propósito é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.service_id) { this.errors.service_id = ['O campo serviço é obrigatório.']; hasErrors = true; }
+        break;
+      case 'add':
+        if (!this.optForm.frequency_id) { this.errors.frequency_id = ['O campo frequência é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.measure_id) { this.errors.measure_id = ['O campo medida é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.service_id) { this.errors.service_id = ['O campo serviço é obrigatório.']; hasErrors = true; }
+        break;
+      case 'transport':
+        if (!this.optForm.broker_id) { this.errors.broker_id = ['O campo broker é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.service_id) { this.errors.service_id = ['O campo serviço/trecho é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.vehicle_id) { this.errors.vehicle_id = ['O campo tipo veículo é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.car_model_id) { this.errors.car_model_id = ['O campo modelo veículo é obrigatório.']; hasErrors = true; }
+        if (!this.optForm.brand_id) { this.errors.brand_id = ['O campo marca veículo é obrigatório.']; hasErrors = true; }
+        break;
+    }
+
+    if (hasErrors) {
+      this.processing = false;
+      // Map frontend keys to backend keys for visual error cues consistency in HTML
+      if (this.errors.broker_id) this.errors.broker = this.errors.broker_id;
+      if (this.errors.regime_id) this.errors.regime = this.errors.regime_id;
+      if (this.errors.purpose_id) this.errors.purpose = this.errors.purpose_id;
+      if (this.errors.vehicle_id) this.errors.vehicle = this.errors.vehicle_id;
+      if (this.errors.car_model_id) this.errors.model = this.errors.car_model_id;
+      if (this.errors.service_id) this.errors.service = this.errors.service_id;
+      if (this.errors.brand_id) this.errors.brand = this.errors.brand_id;
+      if (this.errors.frequency_id) this.errors.frequency = this.errors.frequency_id;
+      if (this.errors.measure_id) this.errors.measure = this.errors.measure_id;
+
+      this.toastService.error('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
 
     let payload: any = { ...this.optForm };
     let obs: Observable<any>;
@@ -853,6 +1374,9 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
       case 'hall':
         payload.event_hall_id = this.optForm.parent_id;
         payload.broker = this.optForm.broker_id;
+        payload.name = this.optForm.name;
+        payload.m2 = this.optForm.m2;
+        payload.pax = this.optForm.pax;
         obs = this.eventService.saveHallOpt(payload);
         break;
       case 'add':
@@ -942,7 +1466,8 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
         this.loadInitialData();
       },
       error: (err) => {
-        this.toastService.error('Erro ao remover opção.');
+        const message = err?.error?.message || err?.message || 'Erro ao remover opção.';
+        this.toastService.error(message);
         console.error(err);
         this.isLoader = false;
       },
@@ -973,12 +1498,13 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     const cost = this.unitCost(opt);
     const percent = parseFloat(opt.received_proposal_percent || 0);
     if (percent > 0) {
-      return Math.ceil(cost / percent);
+      const factor = percent > 2 ? percent / 100 : percent;
+      return Math.ceil(cost / factor);
     }
     return cost;
   }
 
-  roomNights(provider: any, isAB = false): number {
+  roomNights(provider: any, includeLastDay = false): number {
     let sum = 0;
     const opts =
       provider.event_hotels_opt ||
@@ -992,12 +1518,12 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     for (const opt of opts) {
       const dateIn = opt.in || opt.outbound_date;
       const dateOut = opt.out || opt.inbound_date;
-      sum += parseFloat(opt.count || 0) * this.daysBetween(dateIn, dateOut, isAB);
+      sum += parseFloat(opt.count || 0) * this.daysBetween(dateIn, dateOut, includeLastDay);
     }
     return sum;
   }
 
-  average(provider: any, isAB = false): number {
+  average(provider: any, includeLastDay = false): number {
     const opts =
       provider.event_hotels_opt ||
       provider.event_ab_opts ||
@@ -1033,7 +1559,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     return sum;
   }
 
-  sumNts(provider: any, isAB = false): number {
+  sumNts(provider: any, includeLastDay = false): number {
     let sum = 0;
     const opts =
       provider.event_hotels_opt ||
@@ -1047,12 +1573,12 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     for (const opt of opts) {
       const dateIn = opt.in || opt.outbound_date;
       const dateOut = opt.out || opt.inbound_date;
-      sum += this.daysBetween(dateIn, dateOut, isAB);
+      sum += this.daysBetween(dateIn, dateOut, includeLastDay);
     }
     return sum;
   }
 
-  sumSale(provider: any, isAB = false): number {
+  sumSale(provider: any, includeLastDay = false): number {
     let sum = 0;
     const opts =
       provider.event_hotels_opt ||
@@ -1072,7 +1598,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     return sum;
   }
 
-  sumCost(provider: any, isAB = false): number {
+  sumCost(provider: any, includeLastDay = false): number {
     let sum = 0;
     const opts =
       provider.event_hotels_opt ||
@@ -1092,7 +1618,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
     return sum;
   }
 
-  sumTaxes(provider: any, taxType: 'iss' | 'serv' | 'iva' | 'sc', isAB = false): number {
+  sumTaxes(provider: any, taxType: 'iss' | 'serv' | 'iva' | 'sc', includeLastDay = false): number {
     let sum = 0;
     const opts =
       provider.event_hotels_opt ||
@@ -1254,7 +1780,7 @@ export class EventCreateComponent implements OnInit, AfterViewInit {
   savePassenger() {
     this.processing = true;
     this.errors = {};
-    
+
     const payload = {
       ...this.passengerForm,
       event_airfare_id: this.passengerForm.parent_id

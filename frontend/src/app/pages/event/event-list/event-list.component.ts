@@ -180,6 +180,15 @@ export class EventListComponent implements OnInit, AfterViewInit {
     this.loadEvents();
   }
 
+  sortByName<T>(list: T[], key: string = 'name'): T[] {
+    if (!list || list.length === 0) return [];
+    return [...list].sort((a: any, b: any) => {
+      const valA = String(a[key] || '');
+      const valB = String(b[key] || '');
+      return valA.localeCompare(valB, 'pt-BR');
+    });
+  }
+
   ngAfterViewInit() {
     this.flatpickrInstance = flatpickr(this.dateRangePickerElement.nativeElement, {
       mode: 'range',
@@ -249,8 +258,8 @@ export class EventListComponent implements OnInit, AfterViewInit {
     // Load all necessary lookups by calling edit-data with ID 0
     this.eventService.getEditData(0).subscribe({
       next: (res) => {
-        this.customers = res.customers || [];
-        this.users = res.users || [];
+        this.customers = this.sortByName(res.customers || []);
+        this.users = this.sortByName(res.users || []);
         this.allStatus = res.allStatus || {};
       },
       error: (err) => console.error('Erro ao buscar dados auxiliares', err),
@@ -435,7 +444,11 @@ export class EventListComponent implements OnInit, AfterViewInit {
   }
 
   get allStatusKeys(): string[] {
-    return Object.keys(this.allStatus);
+    return Object.keys(this.allStatus).sort((a, b) => {
+      const labelA = this.allStatus[a]?.label || '';
+      const labelB = this.allStatus[b]?.label || '';
+      return labelA.localeCompare(labelB, 'pt-BR');
+    });
   }
 
   getStatusLabel(status: string): string {

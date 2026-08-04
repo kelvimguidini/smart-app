@@ -11,6 +11,7 @@ use App\Domains\Additions\Repositories\EventAddRepositoryInterface;
 use App\Domains\Additions\Repositories\EventAddOptRepositoryInterface;
 use App\Domains\Auth\Repositories\UserRepositoryInterface;
 use App\Domains\Shared\Repositories\StatusHistoryRepositoryInterface;
+use App\Models\StatusHistory;
 
 class EventAddApiController extends Controller
 {
@@ -47,6 +48,16 @@ class EventAddApiController extends Controller
             'currency' => 'required|integer',
             'taxa_4bts' => 'required|numeric|min:0|max:100',
         ]);
+
+        $currency = \App\Models\Currency::find($request->currency);
+        if ($currency && $currency->sigla !== 'BRL') {
+            $request->validate([
+                'iof' => 'required|numeric|gt:0',
+            ], [
+                'iof.required' => 'O IOF é obrigatório para moedas estrangeiras.',
+                'iof.gt' => 'O IOF não pode ser zero ou menor para moedas estrangeiras.',
+            ]);
+        }
 
         try {
             $user = $this->userRepository->find(Auth::user()->id);
@@ -145,8 +156,12 @@ class EventAddApiController extends Controller
 
         try {
             $user = $this->userRepository->find(Auth::user()->id);
-            if (!$user->getPermissions()->contains('name', 'status_level_2')) {
-                if ($this->statusHistoryRepository->isBlockedTableRecord('event_adds', $request->event_add_id)) {
+            $hasLevel2Permission = $user->getPermissions()->contains('name', 'status_level_2');
+            $hasLevel1Permission = $user->getPermissions()->contains('name', 'status_level_1');
+
+            if (!$hasLevel2Permission) {
+                $currentStatus = $this->statusHistoryRepository->latestStatusForTable('event_adds', $request->event_add_id);
+                if ($currentStatus && !StatusHistory::canUserEditStatus($currentStatus, $hasLevel2Permission, $hasLevel1Permission)) {
                     return response()->json(['message' => 'Esse registro não pode ser atualizado devido ao status atual!'], 422);
                 }
 
@@ -202,8 +217,12 @@ class EventAddApiController extends Controller
 
             $eventAdd = $opt->event_add;
             $user = $this->userRepository->find(Auth::user()->id);
-            if (!$user->getPermissions()->contains('name', 'status_level_2')) {
-                if ($this->statusHistoryRepository->isBlockedTableRecord('event_adds', $eventAdd->id)) {
+            $hasLevel2Permission = $user->getPermissions()->contains('name', 'status_level_2');
+            $hasLevel1Permission = $user->getPermissions()->contains('name', 'status_level_1');
+
+            if (!$hasLevel2Permission) {
+                $currentStatus = $this->statusHistoryRepository->latestStatusForTable('event_adds', $eventAdd->id);
+                if ($currentStatus && !StatusHistory::canUserEditStatus($currentStatus, $hasLevel2Permission, $hasLevel1Permission)) {
                     return response()->json(['message' => 'Esse registro não pode ser apagado devido ao status atual!'], 422);
                 }
 

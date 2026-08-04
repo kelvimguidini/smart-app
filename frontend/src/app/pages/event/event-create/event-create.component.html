@@ -316,7 +316,14 @@
                       CRD:
                       <span class="text-danger">*</span>
                     </label>
-                    <select id="crd_id" class="form-select" [class.is-invalid]="errors.crd_id" [(ngModel)]="basicForm.crd_id" (mousedown)="checkCustomerSelected($event)" name="crd_id" required>
+                    <select
+                      id="crd_id"
+                      class="form-select"
+                      [class.is-invalid]="errors.crd_id"
+                      [(ngModel)]="basicForm.crd_id"
+                      (mousedown)="checkCustomerSelected($event)"
+                      name="crd_id"
+                      required>
                       <option value="">.:: Selecione ::.</option>
                       <option *ngFor="let option of crdsFiltered" [ngValue]="option.id">{{ option.name }} - {{ option.number }}</option>
                     </select>
@@ -485,6 +492,19 @@
                 </button>
                 <button
                   type="button"
+                  class="btn btn-sm btn-outline-primary"
+                  title="Alterar Markup de Todas as Tarifas"
+                  (click)="
+                    updateMarkupBulk(
+                      item,
+                      activeTab === 1 ? 'hotel' : activeTab === 2 ? 'ab' : activeTab === 3 ? 'hall' : activeTab === 4 ? 'add' : 'transport'
+                    )
+                  ">
+                  <i class="fas fa-percentage me-1"></i>
+                  Editar Markup Geral
+                </button>
+                <button
+                  type="button"
                   class="btn btn-sm btn-outline-success"
                   title="Adicionar Nova Tarifa/Opção"
                   (click)="
@@ -556,7 +576,7 @@
                       </ng-container>
 
                       <!-- Comparativo Column (Grouped, only when activeTab === 1) -->
-                      <th colspan="3" class="bg-secondary text-white text-center font-weight-bold border-bottom-0" *ngIf="activeTab === 1">Comparativo</th>
+                      <th colspan="3" class="bg-secondary text-white text-center font-weight-bold border-bottom-0" *ngIf="activeTab === 1 && showDetailsHotel">Comparativo</th>
 
                       <!-- Actions Column -->
                       <th rowspan="2" class="align-middle text-center bg-light text-dark font-weight-bold" style="width: 100px" *ngIf="!isReadOnly">Ações</th>
@@ -568,6 +588,9 @@
                       <th scope="col" class="sticky-col text-start" *ngIf="activeTab !== 1">Serviço/Detalhe</th>
                       <th scope="col" class="sticky-col text-start" [class.sticky-col]="activeTab === 1">Broker</th>
                       <th scope="col" class="text-start" [class.sticky-col]="activeTab === 1" *ngIf="activeTab === 1">Regime</th>
+                      <th scope="col" class="text-start" *ngIf="activeTab === 3">Nome Salão</th>
+                      <th scope="col" class="text-start" *ngIf="activeTab === 3">Metragem</th>
+                      <th scope="col" class="text-start" *ngIf="activeTab === 3">Pax</th>
                       <th scope="col" class="text-start" *ngIf="activeTab === 1 || activeTab === 3">Propósito</th>
                       <th scope="col" class="text-start" *ngIf="activeTab === 1">CAT.</th>
                       <th scope="col" class="text-start" *ngIf="activeTab === 1">APTO</th>
@@ -616,7 +639,7 @@
                       </ng-container>
 
                       <!-- Comparativo Columns -->
-                      <ng-container *ngIf="activeTab === 1">
+                      <ng-container *ngIf="activeTab === 1 && showDetailsHotel">
                         <th class="bg-secondary text-white text-end">Trivago</th>
                         <th class="bg-secondary text-white text-end">Website HTL</th>
                         <th class="bg-secondary text-white text-end">Omnibess</th>
@@ -631,7 +654,7 @@
                       ">
                       <td
                         [attr.colspan]="
-                          (activeTab === 1 || activeTab === 5 ? 10 : activeTab === 2 || activeTab === 4 ? 9 : 8) +
+                          (activeTab === 1 || activeTab === 5 ? 10 : activeTab === 3 ? 11 : activeTab === 2 || activeTab === 4 ? 9 : 8) +
                           6 +
                           ((
                             activeTab === 1
@@ -648,7 +671,7 @@
                               ? 8
                               : 6
                             : 0) +
-                          (activeTab === 1 ? 3 : 0) +
+                          (activeTab === 1 && showDetailsHotel ? 3 : 0) +
                           (isReadOnly ? 0 : 1)
                         "
                         class="py-4 text-muted">
@@ -670,6 +693,9 @@
 
                       <!-- Tab Specific Columns -->
                       <td class="text-start" [class.sticky-col]="activeTab === 1" *ngIf="activeTab === 1">{{ opt.regime?.name || '-' }}</td>
+                      <td class="text-start" *ngIf="activeTab === 3">{{ opt.name || '-' }}</td>
+                      <td class="text-start" *ngIf="activeTab === 3">{{ opt.m2 || '-' }}</td>
+                      <td class="text-start" *ngIf="activeTab === 3">{{ opt.pax || '-' }}</td>
                       <td class="text-start" *ngIf="activeTab === 1 || activeTab === 3">{{ opt.purpose?.name || '-' }}</td>
                       <td class="text-start" *ngIf="activeTab === 1">{{ opt.category_hotel?.name || opt.category?.name || '-' }}</td>
                       <td class="text-start" *ngIf="activeTab === 1">{{ opt.apto_hotel?.name || opt.apto?.name || '-' }}</td>
@@ -683,8 +709,8 @@
 
                       <td class="text-center">{{ opt.in | date: 'dd/MM/yyyy' }}</td>
                       <td class="text-center">{{ opt.out | date: 'dd/MM/yyyy' }}</td>
-                      <td class="text-center">{{ opt.count || 0 }}</td>
-                      <td class="text-center">{{ daysBetween(opt.in, opt.out, activeTab === 2) }}</td>
+                      <td class="text-center">{{ (opt.count || 0) | number:'1.0-0'}}</td>
+                      <td class="text-center">{{ daysBetween(opt.in, opt.out, activeTab !== 1) | number:'1.0-0'}}</td>
 
                       <!-- Sale and Cost Calculations -->
                       <td class="bg-success-light text-success font-weight-bold text-center">{{ opt.kickback }}%</td>
@@ -692,14 +718,14 @@
                         {{ formatCurrency(unitSale(opt), item.currency?.sigla) }}
                       </td>
                       <td class="bg-success-solid font-weight-bold text-end">
-                        {{ formatCurrency(unitSale(opt) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count, item.currency?.sigla) }}
+                        {{ formatCurrency(unitSale(opt) * daysBetween(opt.in, opt.out, activeTab !== 1) * opt.count, item.currency?.sigla) }}
                       </td>
 
                       <td class="bg-warning-light text-dark font-weight-bold text-end">
                         {{ formatCurrency(unitCost(opt), item.currency?.sigla) }}
                       </td>
                       <td class="bg-warning-solid font-weight-bold text-end">
-                        {{ formatCurrency(unitCost(opt) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count, item.currency?.sigla) }}
+                        {{ formatCurrency(unitCost(opt) * daysBetween(opt.in, opt.out, activeTab !== 1) * opt.count, item.currency?.sigla) }}
                       </td>
                       <td class="text-end">{{ formatCurrency(opt.received_proposal || 0, item.currency?.sigla) }}</td>
                       <td class="text-center">{{ opt.received_proposal_percent }}%</td>
@@ -720,7 +746,7 @@
                         <td class="bg-light-tax text-primary font-weight-bold text-end">
                           {{
                             formatCurrency(
-                              ((unitSale(opt) * parseFloat(item.iss_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count,
+                              ((unitSale(opt) * parseFloat(item.iss_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab !== 1) * opt.count,
                               item.currency?.sigla
                             )
                           }}
@@ -728,7 +754,7 @@
                         <td class="bg-light-tax text-primary text-end">
                           {{
                             formatCurrency(
-                              ((unitCost(opt) * parseFloat(item.iss_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count,
+                              ((unitCost(opt) * parseFloat(item.iss_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab !== 1) * opt.count,
                               item.currency?.sigla
                             )
                           }}
@@ -736,7 +762,7 @@
                         <td class="bg-light-tax text-primary font-weight-bold text-end">
                           {{
                             formatCurrency(
-                              ((unitSale(opt) * parseFloat(item.service_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count,
+                              ((unitSale(opt) * parseFloat(item.service_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab !== 1) * opt.count,
                               item.currency?.sigla
                             )
                           }}
@@ -744,7 +770,7 @@
                         <td class="bg-light-tax text-primary text-end">
                           {{
                             formatCurrency(
-                              ((unitCost(opt) * parseFloat(item.service_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count,
+                              ((unitCost(opt) * parseFloat(item.service_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab !== 1) * opt.count,
                               item.currency?.sigla
                             )
                           }}
@@ -752,7 +778,7 @@
                         <td class="bg-light-tax text-primary font-weight-bold text-end">
                           {{
                             formatCurrency(
-                              ((unitSale(opt) * parseFloat(item.iva_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count,
+                              ((unitSale(opt) * parseFloat(item.iva_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab !== 1) * opt.count,
                               item.currency?.sigla
                             )
                           }}
@@ -760,7 +786,7 @@
                         <td class="bg-light-tax text-primary text-end">
                           {{
                             formatCurrency(
-                              ((unitCost(opt) * parseFloat(item.iva_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count,
+                              ((unitCost(opt) * parseFloat(item.iva_percent || 0)) / 100) * daysBetween(opt.in, opt.out, activeTab !== 1) * opt.count,
                               item.currency?.sigla
                             )
                           }}
@@ -768,7 +794,7 @@
                         <td class="bg-light-tax text-primary font-weight-bold text-end" *ngIf="activeTab === 1 || activeTab === 2">
                           {{
                             formatCurrency(
-                              parseFloat(item.service_charge || 0) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count,
+                              parseFloat(item.service_charge || 0) * daysBetween(opt.in, opt.out, activeTab !== 1) * opt.count,
                               item.currency?.sigla
                             )
                           }}
@@ -776,7 +802,7 @@
                         <td class="bg-light-tax text-primary text-end" *ngIf="activeTab === 1 || activeTab === 2">
                           {{
                             formatCurrency(
-                              parseFloat(item.service_charge || 0) * daysBetween(opt.in, opt.out, activeTab === 2) * opt.count,
+                              parseFloat(item.service_charge || 0) * daysBetween(opt.in, opt.out, activeTab !== 1) * opt.count,
                               item.currency?.sigla
                             )
                           }}
@@ -784,7 +810,7 @@
                       </ng-container>
 
                       <!-- Comparativo Values -->
-                      <ng-container *ngIf="activeTab === 1">
+                      <ng-container *ngIf="activeTab === 1 && showDetailsHotel">
                         <td class="bg-compare text-end font-weight-bold">{{ formatCurrency(opt.compare_trivago || 0, item.currency?.sigla) }}</td>
                         <td class="bg-compare text-end font-weight-bold">{{ formatCurrency(opt.compare_website_htl || 0, item.currency?.sigla) }}</td>
                         <td class="bg-compare text-end font-weight-bold">{{ formatCurrency(opt.compare_omnibess || 0, item.currency?.sigla) }}</td>
@@ -851,10 +877,10 @@
                       <td></td>
                       <!-- Propósito -->
                       <td class="font-weight-bold text-start">Room Nights:</td>
-                      <td class="font-weight-bold text-center">{{ roomNights(item, false) }}</td>
+                      <td class="font-weight-bold text-center">{{ roomNights(item, false) | number:'1.0-0' }}</td>
                       <td class="font-weight-bold text-start"># Aptos:</td>
-                      <td class="text-center font-weight-bold">{{ sumCount(item) }}</td>
-                      <td class="text-center font-weight-bold">{{ sumNts(item, false) }}</td>
+                      <td class="text-center font-weight-bold">{{ sumCount(item) | number:'1.0-0' }}</td>
+                      <td class="text-center font-weight-bold">{{ sumNts(item, false) | number:'1.0-0' }}</td>
                       <td></td>
                       <!-- NTS spacer -->
                       <td class="bg-success-solid font-weight-bold text-end">Total venda:</td>
@@ -895,15 +921,17 @@
                       </ng-container>
 
                       <!-- Comparativo Sum Columns -->
-                      <td class="bg-secondary text-white text-end font-weight-bold">
-                        {{ formatCurrency(sumCompare(item, 'compare_trivago'), item.currency?.sigla) }}
-                      </td>
-                      <td class="bg-secondary text-white text-end font-weight-bold">
-                        {{ formatCurrency(sumCompare(item, 'compare_website_htl'), item.currency?.sigla) }}
-                      </td>
-                      <td class="bg-secondary text-white text-end font-weight-bold">
-                        {{ formatCurrency(sumCompare(item, 'compare_omnibess'), item.currency?.sigla) }}
-                      </td>
+                      <ng-container *ngIf="activeTab === 1 && showDetailsHotel">
+                        <td class="bg-secondary text-white text-end font-weight-bold">
+                          {{ formatCurrency(sumCompare(item, 'compare_trivago'), item.currency?.sigla) }}
+                        </td>
+                        <td class="bg-secondary text-white text-end font-weight-bold">
+                          {{ formatCurrency(sumCompare(item, 'compare_website_htl'), item.currency?.sigla) }}
+                        </td>
+                        <td class="bg-secondary text-white text-end font-weight-bold">
+                          {{ formatCurrency(sumCompare(item, 'compare_omnibess'), item.currency?.sigla) }}
+                        </td>
+                      </ng-container>
 
                       <td *ngIf="!isReadOnly"></td>
                     </tr>
@@ -911,28 +939,30 @@
                     <!-- Total / Summary Row (Other tabs) -->
                     <tr class="table-subheader" *ngIf="activeTab !== 1">
                       <td class="sticky-col font-weight-bold text-start">Diária Média:</td>
-                      <td class="font-weight-bold text-end" [class.sticky-col]="activeTab === 1">{{ formatCurrency(average(item, activeTab === 2), item.currency?.sigla) }}</td>
+                      <td class="font-weight-bold text-end" [class.sticky-col]="activeTab === 1">
+                        {{ formatCurrency(average(item, activeTab === 2), item.currency?.sigla) }}
+                      </td>
                       <td
-                        [attr.colspan]="activeTab === 5 ? 3 : activeTab === 2 || activeTab === 4 ? 2 : 1"
+                        [attr.colspan]="activeTab === 5 ? 3 : activeTab === 3 ? 4 : activeTab === 2 || activeTab === 4 ? 2 : 1"
                         *ngIf="activeTab === 2 || activeTab === 3 || activeTab === 4 || activeTab === 5"></td>
 
                       <td class="font-weight-bold text-start">Room Nights:</td>
-                      <td class="font-weight-bold text-center">{{ roomNights(item, activeTab === 2) }}</td>
+                      <td class="font-weight-bold text-center">{{ roomNights(item, activeTab === 2) | number:'1.0-0' }}</td>
                       <td class="font-weight-bold text-start"># Qtd:</td>
-                      <td class="text-center font-weight-bold">{{ sumCount(item) }}</td>
-                      <td class="text-center font-weight-bold">{{ sumNts(item, activeTab === 2) }}</td>
+                      <td class="text-center font-weight-bold">{{ sumCount(item) | number:'1.0-0' }}</td>
+                      <td class="text-center font-weight-bold">{{ sumNts(item, activeTab === 2) | number:'1.0-0' }}</td>
 
                       <td class="bg-success-solid font-weight-bold text-end">Total Venda:</td>
-                      <td class="bg-success-solid font-weight-bold text-end">{{ formatCurrency(sumSale(item, activeTab === 2), item.currency?.sigla) }}</td>
+                      <td class="bg-success-solid font-weight-bold text-end">{{ formatCurrency(sumSale(item, activeTab !== 1), item.currency?.sigla) }}</td>
 
                       <td class="bg-warning-solid font-weight-bold text-end">Total Custo:</td>
-                      <td class="bg-warning-solid font-weight-bold text-end">{{ formatCurrency(sumCost(item, activeTab === 2), item.currency?.sigla) }}</td>
+                      <td class="bg-warning-solid font-weight-bold text-end">{{ formatCurrency(sumCost(item, activeTab !== 1), item.currency?.sigla) }}</td>
 
                       <td class="font-weight-bold text-end">Margem %</td>
                       <td class="font-weight-bold text-center">
                         {{
-                          sumSale(item, activeTab === 2) > 0
-                            ? ((1 - sumCost(item, activeTab === 2) / sumSale(item, activeTab === 2)) * 100 | number: '1.2-2')
+                          sumSale(item, activeTab !== 1) > 0
+                            ? ((1 - sumCost(item, activeTab !== 1) / sumSale(item, activeTab !== 1)) * 100 | number: '1.2-2')
                             : '0.00'
                         }}%
                       </td>
@@ -941,28 +971,28 @@
                       <ng-container
                         *ngIf="activeTab === 2 ? showDetailsAB : activeTab === 3 ? showDetailsHall : activeTab === 4 ? showDetailsAdd : showDetailsTransport">
                         <td class="bg-light-tax text-primary font-weight-bold text-end">
-                          {{ formatCurrency(sumTaxes(item, 'iss', activeTab === 2), item.currency?.sigla) }}
+                          {{ formatCurrency(sumTaxes(item, 'iss', activeTab !== 1), item.currency?.sigla) }}
                         </td>
                         <td class="bg-light-tax text-primary font-weight-bold text-end">
-                          {{ formatCurrency((sumCost(item, activeTab === 2) * parseFloat(item.iss_percent || 0)) / 100, item.currency?.sigla) }}
+                          {{ formatCurrency((sumCost(item, activeTab !== 1) * parseFloat(item.iss_percent || 0)) / 100, item.currency?.sigla) }}
                         </td>
                         <td class="bg-light-tax text-primary font-weight-bold text-end">
-                          {{ formatCurrency(sumTaxes(item, 'serv', activeTab === 2), item.currency?.sigla) }}
+                          {{ formatCurrency(sumTaxes(item, 'serv', activeTab !== 1), item.currency?.sigla) }}
                         </td>
                         <td class="bg-light-tax text-primary font-weight-bold text-end">
-                          {{ formatCurrency((sumCost(item, activeTab === 2) * parseFloat(item.service_percent || 0)) / 100, item.currency?.sigla) }}
+                          {{ formatCurrency((sumCost(item, activeTab !== 1) * parseFloat(item.service_percent || 0)) / 100, item.currency?.sigla) }}
                         </td>
                         <td class="bg-light-tax text-primary font-weight-bold text-end">
-                          {{ formatCurrency(sumTaxes(item, 'iva', activeTab === 2), item.currency?.sigla) }}
+                          {{ formatCurrency(sumTaxes(item, 'iva', activeTab !== 1), item.currency?.sigla) }}
                         </td>
                         <td class="bg-light-tax text-primary font-weight-bold text-end">
-                          {{ formatCurrency((sumCost(item, activeTab === 2) * parseFloat(item.iva_percent || 0)) / 100, item.currency?.sigla) }}
+                          {{ formatCurrency((sumCost(item, activeTab !== 1) * parseFloat(item.iva_percent || 0)) / 100, item.currency?.sigla) }}
                         </td>
                         <td class="bg-light-tax text-primary font-weight-bold text-end" *ngIf="activeTab === 2">
-                          {{ formatCurrency(sumTaxes(item, 'sc', activeTab === 2), item.currency?.sigla) }}
+                          {{ formatCurrency(sumTaxes(item, 'sc', true), item.currency?.sigla) }}
                         </td>
                         <td class="bg-light-tax text-primary font-weight-bold text-end" *ngIf="activeTab === 2">
-                          {{ formatCurrency(sumTaxes(item, 'sc', activeTab === 2), item.currency?.sigla) }}
+                          {{ formatCurrency(sumTaxes(item, 'sc', true), item.currency?.sigla) }}
                         </td>
                       </ng-container>
                       <td *ngIf="!isReadOnly"></td>
@@ -971,18 +1001,18 @@
                     <!-- Internal Observations Row -->
                     <tr class="observation-row">
                       <td class="sticky-col text-start font-weight-bold" colspan="2">OBSERVAÇÃO INTERNA:</td>
-                      <td class="text-start text-dark" [attr.colspan]="activeTab === 1 || activeTab === 5 ? 8 : activeTab === 2 || activeTab === 4 ? 7 : 6">
+                      <td class="text-start text-dark" [attr.colspan]="activeTab === 1 || activeTab === 5 ? 8 : activeTab === 3 ? 9 : activeTab === 2 || activeTab === 4 ? 7 : 6">
                         {{ item.internal_observation || '-' }}
                       </td>
                       <td colspan="2" class="font-weight-bold text-end">Faturamento Venda:</td>
                       <td colspan="2" class="bg-success-solid font-weight-bold text-end">
                         {{
                           formatCurrency(
-                            sumSale(item, activeTab === 2) +
-                              sumTaxes(item, 'iss', activeTab === 2) +
-                              sumTaxes(item, 'serv', activeTab === 2) +
-                              sumTaxes(item, 'iva', activeTab === 2) +
-                              sumTaxes(item, 'sc', activeTab === 2),
+                            sumSale(item, activeTab !== 1) +
+                              sumTaxes(item, 'iss', activeTab !== 1) +
+                              sumTaxes(item, 'serv', activeTab !== 1) +
+                              sumTaxes(item, 'iva', activeTab !== 1) +
+                              sumTaxes(item, 'sc', activeTab !== 1),
                             item.currency?.sigla
                           )
                         }}
@@ -992,7 +1022,7 @@
                           activeTab === 1
                             ? showDetailsHotel
                               ? 13
-                              : 5
+                              : 2
                             : (activeTab === 2 ? showDetailsAB : activeTab === 3 ? showDetailsHall : activeTab === 4 ? showDetailsAdd : showDetailsTransport)
                               ? activeTab === 2
                                 ? 10
@@ -1005,21 +1035,42 @@
                     <!-- Customer Observations Row -->
                     <tr class="observation-row">
                       <td class="sticky-col text-start font-weight-bold" colspan="2">OBSERVAÇÃO CLIENTE:</td>
-                      <td class="text-start text-dark" [attr.colspan]="activeTab === 1 || activeTab === 5 ? 8 : activeTab === 2 || activeTab === 4 ? 7 : 6">
+                      <td class="text-start text-dark" [attr.colspan]="activeTab === 1 || activeTab === 5 ? 8 : activeTab === 3 ? 9 : activeTab === 2 || activeTab === 4 ? 7 : 6">
                         {{ item.customer_observation || '-' }}
                       </td>
                       <td colspan="2" class="font-weight-bold text-end">Faturamento Custo:</td>
                       <td colspan="2" class="bg-warning-solid font-weight-bold text-end">
                         {{
                           formatCurrency(
-                            sumCost(item, activeTab === 2) +
-                              (sumCost(item, activeTab === 2) * parseFloat(item.iss_percent || 0)) / 100 +
-                              (sumCost(item, activeTab === 2) * parseFloat(item.service_percent || 0)) / 100 +
-                              (sumCost(item, activeTab === 2) * parseFloat(item.iva_percent || 0)) / 100 +
-                              sumTaxes(item, 'sc', activeTab === 2),
+                            sumCost(item, activeTab !== 1) +
+                              (sumCost(item, activeTab !== 1) * parseFloat(item.iss_percent || 0)) / 100 +
+                              (sumCost(item, activeTab !== 1) * parseFloat(item.service_percent || 0)) / 100 +
+                              (sumCost(item, activeTab !== 1) * parseFloat(item.iva_percent || 0)) / 100 +
+                              sumTaxes(item, 'sc', activeTab !== 1),
                             item.currency?.sigla
                           )
                         }}
+                      </td>
+                      <td
+                        [attr.colspan]="
+                          activeTab === 1
+                            ? showDetailsHotel
+                              ? 13
+                              : 2
+                            : (activeTab === 2 ? showDetailsAB : activeTab === 3 ? showDetailsHall : activeTab === 4 ? showDetailsAdd : showDetailsTransport)
+                              ? activeTab === 2
+                                ? 10
+                                : 8
+                              : 2
+                        "></td>
+                      <td *ngIf="!isReadOnly"></td>
+                    </tr>
+
+                    <!-- Prazo / Deadline Row -->
+                    <tr class="observation-row">
+                      <td class="sticky-col text-start font-weight-bold" colspan="2">PRAZO / DATA LIMITE:</td>
+                      <td class="text-start text-dark" [attr.colspan]="(activeTab === 1 || activeTab === 5 ? 8 : activeTab === 3 ? 9 : activeTab === 2 || activeTab === 4 ? 7 : 6) + 4">
+                        {{ (item.deadline_date | date: 'dd/MM/yyyy') || '-' }}
                       </td>
                       <td
                         [attr.colspan]="
@@ -1334,7 +1385,7 @@
                     Adicionar Passageiro
                   </button>
                 </div>
-                
+
                 <div class="table-responsive">
                   <table class="table table-bordered table-hover align-middle mb-0 bg-white" style="min-width: 1200px; font-size: 0.9rem;">
                     <thead class="table-secondary text-dark">
@@ -1369,7 +1420,7 @@
                         <td class="text-center">{{ pax.document || '-' }}</td>
                         <td class="text-center">{{ pax.birth_date | date: 'dd/MM/yyyy' }}</td>
                         <td class="text-center">{{ pax.passport_validity | date: 'dd/MM/yyyy' }}</td>
-                        
+
                         <!-- Outbound -->
                         <td class="text-center">{{ pax.outbound_date | date: 'dd/MM/yyyy' }}</td>
                         <td>{{ pax.outbound_origin || '-' }}</td>
@@ -1377,7 +1428,7 @@
                         <td class="text-center">
                           {{ pax.outbound_departure || '-' }} <span *ngIf="pax.outbound_departure && pax.outbound_arrival">/</span> {{ pax.outbound_arrival || '-' }}
                         </td>
-                        
+
                         <!-- Inbound -->
                         <td class="text-center">{{ pax.inbound_date | date: 'dd/MM/yyyy' }}</td>
                         <td>{{ pax.inbound_origin || '-' }}</td>
@@ -1475,6 +1526,7 @@
             class="form-select"
             [class.is-invalid]="errors.currency_id"
             [(ngModel)]="providerLinkForm.currency_id"
+            (ngModelChange)="onCurrencyChange($event)"
             name="currency_id"
             required>
             <option value="">.:: Selecione ::.</option>
@@ -1488,17 +1540,35 @@
         <!-- Inputs Percentuais -->
         <div class="col-md-3 form-group mb-3">
           <label for="iss_percent" class="form-label font-weight-bold">ISS (%):</label>
-          <input type="number" step="0.01" id="iss_percent" class="form-control" [(ngModel)]="providerLinkForm.iss_percent" name="iss_percent" />
+          <input
+            type="text"
+            id="iss_percent"
+            class="form-control"
+            [value]="formatPercent(providerLinkForm.iss_percent)"
+            (input)="onPercentInput($event, 'iss_percent', 'providerLinkForm')"
+            name="iss_percent" />
         </div>
 
         <div class="col-md-3 form-group mb-3">
           <label for="service_percent" class="form-label font-weight-bold">Serviço (%):</label>
-          <input type="number" step="0.01" id="service_percent" class="form-control" [(ngModel)]="providerLinkForm.service_percent" name="service_percent" />
+          <input
+            type="text"
+            id="service_percent"
+            class="form-control"
+            [value]="formatPercent(providerLinkForm.service_percent)"
+            (input)="onPercentInput($event, 'service_percent', 'providerLinkForm')"
+            name="service_percent" />
         </div>
 
         <div class="col-md-3 form-group mb-3">
           <label for="iva_percent" class="form-label font-weight-bold">IVA (%):</label>
-          <input type="number" step="0.01" id="iva_percent" class="form-control" [(ngModel)]="providerLinkForm.iva_percent" name="iva_percent" />
+          <input
+            type="text"
+            id="iva_percent"
+            class="form-control"
+            [value]="formatPercent(providerLinkForm.iva_percent)"
+            (input)="onPercentInput($event, 'iva_percent', 'providerLinkForm')"
+            name="iva_percent" />
         </div>
 
         <div class="col-md-3 form-group mb-3">
@@ -1507,12 +1577,12 @@
             <span class="text-danger">*</span>
           </label>
           <input
-            type="number"
-            step="0.01"
+            type="text"
             id="taxa_4bts"
             class="form-control"
             [class.is-invalid]="errors.taxa_4bts"
-            [(ngModel)]="providerLinkForm.taxa_4bts"
+            [value]="formatPercent(providerLinkForm.taxa_4bts)"
+            (input)="onPercentInput($event, 'taxa_4bts', 'providerLinkForm')"
             name="taxa_4bts"
             required />
           <div *ngIf="errors.taxa_4bts" class="text-danger mt-1">
@@ -1521,19 +1591,70 @@
         </div>
 
         <!-- Service Charge (Turismo) - Hotel/AB only -->
-        <div class="col-md-6 form-group mb-3" *ngIf="providerLinkType === 'hotel' || providerLinkType === 'ab'">
-          <label for="service_charge" class="form-label font-weight-bold">Taxa Serviço Diária/Turismo:</label>
-          <input type="number" step="0.01" id="service_charge" class="form-control" [(ngModel)]="providerLinkForm.service_charge" name="service_charge" />
+        <div class="col-md-3 form-group mb-3" *ngIf="providerLinkType === 'hotel' || providerLinkType === 'ab'">
+          <label for="service_charge" class="form-label font-weight-bold">Taxa Turismo:</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light text-muted font-weight-bold" *ngIf="getSelectedCurrencySymbol()">
+              {{ getSelectedCurrencySymbol() }}
+            </span>
+            <input
+              type="text"
+              id="service_charge"
+              class="form-control"
+              [value]="formatMoney(providerLinkForm.service_charge)"
+              (input)="onMoneyInput($event, 'service_charge', 'providerLinkForm')"
+              name="service_charge" />
+          </div>
         </div>
 
         <!-- Forma de Pagamento -->
-        <div class="col-md-6 form-group mb-3" [ngClass]="providerLinkType !== 'hotel' && providerLinkType !== 'ab' ? 'col-md-12' : 'col-md-6'">
+        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-3' : 'col-md-4'" class="form-group mb-3">
           <label for="payment_method" class="form-label font-weight-bold">Forma de Pagamento:</label>
           <select id="payment_method" class="form-select" [(ngModel)]="providerLinkForm.payment_method" name="payment_method">
             <option value="Indefinido">Indefinido</option>
             <option value="Dinheiro">Dinheiro</option>
             <option value="Cartão">Cartão</option>
           </select>
+        </div>
+
+        <!-- Nota Fiscal -->
+        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-3' : 'col-md-4'" class="form-group mb-3">
+          <label for="invoice" class="form-label font-weight-bold">Nota Fiscal:</label>
+          <select id="invoice" class="form-select" [(ngModel)]="providerLinkForm.invoice" name="invoice">
+            <option [ngValue]="true">Sim</option>
+            <option [ngValue]="false">Não</option>
+          </select>
+        </div>
+
+        <!-- IOF -->
+        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-3' : 'col-md-4'" class="form-group mb-3">
+          <label for="iof" class="form-label font-weight-bold">IOF (%):</label>
+          <input
+            type="text"
+            id="iof"
+            class="form-control"
+            [class.is-invalid]="errors.iof"
+            [value]="formatPercent(providerLinkForm.iof)"
+            (input)="onPercentInput($event, 'iof', 'providerLinkForm')"
+            name="iof" />
+          <div *ngIf="errors.iof" class="text-danger mt-1">
+            <small *ngFor="let err of errors.iof" class="d-block">{{ err }}</small>
+          </div>
+        </div>
+
+        <!-- Prazo -->
+        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-3' : 'col-md-4'" class="form-group mb-3">
+          <label for="deadline_date" class="form-label font-weight-bold">Prazo:</label>
+          <input
+            type="date"
+            id="deadline_date"
+            class="form-control"
+            [class.is-invalid]="errors.deadline_date"
+            [(ngModel)]="providerLinkForm.deadline_date"
+            name="deadline_date" />
+          <div *ngIf="errors.deadline_date" class="text-danger mt-1">
+            <small *ngFor="let err of errors.deadline_date" class="d-block">{{ err }}</small>
+          </div>
         </div>
 
         <!-- Observações -->
@@ -1555,6 +1676,70 @@
             class="form-control"
             [(ngModel)]="providerLinkForm.customer_observation"
             name="customer_observation"></textarea>
+        </div>
+
+        <!-- Check-in/Check-out Times - Hotel only -->
+        <div class="col-md-12 mb-3" *ngIf="providerLinkType === 'hotel'">
+          <div class="card p-3 bg-light border border-secondary border-opacity-10 shadow-sm">
+            <div class="row align-items-center">
+              <div class="col-md-4 form-check mb-0 d-flex align-items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="change_hotel_times"
+                  class="form-check-input mt-0"
+                  [(ngModel)]="providerLinkForm.change_hotel_times"
+                  (ngModelChange)="onChangeHotelTimesToggle()"
+                  name="change_hotel_times" />
+                <label for="change_hotel_times" class="form-check-label font-weight-bold text-dark mb-0">
+                  Alterar horários padrão do hotel?
+                </label>
+              </div>
+
+              <div class="col-md-2 form-group mb-0">
+                <label for="checkin_time" class="form-label font-weight-bold text-secondary mb-1" style="font-size: 0.85rem;">Check-in Início:</label>
+                <input
+                  type="time"
+                  id="checkin_time"
+                  class="form-control"
+                  [(ngModel)]="providerLinkForm.checkin_time"
+                  name="checkin_time"
+                  [disabled]="!providerLinkForm.change_hotel_times" />
+              </div>
+
+              <div class="col-md-2 form-group mb-0">
+                <label for="checkin_time_end" class="form-label font-weight-bold text-secondary mb-1" style="font-size: 0.85rem;">Check-in Fim:</label>
+                <input
+                  type="time"
+                  id="checkin_time_end"
+                  class="form-control"
+                  [(ngModel)]="providerLinkForm.checkin_time_end"
+                  name="checkin_time_end"
+                  [disabled]="!providerLinkForm.change_hotel_times" />
+              </div>
+
+              <div class="col-md-2 form-group mb-0">
+                <label for="checkout_time" class="form-label font-weight-bold text-secondary mb-1" style="font-size: 0.85rem;">Check-out Início:</label>
+                <input
+                  type="time"
+                  id="checkout_time"
+                  class="form-control"
+                  [(ngModel)]="providerLinkForm.checkout_time"
+                  name="checkout_time"
+                  [disabled]="!providerLinkForm.change_hotel_times" />
+              </div>
+
+              <div class="col-md-2 form-group mb-0">
+                <label for="checkout_time_end" class="form-label font-weight-bold text-secondary mb-1" style="font-size: 0.85rem;">Check-out Fim:</label>
+                <input
+                  type="time"
+                  id="checkout_time_end"
+                  class="form-control"
+                  [(ngModel)]="providerLinkForm.checkout_time_end"
+                  name="checkout_time_end"
+                  [disabled]="!providerLinkForm.change_hotel_times" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1579,10 +1764,13 @@
             Broker:
             <span class="text-danger">*</span>
           </label>
-          <select id="broker_id" class="form-select" [(ngModel)]="optForm.broker_id" name="broker_id" required>
+          <select id="broker_id" class="form-select" [class.is-invalid]="errors.broker || errors.broker_id" [(ngModel)]="optForm.broker_id" name="broker_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of optFormType === 'transport' ? brokersT : brokers" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.broker || errors.broker_id" class="text-danger mt-1">
+            <small *ngFor="let err of (errors.broker || errors.broker_id)" class="d-block">{{ err }}</small>
+          </div>
         </div>
 
         <!-- REGIME (hotel only) -->
@@ -1591,10 +1779,13 @@
             Regime:
             <span class="text-danger">*</span>
           </label>
-          <select id="regime_id" class="form-select" [(ngModel)]="optForm.regime_id" name="regime_id" required>
+          <select id="regime_id" class="form-select" [class.is-invalid]="errors.regime || errors.regime_id" [(ngModel)]="optForm.regime_id" name="regime_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of regimes" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.regime || errors.regime_id" class="text-danger mt-1">
+            <small *ngFor="let err of (errors.regime || errors.regime_id)" class="d-block">{{ err }}</small>
+          </div>
         </div>
 
         <!-- PROPÓSITO (hotel/hall only) -->
@@ -1603,10 +1794,35 @@
             Propósito:
             <span class="text-danger">*</span>
           </label>
-          <select id="purpose_id" class="form-select" [(ngModel)]="optForm.purpose_id" name="purpose_id" required>
+          <select id="purpose_id" class="form-select" [class.is-invalid]="errors.purpose || errors.purpose_id" [(ngModel)]="optForm.purpose_id" name="purpose_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of optFormType === 'hall' ? purposesHall : purposes" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.purpose || errors.purpose_id" class="text-danger mt-1">
+            <small *ngFor="let err of (errors.purpose || errors.purpose_id)" class="d-block">{{ err }}</small>
+          </div>
+        </div>
+
+        <!-- NOME SALÃO, METRAGEM, PAX (hall only) -->
+        <div class="col-md-6 form-group mb-3" *ngIf="optFormType === 'hall'">
+          <label for="hall_name" class="form-label font-weight-bold">
+            Nome do Salão:
+          </label>
+          <input type="text" id="hall_name" class="form-control" [(ngModel)]="optForm.name" name="name" placeholder="Ex: Salão Copacabana" />
+        </div>
+
+        <div class="col-md-3 form-group mb-3" *ngIf="optFormType === 'hall'">
+          <label for="hall_m2" class="form-label font-weight-bold">
+            Metragem (m²):
+          </label>
+          <input type="text" id="hall_m2" class="form-control" [(ngModel)]="optForm.m2" name="m2" placeholder="Ex: 150" />
+        </div>
+
+        <div class="col-md-3 form-group mb-3" *ngIf="optFormType === 'hall'">
+          <label for="hall_pax" class="form-label font-weight-bold">
+            Qtd. Pax:
+          </label>
+          <input type="text" id="hall_pax" class="form-control" [(ngModel)]="optForm.pax" name="pax" placeholder="Ex: 100" />
         </div>
 
         <!-- CATEGORIA APTO (hotel only) -->
@@ -1615,10 +1831,13 @@
             Categoria Apto:
             <span class="text-danger">*</span>
           </label>
-          <select id="category_id" class="form-select" [(ngModel)]="optForm.category_id" name="category_id" required>
+          <select id="category_id" class="form-select" [class.is-invalid]="errors.category_id || errors.category" [(ngModel)]="optForm.category_id" name="category_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of catsHotel" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.category_id || errors.category" class="text-danger mt-1">
+            <small *ngFor="let err of (errors.category_id || errors.category)" class="d-block">{{ err }}</small>
+          </div>
         </div>
 
         <!-- TIPO APTO (hotel only) -->
@@ -1627,10 +1846,13 @@
             Tipo Apto:
             <span class="text-danger">*</span>
           </label>
-          <select id="apto_id" class="form-select" [(ngModel)]="optForm.apto_id" name="apto_id" required>
+          <select id="apto_id" class="form-select" [class.is-invalid]="errors.apto_id || errors.apto" [(ngModel)]="optForm.apto_id" name="apto_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of aptosHotel" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.apto_id || errors.apto" class="text-danger mt-1">
+            <small *ngFor="let err of (errors.apto_id || errors.apto)" class="d-block">{{ err }}</small>
+          </div>
         </div>
 
         <!-- SERVIÇOS (A&B, Salões, Adicionais, Transporte) -->
@@ -1639,7 +1861,7 @@
             Serviço/Trecho:
             <span class="text-danger">*</span>
           </label>
-          <select id="service_id" class="form-select" [(ngModel)]="optForm.service_id" name="service_id" required>
+          <select id="service_id" class="form-select" [class.is-invalid]="errors.service || errors.service_id" [(ngModel)]="optForm.service_id" name="service_id" required>
             <option value="">.:: Selecione ::.</option>
             <option
               *ngFor="let option of optFormType === 'ab' ? services : optFormType === 'hall' ? servicesHall : optFormType === 'add' ? servicesAdd : servicesT"
@@ -1647,6 +1869,9 @@
               {{ option.name }}
             </option>
           </select>
+          <div *ngIf="errors.service || errors.service_id" class="text-danger mt-1">
+            <small *ngFor="let err of (errors.service || errors.service_id)" class="d-block">{{ err }}</small>
+          </div>
         </div>
 
         <!-- TIPO SERVIÇO (A&B only) -->
@@ -1655,10 +1880,13 @@
             Tipo de Serviço:
             <span class="text-danger">*</span>
           </label>
-          <select id="service_type_id" class="form-select" [(ngModel)]="optForm.service_type_id" name="service_type_id" required>
+          <select id="service_type_id" class="form-select" [class.is-invalid]="errors.service_type_id" [(ngModel)]="optForm.service_type_id" name="service_type_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of servicesType" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.service_type_id" class="text-danger mt-1">
+            <small *ngFor="let err of errors.service_type_id" class="d-block">{{ err }}</small>
+          </div>
         </div>
 
         <!-- LOCAL (A&B only) -->
@@ -1667,10 +1895,13 @@
             Local:
             <span class="text-danger">*</span>
           </label>
-          <select id="local_id" class="form-select" [(ngModel)]="optForm.local_id" name="local_id" required>
+          <select id="local_id" class="form-select" [class.is-invalid]="errors.local_id" [(ngModel)]="optForm.local_id" name="local_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of locals" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.local_id" class="text-danger mt-1">
+            <small *ngFor="let err of errors.local_id" class="d-block">{{ err }}</small>
+          </div>
         </div>
 
         <!-- FREQUENCIA (Adicionais only) -->
@@ -1679,10 +1910,13 @@
             Frequência:
             <span class="text-danger">*</span>
           </label>
-          <select id="frequency_id" class="form-select" [(ngModel)]="optForm.frequency_id" name="frequency_id" required>
+          <select id="frequency_id" class="form-select" [class.is-invalid]="errors.frequency || errors.frequency_id" [(ngModel)]="optForm.frequency_id" name="frequency_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of frequencies" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.frequency || errors.frequency_id" class="text-danger mt-1">
+            <small *ngFor="let err of (errors.frequency || errors.frequency_id)" class="d-block">{{ err }}</small>
+          </div>
         </div>
 
         <!-- MEDIDA (Adicionais only) -->
@@ -1691,10 +1925,13 @@
             Medida:
             <span class="text-danger">*</span>
           </label>
-          <select id="measure_id" class="form-select" [(ngModel)]="optForm.measure_id" name="measure_id" required>
+          <select id="measure_id" class="form-select" [class.is-invalid]="errors.measure || errors.measure_id" [(ngModel)]="optForm.measure_id" name="measure_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of measures" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.measure || errors.measure_id" class="text-danger mt-1">
+            <small *ngFor="let err of (errors.measure || errors.measure_id)" class="d-block">{{ err }}</small>
+          </div>
         </div>
 
         <!-- VEICULO, MODELO, MARCA (Transporte only) -->
@@ -1703,39 +1940,55 @@
             Tipo Veículo:
             <span class="text-danger">*</span>
           </label>
-          <select id="vehicle_id" class="form-select" [(ngModel)]="optForm.vehicle_id" name="vehicle_id" required>
+          <select id="vehicle_id" class="form-select" [class.is-invalid]="errors.vehicle || errors.vehicle_id" [(ngModel)]="optForm.vehicle_id" name="vehicle_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of vehicles" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.vehicle || errors.vehicle_id" class="text-danger mt-1">
+            <small *ngFor="let err of (errors.vehicle || errors.vehicle_id)" class="d-block">{{ err }}</small>
+          </div>
         </div>
         <div class="col-md-4 form-group mb-3" *ngIf="optFormType === 'transport'">
           <label for="car_model_id" class="form-label font-weight-bold">
             Modelo Veículo:
             <span class="text-danger">*</span>
           </label>
-          <select id="car_model_id" class="form-select" [(ngModel)]="optForm.car_model_id" name="car_model_id" required>
+          <select id="car_model_id" class="form-select" [class.is-invalid]="errors.model || errors.car_model_id" [(ngModel)]="optForm.car_model_id" name="car_model_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of models" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.model || errors.car_model_id" class="text-danger mt-1">
+            <small *ngFor="let err of (errors.model || errors.car_model_id)" class="d-block">{{ err }}</small>
+          </div>
         </div>
         <div class="col-md-4 form-group mb-3" *ngIf="optFormType === 'transport'">
           <label for="brand_id" class="form-label font-weight-bold">
             Marca Veículo:
             <span class="text-danger">*</span>
           </label>
-          <select id="brand_id" class="form-select" [(ngModel)]="optForm.brand_id" name="brand_id" required>
+          <select id="brand_id" class="form-select" [class.is-invalid]="errors.brand || errors.brand_id" [(ngModel)]="optForm.brand_id" name="brand_id" required>
             <option value="">.:: Selecione ::.</option>
             <option *ngFor="let option of brands" [value]="option.id">{{ option.name }}</option>
           </select>
+          <div *ngIf="errors.brand || errors.brand_id" class="text-danger mt-1">
+            <small *ngFor="let err of (errors.brand || errors.brand_id)" class="d-block">{{ err }}</small>
+          </div>
         </div>
 
-        <!-- DATAS IN / OUT -->
-        <div class="col-md-6 form-group mb-3" *ngIf="optFormType !== 'airfare'">
-          <label for="opt_in" class="form-label font-weight-bold">
-            Data Entrada (IN):
             <span class="text-danger">*</span>
           </label>
-          <input type="date" id="opt_in" class="form-control" [class.is-invalid]="errors.in" [(ngModel)]="optForm.in" name="in" required />
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="fas fa-calendar-alt text-primary"></i></span>
+            <input
+              type="text"
+              #optDateRangePicker
+              id="opt_date_range"
+              class="form-control bg-white"
+              [class.is-invalid]="errors.in || errors.out"
+              placeholder="Selecione o período..."
+              readonly
+              required />
+          </div>
           <div *ngIf="errors.in" class="text-danger mt-1">
             <small *ngFor="let err of errors.in" class="d-block">{{ err }}</small>
           </div>
@@ -1901,7 +2154,7 @@
             Quantidade:
             <span class="text-danger">*</span>
           </label>
-          <input type="number" id="count" class="form-control" [class.is-invalid]="errors.count" [(ngModel)]="optForm.count" name="count" required />
+          <input type="number" step="1" id="count" class="form-control" [class.is-invalid]="errors.count" [(ngModel)]="optForm.count" name="count" required />
           <div *ngIf="errors.count" class="text-danger mt-1">
             <small *ngFor="let err of errors.count" class="d-block">{{ err }}</small>
           </div>
@@ -1909,41 +2162,52 @@
 
         <div class="col-md-6 form-group mb-3">
           <label for="kickback" class="form-label font-weight-bold">Comissão / Kickback (%):</label>
-          <input type="number" step="0.1" id="kickback" class="form-control" [(ngModel)]="optForm.kickback" name="kickback" />
+          <input
+            type="text"
+            id="kickback"
+            class="form-control"
+            [value]="formatPercent(optForm.kickback)"
+            (input)="onPercentInput($event, 'kickback', 'optForm')"
+            name="kickback" />
         </div>
 
-        <!-- PROPOSTA RECEBIDA (COST), PROPOSAL PERCENT -->
-        <div class="col-md-6 form-group mb-3">
+        <!-- PROPOSTA RECEBIDA (COST), PROPOSAL PERCENT, ORDEM -->
+        <div class="col-md-4 form-group mb-3">
           <label for="received_proposal" class="form-label font-weight-bold">
             Proposta Recebida (Custo Unit.):
             <span class="text-danger">*</span>
           </label>
-          <input
-            type="number"
-            step="0.01"
-            id="received_proposal"
-            class="form-control"
-            [class.is-invalid]="errors.received_proposal"
-            [(ngModel)]="optForm.received_proposal"
-            name="received_proposal"
-            required />
+          <div class="input-group">
+            <span class="input-group-text bg-light text-muted font-weight-bold" *ngIf="getOptCurrencySymbol()">
+              {{ getOptCurrencySymbol() }}
+            </span>
+            <input
+              type="text"
+              id="received_proposal"
+              class="form-control"
+              [class.is-invalid]="errors.received_proposal"
+              [value]="formatMoney(optForm.received_proposal)"
+              (input)="onMoneyInput($event, 'received_proposal', 'optForm')"
+              name="received_proposal"
+              required />
+          </div>
           <div *ngIf="errors.received_proposal" class="text-danger mt-1">
             <small *ngFor="let err of errors.received_proposal" class="d-block">{{ err }}</small>
           </div>
         </div>
 
-        <div class="col-md-6 form-group mb-3">
+        <div class="col-md-4 form-group mb-3">
           <label for="received_proposal_percent" class="form-label font-weight-bold">
             Markup divisor (%):
             <span class="text-danger">*</span>
           </label>
           <input
-            type="number"
-            step="0.01"
+            type="text"
             id="received_proposal_percent"
             class="form-control"
             [class.is-invalid]="errors.received_proposal_percent"
-            [(ngModel)]="optForm.received_proposal_percent"
+            [value]="formatPercent(optForm.received_proposal_percent)"
+            (input)="onPercentInput($event, 'received_proposal_percent', 'optForm')"
             name="received_proposal_percent"
             required />
           <div *ngIf="errors.received_proposal_percent" class="text-danger mt-1">
@@ -1951,37 +2215,69 @@
           </div>
         </div>
 
+        <div class="col-md-4 form-group mb-3">
+          <label for="opt_order" class="form-label font-weight-bold">Ordem:</label>
+          <input
+            type="number"
+            id="opt_order"
+            class="form-control"
+            [(ngModel)]="optForm.order"
+            name="order" />
+        </div>
+
         <!-- COMPARATIVOS (hotel only) -->
         <ng-container *ngIf="optFormType === 'hotel'">
           <div class="col-md-4 form-group mb-3">
             <label for="compare_trivago" class="form-label font-weight-bold">Comparação Trivago:</label>
-            <input type="number" step="0.01" id="compare_trivago" class="form-control" [(ngModel)]="optForm.compare_trivago" name="compare_trivago" />
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted font-weight-bold" *ngIf="getOptCurrencySymbol()">
+                {{ getOptCurrencySymbol() }}
+              </span>
+              <input
+                type="text"
+                id="compare_trivago"
+                class="form-control"
+                [value]="formatMoney(optForm.compare_trivago)"
+                (input)="onMoneyInput($event, 'compare_trivago', 'optForm')"
+                name="compare_trivago" />
+            </div>
           </div>
           <div class="col-md-4 form-group mb-3">
             <label for="compare_website_htl" class="form-label font-weight-bold">Comparação Website HTL:</label>
-            <input
-              type="number"
-              step="0.01"
-              id="compare_website_htl"
-              class="form-control"
-              [(ngModel)]="optForm.compare_website_htl"
-              name="compare_website_htl" />
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted font-weight-bold" *ngIf="getOptCurrencySymbol()">
+                {{ getOptCurrencySymbol() }}
+              </span>
+              <input
+                type="text"
+                id="compare_website_htl"
+                class="form-control"
+                [value]="formatMoney(optForm.compare_website_htl)"
+                (input)="onMoneyInput($event, 'compare_website_htl', 'optForm')"
+                name="compare_website_htl" />
+            </div>
           </div>
           <div class="col-md-4 form-group mb-3">
             <label for="compare_omnibess" class="form-label font-weight-bold">Comparação Omnibess:</label>
-            <input type="number" step="0.01" id="compare_omnibess" class="form-control" [(ngModel)]="optForm.compare_omnibess" name="compare_omnibess" />
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted font-weight-bold" *ngIf="getOptCurrencySymbol()">
+                {{ getOptCurrencySymbol() }}
+              </span>
+              <input
+                type="text"
+                id="compare_omnibess"
+                class="form-control"
+                [value]="formatMoney(optForm.compare_omnibess)"
+                (input)="onMoneyInput($event, 'compare_omnibess', 'optForm')"
+                name="compare_omnibess" />
+            </div>
           </div>
         </ng-container>
 
         <!-- OBSERVAÇÃO (transporte only) -->
         <div class="col-md-12 form-group mb-3" *ngIf="optFormType === 'transport'">
           <label for="opt_observation" class="form-label font-weight-bold">Observações:</label>
-          <textarea
-            id="opt_observation"
-            rows="2"
-            class="form-control"
-            [(ngModel)]="optForm.observation"
-            name="observation"></textarea>
+          <textarea id="opt_observation" rows="2" class="form-control" [(ngModel)]="optForm.observation" name="observation"></textarea>
         </div>
       </div>
 
@@ -1991,6 +2287,41 @@
           <span *ngIf="processing" class="spinner-border spinner-border-sm me-1"></span>
           <i class="fas fa-save me-1"></i>
           Salvar Detalhe
+        </button>
+      </div>
+    </form>
+  </app-modal>
+
+  <!-- MODAL 3: EDITAR MARKUP EM MASSA -->
+  <app-modal
+    [show]="showMarkupForm"
+    (close)="closeMarkupForm()"
+    title="Editar Markup Geral"
+    icon="fa-percentage">
+    <form (ngSubmit)="confirmMarkupBulk()">
+      <div class="row">
+        <div class="col-md-12 form-group mb-3">
+          <label for="bulk_markup" class="form-label font-weight-bold">
+            Markup divisor (%) para todas as tarifas:
+            <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            id="bulk_markup"
+            class="form-control"
+            [value]="formatPercent(bulkMarkupValue)"
+            (input)="onPercentInput($event, 'bulkMarkupValue', 'bulkForm')"
+            name="bulk_markup"
+            required />
+        </div>
+      </div>
+
+      <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
+        <button type="button" class="btn btn-secondary shadow-sm" (click)="closeMarkupForm()">Cancelar</button>
+        <button type="submit" class="btn btn-success shadow-sm" [disabled]="processing">
+          <span *ngIf="processing" class="spinner-border spinner-border-sm me-1"></span>
+          <i class="fas fa-save me-1"></i>
+          Confirmar Atualização
         </button>
       </div>
     </form>

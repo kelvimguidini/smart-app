@@ -48,9 +48,9 @@ class DefaultBudgetService implements BudgetServiceInterface
      */
     public function sendBudgetLink(array $requestData, int $authUserId): bool
     {
-        $providerId = $requestData['provider_id'];
-        $eventId = $requestData['event_id'];
-        $type = $requestData['type'];
+        $providerId = $requestData['provider_id'] ?? null;
+        $eventId = $requestData['event_id'] ?? null;
+        $type = $requestData['type'] ?? null;
 
         $pdfContent = null;
         if (($requestData['download'] ?? false) == "true" || ($requestData['attachment'] ?? false) == "true") {
