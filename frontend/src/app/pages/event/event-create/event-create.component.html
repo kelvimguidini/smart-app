@@ -675,7 +675,7 @@
                       ">
                       <!-- Service/Type Display -->
                       <td class="font-weight-bold sticky-col text-dark text-start" *ngIf="activeTab !== 1">
-                        {{ opt.service?.name || '-' }}
+                        {{ opt.name ? (opt.service?.name ? opt.service.name + ' (' + opt.name + ')' : opt.name) : (opt.service?.name || '-') }}
                       </td>
                       <td class="sticky-col text-start" [class.sticky-col]="activeTab === 1">{{ opt.broker?.name || '-' }}</td>
 
@@ -1421,7 +1421,14 @@
           </div>
         </div>
 
-        <!-- METRAGEM, PAX (hall only) -->
+        <!-- DESCRIÇÃO, METRAGEM, PAX (hall only) -->
+        <div class="col-md-12 form-group mb-3" *ngIf="optFormType === 'hall'">
+          <label for="hall_name" class="form-label font-weight-bold">
+            Descrição:
+          </label>
+          <input type="text" id="hall_name" class="form-control" [(ngModel)]="optForm.name" name="name" placeholder="Ex: Auditório A / Descrição da tarifa" />
+        </div>
+
         <div class="col-md-6 form-group mb-3" *ngIf="optFormType === 'hall'">
           <label for="hall_m2" class="form-label font-weight-bold">
             Metragem (m²):

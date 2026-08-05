@@ -185,9 +185,9 @@ class EventHallApiController extends Controller
                 'received_proposal' => $request->received_proposal,
                 'kickback' => $request->kickback,
                 'count' => $request->count,
-                'name' => $request->name,
-                'm2' => $request->m2,
-                'pax' => $request->pax,
+                'name' => $request->filled('name') ? $request->name : null,
+                'm2' => $request->filled('m2') ? $request->m2 : null,
+                'pax' => $request->filled('pax') ? $request->pax : null,
                 'order' => $request->order ?? 0,
             ];
 

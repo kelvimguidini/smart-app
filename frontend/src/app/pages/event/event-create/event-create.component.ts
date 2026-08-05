@@ -1340,9 +1340,9 @@ export class EventCreateComponent implements OnInit {
       case 'hall':
         payload.event_hall_id = this.optForm.parent_id;
         payload.broker = this.optForm.broker_id;
-        payload.name = this.optForm.name;
-        payload.m2 = this.optForm.m2;
-        payload.pax = this.optForm.pax;
+        payload.name = this.optForm.name || null;
+        payload.m2 = this.optForm.m2 || null;
+        payload.pax = this.optForm.pax || null;
         obs = this.eventService.saveHallOpt(payload);
         break;
       case 'add':
