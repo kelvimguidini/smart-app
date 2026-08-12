@@ -176,8 +176,8 @@ class EventAddApiController extends Controller
                 'frequency_id' => $request->frequency,
                 'measure_id' => $request->measure,
                 'service_id' => $request->service,
-                'unit' => $request->unit,
-                'pax' => $request->pax,
+                'unit' => $request->unit ?? 0,
+                'pax' => $request->pax ?? '',
                 'in' => $request->in,
                 'out' => $request->out,
                 'received_proposal_percent' => $request->received_proposal_percent,
@@ -195,7 +195,8 @@ class EventAddApiController extends Controller
 
             return response()->json(['message' => 'Opção de serviço adicional salva com sucesso!', 'data' => $opt]);
         } catch (Exception $e) {
-            return response()->json(['message' => 'Erro ao salvar opção.', 'error' => $e->getMessage()], 500);
+            \Illuminate\Support\Facades\Log::error('Erro ao salvar opção de serviço adicional: ' . $e->getMessage());
+            return response()->json(['message' => 'Erro ao salvar opção: ' . $e->getMessage(), 'error' => $e->getMessage()], 500);
         }
     }
 

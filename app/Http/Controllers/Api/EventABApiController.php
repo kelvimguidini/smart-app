@@ -195,7 +195,8 @@ class EventABApiController extends Controller
 
             return response()->json(['message' => 'Opção de A&B salva com sucesso!', 'data' => $opt]);
         } catch (Exception $e) {
-            return response()->json(['message' => 'Erro ao salvar opção.', 'error' => $e->getMessage()], 500);
+            \Illuminate\Support\Facades\Log::error('Erro ao salvar opção de A&B: ' . $e->getMessage());
+            return response()->json(['message' => 'Erro ao salvar opção: ' . $e->getMessage(), 'error' => $e->getMessage()], 500);
         }
     }
 
