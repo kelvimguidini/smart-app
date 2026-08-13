@@ -74,32 +74,27 @@ class StatusHistory extends Model
 
     public static function isProviderBlockedInEvent(int $eventId, int $providerId, string $type): bool
     {
-        $checks = [];
-        if (in_array($type, ['hotel', 'ab', 'hall'])) {
-            $checks = [
-                ['table' => 'event_hotels', 'model' => EventHotel::class, 'col' => 'hotel_id'],
-                ['table' => 'event_abs', 'model' => EventAB::class, 'col' => 'ab_id'],
-                ['table' => 'event_halls', 'model' => EventHall::class, 'col' => 'hall_id'],
-            ];
-        } elseif ($type === 'add') {
-            $checks = [
-                ['table' => 'event_adds', 'model' => EventAdd::class, 'col' => 'add_id'],
-            ];
-        } elseif ($type === 'transport') {
-            $checks = [
-                ['table' => 'event_transports', 'model' => EventTransport::class, 'col' => 'transport_id'],
-            ];
+        $typeMapping = [
+            'hotel' => ['table' => 'event_hotels', 'model' => EventHotel::class, 'col' => 'hotel_id'],
+            'ab' => ['table' => 'event_abs', 'model' => EventAB::class, 'col' => 'ab_id'],
+            'hall' => ['table' => 'event_halls', 'model' => EventHall::class, 'col' => 'hall_id'],
+            'add' => ['table' => 'event_adds', 'model' => EventAdd::class, 'col' => 'add_id'],
+            'transport' => ['table' => 'event_transports', 'model' => EventTransport::class, 'col' => 'transport_id'],
+        ];
+
+        if (!isset($typeMapping[$type])) {
+            return false;
         }
 
-        foreach ($checks as $check) {
-            $ids = $check['model']::where('event_id', $eventId)
-                ->where($check['col'], $providerId)
-                ->pluck('id');
+        $check = $typeMapping[$type];
 
-            foreach ($ids as $id) {
-                if (self::isBlockedTableRecord($check['table'], $id)) {
-                    return true;
-                }
+        $ids = $check['model']::where('event_id', $eventId)
+            ->where($check['col'], $providerId)
+            ->pluck('id');
+
+        foreach ($ids as $id) {
+            if (self::isBlockedTableRecord($check['table'], $id)) {
+                return true;
             }
         }
 
