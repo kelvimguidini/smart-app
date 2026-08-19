@@ -373,24 +373,39 @@ export class EventCreateComponent implements OnInit {
         rangeSeparator: ' até ',
       },
       onChange: (selectedDates) => {
+        const formatDate = (date: Date) => {
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        };
         if (selectedDates.length === 2) {
-          const formatDate = (date: Date) => {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-          };
           this.basicForm.date = formatDate(selectedDates[0]);
           this.basicForm.date_final = formatDate(selectedDates[1]);
+        } else if (selectedDates.length === 1) {
+          this.basicForm.date = formatDate(selectedDates[0]);
+          this.basicForm.date_final = formatDate(selectedDates[0]);
         } else if (selectedDates.length === 0) {
           this.basicForm.date = '';
           this.basicForm.date_final = '';
         }
       },
       onClose: (selectedDates) => {
-        if (selectedDates.length !== 2) {
+        const formatDate = (date: Date) => {
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        };
+        if (selectedDates.length === 1) {
+          this.basicForm.date = formatDate(selectedDates[0]);
+          this.basicForm.date_final = formatDate(selectedDates[0]);
+          if (this.flatpickrInstance) {
+            this.flatpickrInstance.setDate([selectedDates[0], selectedDates[0]], false);
+          }
+        } else if (selectedDates.length !== 2) {
           if (this.basicForm.date && this.basicForm.date_final) {
-            this.flatpickrInstance.setDate([this.basicForm.date, this.basicForm.date_final]);
+            this.flatpickrInstance.setDate([this.basicForm.date, this.basicForm.date_final], false);
           } else {
             this.flatpickrInstance.clear();
           }
@@ -829,9 +844,21 @@ export class EventCreateComponent implements OnInit {
       error: (err: HttpErrorResponse) => {
         this.processing = false;
         if (err.status === 422) {
-          this.errors = err.error.errors || {};
+          this.errors = err.error?.errors || {};
+          let errorMsg = err.error?.message;
+          if (!errorMsg || errorMsg === 'The given data was invalid.') {
+            if (this.errors && Object.keys(this.errors).length > 0) {
+              const firstKey = Object.keys(this.errors)[0];
+              const firstVal = this.errors[firstKey];
+              errorMsg = Array.isArray(firstVal) ? firstVal[0] : firstVal;
+            } else {
+              errorMsg = 'Erro de validação ao vincular fornecedor.';
+            }
+          }
+          this.toastService.error(errorMsg);
         } else {
-          this.toastService.error(err.error?.message || 'Erro ao vincular fornecedor.');
+          const message = err.error?.message || err.error?.error || err.message || 'Erro ao vincular fornecedor.';
+          this.toastService.error(message);
         }
       },
     });
@@ -867,7 +894,8 @@ export class EventCreateComponent implements OnInit {
         this.loadInitialData();
       },
       error: (err) => {
-        this.toastService.error('Erro ao remover vínculo.');
+        const message = err?.error?.message || err?.error?.error || err?.message || 'Erro ao remover vínculo.';
+        this.toastService.error(message);
         console.error(err);
         this.isLoader = false;
       },
@@ -1006,7 +1034,8 @@ export class EventCreateComponent implements OnInit {
       error: (err) => {
         this.isLoader = false;
         this.processing = false;
-        this.toastService.error('Erro ao atualizar o markup de algumas tarifas.');
+        const message = err?.error?.message || err?.error?.error || err?.message || 'Erro ao atualizar o markup de algumas tarifas.';
+        this.toastService.error(message);
         console.error(err);
       }
     });
@@ -1200,15 +1229,24 @@ export class EventCreateComponent implements OnInit {
         if (selectedDates.length === 2) {
           this.optForm.in = this.formatDate(selectedDates[0]);
           this.optForm.out = this.formatDate(selectedDates[1]);
+        } else if (selectedDates.length === 1) {
+          this.optForm.in = this.formatDate(selectedDates[0]);
+          this.optForm.out = this.formatDate(selectedDates[0]);
         } else if (selectedDates.length === 0) {
           this.optForm.in = '';
           this.optForm.out = '';
         }
       },
       onClose: (selectedDates) => {
-        if (selectedDates.length !== 2) {
+        if (selectedDates.length === 1) {
+          this.optForm.in = this.formatDate(selectedDates[0]);
+          this.optForm.out = this.formatDate(selectedDates[0]);
+          if (this.optFlatpickrInstance) {
+            this.optFlatpickrInstance.setDate([selectedDates[0], selectedDates[0]], false);
+          }
+        } else if (selectedDates.length !== 2) {
           if (this.optForm.in && this.optForm.out) {
-            this.optFlatpickrInstance.setDate([this.optForm.in, this.optForm.out]);
+            this.optFlatpickrInstance.setDate([this.optForm.in, this.optForm.out], false);
           } else {
             this.optFlatpickrInstance.clear();
           }
@@ -1374,9 +1412,9 @@ export class EventCreateComponent implements OnInit {
       case 'hall':
         payload.event_hall_id = this.optForm.parent_id;
         payload.broker = this.optForm.broker_id;
-        payload.name = this.optForm.name;
-        payload.m2 = this.optForm.m2;
-        payload.pax = this.optForm.pax;
+        payload.name = this.optForm.name || null;
+        payload.m2 = this.optForm.m2 || null;
+        payload.pax = this.optForm.pax || null;
         obs = this.eventService.saveHallOpt(payload);
         break;
       case 'add':
@@ -1416,7 +1454,7 @@ export class EventCreateComponent implements OnInit {
       error: (err: HttpErrorResponse) => {
         this.processing = false;
         if (err.status === 422) {
-          this.errors = err.error.errors || {};
+          this.errors = err.error?.errors || {};
           // Map backend validator keys to frontend property names for error visual cues
           if (this.errors.broker) this.errors.broker_id = this.errors.broker;
           if (this.errors.regime) this.errors.regime_id = this.errors.regime;
@@ -1429,8 +1467,21 @@ export class EventCreateComponent implements OnInit {
           if (this.errors.measure) this.errors.measure_id = this.errors.measure;
           if (this.errors.baggage) this.errors.baggage_id = this.errors.baggage;
           if (this.errors.cabin) this.errors.cabin_id = this.errors.cabin;
+
+          let errorMsg = err.error?.message;
+          if (!errorMsg || errorMsg === 'The given data was invalid.') {
+            if (this.errors && Object.keys(this.errors).length > 0) {
+              const firstKey = Object.keys(this.errors)[0];
+              const firstVal = this.errors[firstKey];
+              errorMsg = Array.isArray(firstVal) ? firstVal[0] : firstVal;
+            } else {
+              errorMsg = 'Erro de validação ao salvar tarifa.';
+            }
+          }
+          this.toastService.error(errorMsg);
         } else {
-          this.toastService.error(err.error?.message || 'Erro ao salvar tarifa.');
+          const message = err.error?.message || err.error?.error || err.message || 'Erro ao salvar tarifa.';
+          this.toastService.error(message);
         }
       },
     });

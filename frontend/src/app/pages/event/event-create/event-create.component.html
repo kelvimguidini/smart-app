@@ -588,7 +588,6 @@
                       <th scope="col" class="sticky-col text-start" *ngIf="activeTab !== 1">Serviço/Detalhe</th>
                       <th scope="col" class="sticky-col text-start" [class.sticky-col]="activeTab === 1">Broker</th>
                       <th scope="col" class="text-start" [class.sticky-col]="activeTab === 1" *ngIf="activeTab === 1">Regime</th>
-                      <th scope="col" class="text-start" *ngIf="activeTab === 3">Nome Salão</th>
                       <th scope="col" class="text-start" *ngIf="activeTab === 3">Metragem</th>
                       <th scope="col" class="text-start" *ngIf="activeTab === 3">Pax</th>
                       <th scope="col" class="text-start" *ngIf="activeTab === 1 || activeTab === 3">Propósito</th>
@@ -654,7 +653,7 @@
                       ">
                       <td
                         [attr.colspan]="
-                          (activeTab === 1 || activeTab === 5 ? 10 : activeTab === 3 ? 11 : activeTab === 2 || activeTab === 4 ? 9 : 8) +
+                          (activeTab === 1 || activeTab === 3 || activeTab === 5 ? 10 : activeTab === 2 || activeTab === 4 ? 9 : 8) +
                           6 +
                           ((
                             activeTab === 1
@@ -687,13 +686,12 @@
                       ">
                       <!-- Service/Type Display -->
                       <td class="font-weight-bold sticky-col text-dark text-start" *ngIf="activeTab !== 1">
-                        {{ opt.service?.name || '-' }}
+                        {{ opt.name ? (opt.service?.name ? opt.service.name + ' (' + opt.name + ')' : opt.name) : (opt.service?.name || '-') }}
                       </td>
                       <td class="sticky-col text-start" [class.sticky-col]="activeTab === 1">{{ opt.broker?.name || '-' }}</td>
 
                       <!-- Tab Specific Columns -->
                       <td class="text-start" [class.sticky-col]="activeTab === 1" *ngIf="activeTab === 1">{{ opt.regime?.name || '-' }}</td>
-                      <td class="text-start" *ngIf="activeTab === 3">{{ opt.name || '-' }}</td>
                       <td class="text-start" *ngIf="activeTab === 3">{{ opt.m2 || '-' }}</td>
                       <td class="text-start" *ngIf="activeTab === 3">{{ opt.pax || '-' }}</td>
                       <td class="text-start" *ngIf="activeTab === 1 || activeTab === 3">{{ opt.purpose?.name || '-' }}</td>
@@ -1803,22 +1801,22 @@
           </div>
         </div>
 
-        <!-- NOME SALÃO, METRAGEM, PAX (hall only) -->
-        <div class="col-md-6 form-group mb-3" *ngIf="optFormType === 'hall'">
+        <!-- DESCRIÇÃO, METRAGEM, PAX (hall only) -->
+        <div class="col-md-12 form-group mb-3" *ngIf="optFormType === 'hall'">
           <label for="hall_name" class="form-label font-weight-bold">
-            Nome do Salão:
+            Descrição:
           </label>
-          <input type="text" id="hall_name" class="form-control" [(ngModel)]="optForm.name" name="name" placeholder="Ex: Salão Copacabana" />
+          <input type="text" id="hall_name" class="form-control" [(ngModel)]="optForm.name" name="name" placeholder="Ex: Auditório A / Descrição da tarifa" />
         </div>
 
-        <div class="col-md-3 form-group mb-3" *ngIf="optFormType === 'hall'">
+        <div class="col-md-6 form-group mb-3" *ngIf="optFormType === 'hall'">
           <label for="hall_m2" class="form-label font-weight-bold">
             Metragem (m²):
           </label>
           <input type="text" id="hall_m2" class="form-control" [(ngModel)]="optForm.m2" name="m2" placeholder="Ex: 150" />
         </div>
 
-        <div class="col-md-3 form-group mb-3" *ngIf="optFormType === 'hall'">
+        <div class="col-md-6 form-group mb-3" *ngIf="optFormType === 'hall'">
           <label for="hall_pax" class="form-label font-weight-bold">
             Qtd. Pax:
           </label>
@@ -1858,7 +1856,7 @@
         <!-- SERVIÇOS (A&B, Salões, Adicionais, Transporte) -->
         <div class="col-md-6 form-group mb-3" *ngIf="optFormType !== 'hotel' && optFormType !== 'airfare'">
           <label for="service_id" class="form-label font-weight-bold">
-            Serviço/Trecho:
+            {{ optFormType === 'transport' ? 'Serviço/Trecho:' : 'Serviços:' }}
             <span class="text-danger">*</span>
           </label>
           <select id="service_id" class="form-select" [class.is-invalid]="errors.service || errors.service_id" [(ngModel)]="optForm.service_id" name="service_id" required>

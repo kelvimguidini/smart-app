@@ -185,9 +185,9 @@ class EventHallApiController extends Controller
                 'received_proposal' => $request->received_proposal,
                 'kickback' => $request->kickback,
                 'count' => $request->count,
-                'name' => $request->name,
-                'm2' => $request->m2,
-                'pax' => $request->pax,
+                'name' => $request->filled('name') ? $request->name : null,
+                'm2' => $request->filled('m2') ? $request->m2 : null,
+                'pax' => $request->filled('pax') ? $request->pax : null,
                 'order' => $request->order ?? 0,
             ];
 
@@ -199,7 +199,8 @@ class EventHallApiController extends Controller
 
             return response()->json(['message' => 'Opção de salão salva com sucesso!', 'data' => $opt]);
         } catch (Exception $e) {
-            return response()->json(['message' => 'Erro ao salvar opção.', 'error' => $e->getMessage()], 500);
+            \Illuminate\Support\Facades\Log::error('Erro ao salvar opção de salão: ' . $e->getMessage());
+            return response()->json(['message' => 'Erro ao salvar opção: ' . $e->getMessage(), 'error' => $e->getMessage()], 500);
         }
     }
 

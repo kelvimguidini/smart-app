@@ -181,7 +181,7 @@ class EventTransportApiController extends Controller
                 'model_id' => $request->model,
                 'service_id' => $request->service,
                 'brand_id' => $request->brand,
-                'observation' => $request->observation,
+                'observation' => $request->observation ?? '',
                 'in' => $request->in,
                 'out' => $request->out,
                 'received_proposal_percent' => $request->received_proposal_percent,
@@ -199,7 +199,8 @@ class EventTransportApiController extends Controller
 
             return response()->json(['message' => 'Opção de transporte salva com sucesso!', 'data' => $opt]);
         } catch (Exception $e) {
-            return response()->json(['message' => 'Erro ao salvar opção.', 'error' => $e->getMessage()], 500);
+            \Illuminate\Support\Facades\Log::error('Erro ao salvar opção de transporte: ' . $e->getMessage());
+            return response()->json(['message' => 'Erro ao salvar opção: ' . $e->getMessage(), 'error' => $e->getMessage()], 500);
         }
     }
 
