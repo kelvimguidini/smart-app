@@ -38,7 +38,7 @@ services:
       MYSQL_USER: apismart
       MYSQL_PASSWORD: casanova
     volumes:
-      - mysql_data:/var/lib/mysql369
+      - mysql_data:/var/lib/mysql
       - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
 
 volumes:
