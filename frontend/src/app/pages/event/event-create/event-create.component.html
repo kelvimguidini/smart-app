@@ -533,10 +533,10 @@
                     <tr>
                       <!-- Metadata Columns Group -->
                       <th
-                        [attr.colspan]="activeTab === 1 || activeTab === 5 ? 10 : activeTab === 2 || activeTab === 4 ? 9 : 8"
+                        [attr.colspan]="activeTab === 1 || activeTab === 3 || activeTab === 5 ? 9 : 8"
                         class="text-start bg-light text-dark font-weight-bold"></th>
                       <!-- Valor de Venda Group -->
-                      <th colspan="2" class="bg-success-header text-center font-weight-bold text-white">Valor de Venda</th>
+                      <th colspan="3" class="bg-success-header text-center font-weight-bold text-white">Valor de Venda</th>
                       <!-- Valor de Custo Group -->
                       <th colspan="2" class="bg-warning-header text-center font-weight-bold text-white">Valor de Custo</th>
                       <!-- Proposta Recebida / % rowspan Group -->
@@ -642,8 +642,8 @@
                       ">
                       <td
                         [attr.colspan]="
-                          (activeTab === 1 || activeTab === 3 || activeTab === 5 ? 10 : activeTab === 2 || activeTab === 4 ? 9 : 8) +
-                          6 +
+                          (activeTab === 1 || activeTab === 3 || activeTab === 5 ? 9 : 8) +
+                          7 +
                           ((
                             activeTab === 1
                               ? showDetailsHotel
@@ -926,21 +926,19 @@
                     <!-- Total / Summary Row (Other tabs) -->
                     <tr class="table-subheader" *ngIf="activeTab !== 1">
                       <td class="sticky-col font-weight-bold text-start">Diária Média:</td>
-                      <td class="font-weight-bold text-end" [class.sticky-col]="activeTab === 1">
+                      <td class="font-weight-bold text-end">
                         {{ formatCurrency(average(item, activeTab === 2), item.currency?.sigla) }}
                       </td>
                       <td
-                        [attr.colspan]="activeTab === 5 ? 3 : activeTab === 3 ? 4 : activeTab === 2 || activeTab === 4 ? 2 : 1"
+                        [attr.colspan]="activeTab === 3 || activeTab === 5 ? 4 : 3"
                         *ngIf="activeTab === 2 || activeTab === 3 || activeTab === 4 || activeTab === 5"></td>
 
-                      <td class="font-weight-bold text-start">Room Nights:</td>
-                      <td class="font-weight-bold text-center">{{ roomNights(item, activeTab === 2) | number:'1.0-0' }}</td>
                       <td class="font-weight-bold text-start"># Qtd:</td>
                       <td class="text-center font-weight-bold">{{ sumCount(item) | number:'1.0-0' }}</td>
                       <td class="text-center font-weight-bold">{{ sumNts(item, activeTab === 2) | number:'1.0-0' }}</td>
 
                       <td class="bg-success-solid font-weight-bold text-end">Total Venda:</td>
-                      <td class="bg-success-solid font-weight-bold text-end">{{ formatCurrency(sumSale(item, activeTab !== 1), item.currency?.sigla) }}</td>
+                      <td class="bg-success-solid font-weight-bold text-end" colspan="2">{{ formatCurrency(sumSale(item, activeTab !== 1), item.currency?.sigla) }}</td>
 
                       <td class="bg-warning-solid font-weight-bold text-end">Total Custo:</td>
                       <td class="bg-warning-solid font-weight-bold text-end">{{ formatCurrency(sumCost(item, activeTab !== 1), item.currency?.sigla) }}</td>
@@ -988,7 +986,7 @@
                     <!-- Internal Observations Row -->
                     <tr class="observation-row">
                       <td class="sticky-col text-start font-weight-bold" colspan="2">OBSERVAÇÃO INTERNA:</td>
-                      <td class="text-start text-dark" [attr.colspan]="activeTab === 1 || activeTab === 5 ? 8 : activeTab === 3 ? 9 : activeTab === 2 || activeTab === 4 ? 7 : 6">
+                      <td class="text-start text-dark" [attr.colspan]="activeTab === 1 || activeTab === 3 || activeTab === 5 ? 10 : 9">
                         {{ item.internal_observation || '-' }}
                       </td>
                       <td colspan="2" class="font-weight-bold text-end">Faturamento Venda:</td>
@@ -1005,24 +1003,25 @@
                         }}
                       </td>
                       <td
-                        [attr.colspan]="
+                        *ngIf="
                           activeTab === 1
                             ? showDetailsHotel
-                              ? 13
-                              : 2
-                            : (activeTab === 2 ? showDetailsAB : activeTab === 3 ? showDetailsHall : activeTab === 4 ? showDetailsAdd : showDetailsTransport)
-                              ? activeTab === 2
-                                ? 10
-                                : 8
-                              : 2
-                        "></td>
+                            : activeTab === 2
+                              ? showDetailsAB
+                              : activeTab === 3
+                                ? showDetailsHall
+                                : activeTab === 4
+                                  ? showDetailsAdd
+                                  : showDetailsTransport
+                        "
+                        [attr.colspan]="(activeTab === 1 || activeTab === 2 ? 8 : 6) + (activeTab === 1 && showDetailsHotel ? 3 : 0)"></td>
                       <td *ngIf="!isReadOnly"></td>
                     </tr>
 
                     <!-- Customer Observations Row -->
                     <tr class="observation-row">
                       <td class="sticky-col text-start font-weight-bold" colspan="2">OBSERVAÇÃO CLIENTE:</td>
-                      <td class="text-start text-dark" [attr.colspan]="activeTab === 1 || activeTab === 5 ? 8 : activeTab === 3 ? 9 : activeTab === 2 || activeTab === 4 ? 7 : 6">
+                      <td class="text-start text-dark" [attr.colspan]="activeTab === 1 || activeTab === 3 || activeTab === 5 ? 10 : 9">
                         {{ item.customer_observation || '-' }}
                       </td>
                       <td colspan="2" class="font-weight-bold text-end">Faturamento Custo:</td>
@@ -1039,38 +1038,40 @@
                         }}
                       </td>
                       <td
-                        [attr.colspan]="
+                        *ngIf="
                           activeTab === 1
                             ? showDetailsHotel
-                              ? 13
-                              : 2
-                            : (activeTab === 2 ? showDetailsAB : activeTab === 3 ? showDetailsHall : activeTab === 4 ? showDetailsAdd : showDetailsTransport)
-                              ? activeTab === 2
-                                ? 10
-                                : 8
-                              : 2
-                        "></td>
+                            : activeTab === 2
+                              ? showDetailsAB
+                              : activeTab === 3
+                                ? showDetailsHall
+                                : activeTab === 4
+                                  ? showDetailsAdd
+                                  : showDetailsTransport
+                        "
+                        [attr.colspan]="(activeTab === 1 || activeTab === 2 ? 8 : 6) + (activeTab === 1 && showDetailsHotel ? 3 : 0)"></td>
                       <td *ngIf="!isReadOnly"></td>
                     </tr>
 
                     <!-- Prazo / Deadline Row -->
                     <tr class="observation-row">
                       <td class="sticky-col text-start font-weight-bold" colspan="2">PRAZO / DATA LIMITE:</td>
-                      <td class="text-start text-dark" [attr.colspan]="(activeTab === 1 || activeTab === 5 ? 8 : activeTab === 3 ? 9 : activeTab === 2 || activeTab === 4 ? 7 : 6) + 4">
+                      <td class="text-start text-dark" [attr.colspan]="(activeTab === 1 || activeTab === 3 || activeTab === 5 ? 10 : 9) + 4">
                         {{ (item.deadline_date | date: 'dd/MM/yyyy') || '-' }}
                       </td>
                       <td
-                        [attr.colspan]="
+                        *ngIf="
                           activeTab === 1
                             ? showDetailsHotel
-                              ? 13
-                              : 5
-                            : (activeTab === 2 ? showDetailsAB : activeTab === 3 ? showDetailsHall : activeTab === 4 ? showDetailsAdd : showDetailsTransport)
-                              ? activeTab === 2
-                                ? 10
-                                : 8
-                              : 2
-                        "></td>
+                            : activeTab === 2
+                              ? showDetailsAB
+                              : activeTab === 3
+                                ? showDetailsHall
+                                : activeTab === 4
+                                  ? showDetailsAdd
+                                  : showDetailsTransport
+                        "
+                        [attr.colspan]="(activeTab === 1 || activeTab === 2 ? 8 : 6) + (activeTab === 1 && showDetailsHotel ? 3 : 0)"></td>
                       <td *ngIf="!isReadOnly"></td>
                     </tr>
                   </tbody>
