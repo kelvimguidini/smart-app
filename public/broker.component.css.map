@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/pages/hotel/broker/broker.component.scss"],
+  "sourcesContent": ["/* Estilos para o dropdown do Autocomplete usando Tailwind */\r\n/* Não precisa adicionar quase nada já que usamos classes utilitárias no HTML */\r\n.form-input {\r\n    transition: all 0.2s ease-in-out;\r\n}\r\n\r\n.card {\r\n    transition: all 0.3s ease;\r\n    border: none;\r\n    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);\r\n}\r\n"],
+  "mappings": ";;;AAEA,CAAA;AACI,cAAA,IAAA,KAAA;;AAGJ,CAAA;AACI,cAAA,IAAA,KAAA;AACA,UAAA;AACA,cAAA,EAAA,QAAA,QAAA,EAAA,KAAA,EAAA,EAAA,EAAA,EAAA,EAAA,EAAA;;",
+  "names": []
+}

@@ -96,7 +96,11 @@ class DefaultProviderService implements ProviderServiceInterface
         $subject = "Proposta para hotel";
         $filenamePrefix = "Proposta";
 
-        if ($pdfType === 2) {
+        if ($data['table'] == 'event_airfares' || $data['table'] == 'event_airfare') {
+            $view = 'airfareProposalPdf';
+            $subject = "Proposta Fretamento / Aéreo";
+            $filenamePrefix = "Proposta_Aereo";
+        } elseif ($pdfType === 2) {
             $view = 'invoicePDF';
             $subject = "Faturamento evento";
             $filenamePrefix = "Faturamento";

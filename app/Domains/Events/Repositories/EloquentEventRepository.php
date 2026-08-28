@@ -176,6 +176,22 @@ class EloquentEventRepository implements EventRepositoryInterface
             ]);
         }
 
+        if ($table == 'event_airfares' || $table == 'event_airfare') {
+            $withRelations = array_merge($withRelations, [
+                'event_airfares' => fn($q) => $providerId > 0 ? $q->where(function($sub) use ($providerId) {
+                    $sub->where('airfare_id', $providerId)->orWhere('airline_id', $providerId)->orWhere('id', $providerId);
+                }) : $q,
+                'event_airfares.provider',
+                'event_airfares.airline',
+                'event_airfares.eventAirfareOpts' => fn($q) => $q->orderBy('order', 'asc'),
+                'event_airfares.eventAirfareOpts.outbound_airline',
+                'event_airfares.eventAirfareOpts.inbound_airline',
+                'event_airfares.eventAirfareOpts.baggage',
+                'event_airfares.eventAirfareOpts.cabin',
+                'event_airfares.currency',
+            ]);
+        }
+
         $eventDataBase = Event::with($withRelations)->find($eventId);
 
         $providers = collect();
@@ -187,6 +203,9 @@ class EloquentEventRepository implements EventRepositoryInterface
             $providers = $providers->concat($eventDataBase->event_transports->pluck('transport'));
         } elseif ($table == 'event_adds') {
             $providers = $providers->concat($eventDataBase->event_adds->pluck('add'));
+        } elseif ($table == 'event_airfares' || $table == 'event_airfare') {
+            $providers = $providers->concat($eventDataBase->event_airfares->pluck('provider'));
+            $providers = $providers->concat($eventDataBase->event_airfares->pluck('airline'));
         }
 
         $providerDataBase = $providers->filter()->unique()->values()->first();

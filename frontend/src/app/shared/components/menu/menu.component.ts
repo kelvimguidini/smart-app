@@ -161,10 +161,9 @@ export class MenuComponent implements OnInit {
       collapseHeader: 'Tabelas auxiliares',
       collapsed: true,
       subMenu: [
-        { link: '/airline', name: 'Cias Aéreas', role: 'airfare_airline_admin' },
-        { link: '/baggage', name: 'Bagagem', role: 'airfare_baggage_admin' },
-        { link: '/cabin', name: 'Cabine', role: 'airfare_cabin_admin' },
-        { link: '/provider-airfare', name: 'Fornecedor', role: 'admin_provider_airfare' },
+        { link: '/airline', name: 'Cias Aéreas', role: ['airfare_airline_admin', 'air_operator'] },
+        { link: '/baggage', name: 'Bagagem', role: ['airfare_baggage_admin', 'air_operator'] },
+        { link: '/cabin', name: 'Cabine', role: ['airfare_cabin_admin', 'air_operator'] },
       ]
     },
     {
@@ -232,7 +231,7 @@ export class MenuComponent implements OnInit {
       '/local', '/service-hall', '/purpose-hall', '/measure',
       '/frequency', '/service-add', '/provider-service', '/brand',
       '/car-model', '/vehicle', '/transport-service', '/broker-trans', '/provider-transport',
-      '/airline', '/baggage', '/cabin', '/provider-airfare',
+      '/airline', '/baggage', '/cabin',
       '/event', '/event-list', '/currency', '/customer', '/customer-requester', '/customer-sector', '/customer-cost-center', '/crd', '/city'
     ];
     return angularRoutes.includes(link);

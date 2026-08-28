@@ -230,8 +230,13 @@ class ProviderController extends Controller
         $data = $this->eventRepository->getProposalData($request->event_id, $request->provider_id, $request->type);
         
         $view = 'proposalPdf';
-        if ($type === 2) $view = 'invoicePDF';
-        elseif ($type === 3) $view = 'proposalPdfWithoutValues';
+        if ($data['table'] == 'event_airfares' || $data['table'] == 'event_airfare') {
+            $view = 'airfareProposalPdf';
+        } elseif ($type === 2) {
+            $view = 'invoicePDF';
+        } elseif ($type === 3) {
+            $view = 'proposalPdfWithoutValues';
+        }
 
         $options = new \Dompdf\Options();
         $options->set('isRemoteEnabled', true);

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/layouts/authenticated-layout/authenticated-layout.component.scss"],
+  "sourcesContent": ["/* Layout principal */\r\n#wrapper {\r\n    display: flex;\r\n    min-height: 100vh;\r\n}\r\n\r\n#content-wrapper {\r\n    background-color: #f8f9fc;\r\n    width: 100%;\r\n    overflow-x: hidden;\r\n}\r\n"],
+  "mappings": ";AACA,CAAA;AACI,WAAA;AACA,cAAA;;AAGJ,CAAA;AACI,oBAAA;AACA,SAAA;AACA,cAAA;;",
+  "names": []
+}

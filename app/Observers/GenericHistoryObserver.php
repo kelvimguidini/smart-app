@@ -136,8 +136,8 @@ class GenericHistoryObserver
                 'model' => \App\Models\ServiceType::class,
                 'field' => 'name'
             ],
-            'airfare_id' => [
-                'model' => \App\Models\ProviderAirfare::class,
+            'airline_id' => [
+                'model' => \App\Models\AirfareAirline::class,
                 'field' => 'name'
             ],
             'outbound_airline_id' => [

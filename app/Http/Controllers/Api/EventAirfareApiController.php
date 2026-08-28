@@ -46,11 +46,15 @@ class EventAirfareApiController extends Controller
         }
 
         $request->validate([
-            'provider_id' => 'required|integer',
             'event_id' => 'required|integer',
             'currency' => 'required|integer',
             'taxa_4bts' => 'required|numeric|min:0|max:100',
         ]);
+
+        $airlineId = $request->airline_id ?: $request->provider_id;
+        if (!$airlineId) {
+            return response()->json(['message' => 'Por favor, selecione a Companhia Aérea.'], 422);
+        }
 
         try {
             $user = $this->userRepository->find(Auth::user()->id);
@@ -59,24 +63,44 @@ class EventAirfareApiController extends Controller
                     if ($this->statusHistoryRepository->isBlockedTableRecord('event_airfares', $request->id)) {
                         return response()->json(['message' => 'Esse registro não pode ser atualizado devido ao status atual!'], 422);
                     }
-                    if ($this->statusHistoryRepository->isProviderBlockedInEvent($request->event_id, $request->provider_id, 'airfare')) {
-                        return response()->json(['message' => 'Esse fornecedor já possui um registro bloqueado neste evento!'], 422);
+                    if ($this->statusHistoryRepository->isProviderBlockedInEvent($request->event_id, $airlineId, 'airfare')) {
+                        return response()->json(['message' => 'Essa companhia aérea já possui um registro bloqueado neste evento!'], 422);
                     }
                 }
             } else {
                 if (!$user->getPermissions()->contains('name', 'status_level_2') && 
-                    $this->statusHistoryRepository->isProviderBlockedInEvent($request->event_id, $request->provider_id, 'airfare')) {
-                    return response()->json(['message' => 'Esse fornecedor já possui um registro bloqueado neste evento!'], 422);
+                    $this->statusHistoryRepository->isProviderBlockedInEvent($request->event_id, $airlineId, 'airfare')) {
+                    return response()->json(['message' => 'Essa companhia aérea já possui um registro bloqueado neste evento!'], 422);
                 }
             }
 
             $providerData = $request->only([
                 'event_id', 'iss_percent', 'service_percent', 'iva_percent', 
                 'invoice', 'internal_observation', 'customer_observation', 
-                'iof', 'taxa_4bts', 'service_charge', 'deadline_date', 'payment_method'
+                'iof', 'taxa_4bts', 'service_charge', 'deadline_date', 'payment_method',
+                'aircraft', 'passengers_info', 'baggage_info', 'flight_time',
+                'pax_first', 'pax_executiva', 'pax_premium', 'pax_economica', 'total_pax',
+                'prazo_cia', 'status_contrato', 'prazo_proposta',
+                'inc_taxa_embarque', 'inc_servico_bordo', 'inc_porao', 'inc_bagagem_bordo',
+                'inc_sala_vip', 'inc_fbo_origem', 'inc_fbo_destino', 'inc_alteracao_nomes',
+                'taxa_embarque_unit', 'total_taxa_embarque', 'total_net_sem_4bts',
+                'total_venda_sem_4bts', 'resultado_bruto', 'exchange_rate_brl',
+                'tt_net_brl', 'tt_venda_brl',
+                'photo_1', 'photo_2', 'photo_3', 'photo_4', 'observations', 'notes'
             ]);
             $providerData['currency_id'] = $request->currency;
-            $providerData['airfare_id'] = $request->provider_id;
+            $providerData['airfare_id'] = $request->provider_id ?: null;
+            $providerData['airline_id'] = $request->airline_id ?: $request->provider_id;
+
+            foreach (['photo_1', 'photo_2', 'photo_3', 'photo_4'] as $photoKey) {
+                if ($request->hasFile($photoKey)) {
+                    $path = \Illuminate\Support\Facades\Storage::putFile('public/airfares', $request->file($photoKey));
+                    $providerData[$photoKey] = \Illuminate\Support\Facades\Storage::url($path);
+                    if (\Illuminate\Support\Facades\Artisan::hasCommand('files:copy')) {
+                        \Illuminate\Support\Facades\Artisan::call('files:copy');
+                    }
+                }
+            }
 
             $provider = $request->id > 0 
                 ? $this->eventAirfareRepository->saveEventAirfare($providerData, $request->id) 

@@ -12,7 +12,42 @@ class EventAirfare extends Model
     protected $fillable = [
         'event_id',
         'airfare_id',
+        'airline_id',
         'currency_id',
+        'aircraft',
+        'passengers_info',
+        'baggage_info',
+        'flight_time',
+        'pax_first',
+        'pax_executiva',
+        'pax_premium',
+        'pax_economica',
+        'total_pax',
+        'prazo_cia',
+        'status_contrato',
+        'prazo_proposta',
+        'inc_taxa_embarque',
+        'inc_servico_bordo',
+        'inc_porao',
+        'inc_bagagem_bordo',
+        'inc_sala_vip',
+        'inc_fbo_origem',
+        'inc_fbo_destino',
+        'inc_alteracao_nomes',
+        'taxa_embarque_unit',
+        'total_taxa_embarque',
+        'total_net_sem_4bts',
+        'total_venda_sem_4bts',
+        'resultado_bruto',
+        'exchange_rate_brl',
+        'tt_net_brl',
+        'tt_venda_brl',
+        'photo_1',
+        'photo_2',
+        'photo_3',
+        'photo_4',
+        'observations',
+        'notes',
         'iss_percent',
         'service_percent',
         'iva_percent',
@@ -33,24 +68,6 @@ class EventAirfare extends Model
     protected $table = 'event_airfare';
 
     protected $id = 'id';
-    protected $event_id = 'event_id';
-    protected $airfare_id = 'airfare_id';
-    protected $currency_id = 'currency_id';
-    protected $iss_percent = 'iss_percent';
-    protected $service_percent = 'service_percent';
-    protected $iva_percent = 'iva_percent';
-    protected $iof = 'iof';
-    protected $taxa_4bts = 'taxa_4bts';
-    protected $service_charge = 'service_charge';
-    protected $invoice = 'invoice';
-    protected $internal_observation = 'internal_observation';
-    protected $customer_observation = 'customer_observation';
-    protected $sended_mail = 'sended_mail';
-    protected $sended_mail_link = 'sended_mail_link';
-    protected $token_budget = 'token_budget';
-    protected $deadline_date = 'deadline_date';
-    protected $payment_method = 'payment_method';
-    protected $order = 'order';
 
     public function event()
     {
@@ -59,7 +76,12 @@ class EventAirfare extends Model
 
     public function provider()
     {
-        return $this->hasOne(ProviderAirfare::class, 'id', 'airfare_id');
+        return $this->hasOne(AirfareAirline::class, 'id', 'airline_id');
+    }
+
+    public function airline()
+    {
+        return $this->hasOne(AirfareAirline::class, 'id', 'airline_id');
     }
 
     public function currency()

@@ -187,6 +187,11 @@ class Event extends Model
         return $this->hasMany(EventTransport::class, 'event_id', 'id');
     }
 
+    public function event_airfares()
+    {
+        return $this->hasMany(EventAirfare::class, 'event_id', 'id');
+    }
+
     public function eventLocals()
     {
         return $this->hasMany(EventLocal::class, 'event_id', 'id');

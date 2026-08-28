@@ -8,6 +8,7 @@ import { Observable, of, forkJoin } from 'rxjs';
 import { EventService } from '../../../services/event.service';
 import { AuthService } from '../../../services/auth.service';
 import { CityService } from '../../../services/city.service';
+import { AirfareAirlineService } from '../../../services/airfare-airline.service';
 import { ToastService } from '../../../services/toast.service';
 import { AutocompleteComponent } from '../../../shared/components/autocomplete/autocomplete.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
@@ -27,6 +28,7 @@ export class EventCreateComponent implements OnInit {
   private readonly eventService = inject(EventService);
   private readonly authService = inject(AuthService);
   private readonly cityService = inject(CityService);
+  private readonly airlineService = inject(AirfareAirlineService);
   private readonly toastService = inject(ToastService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -186,7 +188,7 @@ export class EventCreateComponent implements OnInit {
     } else if (this.providerLinkType === 'transport') {
       sourceList = this.providersTransport;
     } else if (this.providerLinkType === 'airfare') {
-      sourceList = this.providersAirfare;
+      sourceList = (this.airlines && this.airlines.length > 0) ? this.airlines : (this.providersAirfare || []);
     }
     const filtered = sourceList.filter(p =>
       (p.name && p.name.toLowerCase().includes(termLower)) ||
@@ -201,6 +203,9 @@ export class EventCreateComponent implements OnInit {
 
   displayProvider = (provider: any): string => {
     if (!provider) return '';
+    if (this.providerLinkType === 'airfare' || !provider.city) {
+      return provider.name || '';
+    }
     let locationStr = 'S/ Cidade';
     if (provider.city) {
       const stateOrCountry = provider.city.states || provider.city.country;
@@ -219,7 +224,7 @@ export class EventCreateComponent implements OnInit {
     } else if (this.providerLinkType === 'transport') {
       found = this.providersTransport.find(p => p.id === providerId);
     } else if (this.providerLinkType === 'airfare') {
-      found = this.providersAirfare.find(p => p.id === providerId);
+      found = this.airlines.find(p => p.id === providerId) || this.providersAirfare.find(p => p.id === providerId);
     }
 
     if (found) {
@@ -303,12 +308,11 @@ export class EventCreateComponent implements OnInit {
     status: '',
   };
   showOptForm = false;
-  optFormType: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' = 'hotel';
+  optFormType: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' | 'airfare' = 'hotel';
   showMarkupForm = false;
   bulkMarkupValue = 100.00;
   bulkMarkupTargetItem: any = null;
-  bulkMarkupTargetType: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' = 'hotel';
-  optFormType: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' | 'airfare' = 'hotel';
+  bulkMarkupTargetType: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' | 'airfare' = 'hotel';
 
   // Autocomplete Functions
   searchCities = (term: string) => this.cityService.searchCities(term);
@@ -433,6 +437,12 @@ export class EventCreateComponent implements OnInit {
         this.providersService = this.sortByName(res.providersService || []);
         this.providersTransport = this.sortByName(res.providersTransport || []);
         this.brokers = this.sortByName(res.brokers || []);
+        this.airlineService.getAirlines({ per_page: 200 }).subscribe({
+          next: (aRes: any) => {
+            this.airlines = this.sortByName(aRes.data || aRes || []);
+          },
+          error: () => {}
+        });
         this.currencies = this.sortByName(res.currencies || []);
         this.regimes = this.sortByName(res.regimes || []);
         this.purposes = this.sortByName(res.purposes || []);
@@ -648,12 +658,12 @@ export class EventCreateComponent implements OnInit {
     return 'Indefinido';
   }
 
-  openAddProviderLink(type: 'hotel' | 'ab' | 'hall' | 'add' | 'transport', editItem: any = null) {
+  openAddProviderLink(type: 'hotel' | 'ab' | 'hall' | 'add' | 'transport' | 'airfare', editItem: any = null) {
     this.providerLinkType = type;
     this.errors = {};
 
     if (editItem) {
-      const pId = editItem.hotel_id || editItem.ab_id || editItem.hall_id || editItem.add_id || editItem.transport_id;
+      const pId = editItem.hotel_id || editItem.ab_id || editItem.hall_id || editItem.add_id || editItem.transport_id || editItem.airline_id || editItem.airfare_id;
       // Find matching provider and display name
       let found: any = null;
       if (type === 'hotel' || type === 'ab' || type === 'hall') {
@@ -662,8 +672,10 @@ export class EventCreateComponent implements OnInit {
         found = this.providersService.find(p => p.id === pId);
       } else if (type === 'transport') {
         found = this.providersTransport.find(p => p.id === pId);
+      } else if (type === 'airfare') {
+        found = this.airlines.find(p => p.id === pId) || this.providersAirfare.find(p => p.id === pId);
       }
-      this.selectedProviderName = found ? this.displayProvider(found) : '';
+      this.selectedProviderName = found ? this.displayProvider(found) : (editItem.airline?.name || editItem.provider?.name || '');
 
       let isDifferent = false;
       if (type === 'hotel' && found) {
@@ -674,7 +686,6 @@ export class EventCreateComponent implements OnInit {
           (editItem.checkout_time_end || '') !== (found.checkout_time_end || '');
       }
 
-      const pId = editItem.hotel_id || editItem.ab_id || editItem.hall_id || editItem.add_id || editItem.transport_id || editItem.airfare_id;
       this.providerLinkForm = {
         id: editItem.id,
         provider_id: pId,
@@ -695,20 +706,20 @@ export class EventCreateComponent implements OnInit {
         checkout_time: editItem.checkout_time || '',
         checkout_time_end: editItem.checkout_time_end || '',
         deadline_date: editItem.deadline_date ? editItem.deadline_date.split('T')[0] : '',
+        aircraft: editItem.aircraft || '',
+        passengers_info: editItem.passengers_info || '',
+        baggage_info: editItem.baggage_info || '',
+        flight_time: editItem.flight_time || '',
+        photo_1: editItem.photo_1 || '',
+        photo_2: editItem.photo_2 || '',
+        photo_3: editItem.photo_3 || '',
+        photo_4: editItem.photo_4 || '',
+        observations: editItem.observations !== null && editItem.observations !== undefined ? editItem.observations : `• Os horários da programação estão sujeitos a disponibilidade de SLOT nos Aeroportos que operam sob esse sistema.
+• O valor acima não inclui atendimentos e catering.
+• Os valores estão sujeitos a alteração quando for realizada a solicitação de confirmação da aeronave.
+• Não inclui taxa de embarque, taxa de serviço (10%) e IOF (3,5%).`,
+        notes: editItem.notes || ''
       };
-      };
-      // Find matching provider and display name
-      let found: any = null;
-      if (type === 'hotel' || type === 'ab') {
-        found = this.providers.find(p => p.id === pId);
-      } else if (type === 'add') {
-        found = this.providersService.find(p => p.id === pId);
-      } else if (type === 'transport') {
-        found = this.providersTransport.find(p => p.id === pId);
-      } else if (type === 'airfare') {
-        found = this.providersAirfare.find(p => p.id === pId);
-      }
-      this.selectedProviderName = found ? this.displayProvider(found) : '';
     } else {
       this.providerLinkForm = {
         id: 0,
@@ -730,11 +741,48 @@ export class EventCreateComponent implements OnInit {
         checkout_time: '',
         checkout_time_end: '',
         deadline_date: '',
+        aircraft: '',
+        passengers_info: '',
+        baggage_info: '',
+        flight_time: '',
+        photo_1: '',
+        photo_2: '',
+        photo_3: '',
+        photo_4: '',
+        observations: `• Os horários da programação estão sujeitos a disponibilidade de SLOT nos Aeroportos que operam sob esse sistema.
+• O valor acima não inclui atendimentos e catering.
+• Os valores estão sujeitos a alteração quando for realizada a solicitação de confirmação da aeronave.
+• Não inclui taxa de embarque, taxa de serviço (10%) e IOF (3,5%).`,
+        notes: ''
       };
       this.selectedProviderName = '';
     }
 
     this.showProviderLinkForm = true;
+  }
+
+  calculatePaxTotal() {
+    const f = Number(this.providerLinkForm.pax_first || 0);
+    const ex = Number(this.providerLinkForm.pax_executiva || 0);
+    const pr = Number(this.providerLinkForm.pax_premium || 0);
+    const ec = Number(this.providerLinkForm.pax_economica || 0);
+    this.providerLinkForm.total_pax = f + ex + pr + ec;
+  }
+
+  getPhotoValue(pNum: number): string {
+    const key = `photo_${pNum}` as keyof typeof this.providerLinkForm;
+    return (this.providerLinkForm as any)[key] || '';
+  }
+
+  onPhotoFileChange(event: any, pNum: number) {
+    const file = event.target?.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      const key = `photo_${pNum}` as keyof typeof this.providerLinkForm;
+      (this.providerLinkForm as any)[key] = e.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 
   closeProviderLinkForm() {
@@ -763,7 +811,7 @@ export class EventCreateComponent implements OnInit {
     let hasErrors = false;
 
     if (!this.providerLinkForm.provider_id) {
-      this.errors.provider_id = ['O campo fornecedor é obrigatório.'];
+      this.errors.provider_id = [this.providerLinkType === 'airfare' ? 'O campo companhia aérea é obrigatório.' : 'O campo fornecedor é obrigatório.'];
       hasErrors = true;
     }
 
@@ -810,6 +858,7 @@ export class EventCreateComponent implements OnInit {
       ...this.providerLinkForm,
       event_id: this.eventId,
       currency: this.providerLinkForm.currency_id,
+      airline_id: this.providerLinkType === 'airfare' ? this.providerLinkForm.provider_id : null,
     };
 
     let obs: Observable<any>;
@@ -1643,7 +1692,7 @@ export class EventCreateComponent implements OnInit {
     for (const opt of opts) {
       const dateIn = opt.in || opt.outbound_date;
       const dateOut = opt.out || opt.inbound_date;
-      const multiplyDays = (provider.eventAirfareOpts || provider.event_airfare_opts) ? 1 : this.daysBetween(dateIn, dateOut, isAB);
+      const multiplyDays = (provider.eventAirfareOpts || provider.event_airfare_opts) ? 1 : this.daysBetween(dateIn, dateOut, includeLastDay);
       sum += this.unitSale(opt) * (multiplyDays || 1) * parseFloat(opt.count || 0);
     }
     return sum;
@@ -1663,7 +1712,7 @@ export class EventCreateComponent implements OnInit {
     for (const opt of opts) {
       const dateIn = opt.in || opt.outbound_date;
       const dateOut = opt.out || opt.inbound_date;
-      const multiplyDays = (provider.eventAirfareOpts || provider.event_airfare_opts) ? 1 : this.daysBetween(dateIn, dateOut, isAB);
+      const multiplyDays = (provider.eventAirfareOpts || provider.event_airfare_opts) ? 1 : this.daysBetween(dateIn, dateOut, includeLastDay);
       sum += this.unitCost(opt) * (multiplyDays || 1) * parseFloat(opt.count || 0);
     }
     return sum;
@@ -1684,7 +1733,7 @@ export class EventCreateComponent implements OnInit {
     for (const opt of opts) {
       const dateIn = opt.in || opt.outbound_date;
       const dateOut = opt.out || opt.inbound_date;
-      const multiplyDays = (provider.eventAirfareOpts || provider.event_airfare_opts) ? 1 : this.daysBetween(dateIn, dateOut, isAB);
+      const multiplyDays = (provider.eventAirfareOpts || provider.event_airfare_opts) ? 1 : this.daysBetween(dateIn, dateOut, includeLastDay);
       const count = parseFloat(opt.count || 0);
       const sale = this.unitSale(opt);
 
@@ -1868,5 +1917,60 @@ export class EventCreateComponent implements OnInit {
         this.isLoader = false;
       }
     });
+  }
+
+  getOptCurrencySymbol(): string {
+    const cId = this.optForm?.currency_id || this.providerLinkForm?.currency_id;
+    if (!cId) return 'R$';
+    const found = this.currencies?.find((c: any) => c.id == cId);
+    return found ? (found.symbol || found.sigla || 'R$') : 'R$';
+  }
+
+  getSelectedCurrencySymbol(): string {
+    return this.getOptCurrencySymbol();
+  }
+
+  formatMoney(val: any): string {
+    if (val === null || val === undefined || val === '') return '';
+    const num = typeof val === 'number' ? val : parseFloat(val);
+    if (isNaN(num)) return '';
+    return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  onMoneyInput(event: any, field: string, targetObj: string = 'optForm') {
+    const input = event.target as HTMLInputElement;
+    let raw = input.value.replace(/\D/g, '');
+    if (!raw) {
+      if (targetObj === 'optForm') (this.optForm as any)[field] = 0;
+      else if (targetObj === 'providerLinkForm') (this.providerLinkForm as any)[field] = 0;
+      else (this as any)[field] = 0;
+      return;
+    }
+    const numValue = parseFloat(raw) / 100;
+    if (targetObj === 'optForm') (this.optForm as any)[field] = numValue;
+    else if (targetObj === 'providerLinkForm') (this.providerLinkForm as any)[field] = numValue;
+    else (this as any)[field] = numValue;
+  }
+
+  formatPercent(val: any): string {
+    if (val === null || val === undefined || val === '') return '';
+    const num = typeof val === 'number' ? val : parseFloat(val);
+    if (isNaN(num)) return '';
+    return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  onPercentInput(event: any, field: string, targetObj: string = 'this') {
+    const input = event.target as HTMLInputElement;
+    let raw = input.value.replace(/\D/g, '');
+    if (!raw) {
+      if (targetObj === 'this' || targetObj === 'thisScope') (this as any)[field] = 0;
+      else if (targetObj === 'optForm') (this.optForm as any)[field] = 0;
+      else (this as any)[field] = 0;
+      return;
+    }
+    const numValue = parseFloat(raw) / 100;
+    if (targetObj === 'this' || targetObj === 'thisScope') (this as any)[field] = numValue;
+    else if (targetObj === 'optForm') (this.optForm as any)[field] = numValue;
+    else (this as any)[field] = numValue;
   }
 }

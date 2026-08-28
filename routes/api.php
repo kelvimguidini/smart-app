@@ -269,12 +269,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('airfare-cabins/{id}/activate', [\App\Http\Controllers\Api\AirfareCabinApiController::class, 'activateItem']);
     Route::put('airfare-cabins/{id}/deactivate', [\App\Http\Controllers\Api\AirfareCabinApiController::class, 'deactivateItem']);
 
-    Route::get('provider-airfares', [\App\Http\Controllers\Api\ProviderAirfareApiController::class, 'index']);
-    Route::post('provider-airfares', [\App\Http\Controllers\Api\ProviderAirfareApiController::class, 'store']);
-    Route::delete('provider-airfares/{id}', [\App\Http\Controllers\Api\ProviderAirfareApiController::class, 'destroy']);
-    Route::put('provider-airfares/{id}/activate', [\App\Http\Controllers\Api\ProviderAirfareApiController::class, 'activateItem']);
-    Route::put('provider-airfares/{id}/deactivate', [\App\Http\Controllers\Api\ProviderAirfareApiController::class, 'deactivateItem']);
-
     // Rotas de Eventos (Angular SPA)
     Route::get('events/list', [\App\Http\Controllers\Api\EventApiController::class, 'listEvents']);
     Route::get('events/{id}/edit-data', [\App\Http\Controllers\Api\EventApiController::class, 'getEditData']);

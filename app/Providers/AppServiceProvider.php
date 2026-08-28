@@ -210,11 +210,6 @@ use App\Domains\Shared\Repositories\EloquentAirfareCabinRepository;
 use App\Domains\Shared\Services\AirfareCabinServiceInterface;
 use App\Domains\Shared\Services\DefaultAirfareCabinService;
 
-use App\Domains\Shared\Repositories\ProviderAirfareRepositoryInterface;
-use App\Domains\Shared\Repositories\EloquentProviderAirfareRepository;
-use App\Domains\Shared\Services\ProviderAirfareServiceInterface;
-use App\Domains\Shared\Services\DefaultProviderAirfareService;
-
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -318,8 +313,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AirfareBaggageServiceInterface::class, DefaultAirfareBaggageService::class);
         $this->app->bind(AirfareCabinRepositoryInterface::class, EloquentAirfareCabinRepository::class);
         $this->app->bind(AirfareCabinServiceInterface::class, DefaultAirfareCabinService::class);
-        $this->app->bind(ProviderAirfareRepositoryInterface::class, EloquentProviderAirfareRepository::class);
-        $this->app->bind(ProviderAirfareServiceInterface::class, DefaultProviderAirfareService::class);
         
         // API Terceiros Services & Repositories
         $this->app->bind(AuthApiRepositoryInterface::class, EloquentAuthApiRepository::class);

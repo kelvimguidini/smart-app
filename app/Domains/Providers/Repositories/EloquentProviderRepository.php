@@ -61,7 +61,7 @@ class EloquentProviderRepository implements ProviderRepositoryInterface
 
     public function allAirfareWithCity(): Collection
     {
-        return \App\Models\ProviderAirfare::with("city")->get();
+        return \App\Models\AirfareAirline::all();
     }
 
     /**

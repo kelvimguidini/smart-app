@@ -1121,7 +1121,7 @@
               class="btn btn-sm btn-success shadow-sm"
               (click)="openAddProviderLink('airfare')">
               <i class="fas fa-plus me-1"></i>
-              Vincular Novo Fornecedor
+              Novo Orçamento de Fretamento
             </button>
           </div>
         </div>
@@ -1132,7 +1132,7 @@
             <div class="card-header bg-light py-3 d-sm-flex align-items-center justify-content-between">
               <div>
                 <h6 class="m-0 font-weight-bold text-primary">
-                  Fornecedor {{ provIdx + 1 }}: {{ item.provider?.name }}
+                  Orçamento Fretamento {{ provIdx + 1 }}: {{ item.airline?.name || item.provider?.name || item.aircraft || 'Fretamento' }}
                   <span
                     class="badge ms-2"
                     [ngClass]="item.provider?.national ? 'bg-success' : 'bg-info'">
@@ -1144,10 +1144,10 @@
                 <button
                   type="button"
                   class="btn btn-sm btn-outline-info"
-                  title="Editar Cadastro do Fornecedor"
+                  title="Editar Orçamento de Fretamento"
                   (click)="openAddProviderLink('airfare', item)">
                   <i class="fas fa-edit me-1"></i>
-                  Editar Cadastro
+                  Editar Orçamento
                 </button>
                 <button
                   type="button"
@@ -1480,7 +1480,11 @@
   <app-modal
     [show]="showProviderLinkForm"
     (close)="closeProviderLinkForm()"
-    [title]="providerLinkForm.id ? 'Editar Vínculo' : 'Vincular Novo Fornecedor'"
+    [title]="
+      providerLinkType === 'airfare'
+        ? (providerLinkForm.id ? 'Editar Orçamento de Fretamento' : 'Novo Orçamento de Fretamento')
+        : (providerLinkForm.id ? 'Editar Vínculo' : 'Vincular Novo Fornecedor')
+    "
     [icon]="
       providerLinkType === 'hotel'
         ? 'fa-hotel'
@@ -1500,8 +1504,8 @@
         <div class="col-md-6 mb-3">
           <app-autocomplete
             id="provider_id"
-            label="Fornecedor"
-            placeholder="Digite para buscar o fornecedor..."
+            [label]="providerLinkType === 'airfare' ? 'Companhia Aérea' : 'Fornecedor'"
+            [placeholder]="providerLinkType === 'airfare' ? 'Digite para buscar a Companhia Aérea...' : 'Digite para buscar o fornecedor...'"
             [required]="true"
             [searchFn]="searchProviders"
             [displayFn]="displayProvider"
@@ -1510,7 +1514,7 @@
             [(ngModel)]="providerLinkForm.provider_id"
             (ngModelChange)="onProviderChange($event)"
             name="provider_id"
-            [errors]="errors.provider_id"
+            [errors]="errors.provider_id || errors.airline_id"
             [disabled]="providerLinkForm.id > 0"></app-autocomplete>
         </div>
 
@@ -1675,6 +1679,134 @@
             class="form-control"
             [(ngModel)]="providerLinkForm.customer_observation"
             name="customer_observation"></textarea>
+        </div>
+
+        <!-- Seção Específica para Proposta de Aéreo / Fretamento (3 Blocos da Planilha) -->
+        <div class="col-md-12 mb-3" *ngIf="providerLinkType === 'airfare'">
+          <div class="card p-3 bg-light border border-warning shadow-sm">
+            <h6 class="text-warning-emphasis font-weight-bold mb-3">
+              <i class="fas fa-plane-departure me-2"></i> Orçamento Fretamento / Cia Aérea (Bloco 2)
+            </h6>
+            
+            <div class="row">
+              <div class="col-md-4 form-group mb-3">
+                <label for="aircraft" class="form-label font-weight-bold">Aeronave / Equipamento:</label>
+                <input type="text" id="aircraft" class="form-control" placeholder="Ex: Boeing 737-700" [(ngModel)]="providerLinkForm.aircraft" name="aircraft" />
+              </div>
+              <div class="col-md-4 form-group mb-3">
+                <label for="prazo_cia" class="form-label font-weight-bold">Prazo da Cia:</label>
+                <input type="text" id="prazo_cia" class="form-control" placeholder="Ex: 24h" [(ngModel)]="providerLinkForm.prazo_cia" name="prazo_cia" />
+              </div>
+              <div class="col-md-4 form-group mb-3">
+                <label for="status_contrato" class="form-label font-weight-bold">Status do Contrato:</label>
+                <input type="text" id="status_contrato" class="form-control" placeholder="Ex: Solicitado / Confirmado" [(ngModel)]="providerLinkForm.status_contrato" name="status_contrato" />
+              </div>
+
+              <!-- Distribuição de Pax / Assentos -->
+              <div class="col-md-12 mb-3">
+                <label class="form-label font-weight-bold text-dark mb-1">Distribuição de Assentos (PAX):</label>
+                <div class="row bg-white p-2 border rounded">
+                  <div class="col-md-2 form-group">
+                    <label class="small font-weight-bold">FIRST:</label>
+                    <input type="number" min="0" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.pax_first" (ngModelChange)="calculatePaxTotal()" name="pax_first" />
+                  </div>
+                  <div class="col-md-2 form-group">
+                    <label class="small font-weight-bold">EXECUTIVA:</label>
+                    <input type="number" min="0" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.pax_executiva" (ngModelChange)="calculatePaxTotal()" name="pax_executiva" />
+                  </div>
+                  <div class="col-md-2 form-group">
+                    <label class="small font-weight-bold">PREMIUM:</label>
+                    <input type="number" min="0" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.pax_premium" (ngModelChange)="calculatePaxTotal()" name="pax_premium" />
+                  </div>
+                  <div class="col-md-3 form-group">
+                    <label class="small font-weight-bold">ECONÔMICA:</label>
+                    <input type="number" min="0" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.pax_economica" (ngModelChange)="calculatePaxTotal()" name="pax_economica" />
+                  </div>
+                  <div class="col-md-3 form-group">
+                    <label class="small font-weight-bold">TOTAL PAX:</label>
+                    <input type="number" readonly class="form-control form-control-sm bg-light font-weight-bold text-primary" [value]="providerLinkForm.total_pax" name="total_pax" />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Inclusões / Serviços do Frete -->
+              <div class="col-md-12 mb-3">
+                <label class="form-label font-weight-bold text-dark mb-1">Inclusões & Serviços:</label>
+                <div class="row bg-white p-2 border rounded">
+                  <div class="col-md-3 form-group mb-2">
+                    <label class="small font-weight-bold d-block">Taxa de Embarque:</label>
+                    <select class="form-select form-select-sm" [(ngModel)]="providerLinkForm.inc_taxa_embarque" name="inc_taxa_embarque">
+                      <option [ngValue]="true">SIM</option>
+                      <option [ngValue]="false">NÃO</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3 form-group mb-2">
+                    <label class="small font-weight-bold d-block">Serviço de Bordo:</label>
+                    <select class="form-select form-select-sm" [(ngModel)]="providerLinkForm.inc_servico_bordo" name="inc_servico_bordo">
+                      <option [ngValue]="true">SIM</option>
+                      <option [ngValue]="false">NÃO</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3 form-group mb-2">
+                    <label class="small font-weight-bold">Porão:</label>
+                    <input type="text" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.inc_porao" name="inc_porao" placeholder="Ex: 23 kg por pessoa" />
+                  </div>
+                  <div class="col-md-3 form-group mb-2">
+                    <label class="small font-weight-bold">Bagagem a borda:</label>
+                    <input type="text" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.inc_bagagem_bordo" name="inc_bagagem_bordo" placeholder="Ex: 10 kg por pessoa" />
+                  </div>
+                  <div class="col-md-3 form-group">
+                    <label class="small font-weight-bold d-block">Sala VIP Aeroporto:</label>
+                    <select class="form-select form-select-sm" [(ngModel)]="providerLinkForm.inc_sala_vip" name="inc_sala_vip">
+                      <option [ngValue]="true">SIM</option>
+                      <option [ngValue]="false">NÃO</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3 form-group">
+                    <label class="small font-weight-bold">FBO Origem:</label>
+                    <input type="text" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.inc_fbo_origem" name="inc_fbo_origem" />
+                  </div>
+                  <div class="col-md-3 form-group">
+                    <label class="small font-weight-bold">FBO Destino:</label>
+                    <input type="text" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.inc_fbo_destino" name="inc_fbo_destino" />
+                  </div>
+                  <div class="col-md-3 form-group">
+                    <label class="small font-weight-bold d-block">Alteração de Nomes:</label>
+                    <select class="form-select form-select-sm" [(ngModel)]="providerLinkForm.inc_alteracao_nomes" name="inc_alteracao_nomes">
+                      <option [ngValue]="true">SIM</option>
+                      <option [ngValue]="false">NÃO</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Observações & Notes -->
+              <div class="col-md-6 form-group mb-3">
+                <label for="observations" class="form-label font-weight-bold">Observações (Proposta):</label>
+                <textarea id="observations" rows="3" class="form-control" [(ngModel)]="providerLinkForm.observations" name="observations" placeholder="Tópicos de observações da proposta..."></textarea>
+              </div>
+              <div class="col-md-6 form-group mb-3">
+                <label for="notes" class="form-label font-weight-bold">Notes (Fretamento):</label>
+                <textarea id="notes" rows="3" class="form-control" [(ngModel)]="providerLinkForm.notes" name="notes" placeholder="Notas internas do fretamento..."></textarea>
+              </div>
+
+              <!-- Upload/Seleção de 4 Fotos -->
+              <div class="col-md-12 mt-2">
+                <label class="form-label font-weight-bold d-block">Fotos da Proposta (Até 4 Imagens):</label>
+                <div class="row">
+                  <div class="col-md-3 mb-2" *ngFor="let pNum of [1, 2, 3, 4]">
+                    <div class="border p-2 text-center bg-white rounded">
+                      <span class="d-block font-weight-bold mb-1" style="font-size: 0.85rem;">Foto {{ pNum }}</span>
+                      <div *ngIf="getPhotoValue(pNum)" class="mb-2">
+                        <img [src]="getPhotoValue(pNum)" style="max-height: 80px; max-width: 100%; object-fit: contain;" class="rounded border">
+                      </div>
+                      <input type="file" accept="image/*" class="form-control form-control-sm" (change)="onPhotoFileChange($event, pNum)">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Check-in/Check-out Times - Hotel only -->
@@ -1973,7 +2105,9 @@
             <small *ngFor="let err of (errors.brand || errors.brand_id)" class="d-block">{{ err }}</small>
           </div>
         </div>
-
+        <div class="col-md-6 form-group mb-3" *ngIf="optFormType !== 'airfare'">
+          <label for="opt_date_range" class="form-label font-weight-bold">
+            Período (IN / OUT):
             <span class="text-danger">*</span>
           </label>
           <div class="input-group">
