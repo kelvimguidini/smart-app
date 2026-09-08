@@ -73,6 +73,8 @@ php artisan db:seed --class=DatabaseSeeder
 php artisan db:seed --class=StatusHistorySeeder
 php artisan db:seed --class=IncrementalPermissionsSeeder
 php artisan db:seed --class=TransportSeeder
+php artisan db:seed --class=AirfareSeeder
+php artisan db:seed --class=AirportSeeder
 
 ```
 
