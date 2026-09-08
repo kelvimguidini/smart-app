@@ -101,10 +101,15 @@ export class AutocompleteComponent implements ControlValueAccessor, OnInit, OnDe
     }
   }
 
-  selectItem(item: any) {
+  selectItem(item: any, event?: MouseEvent) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     this.selectedItem = item;
-    this.inputText = this.displayFn(item);
-    this.innerValue = item[this.valueField];
+    const displayText = this.displayFn ? this.displayFn(item) : (item.name || item);
+    this.inputText = displayText;
+    this.innerValue = this.valueField ? (item[this.valueField] !== undefined ? item[this.valueField] : displayText) : displayText;
     this.showDropdown = false;
     this.onChange(this.innerValue);
   }
@@ -115,19 +120,23 @@ export class AutocompleteComponent implements ControlValueAccessor, OnInit, OnDe
       this.showDropdown = false;
       // Validation rule: if text doesn't match selected item, clear text
       if (!this.selectedItem) {
-          if (this.inputText === this.initialText && this.innerValue) {
+          if (this.innerValue && (this.inputText === this.initialText || this.inputText === this.innerValue)) {
               return; // valid untouched edit state
           }
-          this.inputText = '';
-          this.innerValue = null;
-          this.onChange(this.innerValue);
-      } else if (this.displayFn(this.selectedItem) !== this.inputText) {
+          if (!this.inputText) {
+              this.innerValue = null;
+              this.onChange(this.innerValue);
+          }
+      } else if (this.displayFn && this.displayFn(this.selectedItem) !== this.inputText) {
+          if (this.innerValue && this.inputText === this.innerValue) {
+              return;
+          }
           this.inputText = '';
           this.selectedItem = null;
           this.innerValue = null;
           this.onChange(this.innerValue);
       }
-    }, 150);
+    }, 200);
   }
 
   @HostListener('document:click', ['$event'])
@@ -144,6 +153,8 @@ export class AutocompleteComponent implements ControlValueAccessor, OnInit, OnDe
         this.inputText = '';
         this.selectedItem = null;
         this.initialText = '';
+    } else if (typeof value === 'string' && (!this.inputText || this.inputText !== value)) {
+        this.inputText = value;
     }
   }
 

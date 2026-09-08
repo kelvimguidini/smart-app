@@ -126,7 +126,7 @@ class ProviderController extends Controller
 
     public function proposalPdf(Request $request)
     {
-        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator') && !Gate::allows('land_operator')) abort(403);
+        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator') && !Gate::allows('land_operator') && !Gate::allows('air_operator')) abort(403);
         
         if ($request->download == "true") {
             // Need to keep legacy createPDF logic for direct download or use a helper
@@ -149,7 +149,7 @@ class ProviderController extends Controller
 
     public function proposalPdfWithoutValues(Request $request)
     {
-        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator') && !Gate::allows('land_operator')) abort(403);
+        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator') && !Gate::allows('land_operator') && !Gate::allows('air_operator')) abort(403);
         
         if ($request->download == "true") return $this->handleDownload($request, 3);
 
@@ -167,7 +167,7 @@ class ProviderController extends Controller
 
     public function invoicingPdf(Request $request)
     {
-        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator') && !Gate::allows('land_operator')) abort(403);
+        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator') && !Gate::allows('land_operator') && !Gate::allows('air_operator')) abort(403);
         
         if ($request->download == "true") return $this->handleDownload($request, 2);
 
@@ -185,7 +185,7 @@ class ProviderController extends Controller
 
     public function createLink(Request $request, \App\Domains\Budgets\Services\BudgetServiceInterface $budgetService)
     {
-        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator') && !Gate::allows('land_operator')) {
+        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator') && !Gate::allows('land_operator') && !Gate::allows('air_operator')) {
             abort(403);
         }
 
@@ -230,8 +230,13 @@ class ProviderController extends Controller
         $data = $this->eventRepository->getProposalData($request->event_id, $request->provider_id, $request->type);
         
         $view = 'proposalPdf';
-        if ($type === 2) $view = 'invoicePDF';
-        elseif ($type === 3) $view = 'proposalPdfWithoutValues';
+        if ($data['table'] == 'event_airfares' || $data['table'] == 'event_airfare') {
+            $view = 'airfareProposalPdf';
+        } elseif ($type === 2) {
+            $view = 'invoicePDF';
+        } elseif ($type === 3) {
+            $view = 'proposalPdfWithoutValues';
+        }
 
         $options = new \Dompdf\Options();
         $options->set('isRemoteEnabled', true);

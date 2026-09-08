@@ -582,8 +582,8 @@ function quebraTexto($texto, $limite = 40)
                         <tfoot class="table-footer">
                             <tr style="background-color: #ffe0b1">
                                 <td colspan="1"><b>Comentários:</b></td>
-                                <td colspan="3">{{ $hotelEvent->customer_observation }}</td>
-                                <td colspan="2">
+                                <td colspan="2">{{ $hotelEvent->customer_observation }}</td>
+                                <td colspan="1">
                                     <b>Check-in:</b> {{ $hotelEvent->checkin_time }} - {{ $hotelEvent->checkin_time_end }} <br>
                                     <b>Check-out:</b> {{ $hotelEvent->checkout_time }} - {{ $hotelEvent->checkout_time_end }}
                                 </td>
@@ -816,7 +816,8 @@ function quebraTexto($texto, $limite = 40)
                         </tr>
                         <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                             <th>Serviços</th>
-                            <th colspan="2" style="text-align: left;">Totais de:</th>
+                            <th>Totais de:</th>
+                            <th>Quantidade</th>
                         </tr>
                     </thead>
                     <tbody>

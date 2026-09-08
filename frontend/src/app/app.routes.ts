@@ -40,6 +40,10 @@ import { EventListComponent } from './pages/event/event-list/event-list.componen
 import { EventCreateComponent } from './pages/event/event-create/event-create.component';
 import { BudgetComponent } from './pages/event/budget/budget.component';
 
+import { AirlineComponent } from './pages/airfare/airline/airline.component';
+import { BaggageComponent } from './pages/airfare/baggage/baggage.component';
+import { CabinComponent } from './pages/airfare/cabin/cabin.component';
+
 import { authGuard } from './guards/auth.guard';
 import { guestGuard } from './guards/guest.guard';
 
@@ -74,6 +78,9 @@ export const routes: Routes = [
   { path: 'transport-service', component: TransportServiceComponent, canActivate: [authGuard], title: 'Serviços de Transporte - SmartApp' },
   { path: 'broker-trans', component: BrokerTransComponent, canActivate: [authGuard], title: 'Brokers de Transporte - SmartApp' },
   { path: 'provider-transport', component: ProviderTransportComponent, canActivate: [authGuard], title: 'Fornecedores de Transporte - SmartApp' },
+  { path: 'airline', component: AirlineComponent, canActivate: [authGuard], title: 'Cias Aéreas - SmartApp' },
+  { path: 'baggage', component: BaggageComponent, canActivate: [authGuard], title: 'Bagagem - SmartApp' },
+  { path: 'cabin', component: CabinComponent, canActivate: [authGuard], title: 'Cabines - SmartApp' },
   { path: 'event-list', component: EventListComponent, canActivate: [authGuard], title: 'Eventos - SmartApp' },
   { path: 'event', component: EventCreateComponent, canActivate: [authGuard], title: 'Criar Evento - SmartApp' },
   { path: 'event/:id', component: EventCreateComponent, canActivate: [authGuard], title: 'Editar Evento - SmartApp' },

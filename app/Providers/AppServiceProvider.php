@@ -187,6 +187,27 @@ use App\Domains\Shared\Repositories\EloquentProviderTransportRepository;
 use App\Domains\Shared\Services\ProviderTransportServiceInterface;
 use App\Domains\Shared\Services\DefaultProviderTransportService;
 
+// Airfares Imports
+use App\Domains\Airfares\Repositories\EventAirfareRepositoryInterface;
+use App\Domains\Airfares\Repositories\EloquentEventAirfareRepository;
+use App\Domains\Airfares\Repositories\EventAirfareOptRepositoryInterface;
+use App\Domains\Airfares\Repositories\EloquentEventAirfareOptRepository;
+
+use App\Domains\Shared\Repositories\AirfareAirlineRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentAirfareAirlineRepository;
+use App\Domains\Shared\Services\AirfareAirlineServiceInterface;
+use App\Domains\Shared\Services\DefaultAirfareAirlineService;
+
+use App\Domains\Shared\Repositories\AirfareBaggageRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentAirfareBaggageRepository;
+use App\Domains\Shared\Services\AirfareBaggageServiceInterface;
+use App\Domains\Shared\Services\DefaultAirfareBaggageService;
+
+use App\Domains\Shared\Repositories\AirfareCabinRepositoryInterface;
+use App\Domains\Shared\Repositories\EloquentAirfareCabinRepository;
+use App\Domains\Shared\Services\AirfareCabinServiceInterface;
+use App\Domains\Shared\Services\DefaultAirfareCabinService;
+
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -212,6 +233,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(EventAddOptRepositoryInterface::class, EloquentEventAddOptRepository::class);
         $this->app->bind(EventTransportRepositoryInterface::class, EloquentEventTransportRepository::class);
         $this->app->bind(EventTransportOptRepositoryInterface::class, EloquentEventTransportOptRepository::class);
+        $this->app->bind(EventAirfareRepositoryInterface::class, EloquentEventAirfareRepository::class);
+        $this->app->bind(EventAirfareOptRepositoryInterface::class, EloquentEventAirfareOptRepository::class);
         $this->app->bind(CustomerRepositoryInterface::class, EloquentCustomerRepository::class);
         $this->app->bind(ProviderRepositoryInterface::class, EloquentProviderRepository::class);
         $this->app->bind(LookupRepositoryInterface::class, EloquentLookupRepository::class);
@@ -281,6 +304,12 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(BrokerTransportServiceInterface::class, DefaultBrokerTransportService::class);
         $this->app->bind(ProviderTransportServiceInterface::class, DefaultProviderTransportService::class);
         
+        $this->app->bind(AirfareAirlineRepositoryInterface::class, EloquentAirfareAirlineRepository::class);
+        $this->app->bind(AirfareAirlineServiceInterface::class, DefaultAirfareAirlineService::class);
+        $this->app->bind(AirfareBaggageRepositoryInterface::class, EloquentAirfareBaggageRepository::class);
+        $this->app->bind(AirfareBaggageServiceInterface::class, DefaultAirfareBaggageService::class);
+        $this->app->bind(AirfareCabinRepositoryInterface::class, EloquentAirfareCabinRepository::class);
+        $this->app->bind(AirfareCabinServiceInterface::class, DefaultAirfareCabinService::class);
         // API Terceiros Services & Repositories
         $this->app->bind(AuthApiRepositoryInterface::class, EloquentAuthApiRepository::class);
         $this->app->bind(AuthApiServiceInterface::class, DefaultAuthApiService::class);
@@ -307,6 +336,8 @@ class AppServiceProvider extends ServiceProvider
         EventHotelOpt::observe(GenericHistoryObserver::class);
         EventTransport::observe(GenericHistoryObserver::class);
         EventTransportOpt::observe(GenericHistoryObserver::class);
+        \App\Models\EventAirfare::observe(GenericHistoryObserver::class);
+        \App\Models\EventAirfareOpt::observe(GenericHistoryObserver::class);
     }
 }
 

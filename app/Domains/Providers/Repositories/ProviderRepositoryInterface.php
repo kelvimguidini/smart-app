@@ -15,6 +15,7 @@ interface ProviderRepositoryInterface
     public function allWithCityAdmin(): Collection;
     public function allServicesWithCity(): Collection;
     public function allTransportWithCity(): Collection;
+    public function allAirfareWithCity(): Collection;
     
     /**
      * Cria um fornecedor e seu serviço correspondente.

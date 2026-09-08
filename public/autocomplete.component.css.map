@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/components/autocomplete/autocomplete.component.scss"],
+  "sourcesContent": [".cursor-pointer {\r\n    cursor: pointer;\r\n}\r\n\r\n.list-group-item:hover {\r\n    background-color: #f8f9fa;\r\n}\r\n"],
+  "mappings": ";AAAA,CAAA;AACI,UAAA;;AAGJ,CAAA,eAAA;AACI,oBAAA;;",
+  "names": []
+}

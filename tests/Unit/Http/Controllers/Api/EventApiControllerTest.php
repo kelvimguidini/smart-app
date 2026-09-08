@@ -20,7 +20,8 @@ class EventApiControllerTest extends TestCase
         parent::setUp();
         
         $this->eventApiServiceMock = Mockery::mock(EventApiServiceInterface::class);
-        $this->controller = new EventApiController($this->eventApiServiceMock);
+        $this->app->instance(EventApiServiceInterface::class, $this->eventApiServiceMock);
+        $this->controller = $this->app->make(EventApiController::class);
     }
 
     public function tearDown(): void

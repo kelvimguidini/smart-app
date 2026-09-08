@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/pages/hotel/purpose/purpose.component.scss"],
+  "sourcesContent": [":host {\r\n    display: block;\r\n}\r\n\r\n.table-info {\r\n    background-color: rgba(54, 185, 204, 0.1) !important;\r\n}\r\n\r\n.opacity-50 {\r\n    opacity: 0.5;\r\n}\r\n\r\n.cursor-pointer {\r\n    cursor: pointer;\r\n}\r\n"],
+  "mappings": ";AAAA;AACI,WAAA;;AAGJ,CAAA;AACI,oBAAA,KAAA,EAAA,EAAA,GAAA,EAAA,GAAA,EAAA;;AAGJ,CAAA;AACI,WAAA;;AAGJ,CAAA;AACI,UAAA;;",
+  "names": []
+}

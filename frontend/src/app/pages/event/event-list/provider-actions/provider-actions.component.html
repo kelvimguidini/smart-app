@@ -28,7 +28,7 @@
 
   <!-- 3. Avaliar Orçamento -->
   <button
-    *ngIf="prov && !prov.isTransport && prov.providerBudget && prov.providerBudget[0] && !prov.providerBudget[0].evaluated && hasPermission('prove_budget_hotel')"
+    *ngIf="prov && !prov.isTransport && !prov.isAirfare && prov.providerBudget && prov.providerBudget[0] && !prov.providerBudget[0].evaluated && hasPermission('prove_budget_hotel')"
     type="button"
     class="btn btn-info text-white shadow-sm btn-action animate-in"
     title="Avaliar Orçamento"
@@ -39,7 +39,7 @@
 
   <!-- 4. Ver (Orçamento Avaliado) -->
   <button
-    *ngIf="prov && !prov.isTransport && prov.providerBudget && prov.providerBudget[0] && prov.providerBudget[0].evaluated"
+    *ngIf="prov && !prov.isTransport && !prov.isAirfare && prov.providerBudget && prov.providerBudget[0] && prov.providerBudget[0].evaluated"
     type="button"
     class="btn btn-info text-white shadow-sm btn-action animate-in"
     title="Ver avaliação de orçamento"
@@ -50,7 +50,7 @@
 
   <!-- 5. Proposta -->
   <button
-    *ngIf="prov && prov.providerBudget && hasPermission('event_admin') && (prov.status === 'dating_with_customer' || prov.status === 'approved_by_manager' || prov.status === 'sent_to_customer')"
+    *ngIf="prov && (prov.isAirfare || prov.providerBudget) && (hasPermission('event_admin') || (prov.isAirfare && hasPermission('air_operator')) || hasPermission('hotel_operator')) && (prov.status === 'dating_with_customer' || prov.status === 'approved_by_manager' || prov.status === 'sent_to_customer')"
     type="button"
     class="btn btn-primary text-white shadow-sm btn-action animate-in"
     title="Proposta (Com Valores)"
@@ -61,7 +61,7 @@
 
   <!-- 6. Proposta (Sem Valores) -->
   <button
-    *ngIf="prov && prov.providerBudget && hasPermission('event_admin') && ['created', 'briefing', 'provider_requested', 'provider_responsed', 'sent_maneger', 'add_information', 'added_information', 'change_request'].includes(prov.status)"
+    *ngIf="prov && (prov.isAirfare || prov.providerBudget) && (hasPermission('event_admin') || (prov.isAirfare && hasPermission('air_operator')) || hasPermission('hotel_operator')) && (['created', 'briefing', 'provider_requested', 'provider_responsed', 'sent_maneger', 'add_information', 'added_information', 'change_request'].includes(prov.status) || !prov.status)"
     type="button"
     class="btn btn-warning text-dark shadow-sm btn-action animate-in"
     title="Proposta (Sem Valores)"
@@ -72,7 +72,7 @@
 
   <!-- 7. Faturamento -->
   <button
-    *ngIf="hasPermission('event_admin') && prov.status === 'dating_with_customer'"
+    *ngIf="(hasPermission('event_admin') || (prov.isAirfare && hasPermission('air_operator')) || hasPermission('hotel_operator')) && prov.status === 'dating_with_customer'"
     type="button"
     class="btn btn-info text-white shadow-sm btn-action animate-in"
     title="Faturamento"

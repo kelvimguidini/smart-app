@@ -45,7 +45,7 @@ class DefaultEventApiServiceTest extends TestCase
                 return $arg == $end_carbon;
             }))
             ->once()
-            ->andReturn(new Collection([]));
+            ->andReturn(new \Illuminate\Database\Eloquent\Collection([]));
 
         $xml = $this->service->generateXmlPayload($startDate, $endDate);
         

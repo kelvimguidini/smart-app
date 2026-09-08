@@ -155,6 +155,18 @@ export class MenuComponent implements OnInit {
       ]
     },
     {
+      name: 'Aéreo',
+      icon: 'fa fa-plane',
+      isItem: false,
+      collapseHeader: 'Tabelas auxiliares',
+      collapsed: true,
+      subMenu: [
+        { link: '/airline', name: 'Cias Aéreas', role: ['airfare_airline_admin', 'air_operator'] },
+        { link: '/baggage', name: 'Bagagem', role: ['airfare_baggage_admin', 'air_operator'] },
+        { link: '/cabin', name: 'Cabine', role: ['airfare_cabin_admin', 'air_operator'] },
+      ]
+    },
+    {
       name: 'Administrativo',
       icon: 'fa fa-user-cog',
       isItem: false,
@@ -219,6 +231,7 @@ export class MenuComponent implements OnInit {
       '/local', '/service-hall', '/purpose-hall', '/measure',
       '/frequency', '/service-add', '/provider-service', '/brand',
       '/car-model', '/vehicle', '/transport-service', '/broker-trans', '/provider-transport',
+      '/airline', '/baggage', '/cabin',
       '/event', '/event-list', '/currency', '/customer', '/customer-requester', '/customer-sector', '/customer-cost-center', '/crd', '/city'
     ];
     return angularRoutes.includes(link);

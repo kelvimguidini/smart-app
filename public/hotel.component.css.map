@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/pages/hotel/hotel/hotel.component.scss"],
+  "sourcesContent": [".form-control:focus {\r\n    border-color: var(--bs-primary);\r\n    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);\r\n}\r\n\r\n.border-left-primary {\r\n    border-left: 4px solid var(--bs-primary) !important;\r\n}\r\n\r\n.border-left-secondary {\r\n    border-left: 4px solid var(--bs-secondary) !important;\r\n}\r\n\r\n.card {\r\n    transition: all 0.3s ease;\r\n    border: none;\r\n    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);\r\n}\r\n\r\n.placeholder-glow .placeholder {\r\n    height: 1.5rem;\r\n}\r\n\r\n.form-group {\r\n    width: 100%;\r\n}\r\n\r\n.form-label {\r\n    font-weight: 600;\r\n    margin-bottom: .7rem;\r\n}\r\n\r\n.form-group .row {\r\n    margin: 0;\r\n}\r\n\r\ninput[type=\"time\"] {\r\n    min-width: 100%;\r\n}"],
+  "mappings": ";AAAA,CAAA,YAAA;AACI,gBAAA,IAAA;AACA,cAAA,EAAA,EAAA,EAAA,QAAA,KAAA,IAAA,iBAAA,EAAA;;AAGJ,CAAA;AACI,eAAA,IAAA,MAAA,IAAA;;AAGJ,CAAA;AACI,eAAA,IAAA,MAAA,IAAA;;AAGJ,CAAA;AACI,cAAA,IAAA,KAAA;AACA,UAAA;AACA,cAAA,EAAA,QAAA,QAAA,EAAA,KAAA,EAAA,EAAA,EAAA,EAAA,EAAA,EAAA;;AAGJ,CAAA,iBAAA,CAAA;AACI,UAAA;;AAGJ,CAAA;AACI,SAAA;;AAGJ,CAAA;AACI,eAAA;AACA,iBAAA;;AAGJ,CATA,WASA,CAAA;AACI,UAAA;;AAGJ,KAAA,CAAA;AACI,aAAA;;",
+  "names": []
+}

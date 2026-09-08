@@ -86,6 +86,7 @@ class DefaultEventService implements EventServiceInterface
             'event_hall' => $this->eventHallRepository->getIdsByEvent($eventId),
             'event_add' => $this->eventAddRepository->getIdsByEvent($eventId),
             'event_transport' => $this->eventTransportRepository->getIdsByEvent($eventId),
+            'event_airfare' => \App\Models\EventAirfare::where('event_id', $eventId)->pluck('id')->toArray(),
         ];
     }
 }
