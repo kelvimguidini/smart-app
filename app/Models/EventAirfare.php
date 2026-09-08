@@ -11,21 +11,15 @@ class EventAirfare extends Model
 
     protected $fillable = [
         'event_id',
-        'airfare_id',
         'airline_id',
         'currency_id',
-        'aircraft',
-        'passengers_info',
-        'baggage_info',
-        'flight_time',
+        'equipment',
         'pax_first',
         'pax_executiva',
         'pax_premium',
         'pax_economica',
         'total_pax',
         'prazo_cia',
-        'status_contrato',
-        'prazo_proposta',
         'inc_taxa_embarque',
         'inc_servico_bordo',
         'inc_porao',
@@ -35,13 +29,8 @@ class EventAirfare extends Model
         'inc_fbo_destino',
         'inc_alteracao_nomes',
         'taxa_embarque_unit',
-        'total_taxa_embarque',
         'total_net_sem_4bts',
-        'total_venda_sem_4bts',
-        'resultado_bruto',
-        'exchange_rate_brl',
-        'tt_net_brl',
-        'tt_venda_brl',
+        'markup',
         'photo_1',
         'photo_2',
         'photo_3',
@@ -92,11 +81,6 @@ class EventAirfare extends Model
     public function eventAirfareOpts()
     {
         return $this->hasMany(EventAirfareOpt::class, 'event_airfare_id', 'id');
-    }
-
-    public function passengers()
-    {
-        return $this->hasMany(EventAirfarePassenger::class, 'event_airfare_id', 'id');
     }
 
     public function status_his()

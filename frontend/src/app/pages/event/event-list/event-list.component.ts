@@ -440,6 +440,29 @@ export class EventListComponent implements OnInit, AfterViewInit {
       }
     });
 
+    const airfares = event.event_airfares || event.event_airfare || event.eventAirfares || [];
+    airfares.forEach((current: any) => {
+      const airId = current.airline?.id || current.id;
+      if (!groups.some((g) => g.type === 'Aéreo' && (g.id === airId || g.table_id === current.id))) {
+        groups.push({
+          id: airId,
+          name: current.airline?.name || current.name || 'Companhia Aérea',
+          city: current.airline?.city || null,
+          email: current.airline?.email,
+          sended_mail: current.sended_mail,
+          sended_mail_link: current.sended_mail_link,
+          token_budget: current.token_budget,
+          providerBudget: current.provider_budget,
+          isAirfare: true,
+          type: 'Aéreo',
+          table: 'event_airfares',
+          table_id: current.id,
+          status: current.status_his?.[0]?.status,
+          order: current.order || 0,
+        });
+      }
+    });
+
     return groups.sort((a, b) => a.order - b.order);
   }
 

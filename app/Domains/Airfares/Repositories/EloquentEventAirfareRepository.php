@@ -20,7 +20,12 @@ class EloquentEventAirfareRepository implements EventAirfareRepositoryInterface
     public function updateByEventAndProvider(int $eventId, int $providerId, array $data): bool
     {
         return EventAirfare::where('event_id', $eventId)
-            ->where('airfare_id', $providerId)
+            ->where(function ($q) use ($providerId) {
+                $q->where('airline_id', $providerId);
+                if (\Illuminate\Support\Facades\Schema::hasColumn('event_airfare', 'airfare_id')) {
+                    $q->orWhere('airfare_id', $providerId);
+                }
+            })
             ->update($data) > 0;
     }
 
@@ -28,19 +33,13 @@ class EloquentEventAirfareRepository implements EventAirfareRepositoryInterface
     {
         return EventAirfare::with([
             'eventAirfareOpts' => function ($q) {
-                $q->orderBy('order', 'asc')->orderBy('id');
+                $q->orderBy('id', 'asc');
             },
             'eventAirfareOpts.outbound_airline',
-            'eventAirfareOpts.inbound_airline',
-            'eventAirfareOpts.currency',
-            'eventAirfareOpts.baggage',
-            'eventAirfareOpts.cabin',
-            'provider.city',
+            'provider',
+            'airline',
             'currency',
-            'event',
-            'passengers' => function ($q) {
-                $q->orderBy('name', 'asc');
-            }
+            'event'
         ])->where('event_id', '=', $eventId)->get();
     }
 
@@ -53,19 +52,13 @@ class EloquentEventAirfareRepository implements EventAirfareRepositoryInterface
     {
         return EventAirfare::with([
             'eventAirfareOpts' => function ($q) {
-                $q->orderBy('order', 'asc')->orderBy('id');
+                $q->orderBy('id', 'asc');
             },
             'eventAirfareOpts.outbound_airline',
-            'eventAirfareOpts.inbound_airline',
-            'eventAirfareOpts.currency',
-            'eventAirfareOpts.baggage',
-            'eventAirfareOpts.cabin',
-            'provider.city',
+            'provider',
+            'airline',
             'currency',
-            'event',
-            'passengers' => function ($q) {
-                $q->orderBy('name', 'asc');
-            }
+            'event'
         ])->find($id);
     }
 

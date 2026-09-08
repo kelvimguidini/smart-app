@@ -17,6 +17,29 @@ if ($event != null && isset($event->event_airfares)) {
     }
 }
 
+$operador = $event->airOperator->name ?? ($event->hotelOperator->name ?? ($event->landOperator->name ?? 'ADMIN'));
+
+if (!function_exists('quebraTexto')) {
+    function quebraTexto($texto, $limite = 40)
+    {
+        $palavras = explode(' ', $texto ?? '');
+        $linhaAtual = '';
+        $resultado = '';
+
+        foreach ($palavras as $palavra) {
+            if (strlen($linhaAtual . ' ' . $palavra) > $limite) {
+                $resultado .= trim($linhaAtual) . "<br>";
+                $linhaAtual = $palavra;
+            } else {
+                $linhaAtual .= ' ' . $palavra;
+            }
+        }
+
+        $resultado .= trim($linhaAtual);
+        return $resultado;
+    }
+}
+
 function formatCurrencyBr($value) {
     return 'R$ ' . number_format((float)$value, 2, ',', '.');
 }
@@ -31,6 +54,23 @@ function formatDateBr($dateStr) {
     }
 }
 
+function formatDateExtensoBr($dateStr) {
+    if (empty($dateStr)) return '-';
+    try {
+        $meses = [
+            1 => 'Janeiro', 2 => 'Fevereiro', 3 => 'Março', 4 => 'Abril',
+            5 => 'Maio', 6 => 'Junho', 7 => 'Julho', 8 => 'Agosto',
+            9 => 'Setembro', 10 => 'Outubro', 11 => 'Novembro', 12 => 'Dezembro'
+        ];
+        $dt = new DateTime($dateStr);
+        $dia = $dt->format('d');
+        $mes = (int)$dt->format('m');
+        return "{$dia} de " . ($meses[$mes] ?? $dt->format('M'));
+    } catch (\Exception $e) {
+        return $dateStr;
+    }
+}
+
 function getImgSrc($path) {
     if (empty($path)) return null;
     if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://') || str_starts_with($path, 'data:image')) {
@@ -40,511 +80,542 @@ function getImgSrc($path) {
     if (file_exists(public_path($cleanPath))) {
         return public_path($cleanPath);
     }
-    return $path;
+    if (file_exists(storage_path('app/public/' . preg_replace('#^storage/#', '', $cleanPath)))) {
+        return storage_path('app/public/' . preg_replace('#^storage/#', '', $cleanPath));
+    }
+    return null;
+}
+
+function getAirfarePhotoSrc($airfare, $pNum) {
+    $field = 'photo_' . $pNum;
+    $val = $airfare->$field ?? null;
+    if (!empty($val)) {
+        $resolved = getImgSrc($val);
+        if ($resolved && file_exists($resolved)) return $resolved;
+    }
+    // Fallback default image
+    $defaultPath = public_path("images/airfares/default_{$pNum}.jpg");
+    if (file_exists($defaultPath)) {
+        return $defaultPath;
+    }
+    $altPath = public_path("storage/airfares/1xIaOwnuKjeo2MU8AQC94vS6J0iNH0haGK66oMDq.jpg");
+    if (file_exists($altPath)) {
+        return $altPath;
+    }
+    return null;
+}
+
+function formatTimePdf($timeStr) {
+    if (empty($timeStr) || $timeStr === '-') return '-';
+    $clean = preg_replace('/[^0-9]/', '', (string)$timeStr);
+    if (strlen($clean) === 4) {
+        return substr($clean, 0, 2) . ':' . substr($clean, 2, 2);
+    }
+    if (strpos((string)$timeStr, ':') !== false) {
+        $parts = explode(':', (string)$timeStr);
+        if (count($parts) >= 2) {
+            return str_pad($parts[0], 2, '0', STR_PAD_LEFT) . ':' . str_pad($parts[1], 2, '0', STR_PAD_LEFT);
+        }
+    }
+    return $timeStr;
 }
 ?>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Pedido Fretamento</title>
+    <title>Proposta Fretamento</title>
     <style>
         @page {
-            margin: 12px 15px 12px 15px;
+            margin: 10px;
         }
         body {
             font-family: Helvetica, Arial, sans-serif;
             color: #222222;
-            font-size: 8.5pt;
+            font-size: 8pt;
             margin: 0;
             padding: 0;
         }
-        .header-title-bar {
-            background-color: #E65100;
-            color: #FFFFFF;
-            font-size: 11pt;
-            font-weight: bold;
-            text-align: center;
-            padding: 5px 0;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-        .tbl-event {
+        .header {
+            background: #3e3e3e;
+            padding: 10px;
             width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 12px;
+            margin: -10px;
+            margin-bottom: 15px;
+            height: 150px;
+            text-align: start;
         }
-        .tbl-event td {
-            border: 1px solid #333333;
-            padding: 4px 6px;
+        .left {
+            float: left;
+            width: 200px;
+        }
+        .right {
+            float: right;
+            width: 150px;
+            text-align: start;
+            margin-right: 0.2cm;
+        }
+        .center {
+            vertical-align: middle;
+            text-align: left !important;
+            width: calc(100% - 350px - 0.2cm);
+            margin: 0 0 auto 16px;
+            height: 150px;
+        }
+        .header-table {
+            border-collapse: collapse;
+            margin-bottom: 10px;
+            height: 150px;
+            width: 100%;
+        }
+        .header-table td {
+            vertical-align: middle;
+            padding: 0;
+            border: none;
+        }
+        .arrow {
+            display: inline-block;
+            margin: 15px 0;
+            padding: 9px 40px;
+            background-color: #e9540d;
+            font-weight: bold;
+            text-align: start;
+        }
+        .title {
+            font-weight: bold;
+            font-style: normal;
+            color: #fff;
             font-size: 8pt;
+            margin: 0;
         }
-        .lbl-orange {
-            background-color: #F57C00;
-            color: #FFFFFF;
-            font-weight: bold;
+        .event-info {
+            margin-top: 5px;
+        }
+        .line {
+            white-space: nowrap;
+            font-size: 8pt;
+            text-align: start;
             text-transform: uppercase;
-            width: 18%;
+            padding: 0 8px;
+            min-height: 15px;
         }
-        .val-cell {
-            background-color: #FFFFFF;
-            color: #111111;
-        }
-        .charter-section {
-            margin-bottom: 14px;
-            page-break-inside: avoid;
-        }
-        .charter-title-bar {
-            background-color: #FFB74D;
-            color: #111111;
-            font-size: 9.5pt;
+        .line p {
+            display: inline-block;
             font-weight: bold;
-            text-align: center;
-            padding: 4px 0;
-            text-transform: uppercase;
-            border: 1px solid #333333;
-            border-bottom: none;
+            color: rgb(216, 93, 16);
+            margin: 0 5px 0 0;
         }
-        .charter-title-bar-alt {
-            background-color: #81C784;
-            color: #111111;
-            font-size: 9.5pt;
-            font-weight: bold;
-            text-align: center;
-            padding: 4px 0;
-            text-transform: uppercase;
-            border: 1px solid #333333;
-            border-bottom: none;
+        .event-data {
+            font-weight: 700;
+            color: #fff;
+            margin-left: 4px;
+            display: inline-table;
         }
-        .tbl-header-info {
+
+        /* Seção de Trechos / Pernas de Voo */
+        .tbl-flight-legs {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 0px;
+            margin-top: 15px;
+            margin-bottom: 15px;
         }
-        .tbl-header-info td {
-            border: 1px solid #333333;
-            padding: 3px 5px;
-            font-size: 7.5pt;
-            text-align: center;
+        .tbl-flight-legs td {
+            vertical-align: top;
+            padding: 3px 6px;
         }
-        .hdr-lbl {
-            background-color: #FFE0B2;
+        .leg-hdr {
             font-weight: bold;
+            font-size: 8.5pt;
+            color: #111111;
             text-transform: uppercase;
         }
-        .hdr-lbl-alt {
-            background-color: #C8E6C9;
-            font-weight: bold;
-            text-transform: uppercase;
+        .leg-val {
+            font-size: 8.5pt;
+            color: #222222;
+            margin-top: 2px;
         }
-        .tbl-legs-inc {
+
+        /* Bloco Intermediário: Specs vs Observações */
+        .tbl-specs-obs {
             width: 100%;
             border-collapse: collapse;
-            margin-top: -1px;
+            margin-bottom: 15px;
         }
-        .tbl-legs-inc td {
+        .tbl-specs-obs td {
             vertical-align: top;
             padding: 0;
         }
-        .tbl-legs {
-            width: 100%;
-            border-collapse: collapse;
+        .spec-row td {
+            padding: 3px 0;
+            font-size: 8.5pt;
         }
-        .tbl-legs th {
-            background-color: #FFF3E0;
-            border: 1px solid #333333;
-            padding: 3px 4px;
-            font-size: 7pt;
-            text-transform: uppercase;
-            text-align: center;
-        }
-        .tbl-legs-alt th {
-            background-color: #E8F5E9;
-            border: 1px solid #333333;
-            padding: 3px 4px;
-            font-size: 7pt;
-            text-transform: uppercase;
-            text-align: center;
-        }
-        .tbl-legs td {
-            border: 1px solid #333333;
-            padding: 3px 4px;
-            font-size: 7.5pt;
-            text-align: center;
-        }
-        .tbl-inc {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .tbl-inc th {
-            background-color: #FFE0B2;
-            border: 1px solid #333333;
-            padding: 3px 4px;
-            font-size: 7pt;
-            text-transform: uppercase;
-            text-align: center;
-        }
-        .tbl-inc-alt th {
-            background-color: #C8E6C9;
-            border: 1px solid #333333;
-            padding: 3px 4px;
-            font-size: 7pt;
-            text-transform: uppercase;
-            text-align: center;
-        }
-        .tbl-inc td {
-            border: 1px solid #333333;
-            padding: 2.5px 4px;
-            font-size: 7pt;
-        }
-        .tbl-totals {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: -1px;
-        }
-        .tbl-totals td {
-            border: 1px solid #333333;
-            padding: 3px 5px;
-            font-size: 7.5pt;
-        }
-        .tot-lbl {
-            background-color: #FFE0B2;
+        .spec-label {
+            width: 95px;
             font-weight: bold;
-            text-transform: uppercase;
+            color: #111111;
         }
-        .tot-lbl-alt {
-            background-color: #C8E6C9;
+        .spec-val {
+            color: #222222;
+        }
+        .spec-val-bold {
             font-weight: bold;
-            text-transform: uppercase;
+            color: #111111;
         }
-        .photos-table {
-            width: 100%;
-            border-collapse: collapse;
+        .valor-box {
+            background-color: #DDE2E5;
+            border: 1px solid #CBD5E1;
             margin-top: 8px;
+            padding: 6px 12px;
         }
-        .photo-cell {
+        .valor-label {
+            font-weight: bold;
+            font-size: 9pt;
+            color: #111111;
+            display: inline-block;
+            width: 75px;
+        }
+        .valor-val {
+            font-weight: bold;
+            font-size: 10.5pt;
+            color: #111111;
+            display: inline-block;
+        }
+
+        /* Observações da Proposta */
+        .obs-title {
+            color: #00875A;
+            font-weight: bold;
+            font-size: 8.5pt;
+            margin-bottom: 4px;
+        }
+        .obs-content {
+            font-size: 7.2pt;
+            color: #00875A;
+            line-height: 1.4;
+        }
+
+        /* Grid de 4 Fotos 2x2 */
+        .tbl-photos-grid {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 4px;
+        }
+        .tbl-photos-grid td {
             width: 50%;
             padding: 3px;
-            text-align: center;
+            vertical-align: middle;
         }
-        .photo-box {
+        .aircraft-photo {
             width: 100%;
-            height: 140px;
-            background-color: #F8FAFC;
-            border: 1px solid #CBD5E1;
-            overflow: hidden;
-            text-align: center;
-        }
-        .photo-img {
-            max-width: 100%;
-            max-height: 140px;
+            height: 150px;
             object-fit: cover;
+            display: block;
+            border: 1px solid #CBD5E1;
         }
-        .disclaimer {
-            font-size: 7pt;
+        .photo-fallback {
+            width: 100%;
+            height: 150px;
+            background-color: #E2E8F0;
+            border: 1px dashed #94A3B8;
+            text-align: center;
+            box-sizing: border-box;
+            padding-top: 60px;
+        }
+        .disclaimer-txt {
+            font-size: 6.8pt;
             font-style: italic;
             color: #444444;
             margin-top: 2px;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
+
+        /* Seção Notas Legais Padrão */
         .notes-section {
+            page-break-inside: avoid;
             margin-top: 6px;
         }
-        .notes-header {
+        .notes-hdr {
             background-color: #00875A;
             color: #FFFFFF;
             font-size: 8.5pt;
             font-weight: bold;
             padding: 3px 6px;
         }
-        .notes-body {
-            font-size: 6.8pt;
+        .notes-txt {
+            font-size: 6.5pt;
             color: #333333;
-            line-height: 1.25;
+            line-height: 1.35;
             padding-top: 4px;
         }
-        .notes-body p {
-            margin: 0 0 4px 0;
+        .notes-txt p {
+            margin: 0 0 3px 0;
             text-align: justify;
         }
-        .footer-bar {
-            margin-top: 10px;
+
+        /* Barra Verde de Rodapé */
+        .footer-green-bar {
+            margin-top: 15px;
+            height: 8px;
             background-color: #00875A;
-            color: #FFFFFF;
-            font-size: 7.5pt;
-            font-weight: bold;
-            text-align: center;
-            padding: 3px 0;
-            letter-spacing: 0.5px;
+            width: 100%;
         }
     </style>
 </head>
 <body>
 
-    <!-- BLOCO 1: CABEÇALHO DO EVENTO (PEDIDO FRETAMENTO) -->
-    <div class="header-title-bar">PEDIDO FRETAMENTO</div>
+    <!-- CABEÇALHO DA PROPOSTA (PADRÃO 4BTS IDÊNTICO A HOTEL E TRANSPORTE) -->
+    <header class="header">
+        <table class="header-table" width="100%">
+            <tr style="background-color: transparent;">
+                <td class="left">
+                    <div class="arrow">
+                        <div class="title">PROPOSTA N° {{ $event != null ? $event->code : '' }}</div>
+                    </div>
+                    <div>
+                        @if (extension_loaded('gd') && file_exists(public_path('logo.png')))
+                            <img style="width: 150px;" src="{{ public_path('logo.png') }}" alt="4BTS">
+                        @else
+                            <span style="font-weight: bold; font-size: 16px; color: #e9540d;">4BTS</span>
+                        @endif
+                    </div>
+                </td>
+                <td class="center">
+                    <div class="event-info">
+                        <div class="line">
+                            <p>Evento:</p>
+                            <span class="event-data">{!! quebraTexto($event->name ?? '', 50) !!}</span>
+                        </div>
+                    </div>
+                    <div class="event-info">
+                        <div class="line">
+                            <p>De:</p>
+                            <span class="event-data">{{ $event->date ? date("d/m/Y", strtotime($event->date)) : '-' }}</span>
+                            <p>Até:</p>
+                            <span class="event-data">{{ $event->date_final ? date("d/m/Y", strtotime($event->date_final)) : '-' }}</span>
+                        </div>
+                    </div>
+                    <div class="event-info">
+                        <div class="line">
+                            <p>Fornecedor:</p>
+                            <span class="event-data">{{ $provider != null ? $provider->name : ($airfares->first()->airline->name ?? ($airfares->first()->provider->name ?? 'FRETAMENTO')) }}</span>
+                        </div>
+                    </div>
+                    <div class="event-info">
+                        <div class="line">
+                            <p>CC:</p>
+                            <span class="event-data">{{ $event->cost_center ?? '' }}</span>
 
-    <table class="tbl-event">
-        <tr>
-            <td class="lbl-orange">NOME DO EVENTO:</td>
-            <td class="val-cell" style="width: 32%;">{{ $event->name ?? '' }}</td>
-            <td class="lbl-orange" style="width: 18%;">DATA DO EVENTO:</td>
-            <td class="val-cell" style="width: 32%;">{{ formatDateBr($event->date ?? '') }} {{ $event->date_final ? 'a ' . formatDateBr($event->date_final) : '' }}</td>
-        </tr>
-        <tr>
-            <td class="lbl-orange">SOLICITANTE:</td>
-            <td class="val-cell">{{ $event->requester ?? '' }}</td>
-            <td class="lbl-orange">CLIENTE:</td>
-            <td class="val-cell">{{ $event->customer->name ?? '' }}</td>
-        </tr>
-        <tr>
-            <td class="lbl-orange">CRD:</td>
-            <td class="val-cell">{{ $event->crd->name ?? '' }}</td>
-            <td class="lbl-orange">OPERADOR:</td>
-            <td class="val-cell">{{ $event->airOperator->name ?? ($event->hotelOperator->name ?? '') }}</td>
-        </tr>
-        <tr>
-            <td class="lbl-orange">DIVISÃO:</td>
-            <td class="val-cell">{{ $event->sector ?? '' }}</td>
-            <td class="val-cell" colspan="2" rowspan="3" style="text-align: right; vertical-align: middle; padding-right: 15px;">
-                @if(file_exists(public_path('logo.png')))
-                    <img src="{{ public_path('logo.png') }}" style="width: 140px;" alt="4BTS">
-                @endif
-            </td>
-        </tr>
-        <tr>
-            <td class="lbl-orange">BASE DE PAX:</td>
-            <td class="val-cell">{{ $event->pax_base ?? '' }}</td>
-        </tr>
-        <tr>
-            <td class="lbl-orange">CENTRO DE CUSTO:</td>
-            <td class="val-cell">{{ $event->cost_center ?? '' }}</td>
-        </tr>
-    </table>
+                            @if($event->exchange_rate != null && $event->exchange_rate != 0 && $event->exchange_rate != 1)
+                            <p>Câmbio</p> <span class="event-data">{{ $event->exchange_rate }}</span>
+                            @endif
+                        </div>
+                    </div>
 
-    <!-- BLOCO 2 & BLOCO 3: ORÇAMENTOS DE FRETAMENTO (Repete para cada Cia/Frete) -->
+                    <div class="event-info">
+                        <div class="line">
+                            <p>CONSULTOR:</p>
+                            <span class="event-data">{{ $operador }}</span>
+                        </div>
+                    </div>
+
+                </td>
+                <td class="right">
+                    @if (extension_loaded('gd') && $event != null && $event->customer != null && !empty($event->customer->logo) && file_exists(public_path($event->customer->logo)))
+                        <img src="{{ public_path($event->customer->logo) }}" style="max-width: 100px; max-height: 100px;" alt="{{ $event->customer->name }}">
+                    @elseif ($event != null && $event->customer != null)
+                        <span style="font-weight: bold; font-size: 14px; color: #fff;">{{ $event->customer->name }}</span>
+                    @endif
+                </td>
+            </tr>
+        </table>
+    </header>
+
+    <!-- CONTEÚDO DA PROPOSTA DE FRETAMENTO -->
     @if($airfares->count() > 0)
         @foreach($airfares as $index => $airfare)
-            <?php
-            $isAlt = ($index % 2 !== 0);
-            $ciaName = $airfare->airline->name ?? ($airfare->provider->name ?? 'Cia Aérea');
-            $opts = $airfare->eventAirfareOpts ?? collect();
-            ?>
+            @php
+                $opts = $airfare->eventAirfareOpts ?? collect();
+                $custoNet = (float)($airfare->total_net_sem_4bts ?? 0);
+                $txUnit = (float)($airfare->taxa_embarque_unit ?? 0);
+                $paxTotal = (int)($airfare->total_pax ?: (($airfare->pax_first + $airfare->pax_executiva + $airfare->pax_premium + $airfare->pax_economica) ?: 0));
+                $totTaxaEmbarque = $txUnit * $paxTotal;
+                $mk = ($airfare->markup && (float)$airfare->markup > 0) ? (float)$airfare->markup : 0.75;
+                $vendaEstimada = $custoNet > 0 ? ($custoNet / $mk) : 0;
+                $valorFinal = $vendaEstimada + $totTaxaEmbarque;
+            @endphp
 
-            <div class="charter-section">
-                <div class="{{ $isAlt ? 'charter-title-bar-alt' : 'charter-title-bar' }}">
-                    ORÇAMENTO FRETAMENTO {{ $index + 1 }} - {{ mb_strtoupper($ciaName) }}
-                </div>
-
-                <!-- Cabeçalho do Frete: Cia, Aeronave, Assentos, Pax, Prazo, Status -->
-                <table class="tbl-header-info">
+            <div class="charter-block" style="{{ $index > 0 ? 'page-break-before: always; margin-top: 15px;' : '' }}">
+                
+                <!-- 1. Linha de Trechos (DATA, TRECHO Origem, TRECHO Destino, Horario) -->
+                <table class="tbl-flight-legs">
+                    @forelse($opts as $opt)
                     <tr>
-                        <td class="{{ $isAlt ? 'hdr-lbl-alt' : 'hdr-lbl' }}" style="width: 10%;">CIA:</td>
-                        <td style="width: 25%; font-weight: bold;">{{ $ciaName }}</td>
-                        <td class="{{ $isAlt ? 'hdr-lbl-alt' : 'hdr-lbl' }}" style="width: 8%;">FIRST</td>
-                        <td class="{{ $isAlt ? 'hdr-lbl-alt' : 'hdr-lbl' }}" style="width: 10%;">EXECUTIVA</td>
-                        <td class="{{ $isAlt ? 'hdr-lbl-alt' : 'hdr-lbl' }}" style="width: 10%;">PREMIUM</td>
-                        <td class="{{ $isAlt ? 'hdr-lbl-alt' : 'hdr-lbl' }}" style="width: 10%;">ECONÔMICA</td>
-                        <td class="{{ $isAlt ? 'hdr-lbl-alt' : 'hdr-lbl' }}" style="width: 12%;">TOTAL PAX</td>
-                        <td style="width: 5%; font-weight: bold;">{{ $airfare->total_pax ?: (($airfare->pax_first + $airfare->pax_executiva + $airfare->pax_premium + $airfare->pax_economica) ?: '-') }}</td>
-                        <td class="{{ $isAlt ? 'hdr-lbl-alt' : 'hdr-lbl' }}" style="width: 10%;">PRAZO DA CIA:</td>
-                        <td style="width: 10%;">{{ $airfare->prazo_cia ?: '-' }}</td>
+                        <td style="width: 25%;">
+                            <div class="leg-hdr">DATA</div>
+                            <div class="leg-val">{{ formatDateExtensoBr($opt->outbound_date) }}</div>
+                        </td>
+                        <td style="width: 25%;">
+                            <div class="leg-hdr">TRECHO</div>
+                            <div class="leg-val">{{ $opt->outbound_origin ?: '-' }}</div>
+                        </td>
+                        <td style="width: 25%;">
+                            <div class="leg-hdr">TRECHO</div>
+                            <div class="leg-val">{{ $opt->outbound_destination ?: '-' }}</div>
+                        </td>
+                        <td style="width: 25%;">
+                            <div class="leg-hdr">Horario: <span style="font-weight: normal; text-transform: none;">{{ ($opt->outbound_departure_time && $opt->outbound_arrival_time) ? formatTimePdf($opt->outbound_departure_time) . ' às ' . formatTimePdf($opt->outbound_arrival_time) : 'À confirmar' }}</span></div>
+                        </td>
                     </tr>
+                    @empty
                     <tr>
-                        <td class="{{ $isAlt ? 'hdr-lbl-alt' : 'hdr-lbl' }}">EQUIPAMENTO:</td>
-                        <td style="font-weight: bold;">{{ $airfare->aircraft ?: '-' }}</td>
-                        <td>{{ $airfare->pax_first ?: 0 }}</td>
-                        <td>{{ $airfare->pax_executiva ?: 0 }}</td>
-                        <td>{{ $airfare->pax_premium ?: 0 }}</td>
-                        <td>{{ $airfare->pax_economica ?: 0 }}</td>
-                        <td colspan="2"></td>
-                        <td class="{{ $isAlt ? 'hdr-lbl-alt' : 'hdr-lbl' }}">STATUS CONTRATO:</td>
-                        <td>{{ $airfare->status_contrato ?: '-' }}</td>
+                        <td style="width: 25%;">
+                            <div class="leg-hdr">DATA</div>
+                            <div class="leg-val">{{ formatDateExtensoBr($event->date) }}</div>
+                        </td>
+                        <td style="width: 25%;">
+                            <div class="leg-hdr">TRECHO</div>
+                            <div class="leg-val">Origem a confirmar</div>
+                        </td>
+                        <td style="width: 25%;">
+                            <div class="leg-hdr">TRECHO</div>
+                            <div class="leg-val">Destino a confirmar</div>
+                        </td>
+                        <td style="width: 25%;">
+                            <div class="leg-hdr">Horario: <span style="font-weight: normal; text-transform: none;">À confirmar</span></div>
+                        </td>
                     </tr>
+                    @endforelse
                 </table>
 
-                <!-- BLOCO 3: Trechos & Tarifas + Painel de Inclusões -->
-                <table class="tbl-legs-inc">
+                <!-- 2. Especificações da Aeronave + Valor vs Observações -->
+                <table class="tbl-specs-obs">
                     <tr>
-                        <!-- Coluna Esquerda: Tabela de Pernas do Voo -->
-                        <td style="width: 72%;">
-                            <table class="tbl-legs {{ $isAlt ? 'tbl-legs-alt' : '' }}">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 10%;">CIA</th>
-                                        <th style="width: 10%;">VOO</th>
-                                        <th style="width: 10%;">DE</th>
-                                        <th style="width: 10%;">PARA</th>
-                                        <th style="width: 14%;">DATAS</th>
-                                        <th style="width: 10%;">SAÍDA</th>
-                                        <th style="width: 10%;">CHEGADA</th>
-                                        <th style="width: 8%;">MARK UP</th>
-                                        <th style="width: 9%;">CUSTO</th>
-                                        <th style="width: 9%;">VENDA</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if($opts->count() > 0)
-                                        @foreach($opts as $opt)
-                                            <?php
-                                            $received = floatval($opt->received_proposal ?? 0);
-                                            $percent = floatval($opt->received_proposal_percent ?? 0);
-                                            $unitSale = $received;
-                                            if ($percent > 0) {
-                                                $factor = $percent > 2 ? $percent / 100 : $percent;
-                                                $unitSale = ceil($received / $factor);
-                                            }
-                                            $markupText = $percent > 0 ? number_format($percent, 2, ',', '.') : '-';
-                                            ?>
-                                            <tr>
-                                                <td>{{ $opt->outbound_airline->name ?? $ciaName }}</td>
-                                                <td>{{ $opt->outbound_flight_number ?: '-' }}</td>
-                                                <td>{{ $opt->outbound_origin ?: '-' }}</td>
-                                                <td>{{ $opt->outbound_destination ?: '-' }}</td>
-                                                <td>{{ formatDateBr($opt->outbound_date) }}</td>
-                                                <td>{{ $opt->outbound_departure_time ?: '-' }}</td>
-                                                <td>{{ $opt->outbound_arrival_time ?: '-' }}</td>
-                                                <td>{{ $markupText }}</td>
-                                                <td>{{ formatCurrencyBr($received) }}</td>
-                                                <td>{{ formatCurrencyBr($unitSale) }}</td>
-                                            </tr>
-                                        @endforeach
-                                    @else
-                                        <tr>
-                                            <td colspan="10" style="text-align: center; color: #777;">Nenhum trecho de voo cadastrado</td>
-                                        </tr>
-                                    @endif
-                                </tbody>
+                        <!-- Coluna Esquerda: Especificações e Caixa de Valor -->
+                        <td style="width: 46%; padding-right: 15px;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr class="spec-row">
+                                    <td class="spec-label">Aeronave:</td>
+                                    <td class="spec-val-bold">{{ $airfare->equipment ?: 'Boeing 737' }}</td>
+                                </tr>
+                                <tr class="spec-row">
+                                    <td class="spec-label" style="font-weight: normal;">Passageiros:</td>
+                                    <td class="spec-val">
+                                        @if($airfare->total_pax > 0)
+                                            {{ $airfare->total_pax }} PAX @if($airfare->pax_executiva > 0) ({{ $airfare->pax_executiva }} em Executiva) @elseif($airfare->pax_economica > 0) ({{ $airfare->pax_economica }} em Econômica) @endif
+                                        @elseif($paxTotal > 0)
+                                            {{ $paxTotal }} PAX
+                                        @else
+                                            A confirmar
+                                        @endif
+                                    </td>
+                                </tr>
+                                <tr class="spec-row">
+                                    <td class="spec-label" style="font-weight: normal;">Bagagem:</td>
+                                    <td class="spec-val">{{ $airfare->inc_porao ?: '23 kg por pessoa' }}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" style="padding-top: 6px;">
+                                        <div class="valor-box">
+                                            <span class="valor-label">Valor:</span>
+                                            <span class="valor-val">{{ formatCurrencyBr($valorFinal) }}</span>
+                                        </div>
+                                    </td>
+                                </tr>
                             </table>
                         </td>
 
-                        <!-- Coluna Direita: Inclusões e Serviços -->
-                        <td style="width: 28%; border-left: 1px solid #333333;">
-                            <table class="tbl-inc {{ $isAlt ? 'tbl-inc-alt' : '' }}">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 65%;">INCLUI:</th>
-                                        <th style="width: 35%;">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Taxas de Embarque</td>
-                                        <td style="text-align: center; font-weight: bold;">{{ $airfare->inc_taxa_embarque ? 'SIM' : 'NÃO' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Serviço de Bordo</td>
-                                        <td style="text-align: center; font-weight: bold;">{{ $airfare->inc_servico_bordo ? 'SIM' : 'NÃO' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Porão</td>
-                                        <td style="text-align: center;">{{ $airfare->inc_porao ?: '-' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Bagagem a bordo</td>
-                                        <td style="text-align: center;">{{ $airfare->inc_bagagem_bordo ?: '-' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Sala Vip Aeroporto</td>
-                                        <td style="text-align: center; font-weight: bold;">{{ $airfare->inc_sala_vip ? 'SIM' : 'NÃO' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>FBO Origem</td>
-                                        <td style="text-align: center;">{{ $airfare->inc_fbo_origem ?: '0' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>FBO Destino</td>
-                                        <td style="text-align: center;">{{ $airfare->inc_fbo_destino ?: '0' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Alterações de Nomes</td>
-                                        <td style="text-align: center; font-weight: bold;">{{ $airfare->inc_alteracao_nomes ? 'SIM' : 'NÃO' }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <!-- Coluna Direita: Observações da Proposta -->
+                        <td style="width: 54%; padding-left: 15px;">
+                            <div class="obs-title">Observações:</div>
+                            <div class="obs-content">
+                                @if(!empty($airfare->observations))
+                                    {!! nl2br(e($airfare->observations)) !!}
+                                @else
+                                    • Os horários da programação estão sujeitos a disponibilidade de SLOT nos Aeroportos que operam sob esse sistema.<br>
+                                    • O valor acima não inclui atendimentos e catering.<br>
+                                    • Os valores estão sujeitos a alteração quando for realizada a solicitação de confirmação da aeronave.<br>
+                                    • Não inclui taxa de embarque, taxa de serviço (10%) e IOF (3,5%).
+                                @endif
+                            </div>
+                            @if(!empty($airfare->notes))
+                                <div style="margin-top: 5px; padding: 4px 6px; background-color: #FFFDE7; border-left: 3px solid #F57F17; font-size: 7pt; color: #333333;">
+                                    <strong>Notes (Fretamento):</strong> {{ $airfare->notes }}
+                                </div>
+                            @endif
+                            @if(!empty($airfare->customer_observation))
+                                <div style="margin-top: 5px; padding: 4px 6px; background-color: #F1F8E9; border-left: 3px solid #2E7D32; font-size: 7pt; color: #333333;">
+                                    <strong>Observação Cliente:</strong> {{ $airfare->customer_observation }}
+                                </div>
+                            @endif
                         </td>
                     </tr>
                 </table>
 
-                <!-- Painel de Totais Financeiros e Impostos -->
-                <table class="tbl-totals">
+                <!-- 3. Grid de 4 Fotos da Proposta (2x2) -->
+                <table class="tbl-photos-grid">
                     <tr>
-                        <td class="{{ $isAlt ? 'tot-lbl-alt' : 'tot-lbl' }}" style="width: 15%;">TAXA DE EMBARQUE</td>
-                        <td style="width: 12%;">{{ formatCurrencyBr($airfare->taxa_embarque_unit) }}</td>
-                        <td class="{{ $isAlt ? 'tot-lbl-alt' : 'tot-lbl' }}" style="width: 25%;">TOTAL NET COM TXS SEM TX 4BTS</td>
-                        <td style="width: 15%;">{{ formatCurrencyBr($airfare->total_net_sem_4bts) }}</td>
-                        <td class="{{ $isAlt ? 'tot-lbl-alt' : 'tot-lbl' }}" style="width: 18%;">RESULTADO BRUTO</td>
-                        <td style="width: 15%; font-weight: bold;">{{ formatCurrencyBr($airfare->resultado_bruto) }}</td>
+                        <td>
+                            @php $p1 = getAirfarePhotoSrc($airfare, 1); @endphp
+                            @if(extension_loaded('gd') && $p1 && file_exists($p1))
+                                <img src="{{ $p1 }}" class="aircraft-photo">
+                            @else
+                                <div class="photo-fallback">
+                                    <span style="font-size: 8.5pt; font-weight: bold; color: #475569;">Aeronave - Foto 1</span>
+                                </div>
+                            @endif
+                        </td>
+                        <td>
+                            @php $p2 = getAirfarePhotoSrc($airfare, 2); @endphp
+                            @if(extension_loaded('gd') && $p2 && file_exists($p2))
+                                <img src="{{ $p2 }}" class="aircraft-photo">
+                            @else
+                                <div class="photo-fallback">
+                                    <span style="font-size: 8.5pt; font-weight: bold; color: #475569;">Aeronave - Foto 2</span>
+                                </div>
+                            @endif
+                        </td>
                     </tr>
                     <tr>
-                        <td class="{{ $isAlt ? 'tot-lbl-alt' : 'tot-lbl' }}">TOTAL TX EMBARQUE</td>
-                        <td>{{ formatCurrencyBr($airfare->total_taxa_embarque) }}</td>
-                        <td class="{{ $isAlt ? 'tot-lbl-alt' : 'tot-lbl' }}">TOTAL VENDA COM TXS SEM TX 4BTS</td>
-                        <td>{{ formatCurrencyBr($airfare->total_venda_sem_4bts) }}</td>
-                        <td class="{{ $isAlt ? 'tot-lbl-alt' : 'tot-lbl' }}">TAXA DE SERVIÇOS 4BTS</td>
-                        <td>{{ number_format($airfare->taxa_4bts ?: 10, 2, ',', '.') }}%</td>
-                    </tr>
-                    <tr>
-                        <td class="{{ $isAlt ? 'tot-lbl-alt' : 'tot-lbl' }}">MOEDA / CÂMBIO (R$)</td>
-                        <td>{{ $airfare->currency->sigla ?? 'REAL' }} ({{ number_format($airfare->exchange_rate_brl ?: 1, 2, ',', '.') }})</td>
-                        <td class="{{ $isAlt ? 'tot-lbl-alt' : 'tot-lbl' }}">PRAZO PROPOSTA</td>
-                        <td>{{ formatDateBr($airfare->prazo_proposta) }}</td>
-                        <td class="{{ $isAlt ? 'tot-lbl-alt' : 'tot-lbl' }}">NOTES</td>
-                        <td>{{ $airfare->notes ?: '-' }}</td>
+                        <td>
+                            @php $p3 = getAirfarePhotoSrc($airfare, 3); @endphp
+                            @if(extension_loaded('gd') && $p3 && file_exists($p3))
+                                <img src="{{ $p3 }}" class="aircraft-photo">
+                            @else
+                                <div class="photo-fallback">
+                                    <span style="font-size: 8.5pt; font-weight: bold; color: #475569;">Aeronave - Foto 3</span>
+                                </div>
+                            @endif
+                        </td>
+                        <td>
+                            @php $p4 = getAirfarePhotoSrc($airfare, 4); @endphp
+                            @if(extension_loaded('gd') && $p4 && file_exists($p4))
+                                <img src="{{ $p4 }}" class="aircraft-photo">
+                            @else
+                                <div class="photo-fallback">
+                                    <span style="font-size: 8.5pt; font-weight: bold; color: #475569;">Aeronave - Foto 4</span>
+                                </div>
+                            @endif
+                        </td>
                     </tr>
                 </table>
+                <div class="disclaimer-txt">* Imagens meramente ilustrativas</div>
+
             </div>
-
-            <!-- Exibição de Fotos (se cadastradas no primeiro ou neste frete) -->
-            @if($airfare->photo_1 || $airfare->photo_2 || $airfare->photo_3 || $airfare->photo_4)
-                <div class="photos-container">
-                    <table class="photos-table">
-                        <tr>
-                            <td class="photo-cell">
-                                <div class="photo-box">
-                                    @if($airfare->photo_1) <img src="{{ getImgSrc($airfare->photo_1) }}" class="photo-img"> @endif
-                                </div>
-                            </td>
-                            <td class="photo-cell">
-                                <div class="photo-box">
-                                    @if($airfare->photo_2) <img src="{{ getImgSrc($airfare->photo_2) }}" class="photo-img"> @endif
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="photo-cell">
-                                <div class="photo-box">
-                                    @if($airfare->photo_3) <img src="{{ getImgSrc($airfare->photo_3) }}" class="photo-img"> @endif
-                                </div>
-                            </td>
-                            <td class="photo-cell">
-                                <div class="photo-box">
-                                    @if($airfare->photo_4) <img src="{{ getImgSrc($airfare->photo_4) }}" class="photo-img"> @endif
-                                </div>
-                            </td>
-                        </tr>
-                    </table>
-                    <div class="disclaimer">* Imagens meramente ilustrativas</div>
-                </div>
-            @endif
         @endforeach
     @endif
 
-    <!-- Seção de Notas Padrão -->
+    <!-- 4. Seção de Notas Legais Padrão -->
     <div class="notes-section">
-        <div class="notes-header">Notas</div>
-        <div class="notes-body">
+        <div class="notes-hdr">Notas</div>
+        <div class="notes-txt">
             <p>Todas as ofertas estão sujeitas à aprovação final de conformidade [Risco], disponibilidade da aeronave e da tripulação no momento da confirmação da reserva, programação necessária, a companhia aérea obtendo slots de aeroporto, estacionamento e permissões nos aeroportos solicitados e todas as permissões e autorizações de rota.</p>
             <p>A menos que especificado acima, as ofertas são totalmente inclusivas da aeronave, taxas e encargos operacionais padrão. Excluídos, a menos que indicado acima, estão quaisquer taxas de manuseio fora do horário comercial e taxas de extensão, uso de telefone via satélite (se aplicável), desgelo da aeronave e / ou hangaragem, se necessário, custos excepcionais de catering e quaisquer impostos sobre carbono, ETS e similares cobrados pelo operador.</p>
             <p>Todas as ofertas estão sujeitas a sobretaxas de combustível [e flutuações cambiais] devido a variações de mercado. Os voos são operados de acordo com os termos e condições do nosso contrato padrão de sublocação. As fotos mostradas são apenas para fins de indicação, a aeronave real pode ser diferente.</p>
         </div>
     </div>
 
-    <!-- Rodapé -->
-    <div class="footer-bar">
-        APENAS COTAÇÃO – NENHUM BLOQUEIO FOI REALIZADO
-    </div>
+    <!-- 5. Rodapé Verde -->
+    <div class="footer-green-bar"></div>
 
 </body>
 </html>

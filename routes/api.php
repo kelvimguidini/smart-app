@@ -315,8 +315,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('event-airfares/{id}', [\App\Http\Controllers\Api\EventAirfareApiController::class, 'destroy']);
     Route::post('event-airfares/opts', [\App\Http\Controllers\Api\EventAirfareApiController::class, 'storeOpt']);
     Route::delete('event-airfares/opts/{id}', [\App\Http\Controllers\Api\EventAirfareApiController::class, 'destroyOpt']);
-    Route::post('event-airfares/passengers', [\App\Http\Controllers\Api\EventAirfareApiController::class, 'storePassenger']);
-    Route::delete('event-airfares/passengers/{id}', [\App\Http\Controllers\Api\EventAirfareApiController::class, 'destroyPassenger']);
+    Route::get('airports/search', [\App\Http\Controllers\Api\AirportApiController::class, 'search']);
 });
 
 

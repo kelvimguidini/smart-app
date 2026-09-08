@@ -191,7 +191,7 @@
                             <i class="fas fa-history"></i>
                           </button>
                           <a
-                            *ngIf="hasPermission('event_admin')"
+                            *ngIf="hasPermission('event_admin') || hasPermission('hotel_operator') || hasPermission('air_operator') || hasPermission('land_operator')"
                             [routerLink]="['/event', event.id]"
                             class="btn btn-primary text-white shadow-sm btn-action"
                             data-tooltip="Editar Evento">

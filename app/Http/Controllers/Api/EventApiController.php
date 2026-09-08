@@ -139,7 +139,7 @@ class EventApiController extends Controller
      */
     public function listEvents(Request $request)
     {
-        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator')) {
+        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator') && !Gate::allows('air_operator') && !Gate::allows('land_operator')) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -156,7 +156,7 @@ class EventApiController extends Controller
      */
     public function getEditData(Request $request, $id = 0)
     {
-        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator')) {
+        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator') && !Gate::allows('air_operator') && !Gate::allows('land_operator')) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -330,7 +330,7 @@ class EventApiController extends Controller
      */
     public function destroy($id)
     {
-        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator')) {
+        if (!Gate::allows('event_admin') && !Gate::allows('hotel_operator') && !Gate::allows('air_operator') && !Gate::allows('land_operator')) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 

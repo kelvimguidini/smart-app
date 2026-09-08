@@ -1092,6 +1092,16 @@
           </div>
         </ng-container>
 
+        <!-- Empty Page State -->
+        <div
+          *ngIf="
+            (activeTab === 1 ? eventHotels : activeTab === 2 ? eventABs : activeTab === 3 ? eventHalls : activeTab === 4 ? eventAdds : eventTransports)
+              ?.length === 0
+          "
+          class="alert alert-secondary py-5 text-center shadow-sm">
+          <i class="fas fa-folder-open fa-3x mb-3 text-muted"></i>
+          <h5 class="text-secondary font-weight-bold">Nenhum fornecedor vinculado</h5>
+          <p class="text-muted mb-0">Use o botão no topo para vincular um fornecedor a este evento.</p>
         </div>
       </div>
 
@@ -1105,15 +1115,6 @@
           </h5>
 
           <div class="d-flex gap-2">
-            <!-- View Details Toggle Button -->
-            <button
-              type="button"
-              class="btn btn-sm btn-info text-white shadow-sm"
-              (click)="toggleDetails('airfare')">
-              <i class="fas" [ngClass]="showDetailsAirfare ? 'fa-eye-slash' : 'fa-eye'"></i>
-              {{ showDetailsAirfare ? ' Ocultar Detalhes' : ' Exibir Detalhes' }}
-            </button>
-
             <!-- Vincular Fornecedor button -->
             <button
               *ngIf="!isReadOnly"
@@ -1132,7 +1133,7 @@
             <div class="card-header bg-light py-3 d-sm-flex align-items-center justify-content-between">
               <div>
                 <h6 class="m-0 font-weight-bold text-primary">
-                  Orçamento Fretamento {{ provIdx + 1 }}: {{ item.airline?.name || item.provider?.name || item.aircraft || 'Fretamento' }}
+                  Orçamento Fretamento {{ provIdx + 1 }}: {{ item.airline?.name || item.provider?.name || item.equipment || 'Fretamento' }}
                   <span
                     class="badge ms-2"
                     [ngClass]="item.provider?.national ? 'bg-success' : 'bg-info'">
@@ -1152,10 +1153,10 @@
                 <button
                   type="button"
                   class="btn btn-sm btn-outline-success"
-                  title="Adicionar Opção de Voo"
+                  title="Novo Trecho"
                   (click)="openAddOpt('airfare', item.id)">
                   <i class="fas fa-plus me-1"></i>
-                  Adicionar Tarifa
+                  Novo Trecho
                 </button>
                 <app-confirm-modal
                   [btnClass]="'btn btn-sm btn-outline-danger'"
@@ -1171,295 +1172,261 @@
               </div>
             </div>
 
-            <div class="card-body p-3">
-              <!-- Summary Table -->
-              <div class="table-responsive mb-3">
-                <table class="table table-bordered align-middle mb-0 bg-white shadow-sm" style="font-size: 0.9rem;">
-                  <thead class="bg-light text-dark">
+            <div class="card-body p-0">
+              <!-- Top Info Bar: Charter Airfare Metadata (Equipamento, Pax, Prazos) -->
+              <div class="bg-light px-3 py-2 border-bottom d-flex flex-wrap align-items-center justify-content-between gap-3" style="font-size: 0.85rem;">
+                <div>
+                  <span class="font-weight-bold text-secondary me-1"><i class="fas fa-plane me-1 text-primary"></i>Equipamento:</span>
+                  <span class="badge bg-primary text-white font-weight-bold" style="font-size: 0.82rem;">{{ item.equipment || 'Não informado' }}</span>
+                </div>
+                <div class="d-flex align-items-center gap-1">
+                  <span class="font-weight-bold text-secondary me-1"><i class="fas fa-users me-1 text-primary"></i>Distribuição PAX:</span>
+                  <span class="badge bg-light text-dark border">First: {{ item.pax_first || 0 }}</span>
+                  <span class="badge bg-light text-dark border">Executiva: {{ item.pax_executiva || 0 }}</span>
+                  <span class="badge bg-light text-dark border">Premium: {{ item.pax_premium || 0 }}</span>
+                  <span class="badge bg-light text-dark border">Econômica: {{ item.pax_economica || 0 }}</span>
+                  <span class="badge bg-success text-white font-weight-bold ms-1">TOTAL: {{ item.total_pax || 0 }} PAX</span>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                  <div>
+                    <span class="font-weight-bold text-secondary me-1"><i class="far fa-calendar-alt me-1 text-primary"></i>Prazo:</span>
+                    <span class="text-dark font-weight-bold">{{ item.deadline_date ? (item.deadline_date | date: 'dd/MM/yyyy') : '-' }}</span>
+                  </div>
+                  <div>
+                    <span class="font-weight-bold text-secondary me-1"><i class="far fa-clock me-1 text-warning"></i>Prazo Cia:</span>
+                    <span class="text-dark font-weight-bold">{{ item.prazo_cia ? (item.prazo_cia | date: 'dd/MM/yyyy') : '-' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Main Table: Flight Legs + Financials + Footer Summary -->
+              <div class="table-responsive">
+                <table class="table table-bordered align-middle mb-0 table-tariffs shadow-sm" style="min-width: 1200px">
+                  <thead>
+                    <!-- Row 1: Grouped Headers -->
                     <tr>
-                      <th>Contato</th>
-                      <th>E-mail</th>
-                      <th>Telefone</th>
-                      <th>Moeda</th>
-                      <th>ISS (%)</th>
-                      <th>Taxa 4BTS (%)</th>
-                      <th>Total Custo</th>
-                      <th>Total Venda</th>
-                      <th>Margem (%)</th>
-                      <th>Val. Faturamento (Custo)</th>
-                      <th>Val. Faturamento (Venda)</th>
+                      <th colspan="7" class="text-start bg-light text-dark font-weight-bold">
+                        <i class="fas fa-route me-1 text-primary"></i> Trechos de Voo (Fretamento)
+                      </th>
+                      <th class="bg-light text-center font-weight-bold text-dark" style="width: 90px;">Mark Up</th>
+                      <th class="bg-warning-header text-center font-weight-bold text-white" style="width: 140px;">Valor de Custo</th>
+                      <th class="bg-success-header text-center font-weight-bold text-white" style="width: 140px;">Valor de Venda</th>
+                      <th class="align-middle text-center bg-light text-dark font-weight-bold" style="width: 110px;" *ngIf="!isReadOnly">Ações</th>
+                    </tr>
+
+                    <!-- Row 2: Sub-headers -->
+                    <tr>
+                      <th class="text-center font-weight-bold" style="width: 80px;">CIA</th>
+                      <th class="text-center font-weight-bold" style="width: 90px;">VOO</th>
+                      <th class="text-center font-weight-bold">DE</th>
+                      <th class="text-center font-weight-bold">PARA</th>
+                      <th class="text-center font-weight-bold" style="width: 110px;">DATAS</th>
+                      <th class="text-center font-weight-bold" style="width: 90px;">SAÍDA</th>
+                      <th class="text-center font-weight-bold" style="width: 90px;">CHEGADA</th>
+                      <th class="text-center font-weight-bold">Custo / Venda</th>
+                      <th class="text-end font-weight-bold text-warning-emphasis">Custo Fretamento</th>
+                      <th class="text-end font-weight-bold text-success">Venda Fretamento</th>
+                      <th class="text-center font-weight-bold" style="width: 110px;" *ngIf="!isReadOnly">Trecho</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td>{{ item.provider?.contact || '-' }}</td>
-                      <td>{{ item.provider?.email || '-' }}</td>
-                      <td>{{ item.provider?.phone || '-' }}</td>
-                      <td>{{ item.currency?.sigla || '-' }}</td>
-                      <td>{{ item.iss_percent || 0 }}%</td>
-                      <td>{{ item.taxa_4bts || 0 }}%</td>
-                      <td class="font-weight-bold text-warning">{{ formatCurrency(sumCost(item), item.currency?.sigla) }}</td>
-                      <td class="font-weight-bold text-success">{{ formatCurrency(sumSale(item), item.currency?.sigla) }}</td>
-                      <td class="font-weight-bold">
-                        {{ sumSale(item) > 0 ? ((1 - sumCost(item) / sumSale(item)) * 100 | number: '1.2-2') : '0.00' }}%
+                    <!-- Empty list placeholder -->
+                    <tr *ngIf="(!item.eventAirfareOpts || item.eventAirfareOpts.length === 0) && (!item.event_airfare_opts || item.event_airfare_opts.length === 0)">
+                      <td [attr.colspan]="isReadOnly ? 10 : 11" class="py-4 text-muted text-center">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Nenhum trecho cadastrado para este orçamento de fretamento.
                       </td>
-                      <td class="font-weight-bold text-warning bg-warning-light">
-                        {{ formatCurrency(sumCost(item) + sumTaxes(item, 'iss'), item.currency?.sigla) }}
+                    </tr>
+
+                    <!-- Flight Legs Loop -->
+                    <tr *ngFor="let opt of item.eventAirfareOpts || item.event_airfare_opts; let optIdx = index">
+                      <td class="text-center font-weight-bold">{{ opt.outbound_airline?.name || item.airline?.name || '-' }}</td>
+                      <td class="text-center font-weight-bold text-primary">{{ opt.outbound_flight_number || '-' }}</td>
+                      <td class="text-center">{{ opt.outbound_origin || '-' }}</td>
+                      <td class="text-center">{{ opt.outbound_destination || '-' }}</td>
+                      <td class="text-center">{{ opt.outbound_date ? (opt.outbound_date | date: 'dd/MM/yyyy') : '-' }}</td>
+                      <td class="text-center">{{ formatTime(opt.outbound_departure_time) }}</td>
+                      <td class="text-center">{{ formatTime(opt.outbound_arrival_time) }}</td>
+
+                      <!-- Financial Columns (Spans across all segments of this charter) -->
+                      <td
+                        *ngIf="optIdx === 0"
+                        [attr.rowspan]="(item.eventAirfareOpts || item.event_airfare_opts).length"
+                        class="text-center font-weight-bold align-middle bg-light text-primary"
+                        style="font-size: 0.95rem;">
+                        {{ getAirfareMarkup(item) }}
                       </td>
-                      <td class="font-weight-bold text-success bg-success-light">
-                        {{ formatCurrency(sumSale(item) + sumTaxes(item, 'iss'), item.currency?.sigla) }}
+                      <td
+                        *ngIf="optIdx === 0"
+                        [attr.rowspan]="(item.eventAirfareOpts || item.event_airfare_opts).length"
+                        class="text-end font-weight-bold align-middle bg-warning-light text-dark"
+                        style="font-size: 0.95rem;">
+                        {{ formatCurrency(item.total_net_sem_4bts || 0, item.currency?.sigla) }}
+                      </td>
+                      <td
+                        *ngIf="optIdx === 0"
+                        [attr.rowspan]="(item.eventAirfareOpts || item.event_airfare_opts).length"
+                        class="text-end font-weight-bold align-middle bg-success-light text-success"
+                        style="font-size: 0.95rem;">
+                        {{ formatCurrency(getAirfareVendaCalc(item), item.currency?.sigla) }}
+                      </td>
+
+                      <!-- Action Buttons per Leg -->
+                      <td *ngIf="!isReadOnly" class="align-middle text-center" style="width: 110px;">
+                        <div class="d-flex justify-content-center align-items-center gap-1">
+                          <button
+                            type="button"
+                            class="btn btn-info text-white shadow-sm btn-action"
+                            title="Editar Trecho"
+                            data-tooltip="Editar Trecho"
+                            [disabled]="statusBlockEdit(item)"
+                            (click)="openAddOpt('airfare', item.id, opt)">
+                            <i class="fas fa-edit"></i>
+                          </button>
+                          <button
+                            type="button"
+                            class="btn btn-secondary text-white shadow-sm btn-action"
+                            title="Clonar Trecho"
+                            data-tooltip="Clonar Trecho"
+                            [disabled]="statusBlockEdit(item)"
+                            (click)="openAddOpt('airfare', item.id, opt, true)">
+                            <i class="fas fa-clone"></i>
+                          </button>
+                          <app-confirm-modal
+                            [btnClass]="'btn btn-danger text-white shadow-sm btn-action'"
+                            [modalTitle]="'Remover Trecho'"
+                            [message]="'Deseja realmente remover este trecho?'"
+                            [okButtonLabel]="'Remover'"
+                            [tooltip]="'Excluir Trecho'"
+                            (confirm)="deleteOpt('airfare', opt.id)">
+                            <span modal-button><i class="fas fa-trash"></i></span>
+                          </app-confirm-modal>
+                        </div>
+                      </td>
+                    </tr>
+
+                    <!-- Total / Summary Row 1 (Financials & Taxes) -->
+                    <tr class="table-subheader">
+                      <td colspan="2" class="sticky-col font-weight-bold text-start">Tx. Embarque (Unit.):</td>
+                      <td class="font-weight-bold text-start text-dark">
+                        {{ formatCurrency(item.taxa_embarque_unit || 0, item.currency?.sigla) }}
+                      </td>
+                      <td class="font-weight-bold text-end">Total Tx. Embarque:</td>
+                      <td class="text-center font-weight-bold text-dark">
+                        {{ formatCurrency(((item.taxa_embarque_unit || 0) * (item.total_pax || 0)), item.currency?.sigla) }}
+                      </td>
+                      <td colspan="2" class="bg-warning-solid font-weight-bold text-end">Total Custo (c/ Txs):</td>
+                      <td class="bg-warning-solid font-weight-bold text-end" colspan="2">
+                        {{ formatCurrency(getAirfareNetComTxs(item), item.currency?.sigla) }}
+                      </td>
+                      <td class="bg-success-solid font-weight-bold text-end">Total Venda (c/ Txs):</td>
+                      <td class="bg-success-solid font-weight-bold text-end" [attr.colspan]="isReadOnly ? 1 : 2">
+                        {{ formatCurrency(getAirfareVendaComTxs(item), item.currency?.sigla) }}
+                      </td>
+                    </tr>
+
+                    <!-- Total / Summary Row 2 (Resultado Bruto / Margem) -->
+                    <tr class="table-subheader">
+                      <td colspan="2" class="sticky-col font-weight-bold text-start">Resultado Bruto (Lucro):</td>
+                      <td class="font-weight-bold text-start text-primary" colspan="3">
+                        {{ formatCurrency(getAirfareResultadoBruto(item), item.currency?.sigla) }}
+                      </td>
+                      <td colspan="2" class="font-weight-bold text-end">Margem Estimada (%):</td>
+                      <td class="text-end font-weight-bold text-primary" [attr.colspan]="isReadOnly ? 3 : 4">
+                        {{ getAirfareMargemPercent(item) | number: '1.2-2' }}%
+                      </td>
+                    </tr>
+
+                    <!-- Inclusions & Services Row (INCLUI / STATUS) -->
+                    <tr class="observation-row">
+                      <td colspan="2" class="sticky-col text-start font-weight-bold text-dark">
+                        <i class="fas fa-concierge-bell me-1 text-primary"></i> INCLUI / SERVIÇOS:
+                      </td>
+                      <td [attr.colspan]="isReadOnly ? 8 : 9" class="text-start py-2">
+                        <div class="d-flex flex-wrap gap-2">
+                          <span class="badge" [ngClass]="item.inc_taxa_embarque ? 'bg-success' : 'bg-secondary'">
+                            Taxas de Embarque: {{ item.inc_taxa_embarque ? 'SIM' : 'NÃO' }}
+                          </span>
+                          <span class="badge" [ngClass]="item.inc_servico_bordo ? 'bg-success' : 'bg-secondary'">
+                            Serviço de Bordo: {{ item.inc_servico_bordo ? 'SIM' : 'NÃO' }}
+                          </span>
+                          <span class="badge bg-light text-dark border">
+                            <i class="fas fa-suitcase me-1 text-primary"></i>Porão: {{ item.inc_porao || '23 kg por pessoa' }}
+                          </span>
+                          <span class="badge bg-light text-dark border">
+                            <i class="fas fa-briefcase me-1 text-primary"></i>Bagagem a bordo: {{ item.inc_bagagem_bordo || '10 kg por pessoa' }}
+                          </span>
+                          <span class="badge" [ngClass]="item.inc_sala_vip ? 'bg-success' : 'bg-secondary'">
+                            Sala VIP: {{ item.inc_sala_vip ? 'SIM' : 'NÃO' }}
+                          </span>
+                          <span class="badge bg-light text-dark border">
+                            FBO Origem: {{ item.inc_fbo_origem || '0' }}
+                          </span>
+                          <span class="badge bg-light text-dark border">
+                            FBO Destino: {{ item.inc_fbo_destino || '0' }}
+                          </span>
+                          <span class="badge" [ngClass]="item.inc_alteracao_nomes ? 'bg-success' : 'bg-secondary'">
+                            Alteração Nomes: {{ item.inc_alteracao_nomes ? 'SIM' : 'NÃO' }}
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+
+                    <!-- Faturamento e Parâmetros Row -->
+                    <tr class="observation-row">
+                      <td colspan="2" class="sticky-col text-start font-weight-bold">TAXA 4BTS:</td>
+                      <td class="text-start font-weight-bold text-dark" colspan="3">
+                        <span class="badge bg-secondary">Tx 4BTS: {{ item.taxa_4bts || 10 }}%</span>
+                      </td>
+                      <td colspan="2" class="font-weight-bold text-end">Custo Total:</td>
+                      <td colspan="2" class="bg-warning-solid font-weight-bold text-end">
+                        {{ formatCurrency(getAirfareNetComTxs(item), item.currency?.sigla) }}
+                      </td>
+                      <td class="font-weight-bold text-end">Venda Total:</td>
+                      <td class="bg-success-solid font-weight-bold text-end" [attr.colspan]="isReadOnly ? 1 : 2">
+                        {{ formatCurrency(getAirfareVendaComTxs(item), item.currency?.sigla) }}
+                      </td>
+                    </tr>
+
+                    <!-- Notes Row -->
+                    <tr class="observation-row" *ngIf="item.notes">
+                      <td colspan="2" class="sticky-col text-start font-weight-bold">NOTES (FRETAMENTO):</td>
+                      <td [attr.colspan]="isReadOnly ? 8 : 9" class="text-start text-dark">
+                        {{ item.notes }}
+                      </td>
+                    </tr>
+
+                    <!-- Internal Observation Row -->
+                    <tr class="observation-row">
+                      <td colspan="2" class="sticky-col text-start font-weight-bold">OBSERVAÇÃO INTERNA:</td>
+                      <td [attr.colspan]="isReadOnly ? 8 : 9" class="text-start text-dark">
+                        {{ item.internal_observation || '-' }}
+                      </td>
+                    </tr>
+
+                    <!-- Customer Observation Row -->
+                    <tr class="observation-row">
+                      <td colspan="2" class="sticky-col text-start font-weight-bold">OBSERVAÇÃO CLIENTE:</td>
+                      <td [attr.colspan]="isReadOnly ? 8 : 9" class="text-start text-dark">
+                        {{ item.customer_observation || '-' }}
+                      </td>
+                    </tr>
+
+                    <!-- Proposta Fotos Row -->
+                    <tr class="observation-row" *ngIf="item.photo_1 || item.photo_2 || item.photo_3 || item.photo_4">
+                      <td colspan="2" class="sticky-col text-start font-weight-bold">FOTOS DA PROPOSTA:</td>
+                      <td [attr.colspan]="isReadOnly ? 8 : 9" class="text-start py-2">
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                          <ng-container *ngFor="let p of [item.photo_1, item.photo_2, item.photo_3, item.photo_4]">
+                            <a *ngIf="p" [href]="resolvePhotoUrl(p)" target="_blank" class="d-inline-block border rounded p-1 bg-light shadow-sm">
+                              <img [src]="resolvePhotoUrl(p)" style="height: 50px; max-width: 80px; object-fit: contain;" class="rounded">
+                            </a>
+                          </ng-container>
+                        </div>
                       </td>
                     </tr>
                   </tbody>
                 </table>
-              </div>
-
-              <!-- Options Table -->
-              <div class="mb-4">
-                <h6 class="font-weight-bold text-primary mb-2">
-                  <i class="fas fa-plane-departure me-1"></i>
-                  Cotações/Opções de Voo
-                </h6>
-                <div class="table-responsive">
-                  <table class="table table-bordered table-striped align-middle mb-0 table-tariffs" style="min-width: 1200px">
-                    <thead class="table-dark">
-                      <tr>
-                        <th colspan="7" class="text-center font-weight-bold border-bottom-0 bg-primary">Ida (Outbound)</th>
-                        <th colspan="7" class="text-center font-weight-bold border-bottom-0 bg-info">Volta (Inbound)</th>
-                        <th colspan="5" class="text-center font-weight-bold border-bottom-0 bg-success">Dados Financeiros e Regras</th>
-                        <ng-container *ngIf="showDetailsAirfare">
-                          <th colspan="6" class="text-center font-weight-bold border-bottom-0 bg-secondary">Detalhes Adicionais</th>
-                        </ng-container>
-                        <th rowspan="2" class="align-middle text-center" *ngIf="!isReadOnly">Ações</th>
-                      </tr>
-                      <tr>
-                        <!-- Ida -->
-                        <th>Cia</th>
-                        <th>Voo</th>
-                        <th>Classe</th>
-                        <th>Data</th>
-                        <th>Origem</th>
-                        <th>Destino</th>
-                        <th>Dep/Arr</th>
-                        <!-- Volta -->
-                        <th>Cia</th>
-                        <th>Voo</th>
-                        <th>Classe</th>
-                        <th>Data</th>
-                        <th>Origem</th>
-                        <th>Destino</th>
-                        <th>Dep/Arr</th>
-                        <!-- Fin & Regras -->
-                        <th>Qtd/Pax</th>
-                        <th>Custo Unit.</th>
-                        <th>Total Custo</th>
-                        <th>Venda Unit.</th>
-                        <th>Total Venda</th>
-                        <!-- Details -->
-                        <ng-container *ngIf="showDetailsAirfare">
-                          <th>Cabine</th>
-                          <th>Bagagem</th>
-                          <th>Prop. Rec. (%)</th>
-                          <th>Kickback (%)</th>
-                          <th>Comp. Site</th>
-                          <th>Comp. Cliente</th>
-                        </ng-container>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <!-- Empty list placeholder -->
-                      <tr *ngIf="(!item.eventAirfareOpts || item.eventAirfareOpts.length === 0) && (!item.event_airfare_opts || item.event_airfare_opts.length === 0)">
-                        <td [attr.colspan]="showDetailsAirfare ? 26 : 20" class="py-4 text-muted text-center">
-                          <i class="fas fa-info-circle me-1"></i>
-                          Nenhuma tarifa ou detalhe cadastrado para este fornecedor.
-                        </td>
-                      </tr>
-
-                      <!-- Options Loop -->
-                      <tr *ngFor="let opt of item.eventAirfareOpts || item.event_airfare_opts">
-                        <!-- Ida -->
-                        <td>{{ opt.outbound_airline?.name || '-' }}</td>
-                        <td>{{ opt.outbound_flight_number || '-' }}</td>
-                        <td>{{ opt.outbound_class || '-' }}</td>
-                        <td>{{ opt.outbound_date | date: 'dd/MM/yyyy' }}</td>
-                        <td>{{ opt.outbound_origin || '-' }}</td>
-                        <td>{{ opt.outbound_destination || '-' }}</td>
-                        <td>{{ opt.outbound_departure_time || '-' }} / {{ opt.outbound_arrival_time || '-' }}</td>
-
-                        <!-- Volta -->
-                        <td>{{ opt.inbound_airline?.name || '-' }}</td>
-                        <td>{{ opt.inbound_flight_number || '-' }}</td>
-                        <td>{{ opt.inbound_class || '-' }}</td>
-                        <td>{{ opt.inbound_date | date: 'dd/MM/yyyy' }}</td>
-                        <td>{{ opt.inbound_origin || '-' }}</td>
-                        <td>{{ opt.inbound_destination || '-' }}</td>
-                        <td>{{ opt.inbound_departure_time || '-' }} / {{ opt.inbound_arrival_time || '-' }}</td>
-
-                        <!-- Fin & Regras -->
-                        <td class="text-center">{{ opt.count || 0 }}</td>
-                        <td class="text-end">{{ formatCurrency(unitCost(opt), item.currency?.sigla) }}</td>
-                        <td class="bg-warning-solid font-weight-bold text-end">
-                          {{ formatCurrency(unitCost(opt) * opt.count, item.currency?.sigla) }}
-                        </td>
-                        <td class="text-end">{{ formatCurrency(unitSale(opt), item.currency?.sigla) }}</td>
-                        <td class="bg-success-solid font-weight-bold text-end">
-                          {{ formatCurrency(unitSale(opt) * opt.count, item.currency?.sigla) }}
-                        </td>
-
-                        <!-- Details -->
-                        <ng-container *ngIf="showDetailsAirfare">
-                          <td>{{ opt.cabin?.name || '-' }}</td>
-                          <td>{{ opt.baggage?.name || '-' }}</td>
-                          <td class="text-center">{{ opt.received_proposal_percent }}%</td>
-                          <td class="text-center">{{ opt.kickback }}%</td>
-                          <td class="text-end">{{ formatCurrency(opt.compare_website || 0, item.currency?.sigla) }}</td>
-                          <td class="text-end">{{ formatCurrency(opt.compare_client || 0, item.currency?.sigla) }}</td>
-                        </ng-container>
-
-                        <td class="text-center">
-                          <span class="badge" [ngClass]="{
-                            'bg-secondary': opt.status === 'created' || !opt.status,
-                            'bg-warning': opt.status === 'pending',
-                            'bg-success': opt.status === 'confirmed',
-                            'bg-danger': opt.status === 'cancelled'
-                          }">
-                            {{
-                              opt.status === 'created' ? 'Criado' :
-                              opt.status === 'pending' ? 'Pendente' :
-                              opt.status === 'confirmed' ? 'Confirmado' :
-                              opt.status === 'cancelled' ? 'Cancelado' : (opt.status || 'Criado')
-                            }}
-                          </span>
-                        </td>
-
-                        <!-- Action Buttons -->
-                        <td *ngIf="!isReadOnly">
-                          <div class="d-flex justify-content-center gap-1">
-                            <button
-                              type="button"
-                              class="btn btn-info text-white shadow-sm btn-action btn-sm"
-                              title="Editar Tarifa"
-                              [disabled]="statusBlockEdit(item)"
-                              (click)="openAddOpt('airfare', item.id, opt)">
-                              <i class="fas fa-edit"></i>
-                            </button>
-                            <button
-                              type="button"
-                              class="btn btn-secondary text-white shadow-sm btn-action btn-sm"
-                              title="Clonar Tarifa"
-                              [disabled]="statusBlockEdit(item)"
-                              (click)="openAddOpt('airfare', item.id, opt, true)">
-                              <i class="fas fa-clone"></i>
-                            </button>
-                            <app-confirm-modal
-                              [btnClass]="'btn btn-danger text-white shadow-sm btn-action btn-sm'"
-                              [modalTitle]="'Remover Tarifa'"
-                              [message]="'Deseja realmente remover esta tarifa?'"
-                              [okButtonLabel]="'Remover'"
-                              (confirm)="deleteOpt('airfare', opt.id)">
-                              <span modal-button><i class="fas fa-trash"></i></span>
-                            </app-confirm-modal>
-                          </div>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <!-- Ficha de Voo (Passageiros) Section -->
-              <div class="mt-4 border-top pt-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                  <h6 class="font-weight-bold text-primary mb-0">
-                    <i class="fas fa-users me-1"></i>
-                    Ficha de Voo (Lista de Passageiros)
-                  </h6>
-                  <button
-                    *ngIf="!isReadOnly"
-                    type="button"
-                    class="btn btn-sm btn-success shadow-sm"
-                    (click)="openAddPassenger(item.id)">
-                    <i class="fas fa-user-plus me-1"></i>
-                    Adicionar Passageiro
-                  </button>
-                </div>
-
-                <div class="table-responsive">
-                  <table class="table table-bordered table-hover align-middle mb-0 bg-white" style="min-width: 1200px; font-size: 0.9rem;">
-                    <thead class="table-secondary text-dark">
-                      <tr>
-                        <th rowspan="2" class="align-middle text-start">Nome Completo</th>
-                        <th rowspan="2" class="align-middle text-center">Documento</th>
-                        <th rowspan="2" class="align-middle text-center">Nascimento</th>
-                        <th rowspan="2" class="align-middle text-center">Val. Passaporte</th>
-                        <th colspan="4" class="text-center bg-primary text-white font-weight-bold">Ida (Outbound)</th>
-                        <th colspan="4" class="text-center bg-info text-white font-weight-bold">Volta (Inbound)</th>
-                        <th rowspan="2" class="align-middle text-center" style="width: 100px" *ngIf="!isReadOnly">Ações</th>
-                      </tr>
-                      <tr>
-                        <th>Data</th>
-                        <th>Origem</th>
-                        <th>Destino</th>
-                        <th>Horário (Dep/Arr)</th>
-                        <th>Data</th>
-                        <th>Origem</th>
-                        <th>Destino</th>
-                        <th>Horário (Dep/Arr)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr *ngIf="!item.passengers || item.passengers.length === 0">
-                        <td colspan="13" class="py-3 text-muted text-center">
-                          Nenhum passageiro cadastrado para este voo.
-                        </td>
-                      </tr>
-                      <tr *ngFor="let pax of item.passengers">
-                        <td class="font-weight-bold text-dark text-start">{{ pax.name }}</td>
-                        <td class="text-center">{{ pax.document || '-' }}</td>
-                        <td class="text-center">{{ pax.birth_date | date: 'dd/MM/yyyy' }}</td>
-                        <td class="text-center">{{ pax.passport_validity | date: 'dd/MM/yyyy' }}</td>
-
-                        <!-- Outbound -->
-                        <td class="text-center">{{ pax.outbound_date | date: 'dd/MM/yyyy' }}</td>
-                        <td>{{ pax.outbound_origin || '-' }}</td>
-                        <td>{{ pax.outbound_destination || '-' }}</td>
-                        <td class="text-center">
-                          {{ pax.outbound_departure || '-' }} <span *ngIf="pax.outbound_departure && pax.outbound_arrival">/</span> {{ pax.outbound_arrival || '-' }}
-                        </td>
-
-                        <!-- Inbound -->
-                        <td class="text-center">{{ pax.inbound_date | date: 'dd/MM/yyyy' }}</td>
-                        <td>{{ pax.inbound_origin || '-' }}</td>
-                        <td>{{ pax.inbound_destination || '-' }}</td>
-                        <td class="text-center">
-                          {{ pax.inbound_departure || '-' }} <span *ngIf="pax.inbound_departure && pax.inbound_arrival">/</span> {{ pax.inbound_arrival || '-' }}
-                        </td>
-
-                        <!-- Passenger Actions -->
-                        <td *ngIf="!isReadOnly">
-                          <div class="d-flex justify-content-center gap-1">
-                            <button
-                              type="button"
-                              class="btn btn-outline-info btn-sm btn-action"
-                              title="Editar Passageiro"
-                              (click)="openAddPassenger(item.id, pax)">
-                              <i class="fas fa-edit"></i>
-                            </button>
-                            <app-confirm-modal
-                              [btnClass]="'btn btn-outline-danger btn-sm btn-action'"
-                              [modalTitle]="'Remover Passageiro'"
-                              [message]="'Tem certeza de que deseja remover o passageiro ' + pax.name + '?'"
-                              [okButtonLabel]="'Remover'"
-                              (confirm)="deletePassenger(pax.id)">
-                              <span modal-button><i class="fas fa-trash"></i></span>
-                            </app-confirm-modal>
-                          </div>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
               </div>
             </div>
           </div>
@@ -1473,6 +1440,7 @@
         </div>
       </div>
     </div>
+  </div>
 
   <!-- ==================== DIALOG MODALS ==================== -->
 
@@ -1501,7 +1469,7 @@
     <form (ngSubmit)="saveProviderLink()">
       <div class="row">
         <!-- Select Fornecedor (Autocomplete) -->
-        <div class="col-md-6 mb-3">
+        <div [ngClass]="providerLinkType === 'airfare' ? 'col-md-5' : 'col-md-6'" class="mb-3">
           <app-autocomplete
             id="provider_id"
             [label]="providerLinkType === 'airfare' ? 'Companhia Aérea' : 'Fornecedor'"
@@ -1518,8 +1486,20 @@
             [disabled]="providerLinkForm.id > 0"></app-autocomplete>
         </div>
 
+        <!-- Equipamento (Aéreo only - ao lado de Companhia Aérea) -->
+        <div class="col-md-4 form-group mb-3" *ngIf="providerLinkType === 'airfare'">
+          <label for="equipment" class="form-label font-weight-bold">Equipamento:</label>
+          <input
+            type="text"
+            id="equipment"
+            class="form-control"
+            placeholder="Ex: Boeing 737-700 / Turboprop"
+            [(ngModel)]="providerLinkForm.equipment"
+            name="equipment" />
+        </div>
+
         <!-- Select Moeda -->
-        <div class="col-md-6 form-group mb-3">
+        <div [ngClass]="providerLinkType === 'airfare' ? 'col-md-3' : 'col-md-6'" class="form-group mb-3">
           <label for="currency_id" class="form-label font-weight-bold">
             Moeda:
             <span class="text-danger">*</span>
@@ -1541,7 +1521,7 @@
         </div>
 
         <!-- Inputs Percentuais -->
-        <div class="col-md-3 form-group mb-3">
+        <div [ngClass]="providerLinkType === 'airfare' ? 'col-md-2' : (providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-2' : 'col-md-3')" class="form-group mb-3">
           <label for="iss_percent" class="form-label font-weight-bold">ISS (%):</label>
           <input
             type="text"
@@ -1552,7 +1532,7 @@
             name="iss_percent" />
         </div>
 
-        <div class="col-md-3 form-group mb-3">
+        <div [ngClass]="providerLinkType === 'airfare' ? 'col-md-2' : (providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-2' : 'col-md-3')" class="form-group mb-3">
           <label for="service_percent" class="form-label font-weight-bold">Serviço (%):</label>
           <input
             type="text"
@@ -1563,7 +1543,7 @@
             name="service_percent" />
         </div>
 
-        <div class="col-md-3 form-group mb-3">
+        <div [ngClass]="providerLinkType === 'airfare' ? 'col-md-2' : (providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-2' : 'col-md-3')" class="form-group mb-3">
           <label for="iva_percent" class="form-label font-weight-bold">IVA (%):</label>
           <input
             type="text"
@@ -1574,7 +1554,40 @@
             name="iva_percent" />
         </div>
 
-        <div class="col-md-3 form-group mb-3">
+        <!-- IOF (%) -->
+        <div [ngClass]="providerLinkType === 'airfare' ? 'col-md-2' : (providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-2' : 'col-md-3')" class="form-group mb-3">
+          <label for="iof" class="form-label font-weight-bold">IOF (%):</label>
+          <input
+            type="text"
+            id="iof"
+            class="form-control"
+            [class.is-invalid]="errors.iof"
+            [value]="formatPercent(providerLinkForm.iof)"
+            (input)="onPercentInput($event, 'iof', 'providerLinkForm')"
+            name="iof" />
+          <div *ngIf="errors.iof" class="text-danger mt-1">
+            <small *ngFor="let err of errors.iof" class="d-block">{{ err }}</small>
+          </div>
+        </div>
+
+        <!-- Service Charge (Turismo) - Hotel/AB only -->
+        <div class="col-md-2 form-group mb-3" *ngIf="providerLinkType === 'hotel' || providerLinkType === 'ab'">
+          <label for="service_charge" class="form-label font-weight-bold">Taxa Turismo:</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light text-muted font-weight-bold" *ngIf="getSelectedCurrencySymbol()">
+              {{ getSelectedCurrencySymbol() }}
+            </span>
+            <input
+              type="text"
+              id="service_charge"
+              class="form-control"
+              [value]="formatMoney(providerLinkForm.service_charge)"
+              (input)="onMoneyInput($event, 'service_charge', 'providerLinkForm')"
+              name="service_charge" />
+          </div>
+        </div>
+
+        <div [ngClass]="providerLinkType === 'airfare' ? 'col-md-4' : (providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-2' : 'col-md-3')" class="form-group mb-3">
           <label for="taxa_4bts" class="form-label font-weight-bold">
             Taxa 4BTS (%):
             <span class="text-danger">*</span>
@@ -1593,25 +1606,8 @@
           </div>
         </div>
 
-        <!-- Service Charge (Turismo) - Hotel/AB only -->
-        <div class="col-md-3 form-group mb-3" *ngIf="providerLinkType === 'hotel' || providerLinkType === 'ab'">
-          <label for="service_charge" class="form-label font-weight-bold">Taxa Turismo:</label>
-          <div class="input-group">
-            <span class="input-group-text bg-light text-muted font-weight-bold" *ngIf="getSelectedCurrencySymbol()">
-              {{ getSelectedCurrencySymbol() }}
-            </span>
-            <input
-              type="text"
-              id="service_charge"
-              class="form-control"
-              [value]="formatMoney(providerLinkForm.service_charge)"
-              (input)="onMoneyInput($event, 'service_charge', 'providerLinkForm')"
-              name="service_charge" />
-          </div>
-        </div>
-
         <!-- Forma de Pagamento -->
-        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-3' : 'col-md-4'" class="form-group mb-3">
+        <div [ngClass]="providerLinkType === 'airfare' ? 'col-md-3' : 'col-md-4'" class="form-group mb-3">
           <label for="payment_method" class="form-label font-weight-bold">Forma de Pagamento:</label>
           <select id="payment_method" class="form-select" [(ngModel)]="providerLinkForm.payment_method" name="payment_method">
             <option value="Indefinido">Indefinido</option>
@@ -1621,7 +1617,7 @@
         </div>
 
         <!-- Nota Fiscal -->
-        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-3' : 'col-md-4'" class="form-group mb-3">
+        <div [ngClass]="providerLinkType === 'airfare' ? 'col-md-3' : 'col-md-4'" class="form-group mb-3">
           <label for="invoice" class="form-label font-weight-bold">Nota Fiscal:</label>
           <select id="invoice" class="form-select" [(ngModel)]="providerLinkForm.invoice" name="invoice">
             <option [ngValue]="true">Sim</option>
@@ -1629,79 +1625,50 @@
           </select>
         </div>
 
-        <!-- IOF -->
-        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-3' : 'col-md-4'" class="form-group mb-3">
-          <label for="iof" class="form-label font-weight-bold">IOF (%):</label>
-          <input
-            type="text"
-            id="iof"
-            class="form-control"
-            [class.is-invalid]="errors.iof"
-            [value]="formatPercent(providerLinkForm.iof)"
-            (input)="onPercentInput($event, 'iof', 'providerLinkForm')"
-            name="iof" />
-          <div *ngIf="errors.iof" class="text-danger mt-1">
-            <small *ngFor="let err of errors.iof" class="d-block">{{ err }}</small>
-          </div>
-        </div>
-
         <!-- Prazo -->
-        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-3' : 'col-md-4'" class="form-group mb-3">
+        <div [ngClass]="providerLinkType === 'airfare' ? 'col-md-3' : 'col-md-4'" class="form-group mb-3">
           <label for="deadline_date" class="form-label font-weight-bold">Prazo:</label>
-          <input
-            type="date"
-            id="deadline_date"
-            class="form-control"
-            [class.is-invalid]="errors.deadline_date"
-            [(ngModel)]="providerLinkForm.deadline_date"
-            name="deadline_date" />
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="fas fa-calendar-alt text-primary"></i></span>
+            <input
+              type="text"
+              id="deadline_date"
+              class="form-control bg-white"
+              [class.is-invalid]="errors.deadline_date"
+              placeholder="dd/mm/aaaa"
+              [(ngModel)]="providerLinkForm.deadline_date"
+              appFlatpickr
+              name="deadline_date" />
+          </div>
           <div *ngIf="errors.deadline_date" class="text-danger mt-1">
             <small *ngFor="let err of errors.deadline_date" class="d-block">{{ err }}</small>
           </div>
         </div>
 
-        <!-- Observações -->
-        <div class="col-md-12 form-group mb-3">
-          <label for="internal_observation" class="form-label font-weight-bold">Observação Interna:</label>
-          <textarea
-            id="internal_observation"
-            rows="2"
-            class="form-control"
-            [(ngModel)]="providerLinkForm.internal_observation"
-            name="internal_observation"></textarea>
+        <!-- Prazo da Cia (Aéreo only - ao lado de Prazo) -->
+        <div class="col-md-3 form-group mb-3" *ngIf="providerLinkType === 'airfare'">
+          <label for="prazo_cia" class="form-label font-weight-bold">Prazo da Cia:</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="fas fa-calendar-alt text-warning"></i></span>
+            <input
+              type="text"
+              id="prazo_cia"
+              class="form-control bg-white"
+              placeholder="dd/mm/aaaa"
+              [(ngModel)]="providerLinkForm.prazo_cia"
+              appFlatpickr
+              name="prazo_cia" />
+          </div>
         </div>
 
-        <div class="col-md-12 form-group mb-3">
-          <label for="customer_observation" class="form-label font-weight-bold">Observação Cliente:</label>
-          <textarea
-            id="customer_observation"
-            rows="2"
-            class="form-control"
-            [(ngModel)]="providerLinkForm.customer_observation"
-            name="customer_observation"></textarea>
-        </div>
-
-        <!-- Seção Específica para Proposta de Aéreo / Fretamento (3 Blocos da Planilha) -->
+        <!-- Seção Específica para Proposta de Aéreo / Fretamento -->
         <div class="col-md-12 mb-3" *ngIf="providerLinkType === 'airfare'">
           <div class="card p-3 bg-light border border-warning shadow-sm">
             <h6 class="text-warning-emphasis font-weight-bold mb-3">
-              <i class="fas fa-plane-departure me-2"></i> Orçamento Fretamento / Cia Aérea (Bloco 2)
+              <i class="fas fa-plane-departure me-2"></i> Orçamento Fretamento / Cia Aérea
             </h6>
             
             <div class="row">
-              <div class="col-md-4 form-group mb-3">
-                <label for="aircraft" class="form-label font-weight-bold">Aeronave / Equipamento:</label>
-                <input type="text" id="aircraft" class="form-control" placeholder="Ex: Boeing 737-700" [(ngModel)]="providerLinkForm.aircraft" name="aircraft" />
-              </div>
-              <div class="col-md-4 form-group mb-3">
-                <label for="prazo_cia" class="form-label font-weight-bold">Prazo da Cia:</label>
-                <input type="text" id="prazo_cia" class="form-control" placeholder="Ex: 24h" [(ngModel)]="providerLinkForm.prazo_cia" name="prazo_cia" />
-              </div>
-              <div class="col-md-4 form-group mb-3">
-                <label for="status_contrato" class="form-label font-weight-bold">Status do Contrato:</label>
-                <input type="text" id="status_contrato" class="form-control" placeholder="Ex: Solicitado / Confirmado" [(ngModel)]="providerLinkForm.status_contrato" name="status_contrato" />
-              </div>
-
               <!-- Distribuição de Pax / Assentos -->
               <div class="col-md-12 mb-3">
                 <label class="form-label font-weight-bold text-dark mb-1">Distribuição de Assentos (PAX):</label>
@@ -1780,27 +1747,97 @@
                 </div>
               </div>
 
-              <!-- Observações & Notes -->
-              <div class="col-md-6 form-group mb-3">
-                <label for="observations" class="form-label font-weight-bold">Observações (Proposta):</label>
-                <textarea id="observations" rows="3" class="form-control" [(ngModel)]="providerLinkForm.observations" name="observations" placeholder="Tópicos de observações da proposta..."></textarea>
-              </div>
-              <div class="col-md-6 form-group mb-3">
-                <label for="notes" class="form-label font-weight-bold">Notes (Fretamento):</label>
-                <textarea id="notes" rows="3" class="form-control" [(ngModel)]="providerLinkForm.notes" name="notes" placeholder="Notas internas do fretamento..."></textarea>
+              <!-- Valores Financeiros do Fretamento (Planilha Bloco Financeiro) -->
+              <div class="col-md-12 mb-3">
+                <label class="form-label font-weight-bold text-dark mb-1">
+                  <i class="fas fa-coins me-1 text-warning"></i> Valores do Fretamento & Taxas:
+                </label>
+                <div class="row bg-white p-3 border rounded shadow-sm">
+                  <div class="col-md-4 form-group mb-2">
+                    <label class="small font-weight-bold text-primary">Custo do Fretamento (Net):</label>
+                    <div class="input-group input-group-sm">
+                      <span class="input-group-text bg-light text-muted font-weight-bold" *ngIf="getSelectedCurrencySymbol()">
+                        {{ getSelectedCurrencySymbol() }}
+                      </span>
+                      <input
+                        type="text"
+                        class="form-control form-control-sm font-weight-bold"
+                        [value]="formatMoney(providerLinkForm.total_net_sem_4bts)"
+                        (input)="onMoneyInput($event, 'total_net_sem_4bts', 'providerLinkForm')"
+                        name="total_net_sem_4bts"
+                        placeholder="0,00" />
+                    </div>
+                  </div>
+                  <div class="col-md-4 form-group mb-2">
+                    <label class="small font-weight-bold text-dark">Mark Up:</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      class="form-control form-control-sm font-weight-bold"
+                      [(ngModel)]="providerLinkForm.markup"
+                      (blur)="onMarkupBlur()"
+                      name="markup"
+                      placeholder="0.75" />
+                  </div>
+                  <div class="col-md-4 form-group mb-2">
+                    <label class="small font-weight-bold">Taxa de Embarque (Unit.):</label>
+                    <div class="input-group input-group-sm">
+                      <span class="input-group-text bg-light text-muted font-weight-bold" *ngIf="getSelectedCurrencySymbol()">
+                        {{ getSelectedCurrencySymbol() }}
+                      </span>
+                      <input
+                        type="text"
+                        class="form-control form-control-sm"
+                        [value]="formatMoney(providerLinkForm.taxa_embarque_unit)"
+                        (input)="onMoneyInput($event, 'taxa_embarque_unit', 'providerLinkForm')"
+                        name="taxa_embarque_unit"
+                        placeholder="0,00" />
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <!-- Upload/Seleção de 4 Fotos -->
-              <div class="col-md-12 mt-2">
-                <label class="form-label font-weight-bold d-block">Fotos da Proposta (Até 4 Imagens):</label>
-                <div class="row">
-                  <div class="col-md-3 mb-2" *ngFor="let pNum of [1, 2, 3, 4]">
-                    <div class="border p-2 text-center bg-white rounded">
-                      <span class="d-block font-weight-bold mb-1" style="font-size: 0.85rem;">Foto {{ pNum }}</span>
-                      <div *ngIf="getPhotoValue(pNum)" class="mb-2">
-                        <img [src]="getPhotoValue(pNum)" style="max-height: 80px; max-width: 100%; object-fit: contain;" class="rounded border">
+              <!-- Sub-bloco: Campos para Montagem da Proposta (PDF) -->
+              <div class="col-md-12 mb-3">
+                <label class="form-label font-weight-bold text-dark mb-1">
+                  <i class="fas fa-file-pdf me-1 text-danger"></i> Campos para Montagem da Proposta (PDF):
+                </label>
+                <div class="row bg-white p-3 border rounded shadow-sm">
+                  <!-- Observações (Proposta) -->
+                  <div class="col-md-6 form-group mb-3">
+                    <label for="observations" class="small font-weight-bold">Observações (Proposta):</label>
+                    <textarea id="observations" rows="3" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.observations" name="observations" placeholder="Tópicos de observações da proposta..."></textarea>
+                  </div>
+
+                  <!-- Notes (Fretamento) -->
+                  <div class="col-md-6 form-group mb-3">
+                    <label for="notes" class="small font-weight-bold">Notes (Fretamento):</label>
+                    <textarea id="notes" rows="3" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.notes" name="notes" placeholder="Notas internas do fretamento..."></textarea>
+                  </div>
+
+                  <!-- Upload/Seleção de 4 Fotos -->
+                  <div class="col-md-12">
+                    <label class="small font-weight-bold d-block mb-2">Fotos da Proposta (Até 4 Imagens):</label>
+                    <div class="row">
+                      <div class="col-md-3 mb-2" *ngFor="let pNum of [1, 2, 3, 4]">
+                        <div class="border p-2 text-center bg-light rounded h-100 d-flex flex-column justify-content-between">
+                          <span class="d-block font-weight-bold mb-1" style="font-size: 0.85rem;">Foto {{ pNum }}</span>
+                          
+                          <div *ngIf="getPhotoValue(pNum)" class="mb-2 position-relative d-inline-block mx-auto">
+                            <img [src]="getPhotoValue(pNum)" style="max-height: 80px; max-width: 100%; object-fit: contain;" class="rounded border bg-white shadow-sm">
+                            <button type="button" class="btn btn-danger btn-sm position-absolute shadow-sm" style="top: -6px; right: -6px; width: 20px; height: 20px; padding: 0; font-size: 11px; border-radius: 50%; line-height: 1;" (click)="removePhoto(pNum, $event)" title="Remover foto">
+                              &times;
+                            </button>
+                          </div>
+                          
+                          <div *ngIf="!getPhotoValue(pNum)" class="mb-2 d-flex align-items-center justify-content-center border rounded bg-white text-muted mx-auto w-100" style="height: 80px;">
+                            <i class="fa fa-image fa-2x text-black-50"></i>
+                          </div>
+
+                          <input [id]="'photo_input_' + pNum" type="file" accept="image/*" class="form-control form-control-sm" (change)="onPhotoFileChange($event, pNum)">
+                        </div>
                       </div>
-                      <input type="file" accept="image/*" class="form-control form-control-sm" (change)="onPhotoFileChange($event, pNum)">
                     </div>
                   </div>
                 </div>
@@ -1872,6 +1909,29 @@
             </div>
           </div>
         </div>
+
+        <!-- Observações Gerais (Todos os fornecedores - Final do Formulário) -->
+        <div class="col-md-6 form-group mb-3">
+          <label for="internal_observation" class="form-label font-weight-bold">Observação Interna:</label>
+          <textarea
+            id="internal_observation"
+            rows="3"
+            class="form-control"
+            [(ngModel)]="providerLinkForm.internal_observation"
+            name="internal_observation"
+            placeholder="Observações internas..."></textarea>
+        </div>
+
+        <div class="col-md-6 form-group mb-3">
+          <label for="customer_observation" class="form-label font-weight-bold">Observação Cliente:</label>
+          <textarea
+            id="customer_observation"
+            rows="3"
+            class="form-control"
+            [(ngModel)]="providerLinkForm.customer_observation"
+            name="customer_observation"
+            placeholder="Observações para o cliente..."></textarea>
+        </div>
       </div>
 
       <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
@@ -1885,8 +1945,12 @@
     </form>
   </app-modal>
 
-  <!-- MODAL 2: ADICIONAR/EDITAR TARIFA (OPTION) -->
-  <app-modal [show]="showOptForm" (close)="closeOptForm()" [title]="optForm.id ? 'Editar Tarifa' : 'Adicionar Nova Tarifa'" icon="fa-edit">
+  <!-- MODAL 2: ADICIONAR/EDITAR TARIFA OU TRECHO (OPTION) -->
+  <app-modal
+    [show]="showOptForm"
+    (close)="closeOptForm()"
+    [title]="optFormType === 'airfare' ? (optForm.id ? 'Editar Trecho' : 'Novo Trecho') : (optForm.id ? 'Editar Tarifa' : 'Adicionar Nova Tarifa')"
+    icon="fa-edit">
     <form (ngSubmit)="saveOpt()">
       <div class="row">
         <!-- BROKER (except tab 4) -->
@@ -2132,231 +2196,249 @@
             Data Saída (OUT):
             <span class="text-danger">*</span>
           </label>
-          <input type="date" id="opt_out" class="form-control" [class.is-invalid]="errors.out" [(ngModel)]="optForm.out" name="out" required />
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="fas fa-calendar-alt text-primary"></i></span>
+            <input
+              type="text"
+              id="opt_out"
+              class="form-control bg-white"
+              [class.is-invalid]="errors.out"
+              placeholder="dd/mm/aaaa"
+              [(ngModel)]="optForm.out"
+              appFlatpickr
+              name="out"
+              required />
+          </div>
           <div *ngIf="errors.out" class="text-danger mt-1">
             <small *ngFor="let err of errors.out" class="d-block">{{ err }}</small>
           </div>
         </div>
 
-        <!-- AIRFARE-SPECIFIC FIELDS -->
+        <!-- AIRFARE-SPECIFIC FIELDS (TRECHO DE VOO) -->
         <ng-container *ngIf="optFormType === 'airfare'">
-          <!-- Section title: Ida -->
-          <div class="col-12">
-            <h6 class="font-weight-bold text-primary border-bottom pb-2 mb-3">
-              <i class="fas fa-plane-departure me-1"></i> Detalhes do Voo de Ida (Outbound)
-            </h6>
-          </div>
-          <div class="col-md-4 form-group mb-3">
-            <label for="outbound_airline_id" class="form-label font-weight-bold">Companhia Aérea (Ida):</label>
-            <select id="outbound_airline_id" class="form-select" [(ngModel)]="optForm.outbound_airline_id" name="outbound_airline_id">
-              <option value="">.:: Selecione ::.</option>
+          <!-- CIA -->
+          <div class="col-md-6 form-group mb-3">
+            <label for="outbound_airline_id" class="form-label font-weight-bold">
+              CIA:
+              <span class="text-danger">*</span>
+            </label>
+            <select
+              id="outbound_airline_id"
+              class="form-select"
+              [class.is-invalid]="errors.outbound_airline_id"
+              [(ngModel)]="optForm.outbound_airline_id"
+              name="outbound_airline_id"
+              required>
+              <option value="">.:: Selecione a Cia ::.</option>
               <option *ngFor="let option of airlines" [value]="option.id">{{ option.name }}</option>
             </select>
-          </div>
-          <div class="col-md-4 form-group mb-3">
-            <label for="outbound_flight_number" class="form-label font-weight-bold">Número do Voo (Ida):</label>
-            <input type="text" id="outbound_flight_number" class="form-control" [(ngModel)]="optForm.outbound_flight_number" name="outbound_flight_number" />
-          </div>
-          <div class="col-md-4 form-group mb-3">
-            <label for="outbound_class" class="form-label font-weight-bold">Classe (Ida):</label>
-            <input type="text" id="outbound_class" class="form-control" [(ngModel)]="optForm.outbound_class" name="outbound_class" placeholder="Ex: Econômica, Executiva" />
-          </div>
-          <div class="col-md-4 form-group mb-3">
-            <label for="outbound_date" class="form-label font-weight-bold">Data da Ida:</label>
-            <input type="date" id="outbound_date" class="form-control" [(ngModel)]="optForm.outbound_date" name="outbound_date" />
-          </div>
-          <div class="col-md-4 form-group mb-3">
-            <label for="outbound_origin" class="form-label font-weight-bold">Origem (Ida):</label>
-            <input type="text" id="outbound_origin" class="form-control" [(ngModel)]="optForm.outbound_origin" name="outbound_origin" placeholder="Ex: GRU" />
-          </div>
-          <div class="col-md-4 form-group mb-3">
-            <label for="outbound_destination" class="form-label font-weight-bold">Destino (Ida):</label>
-            <input type="text" id="outbound_destination" class="form-control" [(ngModel)]="optForm.outbound_destination" name="outbound_destination" placeholder="Ex: MIA" />
-          </div>
-          <div class="col-md-4 form-group mb-3">
-            <label for="outbound_departure_time" class="form-label font-weight-bold">Horário Partida (Ida):</label>
-            <input type="text" id="outbound_departure_time" class="form-control" [(ngModel)]="optForm.outbound_departure_time" name="outbound_departure_time" placeholder="Ex: 14:30" />
-          </div>
-          <div class="col-md-4 form-group mb-3">
-            <label for="outbound_arrival_time" class="form-label font-weight-bold">Horário Chegada (Ida):</label>
-            <input type="text" id="outbound_arrival_time" class="form-control" [(ngModel)]="optForm.outbound_arrival_time" name="outbound_arrival_time" placeholder="Ex: 22:15" />
-          </div>
-          <div class="col-md-4 form-group mb-3">
-            <label for="outbound_connection_details" class="form-label font-weight-bold">Conexões/Detalhes (Ida):</label>
-            <input type="text" id="outbound_connection_details" class="form-control" [(ngModel)]="optForm.outbound_connection_details" name="outbound_connection_details" placeholder="Ex: Direto, 1 parada" />
+            <div *ngIf="errors.outbound_airline_id" class="text-danger mt-1">
+              <small *ngFor="let err of errors.outbound_airline_id" class="d-block">{{ err }}</small>
+            </div>
           </div>
 
-          <!-- Section title: Volta -->
-          <div class="col-12 mt-2">
-            <h6 class="font-weight-bold text-primary border-bottom pb-2 mb-3">
-              <i class="fas fa-plane-arrival me-1"></i> Detalhes do Voo de Volta (Inbound)
-            </h6>
-          </div>
-          <div class="col-md-4 form-group mb-3">
-            <label for="inbound_airline_id" class="form-label font-weight-bold">Companhia Aérea (Volta):</label>
-            <select id="inbound_airline_id" class="form-select" [(ngModel)]="optForm.inbound_airline_id" name="inbound_airline_id">
-              <option value="">.:: Selecione ::.</option>
-              <option *ngFor="let option of airlines" [value]="option.id">{{ option.name }}</option>
-            </select>
-          </div>
-          <div class="col-md-4 form-group mb-3">
-            <label for="inbound_flight_number" class="form-label font-weight-bold">Número do Voo (Volta):</label>
-            <input type="text" id="inbound_flight_number" class="form-control" [(ngModel)]="optForm.inbound_flight_number" name="inbound_flight_number" />
-          </div>
-          <div class="col-md-4 form-group mb-3">
-            <label for="inbound_class" class="form-label font-weight-bold">Classe (Volta):</label>
-            <input type="text" id="inbound_class" class="form-control" [(ngModel)]="optForm.inbound_class" name="inbound_class" placeholder="Ex: Econômica, Executiva" />
-          </div>
-          <div class="col-md-4 form-group mb-3">
-            <label for="inbound_date" class="form-label font-weight-bold">Data da Volta:</label>
-            <input type="date" id="inbound_date" class="form-control" [(ngModel)]="optForm.inbound_date" name="inbound_date" />
-          </div>
-          <div class="col-md-4 form-group mb-3">
-            <label for="inbound_origin" class="form-label font-weight-bold">Origem (Volta):</label>
-            <input type="text" id="inbound_origin" class="form-control" [(ngModel)]="optForm.inbound_origin" name="inbound_origin" placeholder="Ex: MIA" />
-          </div>
-          <div class="col-md-4 form-group mb-3">
-            <label for="inbound_destination" class="form-label font-weight-bold">Destino (Volta):</label>
-            <input type="text" id="inbound_destination" class="form-control" [(ngModel)]="optForm.inbound_destination" name="inbound_destination" placeholder="Ex: GRU" />
-          </div>
-          <div class="col-md-4 form-group mb-3">
-            <label for="inbound_departure_time" class="form-label font-weight-bold">Horário Partida (Volta):</label>
-            <input type="text" id="inbound_departure_time" class="form-control" [(ngModel)]="optForm.inbound_departure_time" name="inbound_departure_time" placeholder="Ex: 23:30" />
-          </div>
-          <div class="col-md-4 form-group mb-3">
-            <label for="inbound_arrival_time" class="form-label font-weight-bold">Horário Chegada (Volta):</label>
-            <input type="text" id="inbound_arrival_time" class="form-control" [(ngModel)]="optForm.inbound_arrival_time" name="inbound_arrival_time" placeholder="Ex: 06:45" />
-          </div>
-          <div class="col-md-4 form-group mb-3">
-            <label for="inbound_connection_details" class="form-label font-weight-bold">Conexões/Detalhes (Volta):</label>
-            <input type="text" id="inbound_connection_details" class="form-control" [(ngModel)]="optForm.inbound_connection_details" name="inbound_connection_details" placeholder="Ex: Direto, 1 parada" />
+          <!-- VOO -->
+          <div class="col-md-6 form-group mb-3">
+            <label for="outbound_flight_number" class="form-label font-weight-bold">
+              VOO:
+              <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              id="outbound_flight_number"
+              class="form-control"
+              [class.is-invalid]="errors.outbound_flight_number"
+              [(ngModel)]="optForm.outbound_flight_number"
+              name="outbound_flight_number"
+              placeholder="Ex: 1851"
+              required />
+            <div *ngIf="errors.outbound_flight_number" class="text-danger mt-1">
+              <small *ngFor="let err of errors.outbound_flight_number" class="d-block">{{ err }}</small>
+            </div>
           </div>
 
-          <!-- Rules and comparison -->
-          <div class="col-12 mt-2">
-            <h6 class="font-weight-bold text-primary border-bottom pb-2 mb-3">
-              <i class="fas fa-cog me-1"></i> Regras e Comparativos
-            </h6>
+          <!-- DE -->
+          <div class="col-md-6 mb-3">
+            <app-autocomplete
+              label="DE"
+              id="outbound_origin"
+              placeholder="Digite IATA, cidade ou nome do aeroporto..."
+              [required]="true"
+              [searchFn]="searchAirports"
+              [displayFn]="displayAirport"
+              valueField="formatted"
+              [(ngModel)]="optForm.outbound_origin"
+              [initialText]="optForm.outbound_origin"
+              name="outbound_origin"
+              [errors]="errors['outbound_origin']">
+            </app-autocomplete>
           </div>
+
+          <!-- PARA -->
+          <div class="col-md-6 mb-3">
+            <app-autocomplete
+              label="PARA"
+              id="outbound_destination"
+              placeholder="Digite IATA, cidade ou nome do aeroporto..."
+              [required]="true"
+              [searchFn]="searchAirports"
+              [displayFn]="displayAirport"
+              valueField="formatted"
+              [(ngModel)]="optForm.outbound_destination"
+              [initialText]="optForm.outbound_destination"
+              name="outbound_destination"
+              [errors]="errors['outbound_destination']">
+            </app-autocomplete>
+          </div>
+
+          <!-- DATAS -->
           <div class="col-md-4 form-group mb-3">
-            <label for="baggage_id" class="form-label font-weight-bold">Bagagem:</label>
-            <select id="baggage_id" class="form-select" [(ngModel)]="optForm.baggage_id" name="baggage_id">
-              <option value="">.:: Selecione ::.</option>
-              <option *ngFor="let option of baggages" [value]="option.id">{{ option.name }}</option>
-            </select>
+            <label for="outbound_date" class="form-label font-weight-bold">
+              DATAS:
+              <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+              <span class="input-group-text bg-light"><i class="fas fa-calendar-alt text-primary"></i></span>
+              <input
+                type="text"
+                id="outbound_date"
+                class="form-control bg-white"
+                [class.is-invalid]="errors.outbound_date"
+                placeholder="dd/mm/aaaa"
+                [(ngModel)]="optForm.outbound_date"
+                appFlatpickr
+                name="outbound_date"
+                required />
+            </div>
+            <div *ngIf="errors.outbound_date" class="text-danger mt-1">
+              <small *ngFor="let err of errors.outbound_date" class="d-block">{{ err }}</small>
+            </div>
           </div>
+
+          <!-- SAÍDA -->
           <div class="col-md-4 form-group mb-3">
-            <label for="cabin_id" class="form-label font-weight-bold">Cabine:</label>
-            <select id="cabin_id" class="form-select" [(ngModel)]="optForm.cabin_id" name="cabin_id">
-              <option value="">.:: Selecione ::.</option>
-              <option *ngFor="let option of cabins" [value]="option.id">{{ option.name }}</option>
-            </select>
+            <label for="outbound_departure_time" class="form-label font-weight-bold">
+              SAÍDA:
+              <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              id="outbound_departure_time"
+              class="form-control"
+              [class.is-invalid]="errors.outbound_departure_time"
+              [(ngModel)]="optForm.outbound_departure_time"
+              name="outbound_departure_time"
+              placeholder="Ex: 10:55"
+              mask="00:00"
+              [dropSpecialCharacters]="false"
+              required />
+            <div *ngIf="errors.outbound_departure_time" class="text-danger mt-1">
+              <small *ngFor="let err of errors.outbound_departure_time" class="d-block">{{ err }}</small>
+            </div>
           </div>
+
+          <!-- CHEGADA -->
           <div class="col-md-4 form-group mb-3">
-            <label for="opt_currency_id" class="form-label font-weight-bold">Moeda:</label>
-            <select id="opt_currency_id" class="form-select" [(ngModel)]="optForm.currency_id" name="currency_id">
-              <option *ngFor="let option of currencies" [value]="option.id">{{ option.name }} ({{ option.sigla }})</option>
-            </select>
-          </div>
-          <div class="col-md-4 form-group mb-3">
-            <label for="compare_website" class="form-label font-weight-bold">Comparação Website:</label>
-            <input type="number" step="0.01" id="compare_website" class="form-control" [(ngModel)]="optForm.compare_website" name="compare_website" />
-          </div>
-          <div class="col-md-4 form-group mb-3">
-            <label for="compare_client" class="form-label font-weight-bold">Comparação Cliente:</label>
-            <input type="number" step="0.01" id="compare_client" class="form-control" [(ngModel)]="optForm.compare_client" name="compare_client" />
-          </div>
-          <div class="col-md-4 form-group mb-3">
-            <label for="status" class="form-label font-weight-bold">Status da Cotação:</label>
-            <select id="status" class="form-select" [(ngModel)]="optForm.status" name="status">
-              <option value="created">Criado</option>
-              <option value="pending">Pendente</option>
-              <option value="confirmed">Confirmado</option>
-              <option value="cancelled">Cancelado</option>
-            </select>
-          </div>
-          <div class="col-12 form-group mb-3">
-            <label for="observation" class="form-label font-weight-bold">Observações:</label>
-            <textarea id="observation" rows="2" class="form-control" [(ngModel)]="optForm.observation" name="observation"></textarea>
+            <label for="outbound_arrival_time" class="form-label font-weight-bold">
+              CHEGADA:
+              <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              id="outbound_arrival_time"
+              class="form-control"
+              [class.is-invalid]="errors.outbound_arrival_time"
+              [(ngModel)]="optForm.outbound_arrival_time"
+              name="outbound_arrival_time"
+              placeholder="Ex: 12:20"
+              mask="00:00"
+              [dropSpecialCharacters]="false"
+              required />
+            <div *ngIf="errors.outbound_arrival_time" class="text-danger mt-1">
+              <small *ngFor="let err of errors.outbound_arrival_time" class="d-block">{{ err }}</small>
+            </div>
           </div>
         </ng-container>
 
-        <!-- QUANTIDADE, COMISSÃO / KICKBACK -->
-        <div class="col-md-6 form-group mb-3">
-          <label for="count" class="form-label font-weight-bold">
-            Quantidade:
-            <span class="text-danger">*</span>
-          </label>
-          <input type="number" step="1" id="count" class="form-control" [class.is-invalid]="errors.count" [(ngModel)]="optForm.count" name="count" required />
-          <div *ngIf="errors.count" class="text-danger mt-1">
-            <small *ngFor="let err of errors.count" class="d-block">{{ err }}</small>
+        <!-- CAMPOS FINANCEIROS E QUANTIDADE (OUTROS SERVIÇOS, EXCETO AÉREO) -->
+        <ng-container *ngIf="optFormType !== 'airfare'">
+          <!-- QUANTIDADE, COMISSÃO / KICKBACK -->
+          <div class="col-md-6 form-group mb-3">
+            <label for="count" class="form-label font-weight-bold">
+              Quantidade:
+              <span class="text-danger">*</span>
+            </label>
+            <input type="number" step="1" id="count" class="form-control" [class.is-invalid]="errors.count" [(ngModel)]="optForm.count" name="count" required />
+            <div *ngIf="errors.count" class="text-danger mt-1">
+              <small *ngFor="let err of errors.count" class="d-block">{{ err }}</small>
+            </div>
           </div>
-        </div>
 
-        <div class="col-md-6 form-group mb-3">
-          <label for="kickback" class="form-label font-weight-bold">Comissão / Kickback (%):</label>
-          <input
-            type="text"
-            id="kickback"
-            class="form-control"
-            [value]="formatPercent(optForm.kickback)"
-            (input)="onPercentInput($event, 'kickback', 'optForm')"
-            name="kickback" />
-        </div>
-
-        <!-- PROPOSTA RECEBIDA (COST), PROPOSAL PERCENT, ORDEM -->
-        <div class="col-md-4 form-group mb-3">
-          <label for="received_proposal" class="form-label font-weight-bold">
-            Proposta Recebida (Custo Unit.):
-            <span class="text-danger">*</span>
-          </label>
-          <div class="input-group">
-            <span class="input-group-text bg-light text-muted font-weight-bold" *ngIf="getOptCurrencySymbol()">
-              {{ getOptCurrencySymbol() }}
-            </span>
+          <div class="col-md-6 form-group mb-3">
+            <label for="kickback" class="form-label font-weight-bold">Comissão / Kickback (%):</label>
             <input
               type="text"
-              id="received_proposal"
+              id="kickback"
               class="form-control"
-              [class.is-invalid]="errors.received_proposal"
-              [value]="formatMoney(optForm.received_proposal)"
-              (input)="onMoneyInput($event, 'received_proposal', 'optForm')"
-              name="received_proposal"
+              [value]="formatPercent(optForm.kickback)"
+              (input)="onPercentInput($event, 'kickback', 'optForm')"
+              name="kickback" />
+          </div>
+
+          <!-- PROPOSTA RECEBIDA (COST), PROPOSAL PERCENT, ORDEM -->
+          <div class="col-md-4 form-group mb-3">
+            <label for="received_proposal" class="form-label font-weight-bold">
+              Proposta Recebida (Custo Unit.):
+              <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted font-weight-bold" *ngIf="getOptCurrencySymbol()">
+                {{ getOptCurrencySymbol() }}
+              </span>
+              <input
+                type="text"
+                id="received_proposal"
+                class="form-control"
+                [class.is-invalid]="errors.received_proposal"
+                [value]="formatMoney(optForm.received_proposal)"
+                (input)="onMoneyInput($event, 'received_proposal', 'optForm')"
+                name="received_proposal"
+                required />
+            </div>
+            <div *ngIf="errors.received_proposal" class="text-danger mt-1">
+              <small *ngFor="let err of errors.received_proposal" class="d-block">{{ err }}</small>
+            </div>
+          </div>
+
+          <div class="col-md-4 form-group mb-3">
+            <label for="received_proposal_percent" class="form-label font-weight-bold">
+              Markup divisor (%):
+              <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              id="received_proposal_percent"
+              class="form-control"
+              [class.is-invalid]="errors.received_proposal_percent"
+              [value]="formatPercent(optForm.received_proposal_percent)"
+              (input)="onPercentInput($event, 'received_proposal_percent', 'optForm')"
+              name="received_proposal_percent"
               required />
+            <div *ngIf="errors.received_proposal_percent" class="text-danger mt-1">
+              <small *ngFor="let err of errors.received_proposal_percent" class="d-block">{{ err }}</small>
+            </div>
           </div>
-          <div *ngIf="errors.received_proposal" class="text-danger mt-1">
-            <small *ngFor="let err of errors.received_proposal" class="d-block">{{ err }}</small>
-          </div>
-        </div>
 
-        <div class="col-md-4 form-group mb-3">
-          <label for="received_proposal_percent" class="form-label font-weight-bold">
-            Markup divisor (%):
-            <span class="text-danger">*</span>
-          </label>
-          <input
-            type="text"
-            id="received_proposal_percent"
-            class="form-control"
-            [class.is-invalid]="errors.received_proposal_percent"
-            [value]="formatPercent(optForm.received_proposal_percent)"
-            (input)="onPercentInput($event, 'received_proposal_percent', 'optForm')"
-            name="received_proposal_percent"
-            required />
-          <div *ngIf="errors.received_proposal_percent" class="text-danger mt-1">
-            <small *ngFor="let err of errors.received_proposal_percent" class="d-block">{{ err }}</small>
+          <div class="col-md-4 form-group mb-3">
+            <label for="opt_order" class="form-label font-weight-bold">Ordem:</label>
+            <input
+              type="number"
+              id="opt_order"
+              class="form-control"
+              [(ngModel)]="optForm.order"
+              name="order" />
           </div>
-        </div>
-
-        <div class="col-md-4 form-group mb-3">
-          <label for="opt_order" class="form-label font-weight-bold">Ordem:</label>
-          <input
-            type="number"
-            id="opt_order"
-            class="form-control"
-            [(ngModel)]="optForm.order"
-            name="order" />
-        </div>
+        </ng-container>
 
         <!-- COMPARATIVOS (hotel only) -->
         <ng-container *ngIf="optFormType === 'hotel'">
@@ -2419,7 +2501,7 @@
         <button type="submit" class="btn btn-success shadow-sm" [disabled]="processing">
           <span *ngIf="processing" class="spinner-border spinner-border-sm me-1"></span>
           <i class="fas fa-save me-1"></i>
-          Salvar Detalhe
+          {{ optFormType === 'airfare' ? 'Salvar Trecho' : 'Salvar Detalhe' }}
         </button>
       </div>
     </form>
@@ -2455,104 +2537,6 @@
           <span *ngIf="processing" class="spinner-border spinner-border-sm me-1"></span>
           <i class="fas fa-save me-1"></i>
           Confirmar Atualização
-        </button>
-      </div>
-    </form>
-  </app-modal>
-
-  <!-- MODAL 3: ADICIONAR/EDITAR PASSAGEIRO -->
-  <app-modal [show]="showPassengerForm" (close)="closePassengerForm()" [title]="passengerForm.id ? 'Editar Passageiro' : 'Adicionar Novo Passageiro'" icon="fa-user">
-    <form (ngSubmit)="savePassenger()">
-      <div class="row">
-        <div class="col-12">
-          <h6 class="font-weight-bold text-primary border-bottom pb-2 mb-3">
-            <i class="fas fa-user me-1"></i> Dados Pessoais do Passageiro
-          </h6>
-        </div>
-        <div class="col-md-6 form-group mb-3">
-          <label for="pax_name" class="form-label font-weight-bold">
-            Nome Completo:
-            <span class="text-danger">*</span>
-          </label>
-          <input type="text" id="pax_name" class="form-control" [class.is-invalid]="errors.name" [(ngModel)]="passengerForm.name" name="name" required />
-          <div *ngIf="errors.name" class="text-danger mt-1">
-            <small *ngFor="let err of errors.name" class="d-block">{{ err }}</small>
-          </div>
-        </div>
-        <div class="col-md-6 form-group mb-3">
-          <label for="pax_document" class="form-label font-weight-bold">Documento (RG/CPF/Passaporte):</label>
-          <input type="text" id="pax_document" class="form-control" [(ngModel)]="passengerForm.document" name="document" />
-        </div>
-        <div class="col-md-6 form-group mb-3">
-          <label for="pax_birth_date" class="form-label font-weight-bold">Data de Nascimento:</label>
-          <input type="date" id="pax_birth_date" class="form-control" [(ngModel)]="passengerForm.birth_date" name="birth_date" />
-        </div>
-        <div class="col-md-6 form-group mb-3">
-          <label for="pax_passport_validity" class="form-label font-weight-bold">Validade Passaporte:</label>
-          <input type="date" id="pax_passport_validity" class="form-control" [(ngModel)]="passengerForm.passport_validity" name="passport_validity" />
-        </div>
-
-        <!-- Outbound Segment -->
-        <div class="col-12 mt-2">
-          <h6 class="font-weight-bold text-primary border-bottom pb-2 mb-3">
-            <i class="fas fa-plane-departure me-1"></i> Percurso do Voo de Ida (Outbound)
-          </h6>
-        </div>
-        <div class="col-md-6 form-group mb-3">
-          <label for="pax_outbound_date" class="form-label font-weight-bold">Data da Ida:</label>
-          <input type="date" id="pax_outbound_date" class="form-control" [(ngModel)]="passengerForm.outbound_date" name="outbound_date" />
-        </div>
-        <div class="col-md-3 form-group mb-3">
-          <label for="pax_outbound_origin" class="form-label font-weight-bold">Origem:</label>
-          <input type="text" id="pax_outbound_origin" class="form-control" [(ngModel)]="passengerForm.outbound_origin" name="outbound_origin" placeholder="Ex: GRU" />
-        </div>
-        <div class="col-md-3 form-group mb-3">
-          <label for="pax_outbound_destination" class="form-label font-weight-bold">Destino:</label>
-          <input type="text" id="pax_outbound_destination" class="form-control" [(ngModel)]="passengerForm.outbound_destination" name="outbound_destination" placeholder="Ex: MIA" />
-        </div>
-        <div class="col-md-6 form-group mb-3">
-          <label for="pax_outbound_departure" class="form-label font-weight-bold">Horário de Partida:</label>
-          <input type="text" id="pax_outbound_departure" class="form-control" [(ngModel)]="passengerForm.outbound_departure" name="outbound_departure" placeholder="Ex: 14:30" />
-        </div>
-        <div class="col-md-6 form-group mb-3">
-          <label for="pax_outbound_arrival" class="form-label font-weight-bold">Horário de Chegada:</label>
-          <input type="text" id="pax_outbound_arrival" class="form-control" [(ngModel)]="passengerForm.outbound_arrival" name="outbound_arrival" placeholder="Ex: 22:15" />
-        </div>
-
-        <!-- Inbound Segment -->
-        <div class="col-12 mt-2">
-          <h6 class="font-weight-bold text-primary border-bottom pb-2 mb-3">
-            <i class="fas fa-plane-arrival me-1"></i> Percurso do Voo de Volta (Inbound)
-          </h6>
-        </div>
-        <div class="col-md-6 form-group mb-3">
-          <label for="pax_inbound_date" class="form-label font-weight-bold">Data da Volta:</label>
-          <input type="date" id="pax_inbound_date" class="form-control" [(ngModel)]="passengerForm.inbound_date" name="inbound_date" />
-        </div>
-        <div class="col-md-3 form-group mb-3">
-          <label for="pax_inbound_origin" class="form-label font-weight-bold">Origem:</label>
-          <input type="text" id="pax_inbound_origin" class="form-control" [(ngModel)]="passengerForm.inbound_origin" name="inbound_origin" placeholder="Ex: MIA" />
-        </div>
-        <div class="col-md-3 form-group mb-3">
-          <label for="pax_inbound_destination" class="form-label font-weight-bold">Destino:</label>
-          <input type="text" id="pax_inbound_destination" class="form-control" [(ngModel)]="passengerForm.inbound_destination" name="inbound_destination" placeholder="Ex: GRU" />
-        </div>
-        <div class="col-md-6 form-group mb-3">
-          <label for="pax_inbound_departure" class="form-label font-weight-bold">Horário de Partida:</label>
-          <input type="text" id="pax_inbound_departure" class="form-control" [(ngModel)]="passengerForm.inbound_departure" name="inbound_departure" placeholder="Ex: 23:30" />
-        </div>
-        <div class="col-md-6 form-group mb-3">
-          <label for="pax_inbound_arrival" class="form-label font-weight-bold">Horário de Chegada:</label>
-          <input type="text" id="pax_inbound_arrival" class="form-control" [(ngModel)]="passengerForm.inbound_arrival" name="inbound_arrival" placeholder="Ex: 06:45" />
-        </div>
-      </div>
-
-      <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
-        <button type="button" class="btn btn-secondary shadow-sm" (click)="closePassengerForm()">Cancelar</button>
-        <button type="submit" class="btn btn-success shadow-sm" [disabled]="processing">
-          <span *ngIf="processing" class="spinner-border spinner-border-sm me-1"></span>
-          <i class="fas fa-save me-1"></i>
-          Salvar Passageiro
         </button>
       </div>
     </form>

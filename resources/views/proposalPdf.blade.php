@@ -887,7 +887,8 @@ function quebraTexto($texto, $limite = 40)
                         </tr>
                         <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
                             <th>Serviços</th>
-                            <th colspan="2" style="text-align: left;">Totais de:</th>
+                            <th>Totais de:</th>
+                            <th>Quantidade</th>
                             <th>Preço médio</th>
                             <th>Total do Pedido</th>
                         </tr>

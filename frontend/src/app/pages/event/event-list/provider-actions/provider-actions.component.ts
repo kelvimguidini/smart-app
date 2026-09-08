@@ -145,7 +145,7 @@ export class ProviderActionsComponent {
 
   saveStatus() {
     if (!this.formStatus.status_hotel) {
-      alert("Por favor, selecione um status de hotel válido.");
+      alert("Por favor, selecione um status válido.");
       return;
     }
     this.isSending = true;
@@ -347,7 +347,8 @@ export class ProviderActionsComponent {
     if (!this.sendEmail) {
       // Direct Download (Async)
       const downloadUrl = `${this.eventService.getApiUrl()}/proposal-hotel/true/${this.prov.id}/${this.event.id}/${this.prov.table}`;
-      const filename = `Proposta_ID${this.event.id}_${this.prov.name || 'Fornecedor'}.pdf`;
+      const prefix = this.prov.isAirfare ? 'Proposta_Aereo_' : 'Proposta_';
+      const filename = `${prefix}ID${this.event.id}_${this.prov.name || 'Fornecedor'}.pdf`;
       this.showProposalModal = false;
       this.baixarPdfAssincrono(downloadUrl, filename, false);
     } else {
@@ -391,7 +392,8 @@ export class ProviderActionsComponent {
     if (!this.sendEmailWithoutValues) {
       // Direct Download (Async)
       const downloadUrl = `${this.eventService.getApiUrl()}/proposal-hotel-without-values/true/${this.prov.id}/${this.event.id}/${this.prov.table}`;
-      const filename = `Proposta_Sem_Valores_ID${this.event.id}_${this.prov.name || 'Fornecedor'}.pdf`;
+      const prefix = this.prov.isAirfare ? 'Proposta_Sem_Valores_Aereo_' : 'Proposta_Sem_Valores_';
+      const filename = `${prefix}ID${this.event.id}_${this.prov.name || 'Fornecedor'}.pdf`;
       this.showProposalWithoutValuesModal = false;
       this.baixarPdfAssincrono(downloadUrl, filename, false);
     } else {

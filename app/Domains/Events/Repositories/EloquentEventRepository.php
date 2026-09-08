@@ -25,7 +25,8 @@ class EloquentEventRepository implements EventRepositoryInterface
             'event_abs.ab.city', 'event_abs.status_his', 'event_abs.currency', 'event_abs.providerBudget',
             'event_halls.hall.city', 'event_halls.status_his', 'event_halls.currency', 'event_halls.providerBudget',
             'event_adds.add.city', 'event_adds.status_his', 'event_adds.currency', 'event_adds.providerBudget',
-            'event_transports.transport.city', 'event_transports.status_his', 'event_transports.currency', 'event_transports.providerBudget'
+            'event_transports.transport.city', 'event_transports.status_his', 'event_transports.currency', 'event_transports.providerBudget',
+            'event_airfares.airline', 'event_airfares.provider', 'event_airfares.status_his', 'event_airfares.currency'
         ]);
 
         if (Gate::allows('event_admin')) {
@@ -179,15 +180,12 @@ class EloquentEventRepository implements EventRepositoryInterface
         if ($table == 'event_airfares' || $table == 'event_airfare') {
             $withRelations = array_merge($withRelations, [
                 'event_airfares' => fn($q) => $providerId > 0 ? $q->where(function($sub) use ($providerId) {
-                    $sub->where('airfare_id', $providerId)->orWhere('airline_id', $providerId)->orWhere('id', $providerId);
+                    $sub->where('airline_id', $providerId)->orWhere('id', $providerId);
                 }) : $q,
                 'event_airfares.provider',
                 'event_airfares.airline',
-                'event_airfares.eventAirfareOpts' => fn($q) => $q->orderBy('order', 'asc'),
+                'event_airfares.eventAirfareOpts' => fn($q) => $q->orderBy('id', 'asc'),
                 'event_airfares.eventAirfareOpts.outbound_airline',
-                'event_airfares.eventAirfareOpts.inbound_airline',
-                'event_airfares.eventAirfareOpts.baggage',
-                'event_airfares.eventAirfareOpts.cabin',
                 'event_airfares.currency',
             ]);
         }

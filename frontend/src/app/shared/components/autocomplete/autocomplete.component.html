@@ -25,7 +25,7 @@
       <li 
           *ngFor="let item of searchResults" 
           class="list-group-item list-group-item-action cursor-pointer"
-          (mousedown)="selectItem(item)">
+          (mousedown)="selectItem(item, $event)">
           {{ displayFn(item) }}
       </li>
       <li *ngIf="searchResults.length === 0" class="list-group-item text-muted">

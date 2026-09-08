@@ -80,6 +80,7 @@ class StatusHistory extends Model
             'hall' => ['table' => 'event_halls', 'model' => EventHall::class, 'col' => 'hall_id'],
             'add' => ['table' => 'event_adds', 'model' => EventAdd::class, 'col' => 'add_id'],
             'transport' => ['table' => 'event_transports', 'model' => EventTransport::class, 'col' => 'transport_id'],
+            'airfare' => ['table' => 'event_airfares', 'model' => EventAirfare::class, 'col' => 'airline_id'],
         ];
 
         if (!isset($typeMapping[$type])) {

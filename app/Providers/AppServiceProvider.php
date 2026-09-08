@@ -192,8 +192,6 @@ use App\Domains\Airfares\Repositories\EventAirfareRepositoryInterface;
 use App\Domains\Airfares\Repositories\EloquentEventAirfareRepository;
 use App\Domains\Airfares\Repositories\EventAirfareOptRepositoryInterface;
 use App\Domains\Airfares\Repositories\EloquentEventAirfareOptRepository;
-use App\Domains\Airfares\Repositories\EventAirfarePassengerRepositoryInterface;
-use App\Domains\Airfares\Repositories\EloquentEventAirfarePassengerRepository;
 
 use App\Domains\Shared\Repositories\AirfareAirlineRepositoryInterface;
 use App\Domains\Shared\Repositories\EloquentAirfareAirlineRepository;
@@ -237,7 +235,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(EventTransportOptRepositoryInterface::class, EloquentEventTransportOptRepository::class);
         $this->app->bind(EventAirfareRepositoryInterface::class, EloquentEventAirfareRepository::class);
         $this->app->bind(EventAirfareOptRepositoryInterface::class, EloquentEventAirfareOptRepository::class);
-        $this->app->bind(EventAirfarePassengerRepositoryInterface::class, EloquentEventAirfarePassengerRepository::class);
         $this->app->bind(CustomerRepositoryInterface::class, EloquentCustomerRepository::class);
         $this->app->bind(ProviderRepositoryInterface::class, EloquentProviderRepository::class);
         $this->app->bind(LookupRepositoryInterface::class, EloquentLookupRepository::class);
@@ -313,7 +310,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AirfareBaggageServiceInterface::class, DefaultAirfareBaggageService::class);
         $this->app->bind(AirfareCabinRepositoryInterface::class, EloquentAirfareCabinRepository::class);
         $this->app->bind(AirfareCabinServiceInterface::class, DefaultAirfareCabinService::class);
-        
         // API Terceiros Services & Repositories
         $this->app->bind(AuthApiRepositoryInterface::class, EloquentAuthApiRepository::class);
         $this->app->bind(AuthApiServiceInterface::class, DefaultAuthApiService::class);
