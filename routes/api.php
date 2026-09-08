@@ -257,17 +257,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('airfare-airlines/{id}/activate', [\App\Http\Controllers\Api\AirfareAirlineApiController::class, 'activateItem']);
     Route::put('airfare-airlines/{id}/deactivate', [\App\Http\Controllers\Api\AirfareAirlineApiController::class, 'deactivateItem']);
 
-    Route::get('airfare-baggages', [\App\Http\Controllers\Api\AirfareBaggageApiController::class, 'index']);
-    Route::post('airfare-baggages', [\App\Http\Controllers\Api\AirfareBaggageApiController::class, 'store']);
-    Route::delete('airfare-baggages/{id}', [\App\Http\Controllers\Api\AirfareBaggageApiController::class, 'destroy']);
-    Route::put('airfare-baggages/{id}/activate', [\App\Http\Controllers\Api\AirfareBaggageApiController::class, 'activateItem']);
-    Route::put('airfare-baggages/{id}/deactivate', [\App\Http\Controllers\Api\AirfareBaggageApiController::class, 'deactivateItem']);
+    // Route::get('airfare-baggages', [\App\Http\Controllers\Api\AirfareBaggageApiController::class, 'index']);
+    // Route::post('airfare-baggages', [\App\Http\Controllers\Api\AirfareBaggageApiController::class, 'store']);
+    // Route::delete('airfare-baggages/{id}', [\App\Http\Controllers\Api\AirfareBaggageApiController::class, 'destroy']);
+    // Route::put('airfare-baggages/{id}/activate', [\App\Http\Controllers\Api\AirfareBaggageApiController::class, 'activateItem']);
+    // Route::put('airfare-baggages/{id}/deactivate', [\App\Http\Controllers\Api\AirfareBaggageApiController::class, 'deactivateItem']);
 
-    Route::get('airfare-cabins', [\App\Http\Controllers\Api\AirfareCabinApiController::class, 'index']);
-    Route::post('airfare-cabins', [\App\Http\Controllers\Api\AirfareCabinApiController::class, 'store']);
-    Route::delete('airfare-cabins/{id}', [\App\Http\Controllers\Api\AirfareCabinApiController::class, 'destroy']);
-    Route::put('airfare-cabins/{id}/activate', [\App\Http\Controllers\Api\AirfareCabinApiController::class, 'activateItem']);
-    Route::put('airfare-cabins/{id}/deactivate', [\App\Http\Controllers\Api\AirfareCabinApiController::class, 'deactivateItem']);
+    // Route::get('airfare-cabins', [\App\Http\Controllers\Api\AirfareCabinApiController::class, 'index']);
+    // Route::post('airfare-cabins', [\App\Http\Controllers\Api\AirfareCabinApiController::class, 'store']);
+    // Route::delete('airfare-cabins/{id}', [\App\Http\Controllers\Api\AirfareCabinApiController::class, 'destroy']);
+    // Route::put('airfare-cabins/{id}/activate', [\App\Http\Controllers\Api\AirfareCabinApiController::class, 'activateItem']);
+    // Route::put('airfare-cabins/{id}/deactivate', [\App\Http\Controllers\Api\AirfareCabinApiController::class, 'deactivateItem']);
 
     // Rotas de Eventos (Angular SPA)
     Route::get('events/list', [\App\Http\Controllers\Api\EventApiController::class, 'listEvents']);

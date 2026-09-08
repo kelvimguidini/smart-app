@@ -162,8 +162,8 @@ export class MenuComponent implements OnInit {
       collapsed: true,
       subMenu: [
         { link: '/airline', name: 'Cias Aéreas', role: ['airfare_airline_admin', 'air_operator'] },
-        { link: '/baggage', name: 'Bagagem', role: ['airfare_baggage_admin', 'air_operator'] },
-        { link: '/cabin', name: 'Cabine', role: ['airfare_cabin_admin', 'air_operator'] },
+        // { link: '/baggage', name: 'Bagagem', role: ['airfare_baggage_admin', 'air_operator'] },
+        // { link: '/cabin', name: 'Cabine', role: ['airfare_cabin_admin', 'air_operator'] },
       ]
     },
     {

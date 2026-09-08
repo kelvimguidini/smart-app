@@ -1521,7 +1521,7 @@
         </div>
 
         <!-- Inputs Percentuais -->
-        <div [ngClass]="providerLinkType === 'airfare' ? 'col-md-2' : (providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-2' : 'col-md-3')" class="form-group mb-3">
+        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-2' : 'col-md-3'" class="form-group mb-3" *ngIf="providerLinkType !== 'airfare'">
           <label for="iss_percent" class="form-label font-weight-bold">ISS (%):</label>
           <input
             type="text"
@@ -1532,7 +1532,7 @@
             name="iss_percent" />
         </div>
 
-        <div [ngClass]="providerLinkType === 'airfare' ? 'col-md-2' : (providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-2' : 'col-md-3')" class="form-group mb-3">
+        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-2' : 'col-md-3'" class="form-group mb-3" *ngIf="providerLinkType !== 'airfare'">
           <label for="service_percent" class="form-label font-weight-bold">Serviço (%):</label>
           <input
             type="text"
@@ -1543,7 +1543,7 @@
             name="service_percent" />
         </div>
 
-        <div [ngClass]="providerLinkType === 'airfare' ? 'col-md-2' : (providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-2' : 'col-md-3')" class="form-group mb-3">
+        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-2' : 'col-md-3'" class="form-group mb-3" *ngIf="providerLinkType !== 'airfare'">
           <label for="iva_percent" class="form-label font-weight-bold">IVA (%):</label>
           <input
             type="text"
@@ -1555,7 +1555,7 @@
         </div>
 
         <!-- IOF (%) -->
-        <div [ngClass]="providerLinkType === 'airfare' ? 'col-md-2' : (providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-2' : 'col-md-3')" class="form-group mb-3">
+        <div [ngClass]="providerLinkType === 'airfare' ? 'col-md-4' : (providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-2' : 'col-md-3')" class="form-group mb-3">
           <label for="iof" class="form-label font-weight-bold">IOF (%):</label>
           <input
             type="text"
@@ -1607,7 +1607,7 @@
         </div>
 
         <!-- Forma de Pagamento -->
-        <div [ngClass]="providerLinkType === 'airfare' ? 'col-md-3' : 'col-md-4'" class="form-group mb-3">
+        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' || providerLinkType === 'airfare' ? 'col-md-4' : 'col-md-3'" class="form-group mb-3">
           <label for="payment_method" class="form-label font-weight-bold">Forma de Pagamento:</label>
           <select id="payment_method" class="form-select" [(ngModel)]="providerLinkForm.payment_method" name="payment_method">
             <option value="Indefinido">Indefinido</option>
@@ -1617,7 +1617,7 @@
         </div>
 
         <!-- Nota Fiscal -->
-        <div [ngClass]="providerLinkType === 'airfare' ? 'col-md-3' : 'col-md-4'" class="form-group mb-3">
+        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' || providerLinkType === 'airfare' ? 'col-md-4' : 'col-md-3'" class="form-group mb-3">
           <label for="invoice" class="form-label font-weight-bold">Nota Fiscal:</label>
           <select id="invoice" class="form-select" [(ngModel)]="providerLinkForm.invoice" name="invoice">
             <option [ngValue]="true">Sim</option>
@@ -1626,7 +1626,7 @@
         </div>
 
         <!-- Prazo -->
-        <div [ngClass]="providerLinkType === 'airfare' ? 'col-md-3' : 'col-md-4'" class="form-group mb-3">
+        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' || providerLinkType === 'airfare' ? 'col-md-4' : 'col-md-3'" class="form-group mb-3">
           <label for="deadline_date" class="form-label font-weight-bold">Prazo:</label>
           <div class="input-group">
             <span class="input-group-text bg-light"><i class="fas fa-calendar-alt text-primary"></i></span>
@@ -1646,7 +1646,7 @@
         </div>
 
         <!-- Prazo da Cia (Aéreo only - ao lado de Prazo) -->
-        <div class="col-md-3 form-group mb-3" *ngIf="providerLinkType === 'airfare'">
+        <div class="col-md-4 form-group mb-3" *ngIf="providerLinkType === 'airfare'">
           <label for="prazo_cia" class="form-label font-weight-bold">Prazo da Cia:</label>
           <div class="input-group">
             <span class="input-group-text bg-light"><i class="fas fa-calendar-alt text-warning"></i></span>
