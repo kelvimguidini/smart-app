@@ -1351,10 +1351,10 @@
                             Serviço de Bordo: {{ item.inc_servico_bordo ? 'SIM' : 'NÃO' }}
                           </span>
                           <span class="badge bg-light text-dark border">
-                            <i class="fas fa-suitcase me-1 text-primary"></i>Porão: {{ item.inc_porao || '23 kg por pessoa' }}
+                            <i class="fas fa-suitcase me-1 text-primary"></i>Porão: {{ formatKilos(item.inc_porao, 23) }}
                           </span>
                           <span class="badge bg-light text-dark border">
-                            <i class="fas fa-briefcase me-1 text-primary"></i>Bagagem a bordo: {{ item.inc_bagagem_bordo || '10 kg por pessoa' }}
+                            <i class="fas fa-briefcase me-1 text-primary"></i>Bagagem a bordo: {{ formatKilos(item.inc_bagagem_bordo, 10) }}
                           </span>
                           <span class="badge" [ngClass]="item.inc_sala_vip ? 'bg-success' : 'bg-secondary'">
                             Sala VIP: {{ item.inc_sala_vip ? 'SIM' : 'NÃO' }}
@@ -1716,11 +1716,17 @@
                   </div>
                   <div class="col-md-3 form-group mb-2">
                     <label class="small font-weight-bold">Porão:</label>
-                    <input type="text" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.inc_porao" name="inc_porao" placeholder="Ex: 23 kg por pessoa" />
+                    <div class="input-group input-group-sm">
+                      <input type="number" min="0" step="1" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.inc_porao" name="inc_porao" placeholder="23" />
+                      <span class="input-group-text bg-light">kg</span>
+                    </div>
                   </div>
                   <div class="col-md-3 form-group mb-2">
-                    <label class="small font-weight-bold">Bagagem a borda:</label>
-                    <input type="text" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.inc_bagagem_bordo" name="inc_bagagem_bordo" placeholder="Ex: 10 kg por pessoa" />
+                    <label class="small font-weight-bold">Bagagem a bordo:</label>
+                    <div class="input-group input-group-sm">
+                      <input type="number" min="0" step="1" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.inc_bagagem_bordo" name="inc_bagagem_bordo" placeholder="10" />
+                      <span class="input-group-text bg-light">kg</span>
+                    </div>
                   </div>
                   <div class="col-md-3 form-group">
                     <label class="small font-weight-bold d-block">Sala VIP Aeroporto:</label>
@@ -1911,6 +1917,7 @@
         </div>
 
         <!-- Observações Gerais (Todos os fornecedores - Final do Formulário) -->
+        <div class="w-100"></div>
         <div class="col-md-6 form-group mb-3">
           <label for="internal_observation" class="form-label font-weight-bold">Observação Interna:</label>
           <textarea

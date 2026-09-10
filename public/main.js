@@ -69899,10 +69899,9 @@ var MenuComponent = class _MenuComponent {
       collapseHeader: "Tabelas auxiliares",
       collapsed: true,
       subMenu: [
-        { link: "/airline", name: "Cias A\xE9reas", role: ["airfare_airline_admin", "air_operator"] },
-        { link: "/baggage", name: "Bagagem", role: ["airfare_baggage_admin", "air_operator"] },
-        { link: "/cabin", name: "Cabine", role: ["airfare_cabin_admin", "air_operator"] },
-        { link: "/provider-airfare", name: "Fornecedor", role: ["admin_provider_airfare", "air_operator"] }
+        { link: "/airline", name: "Cias A\xE9reas", role: ["airfare_airline_admin", "air_operator"] }
+        // { link: '/baggage', name: 'Bagagem', role: ['airfare_baggage_admin', 'air_operator'] },
+        // { link: '/cabin', name: 'Cabine', role: ['airfare_cabin_admin', 'air_operator'] },
       ]
     },
     {
@@ -69988,7 +69987,6 @@ var MenuComponent = class _MenuComponent {
       "/airline",
       "/baggage",
       "/cabin",
-      "/provider-airfare",
       "/event",
       "/event-list",
       "/currency",
@@ -87886,10 +87884,10 @@ function AutocompleteComponent_ul_5_li_1_Template(rf, ctx) {
   if (rf & 1) {
     const _r2 = \u0275\u0275getCurrentView();
     \u0275\u0275elementStart(0, "li", 15);
-    \u0275\u0275listener("mousedown", function AutocompleteComponent_ul_5_li_1_Template_li_mousedown_0_listener() {
+    \u0275\u0275listener("mousedown", function AutocompleteComponent_ul_5_li_1_Template_li_mousedown_0_listener($event) {
       const item_r3 = \u0275\u0275restoreView(_r2).$implicit;
       const ctx_r0 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r0.selectItem(item_r3));
+      return \u0275\u0275resetView(ctx_r0.selectItem(item_r3, $event));
     });
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
@@ -88015,10 +88013,15 @@ var AutocompleteComponent = class _AutocompleteComponent {
       this.searchResults = [];
     }
   }
-  selectItem(item) {
+  selectItem(item, event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     this.selectedItem = item;
-    this.inputText = this.displayFn(item);
-    this.innerValue = item[this.valueField];
+    const displayText = this.displayFn ? this.displayFn(item) : item.name || item;
+    this.inputText = displayText;
+    this.innerValue = this.valueField ? item[this.valueField] !== void 0 ? item[this.valueField] : displayText : displayText;
     this.showDropdown = false;
     this.onChange(this.innerValue);
   }
@@ -88027,19 +88030,23 @@ var AutocompleteComponent = class _AutocompleteComponent {
     setTimeout(() => {
       this.showDropdown = false;
       if (!this.selectedItem) {
-        if (this.inputText === this.initialText && this.innerValue) {
+        if (this.innerValue && (this.inputText === this.initialText || this.inputText === this.innerValue)) {
           return;
         }
-        this.inputText = "";
-        this.innerValue = null;
-        this.onChange(this.innerValue);
-      } else if (this.displayFn(this.selectedItem) !== this.inputText) {
+        if (!this.inputText) {
+          this.innerValue = null;
+          this.onChange(this.innerValue);
+        }
+      } else if (this.displayFn && this.displayFn(this.selectedItem) !== this.inputText) {
+        if (this.innerValue && this.inputText === this.innerValue) {
+          return;
+        }
         this.inputText = "";
         this.selectedItem = null;
         this.innerValue = null;
         this.onChange(this.innerValue);
       }
-    }, 150);
+    }, 200);
   }
   clickout(event) {
     if (!this.eRef.nativeElement.contains(event.target)) {
@@ -88053,6 +88060,8 @@ var AutocompleteComponent = class _AutocompleteComponent {
       this.inputText = "";
       this.selectedItem = null;
       this.initialText = "";
+    } else if (typeof value === "string" && (!this.inputText || this.inputText !== value)) {
+      this.inputText = value;
     }
   }
   registerOnChange(fn) {
@@ -88125,7 +88134,7 @@ var AutocompleteComponent = class _AutocompleteComponent {
         useExisting: forwardRef(() => AutocompleteComponent),
         multi: true
       }
-    ], template: '<div class="form-group mb-0 position-relative">\r\n  <label *ngIf="label" [for]="id" class="form-label">{{ label }}: <span *ngIf="required" class="text-danger">*</span></label>\r\n  <div class="position-relative">\r\n      <input \r\n          type="text" \r\n          [id]="id" \r\n          class="form-control" \r\n          [class.is-invalid]="errors && errors.length > 0"\r\n          [(ngModel)]="inputText" \r\n          (input)="onInput($event)"\r\n          (blur)="onBlur()"\r\n          [name]="id" \r\n          [placeholder]="placeholder"\r\n          autocomplete="off"\r\n          [required]="required"\r\n          [disabled]="disabled">\r\n          \r\n      <div *ngIf="isSearching" class="position-absolute" style="right: 10px; top: 10px;">\r\n          <div class="spinner-border spinner-border-sm text-primary" role="status"></div>\r\n      </div>\r\n  </div>\r\n\r\n  <!-- Dropdown Autocomplete -->\r\n  <ul *ngIf="showDropdown" class="list-group position-absolute w-100 shadow" style="z-index: 1000; max-height: 200px; overflow-y: auto;">\r\n      <li \r\n          *ngFor="let item of searchResults" \r\n          class="list-group-item list-group-item-action cursor-pointer"\r\n          (mousedown)="selectItem(item)">\r\n          {{ displayFn(item) }}\r\n      </li>\r\n      <li *ngIf="searchResults.length === 0" class="list-group-item text-muted">\r\n          Nenhum registro encontrado\r\n      </li>\r\n  </ul>\r\n\r\n  <div *ngIf="errors && errors.length > 0" class="text-danger mt-1">\r\n      <small *ngFor="let err of errors" class="d-block">{{ err }}</small>\r\n  </div>\r\n</div>\r\n', styles: ["/* src/app/shared/components/autocomplete/autocomplete.component.scss */\n.cursor-pointer {\n  cursor: pointer;\n}\n.list-group-item:hover {\n  background-color: #f8f9fa;\n}\n/*# sourceMappingURL=autocomplete.component.css.map */\n"] }]
+    ], template: '<div class="form-group mb-0 position-relative">\r\n  <label *ngIf="label" [for]="id" class="form-label">{{ label }}: <span *ngIf="required" class="text-danger">*</span></label>\r\n  <div class="position-relative">\r\n      <input \r\n          type="text" \r\n          [id]="id" \r\n          class="form-control" \r\n          [class.is-invalid]="errors && errors.length > 0"\r\n          [(ngModel)]="inputText" \r\n          (input)="onInput($event)"\r\n          (blur)="onBlur()"\r\n          [name]="id" \r\n          [placeholder]="placeholder"\r\n          autocomplete="off"\r\n          [required]="required"\r\n          [disabled]="disabled">\r\n          \r\n      <div *ngIf="isSearching" class="position-absolute" style="right: 10px; top: 10px;">\r\n          <div class="spinner-border spinner-border-sm text-primary" role="status"></div>\r\n      </div>\r\n  </div>\r\n\r\n  <!-- Dropdown Autocomplete -->\r\n  <ul *ngIf="showDropdown" class="list-group position-absolute w-100 shadow" style="z-index: 1000; max-height: 200px; overflow-y: auto;">\r\n      <li \r\n          *ngFor="let item of searchResults" \r\n          class="list-group-item list-group-item-action cursor-pointer"\r\n          (mousedown)="selectItem(item, $event)">\r\n          {{ displayFn(item) }}\r\n      </li>\r\n      <li *ngIf="searchResults.length === 0" class="list-group-item text-muted">\r\n          Nenhum registro encontrado\r\n      </li>\r\n  </ul>\r\n\r\n  <div *ngIf="errors && errors.length > 0" class="text-danger mt-1">\r\n      <small *ngFor="let err of errors" class="d-block">{{ err }}</small>\r\n  </div>\r\n</div>\r\n', styles: ["/* src/app/shared/components/autocomplete/autocomplete.component.scss */\n.cursor-pointer {\n  cursor: pointer;\n}\n.list-group-item:hover {\n  background-color: #f8f9fa;\n}\n/*# sourceMappingURL=autocomplete.component.css.map */\n"] }]
   }], () => [{ type: ElementRef }], { label: [{
     type: Input
   }], id: [{
@@ -107400,12 +107409,6 @@ var EventService = class _EventService {
   deleteAirfareOpt(id) {
     return this.http.delete(`${this.apiUrl}/api/event-airfares/opts/${id}`);
   }
-  saveAirfarePassenger(data) {
-    return this.http.post(`${this.apiUrl}/api/event-airfares/passengers`, data);
-  }
-  deleteAirfarePassenger(id) {
-    return this.http.delete(`${this.apiUrl}/api/event-airfares/passengers/${id}`);
-  }
   // 7. EVENT HISTORY ENDPOINTS
   getHistory(eventId) {
     return this.http.get(`${this.apiUrl}/api/events/history/${eventId}`);
@@ -108322,7 +108325,7 @@ var ProviderActionsComponent = class _ProviderActionsComponent {
   }
   saveStatus() {
     if (!this.formStatus.status_hotel) {
-      alert("Por favor, selecione um status de hotel v\xE1lido.");
+      alert("Por favor, selecione um status v\xE1lido.");
       return;
     }
     this.isSending = true;
@@ -108490,7 +108493,8 @@ var ProviderActionsComponent = class _ProviderActionsComponent {
   sendProposal() {
     if (!this.sendEmail) {
       const downloadUrl = `${this.eventService.getApiUrl()}/proposal-hotel/true/${this.prov.id}/${this.event.id}/${this.prov.table}`;
-      const filename = `Proposta_ID${this.event.id}_${this.prov.name || "Fornecedor"}.pdf`;
+      const prefix = this.prov.isAirfare ? "Proposta_Aereo_" : "Proposta_";
+      const filename = `${prefix}ID${this.event.id}_${this.prov.name || "Fornecedor"}.pdf`;
       this.showProposalModal = false;
       this.baixarPdfAssincrono(downloadUrl, filename, false);
     } else {
@@ -108530,7 +108534,8 @@ var ProviderActionsComponent = class _ProviderActionsComponent {
   sendProposalWithoutValues() {
     if (!this.sendEmailWithoutValues) {
       const downloadUrl = `${this.eventService.getApiUrl()}/proposal-hotel-without-values/true/${this.prov.id}/${this.event.id}/${this.prov.table}`;
-      const filename = `Proposta_Sem_Valores_ID${this.event.id}_${this.prov.name || "Fornecedor"}.pdf`;
+      const prefix = this.prov.isAirfare ? "Proposta_Sem_Valores_Aereo_" : "Proposta_Sem_Valores_";
+      const filename = `${prefix}ID${this.event.id}_${this.prov.name || "Fornecedor"}.pdf`;
       this.showProposalWithoutValuesModal = false;
       this.baixarPdfAssincrono(downloadUrl, filename, false);
     } else {
@@ -108777,15 +108782,15 @@ var ProviderActionsComponent = class _ProviderActionsComponent {
       \u0275\u0275advance();
       \u0275\u0275property("ngIf", ctx.hasPermission("status_level_1") || ctx.hasPermission("status_level_2"));
       \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.prov && !ctx.prov.isTransport && ctx.prov.providerBudget && ctx.prov.providerBudget[0] && !ctx.prov.providerBudget[0].evaluated && ctx.hasPermission("prove_budget_hotel"));
+      \u0275\u0275property("ngIf", ctx.prov && !ctx.prov.isTransport && !ctx.prov.isAirfare && ctx.prov.providerBudget && ctx.prov.providerBudget[0] && !ctx.prov.providerBudget[0].evaluated && ctx.hasPermission("prove_budget_hotel"));
       \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.prov && !ctx.prov.isTransport && ctx.prov.providerBudget && ctx.prov.providerBudget[0] && ctx.prov.providerBudget[0].evaluated);
+      \u0275\u0275property("ngIf", ctx.prov && !ctx.prov.isTransport && !ctx.prov.isAirfare && ctx.prov.providerBudget && ctx.prov.providerBudget[0] && ctx.prov.providerBudget[0].evaluated);
       \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.prov && ctx.prov.providerBudget && ctx.hasPermission("event_admin") && (ctx.prov.status === "dating_with_customer" || ctx.prov.status === "approved_by_manager" || ctx.prov.status === "sent_to_customer"));
+      \u0275\u0275property("ngIf", ctx.prov && (ctx.prov.isAirfare || ctx.prov.providerBudget) && (ctx.hasPermission("event_admin") || ctx.prov.isAirfare && ctx.hasPermission("air_operator") || ctx.hasPermission("hotel_operator")) && (ctx.prov.status === "dating_with_customer" || ctx.prov.status === "approved_by_manager" || ctx.prov.status === "sent_to_customer"));
       \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.prov && ctx.prov.providerBudget && ctx.hasPermission("event_admin") && \u0275\u0275pureFunction0(58, _c039).includes(ctx.prov.status));
+      \u0275\u0275property("ngIf", ctx.prov && (ctx.prov.isAirfare || ctx.prov.providerBudget) && (ctx.hasPermission("event_admin") || ctx.prov.isAirfare && ctx.hasPermission("air_operator") || ctx.hasPermission("hotel_operator")) && (\u0275\u0275pureFunction0(58, _c039).includes(ctx.prov.status) || !ctx.prov.status));
       \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.hasPermission("event_admin") && ctx.prov.status === "dating_with_customer");
+      \u0275\u0275property("ngIf", (ctx.hasPermission("event_admin") || ctx.prov.isAirfare && ctx.hasPermission("air_operator") || ctx.hasPermission("hotel_operator")) && ctx.prov.status === "dating_with_customer");
       \u0275\u0275advance();
       \u0275\u0275property("show", ctx.showFollowUpModal);
       \u0275\u0275advance();
@@ -108916,7 +108921,7 @@ var ProviderActionsComponent = class _ProviderActionsComponent {
 \r
   <!-- 3. Avaliar Or\xE7amento -->\r
   <button\r
-    *ngIf="prov && !prov.isTransport && prov.providerBudget && prov.providerBudget[0] && !prov.providerBudget[0].evaluated && hasPermission('prove_budget_hotel')"\r
+    *ngIf="prov && !prov.isTransport && !prov.isAirfare && prov.providerBudget && prov.providerBudget[0] && !prov.providerBudget[0].evaluated && hasPermission('prove_budget_hotel')"\r
     type="button"\r
     class="btn btn-info text-white shadow-sm btn-action animate-in"\r
     title="Avaliar Or\xE7amento"\r
@@ -108927,7 +108932,7 @@ var ProviderActionsComponent = class _ProviderActionsComponent {
 \r
   <!-- 4. Ver (Or\xE7amento Avaliado) -->\r
   <button\r
-    *ngIf="prov && !prov.isTransport && prov.providerBudget && prov.providerBudget[0] && prov.providerBudget[0].evaluated"\r
+    *ngIf="prov && !prov.isTransport && !prov.isAirfare && prov.providerBudget && prov.providerBudget[0] && prov.providerBudget[0].evaluated"\r
     type="button"\r
     class="btn btn-info text-white shadow-sm btn-action animate-in"\r
     title="Ver avalia\xE7\xE3o de or\xE7amento"\r
@@ -108938,7 +108943,7 @@ var ProviderActionsComponent = class _ProviderActionsComponent {
 \r
   <!-- 5. Proposta -->\r
   <button\r
-    *ngIf="prov && prov.providerBudget && hasPermission('event_admin') && (prov.status === 'dating_with_customer' || prov.status === 'approved_by_manager' || prov.status === 'sent_to_customer')"\r
+    *ngIf="prov && (prov.isAirfare || prov.providerBudget) && (hasPermission('event_admin') || (prov.isAirfare && hasPermission('air_operator')) || hasPermission('hotel_operator')) && (prov.status === 'dating_with_customer' || prov.status === 'approved_by_manager' || prov.status === 'sent_to_customer')"\r
     type="button"\r
     class="btn btn-primary text-white shadow-sm btn-action animate-in"\r
     title="Proposta (Com Valores)"\r
@@ -108949,7 +108954,7 @@ var ProviderActionsComponent = class _ProviderActionsComponent {
 \r
   <!-- 6. Proposta (Sem Valores) -->\r
   <button\r
-    *ngIf="prov && prov.providerBudget && hasPermission('event_admin') && ['created', 'briefing', 'provider_requested', 'provider_responsed', 'sent_maneger', 'add_information', 'added_information', 'change_request'].includes(prov.status)"\r
+    *ngIf="prov && (prov.isAirfare || prov.providerBudget) && (hasPermission('event_admin') || (prov.isAirfare && hasPermission('air_operator')) || hasPermission('hotel_operator')) && (['created', 'briefing', 'provider_requested', 'provider_responsed', 'sent_maneger', 'add_information', 'added_information', 'change_request'].includes(prov.status) || !prov.status)"\r
     type="button"\r
     class="btn btn-warning text-dark shadow-sm btn-action animate-in"\r
     title="Proposta (Sem Valores)"\r
@@ -108960,7 +108965,7 @@ var ProviderActionsComponent = class _ProviderActionsComponent {
 \r
   <!-- 7. Faturamento -->\r
   <button\r
-    *ngIf="hasPermission('event_admin') && prov.status === 'dating_with_customer'"\r
+    *ngIf="(hasPermission('event_admin') || (prov.isAirfare && hasPermission('air_operator')) || hasPermission('hotel_operator')) && prov.status === 'dating_with_customer'"\r
     type="button"\r
     class="btn btn-info text-white shadow-sm btn-action animate-in"\r
     title="Faturamento"\r
@@ -111734,7 +111739,7 @@ function EventListComponent_ng_container_95_Template(rf, ctx) {
     \u0275\u0275advance(4);
     \u0275\u0275property("ngIf", ctx_r4.hasPermission("show_history"));
     \u0275\u0275advance();
-    \u0275\u0275property("ngIf", ctx_r4.hasPermission("event_admin"));
+    \u0275\u0275property("ngIf", ctx_r4.hasPermission("event_admin") || ctx_r4.hasPermission("hotel_operator") || ctx_r4.hasPermission("air_operator") || ctx_r4.hasPermission("land_operator"));
     \u0275\u0275advance();
     \u0275\u0275property("ngIf", ctx_r4.hasPermission("event_admin"));
     \u0275\u0275advance();
@@ -112206,9 +112211,39 @@ var EventListComponent = class _EventListComponent {
     event_hall: "Sal\xE3o",
     event_hall_opt: "Sal\xE3o - Detalhes",
     event_transport: "Transporte",
-    event_transport_opt: "Transporte - Detalhes"
+    event_transport_opt: "Transporte - Detalhes",
+    event_airfare: "A\xE9reo",
+    event_airfares: "A\xE9reo",
+    event_airfare_opt: "A\xE9reo - Trecho",
+    event_airfare_opts: "A\xE9reo - Trecho"
   };
   fieldLabels = {
+    airline_id: "Companhia A\xE9rea",
+    equipment: "Equipamento",
+    pax_first: "Pax First",
+    pax_executiva: "Pax Executiva",
+    pax_premium: "Pax Premium",
+    pax_economica: "Pax Econ\xF4mica",
+    total_pax: "Total Pax",
+    prazo_cia: "Prazo da Cia",
+    inc_taxa_embarque: "Taxa de Embarque",
+    inc_servico_bordo: "Servi\xE7o de Bordo",
+    inc_porao: "Por\xE3o",
+    inc_bagagem_bordo: "Bagagem a bordo",
+    inc_sala_vip: "Sala VIP",
+    inc_fbo_origem: "FBO Origem",
+    inc_fbo_destino: "FBO Destino",
+    inc_alteracao_nomes: "Altera\xE7\xE3o de Nomes",
+    taxa_embarque_unit: "Taxa de Embarque Unit\xE1ria",
+    total_net_sem_4bts: "Custo Net",
+    markup: "Mark Up",
+    flight_number: "N\xFAmero do Voo",
+    origin: "Origem",
+    destination: "Destino",
+    departure_time: "Hor\xE1rio Sa\xEDda",
+    arrival_time: "Hor\xE1rio Chegada",
+    departure_date: "Data Sa\xEDda",
+    arrival_date: "Data Chegada",
     name: "Nome do Evento",
     code: "C\xF3digo do Zendesk",
     requester: "Solicitante",
@@ -112541,6 +112576,28 @@ var EventListComponent = class _EventListComponent {
           providerBudget: current.provider_budget,
           isTransport: true,
           table: "event_transports",
+          table_id: current.id,
+          status: current.status_his?.[0]?.status,
+          order: current.order || 0
+        });
+      }
+    });
+    const airfares = event.event_airfares || event.event_airfare || event.eventAirfares || [];
+    airfares.forEach((current) => {
+      const airId = current.airline?.id || current.id;
+      if (!groups.some((g) => g.type === "A\xE9reo" && (g.id === airId || g.table_id === current.id))) {
+        groups.push({
+          id: airId,
+          name: current.airline?.name || current.name || "Companhia A\xE9rea",
+          city: current.airline?.city || null,
+          email: current.airline?.email,
+          sended_mail: current.sended_mail,
+          sended_mail_link: current.sended_mail_link,
+          token_budget: current.token_budget,
+          providerBudget: current.provider_budget,
+          isAirfare: true,
+          type: "A\xE9reo",
+          table: "event_airfares",
           table_id: current.id,
           status: current.status_his?.[0]?.status,
           order: current.order || 0
@@ -113294,7 +113351,7 @@ var EventListComponent = class _EventListComponent {
                             <i class="fas fa-history"></i>\r
                           </button>\r
                           <a\r
-                            *ngIf="hasPermission('event_admin')"\r
+                            *ngIf="hasPermission('event_admin') || hasPermission('hotel_operator') || hasPermission('air_operator') || hasPermission('land_operator')"\r
                             [routerLink]="['/event', event.id]"\r
                             class="btn btn-primary text-white shadow-sm btn-action"\r
                             data-tooltip="Editar Evento">\r
@@ -113615,19 +113672,255 @@ var EventListComponent = class _EventListComponent {
   (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(EventListComponent, { className: "EventListComponent", filePath: "src/app/pages/event/event-list/event-list.component.ts", lineNumber: 30 });
 })();
 
+// src/app/services/airfare-airline.service.ts
+var AirfareAirlineService = class _AirfareAirlineService {
+  http = inject(HttpClient);
+  apiUrl = environment.apiUrl;
+  getAirlines(params = {}) {
+    return this.http.get(`${this.apiUrl}/api/airfare-airlines`, { params });
+  }
+  saveAirline(data) {
+    return this.http.post(`${this.apiUrl}/api/airfare-airlines`, data);
+  }
+  deleteAirline(id) {
+    return this.http.delete(`${this.apiUrl}/api/airfare-airlines/${id}`);
+  }
+  activateAirline(id) {
+    return this.http.put(`${this.apiUrl}/api/airfare-airlines/${id}/activate`, {});
+  }
+  deactivateAirline(id) {
+    return this.http.put(`${this.apiUrl}/api/airfare-airlines/${id}/deactivate`, {});
+  }
+  static \u0275fac = function AirfareAirlineService_Factory(__ngFactoryType__) {
+    return new (__ngFactoryType__ || _AirfareAirlineService)();
+  };
+  static \u0275prov = /* @__PURE__ */ \u0275\u0275defineInjectable({ token: _AirfareAirlineService, factory: _AirfareAirlineService.\u0275fac, providedIn: "root" });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(AirfareAirlineService, [{
+    type: Injectable,
+    args: [{
+      providedIn: "root"
+    }]
+  }], null, null);
+})();
+
+// src/app/services/airport.service.ts
+var AirportService = class _AirportService {
+  http = inject(HttpClient);
+  apiUrl = environment.apiUrl;
+  searchAirports(term) {
+    let params = new HttpParams();
+    if (term) {
+      params = params.set("term", term);
+    }
+    return this.http.get(`${this.apiUrl}/api/airports/search`, { params }).pipe(map((airports) => (airports || []).map((a) => __spreadProps(__spreadValues({}, a), {
+      formatted: `${a.name} (${a.iata_code})`
+    }))));
+  }
+  static \u0275fac = function AirportService_Factory(__ngFactoryType__) {
+    return new (__ngFactoryType__ || _AirportService)();
+  };
+  static \u0275prov = /* @__PURE__ */ \u0275\u0275defineInjectable({ token: _AirportService, factory: _AirportService.\u0275fac, providedIn: "root" });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(AirportService, [{
+    type: Injectable,
+    args: [{
+      providedIn: "root"
+    }]
+  }], null, null);
+})();
+
+// src/app/shared/directives/flatpickr.directive.ts
+var FlatpickrDirective = class _FlatpickrDirective {
+  el;
+  mode = "single";
+  altFormat = "d/m/Y";
+  dateFormat = "Y-m-d";
+  minDate;
+  maxDate;
+  enableTime = false;
+  dateChange = new EventEmitter();
+  fpInstance = null;
+  onChange = () => {
+  };
+  onTouched = () => {
+  };
+  innerValue = null;
+  constructor(el) {
+    this.el = el;
+  }
+  ngOnInit() {
+    this.initFlatpickr();
+  }
+  ngOnChanges(changes) {
+    if (this.fpInstance) {
+      if (changes["minDate"] && this.minDate !== void 0) {
+        this.fpInstance.set("minDate", this.minDate);
+      }
+      if (changes["maxDate"] && this.maxDate !== void 0) {
+        this.fpInstance.set("maxDate", this.maxDate);
+      }
+    }
+  }
+  ngOnDestroy() {
+    if (this.fpInstance) {
+      this.fpInstance.destroy();
+      this.fpInstance = null;
+    }
+  }
+  initFlatpickr() {
+    this.fpInstance = esm_default(this.el.nativeElement, {
+      mode: this.mode,
+      dateFormat: this.dateFormat,
+      altInput: true,
+      altFormat: this.altFormat,
+      altInputClass: this.el.nativeElement.className,
+      disableMobile: true,
+      locale: {
+        firstDayOfWeek: 1,
+        weekdays: {
+          shorthand: ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "S\xE1b"],
+          longhand: [
+            "Domingo",
+            "Segunda-feira",
+            "Ter\xE7a-feira",
+            "Quarta-feira",
+            "Quinta-feira",
+            "Sexta-feira",
+            "S\xE1bado"
+          ]
+        },
+        months: {
+          shorthand: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"],
+          longhand: [
+            "Janeiro",
+            "Fevereiro",
+            "Mar\xE7o",
+            "Abril",
+            "Maio",
+            "Junho",
+            "Julho",
+            "Agosto",
+            "Setembro",
+            "Outubro",
+            "Novembro",
+            "Dezembro"
+          ]
+        },
+        rangeSeparator: " at\xE9 "
+      },
+      onChange: (selectedDates, dateStr) => {
+        let valueToEmit = dateStr;
+        if (this.mode === "single") {
+          valueToEmit = selectedDates.length ? this.formatDate(selectedDates[0]) : "";
+        }
+        this.innerValue = valueToEmit;
+        this.onChange(valueToEmit);
+        this.dateChange.emit(valueToEmit);
+      },
+      onClose: () => {
+        this.onTouched();
+      }
+    });
+    if (this.innerValue) {
+      this.fpInstance.setDate(this.innerValue, false);
+    }
+  }
+  formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+  writeValue(value) {
+    this.innerValue = value;
+    if (this.fpInstance) {
+      if (value) {
+        this.fpInstance.setDate(value, false);
+      } else {
+        this.fpInstance.clear();
+      }
+    }
+  }
+  registerOnChange(fn) {
+    this.onChange = fn;
+  }
+  registerOnTouched(fn) {
+    this.onTouched = fn;
+  }
+  setDisabledState(isDisabled) {
+    if (this.fpInstance) {
+      if (isDisabled) {
+        this.fpInstance.input.setAttribute("disabled", "disabled");
+        if (this.fpInstance.altInput) {
+          this.fpInstance.altInput.setAttribute("disabled", "disabled");
+        }
+      } else {
+        this.fpInstance.input.removeAttribute("disabled");
+        if (this.fpInstance.altInput) {
+          this.fpInstance.altInput.removeAttribute("disabled");
+        }
+      }
+    }
+  }
+  static \u0275fac = function FlatpickrDirective_Factory(__ngFactoryType__) {
+    return new (__ngFactoryType__ || _FlatpickrDirective)(\u0275\u0275directiveInject(ElementRef));
+  };
+  static \u0275dir = /* @__PURE__ */ \u0275\u0275defineDirective({ type: _FlatpickrDirective, selectors: [["", "appFlatpickr", ""]], inputs: { mode: "mode", altFormat: "altFormat", dateFormat: "dateFormat", minDate: "minDate", maxDate: "maxDate", enableTime: "enableTime" }, outputs: { dateChange: "dateChange" }, features: [\u0275\u0275ProvidersFeature([
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => _FlatpickrDirective),
+      multi: true
+    }
+  ]), \u0275\u0275NgOnChangesFeature] });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(FlatpickrDirective, [{
+    type: Directive,
+    args: [{
+      selector: "[appFlatpickr]",
+      standalone: true,
+      providers: [
+        {
+          provide: NG_VALUE_ACCESSOR,
+          useExisting: forwardRef(() => FlatpickrDirective),
+          multi: true
+        }
+      ]
+    }]
+  }], () => [{ type: ElementRef }], { mode: [{
+    type: Input
+  }], altFormat: [{
+    type: Input
+  }], dateFormat: [{
+    type: Input
+  }], minDate: [{
+    type: Input
+  }], maxDate: [{
+    type: Input
+  }], enableTime: [{
+    type: Input
+  }], dateChange: [{
+    type: Output
+  }] });
+})();
+
 // src/app/pages/event/event-create/event-create.component.ts
 var _c041 = ["dateRangePicker"];
-var _c137 = (a0, a1, a2, a3) => ({ "bg-secondary": a0, "bg-warning": a1, "bg-success": a2, "bg-danger": a3 });
+var _c137 = (a0, a1, a2, a3) => [a0, a1, a2, a3];
+var _c24 = () => [1, 2, 3, 4];
 function EventCreateComponent_div_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 161)(1, "div", 162)(2, "span", 163);
+    \u0275\u0275elementStart(0, "div", 109)(1, "div", 110)(2, "span", 111);
     \u0275\u0275text(3, "Carregando...");
     \u0275\u0275elementEnd()()();
   }
 }
 function EventCreateComponent_div_55_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -113639,8 +113932,8 @@ function EventCreateComponent_div_55_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_55_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_55_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_55_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -113651,7 +113944,7 @@ function EventCreateComponent_div_55_Template(rf, ctx) {
 }
 function EventCreateComponent_div_62_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -113663,8 +113956,8 @@ function EventCreateComponent_div_62_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_62_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_62_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_62_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -113676,14 +113969,14 @@ function EventCreateComponent_div_62_Template(rf, ctx) {
 function EventCreateComponent_div_67_button_9_Template(rf, ctx) {
   if (rf & 1) {
     const _r7 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 172);
+    \u0275\u0275elementStart(0, "button", 120);
     \u0275\u0275listener("click", function EventCreateComponent_div_67_button_9_Template_button_click_0_listener() {
       \u0275\u0275restoreView(_r7);
       const i_r8 = \u0275\u0275nextContext().index;
       const ctx_r2 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r2.removeCountry(i_r8));
     });
-    \u0275\u0275element(1, "i", 173);
+    \u0275\u0275element(1, "i", 121);
     \u0275\u0275text(2, " Remover Local ");
     \u0275\u0275elementEnd();
   }
@@ -113691,27 +113984,27 @@ function EventCreateComponent_div_67_button_9_Template(rf, ctx) {
 function EventCreateComponent_div_67_Template(rf, ctx) {
   if (rf & 1) {
     const _r5 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 167)(1, "div", 168)(2, "label", 169);
+    \u0275\u0275elementStart(0, "div", 115)(1, "div", 116)(2, "label", 117);
     \u0275\u0275text(3, "Pa\xEDs:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(4, "input", 170);
+    \u0275\u0275elementStart(4, "input", 118);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_67_Template_input_ngModelChange_4_listener($event) {
       const country_r6 = \u0275\u0275restoreView(_r5).$implicit;
       \u0275\u0275twoWayBindingSet(country_r6.pais, $event) || (country_r6.pais = $event);
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "div", 168)(6, "label", 169);
+    \u0275\u0275elementStart(5, "div", 116)(6, "label", 117);
     \u0275\u0275text(7, "Cidade:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(8, "input", 170);
+    \u0275\u0275elementStart(8, "input", 118);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_67_Template_input_ngModelChange_8_listener($event) {
       const country_r6 = \u0275\u0275restoreView(_r5).$implicit;
       \u0275\u0275twoWayBindingSet(country_r6.cidade, $event) || (country_r6.cidade = $event);
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275template(9, EventCreateComponent_div_67_button_9_Template, 3, 0, "button", 171);
+    \u0275\u0275template(9, EventCreateComponent_div_67_button_9_Template, 3, 0, "button", 119);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -113737,20 +114030,20 @@ function EventCreateComponent_div_67_Template(rf, ctx) {
 function EventCreateComponent_button_68_Template(rf, ctx) {
   if (rf & 1) {
     const _r9 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 174);
+    \u0275\u0275elementStart(0, "button", 122);
     \u0275\u0275listener("click", function EventCreateComponent_button_68_Template_button_click_0_listener() {
       \u0275\u0275restoreView(_r9);
       const ctx_r2 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r2.addCountry());
     });
-    \u0275\u0275element(1, "i", 175);
+    \u0275\u0275element(1, "i", 123);
     \u0275\u0275text(2, " Adicionar Local ");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_option_78_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 90);
+    \u0275\u0275elementStart(0, "option", 86);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -113763,7 +114056,7 @@ function EventCreateComponent_option_78_Template(rf, ctx) {
 }
 function EventCreateComponent_div_79_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -113775,8 +114068,8 @@ function EventCreateComponent_div_79_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_79_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_79_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_79_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -113787,7 +114080,7 @@ function EventCreateComponent_div_79_Template(rf, ctx) {
 }
 function EventCreateComponent_option_88_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
+    \u0275\u0275elementStart(0, "option", 124);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -113800,7 +114093,7 @@ function EventCreateComponent_option_88_Template(rf, ctx) {
 }
 function EventCreateComponent_div_89_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -113812,8 +114105,8 @@ function EventCreateComponent_div_89_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_89_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_89_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_89_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -113824,7 +114117,7 @@ function EventCreateComponent_div_89_Template(rf, ctx) {
 }
 function EventCreateComponent_option_98_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
+    \u0275\u0275elementStart(0, "option", 124);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -113837,7 +114130,7 @@ function EventCreateComponent_option_98_Template(rf, ctx) {
 }
 function EventCreateComponent_div_99_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -113849,8 +114142,8 @@ function EventCreateComponent_div_99_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_99_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_99_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_99_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -113861,7 +114154,7 @@ function EventCreateComponent_div_99_Template(rf, ctx) {
 }
 function EventCreateComponent_option_108_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
+    \u0275\u0275elementStart(0, "option", 124);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -113874,7 +114167,7 @@ function EventCreateComponent_option_108_Template(rf, ctx) {
 }
 function EventCreateComponent_div_109_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -113886,8 +114179,8 @@ function EventCreateComponent_div_109_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_109_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_109_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_109_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -113898,7 +114191,7 @@ function EventCreateComponent_div_109_Template(rf, ctx) {
 }
 function EventCreateComponent_div_116_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -113910,8 +114203,8 @@ function EventCreateComponent_div_116_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_116_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_116_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_116_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -113922,7 +114215,7 @@ function EventCreateComponent_div_116_Template(rf, ctx) {
 }
 function EventCreateComponent_div_128_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -113934,8 +114227,8 @@ function EventCreateComponent_div_128_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_128_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_128_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_128_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -113946,7 +114239,7 @@ function EventCreateComponent_div_128_Template(rf, ctx) {
 }
 function EventCreateComponent_div_129_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -113958,8 +114251,8 @@ function EventCreateComponent_div_129_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_129_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_129_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_129_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -113970,7 +114263,7 @@ function EventCreateComponent_div_129_Template(rf, ctx) {
 }
 function EventCreateComponent_option_138_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 90);
+    \u0275\u0275elementStart(0, "option", 86);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -113983,7 +114276,7 @@ function EventCreateComponent_option_138_Template(rf, ctx) {
 }
 function EventCreateComponent_div_139_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -113995,8 +114288,8 @@ function EventCreateComponent_div_139_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_139_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_139_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_139_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -114007,7 +114300,7 @@ function EventCreateComponent_div_139_Template(rf, ctx) {
 }
 function EventCreateComponent_option_146_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
+    \u0275\u0275elementStart(0, "option", 124);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114020,7 +114313,7 @@ function EventCreateComponent_option_146_Template(rf, ctx) {
 }
 function EventCreateComponent_option_153_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
+    \u0275\u0275elementStart(0, "option", 124);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114033,7 +114326,7 @@ function EventCreateComponent_option_153_Template(rf, ctx) {
 }
 function EventCreateComponent_option_160_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
+    \u0275\u0275elementStart(0, "option", 124);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114046,14 +114339,14 @@ function EventCreateComponent_option_160_Template(rf, ctx) {
 }
 function EventCreateComponent_div_161_span_2_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275element(0, "span", 179);
+    \u0275\u0275element(0, "span", 127);
   }
 }
 function EventCreateComponent_div_161_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 177)(1, "button", 178);
-    \u0275\u0275template(2, EventCreateComponent_div_161_span_2_Template, 1, 0, "span", 104);
-    \u0275\u0275element(3, "i", 105);
+    \u0275\u0275elementStart(0, "div", 125)(1, "button", 126);
+    \u0275\u0275template(2, EventCreateComponent_div_161_span_2_Template, 1, 0, "span", 99);
+    \u0275\u0275element(3, "i", 100);
     \u0275\u0275text(4, " Salvar e Avan\xE7ar ");
     \u0275\u0275elementEnd()();
   }
@@ -114068,13 +114361,13 @@ function EventCreateComponent_div_161_Template(rf, ctx) {
 function EventCreateComponent_div_162_button_9_Template(rf, ctx) {
   if (rf & 1) {
     const _r27 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 189);
+    \u0275\u0275elementStart(0, "button", 138);
     \u0275\u0275listener("click", function EventCreateComponent_div_162_button_9_Template_button_click_0_listener() {
       \u0275\u0275restoreView(_r27);
       const ctx_r2 = \u0275\u0275nextContext(2);
       return \u0275\u0275resetView(ctx_r2.openAddProviderLink(ctx_r2.activeTab === 1 ? "hotel" : ctx_r2.activeTab === 2 ? "ab" : ctx_r2.activeTab === 3 ? "hall" : ctx_r2.activeTab === 4 ? "add" : "transport"));
     });
-    \u0275\u0275element(1, "i", 175);
+    \u0275\u0275element(1, "i", 123);
     \u0275\u0275text(2, " Vincular Novo Fornecedor ");
     \u0275\u0275elementEnd();
   }
@@ -114082,45 +114375,45 @@ function EventCreateComponent_div_162_button_9_Template(rf, ctx) {
 function EventCreateComponent_div_162_ng_container_10_div_8_Template(rf, ctx) {
   if (rf & 1) {
     const _r28 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 184)(1, "button", 218);
+    \u0275\u0275elementStart(0, "div", 132)(1, "button", 167);
     \u0275\u0275listener("click", function EventCreateComponent_div_162_ng_container_10_div_8_Template_button_click_1_listener() {
       \u0275\u0275restoreView(_r28);
       const item_r29 = \u0275\u0275nextContext().$implicit;
       const ctx_r2 = \u0275\u0275nextContext(2);
       return \u0275\u0275resetView(ctx_r2.openAddProviderLink(ctx_r2.activeTab === 1 ? "hotel" : ctx_r2.activeTab === 2 ? "ab" : ctx_r2.activeTab === 3 ? "hall" : ctx_r2.activeTab === 4 ? "add" : "transport", item_r29));
     });
-    \u0275\u0275element(2, "i", 219);
+    \u0275\u0275element(2, "i", 168);
     \u0275\u0275text(3, " Editar Cadastro ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(4, "button", 220);
+    \u0275\u0275elementStart(4, "button", 169);
     \u0275\u0275listener("click", function EventCreateComponent_div_162_ng_container_10_div_8_Template_button_click_4_listener() {
       \u0275\u0275restoreView(_r28);
       const item_r29 = \u0275\u0275nextContext().$implicit;
       const ctx_r2 = \u0275\u0275nextContext(2);
       return \u0275\u0275resetView(ctx_r2.updateMarkupBulk(item_r29, ctx_r2.activeTab === 1 ? "hotel" : ctx_r2.activeTab === 2 ? "ab" : ctx_r2.activeTab === 3 ? "hall" : ctx_r2.activeTab === 4 ? "add" : "transport"));
     });
-    \u0275\u0275element(5, "i", 221);
+    \u0275\u0275element(5, "i", 170);
     \u0275\u0275text(6, " Editar Markup Geral ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(7, "button", 222);
+    \u0275\u0275elementStart(7, "button", 171);
     \u0275\u0275listener("click", function EventCreateComponent_div_162_ng_container_10_div_8_Template_button_click_7_listener() {
       \u0275\u0275restoreView(_r28);
       const item_r29 = \u0275\u0275nextContext().$implicit;
       const ctx_r2 = \u0275\u0275nextContext(2);
       return \u0275\u0275resetView(ctx_r2.openAddOpt(ctx_r2.activeTab === 1 ? "hotel" : ctx_r2.activeTab === 2 ? "ab" : ctx_r2.activeTab === 3 ? "hall" : ctx_r2.activeTab === 4 ? "add" : "transport", item_r29.id));
     });
-    \u0275\u0275element(8, "i", 175);
+    \u0275\u0275element(8, "i", 123);
     \u0275\u0275text(9, " Adicionar Tarifa ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(10, "app-confirm-modal", 223);
+    \u0275\u0275elementStart(10, "app-confirm-modal", 172);
     \u0275\u0275listener("confirm", function EventCreateComponent_div_162_ng_container_10_div_8_Template_app_confirm_modal_confirm_10_listener() {
       \u0275\u0275restoreView(_r28);
       const item_r29 = \u0275\u0275nextContext().$implicit;
       const ctx_r2 = \u0275\u0275nextContext(2);
       return \u0275\u0275resetView(ctx_r2.deleteProviderLink(ctx_r2.activeTab === 1 ? "hotel" : ctx_r2.activeTab === 2 ? "ab" : ctx_r2.activeTab === 3 ? "hall" : ctx_r2.activeTab === 4 ? "add" : "transport", item_r29.id));
     });
-    \u0275\u0275elementStart(11, "span", 224);
-    \u0275\u0275element(12, "i", 225);
+    \u0275\u0275elementStart(11, "span", 173);
+    \u0275\u0275element(12, "i", 174);
     \u0275\u0275text(13, " Excluir V\xEDnculo ");
     \u0275\u0275elementEnd()()();
   }
@@ -114132,7 +114425,7 @@ function EventCreateComponent_div_162_ng_container_10_div_8_Template(rf, ctx) {
 }
 function EventCreateComponent_div_162_ng_container_10_ng_container_23_th_7_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 226);
+    \u0275\u0275elementStart(0, "th", 175);
     \u0275\u0275text(1, " Tx. Turismo ");
     \u0275\u0275elementEnd();
   }
@@ -114140,16 +114433,16 @@ function EventCreateComponent_div_162_ng_container_10_ng_container_23_th_7_Templ
 function EventCreateComponent_div_162_ng_container_10_ng_container_23_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "th", 226);
+    \u0275\u0275elementStart(1, "th", 175);
     \u0275\u0275text(2, "ISS");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "th", 226);
+    \u0275\u0275elementStart(3, "th", 175);
     \u0275\u0275text(4, "Servi\xE7o");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "th", 226);
+    \u0275\u0275elementStart(5, "th", 175);
     \u0275\u0275text(6, "IVA");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(7, EventCreateComponent_div_162_ng_container_10_ng_container_23_th_7_Template, 2, 0, "th", 227);
+    \u0275\u0275template(7, EventCreateComponent_div_162_ng_container_10_ng_container_23_th_7_Template, 2, 0, "th", 176);
     \u0275\u0275elementContainerEnd();
   }
   if (rf & 2) {
@@ -114160,28 +114453,28 @@ function EventCreateComponent_div_162_ng_container_10_ng_container_23_Template(r
 }
 function EventCreateComponent_div_162_ng_container_10_th_24_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 228);
+    \u0275\u0275elementStart(0, "th", 177);
     \u0275\u0275text(1, "Comparativo");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_25_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 229);
+    \u0275\u0275elementStart(0, "th", 178);
     \u0275\u0275text(1, "A\xE7\xF5es");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_27_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 204);
+    \u0275\u0275elementStart(0, "th", 153);
     \u0275\u0275text(1, "Servi\xE7o/Detalhe");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_30_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 230);
+    \u0275\u0275elementStart(0, "th", 179);
     \u0275\u0275text(1, "Regime");
     \u0275\u0275elementEnd();
   }
@@ -114192,98 +114485,98 @@ function EventCreateComponent_div_162_ng_container_10_th_30_Template(rf, ctx) {
 }
 function EventCreateComponent_div_162_ng_container_10_th_31_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 230);
+    \u0275\u0275elementStart(0, "th", 179);
     \u0275\u0275text(1, "Metragem");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_32_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 230);
+    \u0275\u0275elementStart(0, "th", 179);
     \u0275\u0275text(1, "Pax");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_33_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 230);
+    \u0275\u0275elementStart(0, "th", 179);
     \u0275\u0275text(1, "Prop\xF3sito");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_34_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 230);
+    \u0275\u0275elementStart(0, "th", 179);
     \u0275\u0275text(1, "CAT.");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_35_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 230);
+    \u0275\u0275elementStart(0, "th", 179);
     \u0275\u0275text(1, "APTO");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_36_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 230);
+    \u0275\u0275elementStart(0, "th", 179);
     \u0275\u0275text(1, "Tipo Servi\xE7o");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_37_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 230);
+    \u0275\u0275elementStart(0, "th", 179);
     \u0275\u0275text(1, "Local");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_38_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 230);
+    \u0275\u0275elementStart(0, "th", 179);
     \u0275\u0275text(1, "Frequ\xEAncia");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_39_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 230);
+    \u0275\u0275elementStart(0, "th", 179);
     \u0275\u0275text(1, "Medida");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_40_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 230);
+    \u0275\u0275elementStart(0, "th", 179);
     \u0275\u0275text(1, "Ve\xEDculo");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_41_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 230);
+    \u0275\u0275elementStart(0, "th", 179);
     \u0275\u0275text(1, "Modelo");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_42_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 230);
+    \u0275\u0275elementStart(0, "th", 179);
     \u0275\u0275text(1, "Marca");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_ng_container_61_th_13_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 231);
+    \u0275\u0275elementStart(0, "th", 180);
     \u0275\u0275text(1, "Cliente");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_ng_container_61_th_14_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 231);
+    \u0275\u0275elementStart(0, "th", 180);
     \u0275\u0275text(1, "Custo");
     \u0275\u0275elementEnd();
   }
@@ -114291,25 +114584,25 @@ function EventCreateComponent_div_162_ng_container_10_ng_container_61_th_14_Temp
 function EventCreateComponent_div_162_ng_container_10_ng_container_61_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "th", 231);
+    \u0275\u0275elementStart(1, "th", 180);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "th", 231);
+    \u0275\u0275elementStart(3, "th", 180);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "th", 231);
+    \u0275\u0275elementStart(5, "th", 180);
     \u0275\u0275text(6);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(7, "th", 231);
+    \u0275\u0275elementStart(7, "th", 180);
     \u0275\u0275text(8);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(9, "th", 231);
+    \u0275\u0275elementStart(9, "th", 180);
     \u0275\u0275text(10);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(11, "th", 231);
+    \u0275\u0275elementStart(11, "th", 180);
     \u0275\u0275text(12);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(13, EventCreateComponent_div_162_ng_container_10_ng_container_61_th_13_Template, 2, 0, "th", 232)(14, EventCreateComponent_div_162_ng_container_10_ng_container_61_th_14_Template, 2, 0, "th", 232);
+    \u0275\u0275template(13, EventCreateComponent_div_162_ng_container_10_ng_container_61_th_13_Template, 2, 0, "th", 181)(14, EventCreateComponent_div_162_ng_container_10_ng_container_61_th_14_Template, 2, 0, "th", 181);
     \u0275\u0275elementContainerEnd();
   }
   if (rf & 2) {
@@ -114336,13 +114629,13 @@ function EventCreateComponent_div_162_ng_container_10_ng_container_61_Template(r
 function EventCreateComponent_div_162_ng_container_10_ng_container_62_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "th", 233);
+    \u0275\u0275elementStart(1, "th", 182);
     \u0275\u0275text(2, "Trivago");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "th", 233);
+    \u0275\u0275elementStart(3, "th", 182);
     \u0275\u0275text(4, "Website HTL");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "th", 233);
+    \u0275\u0275elementStart(5, "th", 182);
     \u0275\u0275text(6, "Omnibess");
     \u0275\u0275elementEnd();
     \u0275\u0275elementContainerEnd();
@@ -114350,7 +114643,7 @@ function EventCreateComponent_div_162_ng_container_10_ng_container_62_Template(r
 }
 function EventCreateComponent_div_162_ng_container_10_tr_64_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr")(1, "td", 234);
+    \u0275\u0275elementStart(0, "tr")(1, "td", 183);
     \u0275\u0275element(2, "i", 14);
     \u0275\u0275text(3, " Nenhuma tarifa ou detalhe cadastrado para este fornecedor. ");
     \u0275\u0275elementEnd()();
@@ -114363,7 +114656,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_64_Template(rf, ctx) {
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 246);
+    \u0275\u0275elementStart(0, "td", 195);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114375,7 +114668,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_1_Template(rf, ct
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_4_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 247);
+    \u0275\u0275elementStart(0, "td", 196);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114389,7 +114682,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_4_Template(rf, ct
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_5_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 247);
+    \u0275\u0275elementStart(0, "td", 196);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114401,7 +114694,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_5_Template(rf, ct
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_6_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 247);
+    \u0275\u0275elementStart(0, "td", 196);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114413,7 +114706,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_6_Template(rf, ct
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_7_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 247);
+    \u0275\u0275elementStart(0, "td", 196);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114425,7 +114718,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_7_Template(rf, ct
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 247);
+    \u0275\u0275elementStart(0, "td", 196);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114437,7 +114730,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_8_Template(rf, ct
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 247);
+    \u0275\u0275elementStart(0, "td", 196);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114449,7 +114742,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_9_Template(rf, ct
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_10_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 247);
+    \u0275\u0275elementStart(0, "td", 196);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114461,7 +114754,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_10_Template(rf, c
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_11_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 247);
+    \u0275\u0275elementStart(0, "td", 196);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114473,7 +114766,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_11_Template(rf, c
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_12_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 247);
+    \u0275\u0275elementStart(0, "td", 196);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114485,7 +114778,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_12_Template(rf, c
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_13_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 247);
+    \u0275\u0275elementStart(0, "td", 196);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114497,7 +114790,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_13_Template(rf, c
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_14_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 247);
+    \u0275\u0275elementStart(0, "td", 196);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114509,7 +114802,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_14_Template(rf, c
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_15_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 247);
+    \u0275\u0275elementStart(0, "td", 196);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114521,7 +114814,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_15_Template(rf, c
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_16_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 247);
+    \u0275\u0275elementStart(0, "td", 196);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114533,7 +114826,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_16_Template(rf, c
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_43_td_13_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 248);
+    \u0275\u0275elementStart(0, "td", 197);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114547,7 +114840,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_43_td_1
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_43_td_14_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 249);
+    \u0275\u0275elementStart(0, "td", 198);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114562,25 +114855,25 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_43_td_1
 function EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_43_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "td", 248);
+    \u0275\u0275elementStart(1, "td", 197);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td", 249);
+    \u0275\u0275elementStart(3, "td", 198);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "td", 248);
+    \u0275\u0275elementStart(5, "td", 197);
     \u0275\u0275text(6);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(7, "td", 249);
+    \u0275\u0275elementStart(7, "td", 198);
     \u0275\u0275text(8);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(9, "td", 248);
+    \u0275\u0275elementStart(9, "td", 197);
     \u0275\u0275text(10);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(11, "td", 249);
+    \u0275\u0275elementStart(11, "td", 198);
     \u0275\u0275text(12);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(13, EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_43_td_13_Template, 2, 1, "td", 250)(14, EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_43_td_14_Template, 2, 1, "td", 251);
+    \u0275\u0275template(13, EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_43_td_13_Template, 2, 1, "td", 199)(14, EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_43_td_14_Template, 2, 1, "td", 200);
     \u0275\u0275elementContainerEnd();
   }
   if (rf & 2) {
@@ -114608,13 +114901,13 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_43_Temp
 function EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_44_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "td", 252);
+    \u0275\u0275elementStart(1, "td", 201);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td", 252);
+    \u0275\u0275elementStart(3, "td", 201);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "td", 252);
+    \u0275\u0275elementStart(5, "td", 201);
     \u0275\u0275text(6);
     \u0275\u0275elementEnd();
     \u0275\u0275elementContainerEnd();
@@ -114634,7 +114927,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_44_Temp
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_45_Template(rf, ctx) {
   if (rf & 1) {
     const _r31 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "td")(1, "div", 253)(2, "button", 254);
+    \u0275\u0275elementStart(0, "td")(1, "div", 202)(2, "button", 203);
     \u0275\u0275listener("click", function EventCreateComponent_div_162_ng_container_10_tr_65_td_45_Template_button_click_2_listener() {
       \u0275\u0275restoreView(_r31);
       const opt_r30 = \u0275\u0275nextContext().$implicit;
@@ -114642,9 +114935,9 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_45_Template(rf, c
       const ctx_r2 = \u0275\u0275nextContext(2);
       return \u0275\u0275resetView(ctx_r2.openAddOpt(ctx_r2.activeTab === 1 ? "hotel" : ctx_r2.activeTab === 2 ? "ab" : ctx_r2.activeTab === 3 ? "hall" : ctx_r2.activeTab === 4 ? "add" : "transport", item_r29.id, opt_r30));
     });
-    \u0275\u0275element(3, "i", 255);
+    \u0275\u0275element(3, "i", 204);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(4, "button", 256);
+    \u0275\u0275elementStart(4, "button", 205);
     \u0275\u0275listener("click", function EventCreateComponent_div_162_ng_container_10_tr_65_td_45_Template_button_click_4_listener() {
       \u0275\u0275restoreView(_r31);
       const opt_r30 = \u0275\u0275nextContext().$implicit;
@@ -114652,17 +114945,17 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_45_Template(rf, c
       const ctx_r2 = \u0275\u0275nextContext(2);
       return \u0275\u0275resetView(ctx_r2.openAddOpt(ctx_r2.activeTab === 1 ? "hotel" : ctx_r2.activeTab === 2 ? "ab" : ctx_r2.activeTab === 3 ? "hall" : ctx_r2.activeTab === 4 ? "add" : "transport", item_r29.id, opt_r30, true));
     });
-    \u0275\u0275element(5, "i", 257);
+    \u0275\u0275element(5, "i", 206);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(6, "app-confirm-modal", 258);
+    \u0275\u0275elementStart(6, "app-confirm-modal", 207);
     \u0275\u0275listener("confirm", function EventCreateComponent_div_162_ng_container_10_tr_65_td_45_Template_app_confirm_modal_confirm_6_listener() {
       \u0275\u0275restoreView(_r31);
       const opt_r30 = \u0275\u0275nextContext().$implicit;
       const ctx_r2 = \u0275\u0275nextContext(3);
       return \u0275\u0275resetView(ctx_r2.deleteOpt(ctx_r2.activeTab === 1 ? "hotel" : ctx_r2.activeTab === 2 ? "ab" : ctx_r2.activeTab === 3 ? "hall" : ctx_r2.activeTab === 4 ? "add" : "transport", opt_r30.id));
     });
-    \u0275\u0275elementStart(7, "span", 224);
-    \u0275\u0275element(8, "i", 225);
+    \u0275\u0275elementStart(7, "span", 173);
+    \u0275\u0275element(8, "i", 174);
     \u0275\u0275elementEnd()()()();
   }
   if (rf & 2) {
@@ -114679,49 +114972,49 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_45_Template(rf, c
 function EventCreateComponent_div_162_ng_container_10_tr_65_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementStart(0, "tr");
-    \u0275\u0275template(1, EventCreateComponent_div_162_ng_container_10_tr_65_td_1_Template, 2, 1, "td", 235);
-    \u0275\u0275elementStart(2, "td", 236);
+    \u0275\u0275template(1, EventCreateComponent_div_162_ng_container_10_tr_65_td_1_Template, 2, 1, "td", 184);
+    \u0275\u0275elementStart(2, "td", 185);
     \u0275\u0275text(3);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(4, EventCreateComponent_div_162_ng_container_10_tr_65_td_4_Template, 2, 3, "td", 237)(5, EventCreateComponent_div_162_ng_container_10_tr_65_td_5_Template, 2, 1, "td", 238)(6, EventCreateComponent_div_162_ng_container_10_tr_65_td_6_Template, 2, 1, "td", 238)(7, EventCreateComponent_div_162_ng_container_10_tr_65_td_7_Template, 2, 1, "td", 238)(8, EventCreateComponent_div_162_ng_container_10_tr_65_td_8_Template, 2, 1, "td", 238)(9, EventCreateComponent_div_162_ng_container_10_tr_65_td_9_Template, 2, 1, "td", 238)(10, EventCreateComponent_div_162_ng_container_10_tr_65_td_10_Template, 2, 1, "td", 238)(11, EventCreateComponent_div_162_ng_container_10_tr_65_td_11_Template, 2, 1, "td", 238)(12, EventCreateComponent_div_162_ng_container_10_tr_65_td_12_Template, 2, 1, "td", 238)(13, EventCreateComponent_div_162_ng_container_10_tr_65_td_13_Template, 2, 1, "td", 238)(14, EventCreateComponent_div_162_ng_container_10_tr_65_td_14_Template, 2, 1, "td", 238)(15, EventCreateComponent_div_162_ng_container_10_tr_65_td_15_Template, 2, 1, "td", 238)(16, EventCreateComponent_div_162_ng_container_10_tr_65_td_16_Template, 2, 1, "td", 238);
-    \u0275\u0275elementStart(17, "td", 239);
+    \u0275\u0275template(4, EventCreateComponent_div_162_ng_container_10_tr_65_td_4_Template, 2, 3, "td", 186)(5, EventCreateComponent_div_162_ng_container_10_tr_65_td_5_Template, 2, 1, "td", 187)(6, EventCreateComponent_div_162_ng_container_10_tr_65_td_6_Template, 2, 1, "td", 187)(7, EventCreateComponent_div_162_ng_container_10_tr_65_td_7_Template, 2, 1, "td", 187)(8, EventCreateComponent_div_162_ng_container_10_tr_65_td_8_Template, 2, 1, "td", 187)(9, EventCreateComponent_div_162_ng_container_10_tr_65_td_9_Template, 2, 1, "td", 187)(10, EventCreateComponent_div_162_ng_container_10_tr_65_td_10_Template, 2, 1, "td", 187)(11, EventCreateComponent_div_162_ng_container_10_tr_65_td_11_Template, 2, 1, "td", 187)(12, EventCreateComponent_div_162_ng_container_10_tr_65_td_12_Template, 2, 1, "td", 187)(13, EventCreateComponent_div_162_ng_container_10_tr_65_td_13_Template, 2, 1, "td", 187)(14, EventCreateComponent_div_162_ng_container_10_tr_65_td_14_Template, 2, 1, "td", 187)(15, EventCreateComponent_div_162_ng_container_10_tr_65_td_15_Template, 2, 1, "td", 187)(16, EventCreateComponent_div_162_ng_container_10_tr_65_td_16_Template, 2, 1, "td", 187);
+    \u0275\u0275elementStart(17, "td", 188);
     \u0275\u0275text(18);
     \u0275\u0275pipe(19, "date");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(20, "td", 239);
+    \u0275\u0275elementStart(20, "td", 188);
     \u0275\u0275text(21);
     \u0275\u0275pipe(22, "date");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(23, "td", 239);
+    \u0275\u0275elementStart(23, "td", 188);
     \u0275\u0275text(24);
     \u0275\u0275pipe(25, "number");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(26, "td", 239);
+    \u0275\u0275elementStart(26, "td", 188);
     \u0275\u0275text(27);
     \u0275\u0275pipe(28, "number");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(29, "td", 240);
+    \u0275\u0275elementStart(29, "td", 189);
     \u0275\u0275text(30);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(31, "td", 241);
+    \u0275\u0275elementStart(31, "td", 190);
     \u0275\u0275text(32);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(33, "td", 242);
+    \u0275\u0275elementStart(33, "td", 191);
     \u0275\u0275text(34);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(35, "td", 243);
+    \u0275\u0275elementStart(35, "td", 192);
     \u0275\u0275text(36);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(37, "td", 244);
+    \u0275\u0275elementStart(37, "td", 193);
     \u0275\u0275text(38);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(39, "td", 245);
+    \u0275\u0275elementStart(39, "td", 194);
     \u0275\u0275text(40);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(41, "td", 239);
+    \u0275\u0275elementStart(41, "td", 188);
     \u0275\u0275text(42);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(43, EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_43_Template, 15, 8, "ng-container", 110)(44, EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_44_Template, 7, 3, "ng-container", 110)(45, EventCreateComponent_div_162_ng_container_10_tr_65_td_45_Template, 9, 7, "td", 110);
+    \u0275\u0275template(43, EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_43_Template, 15, 8, "ng-container", 104)(44, EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_44_Template, 7, 3, "ng-container", 104)(45, EventCreateComponent_div_162_ng_container_10_tr_65_td_45_Template, 9, 7, "td", 104);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -114793,28 +115086,28 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_Template(rf, ctx) {
 function EventCreateComponent_div_162_ng_container_10_tr_66_ng_container_33_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "td", 248);
+    \u0275\u0275elementStart(1, "td", 197);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td", 248);
+    \u0275\u0275elementStart(3, "td", 197);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "td", 248);
+    \u0275\u0275elementStart(5, "td", 197);
     \u0275\u0275text(6);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(7, "td", 248);
+    \u0275\u0275elementStart(7, "td", 197);
     \u0275\u0275text(8);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(9, "td", 248);
+    \u0275\u0275elementStart(9, "td", 197);
     \u0275\u0275text(10);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(11, "td", 248);
+    \u0275\u0275elementStart(11, "td", 197);
     \u0275\u0275text(12);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(13, "td", 248);
+    \u0275\u0275elementStart(13, "td", 197);
     \u0275\u0275text(14);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(15, "td", 248);
+    \u0275\u0275elementStart(15, "td", 197);
     \u0275\u0275text(16);
     \u0275\u0275elementEnd();
     \u0275\u0275elementContainerEnd();
@@ -114843,13 +115136,13 @@ function EventCreateComponent_div_162_ng_container_10_tr_66_ng_container_33_Temp
 function EventCreateComponent_div_162_ng_container_10_tr_66_ng_container_34_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "td", 266);
+    \u0275\u0275elementStart(1, "td", 215);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td", 266);
+    \u0275\u0275elementStart(3, "td", 215);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "td", 266);
+    \u0275\u0275elementStart(5, "td", 215);
     \u0275\u0275text(6);
     \u0275\u0275elementEnd();
     \u0275\u0275elementContainerEnd();
@@ -114872,52 +115165,52 @@ function EventCreateComponent_div_162_ng_container_10_tr_66_td_35_Template(rf, c
 }
 function EventCreateComponent_div_162_ng_container_10_tr_66_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr", 259)(1, "td", 260);
+    \u0275\u0275elementStart(0, "tr", 208)(1, "td", 209);
     \u0275\u0275text(2, "Di\xE1ria M\xE9dia:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td", 261);
+    \u0275\u0275elementStart(3, "td", 210);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
     \u0275\u0275element(5, "td");
-    \u0275\u0275elementStart(6, "td", 262);
+    \u0275\u0275elementStart(6, "td", 211);
     \u0275\u0275text(7, "Room Nights:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(8, "td", 263);
+    \u0275\u0275elementStart(8, "td", 212);
     \u0275\u0275text(9);
     \u0275\u0275pipe(10, "number");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(11, "td", 262);
+    \u0275\u0275elementStart(11, "td", 211);
     \u0275\u0275text(12, "# Aptos:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(13, "td", 264);
+    \u0275\u0275elementStart(13, "td", 213);
     \u0275\u0275text(14);
     \u0275\u0275pipe(15, "number");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(16, "td", 264);
+    \u0275\u0275elementStart(16, "td", 213);
     \u0275\u0275text(17);
     \u0275\u0275pipe(18, "number");
     \u0275\u0275elementEnd();
     \u0275\u0275element(19, "td");
-    \u0275\u0275elementStart(20, "td", 242);
+    \u0275\u0275elementStart(20, "td", 191);
     \u0275\u0275text(21, "Total venda:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(22, "td", 216);
+    \u0275\u0275elementStart(22, "td", 165);
     \u0275\u0275text(23);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(24, "td", 244);
+    \u0275\u0275elementStart(24, "td", 193);
     \u0275\u0275text(25, "Total Custo:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(26, "td", 244);
+    \u0275\u0275elementStart(26, "td", 193);
     \u0275\u0275text(27);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(28, "td", 265);
+    \u0275\u0275elementStart(28, "td", 214);
     \u0275\u0275text(29, "M\xE9dia %");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(30, "td", 263);
+    \u0275\u0275elementStart(30, "td", 212);
     \u0275\u0275text(31);
     \u0275\u0275pipe(32, "number");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(33, EventCreateComponent_div_162_ng_container_10_tr_66_ng_container_33_Template, 17, 8, "ng-container", 110)(34, EventCreateComponent_div_162_ng_container_10_tr_66_ng_container_34_Template, 7, 3, "ng-container", 110)(35, EventCreateComponent_div_162_ng_container_10_tr_66_td_35_Template, 1, 0, "td", 110);
+    \u0275\u0275template(33, EventCreateComponent_div_162_ng_container_10_tr_66_ng_container_33_Template, 17, 8, "ng-container", 104)(34, EventCreateComponent_div_162_ng_container_10_tr_66_ng_container_34_Template, 7, 3, "ng-container", 104)(35, EventCreateComponent_div_162_ng_container_10_tr_66_td_35_Template, 1, 0, "td", 104);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -114960,7 +115253,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_67_td_5_Template(rf, ct
 }
 function EventCreateComponent_div_162_ng_container_10_tr_67_ng_container_27_td_13_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 248);
+    \u0275\u0275elementStart(0, "td", 197);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114973,7 +115266,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_67_ng_container_27_td_1
 }
 function EventCreateComponent_div_162_ng_container_10_tr_67_ng_container_27_td_14_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 248);
+    \u0275\u0275elementStart(0, "td", 197);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114987,25 +115280,25 @@ function EventCreateComponent_div_162_ng_container_10_tr_67_ng_container_27_td_1
 function EventCreateComponent_div_162_ng_container_10_tr_67_ng_container_27_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "td", 248);
+    \u0275\u0275elementStart(1, "td", 197);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td", 248);
+    \u0275\u0275elementStart(3, "td", 197);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "td", 248);
+    \u0275\u0275elementStart(5, "td", 197);
     \u0275\u0275text(6);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(7, "td", 248);
+    \u0275\u0275elementStart(7, "td", 197);
     \u0275\u0275text(8);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(9, "td", 248);
+    \u0275\u0275elementStart(9, "td", 197);
     \u0275\u0275text(10);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(11, "td", 248);
+    \u0275\u0275elementStart(11, "td", 197);
     \u0275\u0275text(12);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(13, EventCreateComponent_div_162_ng_container_10_tr_67_ng_container_27_td_13_Template, 2, 1, "td", 250)(14, EventCreateComponent_div_162_ng_container_10_tr_67_ng_container_27_td_14_Template, 2, 1, "td", 250);
+    \u0275\u0275template(13, EventCreateComponent_div_162_ng_container_10_tr_67_ng_container_27_td_13_Template, 2, 1, "td", 199)(14, EventCreateComponent_div_162_ng_container_10_tr_67_ng_container_27_td_14_Template, 2, 1, "td", 199);
     \u0275\u0275elementContainerEnd();
   }
   if (rf & 2) {
@@ -115036,44 +115329,44 @@ function EventCreateComponent_div_162_ng_container_10_tr_67_td_28_Template(rf, c
 }
 function EventCreateComponent_div_162_ng_container_10_tr_67_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr", 259)(1, "td", 260);
+    \u0275\u0275elementStart(0, "tr", 208)(1, "td", 209);
     \u0275\u0275text(2, "Di\xE1ria M\xE9dia:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td", 265);
+    \u0275\u0275elementStart(3, "td", 214);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(5, EventCreateComponent_div_162_ng_container_10_tr_67_td_5_Template, 1, 1, "td", 110);
-    \u0275\u0275elementStart(6, "td", 262);
+    \u0275\u0275template(5, EventCreateComponent_div_162_ng_container_10_tr_67_td_5_Template, 1, 1, "td", 104);
+    \u0275\u0275elementStart(6, "td", 211);
     \u0275\u0275text(7, "# Qtd:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(8, "td", 264);
+    \u0275\u0275elementStart(8, "td", 213);
     \u0275\u0275text(9);
     \u0275\u0275pipe(10, "number");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(11, "td", 264);
+    \u0275\u0275elementStart(11, "td", 213);
     \u0275\u0275text(12);
     \u0275\u0275pipe(13, "number");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(14, "td", 242);
+    \u0275\u0275elementStart(14, "td", 191);
     \u0275\u0275text(15, "Total Venda:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(16, "td", 216);
+    \u0275\u0275elementStart(16, "td", 165);
     \u0275\u0275text(17);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(18, "td", 244);
+    \u0275\u0275elementStart(18, "td", 193);
     \u0275\u0275text(19, "Total Custo:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(20, "td", 244);
+    \u0275\u0275elementStart(20, "td", 193);
     \u0275\u0275text(21);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(22, "td", 265);
+    \u0275\u0275elementStart(22, "td", 214);
     \u0275\u0275text(23, "Margem %");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(24, "td", 263);
+    \u0275\u0275elementStart(24, "td", 212);
     \u0275\u0275text(25);
     \u0275\u0275pipe(26, "number");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(27, EventCreateComponent_div_162_ng_container_10_tr_67_ng_container_27_Template, 15, 8, "ng-container", 110)(28, EventCreateComponent_div_162_ng_container_10_tr_67_td_28_Template, 1, 0, "td", 110);
+    \u0275\u0275template(27, EventCreateComponent_div_162_ng_container_10_tr_67_ng_container_27_Template, 15, 8, "ng-container", 104)(28, EventCreateComponent_div_162_ng_container_10_tr_67_td_28_Template, 1, 0, "td", 104);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -115144,102 +115437,102 @@ function EventCreateComponent_div_162_ng_container_10_td_97_Template(rf, ctx) {
 function EventCreateComponent_div_162_ng_container_10_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "div", 190)(2, "div", 191)(3, "div")(4, "h6", 182);
+    \u0275\u0275elementStart(1, "div", 139)(2, "div", 140)(3, "div")(4, "h6", 130);
     \u0275\u0275text(5);
-    \u0275\u0275elementStart(6, "span", 192);
+    \u0275\u0275elementStart(6, "span", 141);
     \u0275\u0275text(7);
     \u0275\u0275elementEnd()()();
-    \u0275\u0275template(8, EventCreateComponent_div_162_ng_container_10_div_8_Template, 14, 4, "div", 193);
+    \u0275\u0275template(8, EventCreateComponent_div_162_ng_container_10_div_8_Template, 14, 4, "div", 142);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(9, "div", 194)(10, "div", 195)(11, "table", 196)(12, "thead")(13, "tr");
-    \u0275\u0275element(14, "th", 197);
-    \u0275\u0275elementStart(15, "th", 198);
+    \u0275\u0275elementStart(9, "div", 143)(10, "div", 144)(11, "table", 145)(12, "thead")(13, "tr");
+    \u0275\u0275element(14, "th", 146);
+    \u0275\u0275elementStart(15, "th", 147);
     \u0275\u0275text(16, "Valor de Venda");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(17, "th", 199);
+    \u0275\u0275elementStart(17, "th", 148);
     \u0275\u0275text(18, "Valor de Custo");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(19, "th", 200);
+    \u0275\u0275elementStart(19, "th", 149);
     \u0275\u0275text(20, "Proposta Recebida");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(21, "th", 200);
+    \u0275\u0275elementStart(21, "th", 149);
     \u0275\u0275text(22, "%");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(23, EventCreateComponent_div_162_ng_container_10_ng_container_23_Template, 8, 1, "ng-container", 110)(24, EventCreateComponent_div_162_ng_container_10_th_24_Template, 2, 0, "th", 201)(25, EventCreateComponent_div_162_ng_container_10_th_25_Template, 2, 0, "th", 202);
+    \u0275\u0275template(23, EventCreateComponent_div_162_ng_container_10_ng_container_23_Template, 8, 1, "ng-container", 104)(24, EventCreateComponent_div_162_ng_container_10_th_24_Template, 2, 0, "th", 150)(25, EventCreateComponent_div_162_ng_container_10_th_25_Template, 2, 0, "th", 151);
     \u0275\u0275elementEnd();
     \u0275\u0275elementStart(26, "tr");
-    \u0275\u0275template(27, EventCreateComponent_div_162_ng_container_10_th_27_Template, 2, 0, "th", 203);
-    \u0275\u0275elementStart(28, "th", 204);
+    \u0275\u0275template(27, EventCreateComponent_div_162_ng_container_10_th_27_Template, 2, 0, "th", 152);
+    \u0275\u0275elementStart(28, "th", 153);
     \u0275\u0275text(29, "Broker");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(30, EventCreateComponent_div_162_ng_container_10_th_30_Template, 2, 2, "th", 205)(31, EventCreateComponent_div_162_ng_container_10_th_31_Template, 2, 0, "th", 206)(32, EventCreateComponent_div_162_ng_container_10_th_32_Template, 2, 0, "th", 206)(33, EventCreateComponent_div_162_ng_container_10_th_33_Template, 2, 0, "th", 206)(34, EventCreateComponent_div_162_ng_container_10_th_34_Template, 2, 0, "th", 206)(35, EventCreateComponent_div_162_ng_container_10_th_35_Template, 2, 0, "th", 206)(36, EventCreateComponent_div_162_ng_container_10_th_36_Template, 2, 0, "th", 206)(37, EventCreateComponent_div_162_ng_container_10_th_37_Template, 2, 0, "th", 206)(38, EventCreateComponent_div_162_ng_container_10_th_38_Template, 2, 0, "th", 206)(39, EventCreateComponent_div_162_ng_container_10_th_39_Template, 2, 0, "th", 206)(40, EventCreateComponent_div_162_ng_container_10_th_40_Template, 2, 0, "th", 206)(41, EventCreateComponent_div_162_ng_container_10_th_41_Template, 2, 0, "th", 206)(42, EventCreateComponent_div_162_ng_container_10_th_42_Template, 2, 0, "th", 206);
-    \u0275\u0275elementStart(43, "th", 207);
+    \u0275\u0275template(30, EventCreateComponent_div_162_ng_container_10_th_30_Template, 2, 2, "th", 154)(31, EventCreateComponent_div_162_ng_container_10_th_31_Template, 2, 0, "th", 155)(32, EventCreateComponent_div_162_ng_container_10_th_32_Template, 2, 0, "th", 155)(33, EventCreateComponent_div_162_ng_container_10_th_33_Template, 2, 0, "th", 155)(34, EventCreateComponent_div_162_ng_container_10_th_34_Template, 2, 0, "th", 155)(35, EventCreateComponent_div_162_ng_container_10_th_35_Template, 2, 0, "th", 155)(36, EventCreateComponent_div_162_ng_container_10_th_36_Template, 2, 0, "th", 155)(37, EventCreateComponent_div_162_ng_container_10_th_37_Template, 2, 0, "th", 155)(38, EventCreateComponent_div_162_ng_container_10_th_38_Template, 2, 0, "th", 155)(39, EventCreateComponent_div_162_ng_container_10_th_39_Template, 2, 0, "th", 155)(40, EventCreateComponent_div_162_ng_container_10_th_40_Template, 2, 0, "th", 155)(41, EventCreateComponent_div_162_ng_container_10_th_41_Template, 2, 0, "th", 155)(42, EventCreateComponent_div_162_ng_container_10_th_42_Template, 2, 0, "th", 155);
+    \u0275\u0275elementStart(43, "th", 156);
     \u0275\u0275text(44, "IN");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(45, "th", 207);
+    \u0275\u0275elementStart(45, "th", 156);
     \u0275\u0275text(46, "OUT");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(47, "th", 207);
+    \u0275\u0275elementStart(47, "th", 156);
     \u0275\u0275text(48, "QTD");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(49, "th", 207);
+    \u0275\u0275elementStart(49, "th", 156);
     \u0275\u0275text(50);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(51, "th", 208);
+    \u0275\u0275elementStart(51, "th", 157);
     \u0275\u0275text(52, "Comiss\xE3o (%)");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(53, "th", 209);
+    \u0275\u0275elementStart(53, "th", 158);
     \u0275\u0275text(54, "Unidade");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(55, "th", 209);
+    \u0275\u0275elementStart(55, "th", 158);
     \u0275\u0275text(56, "Total");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(57, "th", 210);
+    \u0275\u0275elementStart(57, "th", 159);
     \u0275\u0275text(58, "Unidade");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(59, "th", 210);
+    \u0275\u0275elementStart(59, "th", 159);
     \u0275\u0275text(60, "Custo TTL");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(61, EventCreateComponent_div_162_ng_container_10_ng_container_61_Template, 15, 8, "ng-container", 110)(62, EventCreateComponent_div_162_ng_container_10_ng_container_62_Template, 7, 0, "ng-container", 110);
+    \u0275\u0275template(61, EventCreateComponent_div_162_ng_container_10_ng_container_61_Template, 15, 8, "ng-container", 104)(62, EventCreateComponent_div_162_ng_container_10_ng_container_62_Template, 7, 0, "ng-container", 104);
     \u0275\u0275elementEnd()();
     \u0275\u0275elementStart(63, "tbody");
-    \u0275\u0275template(64, EventCreateComponent_div_162_ng_container_10_tr_64_Template, 4, 1, "tr", 110)(65, EventCreateComponent_div_162_ng_container_10_tr_65_Template, 46, 43, "tr", 188)(66, EventCreateComponent_div_162_ng_container_10_tr_66_Template, 36, 26, "tr", 211)(67, EventCreateComponent_div_162_ng_container_10_tr_67_Template, 29, 18, "tr", 211);
-    \u0275\u0275elementStart(68, "tr", 212)(69, "td", 213);
+    \u0275\u0275template(64, EventCreateComponent_div_162_ng_container_10_tr_64_Template, 4, 1, "tr", 104)(65, EventCreateComponent_div_162_ng_container_10_tr_65_Template, 46, 43, "tr", 136)(66, EventCreateComponent_div_162_ng_container_10_tr_66_Template, 36, 26, "tr", 160)(67, EventCreateComponent_div_162_ng_container_10_tr_67_Template, 29, 18, "tr", 160);
+    \u0275\u0275elementStart(68, "tr", 161)(69, "td", 162);
     \u0275\u0275text(70, "OBSERVA\xC7\xC3O INTERNA:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(71, "td", 214);
+    \u0275\u0275elementStart(71, "td", 163);
     \u0275\u0275text(72);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(73, "td", 215);
+    \u0275\u0275elementStart(73, "td", 164);
     \u0275\u0275text(74, "Faturamento Venda:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(75, "td", 216);
+    \u0275\u0275elementStart(75, "td", 165);
     \u0275\u0275text(76);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(77, EventCreateComponent_div_162_ng_container_10_td_77_Template, 1, 1, "td", 110)(78, EventCreateComponent_div_162_ng_container_10_td_78_Template, 1, 0, "td", 110);
+    \u0275\u0275template(77, EventCreateComponent_div_162_ng_container_10_td_77_Template, 1, 1, "td", 104)(78, EventCreateComponent_div_162_ng_container_10_td_78_Template, 1, 0, "td", 104);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(79, "tr", 212)(80, "td", 213);
+    \u0275\u0275elementStart(79, "tr", 161)(80, "td", 162);
     \u0275\u0275text(81, "OBSERVA\xC7\xC3O CLIENTE:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(82, "td", 214);
+    \u0275\u0275elementStart(82, "td", 163);
     \u0275\u0275text(83);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(84, "td", 215);
+    \u0275\u0275elementStart(84, "td", 164);
     \u0275\u0275text(85, "Faturamento Custo:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(86, "td", 217);
+    \u0275\u0275elementStart(86, "td", 166);
     \u0275\u0275text(87);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(88, EventCreateComponent_div_162_ng_container_10_td_88_Template, 1, 1, "td", 110)(89, EventCreateComponent_div_162_ng_container_10_td_89_Template, 1, 0, "td", 110);
+    \u0275\u0275template(88, EventCreateComponent_div_162_ng_container_10_td_88_Template, 1, 1, "td", 104)(89, EventCreateComponent_div_162_ng_container_10_td_89_Template, 1, 0, "td", 104);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(90, "tr", 212)(91, "td", 213);
+    \u0275\u0275elementStart(90, "tr", 161)(91, "td", 162);
     \u0275\u0275text(92, "PRAZO / DATA LIMITE:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(93, "td", 214);
+    \u0275\u0275elementStart(93, "td", 163);
     \u0275\u0275text(94);
     \u0275\u0275pipe(95, "date");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(96, EventCreateComponent_div_162_ng_container_10_td_96_Template, 1, 1, "td", 110)(97, EventCreateComponent_div_162_ng_container_10_td_97_Template, 1, 0, "td", 110);
+    \u0275\u0275template(96, EventCreateComponent_div_162_ng_container_10_td_96_Template, 1, 1, "td", 104)(97, EventCreateComponent_div_162_ng_container_10_td_97_Template, 1, 0, "td", 104);
     \u0275\u0275elementEnd()()()()()();
     \u0275\u0275elementContainerEnd();
   }
@@ -115337,25 +115630,37 @@ function EventCreateComponent_div_162_ng_container_10_Template(rf, ctx) {
     \u0275\u0275property("ngIf", !ctx_r2.isReadOnly);
   }
 }
+function EventCreateComponent_div_162_div_11_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 216);
+    \u0275\u0275element(1, "i", 217);
+    \u0275\u0275elementStart(2, "h5", 218);
+    \u0275\u0275text(3, "Nenhum fornecedor vinculado");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(4, "p", 219);
+    \u0275\u0275text(5, "Use o bot\xE3o no topo para vincular um fornecedor a este evento.");
+    \u0275\u0275elementEnd()();
+  }
+}
 function EventCreateComponent_div_162_Template(rf, ctx) {
   if (rf & 1) {
     const _r26 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 180)(1, "div", 181)(2, "h5", 182);
-    \u0275\u0275element(3, "i", 183);
+    \u0275\u0275elementStart(0, "div", 128)(1, "div", 129)(2, "h5", 130);
+    \u0275\u0275element(3, "i", 131);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "div", 184)(6, "button", 185);
+    \u0275\u0275elementStart(5, "div", 132)(6, "button", 133);
     \u0275\u0275listener("click", function EventCreateComponent_div_162_Template_button_click_6_listener() {
       \u0275\u0275restoreView(_r26);
       const ctx_r2 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r2.toggleDetails(ctx_r2.activeTab === 1 ? "hotel" : ctx_r2.activeTab === 2 ? "ab" : ctx_r2.activeTab === 3 ? "hall" : ctx_r2.activeTab === 4 ? "add" : "transport"));
     });
-    \u0275\u0275element(7, "i", 186);
+    \u0275\u0275element(7, "i", 134);
     \u0275\u0275text(8);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(9, EventCreateComponent_div_162_button_9_Template, 3, 0, "button", 187);
+    \u0275\u0275template(9, EventCreateComponent_div_162_button_9_Template, 3, 0, "button", 135);
     \u0275\u0275elementEnd()();
-    \u0275\u0275template(10, EventCreateComponent_div_162_ng_container_10_Template, 98, 49, "ng-container", 188);
+    \u0275\u0275template(10, EventCreateComponent_div_162_ng_container_10_Template, 98, 49, "ng-container", 136)(11, EventCreateComponent_div_162_div_11_Template, 6, 0, "div", 137);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -115370,788 +115675,627 @@ function EventCreateComponent_div_162_Template(rf, ctx) {
     \u0275\u0275property("ngIf", !ctx_r2.isReadOnly);
     \u0275\u0275advance();
     \u0275\u0275property("ngForOf", ctx_r2.activeTab === 1 ? ctx_r2.eventHotels : ctx_r2.activeTab === 2 ? ctx_r2.eventABs : ctx_r2.activeTab === 3 ? ctx_r2.eventHalls : ctx_r2.activeTab === 4 ? ctx_r2.eventAdds : ctx_r2.eventTransports);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ((ctx_r2.activeTab === 1 ? ctx_r2.eventHotels : ctx_r2.activeTab === 2 ? ctx_r2.eventABs : ctx_r2.activeTab === 3 ? ctx_r2.eventHalls : ctx_r2.activeTab === 4 ? ctx_r2.eventAdds : ctx_r2.eventTransports) == null ? null : (ctx_r2.activeTab === 1 ? ctx_r2.eventHotels : ctx_r2.activeTab === 2 ? ctx_r2.eventABs : ctx_r2.activeTab === 3 ? ctx_r2.eventHalls : ctx_r2.activeTab === 4 ? ctx_r2.eventAdds : ctx_r2.eventTransports).length) === 0);
   }
 }
-function EventCreateComponent_div_163_button_9_Template(rf, ctx) {
+function EventCreateComponent_div_163_button_6_Template(rf, ctx) {
   if (rf & 1) {
-    const _r34 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 189);
-    \u0275\u0275listener("click", function EventCreateComponent_div_163_button_9_Template_button_click_0_listener() {
-      \u0275\u0275restoreView(_r34);
+    const _r33 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 138);
+    \u0275\u0275listener("click", function EventCreateComponent_div_163_button_6_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r33);
       const ctx_r2 = \u0275\u0275nextContext(2);
       return \u0275\u0275resetView(ctx_r2.openAddProviderLink("airfare"));
     });
-    \u0275\u0275element(1, "i", 175);
-    \u0275\u0275text(2, " Vincular Novo Fornecedor ");
+    \u0275\u0275element(1, "i", 123);
+    \u0275\u0275text(2, " Novo Or\xE7amento de Fretamento ");
     \u0275\u0275elementEnd();
   }
 }
-function EventCreateComponent_div_163_ng_container_10_div_8_Template(rf, ctx) {
+function EventCreateComponent_div_163_ng_container_7_div_8_Template(rf, ctx) {
   if (rf & 1) {
-    const _r35 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 184)(1, "button", 218);
-    \u0275\u0275listener("click", function EventCreateComponent_div_163_ng_container_10_div_8_Template_button_click_1_listener() {
-      \u0275\u0275restoreView(_r35);
-      const item_r36 = \u0275\u0275nextContext().$implicit;
+    const _r34 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 132)(1, "button", 260);
+    \u0275\u0275listener("click", function EventCreateComponent_div_163_ng_container_7_div_8_Template_button_click_1_listener() {
+      \u0275\u0275restoreView(_r34);
+      const item_r35 = \u0275\u0275nextContext().$implicit;
       const ctx_r2 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r2.openAddProviderLink("airfare", item_r36));
+      return \u0275\u0275resetView(ctx_r2.openAddProviderLink("airfare", item_r35));
     });
-    \u0275\u0275element(2, "i", 219);
-    \u0275\u0275text(3, " Editar Cadastro ");
+    \u0275\u0275element(2, "i", 168);
+    \u0275\u0275text(3, " Editar Or\xE7amento ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(4, "button", 295);
-    \u0275\u0275listener("click", function EventCreateComponent_div_163_ng_container_10_div_8_Template_button_click_4_listener() {
-      \u0275\u0275restoreView(_r35);
-      const item_r36 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275elementStart(4, "button", 261);
+    \u0275\u0275listener("click", function EventCreateComponent_div_163_ng_container_7_div_8_Template_button_click_4_listener() {
+      \u0275\u0275restoreView(_r34);
+      const item_r35 = \u0275\u0275nextContext().$implicit;
       const ctx_r2 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r2.openAddOpt("airfare", item_r36.id));
+      return \u0275\u0275resetView(ctx_r2.openAddOpt("airfare", item_r35.id));
     });
-    \u0275\u0275element(5, "i", 175);
-    \u0275\u0275text(6, " Adicionar Tarifa ");
+    \u0275\u0275element(5, "i", 123);
+    \u0275\u0275text(6, " Novo Trecho ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(7, "app-confirm-modal", 223);
-    \u0275\u0275listener("confirm", function EventCreateComponent_div_163_ng_container_10_div_8_Template_app_confirm_modal_confirm_7_listener() {
-      \u0275\u0275restoreView(_r35);
-      const item_r36 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275elementStart(7, "app-confirm-modal", 172);
+    \u0275\u0275listener("confirm", function EventCreateComponent_div_163_ng_container_7_div_8_Template_app_confirm_modal_confirm_7_listener() {
+      \u0275\u0275restoreView(_r34);
+      const item_r35 = \u0275\u0275nextContext().$implicit;
       const ctx_r2 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r2.deleteProviderLink("airfare", item_r36.id));
+      return \u0275\u0275resetView(ctx_r2.deleteProviderLink("airfare", item_r35.id));
     });
-    \u0275\u0275elementStart(8, "span", 224);
-    \u0275\u0275element(9, "i", 225);
+    \u0275\u0275elementStart(8, "span", 173);
+    \u0275\u0275element(9, "i", 174);
     \u0275\u0275text(10, " Excluir V\xEDnculo ");
     \u0275\u0275elementEnd()()();
   }
   if (rf & 2) {
-    const item_r36 = \u0275\u0275nextContext().$implicit;
+    const item_r35 = \u0275\u0275nextContext().$implicit;
     \u0275\u0275advance(7);
-    \u0275\u0275property("btnClass", "btn btn-sm btn-outline-danger")("modalTitle", "Remover V\xEDnculo")("message", "Tem certeza de que deseja remover " + ((item_r36.provider == null ? null : item_r36.provider.name) || "este fornecedor") + " do evento?")("okButtonLabel", "Remover");
+    \u0275\u0275property("btnClass", "btn btn-sm btn-outline-danger")("modalTitle", "Remover V\xEDnculo")("message", "Tem certeza de que deseja remover " + ((item_r35.provider == null ? null : item_r35.provider.name) || "este fornecedor") + " do evento?")("okButtonLabel", "Remover");
   }
 }
-function EventCreateComponent_div_163_ng_container_10_ng_container_75_Template(rf, ctx) {
+function EventCreateComponent_div_163_ng_container_7_th_59_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "th", 296);
-    \u0275\u0275text(2, "Detalhes Adicionais");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementContainerEnd();
-  }
-}
-function EventCreateComponent_div_163_ng_container_10_th_76_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 291);
+    \u0275\u0275elementStart(0, "th", 262);
     \u0275\u0275text(1, "A\xE7\xF5es");
     \u0275\u0275elementEnd();
   }
 }
-function EventCreateComponent_div_163_ng_container_10_ng_container_116_Template(rf, ctx) {
+function EventCreateComponent_div_163_ng_container_7_th_81_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "th");
-    \u0275\u0275text(2, "Cabine");
+    \u0275\u0275elementStart(0, "th", 241);
+    \u0275\u0275text(1, "Trecho");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "th");
-    \u0275\u0275text(4, "Bagagem");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "th");
-    \u0275\u0275text(6, "Prop. Rec. (%)");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(7, "th");
-    \u0275\u0275text(8, "Kickback (%)");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(9, "th");
-    \u0275\u0275text(10, "Comp. Site");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(11, "th");
-    \u0275\u0275text(12, "Comp. Cliente");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementContainerEnd();
   }
 }
-function EventCreateComponent_div_163_ng_container_10_tr_120_Template(rf, ctx) {
+function EventCreateComponent_div_163_ng_container_7_tr_83_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr")(1, "td", 297);
+    \u0275\u0275elementStart(0, "tr")(1, "td", 263);
     \u0275\u0275element(2, "i", 14);
-    \u0275\u0275text(3, " Nenhuma tarifa ou detalhe cadastrado para este fornecedor. ");
+    \u0275\u0275text(3, " Nenhum trecho cadastrado para este or\xE7amento de fretamento. ");
     \u0275\u0275elementEnd()();
   }
   if (rf & 2) {
     const ctx_r2 = \u0275\u0275nextContext(3);
     \u0275\u0275advance();
-    \u0275\u0275attribute("colspan", ctx_r2.showDetailsAirfare ? 26 : 20);
+    \u0275\u0275attribute("colspan", ctx_r2.isReadOnly ? 10 : 11);
   }
 }
-function EventCreateComponent_div_163_ng_container_10_tr_121_ng_container_41_Template(rf, ctx) {
+function EventCreateComponent_div_163_ng_container_7_tr_84_td_16_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "td");
-    \u0275\u0275text(2);
+    \u0275\u0275elementStart(0, "td", 269);
+    \u0275\u0275text(1);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td");
-    \u0275\u0275text(4);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "td", 239);
-    \u0275\u0275text(6);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(7, "td", 239);
-    \u0275\u0275text(8);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(9, "td", 245);
-    \u0275\u0275text(10);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(11, "td", 245);
-    \u0275\u0275text(12);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementContainerEnd();
   }
   if (rf & 2) {
-    const opt_r37 = \u0275\u0275nextContext().$implicit;
-    const item_r36 = \u0275\u0275nextContext().$implicit;
+    const item_r35 = \u0275\u0275nextContext(2).$implicit;
     const ctx_r2 = \u0275\u0275nextContext(2);
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate((opt_r37.cabin == null ? null : opt_r37.cabin.name) || "-");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate((opt_r37.baggage == null ? null : opt_r37.baggage.name) || "-");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate1("", opt_r37.received_proposal_percent, "%");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate1("", opt_r37.kickback, "%");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(ctx_r2.formatCurrency(opt_r37.compare_website || 0, item_r36.currency == null ? null : item_r36.currency.sigla));
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(ctx_r2.formatCurrency(opt_r37.compare_client || 0, item_r36.currency == null ? null : item_r36.currency.sigla));
+    \u0275\u0275attribute("rowspan", (item_r35.eventAirfareOpts || item_r35.event_airfare_opts).length);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", ctx_r2.getAirfareMarkup(item_r35), " ");
   }
 }
-function EventCreateComponent_div_163_ng_container_10_tr_121_td_45_Template(rf, ctx) {
+function EventCreateComponent_div_163_ng_container_7_tr_84_td_17_Template(rf, ctx) {
   if (rf & 1) {
-    const _r38 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "td")(1, "div", 253)(2, "button", 299);
-    \u0275\u0275listener("click", function EventCreateComponent_div_163_ng_container_10_tr_121_td_45_Template_button_click_2_listener() {
-      \u0275\u0275restoreView(_r38);
-      const opt_r37 = \u0275\u0275nextContext().$implicit;
-      const item_r36 = \u0275\u0275nextContext().$implicit;
-      const ctx_r2 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r2.openAddOpt("airfare", item_r36.id, opt_r37));
-    });
-    \u0275\u0275element(3, "i", 255);
+    \u0275\u0275elementStart(0, "td", 270);
+    \u0275\u0275text(1);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(4, "button", 300);
-    \u0275\u0275listener("click", function EventCreateComponent_div_163_ng_container_10_tr_121_td_45_Template_button_click_4_listener() {
-      \u0275\u0275restoreView(_r38);
-      const opt_r37 = \u0275\u0275nextContext().$implicit;
-      const item_r36 = \u0275\u0275nextContext().$implicit;
-      const ctx_r2 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r2.openAddOpt("airfare", item_r36.id, opt_r37, true));
-    });
-    \u0275\u0275element(5, "i", 257);
+  }
+  if (rf & 2) {
+    const item_r35 = \u0275\u0275nextContext(2).$implicit;
+    const ctx_r2 = \u0275\u0275nextContext(2);
+    \u0275\u0275attribute("rowspan", (item_r35.eventAirfareOpts || item_r35.event_airfare_opts).length);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", ctx_r2.formatCurrency(item_r35.total_net_sem_4bts || 0, item_r35.currency == null ? null : item_r35.currency.sigla), " ");
+  }
+}
+function EventCreateComponent_div_163_ng_container_7_tr_84_td_18_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "td", 271);
+    \u0275\u0275text(1);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(6, "app-confirm-modal", 223);
-    \u0275\u0275listener("confirm", function EventCreateComponent_div_163_ng_container_10_tr_121_td_45_Template_app_confirm_modal_confirm_6_listener() {
-      \u0275\u0275restoreView(_r38);
+  }
+  if (rf & 2) {
+    const item_r35 = \u0275\u0275nextContext(2).$implicit;
+    const ctx_r2 = \u0275\u0275nextContext(2);
+    \u0275\u0275attribute("rowspan", (item_r35.eventAirfareOpts || item_r35.event_airfare_opts).length);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", ctx_r2.formatCurrency(ctx_r2.getAirfareVendaCalc(item_r35), item_r35.currency == null ? null : item_r35.currency.sigla), " ");
+  }
+}
+function EventCreateComponent_div_163_ng_container_7_tr_84_td_19_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r36 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "td", 272)(1, "div", 273)(2, "button", 274);
+    \u0275\u0275listener("click", function EventCreateComponent_div_163_ng_container_7_tr_84_td_19_Template_button_click_2_listener() {
+      \u0275\u0275restoreView(_r36);
+      const opt_r37 = \u0275\u0275nextContext().$implicit;
+      const item_r35 = \u0275\u0275nextContext().$implicit;
+      const ctx_r2 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r2.openAddOpt("airfare", item_r35.id, opt_r37));
+    });
+    \u0275\u0275element(3, "i", 204);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(4, "button", 275);
+    \u0275\u0275listener("click", function EventCreateComponent_div_163_ng_container_7_tr_84_td_19_Template_button_click_4_listener() {
+      \u0275\u0275restoreView(_r36);
+      const opt_r37 = \u0275\u0275nextContext().$implicit;
+      const item_r35 = \u0275\u0275nextContext().$implicit;
+      const ctx_r2 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r2.openAddOpt("airfare", item_r35.id, opt_r37, true));
+    });
+    \u0275\u0275element(5, "i", 206);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(6, "app-confirm-modal", 207);
+    \u0275\u0275listener("confirm", function EventCreateComponent_div_163_ng_container_7_tr_84_td_19_Template_app_confirm_modal_confirm_6_listener() {
+      \u0275\u0275restoreView(_r36);
       const opt_r37 = \u0275\u0275nextContext().$implicit;
       const ctx_r2 = \u0275\u0275nextContext(3);
       return \u0275\u0275resetView(ctx_r2.deleteOpt("airfare", opt_r37.id));
     });
-    \u0275\u0275elementStart(7, "span", 224);
-    \u0275\u0275element(8, "i", 225);
+    \u0275\u0275elementStart(7, "span", 173);
+    \u0275\u0275element(8, "i", 174);
     \u0275\u0275elementEnd()()()();
   }
   if (rf & 2) {
-    const item_r36 = \u0275\u0275nextContext(2).$implicit;
+    const item_r35 = \u0275\u0275nextContext(2).$implicit;
     const ctx_r2 = \u0275\u0275nextContext(2);
     \u0275\u0275advance(2);
-    \u0275\u0275property("disabled", ctx_r2.statusBlockEdit(item_r36));
+    \u0275\u0275property("disabled", ctx_r2.statusBlockEdit(item_r35));
     \u0275\u0275advance(2);
-    \u0275\u0275property("disabled", ctx_r2.statusBlockEdit(item_r36));
+    \u0275\u0275property("disabled", ctx_r2.statusBlockEdit(item_r35));
     \u0275\u0275advance(2);
-    \u0275\u0275property("btnClass", "btn btn-danger text-white shadow-sm btn-action btn-sm")("modalTitle", "Remover Tarifa")("message", "Deseja realmente remover esta tarifa?")("okButtonLabel", "Remover");
+    \u0275\u0275property("btnClass", "btn btn-danger text-white shadow-sm btn-action")("modalTitle", "Remover Trecho")("message", "Deseja realmente remover este trecho?")("okButtonLabel", "Remover")("tooltip", "Excluir Trecho");
   }
 }
-function EventCreateComponent_div_163_ng_container_10_tr_121_Template(rf, ctx) {
+function EventCreateComponent_div_163_ng_container_7_tr_84_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr")(1, "td");
+    \u0275\u0275elementStart(0, "tr")(1, "td", 213);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td");
+    \u0275\u0275elementStart(3, "td", 264);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "td");
+    \u0275\u0275elementStart(5, "td", 188);
     \u0275\u0275text(6);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(7, "td");
+    \u0275\u0275elementStart(7, "td", 188);
     \u0275\u0275text(8);
-    \u0275\u0275pipe(9, "date");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(10, "td");
-    \u0275\u0275text(11);
+    \u0275\u0275elementStart(9, "td", 188);
+    \u0275\u0275text(10);
+    \u0275\u0275pipe(11, "date");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(12, "td");
+    \u0275\u0275elementStart(12, "td", 188);
     \u0275\u0275text(13);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(14, "td");
+    \u0275\u0275elementStart(14, "td", 188);
     \u0275\u0275text(15);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(16, "td");
-    \u0275\u0275text(17);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(18, "td");
-    \u0275\u0275text(19);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(20, "td");
-    \u0275\u0275text(21);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(22, "td");
-    \u0275\u0275text(23);
-    \u0275\u0275pipe(24, "date");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(25, "td");
-    \u0275\u0275text(26);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(27, "td");
-    \u0275\u0275text(28);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(29, "td");
-    \u0275\u0275text(30);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(31, "td", 239);
-    \u0275\u0275text(32);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(33, "td", 245);
-    \u0275\u0275text(34);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(35, "td", 244);
-    \u0275\u0275text(36);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(37, "td", 245);
-    \u0275\u0275text(38);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(39, "td", 242);
-    \u0275\u0275text(40);
-    \u0275\u0275elementEnd();
-    \u0275\u0275template(41, EventCreateComponent_div_163_ng_container_10_tr_121_ng_container_41_Template, 13, 6, "ng-container", 110);
-    \u0275\u0275elementStart(42, "td", 239)(43, "span", 298);
-    \u0275\u0275text(44);
-    \u0275\u0275elementEnd()();
-    \u0275\u0275template(45, EventCreateComponent_div_163_ng_container_10_tr_121_td_45_Template, 9, 6, "td", 110);
+    \u0275\u0275template(16, EventCreateComponent_div_163_ng_container_7_tr_84_td_16_Template, 2, 2, "td", 265)(17, EventCreateComponent_div_163_ng_container_7_tr_84_td_17_Template, 2, 2, "td", 266)(18, EventCreateComponent_div_163_ng_container_7_tr_84_td_18_Template, 2, 2, "td", 267)(19, EventCreateComponent_div_163_ng_container_7_tr_84_td_19_Template, 9, 7, "td", 268);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
     const opt_r37 = ctx.$implicit;
-    const item_r36 = \u0275\u0275nextContext().$implicit;
+    const optIdx_r38 = ctx.index;
+    const item_r35 = \u0275\u0275nextContext().$implicit;
     const ctx_r2 = \u0275\u0275nextContext(2);
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate((opt_r37.outbound_airline == null ? null : opt_r37.outbound_airline.name) || "-");
+    \u0275\u0275textInterpolate((opt_r37.outbound_airline == null ? null : opt_r37.outbound_airline.name) || (item_r35.airline == null ? null : item_r35.airline.name) || "-");
     \u0275\u0275advance(2);
     \u0275\u0275textInterpolate(opt_r37.outbound_flight_number || "-");
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(opt_r37.outbound_class || "-");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(\u0275\u0275pipeBind2(9, 25, opt_r37.outbound_date, "dd/MM/yyyy"));
-    \u0275\u0275advance(3);
     \u0275\u0275textInterpolate(opt_r37.outbound_origin || "-");
     \u0275\u0275advance(2);
     \u0275\u0275textInterpolate(opt_r37.outbound_destination || "-");
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate2("", opt_r37.outbound_departure_time || "-", " / ", opt_r37.outbound_arrival_time || "-", "");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate((opt_r37.inbound_airline == null ? null : opt_r37.inbound_airline.name) || "-");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(opt_r37.inbound_flight_number || "-");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(opt_r37.inbound_class || "-");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(\u0275\u0275pipeBind2(24, 28, opt_r37.inbound_date, "dd/MM/yyyy"));
+    \u0275\u0275textInterpolate(opt_r37.outbound_date ? \u0275\u0275pipeBind2(11, 11, opt_r37.outbound_date, "dd/MM/yyyy") : "-");
     \u0275\u0275advance(3);
-    \u0275\u0275textInterpolate(opt_r37.inbound_origin || "-");
+    \u0275\u0275textInterpolate(ctx_r2.formatTime(opt_r37.outbound_departure_time));
     \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(opt_r37.inbound_destination || "-");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate2("", opt_r37.inbound_departure_time || "-", " / ", opt_r37.inbound_arrival_time || "-", "");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(opt_r37.count || 0);
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(ctx_r2.formatCurrency(ctx_r2.unitCost(opt_r37), item_r36.currency == null ? null : item_r36.currency.sigla));
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate1(" ", ctx_r2.formatCurrency(ctx_r2.unitCost(opt_r37) * opt_r37.count, item_r36.currency == null ? null : item_r36.currency.sigla), " ");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(ctx_r2.formatCurrency(ctx_r2.unitSale(opt_r37), item_r36.currency == null ? null : item_r36.currency.sigla));
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate1(" ", ctx_r2.formatCurrency(ctx_r2.unitSale(opt_r37) * opt_r37.count, item_r36.currency == null ? null : item_r36.currency.sigla), " ");
+    \u0275\u0275textInterpolate(ctx_r2.formatTime(opt_r37.outbound_arrival_time));
     \u0275\u0275advance();
-    \u0275\u0275property("ngIf", ctx_r2.showDetailsAirfare);
-    \u0275\u0275advance(2);
-    \u0275\u0275property("ngClass", \u0275\u0275pureFunction4(31, _c137, opt_r37.status === "created" || !opt_r37.status, opt_r37.status === "pending", opt_r37.status === "confirmed", opt_r37.status === "cancelled"));
+    \u0275\u0275property("ngIf", optIdx_r38 === 0);
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate1(" ", opt_r37.status === "created" ? "Criado" : opt_r37.status === "pending" ? "Pendente" : opt_r37.status === "confirmed" ? "Confirmado" : opt_r37.status === "cancelled" ? "Cancelado" : opt_r37.status || "Criado", " ");
+    \u0275\u0275property("ngIf", optIdx_r38 === 0);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", optIdx_r38 === 0);
     \u0275\u0275advance();
     \u0275\u0275property("ngIf", !ctx_r2.isReadOnly);
   }
 }
-function EventCreateComponent_div_163_ng_container_10_button_127_Template(rf, ctx) {
+function EventCreateComponent_div_163_ng_container_7_tr_150_Template(rf, ctx) {
   if (rf & 1) {
-    const _r39 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 189);
-    \u0275\u0275listener("click", function EventCreateComponent_div_163_ng_container_10_button_127_Template_button_click_0_listener() {
-      \u0275\u0275restoreView(_r39);
-      const item_r36 = \u0275\u0275nextContext().$implicit;
-      const ctx_r2 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r2.openAddPassenger(item_r36.id));
-    });
-    \u0275\u0275element(1, "i", 301);
-    \u0275\u0275text(2, " Adicionar Passageiro ");
+    \u0275\u0275elementStart(0, "tr", 161)(1, "td", 162);
+    \u0275\u0275text(2, "NOTES (FRETAMENTO):");
     \u0275\u0275elementEnd();
-  }
-}
-function EventCreateComponent_div_163_ng_container_10_th_144_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 302);
-    \u0275\u0275text(1, "A\xE7\xF5es");
-    \u0275\u0275elementEnd();
-  }
-}
-function EventCreateComponent_div_163_ng_container_10_tr_163_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr")(1, "td", 303);
-    \u0275\u0275text(2, " Nenhum passageiro cadastrado para este voo. ");
+    \u0275\u0275elementStart(3, "td", 163);
+    \u0275\u0275text(4);
     \u0275\u0275elementEnd()();
   }
-}
-function EventCreateComponent_div_163_ng_container_10_tr_164_span_20_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "span");
-    \u0275\u0275text(1, "/");
-    \u0275\u0275elementEnd();
-  }
-}
-function EventCreateComponent_div_163_ng_container_10_tr_164_span_31_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "span");
-    \u0275\u0275text(1, "/");
-    \u0275\u0275elementEnd();
-  }
-}
-function EventCreateComponent_div_163_ng_container_10_tr_164_td_33_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r40 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "td")(1, "div", 253)(2, "button", 305);
-    \u0275\u0275listener("click", function EventCreateComponent_div_163_ng_container_10_tr_164_td_33_Template_button_click_2_listener() {
-      \u0275\u0275restoreView(_r40);
-      const pax_r41 = \u0275\u0275nextContext().$implicit;
-      const item_r36 = \u0275\u0275nextContext().$implicit;
-      const ctx_r2 = \u0275\u0275nextContext(2);
-      return \u0275\u0275resetView(ctx_r2.openAddPassenger(item_r36.id, pax_r41));
-    });
-    \u0275\u0275element(3, "i", 255);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(4, "app-confirm-modal", 223);
-    \u0275\u0275listener("confirm", function EventCreateComponent_div_163_ng_container_10_tr_164_td_33_Template_app_confirm_modal_confirm_4_listener() {
-      \u0275\u0275restoreView(_r40);
-      const pax_r41 = \u0275\u0275nextContext().$implicit;
-      const ctx_r2 = \u0275\u0275nextContext(3);
-      return \u0275\u0275resetView(ctx_r2.deletePassenger(pax_r41.id));
-    });
-    \u0275\u0275elementStart(5, "span", 224);
-    \u0275\u0275element(6, "i", 225);
-    \u0275\u0275elementEnd()()()();
-  }
   if (rf & 2) {
-    const pax_r41 = \u0275\u0275nextContext().$implicit;
-    \u0275\u0275advance(4);
-    \u0275\u0275property("btnClass", "btn btn-outline-danger btn-sm btn-action")("modalTitle", "Remover Passageiro")("message", "Tem certeza de que deseja remover o passageiro " + pax_r41.name + "?")("okButtonLabel", "Remover");
+    const item_r35 = \u0275\u0275nextContext().$implicit;
+    const ctx_r2 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(3);
+    \u0275\u0275attribute("colspan", ctx_r2.isReadOnly ? 8 : 9);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", item_r35.notes, " ");
   }
 }
-function EventCreateComponent_div_163_ng_container_10_tr_164_Template(rf, ctx) {
+function EventCreateComponent_div_163_ng_container_7_tr_161_ng_container_5_a_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr")(1, "td", 304);
-    \u0275\u0275text(2);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td", 239);
-    \u0275\u0275text(4);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "td", 239);
-    \u0275\u0275text(6);
-    \u0275\u0275pipe(7, "date");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(8, "td", 239);
-    \u0275\u0275text(9);
-    \u0275\u0275pipe(10, "date");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(11, "td", 239);
-    \u0275\u0275text(12);
-    \u0275\u0275pipe(13, "date");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(14, "td");
-    \u0275\u0275text(15);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(16, "td");
-    \u0275\u0275text(17);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(18, "td", 239);
-    \u0275\u0275text(19);
-    \u0275\u0275template(20, EventCreateComponent_div_163_ng_container_10_tr_164_span_20_Template, 2, 0, "span", 110);
-    \u0275\u0275text(21);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(22, "td", 239);
-    \u0275\u0275text(23);
-    \u0275\u0275pipe(24, "date");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(25, "td");
-    \u0275\u0275text(26);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(27, "td");
-    \u0275\u0275text(28);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(29, "td", 239);
-    \u0275\u0275text(30);
-    \u0275\u0275template(31, EventCreateComponent_div_163_ng_container_10_tr_164_span_31_Template, 2, 0, "span", 110);
-    \u0275\u0275text(32);
-    \u0275\u0275elementEnd();
-    \u0275\u0275template(33, EventCreateComponent_div_163_ng_container_10_tr_164_td_33_Template, 7, 4, "td", 110);
+    \u0275\u0275elementStart(0, "a", 278);
+    \u0275\u0275element(1, "img", 279);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const pax_r41 = ctx.$implicit;
-    const ctx_r2 = \u0275\u0275nextContext(3);
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(pax_r41.name);
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(pax_r41.document || "-");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(\u0275\u0275pipeBind2(7, 17, pax_r41.birth_date, "dd/MM/yyyy"));
-    \u0275\u0275advance(3);
-    \u0275\u0275textInterpolate(\u0275\u0275pipeBind2(10, 20, pax_r41.passport_validity, "dd/MM/yyyy"));
-    \u0275\u0275advance(3);
-    \u0275\u0275textInterpolate(\u0275\u0275pipeBind2(13, 23, pax_r41.outbound_date, "dd/MM/yyyy"));
-    \u0275\u0275advance(3);
-    \u0275\u0275textInterpolate(pax_r41.outbound_origin || "-");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(pax_r41.outbound_destination || "-");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate1(" ", pax_r41.outbound_departure || "-", " ");
+    const p_r39 = \u0275\u0275nextContext().$implicit;
+    const ctx_r2 = \u0275\u0275nextContext(4);
+    \u0275\u0275property("href", ctx_r2.resolvePhotoUrl(p_r39), \u0275\u0275sanitizeUrl);
     \u0275\u0275advance();
-    \u0275\u0275property("ngIf", pax_r41.outbound_departure && pax_r41.outbound_arrival);
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate1(" ", pax_r41.outbound_arrival || "-", " ");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(\u0275\u0275pipeBind2(24, 26, pax_r41.inbound_date, "dd/MM/yyyy"));
-    \u0275\u0275advance(3);
-    \u0275\u0275textInterpolate(pax_r41.inbound_origin || "-");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(pax_r41.inbound_destination || "-");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate1(" ", pax_r41.inbound_departure || "-", " ");
-    \u0275\u0275advance();
-    \u0275\u0275property("ngIf", pax_r41.inbound_departure && pax_r41.inbound_arrival);
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate1(" ", pax_r41.inbound_arrival || "-", " ");
-    \u0275\u0275advance();
-    \u0275\u0275property("ngIf", !ctx_r2.isReadOnly);
+    \u0275\u0275property("src", ctx_r2.resolvePhotoUrl(p_r39), \u0275\u0275sanitizeUrl);
   }
 }
-function EventCreateComponent_div_163_ng_container_10_Template(rf, ctx) {
+function EventCreateComponent_div_163_ng_container_7_tr_161_ng_container_5_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "div", 190)(2, "div", 191)(3, "div")(4, "h6", 182);
-    \u0275\u0275text(5);
-    \u0275\u0275elementStart(6, "span", 192);
-    \u0275\u0275text(7);
-    \u0275\u0275elementEnd()()();
-    \u0275\u0275template(8, EventCreateComponent_div_163_ng_container_10_div_8_Template, 11, 4, "div", 193);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(9, "div", 268)(10, "div", 269)(11, "table", 270)(12, "thead", 271)(13, "tr")(14, "th");
-    \u0275\u0275text(15, "Contato");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(16, "th");
-    \u0275\u0275text(17, "E-mail");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(18, "th");
-    \u0275\u0275text(19, "Telefone");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(20, "th");
-    \u0275\u0275text(21, "Moeda");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(22, "th");
-    \u0275\u0275text(23, "ISS (%)");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(24, "th");
-    \u0275\u0275text(25, "Taxa 4BTS (%)");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(26, "th");
-    \u0275\u0275text(27, "Total Custo");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(28, "th");
-    \u0275\u0275text(29, "Total Venda");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(30, "th");
-    \u0275\u0275text(31, "Margem (%)");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(32, "th");
-    \u0275\u0275text(33, "Val. Faturamento (Custo)");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(34, "th");
-    \u0275\u0275text(35, "Val. Faturamento (Venda)");
-    \u0275\u0275elementEnd()()();
-    \u0275\u0275elementStart(36, "tbody")(37, "tr")(38, "td");
-    \u0275\u0275text(39);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(40, "td");
-    \u0275\u0275text(41);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(42, "td");
-    \u0275\u0275text(43);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(44, "td");
-    \u0275\u0275text(45);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(46, "td");
-    \u0275\u0275text(47);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(48, "td");
-    \u0275\u0275text(49);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(50, "td", 272);
-    \u0275\u0275text(51);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(52, "td", 273);
-    \u0275\u0275text(53);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(54, "td", 274);
-    \u0275\u0275text(55);
-    \u0275\u0275pipe(56, "number");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(57, "td", 275);
-    \u0275\u0275text(58);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(59, "td", 276);
-    \u0275\u0275text(60);
-    \u0275\u0275elementEnd()()()()();
-    \u0275\u0275elementStart(61, "div", 277)(62, "h6", 278);
-    \u0275\u0275element(63, "i", 139);
-    \u0275\u0275text(64, " Cota\xE7\xF5es/Op\xE7\xF5es de Voo ");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(65, "div", 195)(66, "table", 279)(67, "thead", 280)(68, "tr")(69, "th", 281);
-    \u0275\u0275text(70, "Ida (Outbound)");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(71, "th", 282);
-    \u0275\u0275text(72, "Volta (Inbound)");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(73, "th", 283);
-    \u0275\u0275text(74, "Dados Financeiros e Regras");
-    \u0275\u0275elementEnd();
-    \u0275\u0275template(75, EventCreateComponent_div_163_ng_container_10_ng_container_75_Template, 3, 0, "ng-container", 110)(76, EventCreateComponent_div_163_ng_container_10_th_76_Template, 2, 0, "th", 284);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(77, "tr")(78, "th");
-    \u0275\u0275text(79, "Cia");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(80, "th");
-    \u0275\u0275text(81, "Voo");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(82, "th");
-    \u0275\u0275text(83, "Classe");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(84, "th");
-    \u0275\u0275text(85, "Data");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(86, "th");
-    \u0275\u0275text(87, "Origem");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(88, "th");
-    \u0275\u0275text(89, "Destino");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(90, "th");
-    \u0275\u0275text(91, "Dep/Arr");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(92, "th");
-    \u0275\u0275text(93, "Cia");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(94, "th");
-    \u0275\u0275text(95, "Voo");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(96, "th");
-    \u0275\u0275text(97, "Classe");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(98, "th");
-    \u0275\u0275text(99, "Data");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(100, "th");
-    \u0275\u0275text(101, "Origem");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(102, "th");
-    \u0275\u0275text(103, "Destino");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(104, "th");
-    \u0275\u0275text(105, "Dep/Arr");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(106, "th");
-    \u0275\u0275text(107, "Qtd/Pax");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(108, "th");
-    \u0275\u0275text(109, "Custo Unit.");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(110, "th");
-    \u0275\u0275text(111, "Total Custo");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(112, "th");
-    \u0275\u0275text(113, "Venda Unit.");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(114, "th");
-    \u0275\u0275text(115, "Total Venda");
-    \u0275\u0275elementEnd();
-    \u0275\u0275template(116, EventCreateComponent_div_163_ng_container_10_ng_container_116_Template, 13, 0, "ng-container", 110);
-    \u0275\u0275elementStart(117, "th");
-    \u0275\u0275text(118, "Status");
-    \u0275\u0275elementEnd()()();
-    \u0275\u0275elementStart(119, "tbody");
-    \u0275\u0275template(120, EventCreateComponent_div_163_ng_container_10_tr_120_Template, 4, 1, "tr", 110)(121, EventCreateComponent_div_163_ng_container_10_tr_121_Template, 46, 36, "tr", 188);
-    \u0275\u0275elementEnd()()()();
-    \u0275\u0275elementStart(122, "div", 285)(123, "div", 181)(124, "h6", 286);
-    \u0275\u0275element(125, "i", 287);
-    \u0275\u0275text(126, " Ficha de Voo (Lista de Passageiros) ");
-    \u0275\u0275elementEnd();
-    \u0275\u0275template(127, EventCreateComponent_div_163_ng_container_10_button_127_Template, 3, 0, "button", 187);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(128, "div", 195)(129, "table", 288)(130, "thead", 289)(131, "tr")(132, "th", 290);
-    \u0275\u0275text(133, "Nome Completo");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(134, "th", 291);
-    \u0275\u0275text(135, "Documento");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(136, "th", 291);
-    \u0275\u0275text(137, "Nascimento");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(138, "th", 291);
-    \u0275\u0275text(139, "Val. Passaporte");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(140, "th", 292);
-    \u0275\u0275text(141, "Ida (Outbound)");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(142, "th", 293);
-    \u0275\u0275text(143, "Volta (Inbound)");
-    \u0275\u0275elementEnd();
-    \u0275\u0275template(144, EventCreateComponent_div_163_ng_container_10_th_144_Template, 2, 0, "th", 294);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(145, "tr")(146, "th");
-    \u0275\u0275text(147, "Data");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(148, "th");
-    \u0275\u0275text(149, "Origem");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(150, "th");
-    \u0275\u0275text(151, "Destino");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(152, "th");
-    \u0275\u0275text(153, "Hor\xE1rio (Dep/Arr)");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(154, "th");
-    \u0275\u0275text(155, "Data");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(156, "th");
-    \u0275\u0275text(157, "Origem");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(158, "th");
-    \u0275\u0275text(159, "Destino");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(160, "th");
-    \u0275\u0275text(161, "Hor\xE1rio (Dep/Arr)");
-    \u0275\u0275elementEnd()()();
-    \u0275\u0275elementStart(162, "tbody");
-    \u0275\u0275template(163, EventCreateComponent_div_163_ng_container_10_tr_163_Template, 3, 0, "tr", 110)(164, EventCreateComponent_div_163_ng_container_10_tr_164_Template, 34, 29, "tr", 188);
-    \u0275\u0275elementEnd()()()()()();
+    \u0275\u0275template(1, EventCreateComponent_div_163_ng_container_7_tr_161_ng_container_5_a_1_Template, 2, 2, "a", 277);
     \u0275\u0275elementContainerEnd();
   }
   if (rf & 2) {
-    const item_r36 = ctx.$implicit;
-    const provIdx_r42 = ctx.index;
-    const ctx_r2 = \u0275\u0275nextContext(2);
-    \u0275\u0275advance(5);
-    \u0275\u0275textInterpolate2(" Fornecedor ", provIdx_r42 + 1, ": ", item_r36.provider == null ? null : item_r36.provider.name, " ");
+    const p_r39 = ctx.$implicit;
     \u0275\u0275advance();
-    \u0275\u0275property("ngClass", (item_r36.provider == null ? null : item_r36.provider.national) ? "bg-success" : "bg-info");
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate1(" ", (item_r36.provider == null ? null : item_r36.provider.national) ? "Nacional" : "Internacional", " ");
-    \u0275\u0275advance();
-    \u0275\u0275property("ngIf", !ctx_r2.isReadOnly);
-    \u0275\u0275advance(31);
-    \u0275\u0275textInterpolate((item_r36.provider == null ? null : item_r36.provider.contact) || "-");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate((item_r36.provider == null ? null : item_r36.provider.email) || "-");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate((item_r36.provider == null ? null : item_r36.provider.phone) || "-");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate((item_r36.currency == null ? null : item_r36.currency.sigla) || "-");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate1("", item_r36.iss_percent || 0, "%");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate1("", item_r36.taxa_4bts || 0, "%");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(ctx_r2.formatCurrency(ctx_r2.sumCost(item_r36), item_r36.currency == null ? null : item_r36.currency.sigla));
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(ctx_r2.formatCurrency(ctx_r2.sumSale(item_r36), item_r36.currency == null ? null : item_r36.currency.sigla));
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate1(" ", ctx_r2.sumSale(item_r36) > 0 ? \u0275\u0275pipeBind2(56, 25, (1 - ctx_r2.sumCost(item_r36) / ctx_r2.sumSale(item_r36)) * 100, "1.2-2") : "0.00", "% ");
-    \u0275\u0275advance(3);
-    \u0275\u0275textInterpolate1(" ", ctx_r2.formatCurrency(ctx_r2.sumCost(item_r36) + ctx_r2.sumTaxes(item_r36, "iss"), item_r36.currency == null ? null : item_r36.currency.sigla), " ");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate1(" ", ctx_r2.formatCurrency(ctx_r2.sumSale(item_r36) + ctx_r2.sumTaxes(item_r36, "iss"), item_r36.currency == null ? null : item_r36.currency.sigla), " ");
-    \u0275\u0275advance(15);
-    \u0275\u0275property("ngIf", ctx_r2.showDetailsAirfare);
-    \u0275\u0275advance();
-    \u0275\u0275property("ngIf", !ctx_r2.isReadOnly);
-    \u0275\u0275advance(40);
-    \u0275\u0275property("ngIf", ctx_r2.showDetailsAirfare);
-    \u0275\u0275advance(4);
-    \u0275\u0275property("ngIf", (!item_r36.eventAirfareOpts || item_r36.eventAirfareOpts.length === 0) && (!item_r36.event_airfare_opts || item_r36.event_airfare_opts.length === 0));
-    \u0275\u0275advance();
-    \u0275\u0275property("ngForOf", item_r36.eventAirfareOpts || item_r36.event_airfare_opts);
-    \u0275\u0275advance(6);
-    \u0275\u0275property("ngIf", !ctx_r2.isReadOnly);
-    \u0275\u0275advance(17);
-    \u0275\u0275property("ngIf", !ctx_r2.isReadOnly);
-    \u0275\u0275advance(19);
-    \u0275\u0275property("ngIf", !item_r36.passengers || item_r36.passengers.length === 0);
-    \u0275\u0275advance();
-    \u0275\u0275property("ngForOf", item_r36.passengers);
+    \u0275\u0275property("ngIf", p_r39);
   }
 }
-function EventCreateComponent_div_163_div_11_Template(rf, ctx) {
+function EventCreateComponent_div_163_ng_container_7_tr_161_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 306);
-    \u0275\u0275element(1, "i", 307);
-    \u0275\u0275elementStart(2, "h5", 308);
+    \u0275\u0275elementStart(0, "tr", 161)(1, "td", 162);
+    \u0275\u0275text(2, "FOTOS DA PROPOSTA:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "td", 252)(4, "div", 276);
+    \u0275\u0275template(5, EventCreateComponent_div_163_ng_container_7_tr_161_ng_container_5_Template, 2, 1, "ng-container", 136);
+    \u0275\u0275elementEnd()()();
+  }
+  if (rf & 2) {
+    const item_r35 = \u0275\u0275nextContext().$implicit;
+    const ctx_r2 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(3);
+    \u0275\u0275attribute("colspan", ctx_r2.isReadOnly ? 8 : 9);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngForOf", \u0275\u0275pureFunction4(2, _c137, item_r35.photo_1, item_r35.photo_2, item_r35.photo_3, item_r35.photo_4));
+  }
+}
+function EventCreateComponent_div_163_ng_container_7_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementContainerStart(0);
+    \u0275\u0275elementStart(1, "div", 139)(2, "div", 140)(3, "div")(4, "h6", 130);
+    \u0275\u0275text(5);
+    \u0275\u0275elementStart(6, "span", 141);
+    \u0275\u0275text(7);
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275template(8, EventCreateComponent_div_163_ng_container_7_div_8_Template, 11, 4, "div", 142);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(9, "div", 143)(10, "div", 220)(11, "div")(12, "span", 221);
+    \u0275\u0275element(13, "i", 222);
+    \u0275\u0275text(14, "Equipamento:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(15, "span", 223);
+    \u0275\u0275text(16);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(17, "div", 224)(18, "span", 221);
+    \u0275\u0275element(19, "i", 225);
+    \u0275\u0275text(20, "Distribui\xE7\xE3o PAX:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(21, "span", 226);
+    \u0275\u0275text(22);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(23, "span", 226);
+    \u0275\u0275text(24);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(25, "span", 226);
+    \u0275\u0275text(26);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(27, "span", 226);
+    \u0275\u0275text(28);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(29, "span", 227);
+    \u0275\u0275text(30);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(31, "div", 228)(32, "div")(33, "span", 221);
+    \u0275\u0275element(34, "i", 229);
+    \u0275\u0275text(35, "Prazo:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(36, "span", 230);
+    \u0275\u0275text(37);
+    \u0275\u0275pipe(38, "date");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(39, "div")(40, "span", 221);
+    \u0275\u0275element(41, "i", 231);
+    \u0275\u0275text(42, "Prazo Cia:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(43, "span", 230);
+    \u0275\u0275text(44);
+    \u0275\u0275pipe(45, "date");
+    \u0275\u0275elementEnd()()()();
+    \u0275\u0275elementStart(46, "div", 144)(47, "table", 232)(48, "thead")(49, "tr")(50, "th", 233);
+    \u0275\u0275element(51, "i", 234);
+    \u0275\u0275text(52, " Trechos de Voo (Fretamento) ");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(53, "th", 235);
+    \u0275\u0275text(54, "Mark Up");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(55, "th", 236);
+    \u0275\u0275text(56, "Valor de Custo");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(57, "th", 237);
+    \u0275\u0275text(58, "Valor de Venda");
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(59, EventCreateComponent_div_163_ng_container_7_th_59_Template, 2, 0, "th", 238);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(60, "tr")(61, "th", 239);
+    \u0275\u0275text(62, "CIA");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(63, "th", 240);
+    \u0275\u0275text(64, "VOO");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(65, "th", 213);
+    \u0275\u0275text(66, "DE");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(67, "th", 213);
+    \u0275\u0275text(68, "PARA");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(69, "th", 241);
+    \u0275\u0275text(70, "DATAS");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(71, "th", 240);
+    \u0275\u0275text(72, "SA\xCDDA");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(73, "th", 240);
+    \u0275\u0275text(74, "CHEGADA");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(75, "th", 213);
+    \u0275\u0275text(76, "Custo / Venda");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(77, "th", 242);
+    \u0275\u0275text(78, "Custo Fretamento");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(79, "th", 243);
+    \u0275\u0275text(80, "Venda Fretamento");
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(81, EventCreateComponent_div_163_ng_container_7_th_81_Template, 2, 0, "th", 244);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(82, "tbody");
+    \u0275\u0275template(83, EventCreateComponent_div_163_ng_container_7_tr_83_Template, 4, 1, "tr", 104)(84, EventCreateComponent_div_163_ng_container_7_tr_84_Template, 20, 14, "tr", 136);
+    \u0275\u0275elementStart(85, "tr", 208)(86, "td", 245);
+    \u0275\u0275text(87, "Tx. Embarque (Unit.):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(88, "td", 246);
+    \u0275\u0275text(89);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(90, "td", 214);
+    \u0275\u0275text(91, "Total Tx. Embarque:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(92, "td", 247);
+    \u0275\u0275text(93);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(94, "td", 166);
+    \u0275\u0275text(95, "Total Custo (c/ Txs):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(96, "td", 166);
+    \u0275\u0275text(97);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(98, "td", 191);
+    \u0275\u0275text(99, "Total Venda (c/ Txs):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(100, "td", 191);
+    \u0275\u0275text(101);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(102, "tr", 208)(103, "td", 245);
+    \u0275\u0275text(104, "Resultado Bruto (Lucro):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(105, "td", 248);
+    \u0275\u0275text(106);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(107, "td", 164);
+    \u0275\u0275text(108, "Margem Estimada (%):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(109, "td", 249);
+    \u0275\u0275text(110);
+    \u0275\u0275pipe(111, "number");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(112, "tr", 161)(113, "td", 250);
+    \u0275\u0275element(114, "i", 251);
+    \u0275\u0275text(115, " INCLUI / SERVI\xC7OS: ");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(116, "td", 252)(117, "div", 253)(118, "span", 254);
+    \u0275\u0275text(119);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(120, "span", 254);
+    \u0275\u0275text(121);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(122, "span", 226);
+    \u0275\u0275element(123, "i", 255);
+    \u0275\u0275text(124);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(125, "span", 226);
+    \u0275\u0275element(126, "i", 256);
+    \u0275\u0275text(127);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(128, "span", 254);
+    \u0275\u0275text(129);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(130, "span", 226);
+    \u0275\u0275text(131);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(132, "span", 226);
+    \u0275\u0275text(133);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(134, "span", 254);
+    \u0275\u0275text(135);
+    \u0275\u0275elementEnd()()()();
+    \u0275\u0275elementStart(136, "tr", 161)(137, "td", 162);
+    \u0275\u0275text(138, "TAXA 4BTS:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(139, "td", 257)(140, "span", 258);
+    \u0275\u0275text(141);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(142, "td", 164);
+    \u0275\u0275text(143, "Custo Total:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(144, "td", 166);
+    \u0275\u0275text(145);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(146, "td", 214);
+    \u0275\u0275text(147, "Venda Total:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(148, "td", 191);
+    \u0275\u0275text(149);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275template(150, EventCreateComponent_div_163_ng_container_7_tr_150_Template, 5, 2, "tr", 259);
+    \u0275\u0275elementStart(151, "tr", 161)(152, "td", 162);
+    \u0275\u0275text(153, "OBSERVA\xC7\xC3O INTERNA:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(154, "td", 163);
+    \u0275\u0275text(155);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(156, "tr", 161)(157, "td", 162);
+    \u0275\u0275text(158, "OBSERVA\xC7\xC3O CLIENTE:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(159, "td", 163);
+    \u0275\u0275text(160);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275template(161, EventCreateComponent_div_163_ng_container_7_tr_161_Template, 6, 7, "tr", 259);
+    \u0275\u0275elementEnd()()()()();
+    \u0275\u0275elementContainerEnd();
+  }
+  if (rf & 2) {
+    const item_r35 = ctx.$implicit;
+    const provIdx_r40 = ctx.index;
+    const ctx_r2 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(5);
+    \u0275\u0275textInterpolate2(" Or\xE7amento Fretamento ", provIdx_r40 + 1, ": ", (item_r35.airline == null ? null : item_r35.airline.name) || (item_r35.provider == null ? null : item_r35.provider.name) || item_r35.equipment || "Fretamento", " ");
+    \u0275\u0275advance();
+    \u0275\u0275property("ngClass", (item_r35.provider == null ? null : item_r35.provider.national) ? "bg-success" : "bg-info");
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", (item_r35.provider == null ? null : item_r35.provider.national) ? "Nacional" : "Internacional", " ");
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", !ctx_r2.isReadOnly);
+    \u0275\u0275advance(8);
+    \u0275\u0275textInterpolate(item_r35.equipment || "N\xE3o informado");
+    \u0275\u0275advance(6);
+    \u0275\u0275textInterpolate1("First: ", item_r35.pax_first || 0, "");
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1("Executiva: ", item_r35.pax_executiva || 0, "");
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1("Premium: ", item_r35.pax_premium || 0, "");
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1("Econ\xF4mica: ", item_r35.pax_economica || 0, "");
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1("TOTAL: ", item_r35.total_pax || 0, " PAX");
+    \u0275\u0275advance(7);
+    \u0275\u0275textInterpolate(item_r35.deadline_date ? \u0275\u0275pipeBind2(38, 48, item_r35.deadline_date, "dd/MM/yyyy") : "-");
+    \u0275\u0275advance(7);
+    \u0275\u0275textInterpolate(item_r35.prazo_cia ? \u0275\u0275pipeBind2(45, 51, item_r35.prazo_cia, "dd/MM/yyyy") : "-");
+    \u0275\u0275advance(15);
+    \u0275\u0275property("ngIf", !ctx_r2.isReadOnly);
+    \u0275\u0275advance(22);
+    \u0275\u0275property("ngIf", !ctx_r2.isReadOnly);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngIf", (!item_r35.eventAirfareOpts || item_r35.eventAirfareOpts.length === 0) && (!item_r35.event_airfare_opts || item_r35.event_airfare_opts.length === 0));
+    \u0275\u0275advance();
+    \u0275\u0275property("ngForOf", item_r35.eventAirfareOpts || item_r35.event_airfare_opts);
+    \u0275\u0275advance(5);
+    \u0275\u0275textInterpolate1(" ", ctx_r2.formatCurrency(item_r35.taxa_embarque_unit || 0, item_r35.currency == null ? null : item_r35.currency.sigla), " ");
+    \u0275\u0275advance(4);
+    \u0275\u0275textInterpolate1(" ", ctx_r2.formatCurrency((item_r35.taxa_embarque_unit || 0) * (item_r35.total_pax || 0), item_r35.currency == null ? null : item_r35.currency.sigla), " ");
+    \u0275\u0275advance(4);
+    \u0275\u0275textInterpolate1(" ", ctx_r2.formatCurrency(ctx_r2.getAirfareNetComTxs(item_r35), item_r35.currency == null ? null : item_r35.currency.sigla), " ");
+    \u0275\u0275advance(3);
+    \u0275\u0275attribute("colspan", ctx_r2.isReadOnly ? 1 : 2);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", ctx_r2.formatCurrency(ctx_r2.getAirfareVendaComTxs(item_r35), item_r35.currency == null ? null : item_r35.currency.sigla), " ");
+    \u0275\u0275advance(5);
+    \u0275\u0275textInterpolate1(" ", ctx_r2.formatCurrency(ctx_r2.getAirfareResultadoBruto(item_r35), item_r35.currency == null ? null : item_r35.currency.sigla), " ");
+    \u0275\u0275advance(3);
+    \u0275\u0275attribute("colspan", ctx_r2.isReadOnly ? 3 : 4);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", \u0275\u0275pipeBind2(111, 54, ctx_r2.getAirfareMargemPercent(item_r35), "1.2-2"), "% ");
+    \u0275\u0275advance(6);
+    \u0275\u0275attribute("colspan", ctx_r2.isReadOnly ? 8 : 9);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngClass", item_r35.inc_taxa_embarque ? "bg-success" : "bg-secondary");
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" Taxas de Embarque: ", item_r35.inc_taxa_embarque ? "SIM" : "N\xC3O", " ");
+    \u0275\u0275advance();
+    \u0275\u0275property("ngClass", item_r35.inc_servico_bordo ? "bg-success" : "bg-secondary");
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" Servi\xE7o de Bordo: ", item_r35.inc_servico_bordo ? "SIM" : "N\xC3O", " ");
+    \u0275\u0275advance(3);
+    \u0275\u0275textInterpolate1("Por\xE3o: ", ctx_r2.formatKilos(item_r35.inc_porao, 23), " ");
+    \u0275\u0275advance(3);
+    \u0275\u0275textInterpolate1("Bagagem a bordo: ", ctx_r2.formatKilos(item_r35.inc_bagagem_bordo, 10), " ");
+    \u0275\u0275advance();
+    \u0275\u0275property("ngClass", item_r35.inc_sala_vip ? "bg-success" : "bg-secondary");
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" Sala VIP: ", item_r35.inc_sala_vip ? "SIM" : "N\xC3O", " ");
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1(" FBO Origem: ", item_r35.inc_fbo_origem || "0", " ");
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1(" FBO Destino: ", item_r35.inc_fbo_destino || "0", " ");
+    \u0275\u0275advance();
+    \u0275\u0275property("ngClass", item_r35.inc_alteracao_nomes ? "bg-success" : "bg-secondary");
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" Altera\xE7\xE3o Nomes: ", item_r35.inc_alteracao_nomes ? "SIM" : "N\xC3O", " ");
+    \u0275\u0275advance(6);
+    \u0275\u0275textInterpolate1("Tx 4BTS: ", item_r35.taxa_4bts || 10, "%");
+    \u0275\u0275advance(4);
+    \u0275\u0275textInterpolate1(" ", ctx_r2.formatCurrency(ctx_r2.getAirfareNetComTxs(item_r35), item_r35.currency == null ? null : item_r35.currency.sigla), " ");
+    \u0275\u0275advance(3);
+    \u0275\u0275attribute("colspan", ctx_r2.isReadOnly ? 1 : 2);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", ctx_r2.formatCurrency(ctx_r2.getAirfareVendaComTxs(item_r35), item_r35.currency == null ? null : item_r35.currency.sigla), " ");
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", item_r35.notes);
+    \u0275\u0275advance(4);
+    \u0275\u0275attribute("colspan", ctx_r2.isReadOnly ? 8 : 9);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", item_r35.internal_observation || "-", " ");
+    \u0275\u0275advance(4);
+    \u0275\u0275attribute("colspan", ctx_r2.isReadOnly ? 8 : 9);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", item_r35.customer_observation || "-", " ");
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", item_r35.photo_1 || item_r35.photo_2 || item_r35.photo_3 || item_r35.photo_4);
+  }
+}
+function EventCreateComponent_div_163_div_8_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 216);
+    \u0275\u0275element(1, "i", 217);
+    \u0275\u0275elementStart(2, "h5", 218);
     \u0275\u0275text(3, "Nenhum fornecedor a\xE9reo vinculado");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(4, "p", 309);
+    \u0275\u0275elementStart(4, "p", 219);
     \u0275\u0275text(5, "Use o bot\xE3o no topo para vincular um fornecedor a\xE9reo a este evento.");
     \u0275\u0275elementEnd()();
   }
 }
 function EventCreateComponent_div_163_Template(rf, ctx) {
   if (rf & 1) {
-    const _r33 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 180)(1, "div", 181)(2, "h5", 182);
+    \u0275\u0275elementStart(0, "div", 128)(1, "div", 129)(2, "h5", 130);
     \u0275\u0275element(3, "i", 20);
     \u0275\u0275text(4, " Fornecedores A\xE9reos Vinculados ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "div", 184)(6, "button", 185);
-    \u0275\u0275listener("click", function EventCreateComponent_div_163_Template_button_click_6_listener() {
-      \u0275\u0275restoreView(_r33);
-      const ctx_r2 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r2.toggleDetails("airfare"));
-    });
-    \u0275\u0275element(7, "i", 186);
-    \u0275\u0275text(8);
-    \u0275\u0275elementEnd();
-    \u0275\u0275template(9, EventCreateComponent_div_163_button_9_Template, 3, 0, "button", 187);
+    \u0275\u0275elementStart(5, "div", 132);
+    \u0275\u0275template(6, EventCreateComponent_div_163_button_6_Template, 3, 0, "button", 135);
     \u0275\u0275elementEnd()();
-    \u0275\u0275template(10, EventCreateComponent_div_163_ng_container_10_Template, 165, 28, "ng-container", 188)(11, EventCreateComponent_div_163_div_11_Template, 6, 0, "div", 267);
+    \u0275\u0275template(7, EventCreateComponent_div_163_ng_container_7_Template, 162, 57, "ng-container", 136)(8, EventCreateComponent_div_163_div_8_Template, 6, 0, "div", 137);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
     const ctx_r2 = \u0275\u0275nextContext();
-    \u0275\u0275advance(7);
-    \u0275\u0275property("ngClass", ctx_r2.showDetailsAirfare ? "fa-eye-slash" : "fa-eye");
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate1(" ", ctx_r2.showDetailsAirfare ? " Ocultar Detalhes" : " Exibir Detalhes", " ");
-    \u0275\u0275advance();
+    \u0275\u0275advance(6);
     \u0275\u0275property("ngIf", !ctx_r2.isReadOnly);
     \u0275\u0275advance();
     \u0275\u0275property("ngForOf", ctx_r2.eventAirfares);
@@ -116159,35 +116303,56 @@ function EventCreateComponent_div_163_Template(rf, ctx) {
     \u0275\u0275property("ngIf", (ctx_r2.eventAirfares == null ? null : ctx_r2.eventAirfares.length) === 0);
   }
 }
-function EventCreateComponent_option_177_Template(rf, ctx) {
+function EventCreateComponent_div_169_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
+    const _r41 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 280)(1, "label", 281);
+    \u0275\u0275text(2, "Equipamento:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "input", 282);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_169_Template_input_ngModelChange_3_listener($event) {
+      \u0275\u0275restoreView(_r41);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.providerLinkForm.equipment, $event) || (ctx_r2.providerLinkForm.equipment = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext();
+    \u0275\u0275advance(3);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.providerLinkForm.equipment);
+  }
+}
+function EventCreateComponent_option_178_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "option", 124);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const option_r43 = ctx.$implicit;
-    \u0275\u0275property("value", option_r43.id);
+    const option_r42 = ctx.$implicit;
+    \u0275\u0275property("value", option_r42.id);
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate2("", option_r43.name, " (", option_r43.sigla, ")");
+    \u0275\u0275textInterpolate2("", option_r42.name, " (", option_r42.sigla, ")");
   }
 }
-function EventCreateComponent_div_178_small_1_Template(rf, ctx) {
+function EventCreateComponent_div_179_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const err_r44 = ctx.$implicit;
+    const err_r43 = ctx.$implicit;
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r44);
+    \u0275\u0275textInterpolate(err_r43);
   }
 }
-function EventCreateComponent_div_178_Template(rf, ctx) {
+function EventCreateComponent_div_179_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_178_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_179_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -116196,33 +116361,96 @@ function EventCreateComponent_div_178_Template(rf, ctx) {
     \u0275\u0275property("ngForOf", ctx_r2.errors.currency_id);
   }
 }
-function EventCreateComponent_div_197_small_1_Template(rf, ctx) {
+function EventCreateComponent_div_180_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    const _r44 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 70)(1, "label", 283);
+    \u0275\u0275text(2, "ISS (%):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "input", 284);
+    \u0275\u0275listener("input", function EventCreateComponent_div_180_Template_input_input_3_listener($event) {
+      \u0275\u0275restoreView(_r44);
+      const ctx_r2 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r2.onPercentInput($event, "iss_percent", "providerLinkForm"));
+    });
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext();
+    \u0275\u0275property("ngClass", ctx_r2.providerLinkType === "hotel" || ctx_r2.providerLinkType === "ab" ? "col-md-2" : "col-md-3");
+    \u0275\u0275advance(3);
+    \u0275\u0275property("value", ctx_r2.formatPercent(ctx_r2.providerLinkForm.iss_percent));
+  }
+}
+function EventCreateComponent_div_181_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r45 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 70)(1, "label", 285);
+    \u0275\u0275text(2, "Servi\xE7o (%):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "input", 286);
+    \u0275\u0275listener("input", function EventCreateComponent_div_181_Template_input_input_3_listener($event) {
+      \u0275\u0275restoreView(_r45);
+      const ctx_r2 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r2.onPercentInput($event, "service_percent", "providerLinkForm"));
+    });
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext();
+    \u0275\u0275property("ngClass", ctx_r2.providerLinkType === "hotel" || ctx_r2.providerLinkType === "ab" ? "col-md-2" : "col-md-3");
+    \u0275\u0275advance(3);
+    \u0275\u0275property("value", ctx_r2.formatPercent(ctx_r2.providerLinkForm.service_percent));
+  }
+}
+function EventCreateComponent_div_182_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r46 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 70)(1, "label", 287);
+    \u0275\u0275text(2, "IVA (%):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "input", 288);
+    \u0275\u0275listener("input", function EventCreateComponent_div_182_Template_input_input_3_listener($event) {
+      \u0275\u0275restoreView(_r46);
+      const ctx_r2 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r2.onPercentInput($event, "iva_percent", "providerLinkForm"));
+    });
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext();
+    \u0275\u0275property("ngClass", ctx_r2.providerLinkType === "hotel" || ctx_r2.providerLinkType === "ab" ? "col-md-2" : "col-md-3");
+    \u0275\u0275advance(3);
+    \u0275\u0275property("value", ctx_r2.formatPercent(ctx_r2.providerLinkForm.iva_percent));
+  }
+}
+function EventCreateComponent_div_187_small_1_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const err_r45 = ctx.$implicit;
+    const err_r47 = ctx.$implicit;
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r45);
+    \u0275\u0275textInterpolate(err_r47);
   }
 }
-function EventCreateComponent_div_197_Template(rf, ctx) {
+function EventCreateComponent_div_187_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_197_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_187_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
     const ctx_r2 = \u0275\u0275nextContext();
     \u0275\u0275advance();
-    \u0275\u0275property("ngForOf", ctx_r2.errors.taxa_4bts);
+    \u0275\u0275property("ngForOf", ctx_r2.errors.iof);
   }
 }
-function EventCreateComponent_div_198_span_4_Template(rf, ctx) {
+function EventCreateComponent_div_188_span_4_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 312);
+    \u0275\u0275elementStart(0, "span", 293);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -116232,17 +116460,17 @@ function EventCreateComponent_div_198_span_4_Template(rf, ctx) {
     \u0275\u0275textInterpolate1(" ", ctx_r2.getSelectedCurrencySymbol(), " ");
   }
 }
-function EventCreateComponent_div_198_Template(rf, ctx) {
+function EventCreateComponent_div_188_Template(rf, ctx) {
   if (rf & 1) {
-    const _r46 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 72)(1, "label", 310);
+    const _r48 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 289)(1, "label", 290);
     \u0275\u0275text(2, "Taxa Turismo:");
     \u0275\u0275elementEnd();
     \u0275\u0275elementStart(3, "div", 52);
-    \u0275\u0275template(4, EventCreateComponent_div_198_span_4_Template, 2, 1, "span", 117);
-    \u0275\u0275elementStart(5, "input", 311);
-    \u0275\u0275listener("input", function EventCreateComponent_div_198_Template_input_input_5_listener($event) {
-      \u0275\u0275restoreView(_r46);
+    \u0275\u0275template(4, EventCreateComponent_div_188_span_4_Template, 2, 1, "span", 291);
+    \u0275\u0275elementStart(5, "input", 292);
+    \u0275\u0275listener("input", function EventCreateComponent_div_188_Template_input_input_5_listener($event) {
+      \u0275\u0275restoreView(_r48);
       const ctx_r2 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r2.onMoneyInput($event, "service_charge", "providerLinkForm"));
     });
@@ -116256,46 +116484,46 @@ function EventCreateComponent_div_198_Template(rf, ctx) {
     \u0275\u0275property("value", ctx_r2.formatMoney(ctx_r2.providerLinkForm.service_charge));
   }
 }
-function EventCreateComponent_div_221_small_1_Template(rf, ctx) {
+function EventCreateComponent_div_195_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const err_r47 = ctx.$implicit;
+    const err_r49 = ctx.$implicit;
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r47);
+    \u0275\u0275textInterpolate(err_r49);
   }
 }
-function EventCreateComponent_div_221_Template(rf, ctx) {
+function EventCreateComponent_div_195_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_221_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_195_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
     const ctx_r2 = \u0275\u0275nextContext();
     \u0275\u0275advance();
-    \u0275\u0275property("ngForOf", ctx_r2.errors.iof);
+    \u0275\u0275property("ngForOf", ctx_r2.errors.taxa_4bts);
   }
 }
-function EventCreateComponent_div_226_small_1_Template(rf, ctx) {
+function EventCreateComponent_div_221_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const err_r48 = ctx.$implicit;
+    const err_r50 = ctx.$implicit;
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r48);
+    \u0275\u0275textInterpolate(err_r50);
   }
 }
-function EventCreateComponent_div_226_Template(rf, ctx) {
+function EventCreateComponent_div_221_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_226_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_221_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -116304,64 +116532,504 @@ function EventCreateComponent_div_226_Template(rf, ctx) {
     \u0275\u0275property("ngForOf", ctx_r2.errors.deadline_date);
   }
 }
-function EventCreateComponent_div_235_Template(rf, ctx) {
+function EventCreateComponent_div_222_Template(rf, ctx) {
   if (rf & 1) {
-    const _r49 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 313)(1, "div", 314)(2, "div", 315)(3, "div", 316)(4, "input", 317);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_235_Template_input_ngModelChange_4_listener($event) {
-      \u0275\u0275restoreView(_r49);
+    const _r51 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 280)(1, "label", 294);
+    \u0275\u0275text(2, "Prazo da Cia:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "div", 52)(4, "span", 53);
+    \u0275\u0275element(5, "i", 295);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(6, "input", 296);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_222_Template_input_ngModelChange_6_listener($event) {
+      \u0275\u0275restoreView(_r51);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.providerLinkForm.prazo_cia, $event) || (ctx_r2.providerLinkForm.prazo_cia = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275elementEnd()()();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext();
+    \u0275\u0275advance(6);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.providerLinkForm.prazo_cia);
+  }
+}
+function EventCreateComponent_div_223_span_97_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 293);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", ctx_r2.getSelectedCurrencySymbol(), " ");
+  }
+}
+function EventCreateComponent_div_223_span_107_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 293);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", ctx_r2.getSelectedCurrencySymbol(), " ");
+  }
+}
+function EventCreateComponent_div_223_div_126_div_4_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r54 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 344);
+    \u0275\u0275element(1, "img", 345);
+    \u0275\u0275elementStart(2, "button", 346);
+    \u0275\u0275listener("click", function EventCreateComponent_div_223_div_126_div_4_Template_button_click_2_listener($event) {
+      \u0275\u0275restoreView(_r54);
+      const pNum_r55 = \u0275\u0275nextContext().$implicit;
+      const ctx_r2 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r2.removePhoto(pNum_r55, $event));
+    });
+    \u0275\u0275text(3, " \xD7 ");
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const pNum_r55 = \u0275\u0275nextContext().$implicit;
+    const ctx_r2 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance();
+    \u0275\u0275property("src", ctx_r2.getPhotoValue(pNum_r55), \u0275\u0275sanitizeUrl);
+  }
+}
+function EventCreateComponent_div_223_div_126_div_5_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 347);
+    \u0275\u0275element(1, "i", 348);
+    \u0275\u0275elementEnd();
+  }
+}
+function EventCreateComponent_div_223_div_126_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r53 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 338)(1, "div", 339)(2, "span", 340);
+    \u0275\u0275text(3);
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(4, EventCreateComponent_div_223_div_126_div_4_Template, 4, 1, "div", 341)(5, EventCreateComponent_div_223_div_126_div_5_Template, 2, 0, "div", 342);
+    \u0275\u0275elementStart(6, "input", 343);
+    \u0275\u0275listener("change", function EventCreateComponent_div_223_div_126_Template_input_change_6_listener($event) {
+      const pNum_r55 = \u0275\u0275restoreView(_r53).$implicit;
+      const ctx_r2 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r2.onPhotoFileChange($event, pNum_r55));
+    });
+    \u0275\u0275elementEnd()()();
+  }
+  if (rf & 2) {
+    const pNum_r55 = ctx.$implicit;
+    const ctx_r2 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(3);
+    \u0275\u0275textInterpolate1("Foto ", pNum_r55, "");
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx_r2.getPhotoValue(pNum_r55));
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", !ctx_r2.getPhotoValue(pNum_r55));
+    \u0275\u0275advance();
+    \u0275\u0275property("id", "photo_input_" + pNum_r55);
+  }
+}
+function EventCreateComponent_div_223_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r52 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 297)(1, "div", 298)(2, "h6", 299);
+    \u0275\u0275element(3, "i", 300);
+    \u0275\u0275text(4, " Or\xE7amento Fretamento / Cia A\xE9rea ");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(5, "div", 9)(6, "div", 297)(7, "label", 301);
+    \u0275\u0275text(8, "Distribui\xE7\xE3o de Assentos (PAX):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(9, "div", 302)(10, "div", 303)(11, "label", 304);
+    \u0275\u0275text(12, "FIRST:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(13, "input", 305);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_input_ngModelChange_13_listener($event) {
+      \u0275\u0275restoreView(_r52);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.providerLinkForm.pax_first, $event) || (ctx_r2.providerLinkForm.pax_first = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275listener("ngModelChange", function EventCreateComponent_div_223_Template_input_ngModelChange_13_listener() {
+      \u0275\u0275restoreView(_r52);
+      const ctx_r2 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r2.calculatePaxTotal());
+    });
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(14, "div", 303)(15, "label", 304);
+    \u0275\u0275text(16, "EXECUTIVA:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(17, "input", 306);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_input_ngModelChange_17_listener($event) {
+      \u0275\u0275restoreView(_r52);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.providerLinkForm.pax_executiva, $event) || (ctx_r2.providerLinkForm.pax_executiva = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275listener("ngModelChange", function EventCreateComponent_div_223_Template_input_ngModelChange_17_listener() {
+      \u0275\u0275restoreView(_r52);
+      const ctx_r2 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r2.calculatePaxTotal());
+    });
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(18, "div", 303)(19, "label", 304);
+    \u0275\u0275text(20, "PREMIUM:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(21, "input", 307);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_input_ngModelChange_21_listener($event) {
+      \u0275\u0275restoreView(_r52);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.providerLinkForm.pax_premium, $event) || (ctx_r2.providerLinkForm.pax_premium = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275listener("ngModelChange", function EventCreateComponent_div_223_Template_input_ngModelChange_21_listener() {
+      \u0275\u0275restoreView(_r52);
+      const ctx_r2 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r2.calculatePaxTotal());
+    });
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(22, "div", 308)(23, "label", 304);
+    \u0275\u0275text(24, "ECON\xD4MICA:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(25, "input", 309);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_input_ngModelChange_25_listener($event) {
+      \u0275\u0275restoreView(_r52);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.providerLinkForm.pax_economica, $event) || (ctx_r2.providerLinkForm.pax_economica = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275listener("ngModelChange", function EventCreateComponent_div_223_Template_input_ngModelChange_25_listener() {
+      \u0275\u0275restoreView(_r52);
+      const ctx_r2 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r2.calculatePaxTotal());
+    });
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(26, "div", 308)(27, "label", 304);
+    \u0275\u0275text(28, "TOTAL PAX:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275element(29, "input", 310);
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(30, "div", 297)(31, "label", 301);
+    \u0275\u0275text(32, "Inclus\xF5es & Servi\xE7os:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(33, "div", 302)(34, "div", 311)(35, "label", 312);
+    \u0275\u0275text(36, "Taxa de Embarque:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(37, "select", 313);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_select_ngModelChange_37_listener($event) {
+      \u0275\u0275restoreView(_r52);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.providerLinkForm.inc_taxa_embarque, $event) || (ctx_r2.providerLinkForm.inc_taxa_embarque = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275elementStart(38, "option", 86);
+    \u0275\u0275text(39, "SIM");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(40, "option", 86);
+    \u0275\u0275text(41, "N\xC3O");
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(42, "div", 311)(43, "label", 312);
+    \u0275\u0275text(44, "Servi\xE7o de Bordo:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(45, "select", 314);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_select_ngModelChange_45_listener($event) {
+      \u0275\u0275restoreView(_r52);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.providerLinkForm.inc_servico_bordo, $event) || (ctx_r2.providerLinkForm.inc_servico_bordo = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275elementStart(46, "option", 86);
+    \u0275\u0275text(47, "SIM");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(48, "option", 86);
+    \u0275\u0275text(49, "N\xC3O");
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(50, "div", 311)(51, "label", 304);
+    \u0275\u0275text(52, "Por\xE3o:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(53, "div", 315)(54, "input", 316);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_input_ngModelChange_54_listener($event) {
+      \u0275\u0275restoreView(_r52);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.providerLinkForm.inc_porao, $event) || (ctx_r2.providerLinkForm.inc_porao = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(55, "span", 53);
+    \u0275\u0275text(56, "kg");
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(57, "div", 311)(58, "label", 304);
+    \u0275\u0275text(59, "Bagagem a bordo:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(60, "div", 315)(61, "input", 317);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_input_ngModelChange_61_listener($event) {
+      \u0275\u0275restoreView(_r52);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.providerLinkForm.inc_bagagem_bordo, $event) || (ctx_r2.providerLinkForm.inc_bagagem_bordo = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(62, "span", 53);
+    \u0275\u0275text(63, "kg");
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(64, "div", 308)(65, "label", 312);
+    \u0275\u0275text(66, "Sala VIP Aeroporto:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(67, "select", 318);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_select_ngModelChange_67_listener($event) {
+      \u0275\u0275restoreView(_r52);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.providerLinkForm.inc_sala_vip, $event) || (ctx_r2.providerLinkForm.inc_sala_vip = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275elementStart(68, "option", 86);
+    \u0275\u0275text(69, "SIM");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(70, "option", 86);
+    \u0275\u0275text(71, "N\xC3O");
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(72, "div", 308)(73, "label", 304);
+    \u0275\u0275text(74, "FBO Origem:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(75, "input", 319);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_input_ngModelChange_75_listener($event) {
+      \u0275\u0275restoreView(_r52);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.providerLinkForm.inc_fbo_origem, $event) || (ctx_r2.providerLinkForm.inc_fbo_origem = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(76, "div", 308)(77, "label", 304);
+    \u0275\u0275text(78, "FBO Destino:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(79, "input", 320);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_input_ngModelChange_79_listener($event) {
+      \u0275\u0275restoreView(_r52);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.providerLinkForm.inc_fbo_destino, $event) || (ctx_r2.providerLinkForm.inc_fbo_destino = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(80, "div", 308)(81, "label", 312);
+    \u0275\u0275text(82, "Altera\xE7\xE3o de Nomes:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(83, "select", 321);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_select_ngModelChange_83_listener($event) {
+      \u0275\u0275restoreView(_r52);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.providerLinkForm.inc_alteracao_nomes, $event) || (ctx_r2.providerLinkForm.inc_alteracao_nomes = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275elementStart(84, "option", 86);
+    \u0275\u0275text(85, "SIM");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(86, "option", 86);
+    \u0275\u0275text(87, "N\xC3O");
+    \u0275\u0275elementEnd()()()()();
+    \u0275\u0275elementStart(88, "div", 297)(89, "label", 301);
+    \u0275\u0275element(90, "i", 322);
+    \u0275\u0275text(91, " Valores do Fretamento & Taxas: ");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(92, "div", 323)(93, "div", 324)(94, "label", 325);
+    \u0275\u0275text(95, "Custo do Fretamento (Net):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(96, "div", 315);
+    \u0275\u0275template(97, EventCreateComponent_div_223_span_97_Template, 2, 1, "span", 291);
+    \u0275\u0275elementStart(98, "input", 326);
+    \u0275\u0275listener("input", function EventCreateComponent_div_223_Template_input_input_98_listener($event) {
+      \u0275\u0275restoreView(_r52);
+      const ctx_r2 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r2.onMoneyInput($event, "total_net_sem_4bts", "providerLinkForm"));
+    });
+    \u0275\u0275elementEnd()()();
+    \u0275\u0275elementStart(99, "div", 324)(100, "label", 327);
+    \u0275\u0275text(101, "Mark Up:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(102, "input", 328);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_input_ngModelChange_102_listener($event) {
+      \u0275\u0275restoreView(_r52);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.providerLinkForm.markup, $event) || (ctx_r2.providerLinkForm.markup = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275listener("blur", function EventCreateComponent_div_223_Template_input_blur_102_listener() {
+      \u0275\u0275restoreView(_r52);
+      const ctx_r2 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r2.onMarkupBlur());
+    });
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(103, "div", 324)(104, "label", 304);
+    \u0275\u0275text(105, "Taxa de Embarque (Unit.):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(106, "div", 315);
+    \u0275\u0275template(107, EventCreateComponent_div_223_span_107_Template, 2, 1, "span", 291);
+    \u0275\u0275elementStart(108, "input", 329);
+    \u0275\u0275listener("input", function EventCreateComponent_div_223_Template_input_input_108_listener($event) {
+      \u0275\u0275restoreView(_r52);
+      const ctx_r2 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r2.onMoneyInput($event, "taxa_embarque_unit", "providerLinkForm"));
+    });
+    \u0275\u0275elementEnd()()()()();
+    \u0275\u0275elementStart(109, "div", 297)(110, "label", 301);
+    \u0275\u0275element(111, "i", 330);
+    \u0275\u0275text(112, " Campos para Montagem da Proposta (PDF): ");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(113, "div", 323)(114, "div", 91)(115, "label", 331);
+    \u0275\u0275text(116, "Observa\xE7\xF5es (Proposta):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(117, "textarea", 332);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_textarea_ngModelChange_117_listener($event) {
+      \u0275\u0275restoreView(_r52);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.providerLinkForm.observations, $event) || (ctx_r2.providerLinkForm.observations = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(118, "div", 91)(119, "label", 333);
+    \u0275\u0275text(120, "Notes (Fretamento):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(121, "textarea", 334);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_textarea_ngModelChange_121_listener($event) {
+      \u0275\u0275restoreView(_r52);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.providerLinkForm.notes, $event) || (ctx_r2.providerLinkForm.notes = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(122, "div", 335)(123, "label", 336);
+    \u0275\u0275text(124, "Fotos da Proposta (At\xE9 4 Imagens):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(125, "div", 9);
+    \u0275\u0275template(126, EventCreateComponent_div_223_div_126_Template, 7, 4, "div", 337);
+    \u0275\u0275elementEnd()()()()()()();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext();
+    \u0275\u0275advance(13);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.providerLinkForm.pax_first);
+    \u0275\u0275advance(4);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.providerLinkForm.pax_executiva);
+    \u0275\u0275advance(4);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.providerLinkForm.pax_premium);
+    \u0275\u0275advance(4);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.providerLinkForm.pax_economica);
+    \u0275\u0275advance(4);
+    \u0275\u0275property("value", ctx_r2.providerLinkForm.total_pax);
+    \u0275\u0275advance(8);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.providerLinkForm.inc_taxa_embarque);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngValue", true);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngValue", false);
+    \u0275\u0275advance(5);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.providerLinkForm.inc_servico_bordo);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngValue", true);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngValue", false);
+    \u0275\u0275advance(6);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.providerLinkForm.inc_porao);
+    \u0275\u0275advance(7);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.providerLinkForm.inc_bagagem_bordo);
+    \u0275\u0275advance(6);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.providerLinkForm.inc_sala_vip);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngValue", true);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngValue", false);
+    \u0275\u0275advance(5);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.providerLinkForm.inc_fbo_origem);
+    \u0275\u0275advance(4);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.providerLinkForm.inc_fbo_destino);
+    \u0275\u0275advance(4);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.providerLinkForm.inc_alteracao_nomes);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngValue", true);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("ngValue", false);
+    \u0275\u0275advance(11);
+    \u0275\u0275property("ngIf", ctx_r2.getSelectedCurrencySymbol());
+    \u0275\u0275advance();
+    \u0275\u0275property("value", ctx_r2.formatMoney(ctx_r2.providerLinkForm.total_net_sem_4bts));
+    \u0275\u0275advance(4);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.providerLinkForm.markup);
+    \u0275\u0275advance(5);
+    \u0275\u0275property("ngIf", ctx_r2.getSelectedCurrencySymbol());
+    \u0275\u0275advance();
+    \u0275\u0275property("value", ctx_r2.formatMoney(ctx_r2.providerLinkForm.taxa_embarque_unit));
+    \u0275\u0275advance(9);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.providerLinkForm.observations);
+    \u0275\u0275advance(4);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.providerLinkForm.notes);
+    \u0275\u0275advance(5);
+    \u0275\u0275property("ngForOf", \u0275\u0275pureFunction0(29, _c24));
+  }
+}
+function EventCreateComponent_div_224_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r56 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 297)(1, "div", 349)(2, "div", 350)(3, "div", 351)(4, "input", 352);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_224_Template_input_ngModelChange_4_listener($event) {
+      \u0275\u0275restoreView(_r56);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.providerLinkForm.change_hotel_times, $event) || (ctx_r2.providerLinkForm.change_hotel_times = $event);
       return \u0275\u0275resetView($event);
     });
-    \u0275\u0275listener("ngModelChange", function EventCreateComponent_div_235_Template_input_ngModelChange_4_listener() {
-      \u0275\u0275restoreView(_r49);
+    \u0275\u0275listener("ngModelChange", function EventCreateComponent_div_224_Template_input_ngModelChange_4_listener() {
+      \u0275\u0275restoreView(_r56);
       const ctx_r2 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r2.onChangeHotelTimesToggle());
     });
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "label", 318);
+    \u0275\u0275elementStart(5, "label", 353);
     \u0275\u0275text(6, " Alterar hor\xE1rios padr\xE3o do hotel? ");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(7, "div", 319)(8, "label", 320);
+    \u0275\u0275elementStart(7, "div", 354)(8, "label", 355);
     \u0275\u0275text(9, "Check-in In\xEDcio:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(10, "input", 321);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_235_Template_input_ngModelChange_10_listener($event) {
-      \u0275\u0275restoreView(_r49);
+    \u0275\u0275elementStart(10, "input", 356);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_224_Template_input_ngModelChange_10_listener($event) {
+      \u0275\u0275restoreView(_r56);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.providerLinkForm.checkin_time, $event) || (ctx_r2.providerLinkForm.checkin_time = $event);
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(11, "div", 319)(12, "label", 322);
+    \u0275\u0275elementStart(11, "div", 354)(12, "label", 357);
     \u0275\u0275text(13, "Check-in Fim:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(14, "input", 323);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_235_Template_input_ngModelChange_14_listener($event) {
-      \u0275\u0275restoreView(_r49);
+    \u0275\u0275elementStart(14, "input", 358);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_224_Template_input_ngModelChange_14_listener($event) {
+      \u0275\u0275restoreView(_r56);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.providerLinkForm.checkin_time_end, $event) || (ctx_r2.providerLinkForm.checkin_time_end = $event);
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(15, "div", 319)(16, "label", 324);
+    \u0275\u0275elementStart(15, "div", 354)(16, "label", 359);
     \u0275\u0275text(17, "Check-out In\xEDcio:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(18, "input", 325);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_235_Template_input_ngModelChange_18_listener($event) {
-      \u0275\u0275restoreView(_r49);
+    \u0275\u0275elementStart(18, "input", 360);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_224_Template_input_ngModelChange_18_listener($event) {
+      \u0275\u0275restoreView(_r56);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.providerLinkForm.checkout_time, $event) || (ctx_r2.providerLinkForm.checkout_time = $event);
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(19, "div", 319)(20, "label", 326);
+    \u0275\u0275elementStart(19, "div", 354)(20, "label", 361);
     \u0275\u0275text(21, "Check-out Fim:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(22, "input", 327);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_235_Template_input_ngModelChange_22_listener($event) {
-      \u0275\u0275restoreView(_r49);
+    \u0275\u0275elementStart(22, "input", 362);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_224_Template_input_ngModelChange_22_listener($event) {
+      \u0275\u0275restoreView(_r56);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.providerLinkForm.checkout_time_end, $event) || (ctx_r2.providerLinkForm.checkout_time_end = $event);
       return \u0275\u0275resetView($event);
@@ -116386,40 +117054,40 @@ function EventCreateComponent_div_235_Template(rf, ctx) {
     \u0275\u0275property("disabled", !ctx_r2.providerLinkForm.change_hotel_times);
   }
 }
-function EventCreateComponent_span_240_Template(rf, ctx) {
+function EventCreateComponent_span_238_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275element(0, "span", 179);
+    \u0275\u0275element(0, "span", 127);
   }
 }
-function EventCreateComponent_div_246_option_8_Template(rf, ctx) {
+function EventCreateComponent_div_244_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
+    \u0275\u0275elementStart(0, "option", 124);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const option_r51 = ctx.$implicit;
-    \u0275\u0275property("value", option_r51.id);
+    const option_r58 = ctx.$implicit;
+    \u0275\u0275property("value", option_r58.id);
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(option_r51.name);
+    \u0275\u0275textInterpolate(option_r58.name);
   }
 }
-function EventCreateComponent_div_246_div_9_small_1_Template(rf, ctx) {
+function EventCreateComponent_div_244_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const err_r52 = ctx.$implicit;
+    const err_r59 = ctx.$implicit;
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r52);
+    \u0275\u0275textInterpolate(err_r59);
   }
 }
-function EventCreateComponent_div_246_div_9_Template(rf, ctx) {
+function EventCreateComponent_div_244_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_246_div_9_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_244_div_9_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -116428,17 +117096,17 @@ function EventCreateComponent_div_246_div_9_Template(rf, ctx) {
     \u0275\u0275property("ngForOf", ctx_r2.errors.broker || ctx_r2.errors.broker_id);
   }
 }
-function EventCreateComponent_div_246_Template(rf, ctx) {
+function EventCreateComponent_div_244_Template(rf, ctx) {
   if (rf & 1) {
-    const _r50 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 69)(1, "label", 328);
+    const _r57 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 363);
     \u0275\u0275text(2, " Broker: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 329);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_246_Template_select_ngModelChange_5_listener($event) {
-      \u0275\u0275restoreView(_r50);
+    \u0275\u0275elementStart(5, "select", 364);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_244_Template_select_ngModelChange_5_listener($event) {
+      \u0275\u0275restoreView(_r57);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.optForm.broker_id, $event) || (ctx_r2.optForm.broker_id = $event);
       return \u0275\u0275resetView($event);
@@ -116446,9 +117114,9 @@ function EventCreateComponent_div_246_Template(rf, ctx) {
     \u0275\u0275elementStart(6, "option", 40);
     \u0275\u0275text(7, ".:: Selecione ::.");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(8, EventCreateComponent_div_246_option_8_Template, 2, 2, "option", 44);
+    \u0275\u0275template(8, EventCreateComponent_div_244_option_8_Template, 2, 2, "option", 44);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(9, EventCreateComponent_div_246_div_9_Template, 2, 1, "div", 30);
+    \u0275\u0275template(9, EventCreateComponent_div_244_div_9_Template, 2, 1, "div", 30);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -116462,35 +117130,35 @@ function EventCreateComponent_div_246_Template(rf, ctx) {
     \u0275\u0275property("ngIf", ctx_r2.errors.broker || ctx_r2.errors.broker_id);
   }
 }
-function EventCreateComponent_div_247_option_8_Template(rf, ctx) {
+function EventCreateComponent_div_245_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
+    \u0275\u0275elementStart(0, "option", 124);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const option_r54 = ctx.$implicit;
-    \u0275\u0275property("value", option_r54.id);
+    const option_r61 = ctx.$implicit;
+    \u0275\u0275property("value", option_r61.id);
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(option_r54.name);
+    \u0275\u0275textInterpolate(option_r61.name);
   }
 }
-function EventCreateComponent_div_247_div_9_small_1_Template(rf, ctx) {
+function EventCreateComponent_div_245_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const err_r55 = ctx.$implicit;
+    const err_r62 = ctx.$implicit;
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r55);
+    \u0275\u0275textInterpolate(err_r62);
   }
 }
-function EventCreateComponent_div_247_div_9_Template(rf, ctx) {
+function EventCreateComponent_div_245_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_247_div_9_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_245_div_9_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -116499,17 +117167,17 @@ function EventCreateComponent_div_247_div_9_Template(rf, ctx) {
     \u0275\u0275property("ngForOf", ctx_r2.errors.regime || ctx_r2.errors.regime_id);
   }
 }
-function EventCreateComponent_div_247_Template(rf, ctx) {
+function EventCreateComponent_div_245_Template(rf, ctx) {
   if (rf & 1) {
-    const _r53 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 69)(1, "label", 330);
+    const _r60 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 365);
     \u0275\u0275text(2, " Regime: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 331);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_247_Template_select_ngModelChange_5_listener($event) {
-      \u0275\u0275restoreView(_r53);
+    \u0275\u0275elementStart(5, "select", 366);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_245_Template_select_ngModelChange_5_listener($event) {
+      \u0275\u0275restoreView(_r60);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.optForm.regime_id, $event) || (ctx_r2.optForm.regime_id = $event);
       return \u0275\u0275resetView($event);
@@ -116517,9 +117185,9 @@ function EventCreateComponent_div_247_Template(rf, ctx) {
     \u0275\u0275elementStart(6, "option", 40);
     \u0275\u0275text(7, ".:: Selecione ::.");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(8, EventCreateComponent_div_247_option_8_Template, 2, 2, "option", 44);
+    \u0275\u0275template(8, EventCreateComponent_div_245_option_8_Template, 2, 2, "option", 44);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(9, EventCreateComponent_div_247_div_9_Template, 2, 1, "div", 30);
+    \u0275\u0275template(9, EventCreateComponent_div_245_div_9_Template, 2, 1, "div", 30);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -116533,35 +117201,35 @@ function EventCreateComponent_div_247_Template(rf, ctx) {
     \u0275\u0275property("ngIf", ctx_r2.errors.regime || ctx_r2.errors.regime_id);
   }
 }
-function EventCreateComponent_div_248_option_8_Template(rf, ctx) {
+function EventCreateComponent_div_246_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
+    \u0275\u0275elementStart(0, "option", 124);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const option_r57 = ctx.$implicit;
-    \u0275\u0275property("value", option_r57.id);
+    const option_r64 = ctx.$implicit;
+    \u0275\u0275property("value", option_r64.id);
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(option_r57.name);
+    \u0275\u0275textInterpolate(option_r64.name);
   }
 }
-function EventCreateComponent_div_248_div_9_small_1_Template(rf, ctx) {
+function EventCreateComponent_div_246_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const err_r58 = ctx.$implicit;
+    const err_r65 = ctx.$implicit;
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r58);
+    \u0275\u0275textInterpolate(err_r65);
   }
 }
-function EventCreateComponent_div_248_div_9_Template(rf, ctx) {
+function EventCreateComponent_div_246_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_248_div_9_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_246_div_9_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -116570,17 +117238,17 @@ function EventCreateComponent_div_248_div_9_Template(rf, ctx) {
     \u0275\u0275property("ngForOf", ctx_r2.errors.purpose || ctx_r2.errors.purpose_id);
   }
 }
-function EventCreateComponent_div_248_Template(rf, ctx) {
+function EventCreateComponent_div_246_Template(rf, ctx) {
   if (rf & 1) {
-    const _r56 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 69)(1, "label", 332);
+    const _r63 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 367);
     \u0275\u0275text(2, " Prop\xF3sito: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 333);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_248_Template_select_ngModelChange_5_listener($event) {
-      \u0275\u0275restoreView(_r56);
+    \u0275\u0275elementStart(5, "select", 368);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_246_Template_select_ngModelChange_5_listener($event) {
+      \u0275\u0275restoreView(_r63);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.optForm.purpose_id, $event) || (ctx_r2.optForm.purpose_id = $event);
       return \u0275\u0275resetView($event);
@@ -116588,9 +117256,9 @@ function EventCreateComponent_div_248_Template(rf, ctx) {
     \u0275\u0275elementStart(6, "option", 40);
     \u0275\u0275text(7, ".:: Selecione ::.");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(8, EventCreateComponent_div_248_option_8_Template, 2, 2, "option", 44);
+    \u0275\u0275template(8, EventCreateComponent_div_246_option_8_Template, 2, 2, "option", 44);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(9, EventCreateComponent_div_248_div_9_Template, 2, 1, "div", 30);
+    \u0275\u0275template(9, EventCreateComponent_div_246_div_9_Template, 2, 1, "div", 30);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -116604,15 +117272,15 @@ function EventCreateComponent_div_248_Template(rf, ctx) {
     \u0275\u0275property("ngIf", ctx_r2.errors.purpose || ctx_r2.errors.purpose_id);
   }
 }
-function EventCreateComponent_div_249_Template(rf, ctx) {
+function EventCreateComponent_div_247_Template(rf, ctx) {
   if (rf & 1) {
-    const _r59 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 95)(1, "label", 334);
+    const _r66 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 106)(1, "label", 369);
     \u0275\u0275text(2, " Descri\xE7\xE3o: ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "input", 335);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_249_Template_input_ngModelChange_3_listener($event) {
-      \u0275\u0275restoreView(_r59);
+    \u0275\u0275elementStart(3, "input", 370);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_247_Template_input_ngModelChange_3_listener($event) {
+      \u0275\u0275restoreView(_r66);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.optForm.name, $event) || (ctx_r2.optForm.name = $event);
       return \u0275\u0275resetView($event);
@@ -116625,15 +117293,15 @@ function EventCreateComponent_div_249_Template(rf, ctx) {
     \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.name);
   }
 }
-function EventCreateComponent_div_250_Template(rf, ctx) {
+function EventCreateComponent_div_248_Template(rf, ctx) {
   if (rf & 1) {
-    const _r60 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 69)(1, "label", 336);
+    const _r67 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 371);
     \u0275\u0275text(2, " Metragem (m\xB2): ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "input", 337);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_250_Template_input_ngModelChange_3_listener($event) {
-      \u0275\u0275restoreView(_r60);
+    \u0275\u0275elementStart(3, "input", 372);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_248_Template_input_ngModelChange_3_listener($event) {
+      \u0275\u0275restoreView(_r67);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.optForm.m2, $event) || (ctx_r2.optForm.m2 = $event);
       return \u0275\u0275resetView($event);
@@ -116646,15 +117314,15 @@ function EventCreateComponent_div_250_Template(rf, ctx) {
     \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.m2);
   }
 }
-function EventCreateComponent_div_251_Template(rf, ctx) {
+function EventCreateComponent_div_249_Template(rf, ctx) {
   if (rf & 1) {
-    const _r61 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 69)(1, "label", 338);
+    const _r68 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 373);
     \u0275\u0275text(2, " Qtd. Pax: ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "input", 339);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_251_Template_input_ngModelChange_3_listener($event) {
-      \u0275\u0275restoreView(_r61);
+    \u0275\u0275elementStart(3, "input", 374);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_249_Template_input_ngModelChange_3_listener($event) {
+      \u0275\u0275restoreView(_r68);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.optForm.pax, $event) || (ctx_r2.optForm.pax = $event);
       return \u0275\u0275resetView($event);
@@ -116667,35 +117335,35 @@ function EventCreateComponent_div_251_Template(rf, ctx) {
     \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.pax);
   }
 }
-function EventCreateComponent_div_252_option_8_Template(rf, ctx) {
+function EventCreateComponent_div_250_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
+    \u0275\u0275elementStart(0, "option", 124);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const option_r63 = ctx.$implicit;
-    \u0275\u0275property("value", option_r63.id);
+    const option_r70 = ctx.$implicit;
+    \u0275\u0275property("value", option_r70.id);
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(option_r63.name);
+    \u0275\u0275textInterpolate(option_r70.name);
   }
 }
-function EventCreateComponent_div_252_div_9_small_1_Template(rf, ctx) {
+function EventCreateComponent_div_250_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const err_r64 = ctx.$implicit;
+    const err_r71 = ctx.$implicit;
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r64);
+    \u0275\u0275textInterpolate(err_r71);
   }
 }
-function EventCreateComponent_div_252_div_9_Template(rf, ctx) {
+function EventCreateComponent_div_250_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_252_div_9_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_250_div_9_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -116704,17 +117372,17 @@ function EventCreateComponent_div_252_div_9_Template(rf, ctx) {
     \u0275\u0275property("ngForOf", ctx_r2.errors.category_id || ctx_r2.errors.category);
   }
 }
-function EventCreateComponent_div_252_Template(rf, ctx) {
+function EventCreateComponent_div_250_Template(rf, ctx) {
   if (rf & 1) {
-    const _r62 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 69)(1, "label", 340);
+    const _r69 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 375);
     \u0275\u0275text(2, " Categoria Apto: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 341);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_252_Template_select_ngModelChange_5_listener($event) {
-      \u0275\u0275restoreView(_r62);
+    \u0275\u0275elementStart(5, "select", 376);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_250_Template_select_ngModelChange_5_listener($event) {
+      \u0275\u0275restoreView(_r69);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.optForm.category_id, $event) || (ctx_r2.optForm.category_id = $event);
       return \u0275\u0275resetView($event);
@@ -116722,9 +117390,9 @@ function EventCreateComponent_div_252_Template(rf, ctx) {
     \u0275\u0275elementStart(6, "option", 40);
     \u0275\u0275text(7, ".:: Selecione ::.");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(8, EventCreateComponent_div_252_option_8_Template, 2, 2, "option", 44);
+    \u0275\u0275template(8, EventCreateComponent_div_250_option_8_Template, 2, 2, "option", 44);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(9, EventCreateComponent_div_252_div_9_Template, 2, 1, "div", 30);
+    \u0275\u0275template(9, EventCreateComponent_div_250_div_9_Template, 2, 1, "div", 30);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -116738,35 +117406,35 @@ function EventCreateComponent_div_252_Template(rf, ctx) {
     \u0275\u0275property("ngIf", ctx_r2.errors.category_id || ctx_r2.errors.category);
   }
 }
-function EventCreateComponent_div_253_option_8_Template(rf, ctx) {
+function EventCreateComponent_div_251_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
+    \u0275\u0275elementStart(0, "option", 124);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const option_r66 = ctx.$implicit;
-    \u0275\u0275property("value", option_r66.id);
+    const option_r73 = ctx.$implicit;
+    \u0275\u0275property("value", option_r73.id);
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(option_r66.name);
+    \u0275\u0275textInterpolate(option_r73.name);
   }
 }
-function EventCreateComponent_div_253_div_9_small_1_Template(rf, ctx) {
+function EventCreateComponent_div_251_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const err_r67 = ctx.$implicit;
+    const err_r74 = ctx.$implicit;
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r67);
+    \u0275\u0275textInterpolate(err_r74);
   }
 }
-function EventCreateComponent_div_253_div_9_Template(rf, ctx) {
+function EventCreateComponent_div_251_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_253_div_9_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_251_div_9_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -116775,17 +117443,17 @@ function EventCreateComponent_div_253_div_9_Template(rf, ctx) {
     \u0275\u0275property("ngForOf", ctx_r2.errors.apto_id || ctx_r2.errors.apto);
   }
 }
-function EventCreateComponent_div_253_Template(rf, ctx) {
+function EventCreateComponent_div_251_Template(rf, ctx) {
   if (rf & 1) {
-    const _r65 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 69)(1, "label", 342);
+    const _r72 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 377);
     \u0275\u0275text(2, " Tipo Apto: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 343);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_253_Template_select_ngModelChange_5_listener($event) {
-      \u0275\u0275restoreView(_r65);
+    \u0275\u0275elementStart(5, "select", 378);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_251_Template_select_ngModelChange_5_listener($event) {
+      \u0275\u0275restoreView(_r72);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.optForm.apto_id, $event) || (ctx_r2.optForm.apto_id = $event);
       return \u0275\u0275resetView($event);
@@ -116793,9 +117461,9 @@ function EventCreateComponent_div_253_Template(rf, ctx) {
     \u0275\u0275elementStart(6, "option", 40);
     \u0275\u0275text(7, ".:: Selecione ::.");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(8, EventCreateComponent_div_253_option_8_Template, 2, 2, "option", 44);
+    \u0275\u0275template(8, EventCreateComponent_div_251_option_8_Template, 2, 2, "option", 44);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(9, EventCreateComponent_div_253_div_9_Template, 2, 1, "div", 30);
+    \u0275\u0275template(9, EventCreateComponent_div_251_div_9_Template, 2, 1, "div", 30);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -116809,35 +117477,35 @@ function EventCreateComponent_div_253_Template(rf, ctx) {
     \u0275\u0275property("ngIf", ctx_r2.errors.apto_id || ctx_r2.errors.apto);
   }
 }
-function EventCreateComponent_div_254_option_8_Template(rf, ctx) {
+function EventCreateComponent_div_252_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
+    \u0275\u0275elementStart(0, "option", 124);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const option_r69 = ctx.$implicit;
-    \u0275\u0275property("value", option_r69.id);
+    const option_r76 = ctx.$implicit;
+    \u0275\u0275property("value", option_r76.id);
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate1(" ", option_r69.name, " ");
+    \u0275\u0275textInterpolate1(" ", option_r76.name, " ");
   }
 }
-function EventCreateComponent_div_254_div_9_small_1_Template(rf, ctx) {
+function EventCreateComponent_div_252_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const err_r70 = ctx.$implicit;
+    const err_r77 = ctx.$implicit;
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r70);
+    \u0275\u0275textInterpolate(err_r77);
   }
 }
-function EventCreateComponent_div_254_div_9_Template(rf, ctx) {
+function EventCreateComponent_div_252_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_254_div_9_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_252_div_9_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -116846,17 +117514,17 @@ function EventCreateComponent_div_254_div_9_Template(rf, ctx) {
     \u0275\u0275property("ngForOf", ctx_r2.errors.service || ctx_r2.errors.service_id);
   }
 }
-function EventCreateComponent_div_254_Template(rf, ctx) {
+function EventCreateComponent_div_252_Template(rf, ctx) {
   if (rf & 1) {
-    const _r68 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 69)(1, "label", 344);
+    const _r75 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 379);
     \u0275\u0275text(2);
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 345);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_254_Template_select_ngModelChange_5_listener($event) {
-      \u0275\u0275restoreView(_r68);
+    \u0275\u0275elementStart(5, "select", 380);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_252_Template_select_ngModelChange_5_listener($event) {
+      \u0275\u0275restoreView(_r75);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.optForm.service_id, $event) || (ctx_r2.optForm.service_id = $event);
       return \u0275\u0275resetView($event);
@@ -116864,9 +117532,9 @@ function EventCreateComponent_div_254_Template(rf, ctx) {
     \u0275\u0275elementStart(6, "option", 40);
     \u0275\u0275text(7, ".:: Selecione ::.");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(8, EventCreateComponent_div_254_option_8_Template, 2, 2, "option", 44);
+    \u0275\u0275template(8, EventCreateComponent_div_252_option_8_Template, 2, 2, "option", 44);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(9, EventCreateComponent_div_254_div_9_Template, 2, 1, "div", 30);
+    \u0275\u0275template(9, EventCreateComponent_div_252_div_9_Template, 2, 1, "div", 30);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -116882,35 +117550,35 @@ function EventCreateComponent_div_254_Template(rf, ctx) {
     \u0275\u0275property("ngIf", ctx_r2.errors.service || ctx_r2.errors.service_id);
   }
 }
-function EventCreateComponent_div_255_option_8_Template(rf, ctx) {
+function EventCreateComponent_div_253_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
+    \u0275\u0275elementStart(0, "option", 124);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const option_r72 = ctx.$implicit;
-    \u0275\u0275property("value", option_r72.id);
+    const option_r79 = ctx.$implicit;
+    \u0275\u0275property("value", option_r79.id);
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(option_r72.name);
+    \u0275\u0275textInterpolate(option_r79.name);
   }
 }
-function EventCreateComponent_div_255_div_9_small_1_Template(rf, ctx) {
+function EventCreateComponent_div_253_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const err_r73 = ctx.$implicit;
+    const err_r80 = ctx.$implicit;
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r73);
+    \u0275\u0275textInterpolate(err_r80);
   }
 }
-function EventCreateComponent_div_255_div_9_Template(rf, ctx) {
+function EventCreateComponent_div_253_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_255_div_9_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_253_div_9_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -116919,17 +117587,17 @@ function EventCreateComponent_div_255_div_9_Template(rf, ctx) {
     \u0275\u0275property("ngForOf", ctx_r2.errors.service_type_id);
   }
 }
-function EventCreateComponent_div_255_Template(rf, ctx) {
+function EventCreateComponent_div_253_Template(rf, ctx) {
   if (rf & 1) {
-    const _r71 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 69)(1, "label", 346);
+    const _r78 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 381);
     \u0275\u0275text(2, " Tipo de Servi\xE7o: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 347);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_255_Template_select_ngModelChange_5_listener($event) {
-      \u0275\u0275restoreView(_r71);
+    \u0275\u0275elementStart(5, "select", 382);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_253_Template_select_ngModelChange_5_listener($event) {
+      \u0275\u0275restoreView(_r78);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.optForm.service_type_id, $event) || (ctx_r2.optForm.service_type_id = $event);
       return \u0275\u0275resetView($event);
@@ -116937,9 +117605,9 @@ function EventCreateComponent_div_255_Template(rf, ctx) {
     \u0275\u0275elementStart(6, "option", 40);
     \u0275\u0275text(7, ".:: Selecione ::.");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(8, EventCreateComponent_div_255_option_8_Template, 2, 2, "option", 44);
+    \u0275\u0275template(8, EventCreateComponent_div_253_option_8_Template, 2, 2, "option", 44);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(9, EventCreateComponent_div_255_div_9_Template, 2, 1, "div", 30);
+    \u0275\u0275template(9, EventCreateComponent_div_253_div_9_Template, 2, 1, "div", 30);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -116953,35 +117621,35 @@ function EventCreateComponent_div_255_Template(rf, ctx) {
     \u0275\u0275property("ngIf", ctx_r2.errors.service_type_id);
   }
 }
-function EventCreateComponent_div_256_option_8_Template(rf, ctx) {
+function EventCreateComponent_div_254_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
+    \u0275\u0275elementStart(0, "option", 124);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const option_r75 = ctx.$implicit;
-    \u0275\u0275property("value", option_r75.id);
+    const option_r82 = ctx.$implicit;
+    \u0275\u0275property("value", option_r82.id);
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(option_r75.name);
+    \u0275\u0275textInterpolate(option_r82.name);
   }
 }
-function EventCreateComponent_div_256_div_9_small_1_Template(rf, ctx) {
+function EventCreateComponent_div_254_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const err_r76 = ctx.$implicit;
+    const err_r83 = ctx.$implicit;
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r76);
+    \u0275\u0275textInterpolate(err_r83);
   }
 }
-function EventCreateComponent_div_256_div_9_Template(rf, ctx) {
+function EventCreateComponent_div_254_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_256_div_9_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_254_div_9_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -116990,17 +117658,17 @@ function EventCreateComponent_div_256_div_9_Template(rf, ctx) {
     \u0275\u0275property("ngForOf", ctx_r2.errors.local_id);
   }
 }
-function EventCreateComponent_div_256_Template(rf, ctx) {
+function EventCreateComponent_div_254_Template(rf, ctx) {
   if (rf & 1) {
-    const _r74 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 69)(1, "label", 348);
+    const _r81 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 383);
     \u0275\u0275text(2, " Local: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 349);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_256_Template_select_ngModelChange_5_listener($event) {
-      \u0275\u0275restoreView(_r74);
+    \u0275\u0275elementStart(5, "select", 384);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_254_Template_select_ngModelChange_5_listener($event) {
+      \u0275\u0275restoreView(_r81);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.optForm.local_id, $event) || (ctx_r2.optForm.local_id = $event);
       return \u0275\u0275resetView($event);
@@ -117008,9 +117676,9 @@ function EventCreateComponent_div_256_Template(rf, ctx) {
     \u0275\u0275elementStart(6, "option", 40);
     \u0275\u0275text(7, ".:: Selecione ::.");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(8, EventCreateComponent_div_256_option_8_Template, 2, 2, "option", 44);
+    \u0275\u0275template(8, EventCreateComponent_div_254_option_8_Template, 2, 2, "option", 44);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(9, EventCreateComponent_div_256_div_9_Template, 2, 1, "div", 30);
+    \u0275\u0275template(9, EventCreateComponent_div_254_div_9_Template, 2, 1, "div", 30);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117024,35 +117692,35 @@ function EventCreateComponent_div_256_Template(rf, ctx) {
     \u0275\u0275property("ngIf", ctx_r2.errors.local_id);
   }
 }
-function EventCreateComponent_div_257_option_8_Template(rf, ctx) {
+function EventCreateComponent_div_255_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
+    \u0275\u0275elementStart(0, "option", 124);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const option_r78 = ctx.$implicit;
-    \u0275\u0275property("value", option_r78.id);
+    const option_r85 = ctx.$implicit;
+    \u0275\u0275property("value", option_r85.id);
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(option_r78.name);
+    \u0275\u0275textInterpolate(option_r85.name);
   }
 }
-function EventCreateComponent_div_257_div_9_small_1_Template(rf, ctx) {
+function EventCreateComponent_div_255_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const err_r79 = ctx.$implicit;
+    const err_r86 = ctx.$implicit;
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r79);
+    \u0275\u0275textInterpolate(err_r86);
   }
 }
-function EventCreateComponent_div_257_div_9_Template(rf, ctx) {
+function EventCreateComponent_div_255_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_257_div_9_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_255_div_9_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117061,17 +117729,17 @@ function EventCreateComponent_div_257_div_9_Template(rf, ctx) {
     \u0275\u0275property("ngForOf", ctx_r2.errors.frequency || ctx_r2.errors.frequency_id);
   }
 }
-function EventCreateComponent_div_257_Template(rf, ctx) {
+function EventCreateComponent_div_255_Template(rf, ctx) {
   if (rf & 1) {
-    const _r77 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 69)(1, "label", 350);
+    const _r84 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 385);
     \u0275\u0275text(2, " Frequ\xEAncia: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 351);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_257_Template_select_ngModelChange_5_listener($event) {
-      \u0275\u0275restoreView(_r77);
+    \u0275\u0275elementStart(5, "select", 386);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_255_Template_select_ngModelChange_5_listener($event) {
+      \u0275\u0275restoreView(_r84);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.optForm.frequency_id, $event) || (ctx_r2.optForm.frequency_id = $event);
       return \u0275\u0275resetView($event);
@@ -117079,9 +117747,9 @@ function EventCreateComponent_div_257_Template(rf, ctx) {
     \u0275\u0275elementStart(6, "option", 40);
     \u0275\u0275text(7, ".:: Selecione ::.");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(8, EventCreateComponent_div_257_option_8_Template, 2, 2, "option", 44);
+    \u0275\u0275template(8, EventCreateComponent_div_255_option_8_Template, 2, 2, "option", 44);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(9, EventCreateComponent_div_257_div_9_Template, 2, 1, "div", 30);
+    \u0275\u0275template(9, EventCreateComponent_div_255_div_9_Template, 2, 1, "div", 30);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117095,35 +117763,35 @@ function EventCreateComponent_div_257_Template(rf, ctx) {
     \u0275\u0275property("ngIf", ctx_r2.errors.frequency || ctx_r2.errors.frequency_id);
   }
 }
-function EventCreateComponent_div_258_option_8_Template(rf, ctx) {
+function EventCreateComponent_div_256_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
+    \u0275\u0275elementStart(0, "option", 124);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const option_r81 = ctx.$implicit;
-    \u0275\u0275property("value", option_r81.id);
+    const option_r88 = ctx.$implicit;
+    \u0275\u0275property("value", option_r88.id);
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(option_r81.name);
+    \u0275\u0275textInterpolate(option_r88.name);
   }
 }
-function EventCreateComponent_div_258_div_9_small_1_Template(rf, ctx) {
+function EventCreateComponent_div_256_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const err_r82 = ctx.$implicit;
+    const err_r89 = ctx.$implicit;
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r82);
+    \u0275\u0275textInterpolate(err_r89);
   }
 }
-function EventCreateComponent_div_258_div_9_Template(rf, ctx) {
+function EventCreateComponent_div_256_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_258_div_9_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_256_div_9_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117132,17 +117800,17 @@ function EventCreateComponent_div_258_div_9_Template(rf, ctx) {
     \u0275\u0275property("ngForOf", ctx_r2.errors.measure || ctx_r2.errors.measure_id);
   }
 }
-function EventCreateComponent_div_258_Template(rf, ctx) {
+function EventCreateComponent_div_256_Template(rf, ctx) {
   if (rf & 1) {
-    const _r80 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 69)(1, "label", 352);
+    const _r87 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 387);
     \u0275\u0275text(2, " Medida: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 353);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_258_Template_select_ngModelChange_5_listener($event) {
-      \u0275\u0275restoreView(_r80);
+    \u0275\u0275elementStart(5, "select", 388);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_256_Template_select_ngModelChange_5_listener($event) {
+      \u0275\u0275restoreView(_r87);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.optForm.measure_id, $event) || (ctx_r2.optForm.measure_id = $event);
       return \u0275\u0275resetView($event);
@@ -117150,9 +117818,9 @@ function EventCreateComponent_div_258_Template(rf, ctx) {
     \u0275\u0275elementStart(6, "option", 40);
     \u0275\u0275text(7, ".:: Selecione ::.");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(8, EventCreateComponent_div_258_option_8_Template, 2, 2, "option", 44);
+    \u0275\u0275template(8, EventCreateComponent_div_256_option_8_Template, 2, 2, "option", 44);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(9, EventCreateComponent_div_258_div_9_Template, 2, 1, "div", 30);
+    \u0275\u0275template(9, EventCreateComponent_div_256_div_9_Template, 2, 1, "div", 30);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117166,35 +117834,35 @@ function EventCreateComponent_div_258_Template(rf, ctx) {
     \u0275\u0275property("ngIf", ctx_r2.errors.measure || ctx_r2.errors.measure_id);
   }
 }
-function EventCreateComponent_div_259_option_8_Template(rf, ctx) {
+function EventCreateComponent_div_257_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
+    \u0275\u0275elementStart(0, "option", 124);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const option_r84 = ctx.$implicit;
-    \u0275\u0275property("value", option_r84.id);
+    const option_r91 = ctx.$implicit;
+    \u0275\u0275property("value", option_r91.id);
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(option_r84.name);
+    \u0275\u0275textInterpolate(option_r91.name);
   }
 }
-function EventCreateComponent_div_259_div_9_small_1_Template(rf, ctx) {
+function EventCreateComponent_div_257_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const err_r85 = ctx.$implicit;
+    const err_r92 = ctx.$implicit;
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r85);
+    \u0275\u0275textInterpolate(err_r92);
   }
 }
-function EventCreateComponent_div_259_div_9_Template(rf, ctx) {
+function EventCreateComponent_div_257_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_259_div_9_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_257_div_9_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117203,17 +117871,17 @@ function EventCreateComponent_div_259_div_9_Template(rf, ctx) {
     \u0275\u0275property("ngForOf", ctx_r2.errors.vehicle || ctx_r2.errors.vehicle_id);
   }
 }
-function EventCreateComponent_div_259_Template(rf, ctx) {
+function EventCreateComponent_div_257_Template(rf, ctx) {
   if (rf & 1) {
-    const _r83 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 115)(1, "label", 354);
+    const _r90 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 280)(1, "label", 389);
     \u0275\u0275text(2, " Tipo Ve\xEDculo: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 355);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_259_Template_select_ngModelChange_5_listener($event) {
-      \u0275\u0275restoreView(_r83);
+    \u0275\u0275elementStart(5, "select", 390);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_257_Template_select_ngModelChange_5_listener($event) {
+      \u0275\u0275restoreView(_r90);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.optForm.vehicle_id, $event) || (ctx_r2.optForm.vehicle_id = $event);
       return \u0275\u0275resetView($event);
@@ -117221,9 +117889,9 @@ function EventCreateComponent_div_259_Template(rf, ctx) {
     \u0275\u0275elementStart(6, "option", 40);
     \u0275\u0275text(7, ".:: Selecione ::.");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(8, EventCreateComponent_div_259_option_8_Template, 2, 2, "option", 44);
+    \u0275\u0275template(8, EventCreateComponent_div_257_option_8_Template, 2, 2, "option", 44);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(9, EventCreateComponent_div_259_div_9_Template, 2, 1, "div", 30);
+    \u0275\u0275template(9, EventCreateComponent_div_257_div_9_Template, 2, 1, "div", 30);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117237,35 +117905,35 @@ function EventCreateComponent_div_259_Template(rf, ctx) {
     \u0275\u0275property("ngIf", ctx_r2.errors.vehicle || ctx_r2.errors.vehicle_id);
   }
 }
-function EventCreateComponent_div_260_option_8_Template(rf, ctx) {
+function EventCreateComponent_div_258_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
+    \u0275\u0275elementStart(0, "option", 124);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const option_r87 = ctx.$implicit;
-    \u0275\u0275property("value", option_r87.id);
+    const option_r94 = ctx.$implicit;
+    \u0275\u0275property("value", option_r94.id);
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(option_r87.name);
+    \u0275\u0275textInterpolate(option_r94.name);
   }
 }
-function EventCreateComponent_div_260_div_9_small_1_Template(rf, ctx) {
+function EventCreateComponent_div_258_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const err_r88 = ctx.$implicit;
+    const err_r95 = ctx.$implicit;
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r88);
+    \u0275\u0275textInterpolate(err_r95);
   }
 }
-function EventCreateComponent_div_260_div_9_Template(rf, ctx) {
+function EventCreateComponent_div_258_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_260_div_9_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_258_div_9_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117274,17 +117942,17 @@ function EventCreateComponent_div_260_div_9_Template(rf, ctx) {
     \u0275\u0275property("ngForOf", ctx_r2.errors.model || ctx_r2.errors.car_model_id);
   }
 }
-function EventCreateComponent_div_260_Template(rf, ctx) {
+function EventCreateComponent_div_258_Template(rf, ctx) {
   if (rf & 1) {
-    const _r86 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 115)(1, "label", 356);
+    const _r93 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 280)(1, "label", 391);
     \u0275\u0275text(2, " Modelo Ve\xEDculo: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 357);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_260_Template_select_ngModelChange_5_listener($event) {
-      \u0275\u0275restoreView(_r86);
+    \u0275\u0275elementStart(5, "select", 392);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_258_Template_select_ngModelChange_5_listener($event) {
+      \u0275\u0275restoreView(_r93);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.optForm.car_model_id, $event) || (ctx_r2.optForm.car_model_id = $event);
       return \u0275\u0275resetView($event);
@@ -117292,9 +117960,9 @@ function EventCreateComponent_div_260_Template(rf, ctx) {
     \u0275\u0275elementStart(6, "option", 40);
     \u0275\u0275text(7, ".:: Selecione ::.");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(8, EventCreateComponent_div_260_option_8_Template, 2, 2, "option", 44);
+    \u0275\u0275template(8, EventCreateComponent_div_258_option_8_Template, 2, 2, "option", 44);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(9, EventCreateComponent_div_260_div_9_Template, 2, 1, "div", 30);
+    \u0275\u0275template(9, EventCreateComponent_div_258_div_9_Template, 2, 1, "div", 30);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117308,35 +117976,35 @@ function EventCreateComponent_div_260_Template(rf, ctx) {
     \u0275\u0275property("ngIf", ctx_r2.errors.model || ctx_r2.errors.car_model_id);
   }
 }
-function EventCreateComponent_div_261_option_8_Template(rf, ctx) {
+function EventCreateComponent_div_259_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
+    \u0275\u0275elementStart(0, "option", 124);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const option_r90 = ctx.$implicit;
-    \u0275\u0275property("value", option_r90.id);
+    const option_r97 = ctx.$implicit;
+    \u0275\u0275property("value", option_r97.id);
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(option_r90.name);
+    \u0275\u0275textInterpolate(option_r97.name);
   }
 }
-function EventCreateComponent_div_261_div_9_small_1_Template(rf, ctx) {
+function EventCreateComponent_div_259_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const err_r91 = ctx.$implicit;
+    const err_r98 = ctx.$implicit;
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r91);
+    \u0275\u0275textInterpolate(err_r98);
   }
 }
-function EventCreateComponent_div_261_div_9_Template(rf, ctx) {
+function EventCreateComponent_div_259_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_261_div_9_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_259_div_9_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117345,17 +118013,17 @@ function EventCreateComponent_div_261_div_9_Template(rf, ctx) {
     \u0275\u0275property("ngForOf", ctx_r2.errors.brand || ctx_r2.errors.brand_id);
   }
 }
-function EventCreateComponent_div_261_Template(rf, ctx) {
+function EventCreateComponent_div_259_Template(rf, ctx) {
   if (rf & 1) {
-    const _r89 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 115)(1, "label", 358);
+    const _r96 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 280)(1, "label", 393);
     \u0275\u0275text(2, " Marca Ve\xEDculo: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 359);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_261_Template_select_ngModelChange_5_listener($event) {
-      \u0275\u0275restoreView(_r89);
+    \u0275\u0275elementStart(5, "select", 394);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_259_Template_select_ngModelChange_5_listener($event) {
+      \u0275\u0275restoreView(_r96);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.optForm.brand_id, $event) || (ctx_r2.optForm.brand_id = $event);
       return \u0275\u0275resetView($event);
@@ -117363,9 +118031,9 @@ function EventCreateComponent_div_261_Template(rf, ctx) {
     \u0275\u0275elementStart(6, "option", 40);
     \u0275\u0275text(7, ".:: Selecione ::.");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(8, EventCreateComponent_div_261_option_8_Template, 2, 2, "option", 44);
+    \u0275\u0275template(8, EventCreateComponent_div_259_option_8_Template, 2, 2, "option", 44);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(9, EventCreateComponent_div_261_div_9_Template, 2, 1, "div", 30);
+    \u0275\u0275template(9, EventCreateComponent_div_259_div_9_Template, 2, 1, "div", 30);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117379,22 +118047,22 @@ function EventCreateComponent_div_261_Template(rf, ctx) {
     \u0275\u0275property("ngIf", ctx_r2.errors.brand || ctx_r2.errors.brand_id);
   }
 }
-function EventCreateComponent_div_262_div_10_small_1_Template(rf, ctx) {
+function EventCreateComponent_div_260_div_10_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const err_r92 = ctx.$implicit;
+    const err_r99 = ctx.$implicit;
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r92);
+    \u0275\u0275textInterpolate(err_r99);
   }
 }
-function EventCreateComponent_div_262_div_10_Template(rf, ctx) {
+function EventCreateComponent_div_260_div_10_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_262_div_10_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_260_div_10_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117403,9 +118071,9 @@ function EventCreateComponent_div_262_div_10_Template(rf, ctx) {
     \u0275\u0275property("ngForOf", ctx_r2.errors.in);
   }
 }
-function EventCreateComponent_div_262_Template(rf, ctx) {
+function EventCreateComponent_div_260_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 69)(1, "label", 360);
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 395);
     \u0275\u0275text(2, " Per\xEDodo (IN / OUT): ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
@@ -117413,9 +118081,9 @@ function EventCreateComponent_div_262_Template(rf, ctx) {
     \u0275\u0275elementStart(5, "div", 52)(6, "span", 53);
     \u0275\u0275element(7, "i", 54);
     \u0275\u0275elementEnd();
-    \u0275\u0275element(8, "input", 361, 1);
+    \u0275\u0275element(8, "input", 396, 1);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(10, EventCreateComponent_div_262_div_10_Template, 2, 1, "div", 30);
+    \u0275\u0275template(10, EventCreateComponent_div_260_div_10_Template, 2, 1, "div", 30);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117426,511 +118094,9 @@ function EventCreateComponent_div_262_Template(rf, ctx) {
     \u0275\u0275property("ngIf", ctx_r2.errors.in);
   }
 }
-function EventCreateComponent_div_263_div_6_small_1_Template(rf, ctx) {
+function EventCreateComponent_div_261_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const err_r94 = ctx.$implicit;
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r94);
-  }
-}
-function EventCreateComponent_div_263_div_6_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_263_div_6_small_1_Template, 2, 1, "small", 165);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const ctx_r2 = \u0275\u0275nextContext(2);
-    \u0275\u0275advance();
-    \u0275\u0275property("ngForOf", ctx_r2.errors.out);
-  }
-}
-function EventCreateComponent_div_263_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r93 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 69)(1, "label", 362);
-    \u0275\u0275text(2, " Data Sa\xEDda (OUT): ");
-    \u0275\u0275elementStart(3, "span", 28);
-    \u0275\u0275text(4, "*");
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "input", 363);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_263_Template_input_ngModelChange_5_listener($event) {
-      \u0275\u0275restoreView(_r93);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.out, $event) || (ctx_r2.optForm.out = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementEnd();
-    \u0275\u0275template(6, EventCreateComponent_div_263_div_6_Template, 2, 1, "div", 30);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const ctx_r2 = \u0275\u0275nextContext();
-    \u0275\u0275advance(5);
-    \u0275\u0275classProp("is-invalid", ctx_r2.errors.out);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.out);
-    \u0275\u0275advance();
-    \u0275\u0275property("ngIf", ctx_r2.errors.out);
-  }
-}
-function EventCreateComponent_ng_container_264_option_11_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const option_r96 = ctx.$implicit;
-    \u0275\u0275property("value", option_r96.id);
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate(option_r96.name);
-  }
-}
-function EventCreateComponent_ng_container_264_option_54_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const option_r97 = ctx.$implicit;
-    \u0275\u0275property("value", option_r97.id);
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate(option_r97.name);
-  }
-}
-function EventCreateComponent_ng_container_264_option_97_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const option_r98 = ctx.$implicit;
-    \u0275\u0275property("value", option_r98.id);
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate(option_r98.name);
-  }
-}
-function EventCreateComponent_ng_container_264_option_104_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const option_r99 = ctx.$implicit;
-    \u0275\u0275property("value", option_r99.id);
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate(option_r99.name);
-  }
-}
-function EventCreateComponent_ng_container_264_option_109_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 176);
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const option_r100 = ctx.$implicit;
-    \u0275\u0275property("value", option_r100.id);
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate2("", option_r100.name, " (", option_r100.sigla, ")");
-  }
-}
-function EventCreateComponent_ng_container_264_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r95 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "div", 127)(2, "h6", 128);
-    \u0275\u0275element(3, "i", 139);
-    \u0275\u0275text(4, " Detalhes do Voo de Ida (Outbound) ");
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "div", 115)(6, "label", 364);
-    \u0275\u0275text(7, "Companhia A\xE9rea (Ida):");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(8, "select", 365);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_select_ngModelChange_8_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.outbound_airline_id, $event) || (ctx_r2.optForm.outbound_airline_id = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementStart(9, "option", 40);
-    \u0275\u0275text(10, ".:: Selecione ::.");
-    \u0275\u0275elementEnd();
-    \u0275\u0275template(11, EventCreateComponent_ng_container_264_option_11_Template, 2, 2, "option", 44);
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(12, "div", 115)(13, "label", 366);
-    \u0275\u0275text(14, "N\xFAmero do Voo (Ida):");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(15, "input", 367);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_input_ngModelChange_15_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.outbound_flight_number, $event) || (ctx_r2.optForm.outbound_flight_number = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(16, "div", 115)(17, "label", 368);
-    \u0275\u0275text(18, "Classe (Ida):");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(19, "input", 369);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_input_ngModelChange_19_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.outbound_class, $event) || (ctx_r2.optForm.outbound_class = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(20, "div", 115)(21, "label", 370);
-    \u0275\u0275text(22, "Data da Ida:");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(23, "input", 371);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_input_ngModelChange_23_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.outbound_date, $event) || (ctx_r2.optForm.outbound_date = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(24, "div", 115)(25, "label", 372);
-    \u0275\u0275text(26, "Origem (Ida):");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(27, "input", 373);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_input_ngModelChange_27_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.outbound_origin, $event) || (ctx_r2.optForm.outbound_origin = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(28, "div", 115)(29, "label", 374);
-    \u0275\u0275text(30, "Destino (Ida):");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(31, "input", 375);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_input_ngModelChange_31_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.outbound_destination, $event) || (ctx_r2.optForm.outbound_destination = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(32, "div", 115)(33, "label", 376);
-    \u0275\u0275text(34, "Hor\xE1rio Partida (Ida):");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(35, "input", 377);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_input_ngModelChange_35_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.outbound_departure_time, $event) || (ctx_r2.optForm.outbound_departure_time = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(36, "div", 115)(37, "label", 378);
-    \u0275\u0275text(38, "Hor\xE1rio Chegada (Ida):");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(39, "input", 379);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_input_ngModelChange_39_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.outbound_arrival_time, $event) || (ctx_r2.optForm.outbound_arrival_time = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(40, "div", 115)(41, "label", 380);
-    \u0275\u0275text(42, "Conex\xF5es/Detalhes (Ida):");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(43, "input", 381);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_input_ngModelChange_43_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.outbound_connection_details, $event) || (ctx_r2.optForm.outbound_connection_details = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(44, "div", 138)(45, "h6", 128);
-    \u0275\u0275element(46, "i", 150);
-    \u0275\u0275text(47, " Detalhes do Voo de Volta (Inbound) ");
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(48, "div", 115)(49, "label", 382);
-    \u0275\u0275text(50, "Companhia A\xE9rea (Volta):");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(51, "select", 383);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_select_ngModelChange_51_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.inbound_airline_id, $event) || (ctx_r2.optForm.inbound_airline_id = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementStart(52, "option", 40);
-    \u0275\u0275text(53, ".:: Selecione ::.");
-    \u0275\u0275elementEnd();
-    \u0275\u0275template(54, EventCreateComponent_ng_container_264_option_54_Template, 2, 2, "option", 44);
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(55, "div", 115)(56, "label", 384);
-    \u0275\u0275text(57, "N\xFAmero do Voo (Volta):");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(58, "input", 385);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_input_ngModelChange_58_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.inbound_flight_number, $event) || (ctx_r2.optForm.inbound_flight_number = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(59, "div", 115)(60, "label", 386);
-    \u0275\u0275text(61, "Classe (Volta):");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(62, "input", 387);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_input_ngModelChange_62_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.inbound_class, $event) || (ctx_r2.optForm.inbound_class = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(63, "div", 115)(64, "label", 388);
-    \u0275\u0275text(65, "Data da Volta:");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(66, "input", 389);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_input_ngModelChange_66_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.inbound_date, $event) || (ctx_r2.optForm.inbound_date = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(67, "div", 115)(68, "label", 390);
-    \u0275\u0275text(69, "Origem (Volta):");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(70, "input", 391);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_input_ngModelChange_70_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.inbound_origin, $event) || (ctx_r2.optForm.inbound_origin = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(71, "div", 115)(72, "label", 392);
-    \u0275\u0275text(73, "Destino (Volta):");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(74, "input", 393);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_input_ngModelChange_74_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.inbound_destination, $event) || (ctx_r2.optForm.inbound_destination = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(75, "div", 115)(76, "label", 394);
-    \u0275\u0275text(77, "Hor\xE1rio Partida (Volta):");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(78, "input", 395);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_input_ngModelChange_78_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.inbound_departure_time, $event) || (ctx_r2.optForm.inbound_departure_time = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(79, "div", 115)(80, "label", 396);
-    \u0275\u0275text(81, "Hor\xE1rio Chegada (Volta):");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(82, "input", 397);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_input_ngModelChange_82_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.inbound_arrival_time, $event) || (ctx_r2.optForm.inbound_arrival_time = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(83, "div", 115)(84, "label", 398);
-    \u0275\u0275text(85, "Conex\xF5es/Detalhes (Volta):");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(86, "input", 399);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_input_ngModelChange_86_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.inbound_connection_details, $event) || (ctx_r2.optForm.inbound_connection_details = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(87, "div", 138)(88, "h6", 128);
-    \u0275\u0275element(89, "i", 400);
-    \u0275\u0275text(90, " Regras e Comparativos ");
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(91, "div", 115)(92, "label", 401);
-    \u0275\u0275text(93, "Bagagem:");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(94, "select", 402);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_select_ngModelChange_94_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.baggage_id, $event) || (ctx_r2.optForm.baggage_id = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementStart(95, "option", 40);
-    \u0275\u0275text(96, ".:: Selecione ::.");
-    \u0275\u0275elementEnd();
-    \u0275\u0275template(97, EventCreateComponent_ng_container_264_option_97_Template, 2, 2, "option", 44);
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(98, "div", 115)(99, "label", 403);
-    \u0275\u0275text(100, "Cabine:");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(101, "select", 404);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_select_ngModelChange_101_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.cabin_id, $event) || (ctx_r2.optForm.cabin_id = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementStart(102, "option", 40);
-    \u0275\u0275text(103, ".:: Selecione ::.");
-    \u0275\u0275elementEnd();
-    \u0275\u0275template(104, EventCreateComponent_ng_container_264_option_104_Template, 2, 2, "option", 44);
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(105, "div", 115)(106, "label", 405);
-    \u0275\u0275text(107, "Moeda:");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(108, "select", 406);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_select_ngModelChange_108_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.currency_id, $event) || (ctx_r2.optForm.currency_id = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275template(109, EventCreateComponent_ng_container_264_option_109_Template, 2, 3, "option", 44);
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(110, "div", 115)(111, "label", 407);
-    \u0275\u0275text(112, "Compara\xE7\xE3o Website:");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(113, "input", 408);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_input_ngModelChange_113_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.compare_website, $event) || (ctx_r2.optForm.compare_website = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(114, "div", 115)(115, "label", 409);
-    \u0275\u0275text(116, "Compara\xE7\xE3o Cliente:");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(117, "input", 410);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_input_ngModelChange_117_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.compare_client, $event) || (ctx_r2.optForm.compare_client = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(118, "div", 115)(119, "label", 411);
-    \u0275\u0275text(120, "Status da Cota\xE7\xE3o:");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(121, "select", 412);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_select_ngModelChange_121_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.status, $event) || (ctx_r2.optForm.status = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementStart(122, "option", 413);
-    \u0275\u0275text(123, "Criado");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(124, "option", 414);
-    \u0275\u0275text(125, "Pendente");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(126, "option", 415);
-    \u0275\u0275text(127, "Confirmado");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(128, "option", 416);
-    \u0275\u0275text(129, "Cancelado");
-    \u0275\u0275elementEnd()()();
-    \u0275\u0275elementStart(130, "div", 417)(131, "label", 418);
-    \u0275\u0275text(132, "Observa\xE7\xF5es:");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(133, "textarea", 419);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_264_Template_textarea_ngModelChange_133_listener($event) {
-      \u0275\u0275restoreView(_r95);
-      const ctx_r2 = \u0275\u0275nextContext();
-      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.observation, $event) || (ctx_r2.optForm.observation = $event);
-      return \u0275\u0275resetView($event);
-    });
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementContainerEnd();
-  }
-  if (rf & 2) {
-    const ctx_r2 = \u0275\u0275nextContext();
-    \u0275\u0275advance(8);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.outbound_airline_id);
-    \u0275\u0275advance(3);
-    \u0275\u0275property("ngForOf", ctx_r2.airlines);
-    \u0275\u0275advance(4);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.outbound_flight_number);
-    \u0275\u0275advance(4);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.outbound_class);
-    \u0275\u0275advance(4);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.outbound_date);
-    \u0275\u0275advance(4);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.outbound_origin);
-    \u0275\u0275advance(4);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.outbound_destination);
-    \u0275\u0275advance(4);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.outbound_departure_time);
-    \u0275\u0275advance(4);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.outbound_arrival_time);
-    \u0275\u0275advance(4);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.outbound_connection_details);
-    \u0275\u0275advance(8);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.inbound_airline_id);
-    \u0275\u0275advance(3);
-    \u0275\u0275property("ngForOf", ctx_r2.airlines);
-    \u0275\u0275advance(4);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.inbound_flight_number);
-    \u0275\u0275advance(4);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.inbound_class);
-    \u0275\u0275advance(4);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.inbound_date);
-    \u0275\u0275advance(4);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.inbound_origin);
-    \u0275\u0275advance(4);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.inbound_destination);
-    \u0275\u0275advance(4);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.inbound_departure_time);
-    \u0275\u0275advance(4);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.inbound_arrival_time);
-    \u0275\u0275advance(4);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.inbound_connection_details);
-    \u0275\u0275advance(8);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.baggage_id);
-    \u0275\u0275advance(3);
-    \u0275\u0275property("ngForOf", ctx_r2.baggages);
-    \u0275\u0275advance(4);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.cabin_id);
-    \u0275\u0275advance(3);
-    \u0275\u0275property("ngForOf", ctx_r2.cabins);
-    \u0275\u0275advance(4);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.currency_id);
-    \u0275\u0275advance();
-    \u0275\u0275property("ngForOf", ctx_r2.currencies);
-    \u0275\u0275advance(4);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.compare_website);
-    \u0275\u0275advance(4);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.compare_client);
-    \u0275\u0275advance(4);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.status);
-    \u0275\u0275advance(12);
-    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.observation);
-  }
-}
-function EventCreateComponent_div_271_small_1_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117940,150 +118106,580 @@ function EventCreateComponent_div_271_small_1_Template(rf, ctx) {
     \u0275\u0275textInterpolate(err_r101);
   }
 }
-function EventCreateComponent_div_271_Template(rf, ctx) {
+function EventCreateComponent_div_261_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_271_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_div_261_div_9_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngForOf", ctx_r2.errors.out);
+  }
+}
+function EventCreateComponent_div_261_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r100 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 397);
+    \u0275\u0275text(2, " Data Sa\xEDda (OUT): ");
+    \u0275\u0275elementStart(3, "span", 28);
+    \u0275\u0275text(4, "*");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(5, "div", 52)(6, "span", 53);
+    \u0275\u0275element(7, "i", 54);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(8, "input", 398);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_261_Template_input_ngModelChange_8_listener($event) {
+      \u0275\u0275restoreView(_r100);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.out, $event) || (ctx_r2.optForm.out = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275elementEnd()();
+    \u0275\u0275template(9, EventCreateComponent_div_261_div_9_Template, 2, 1, "div", 30);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
     const ctx_r2 = \u0275\u0275nextContext();
+    \u0275\u0275advance(8);
+    \u0275\u0275classProp("is-invalid", ctx_r2.errors.out);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.out);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx_r2.errors.out);
+  }
+}
+function EventCreateComponent_ng_container_262_option_9_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "option", 124);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const option_r103 = ctx.$implicit;
+    \u0275\u0275property("value", option_r103.id);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(option_r103.name);
+  }
+}
+function EventCreateComponent_ng_container_262_div_10_small_1_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const err_r104 = ctx.$implicit;
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(err_r104);
+  }
+}
+function EventCreateComponent_ng_container_262_div_10_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_ng_container_262_div_10_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngForOf", ctx_r2.errors.outbound_airline_id);
+  }
+}
+function EventCreateComponent_ng_container_262_div_17_small_1_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const err_r105 = ctx.$implicit;
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(err_r105);
+  }
+}
+function EventCreateComponent_ng_container_262_div_17_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_ng_container_262_div_17_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngForOf", ctx_r2.errors.outbound_flight_number);
+  }
+}
+function EventCreateComponent_ng_container_262_div_31_small_1_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const err_r106 = ctx.$implicit;
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(err_r106);
+  }
+}
+function EventCreateComponent_ng_container_262_div_31_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_ng_container_262_div_31_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngForOf", ctx_r2.errors.outbound_date);
+  }
+}
+function EventCreateComponent_ng_container_262_div_38_small_1_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const err_r107 = ctx.$implicit;
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(err_r107);
+  }
+}
+function EventCreateComponent_ng_container_262_div_38_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_ng_container_262_div_38_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngForOf", ctx_r2.errors.outbound_departure_time);
+  }
+}
+function EventCreateComponent_ng_container_262_div_45_small_1_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const err_r108 = ctx.$implicit;
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(err_r108);
+  }
+}
+function EventCreateComponent_ng_container_262_div_45_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_ng_container_262_div_45_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngForOf", ctx_r2.errors.outbound_arrival_time);
+  }
+}
+function EventCreateComponent_ng_container_262_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r102 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementContainerStart(0);
+    \u0275\u0275elementStart(1, "div", 91)(2, "label", 399);
+    \u0275\u0275text(3, " CIA: ");
+    \u0275\u0275elementStart(4, "span", 28);
+    \u0275\u0275text(5, "*");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(6, "select", 400);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_262_Template_select_ngModelChange_6_listener($event) {
+      \u0275\u0275restoreView(_r102);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.outbound_airline_id, $event) || (ctx_r2.optForm.outbound_airline_id = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275elementStart(7, "option", 40);
+    \u0275\u0275text(8, ".:: Selecione a Cia ::.");
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(9, EventCreateComponent_ng_container_262_option_9_Template, 2, 2, "option", 44);
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(10, EventCreateComponent_ng_container_262_div_10_Template, 2, 1, "div", 30);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(11, "div", 91)(12, "label", 401);
+    \u0275\u0275text(13, " VOO: ");
+    \u0275\u0275elementStart(14, "span", 28);
+    \u0275\u0275text(15, "*");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(16, "input", 402);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_262_Template_input_ngModelChange_16_listener($event) {
+      \u0275\u0275restoreView(_r102);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.outbound_flight_number, $event) || (ctx_r2.optForm.outbound_flight_number = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(17, EventCreateComponent_ng_container_262_div_17_Template, 2, 1, "div", 30);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(18, "div", 403)(19, "app-autocomplete", 404);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_262_Template_app_autocomplete_ngModelChange_19_listener($event) {
+      \u0275\u0275restoreView(_r102);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.outbound_origin, $event) || (ctx_r2.optForm.outbound_origin = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(20, "div", 403)(21, "app-autocomplete", 405);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_262_Template_app_autocomplete_ngModelChange_21_listener($event) {
+      \u0275\u0275restoreView(_r102);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.outbound_destination, $event) || (ctx_r2.optForm.outbound_destination = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(22, "div", 280)(23, "label", 406);
+    \u0275\u0275text(24, " DATAS: ");
+    \u0275\u0275elementStart(25, "span", 28);
+    \u0275\u0275text(26, "*");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(27, "div", 52)(28, "span", 53);
+    \u0275\u0275element(29, "i", 54);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(30, "input", 407);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_262_Template_input_ngModelChange_30_listener($event) {
+      \u0275\u0275restoreView(_r102);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.outbound_date, $event) || (ctx_r2.optForm.outbound_date = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275elementEnd()();
+    \u0275\u0275template(31, EventCreateComponent_ng_container_262_div_31_Template, 2, 1, "div", 30);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(32, "div", 280)(33, "label", 408);
+    \u0275\u0275text(34, " SA\xCDDA: ");
+    \u0275\u0275elementStart(35, "span", 28);
+    \u0275\u0275text(36, "*");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(37, "input", 409);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_262_Template_input_ngModelChange_37_listener($event) {
+      \u0275\u0275restoreView(_r102);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.outbound_departure_time, $event) || (ctx_r2.optForm.outbound_departure_time = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(38, EventCreateComponent_ng_container_262_div_38_Template, 2, 1, "div", 30);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(39, "div", 280)(40, "label", 410);
+    \u0275\u0275text(41, " CHEGADA: ");
+    \u0275\u0275elementStart(42, "span", 28);
+    \u0275\u0275text(43, "*");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(44, "input", 411);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_262_Template_input_ngModelChange_44_listener($event) {
+      \u0275\u0275restoreView(_r102);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.outbound_arrival_time, $event) || (ctx_r2.optForm.outbound_arrival_time = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(45, EventCreateComponent_ng_container_262_div_45_Template, 2, 1, "div", 30);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementContainerEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext();
+    \u0275\u0275advance(6);
+    \u0275\u0275classProp("is-invalid", ctx_r2.errors.outbound_airline_id);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.outbound_airline_id);
+    \u0275\u0275advance(3);
+    \u0275\u0275property("ngForOf", ctx_r2.airlines);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx_r2.errors.outbound_airline_id);
+    \u0275\u0275advance(6);
+    \u0275\u0275classProp("is-invalid", ctx_r2.errors.outbound_flight_number);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.outbound_flight_number);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx_r2.errors.outbound_flight_number);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("required", true)("searchFn", ctx_r2.searchAirports)("displayFn", ctx_r2.displayAirport);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.outbound_origin);
+    \u0275\u0275property("initialText", ctx_r2.optForm.outbound_origin)("errors", ctx_r2.errors["outbound_origin"]);
+    \u0275\u0275advance(2);
+    \u0275\u0275property("required", true)("searchFn", ctx_r2.searchAirports)("displayFn", ctx_r2.displayAirport);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.outbound_destination);
+    \u0275\u0275property("initialText", ctx_r2.optForm.outbound_destination)("errors", ctx_r2.errors["outbound_destination"]);
+    \u0275\u0275advance(9);
+    \u0275\u0275classProp("is-invalid", ctx_r2.errors.outbound_date);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.outbound_date);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx_r2.errors.outbound_date);
+    \u0275\u0275advance(6);
+    \u0275\u0275classProp("is-invalid", ctx_r2.errors.outbound_departure_time);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.outbound_departure_time);
+    \u0275\u0275property("dropSpecialCharacters", false);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx_r2.errors.outbound_departure_time);
+    \u0275\u0275advance(6);
+    \u0275\u0275classProp("is-invalid", ctx_r2.errors.outbound_arrival_time);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.outbound_arrival_time);
+    \u0275\u0275property("dropSpecialCharacters", false);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx_r2.errors.outbound_arrival_time);
+  }
+}
+function EventCreateComponent_ng_container_263_div_7_small_1_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const err_r110 = ctx.$implicit;
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(err_r110);
+  }
+}
+function EventCreateComponent_ng_container_263_div_7_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_ng_container_263_div_7_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext(2);
     \u0275\u0275advance();
     \u0275\u0275property("ngForOf", ctx_r2.errors.count);
   }
 }
-function EventCreateComponent_span_282_Template(rf, ctx) {
+function EventCreateComponent_ng_container_263_span_18_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 312);
+    \u0275\u0275elementStart(0, "span", 293);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const ctx_r2 = \u0275\u0275nextContext();
+    const ctx_r2 = \u0275\u0275nextContext(2);
     \u0275\u0275advance();
     \u0275\u0275textInterpolate1(" ", ctx_r2.getOptCurrencySymbol(), " ");
   }
 }
-function EventCreateComponent_div_284_small_1_Template(rf, ctx) {
+function EventCreateComponent_ng_container_263_div_20_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const err_r102 = ctx.$implicit;
+    const err_r111 = ctx.$implicit;
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r102);
+    \u0275\u0275textInterpolate(err_r111);
   }
 }
-function EventCreateComponent_div_284_Template(rf, ctx) {
+function EventCreateComponent_ng_container_263_div_20_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_284_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_ng_container_263_div_20_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const ctx_r2 = \u0275\u0275nextContext();
+    const ctx_r2 = \u0275\u0275nextContext(2);
     \u0275\u0275advance();
     \u0275\u0275property("ngForOf", ctx_r2.errors.received_proposal);
   }
 }
-function EventCreateComponent_div_291_small_1_Template(rf, ctx) {
+function EventCreateComponent_ng_container_263_div_27_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
+    \u0275\u0275elementStart(0, "small", 114);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const err_r103 = ctx.$implicit;
+    const err_r112 = ctx.$implicit;
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r103);
+    \u0275\u0275textInterpolate(err_r112);
   }
 }
-function EventCreateComponent_div_291_Template(rf, ctx) {
+function EventCreateComponent_ng_container_263_div_27_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_291_small_1_Template, 2, 1, "small", 165);
+    \u0275\u0275elementStart(0, "div", 112);
+    \u0275\u0275template(1, EventCreateComponent_ng_container_263_div_27_small_1_Template, 2, 1, "small", 113);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const ctx_r2 = \u0275\u0275nextContext();
+    const ctx_r2 = \u0275\u0275nextContext(2);
     \u0275\u0275advance();
     \u0275\u0275property("ngForOf", ctx_r2.errors.received_proposal_percent);
   }
 }
-function EventCreateComponent_ng_container_296_span_5_Template(rf, ctx) {
+function EventCreateComponent_ng_container_263_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 312);
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const ctx_r2 = \u0275\u0275nextContext(2);
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate1(" ", ctx_r2.getOptCurrencySymbol(), " ");
-  }
-}
-function EventCreateComponent_ng_container_296_span_11_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 312);
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const ctx_r2 = \u0275\u0275nextContext(2);
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate1(" ", ctx_r2.getOptCurrencySymbol(), " ");
-  }
-}
-function EventCreateComponent_ng_container_296_span_17_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 312);
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const ctx_r2 = \u0275\u0275nextContext(2);
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate1(" ", ctx_r2.getOptCurrencySymbol(), " ");
-  }
-}
-function EventCreateComponent_ng_container_296_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r104 = \u0275\u0275getCurrentView();
+    const _r109 = \u0275\u0275getCurrentView();
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "div", 115)(2, "label", 420);
+    \u0275\u0275elementStart(1, "div", 91)(2, "label", 412);
+    \u0275\u0275text(3, " Quantidade: ");
+    \u0275\u0275elementStart(4, "span", 28);
+    \u0275\u0275text(5, "*");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(6, "input", 413);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_263_Template_input_ngModelChange_6_listener($event) {
+      \u0275\u0275restoreView(_r109);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.count, $event) || (ctx_r2.optForm.count = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(7, EventCreateComponent_ng_container_263_div_7_Template, 2, 1, "div", 30);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(8, "div", 91)(9, "label", 414);
+    \u0275\u0275text(10, "Comiss\xE3o / Kickback (%):");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(11, "input", 415);
+    \u0275\u0275listener("input", function EventCreateComponent_ng_container_263_Template_input_input_11_listener($event) {
+      \u0275\u0275restoreView(_r109);
+      const ctx_r2 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r2.onPercentInput($event, "kickback", "optForm"));
+    });
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(12, "div", 280)(13, "label", 416);
+    \u0275\u0275text(14, " Proposta Recebida (Custo Unit.): ");
+    \u0275\u0275elementStart(15, "span", 28);
+    \u0275\u0275text(16, "*");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(17, "div", 52);
+    \u0275\u0275template(18, EventCreateComponent_ng_container_263_span_18_Template, 2, 1, "span", 291);
+    \u0275\u0275elementStart(19, "input", 417);
+    \u0275\u0275listener("input", function EventCreateComponent_ng_container_263_Template_input_input_19_listener($event) {
+      \u0275\u0275restoreView(_r109);
+      const ctx_r2 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r2.onMoneyInput($event, "received_proposal", "optForm"));
+    });
+    \u0275\u0275elementEnd()();
+    \u0275\u0275template(20, EventCreateComponent_ng_container_263_div_20_Template, 2, 1, "div", 30);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(21, "div", 280)(22, "label", 418);
+    \u0275\u0275text(23, " Markup divisor (%): ");
+    \u0275\u0275elementStart(24, "span", 28);
+    \u0275\u0275text(25, "*");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(26, "input", 419);
+    \u0275\u0275listener("input", function EventCreateComponent_ng_container_263_Template_input_input_26_listener($event) {
+      \u0275\u0275restoreView(_r109);
+      const ctx_r2 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r2.onPercentInput($event, "received_proposal_percent", "optForm"));
+    });
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(27, EventCreateComponent_ng_container_263_div_27_Template, 2, 1, "div", 30);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(28, "div", 280)(29, "label", 420);
+    \u0275\u0275text(30, "Ordem:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(31, "input", 421);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_263_Template_input_ngModelChange_31_listener($event) {
+      \u0275\u0275restoreView(_r109);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.optForm.order, $event) || (ctx_r2.optForm.order = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementContainerEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext();
+    \u0275\u0275advance(6);
+    \u0275\u0275classProp("is-invalid", ctx_r2.errors.count);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.count);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx_r2.errors.count);
+    \u0275\u0275advance(4);
+    \u0275\u0275property("value", ctx_r2.formatPercent(ctx_r2.optForm.kickback));
+    \u0275\u0275advance(7);
+    \u0275\u0275property("ngIf", ctx_r2.getOptCurrencySymbol());
+    \u0275\u0275advance();
+    \u0275\u0275classProp("is-invalid", ctx_r2.errors.received_proposal);
+    \u0275\u0275property("value", ctx_r2.formatMoney(ctx_r2.optForm.received_proposal));
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx_r2.errors.received_proposal);
+    \u0275\u0275advance(6);
+    \u0275\u0275classProp("is-invalid", ctx_r2.errors.received_proposal_percent);
+    \u0275\u0275property("value", ctx_r2.formatPercent(ctx_r2.optForm.received_proposal_percent));
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx_r2.errors.received_proposal_percent);
+    \u0275\u0275advance(4);
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.order);
+  }
+}
+function EventCreateComponent_ng_container_264_span_5_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 293);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", ctx_r2.getOptCurrencySymbol(), " ");
+  }
+}
+function EventCreateComponent_ng_container_264_span_11_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 293);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", ctx_r2.getOptCurrencySymbol(), " ");
+  }
+}
+function EventCreateComponent_ng_container_264_span_17_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 293);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", ctx_r2.getOptCurrencySymbol(), " ");
+  }
+}
+function EventCreateComponent_ng_container_264_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r113 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementContainerStart(0);
+    \u0275\u0275elementStart(1, "div", 280)(2, "label", 422);
     \u0275\u0275text(3, "Compara\xE7\xE3o Trivago:");
     \u0275\u0275elementEnd();
     \u0275\u0275elementStart(4, "div", 52);
-    \u0275\u0275template(5, EventCreateComponent_ng_container_296_span_5_Template, 2, 1, "span", 117);
-    \u0275\u0275elementStart(6, "input", 421);
-    \u0275\u0275listener("input", function EventCreateComponent_ng_container_296_Template_input_input_6_listener($event) {
-      \u0275\u0275restoreView(_r104);
+    \u0275\u0275template(5, EventCreateComponent_ng_container_264_span_5_Template, 2, 1, "span", 291);
+    \u0275\u0275elementStart(6, "input", 423);
+    \u0275\u0275listener("input", function EventCreateComponent_ng_container_264_Template_input_input_6_listener($event) {
+      \u0275\u0275restoreView(_r113);
       const ctx_r2 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r2.onMoneyInput($event, "compare_trivago", "optForm"));
     });
     \u0275\u0275elementEnd()()();
-    \u0275\u0275elementStart(7, "div", 115)(8, "label", 422);
+    \u0275\u0275elementStart(7, "div", 280)(8, "label", 424);
     \u0275\u0275text(9, "Compara\xE7\xE3o Website HTL:");
     \u0275\u0275elementEnd();
     \u0275\u0275elementStart(10, "div", 52);
-    \u0275\u0275template(11, EventCreateComponent_ng_container_296_span_11_Template, 2, 1, "span", 117);
-    \u0275\u0275elementStart(12, "input", 423);
-    \u0275\u0275listener("input", function EventCreateComponent_ng_container_296_Template_input_input_12_listener($event) {
-      \u0275\u0275restoreView(_r104);
+    \u0275\u0275template(11, EventCreateComponent_ng_container_264_span_11_Template, 2, 1, "span", 291);
+    \u0275\u0275elementStart(12, "input", 425);
+    \u0275\u0275listener("input", function EventCreateComponent_ng_container_264_Template_input_input_12_listener($event) {
+      \u0275\u0275restoreView(_r113);
       const ctx_r2 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r2.onMoneyInput($event, "compare_website_htl", "optForm"));
     });
     \u0275\u0275elementEnd()()();
-    \u0275\u0275elementStart(13, "div", 115)(14, "label", 424);
+    \u0275\u0275elementStart(13, "div", 280)(14, "label", 426);
     \u0275\u0275text(15, "Compara\xE7\xE3o Omnibess:");
     \u0275\u0275elementEnd();
     \u0275\u0275elementStart(16, "div", 52);
-    \u0275\u0275template(17, EventCreateComponent_ng_container_296_span_17_Template, 2, 1, "span", 117);
-    \u0275\u0275elementStart(18, "input", 425);
-    \u0275\u0275listener("input", function EventCreateComponent_ng_container_296_Template_input_input_18_listener($event) {
-      \u0275\u0275restoreView(_r104);
+    \u0275\u0275template(17, EventCreateComponent_ng_container_264_span_17_Template, 2, 1, "span", 291);
+    \u0275\u0275elementStart(18, "input", 427);
+    \u0275\u0275listener("input", function EventCreateComponent_ng_container_264_Template_input_input_18_listener($event) {
+      \u0275\u0275restoreView(_r113);
       const ctx_r2 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r2.onMoneyInput($event, "compare_omnibess", "optForm"));
     });
@@ -118106,15 +118702,15 @@ function EventCreateComponent_ng_container_296_Template(rf, ctx) {
     \u0275\u0275property("value", ctx_r2.formatMoney(ctx_r2.optForm.compare_omnibess));
   }
 }
-function EventCreateComponent_div_297_Template(rf, ctx) {
+function EventCreateComponent_div_265_Template(rf, ctx) {
   if (rf & 1) {
-    const _r105 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 95)(1, "label", 426);
+    const _r114 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "div", 106)(1, "label", 428);
     \u0275\u0275text(2, "Observa\xE7\xF5es:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "textarea", 427);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_297_Template_textarea_ngModelChange_3_listener($event) {
-      \u0275\u0275restoreView(_r105);
+    \u0275\u0275elementStart(3, "textarea", 429);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_265_Template_textarea_ngModelChange_3_listener($event) {
+      \u0275\u0275restoreView(_r114);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.optForm.observation, $event) || (ctx_r2.optForm.observation = $event);
       return \u0275\u0275resetView($event);
@@ -118127,49 +118723,22 @@ function EventCreateComponent_div_297_Template(rf, ctx) {
     \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.observation);
   }
 }
-function EventCreateComponent_span_302_Template(rf, ctx) {
+function EventCreateComponent_span_270_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275element(0, "span", 179);
+    \u0275\u0275element(0, "span", 127);
   }
 }
-function EventCreateComponent_span_318_Template(rf, ctx) {
+function EventCreateComponent_span_286_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275element(0, "span", 179);
-  }
-}
-function EventCreateComponent_div_334_small_1_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 166);
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const err_r106 = ctx.$implicit;
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r106);
-  }
-}
-function EventCreateComponent_div_334_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 164);
-    \u0275\u0275template(1, EventCreateComponent_div_334_small_1_Template, 2, 1, "small", 165);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const ctx_r2 = \u0275\u0275nextContext();
-    \u0275\u0275advance();
-    \u0275\u0275property("ngForOf", ctx_r2.errors.name);
-  }
-}
-function EventCreateComponent_span_399_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275element(0, "span", 179);
+    \u0275\u0275element(0, "span", 127);
   }
 }
 var EventCreateComponent = class _EventCreateComponent {
   eventService = inject(EventService);
   authService = inject(AuthService);
   cityService = inject(CityService);
+  airlineService = inject(AirfareAirlineService);
+  airportService = inject(AirportService);
   toastService = inject(ToastService);
   route = inject(ActivatedRoute);
   router = inject(Router);
@@ -118303,11 +118872,14 @@ var EventCreateComponent = class _EventCreateComponent {
     checkin_time_end: "",
     checkout_time: "",
     checkout_time_end: "",
-    deadline_date: ""
+    deadline_date: "",
+    markup: 0.75
   };
   showProviderLinkForm = false;
   providerLinkType = "hotel";
   selectedProviderName = "";
+  photoFiles = {};
+  photoPreviews = {};
   searchProviders = (term) => {
     const termLower = term.toLowerCase();
     let sourceList = [];
@@ -118318,7 +118890,7 @@ var EventCreateComponent = class _EventCreateComponent {
     } else if (this.providerLinkType === "transport") {
       sourceList = this.providersTransport;
     } else if (this.providerLinkType === "airfare") {
-      sourceList = this.providersAirfare;
+      sourceList = this.airlines && this.airlines.length > 0 ? this.airlines : this.providersAirfare || [];
     }
     const filtered = sourceList.filter((p) => p.name && p.name.toLowerCase().includes(termLower) || p.city && (p.city.name && p.city.name.toLowerCase().includes(termLower) || p.city.states && p.city.states.toLowerCase().includes(termLower) || p.city.country && p.city.country.toLowerCase().includes(termLower)));
     return of(filtered);
@@ -118326,6 +118898,9 @@ var EventCreateComponent = class _EventCreateComponent {
   displayProvider = (provider) => {
     if (!provider)
       return "";
+    if (this.providerLinkType === "airfare" || !provider.city) {
+      return provider.name || "";
+    }
     let locationStr = "S/ Cidade";
     if (provider.city) {
       const stateOrCountry = provider.city.states || provider.city.country;
@@ -118344,7 +118919,7 @@ var EventCreateComponent = class _EventCreateComponent {
     } else if (this.providerLinkType === "transport") {
       found = this.providersTransport.find((p) => p.id === providerId);
     } else if (this.providerLinkType === "airfare") {
-      found = this.providersAirfare.find((p) => p.id === providerId);
+      found = this.airlines.find((p) => p.id === providerId) || this.providersAirfare.find((p) => p.id === providerId);
     }
     if (found) {
       this.providerLinkForm.taxa_4bts = found.taxa_4bts || 0;
@@ -118433,7 +119008,88 @@ var EventCreateComponent = class _EventCreateComponent {
   // Autocomplete Functions
   searchCities = (term) => this.cityService.searchCities(term);
   displayCity = (city) => city ? `${city.name} - ${city.states ? city.states : city.country}` : "";
+  searchAirports = (term) => this.airportService.searchAirports(term);
+  displayAirport = (airport) => {
+    if (!airport)
+      return "";
+    if (typeof airport === "string")
+      return airport;
+    return airport.formatted || `${airport.name} (${airport.iata_code})`;
+  };
   isReadOnly = false;
+  isForeignCurrency() {
+    const selectedCurrency = this.currencies.find((c) => Number(c.id) === Number(this.providerLinkForm.currency_id));
+    return selectedCurrency ? selectedCurrency.sigla !== "BRL" : false;
+  }
+  getOptCurrencySymbol() {
+    const cId = this.optForm?.currency_id || this.providerLinkForm?.currency_id;
+    if (!cId)
+      return "R$";
+    const found = this.currencies?.find((c) => c.id == cId);
+    return found ? found.symbol || found.sigla || "R$" : "R$";
+  }
+  getSelectedCurrencySymbol() {
+    return this.getOptCurrencySymbol();
+  }
+  formatMoney(value) {
+    const num = parseFloat(value);
+    if (isNaN(num))
+      return "0,00";
+    return num.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  formatPercent(value) {
+    const num = parseFloat(value);
+    if (isNaN(num))
+      return "0,0";
+    return num.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  }
+  onMoneyInput(event, field, form) {
+    const raw = event.target.value;
+    const clean = raw.replace(/\D/g, "");
+    if (!clean) {
+      if (form === "providerLinkForm") {
+        this.providerLinkForm[field] = 0;
+      } else {
+        this.optForm[field] = 0;
+      }
+      event.target.value = "0,00";
+      return;
+    }
+    const parsed = parseFloat(clean) / 100;
+    if (form === "providerLinkForm") {
+      this.providerLinkForm[field] = parsed;
+    } else {
+      this.optForm[field] = parsed;
+    }
+    event.target.value = this.formatMoney(parsed);
+  }
+  onPercentInput(event, field, form) {
+    const raw = event.target.value;
+    const clean = raw.replace(/\D/g, "");
+    if (!clean) {
+      if (form === "providerLinkForm") {
+        this.providerLinkForm[field] = 0;
+      } else if (form === "optForm") {
+        this.optForm[field] = 0;
+      } else {
+        this[field] = 0;
+      }
+      event.target.value = "0,0";
+      return;
+    }
+    let parsed = parseFloat(clean) / 10;
+    if (parsed > 100) {
+      parsed = 100;
+    }
+    if (form === "providerLinkForm") {
+      this.providerLinkForm[field] = parsed;
+    } else if (form === "optForm") {
+      this.optForm[field] = parsed;
+    } else {
+      this[field] = parsed;
+    }
+    event.target.value = this.formatPercent(parsed);
+  }
   ngOnInit() {
     this.route.params.subscribe((params) => {
       this.eventId = params["id"] ? parseInt(params["id"]) : 0;
@@ -118544,6 +119200,13 @@ var EventCreateComponent = class _EventCreateComponent {
         this.providersService = this.sortByName(res.providersService || []);
         this.providersTransport = this.sortByName(res.providersTransport || []);
         this.brokers = this.sortByName(res.brokers || []);
+        this.airlineService.getAirlines({ per_page: 200 }).subscribe({
+          next: (aRes) => {
+            this.airlines = this.sortByName(aRes.data || aRes || []);
+          },
+          error: () => {
+          }
+        });
         this.currencies = this.sortByName(res.currencies || []);
         this.regimes = this.sortByName(res.regimes || []);
         this.purposes = this.sortByName(res.purposes || []);
@@ -118736,8 +119399,10 @@ var EventCreateComponent = class _EventCreateComponent {
   openAddProviderLink(type, editItem = null) {
     this.providerLinkType = type;
     this.errors = {};
+    this.photoFiles = {};
+    this.photoPreviews = {};
     if (editItem) {
-      const pId = editItem.hotel_id || editItem.ab_id || editItem.hall_id || editItem.add_id || editItem.transport_id || editItem.airfare_id;
+      const pId = editItem.hotel_id || editItem.ab_id || editItem.hall_id || editItem.add_id || editItem.transport_id || editItem.airline_id || editItem.airfare_id;
       let found = null;
       if (type === "hotel" || type === "ab" || type === "hall") {
         found = this.providers.find((p) => p.id === pId);
@@ -118746,9 +119411,9 @@ var EventCreateComponent = class _EventCreateComponent {
       } else if (type === "transport") {
         found = this.providersTransport.find((p) => p.id === pId);
       } else if (type === "airfare") {
-        found = this.providersAirfare.find((p) => p.id === pId);
+        found = this.airlines.find((p) => p.id === pId) || this.providersAirfare.find((p) => p.id === pId);
       }
-      this.selectedProviderName = found ? this.displayProvider(found) : "";
+      this.selectedProviderName = found ? this.displayProvider(found) : editItem.airline?.name || editItem.provider?.name || "";
       let isDifferent = false;
       if (type === "hotel" && found) {
         isDifferent = (editItem.checkin_time || "") !== (found.checkin_time || "") || (editItem.checkin_time_end || "") !== (found.checkin_time_end || "") || (editItem.checkout_time || "") !== (found.checkout_time || "") || (editItem.checkout_time_end || "") !== (found.checkout_time_end || "");
@@ -118772,7 +119437,34 @@ var EventCreateComponent = class _EventCreateComponent {
         checkin_time_end: editItem.checkin_time_end || "",
         checkout_time: editItem.checkout_time || "",
         checkout_time_end: editItem.checkout_time_end || "",
-        deadline_date: editItem.deadline_date ? editItem.deadline_date.split("T")[0] : ""
+        deadline_date: editItem.deadline_date ? editItem.deadline_date.split("T")[0] : "",
+        equipment: editItem.equipment || editItem.aircraft || "",
+        pax_first: editItem.pax_first || 0,
+        pax_executiva: editItem.pax_executiva || 0,
+        pax_premium: editItem.pax_premium || 0,
+        pax_economica: editItem.pax_economica || 0,
+        total_pax: editItem.total_pax || 0,
+        prazo_cia: editItem.prazo_cia ? editItem.prazo_cia.split("T")[0] : "",
+        inc_taxa_embarque: editItem.inc_taxa_embarque !== void 0 ? !!editItem.inc_taxa_embarque : true,
+        inc_servico_bordo: editItem.inc_servico_bordo !== void 0 ? !!editItem.inc_servico_bordo : true,
+        inc_porao: this.parseKilos(editItem.inc_porao, 23),
+        inc_bagagem_bordo: this.parseKilos(editItem.inc_bagagem_bordo, 10),
+        inc_sala_vip: editItem.inc_sala_vip !== void 0 ? !!editItem.inc_sala_vip : false,
+        inc_fbo_origem: editItem.inc_fbo_origem || "0",
+        inc_fbo_destino: editItem.inc_fbo_destino || "0",
+        inc_alteracao_nomes: editItem.inc_alteracao_nomes !== void 0 ? !!editItem.inc_alteracao_nomes : true,
+        taxa_embarque_unit: editItem.taxa_embarque_unit || 0,
+        total_net_sem_4bts: editItem.total_net_sem_4bts || 0,
+        markup: editItem.markup !== void 0 && editItem.markup !== null && editItem.markup !== "" ? Number(Number(editItem.markup).toFixed(2)) : 0.75,
+        photo_1: editItem.photo_1 || "",
+        photo_2: editItem.photo_2 || "",
+        photo_3: editItem.photo_3 || "",
+        photo_4: editItem.photo_4 || "",
+        observations: editItem.observations !== null && editItem.observations !== void 0 ? editItem.observations : `\u2022 Os hor\xE1rios da programa\xE7\xE3o est\xE3o sujeitos a disponibilidade de SLOT nos Aeroportos que operam sob esse sistema.
+\u2022 O valor acima n\xE3o inclui atendimentos e catering.
+\u2022 Os valores est\xE3o sujeitos a altera\xE7\xE3o quando for realizada a solicita\xE7\xE3o de confirma\xE7\xE3o da aeronave.
+\u2022 N\xE3o inclui taxa de embarque, taxa de servi\xE7o (10%) e IOF (3,5%).`,
+        notes: editItem.notes || ""
       };
     } else {
       this.providerLinkForm = {
@@ -118782,7 +119474,7 @@ var EventCreateComponent = class _EventCreateComponent {
         iss_percent: 0,
         service_percent: 0,
         iva_percent: 0,
-        taxa_4bts: 0,
+        taxa_4bts: 10,
         service_charge: 0,
         payment_method: "Indefinido",
         internal_observation: "",
@@ -118794,15 +119486,162 @@ var EventCreateComponent = class _EventCreateComponent {
         checkin_time_end: "",
         checkout_time: "",
         checkout_time_end: "",
-        deadline_date: ""
+        deadline_date: "",
+        equipment: "",
+        pax_first: 0,
+        pax_executiva: 0,
+        pax_premium: 0,
+        pax_economica: 0,
+        total_pax: 0,
+        prazo_cia: "",
+        inc_taxa_embarque: true,
+        inc_servico_bordo: true,
+        inc_porao: 23,
+        inc_bagagem_bordo: 10,
+        inc_sala_vip: false,
+        inc_fbo_origem: "0",
+        inc_fbo_destino: "0",
+        inc_alteracao_nomes: true,
+        taxa_embarque_unit: 0,
+        total_net_sem_4bts: 0,
+        markup: 0.75,
+        photo_1: "",
+        photo_2: "",
+        photo_3: "",
+        photo_4: "",
+        observations: `\u2022 Os hor\xE1rios da programa\xE7\xE3o est\xE3o sujeitos a disponibilidade de SLOT nos Aeroportos que operam sob esse sistema.
+\u2022 O valor acima n\xE3o inclui atendimentos e catering.
+\u2022 Os valores est\xE3o sujeitos a altera\xE7\xE3o quando for realizada a solicita\xE7\xE3o de confirma\xE7\xE3o da aeronave.
+\u2022 N\xE3o inclui taxa de embarque, taxa de servi\xE7o (10%) e IOF (3,5%).`,
+        notes: ""
       };
       this.selectedProviderName = "";
     }
     this.showProviderLinkForm = true;
   }
+  parseKilos(val, defaultKg = 23) {
+    if (val === null || val === void 0 || val === "")
+      return defaultKg;
+    if (typeof val === "number")
+      return Math.floor(val);
+    const match3 = String(val).match(/\d+/);
+    return match3 ? parseInt(match3[0], 10) : defaultKg;
+  }
+  formatKilos(val, defaultKg = 23) {
+    if (val === null || val === void 0 || val === "")
+      return `${defaultKg} kg por pessoa`;
+    const str = String(val).trim();
+    if (/^\d+$/.test(str)) {
+      return `${str} kg por pessoa`;
+    }
+    if (str.toLowerCase().includes("kg")) {
+      return str;
+    }
+    const match3 = str.match(/\d+/);
+    return match3 ? `${match3[0]} kg por pessoa` : `${defaultKg} kg por pessoa`;
+  }
+  calculatePaxTotal() {
+    const f = Number(this.providerLinkForm.pax_first || 0);
+    const ex = Number(this.providerLinkForm.pax_executiva || 0);
+    const pr = Number(this.providerLinkForm.pax_premium || 0);
+    const ec = Number(this.providerLinkForm.pax_economica || 0);
+    this.providerLinkForm.total_pax = f + ex + pr + ec;
+  }
+  formatTime(time) {
+    if (!time)
+      return "-";
+    const str = time.toString().trim();
+    const clean = str.replace(/[^0-9]/g, "");
+    if (clean.length === 4) {
+      return `${clean.substring(0, 2)}:${clean.substring(2, 4)}`;
+    }
+    if (str.includes(":")) {
+      const parts = str.split(":");
+      if (parts.length >= 2) {
+        return `${parts[0].padStart(2, "0")}:${parts[1].padStart(2, "0")}`;
+      }
+    }
+    return str;
+  }
+  onMarkupBlur() {
+    if (this.providerLinkForm.markup !== null && this.providerLinkForm.markup !== void 0 && this.providerLinkForm.markup !== "") {
+      this.providerLinkForm.markup = Number(Number(this.providerLinkForm.markup).toFixed(2));
+    }
+  }
+  getAirfareMarkup(item) {
+    const mk = item && item.markup !== void 0 && item.markup !== null && item.markup !== "" ? Number(item.markup) : 0.75;
+    return new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(mk);
+  }
+  getAirfareVendaCalc(item) {
+    const custo = Number(item.total_net_sem_4bts || 0);
+    const mk = item && item.markup !== void 0 && item.markup !== null && Number(item.markup) > 0 ? Number(item.markup) : 0.75;
+    return custo > 0 ? custo / mk : 0;
+  }
+  getAirfareNetComTxs(item) {
+    const custo = Number(item.total_net_sem_4bts || 0);
+    const txs = Number(item.taxa_embarque_unit || 0) * Number(item.total_pax || 0);
+    return custo + txs;
+  }
+  getAirfareVendaComTxs(item) {
+    const venda = this.getAirfareVendaCalc(item);
+    const txs = Number(item.taxa_embarque_unit || 0) * Number(item.total_pax || 0);
+    return venda + txs;
+  }
+  getAirfareResultadoBruto(item) {
+    return this.getAirfareVendaCalc(item) - Number(item.total_net_sem_4bts || 0);
+  }
+  getAirfareMargemPercent(item) {
+    const venda = this.getAirfareVendaCalc(item);
+    const custo = Number(item.total_net_sem_4bts || 0);
+    return venda > 0 ? (venda - custo) / venda * 100 : 0;
+  }
+  resolvePhotoUrl(val) {
+    if (!val || typeof val !== "string" || val.trim() === "")
+      return "";
+    if (val.startsWith("data:image") && val.length < 500) {
+      return "";
+    }
+    if (val.startsWith("http://") || val.startsWith("https://") || val.startsWith("blob:") || val.startsWith("data:image")) {
+      return val;
+    }
+    const baseUrl = (this.eventService.getApiUrl() || "").replace(/\/+$/, "");
+    const cleanPath = val.startsWith("/") ? val : `/${val}`;
+    return baseUrl ? `${baseUrl}${cleanPath}` : cleanPath;
+  }
+  getPhotoValue(pNum) {
+    if (this.photoPreviews[pNum]) {
+      return this.photoPreviews[pNum];
+    }
+    const key = `photo_${pNum}`;
+    const val = this.providerLinkForm[key];
+    return this.resolvePhotoUrl(val);
+  }
+  onPhotoFileChange(event, pNum) {
+    const file = event.target?.files?.[0];
+    if (!file)
+      return;
+    this.photoFiles[pNum] = file;
+    this.photoPreviews[pNum] = URL.createObjectURL(file);
+  }
+  removePhoto(pNum, event) {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    delete this.photoFiles[pNum];
+    delete this.photoPreviews[pNum];
+    const key = `photo_${pNum}`;
+    this.providerLinkForm[key] = "";
+    const inputElem = document.getElementById(`photo_input_${pNum}`);
+    if (inputElem) {
+      inputElem.value = "";
+    }
+  }
   closeProviderLinkForm() {
     this.showProviderLinkForm = false;
     this.errors = {};
+    this.photoFiles = {};
+    this.photoPreviews = {};
   }
   onCurrencyChange(currencyId) {
     if (!currencyId)
@@ -118823,7 +119662,7 @@ var EventCreateComponent = class _EventCreateComponent {
     this.errors = {};
     let hasErrors = false;
     if (!this.providerLinkForm.provider_id) {
-      this.errors.provider_id = ["O campo fornecedor \xE9 obrigat\xF3rio."];
+      this.errors.provider_id = [this.providerLinkType === "airfare" ? "O campo companhia a\xE9rea \xE9 obrigat\xF3rio." : "O campo fornecedor \xE9 obrigat\xF3rio."];
       hasErrors = true;
     }
     if (!this.providerLinkForm.currency_id) {
@@ -118858,7 +119697,8 @@ var EventCreateComponent = class _EventCreateComponent {
     }
     const payload = __spreadProps(__spreadValues({}, this.providerLinkForm), {
       event_id: this.eventId,
-      currency: this.providerLinkForm.currency_id
+      currency: this.providerLinkForm.currency_id,
+      airline_id: this.providerLinkType === "airfare" ? this.providerLinkForm.provider_id : null
     });
     let obs;
     switch (this.providerLinkType) {
@@ -118877,9 +119717,26 @@ var EventCreateComponent = class _EventCreateComponent {
       case "transport":
         obs = this.eventService.saveEventTransport(payload);
         break;
-      case "airfare":
-        obs = this.eventService.saveEventAirfare(payload);
+      case "airfare": {
+        const formData = new FormData();
+        Object.keys(payload).forEach((key) => {
+          const val = payload[key];
+          if (key.startsWith("photo_")) {
+            const pNum = Number(key.replace("photo_", ""));
+            if (this.photoFiles[pNum]) {
+              formData.append(key, this.photoFiles[pNum]);
+            } else if (val && typeof val === "string" && !val.startsWith("data:image") && !val.startsWith("blob:")) {
+              formData.append(key, val);
+            } else if (val === "" || val === null) {
+              formData.append(key, "");
+            }
+          } else if (val !== null && val !== void 0) {
+            formData.append(key, val);
+          }
+        });
+        obs = this.eventService.saveEventAirfare(formData);
         break;
+      }
     }
     obs.subscribe({
       next: (res) => {
@@ -118964,6 +119821,9 @@ var EventCreateComponent = class _EventCreateComponent {
       case "transport":
         options = item.event_transport_opts || [];
         break;
+      case "airfare":
+        options = item.event_airfare_opts || item.eventAirfareOpts || [];
+        break;
     }
     if (options.length === 0) {
       this.toastService.warning("Este fornecedor n\xE3o possui tarifas cadastradas.");
@@ -119004,6 +119864,9 @@ var EventCreateComponent = class _EventCreateComponent {
         break;
       case "transport":
         options = item.event_transport_opts || [];
+        break;
+      case "airfare":
+        options = item.event_airfare_opts || item.eventAirfareOpts || [];
         break;
     }
     this.processing = true;
@@ -119072,6 +119935,10 @@ var EventCreateComponent = class _EventCreateComponent {
           payload.brand = opt.brand_id;
           requests.push(this.eventService.saveTransportOpt(payload));
           break;
+        case "airfare":
+          payload.event_airfare_id = item.id;
+          requests.push(this.eventService.saveAirfareOpt(payload));
+          break;
       }
     });
     forkJoin(requests).subscribe({
@@ -119133,8 +120000,8 @@ var EventCreateComponent = class _EventCreateComponent {
         outbound_date: editItem.outbound_date ? editItem.outbound_date.split("T")[0] : "",
         outbound_origin: editItem.outbound_origin || "",
         outbound_destination: editItem.outbound_destination || "",
-        outbound_departure_time: editItem.outbound_departure_time || "",
-        outbound_arrival_time: editItem.outbound_arrival_time || "",
+        outbound_departure_time: this.formatTime(editItem.outbound_departure_time),
+        outbound_arrival_time: this.formatTime(editItem.outbound_arrival_time),
         outbound_connection_details: editItem.outbound_connection_details || "",
         inbound_airline_id: editItem.inbound_airline_id || "",
         inbound_flight_number: editItem.inbound_flight_number || "",
@@ -119221,14 +120088,9 @@ var EventCreateComponent = class _EventCreateComponent {
         this.optForm.brand_id = this.brands[0]?.id || "";
         this.optForm.broker_id = this.brokersT[0]?.id || "";
       } else if (type === "airfare") {
-        this.optForm.outbound_airline_id = this.airlines[0]?.id || "";
-        this.optForm.inbound_airline_id = this.airlines[0]?.id || "";
-        this.optForm.baggage_id = this.baggages[0]?.id || "";
-        this.optForm.cabin_id = this.cabins[0]?.id || "";
-        this.optForm.currency_id = this.currencies[0]?.id || "";
+        const parentAirfare = this.eventAirfares?.find((a) => a.id === parentId);
+        this.optForm.outbound_airline_id = parentAirfare?.airline_id || this.airlines[0]?.id || "";
         this.optForm.outbound_date = this.basicForm.date || "";
-        this.optForm.inbound_date = this.basicForm.date_final || "";
-        this.optForm.status = "created";
       }
     }
     this.showOptForm = true;
@@ -119331,138 +120193,169 @@ var EventCreateComponent = class _EventCreateComponent {
     this.processing = true;
     this.errors = {};
     let hasErrors = false;
-    if (!this.optForm.in || !this.optForm.out) {
-      if (!this.optForm.in)
-        this.errors.in = ["O campo de entrada \xE9 obrigat\xF3rio."];
-      if (!this.optForm.out)
-        this.errors.out = ["O campo de sa\xEDda \xE9 obrigat\xF3rio."];
-      hasErrors = true;
-    } else {
-      const dateIn = new Date(this.optForm.in);
-      const dateOut = new Date(this.optForm.out);
-      if (dateOut < dateIn) {
-        this.errors.out = ["A data de sa\xEDda deve ser igual ou posterior \xE0 data de entrada."];
+    if (this.optFormType === "airfare") {
+      if (!this.optForm.outbound_airline_id) {
+        this.errors.outbound_airline_id = ["O campo CIA \xE9 obrigat\xF3rio."];
         hasErrors = true;
       }
-    }
-    if (this.optForm.count === null || this.optForm.count === void 0 || this.optForm.count === "") {
-      this.errors.count = ["O campo quantidade \xE9 obrigat\xF3rio."];
-      hasErrors = true;
-    } else {
-      const countVal = Number(this.optForm.count);
-      if (isNaN(countVal) || countVal <= 0) {
-        this.errors.count = ["A quantidade deve ser maior que zero."];
-        hasErrors = true;
-      } else if (countVal % 1 !== 0) {
-        this.errors.count = ["A quantidade deve ser um n\xFAmero inteiro (sem fra\xE7\xF5es)."];
+      if (!this.optForm.outbound_flight_number) {
+        this.errors.outbound_flight_number = ["O campo VOO \xE9 obrigat\xF3rio."];
         hasErrors = true;
       }
-    }
-    if (this.optForm.received_proposal === null || this.optForm.received_proposal === void 0 || this.optForm.received_proposal === "") {
-      this.errors.received_proposal = ["O campo proposta recebida \xE9 obrigat\xF3rio."];
-      hasErrors = true;
-    }
-    if (this.optForm.received_proposal_percent === null || this.optForm.received_proposal_percent === void 0 || this.optForm.received_proposal_percent === "") {
-      this.errors.received_proposal_percent = ["O campo markup \xE9 obrigat\xF3rio."];
-      hasErrors = true;
-    } else {
-      const markupVal = Number(this.optForm.received_proposal_percent);
-      if (isNaN(markupVal) || markupVal <= 0 || markupVal > 100) {
-        this.errors.received_proposal_percent = ["O markup deve ser maior que 0% e no m\xE1ximo 100%."];
+      if (!this.optForm.outbound_origin) {
+        this.errors.outbound_origin = ["O campo DE (Origem) \xE9 obrigat\xF3rio."];
         hasErrors = true;
       }
-    }
-    switch (this.optFormType) {
-      case "hotel":
-        if (!this.optForm.broker_id) {
-          this.errors.broker_id = ["O campo broker \xE9 obrigat\xF3rio."];
+      if (!this.optForm.outbound_destination) {
+        this.errors.outbound_destination = ["O campo PARA (Destino) \xE9 obrigat\xF3rio."];
+        hasErrors = true;
+      }
+      if (!this.optForm.outbound_date) {
+        this.errors.outbound_date = ["O campo DATAS \xE9 obrigat\xF3rio."];
+        hasErrors = true;
+      }
+      if (!this.optForm.outbound_departure_time) {
+        this.errors.outbound_departure_time = ["O campo SA\xCDDA \xE9 obrigat\xF3rio."];
+        hasErrors = true;
+      }
+      if (!this.optForm.outbound_arrival_time) {
+        this.errors.outbound_arrival_time = ["O campo CHEGADA \xE9 obrigat\xF3rio."];
+        hasErrors = true;
+      }
+    } else {
+      if (!this.optForm.in || !this.optForm.out) {
+        if (!this.optForm.in)
+          this.errors.in = ["O campo de entrada \xE9 obrigat\xF3rio."];
+        if (!this.optForm.out)
+          this.errors.out = ["O campo de sa\xEDda \xE9 obrigat\xF3rio."];
+        hasErrors = true;
+      } else {
+        const dateIn = new Date(this.optForm.in);
+        const dateOut = new Date(this.optForm.out);
+        if (dateOut < dateIn) {
+          this.errors.out = ["A data de sa\xEDda deve ser igual ou posterior \xE0 data de entrada."];
           hasErrors = true;
         }
-        if (!this.optForm.regime_id) {
-          this.errors.regime_id = ["O campo regime \xE9 obrigat\xF3rio."];
+      }
+      if (this.optForm.count === null || this.optForm.count === void 0 || this.optForm.count === "") {
+        this.errors.count = ["O campo quantidade \xE9 obrigat\xF3rio."];
+        hasErrors = true;
+      } else {
+        const countVal = Number(this.optForm.count);
+        if (isNaN(countVal) || countVal <= 0) {
+          this.errors.count = ["A quantidade deve ser maior que zero."];
+          hasErrors = true;
+        } else if (countVal % 1 !== 0) {
+          this.errors.count = ["A quantidade deve ser um n\xFAmero inteiro (sem fra\xE7\xF5es)."];
           hasErrors = true;
         }
-        if (!this.optForm.purpose_id) {
-          this.errors.purpose_id = ["O campo prop\xF3sito \xE9 obrigat\xF3rio."];
+      }
+      if (this.optForm.received_proposal === null || this.optForm.received_proposal === void 0 || this.optForm.received_proposal === "") {
+        this.errors.received_proposal = ["O campo proposta recebida \xE9 obrigat\xF3rio."];
+        hasErrors = true;
+      }
+      if (this.optForm.received_proposal_percent === null || this.optForm.received_proposal_percent === void 0 || this.optForm.received_proposal_percent === "") {
+        this.errors.received_proposal_percent = ["O campo markup \xE9 obrigat\xF3rio."];
+        hasErrors = true;
+      } else {
+        const markupVal = Number(this.optForm.received_proposal_percent);
+        if (isNaN(markupVal) || markupVal <= 0 || markupVal > 100) {
+          this.errors.received_proposal_percent = ["O markup deve ser maior que 0% e no m\xE1ximo 100%."];
           hasErrors = true;
         }
-        if (!this.optForm.category_id) {
-          this.errors.category_id = ["O campo categoria apto \xE9 obrigat\xF3rio."];
-          hasErrors = true;
-        }
-        if (!this.optForm.apto_id) {
-          this.errors.apto_id = ["O campo tipo apto \xE9 obrigat\xF3rio."];
-          hasErrors = true;
-        }
-        break;
-      case "ab":
-        if (!this.optForm.broker_id) {
-          this.errors.broker_id = ["O campo broker \xE9 obrigat\xF3rio."];
-          hasErrors = true;
-        }
-        if (!this.optForm.service_id) {
-          this.errors.service_id = ["O campo servi\xE7o \xE9 obrigat\xF3rio."];
-          hasErrors = true;
-        }
-        if (!this.optForm.service_type_id) {
-          this.errors.service_type_id = ["O campo tipo de servi\xE7o \xE9 obrigat\xF3rio."];
-          hasErrors = true;
-        }
-        if (!this.optForm.local_id) {
-          this.errors.local_id = ["O campo local \xE9 obrigat\xF3rio."];
-          hasErrors = true;
-        }
-        break;
-      case "hall":
-        if (!this.optForm.broker_id) {
-          this.errors.broker_id = ["O campo broker \xE9 obrigat\xF3rio."];
-          hasErrors = true;
-        }
-        if (!this.optForm.purpose_id) {
-          this.errors.purpose_id = ["O campo prop\xF3sito \xE9 obrigat\xF3rio."];
-          hasErrors = true;
-        }
-        if (!this.optForm.service_id) {
-          this.errors.service_id = ["O campo servi\xE7o \xE9 obrigat\xF3rio."];
-          hasErrors = true;
-        }
-        break;
-      case "add":
-        if (!this.optForm.frequency_id) {
-          this.errors.frequency_id = ["O campo frequ\xEAncia \xE9 obrigat\xF3rio."];
-          hasErrors = true;
-        }
-        if (!this.optForm.measure_id) {
-          this.errors.measure_id = ["O campo medida \xE9 obrigat\xF3rio."];
-          hasErrors = true;
-        }
-        if (!this.optForm.service_id) {
-          this.errors.service_id = ["O campo servi\xE7o \xE9 obrigat\xF3rio."];
-          hasErrors = true;
-        }
-        break;
-      case "transport":
-        if (!this.optForm.broker_id) {
-          this.errors.broker_id = ["O campo broker \xE9 obrigat\xF3rio."];
-          hasErrors = true;
-        }
-        if (!this.optForm.service_id) {
-          this.errors.service_id = ["O campo servi\xE7o/trecho \xE9 obrigat\xF3rio."];
-          hasErrors = true;
-        }
-        if (!this.optForm.vehicle_id) {
-          this.errors.vehicle_id = ["O campo tipo ve\xEDculo \xE9 obrigat\xF3rio."];
-          hasErrors = true;
-        }
-        if (!this.optForm.car_model_id) {
-          this.errors.car_model_id = ["O campo modelo ve\xEDculo \xE9 obrigat\xF3rio."];
-          hasErrors = true;
-        }
-        if (!this.optForm.brand_id) {
-          this.errors.brand_id = ["O campo marca ve\xEDculo \xE9 obrigat\xF3rio."];
-          hasErrors = true;
-        }
-        break;
+      }
+      switch (this.optFormType) {
+        case "hotel":
+          if (!this.optForm.broker_id) {
+            this.errors.broker_id = ["O campo broker \xE9 obrigat\xF3rio."];
+            hasErrors = true;
+          }
+          if (!this.optForm.regime_id) {
+            this.errors.regime_id = ["O campo regime \xE9 obrigat\xF3rio."];
+            hasErrors = true;
+          }
+          if (!this.optForm.purpose_id) {
+            this.errors.purpose_id = ["O campo prop\xF3sito \xE9 obrigat\xF3rio."];
+            hasErrors = true;
+          }
+          if (!this.optForm.category_id) {
+            this.errors.category_id = ["O campo categoria apto \xE9 obrigat\xF3rio."];
+            hasErrors = true;
+          }
+          if (!this.optForm.apto_id) {
+            this.errors.apto_id = ["O campo tipo apto \xE9 obrigat\xF3rio."];
+            hasErrors = true;
+          }
+          break;
+        case "ab":
+          if (!this.optForm.broker_id) {
+            this.errors.broker_id = ["O campo broker \xE9 obrigat\xF3rio."];
+            hasErrors = true;
+          }
+          if (!this.optForm.service_id) {
+            this.errors.service_id = ["O campo servi\xE7o \xE9 obrigat\xF3rio."];
+            hasErrors = true;
+          }
+          if (!this.optForm.service_type_id) {
+            this.errors.service_type_id = ["O campo tipo de servi\xE7o \xE9 obrigat\xF3rio."];
+            hasErrors = true;
+          }
+          if (!this.optForm.local_id) {
+            this.errors.local_id = ["O campo local \xE9 obrigat\xF3rio."];
+            hasErrors = true;
+          }
+          break;
+        case "hall":
+          if (!this.optForm.broker_id) {
+            this.errors.broker_id = ["O campo broker \xE9 obrigat\xF3rio."];
+            hasErrors = true;
+          }
+          if (!this.optForm.purpose_id) {
+            this.errors.purpose_id = ["O campo prop\xF3sito \xE9 obrigat\xF3rio."];
+            hasErrors = true;
+          }
+          if (!this.optForm.service_id) {
+            this.errors.service_id = ["O campo servi\xE7o \xE9 obrigat\xF3rio."];
+            hasErrors = true;
+          }
+          break;
+        case "add":
+          if (!this.optForm.frequency_id) {
+            this.errors.frequency_id = ["O campo frequ\xEAncia \xE9 obrigat\xF3rio."];
+            hasErrors = true;
+          }
+          if (!this.optForm.measure_id) {
+            this.errors.measure_id = ["O campo medida \xE9 obrigat\xF3rio."];
+            hasErrors = true;
+          }
+          if (!this.optForm.service_id) {
+            this.errors.service_id = ["O campo servi\xE7o \xE9 obrigat\xF3rio."];
+            hasErrors = true;
+          }
+          break;
+        case "transport":
+          if (!this.optForm.broker_id) {
+            this.errors.broker_id = ["O campo broker \xE9 obrigat\xF3rio."];
+            hasErrors = true;
+          }
+          if (!this.optForm.service_id) {
+            this.errors.service_id = ["O campo servi\xE7o/trecho \xE9 obrigat\xF3rio."];
+            hasErrors = true;
+          }
+          if (!this.optForm.vehicle_id) {
+            this.errors.vehicle_id = ["O campo tipo ve\xEDculo \xE9 obrigat\xF3rio."];
+            hasErrors = true;
+          }
+          if (!this.optForm.car_model_id) {
+            this.errors.car_model_id = ["O campo modelo ve\xEDculo \xE9 obrigat\xF3rio."];
+            hasErrors = true;
+          }
+          if (!this.optForm.brand_id) {
+            this.errors.brand_id = ["O campo marca ve\xEDculo \xE9 obrigat\xF3rio."];
+            hasErrors = true;
+          }
+          break;
+      }
     }
     if (hasErrors) {
       this.processing = false;
@@ -119529,10 +120422,12 @@ var EventCreateComponent = class _EventCreateComponent {
       case "airfare":
         payload.event_airfare_id = this.optForm.parent_id;
         payload.outbound_airline_id = this.optForm.outbound_airline_id;
-        payload.inbound_airline_id = this.optForm.inbound_airline_id;
-        payload.baggage = this.optForm.baggage_id;
-        payload.cabin = this.optForm.cabin_id;
-        payload.currency = this.optForm.currency_id;
+        payload.outbound_flight_number = this.optForm.outbound_flight_number;
+        payload.outbound_origin = this.optForm.outbound_origin;
+        payload.outbound_destination = this.optForm.outbound_destination;
+        payload.outbound_date = this.optForm.outbound_date;
+        payload.outbound_departure_time = this.formatTime(this.optForm.outbound_departure_time);
+        payload.outbound_arrival_time = this.formatTime(this.optForm.outbound_arrival_time);
         obs = this.eventService.saveAirfareOpt(payload);
         break;
     }
@@ -119782,176 +120677,6 @@ var EventCreateComponent = class _EventCreateComponent {
   hasPermission(role) {
     return this.authService.user()?.permissions?.some((p) => p.name === role) || false;
   }
-  // --- PASSENGER (FICHA DE VOO) METHODS ---
-  passengerForm = {
-    id: 0,
-    parent_id: 0,
-    name: "",
-    document: "",
-    passport_validity: "",
-    birth_date: "",
-    outbound_date: "",
-    outbound_origin: "",
-    outbound_destination: "",
-    outbound_departure: "",
-    outbound_arrival: "",
-    inbound_date: "",
-    inbound_origin: "",
-    inbound_destination: "",
-    inbound_departure: "",
-    inbound_arrival: ""
-  };
-  showPassengerForm = false;
-  openAddPassenger(parentAirfareId, editItem = null) {
-    this.errors = {};
-    if (editItem) {
-      this.passengerForm = {
-        id: editItem.id,
-        parent_id: parentAirfareId,
-        name: editItem.name || "",
-        document: editItem.document || "",
-        passport_validity: editItem.passport_validity ? editItem.passport_validity.split("T")[0] : "",
-        birth_date: editItem.birth_date ? editItem.birth_date.split("T")[0] : "",
-        outbound_date: editItem.outbound_date ? editItem.outbound_date.split("T")[0] : "",
-        outbound_origin: editItem.outbound_origin || "",
-        outbound_destination: editItem.outbound_destination || "",
-        outbound_departure: editItem.outbound_departure || "",
-        outbound_arrival: editItem.outbound_arrival || "",
-        inbound_date: editItem.inbound_date ? editItem.inbound_date.split("T")[0] : "",
-        inbound_origin: editItem.inbound_origin || "",
-        inbound_destination: editItem.inbound_destination || "",
-        inbound_departure: editItem.inbound_departure || "",
-        inbound_arrival: editItem.inbound_arrival || ""
-      };
-    } else {
-      this.passengerForm = {
-        id: 0,
-        parent_id: parentAirfareId,
-        name: "",
-        document: "",
-        passport_validity: "",
-        birth_date: "",
-        outbound_date: this.basicForm.date || "",
-        outbound_origin: "",
-        outbound_destination: "",
-        outbound_departure: "",
-        outbound_arrival: "",
-        inbound_date: this.basicForm.date_final || "",
-        inbound_origin: "",
-        inbound_destination: "",
-        inbound_departure: "",
-        inbound_arrival: ""
-      };
-    }
-    this.showPassengerForm = true;
-  }
-  closePassengerForm() {
-    this.showPassengerForm = false;
-    this.errors = {};
-  }
-  savePassenger() {
-    this.processing = true;
-    this.errors = {};
-    const payload = __spreadProps(__spreadValues({}, this.passengerForm), {
-      event_airfare_id: this.passengerForm.parent_id
-    });
-    this.eventService.saveAirfarePassenger(payload).subscribe({
-      next: (res) => {
-        this.processing = false;
-        this.toastService.success(res.message || "Passageiro salvo com sucesso!");
-        this.closePassengerForm();
-        this.loadInitialData();
-      },
-      error: (err) => {
-        this.processing = false;
-        if (err.status === 422) {
-          this.errors = err.error.errors || {};
-        } else {
-          this.toastService.error(err.error?.message || "Erro ao salvar passageiro.");
-        }
-      }
-    });
-  }
-  deletePassenger(id) {
-    this.isLoader = true;
-    this.eventService.deleteAirfarePassenger(id).subscribe({
-      next: (res) => {
-        this.toastService.success("Passageiro removido com sucesso!");
-        this.loadInitialData();
-      },
-      error: (err) => {
-        this.toastService.error("Erro ao remover passageiro.");
-        console.error(err);
-        this.isLoader = false;
-      }
-    });
-  }
-  getOptCurrencySymbol() {
-    const cId = this.optForm?.currency_id || this.providerLinkForm?.currency_id;
-    if (!cId)
-      return "R$";
-    const found = this.currencies?.find((c) => c.id == cId);
-    return found ? found.symbol || found.sigla || "R$" : "R$";
-  }
-  getSelectedCurrencySymbol() {
-    return this.getOptCurrencySymbol();
-  }
-  formatMoney(val) {
-    if (val === null || val === void 0 || val === "")
-      return "";
-    const num = typeof val === "number" ? val : parseFloat(val);
-    if (isNaN(num))
-      return "";
-    return num.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-  onMoneyInput(event, field, targetObj = "optForm") {
-    const input2 = event.target;
-    let raw = input2.value.replace(/\D/g, "");
-    if (!raw) {
-      if (targetObj === "optForm")
-        this.optForm[field] = 0;
-      else if (targetObj === "providerLinkForm")
-        this.providerLinkForm[field] = 0;
-      else
-        this[field] = 0;
-      return;
-    }
-    const numValue = parseFloat(raw) / 100;
-    if (targetObj === "optForm")
-      this.optForm[field] = numValue;
-    else if (targetObj === "providerLinkForm")
-      this.providerLinkForm[field] = numValue;
-    else
-      this[field] = numValue;
-  }
-  formatPercent(val) {
-    if (val === null || val === void 0 || val === "")
-      return "";
-    const num = typeof val === "number" ? val : parseFloat(val);
-    if (isNaN(num))
-      return "";
-    return num.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-  onPercentInput(event, field, targetObj = "this") {
-    const input2 = event.target;
-    let raw = input2.value.replace(/\D/g, "");
-    if (!raw) {
-      if (targetObj === "this" || targetObj === "thisScope")
-        this[field] = 0;
-      else if (targetObj === "optForm")
-        this.optForm[field] = 0;
-      else
-        this[field] = 0;
-      return;
-    }
-    const numValue = parseFloat(raw) / 100;
-    if (targetObj === "this" || targetObj === "thisScope")
-      this[field] = numValue;
-    else if (targetObj === "optForm")
-      this.optForm[field] = numValue;
-    else
-      this[field] = numValue;
-  }
   static \u0275fac = function EventCreateComponent_Factory(__ngFactoryType__) {
     return new (__ngFactoryType__ || _EventCreateComponent)();
   };
@@ -119963,7 +120688,7 @@ var EventCreateComponent = class _EventCreateComponent {
       let _t;
       \u0275\u0275queryRefresh(_t = \u0275\u0275loadQuery()) && (ctx.dateRangePicker = _t.first);
     }
-  }, decls: 402, vars: 192, consts: [["dateRangePicker", ""], ["optDateRangePicker", ""], ["class", "position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-75", "style", "z-index: 2000", 4, "ngIf"], ["header", ""], [1, "d-sm-flex", "align-items-center", "justify-content-between", "mb-4", "animate-in"], [1, "h3", "mb-0", "text-gray-800"], [1, "fa", "fa-calendar-check", "me-2", "text-primary"], ["routerLink", "/event-list", 1, "btn", "btn-secondary", "btn-sm", "shadow-sm"], [1, "fas", "fa-arrow-left", "me-1"], [1, "row"], [1, "col-lg-12"], [1, "nav", "nav-tabs", "animate-in", 2, "animation-delay", "0.05s"], [1, "nav-item"], [1, "nav-link", 2, "cursor", "pointer", 3, "click"], [1, "fas", "fa-info-circle", "me-1"], [1, "fas", "fa-hotel", "me-1"], [1, "fas", "fa-utensils", "me-1"], [1, "fas", "fa-door-open", "me-1"], [1, "fas", "fa-concierge-bell", "me-1"], [1, "fas", "fa-bus", "me-1"], [1, "fas", "fa-plane", "me-1"], [1, "card", "shadow-sm", "border-left-primary", "mb-4", "animate-in"], [1, "card-body"], [3, "ngSubmit"], [1, "border-0", "p-0", "m-0", 3, "disabled"], [1, "col-lg-4"], [1, "form-group", "mb-3"], ["for", "name", 1, "form-label", "font-weight-bold"], [1, "text-danger"], ["type", "text", "id", "name", "name", "name", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], ["class", "text-danger mt-1", 4, "ngIf"], ["for", "code", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "code", "name", "code", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], [1, "border", "rounded", "p-3", "bg-light"], [1, "font-weight-bold", "text-primary", "mb-3"], [1, "fas", "fa-map-marker-alt", "me-1"], ["class", "mb-3 p-2 border-bottom", 4, "ngFor", "ngForOf"], ["type", "button", "class", "btn btn-sm btn-info w-100 mt-2", 3, "click", 4, "ngIf"], ["for", "customer", 1, "form-label", "font-weight-bold"], ["id", "customer", "name", "customer", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["value", ""], [3, "ngValue", 4, "ngFor", "ngForOf"], ["for", "requester", 1, "form-label", "font-weight-bold"], ["id", "requester", "name", "requester", "required", "", 1, "form-select", 3, "ngModelChange", "mousedown", "ngModel"], [3, "value", 4, "ngFor", "ngForOf"], ["for", "sector", 1, "form-label", "font-weight-bold"], ["id", "sector", "name", "sector", "required", "", 1, "form-select", 3, "ngModelChange", "mousedown", "ngModel"], ["for", "cc", 1, "form-label", "font-weight-bold"], ["id", "cc", "name", "cc", "required", "", 1, "form-select", 3, "ngModelChange", "mousedown", "ngModel"], ["for", "paxBase", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "paxBase", "name", "paxBase", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "dateRange", 1, "form-label", "font-weight-bold"], [1, "input-group"], [1, "input-group-text", "bg-light"], [1, "fas", "fa-calendar-alt", "text-primary"], ["type", "text", "id", "dateRange", "placeholder", "Selecione o per\xEDodo...", "readonly", "", "required", "", 1, "form-control", "bg-white"], ["for", "crd_id", 1, "form-label", "font-weight-bold"], ["id", "crd_id", "name", "crd_id", "required", "", 1, "form-select", 3, "ngModelChange", "mousedown", "ngModel"], ["for", "hotel_operator", 1, "form-label", "font-weight-bold"], ["id", "hotel_operator", "name", "hotel_operator", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "land_operator", 1, "form-label", "font-weight-bold"], ["id", "land_operator", "name", "land_operator", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "air_operator", 1, "form-label", "font-weight-bold"], ["id", "air_operator", "name", "air_operator", 1, "form-select", 3, "ngModelChange", "ngModel"], ["class", "d-flex justify-content-end gap-2 mt-4", 4, "ngIf"], ["class", "animate-in", 4, "ngIf"], [3, "close", "show", "title", "icon"], [1, "col-md-6", "mb-3"], ["id", "provider_id", "label", "Fornecedor", "placeholder", "Digite para buscar o fornecedor...", "valueField", "id", "name", "provider_id", 3, "ngModelChange", "required", "searchFn", "displayFn", "initialText", "ngModel", "errors", "disabled"], [1, "col-md-6", "form-group", "mb-3"], ["for", "currency_id", 1, "form-label", "font-weight-bold"], ["id", "currency_id", "name", "currency_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], [1, "col-md-3", "form-group", "mb-3"], ["for", "iss_percent", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "iss_percent", "name", "iss_percent", 1, "form-control", 3, "input", "value"], ["for", "service_percent", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "service_percent", "name", "service_percent", 1, "form-control", 3, "input", "value"], ["for", "iva_percent", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "iva_percent", "name", "iva_percent", 1, "form-control", 3, "input", "value"], ["for", "taxa_4bts", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "taxa_4bts", "name", "taxa_4bts", "required", "", 1, "form-control", 3, "input", "value"], ["class", "col-md-3 form-group mb-3", 4, "ngIf"], [1, "form-group", "mb-3", 3, "ngClass"], ["for", "payment_method", 1, "form-label", "font-weight-bold"], ["id", "payment_method", "name", "payment_method", 1, "form-select", 3, "ngModelChange", "ngModel"], ["value", "Indefinido"], ["value", "Dinheiro"], ["value", "Cart\xE3o"], ["for", "invoice", 1, "form-label", "font-weight-bold"], ["id", "invoice", "name", "invoice", 1, "form-select", 3, "ngModelChange", "ngModel"], [3, "ngValue"], ["for", "iof", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "iof", "name", "iof", 1, "form-control", 3, "input", "value"], ["for", "deadline_date", 1, "form-label", "font-weight-bold"], ["type", "date", "id", "deadline_date", "name", "deadline_date", 1, "form-control", 3, "ngModelChange", "ngModel"], [1, "col-md-12", "form-group", "mb-3"], ["for", "internal_observation", 1, "form-label", "font-weight-bold"], ["id", "internal_observation", "rows", "2", "name", "internal_observation", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "customer_observation", 1, "form-label", "font-weight-bold"], ["id", "customer_observation", "rows", "2", "name", "customer_observation", 1, "form-control", 3, "ngModelChange", "ngModel"], ["class", "col-md-12 mb-3", 4, "ngIf"], [1, "modal-footer", "px-0", "pb-0", "pt-3", "d-flex", "justify-content-end", "gap-2", "border-top"], ["type", "button", 1, "btn", "btn-secondary", "shadow-sm", 3, "click"], ["type", "submit", 1, "btn", "btn-success", "shadow-sm", 3, "disabled"], ["class", "spinner-border spinner-border-sm me-1", 4, "ngIf"], [1, "fas", "fa-save", "me-1"], ["icon", "fa-edit", 3, "close", "show", "title"], ["class", "col-md-6 form-group mb-3", 4, "ngIf"], ["class", "col-md-12 form-group mb-3", 4, "ngIf"], ["class", "col-md-4 form-group mb-3", 4, "ngIf"], [4, "ngIf"], ["for", "count", 1, "form-label", "font-weight-bold"], ["type", "number", "step", "1", "id", "count", "name", "count", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "kickback", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "kickback", "name", "kickback", 1, "form-control", 3, "input", "value"], [1, "col-md-4", "form-group", "mb-3"], ["for", "received_proposal", 1, "form-label", "font-weight-bold"], ["class", "input-group-text bg-light text-muted font-weight-bold", 4, "ngIf"], ["type", "text", "id", "received_proposal", "name", "received_proposal", "required", "", 1, "form-control", 3, "input", "value"], ["for", "received_proposal_percent", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "received_proposal_percent", "name", "received_proposal_percent", "required", "", 1, "form-control", 3, "input", "value"], ["for", "opt_order", 1, "form-label", "font-weight-bold"], ["type", "number", "id", "opt_order", "name", "order", 1, "form-control", 3, "ngModelChange", "ngModel"], ["title", "Editar Markup Geral", "icon", "fa-percentage", 3, "close", "show"], ["for", "bulk_markup", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "bulk_markup", "name", "bulk_markup", "required", "", 1, "form-control", 3, "input", "value"], ["icon", "fa-user", 3, "close", "show", "title"], [1, "col-12"], [1, "font-weight-bold", "text-primary", "border-bottom", "pb-2", "mb-3"], [1, "fas", "fa-user", "me-1"], ["for", "pax_name", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "pax_name", "name", "name", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "pax_document", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "pax_document", "name", "document", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "pax_birth_date", 1, "form-label", "font-weight-bold"], ["type", "date", "id", "pax_birth_date", "name", "birth_date", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "pax_passport_validity", 1, "form-label", "font-weight-bold"], ["type", "date", "id", "pax_passport_validity", "name", "passport_validity", 1, "form-control", 3, "ngModelChange", "ngModel"], [1, "col-12", "mt-2"], [1, "fas", "fa-plane-departure", "me-1"], ["for", "pax_outbound_date", 1, "form-label", "font-weight-bold"], ["type", "date", "id", "pax_outbound_date", "name", "outbound_date", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "pax_outbound_origin", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "pax_outbound_origin", "name", "outbound_origin", "placeholder", "Ex: GRU", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "pax_outbound_destination", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "pax_outbound_destination", "name", "outbound_destination", "placeholder", "Ex: MIA", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "pax_outbound_departure", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "pax_outbound_departure", "name", "outbound_departure", "placeholder", "Ex: 14:30", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "pax_outbound_arrival", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "pax_outbound_arrival", "name", "outbound_arrival", "placeholder", "Ex: 22:15", 1, "form-control", 3, "ngModelChange", "ngModel"], [1, "fas", "fa-plane-arrival", "me-1"], ["for", "pax_inbound_date", 1, "form-label", "font-weight-bold"], ["type", "date", "id", "pax_inbound_date", "name", "inbound_date", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "pax_inbound_origin", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "pax_inbound_origin", "name", "inbound_origin", "placeholder", "Ex: MIA", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "pax_inbound_destination", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "pax_inbound_destination", "name", "inbound_destination", "placeholder", "Ex: GRU", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "pax_inbound_departure", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "pax_inbound_departure", "name", "inbound_departure", "placeholder", "Ex: 23:30", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "pax_inbound_arrival", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "pax_inbound_arrival", "name", "inbound_arrival", "placeholder", "Ex: 06:45", 1, "form-control", 3, "ngModelChange", "ngModel"], [1, "position-fixed", "top-0", "start-0", "w-100", "h-100", "d-flex", "align-items-center", "justify-content-center", "bg-white", "bg-opacity-75", 2, "z-index", "2000"], ["role", "status", 1, "spinner-border", "text-primary", 2, "width", "3rem", "height", "3rem"], [1, "visually-hidden"], [1, "text-danger", "mt-1"], ["class", "d-block", 4, "ngFor", "ngForOf"], [1, "d-block"], [1, "mb-3", "p-2", "border-bottom"], [1, "form-group", "mb-2"], [1, "form-label", "small", "font-weight-bold", 3, "for"], ["type", "text", "required", "", 1, "form-control", "form-control-sm", 3, "ngModelChange", "id", "ngModel", "name"], ["type", "button", "class", "btn btn-sm btn-outline-danger mt-1", 3, "click", 4, "ngIf"], ["type", "button", 1, "btn", "btn-sm", "btn-outline-danger", "mt-1", 3, "click"], [1, "fas", "fa-trash", "me-1"], ["type", "button", 1, "btn", "btn-sm", "btn-info", "w-100", "mt-2", 3, "click"], [1, "fas", "fa-plus", "me-1"], [3, "value"], [1, "d-flex", "justify-content-end", "gap-2", "mt-4"], ["type", "submit", 1, "btn", "btn-primary", "px-4", "shadow-sm", 3, "disabled"], [1, "spinner-border", "spinner-border-sm", "me-1"], [1, "animate-in"], [1, "d-flex", "justify-content-between", "align-items-center", "mb-3"], [1, "m-0", "font-weight-bold", "text-primary"], [1, "fas", "fa-list", "me-1"], [1, "d-flex", "gap-2"], ["type", "button", 1, "btn", "btn-sm", "btn-info", "text-white", "shadow-sm", 3, "click"], [1, "fas", 3, "ngClass"], ["type", "button", "class", "btn btn-sm btn-success shadow-sm", 3, "click", 4, "ngIf"], [4, "ngFor", "ngForOf"], ["type", "button", 1, "btn", "btn-sm", "btn-success", "shadow-sm", 3, "click"], [1, "card", "card-provider-group", "mb-4", "shadow-sm"], [1, "card-header", "bg-light", "py-3", "d-sm-flex", "align-items-center", "justify-content-between"], [1, "badge", "ms-2", 3, "ngClass"], ["class", "d-flex gap-2", 4, "ngIf"], [1, "card-body", "p-0"], [1, "table-responsive"], [1, "table", "table-bordered", "align-middle", "mb-0", "table-tariffs", 2, "min-width", "1200px"], [1, "text-start", "bg-light", "text-dark", "font-weight-bold"], ["colspan", "3", 1, "bg-success-header", "text-center", "font-weight-bold", "text-white"], ["colspan", "2", 1, "bg-warning-header", "text-center", "font-weight-bold", "text-white"], ["rowspan", "2", 1, "align-middle", "text-center", "bg-light", "text-dark", "font-weight-bold"], ["colspan", "3", "class", "bg-secondary text-white text-center font-weight-bold border-bottom-0", 4, "ngIf"], ["rowspan", "2", "class", "align-middle text-center bg-light text-dark font-weight-bold", "style", "width: 100px", 4, "ngIf"], ["scope", "col", "class", "sticky-col text-start", 4, "ngIf"], ["scope", "col", 1, "sticky-col", "text-start"], ["scope", "col", "class", "text-start", 3, "sticky-col", 4, "ngIf"], ["scope", "col", "class", "text-start", 4, "ngIf"], ["scope", "col", 1, "text-center"], ["scope", "col", 1, "bg-success-header", "text-center", "text-white"], ["scope", "col", 1, "bg-success-header", "text-end", "text-white"], ["scope", "col", 1, "bg-warning-header", "text-end", "text-white"], ["class", "table-subheader", 4, "ngIf"], [1, "observation-row"], ["colspan", "2", 1, "sticky-col", "text-start", "font-weight-bold"], [1, "text-start", "text-dark"], ["colspan", "2", 1, "font-weight-bold", "text-end"], ["colspan", "2", 1, "bg-success-solid", "font-weight-bold", "text-end"], ["colspan", "2", 1, "bg-warning-solid", "font-weight-bold", "text-end"], ["type", "button", "title", "Editar Cadastro do Fornecedor", 1, "btn", "btn-sm", "btn-outline-info", 3, "click"], [1, "fas", "fa-edit", "me-1"], ["type", "button", "title", "Alterar Markup de Todas as Tarifas", 1, "btn", "btn-sm", "btn-outline-primary", 3, "click"], [1, "fas", "fa-percentage", "me-1"], ["type", "button", "title", "Adicionar Nova Tarifa/Op\xE7\xE3o", 1, "btn", "btn-sm", "btn-outline-success", 3, "click"], [3, "confirm", "btnClass", "modalTitle", "message", "okButtonLabel"], ["modal-button", ""], [1, "fas", "fa-trash"], ["colspan", "2", 1, "bg-light", "text-primary", "text-center", "font-weight-bold", "border-bottom-0"], ["colspan", "2", "class", "bg-light text-primary text-center font-weight-bold border-bottom-0", 4, "ngIf"], ["colspan", "3", 1, "bg-secondary", "text-white", "text-center", "font-weight-bold", "border-bottom-0"], ["rowspan", "2", 1, "align-middle", "text-center", "bg-light", "text-dark", "font-weight-bold", 2, "width", "100px"], ["scope", "col", 1, "text-start"], [1, "bg-light", "text-primary", "text-end"], ["class", "bg-light text-primary text-end", 4, "ngIf"], [1, "bg-secondary", "text-white", "text-end"], [1, "py-4", "text-muted"], ["class", "font-weight-bold sticky-col text-dark text-start", 4, "ngIf"], [1, "sticky-col", "text-start"], ["class", "text-start", 3, "sticky-col", 4, "ngIf"], ["class", "text-start", 4, "ngIf"], [1, "text-center"], [1, "bg-success-light", "text-success", "font-weight-bold", "text-center"], [1, "bg-success-light", "text-success", "font-weight-bold", "text-end"], [1, "bg-success-solid", "font-weight-bold", "text-end"], [1, "bg-warning-light", "text-dark", "font-weight-bold", "text-end"], [1, "bg-warning-solid", "font-weight-bold", "text-end"], [1, "text-end"], [1, "font-weight-bold", "sticky-col", "text-dark", "text-start"], [1, "text-start"], [1, "bg-light-tax", "text-primary", "font-weight-bold", "text-end"], [1, "bg-light-tax", "text-primary", "text-end"], ["class", "bg-light-tax text-primary font-weight-bold text-end", 4, "ngIf"], ["class", "bg-light-tax text-primary text-end", 4, "ngIf"], [1, "bg-compare", "text-end", "font-weight-bold"], [1, "d-flex", "justify-content-center", "gap-1"], ["type", "button", "title", "Editar Tarifa", "data-tooltip", "Editar Tarifa", 1, "btn", "btn-info", "text-white", "shadow-sm", "btn-action", 3, "click", "disabled"], [1, "fas", "fa-edit"], ["type", "button", "title", "Clonar Tarifa", "data-tooltip", "Clonar Tarifa", 1, "btn", "btn-secondary", "text-white", "shadow-sm", "btn-action", 3, "click", "disabled"], [1, "fas", "fa-clone"], [3, "confirm", "btnClass", "modalTitle", "message", "okButtonLabel", "tooltip"], [1, "table-subheader"], [1, "sticky-col", "font-weight-bold", "text-start"], [1, "sticky-col", "font-weight-bold", "text-end"], [1, "font-weight-bold", "text-start"], [1, "font-weight-bold", "text-center"], [1, "text-center", "font-weight-bold"], [1, "font-weight-bold", "text-end"], [1, "bg-secondary", "text-white", "text-end", "font-weight-bold"], ["class", "alert alert-secondary py-5 text-center shadow-sm", 4, "ngIf"], [1, "card-body", "p-3"], [1, "table-responsive", "mb-3"], [1, "table", "table-bordered", "align-middle", "mb-0", "bg-white", "shadow-sm", 2, "font-size", "0.9rem"], [1, "bg-light", "text-dark"], [1, "font-weight-bold", "text-warning"], [1, "font-weight-bold", "text-success"], [1, "font-weight-bold"], [1, "font-weight-bold", "text-warning", "bg-warning-light"], [1, "font-weight-bold", "text-success", "bg-success-light"], [1, "mb-4"], [1, "font-weight-bold", "text-primary", "mb-2"], [1, "table", "table-bordered", "table-striped", "align-middle", "mb-0", "table-tariffs", 2, "min-width", "1200px"], [1, "table-dark"], ["colspan", "7", 1, "text-center", "font-weight-bold", "border-bottom-0", "bg-primary"], ["colspan", "7", 1, "text-center", "font-weight-bold", "border-bottom-0", "bg-info"], ["colspan", "5", 1, "text-center", "font-weight-bold", "border-bottom-0", "bg-success"], ["rowspan", "2", "class", "align-middle text-center", 4, "ngIf"], [1, "mt-4", "border-top", "pt-4"], [1, "font-weight-bold", "text-primary", "mb-0"], [1, "fas", "fa-users", "me-1"], [1, "table", "table-bordered", "table-hover", "align-middle", "mb-0", "bg-white", 2, "min-width", "1200px", "font-size", "0.9rem"], [1, "table-secondary", "text-dark"], ["rowspan", "2", 1, "align-middle", "text-start"], ["rowspan", "2", 1, "align-middle", "text-center"], ["colspan", "4", 1, "text-center", "bg-primary", "text-white", "font-weight-bold"], ["colspan", "4", 1, "text-center", "bg-info", "text-white", "font-weight-bold"], ["rowspan", "2", "class", "align-middle text-center", "style", "width: 100px", 4, "ngIf"], ["type", "button", "title", "Adicionar Op\xE7\xE3o de Voo", 1, "btn", "btn-sm", "btn-outline-success", 3, "click"], ["colspan", "6", 1, "text-center", "font-weight-bold", "border-bottom-0", "bg-secondary"], [1, "py-4", "text-muted", "text-center"], [1, "badge", 3, "ngClass"], ["type", "button", "title", "Editar Tarifa", 1, "btn", "btn-info", "text-white", "shadow-sm", "btn-action", "btn-sm", 3, "click", "disabled"], ["type", "button", "title", "Clonar Tarifa", 1, "btn", "btn-secondary", "text-white", "shadow-sm", "btn-action", "btn-sm", 3, "click", "disabled"], [1, "fas", "fa-user-plus", "me-1"], ["rowspan", "2", 1, "align-middle", "text-center", 2, "width", "100px"], ["colspan", "13", 1, "py-3", "text-muted", "text-center"], [1, "font-weight-bold", "text-dark", "text-start"], ["type", "button", "title", "Editar Passageiro", 1, "btn", "btn-outline-info", "btn-sm", "btn-action", 3, "click"], [1, "alert", "alert-secondary", "py-5", "text-center", "shadow-sm"], [1, "fas", "fa-folder-open", "fa-3x", "mb-3", "text-muted"], [1, "text-secondary", "font-weight-bold"], [1, "text-muted", "mb-0"], ["for", "service_charge", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "service_charge", "name", "service_charge", 1, "form-control", 3, "input", "value"], [1, "input-group-text", "bg-light", "text-muted", "font-weight-bold"], [1, "col-md-12", "mb-3"], [1, "card", "p-3", "bg-light", "border", "border-secondary", "border-opacity-10", "shadow-sm"], [1, "row", "align-items-center"], [1, "col-md-4", "form-check", "mb-0", "d-flex", "align-items-center", "gap-2"], ["type", "checkbox", "id", "change_hotel_times", "name", "change_hotel_times", 1, "form-check-input", "mt-0", 3, "ngModelChange", "ngModel"], ["for", "change_hotel_times", 1, "form-check-label", "font-weight-bold", "text-dark", "mb-0"], [1, "col-md-2", "form-group", "mb-0"], ["for", "checkin_time", 1, "form-label", "font-weight-bold", "text-secondary", "mb-1", 2, "font-size", "0.85rem"], ["type", "time", "id", "checkin_time", "name", "checkin_time", 1, "form-control", 3, "ngModelChange", "ngModel", "disabled"], ["for", "checkin_time_end", 1, "form-label", "font-weight-bold", "text-secondary", "mb-1", 2, "font-size", "0.85rem"], ["type", "time", "id", "checkin_time_end", "name", "checkin_time_end", 1, "form-control", 3, "ngModelChange", "ngModel", "disabled"], ["for", "checkout_time", 1, "form-label", "font-weight-bold", "text-secondary", "mb-1", 2, "font-size", "0.85rem"], ["type", "time", "id", "checkout_time", "name", "checkout_time", 1, "form-control", 3, "ngModelChange", "ngModel", "disabled"], ["for", "checkout_time_end", 1, "form-label", "font-weight-bold", "text-secondary", "mb-1", 2, "font-size", "0.85rem"], ["type", "time", "id", "checkout_time_end", "name", "checkout_time_end", 1, "form-control", 3, "ngModelChange", "ngModel", "disabled"], ["for", "broker_id", 1, "form-label", "font-weight-bold"], ["id", "broker_id", "name", "broker_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "regime_id", 1, "form-label", "font-weight-bold"], ["id", "regime_id", "name", "regime_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "purpose_id", 1, "form-label", "font-weight-bold"], ["id", "purpose_id", "name", "purpose_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "hall_name", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "hall_name", "name", "name", "placeholder", "Ex: Audit\xF3rio A / Descri\xE7\xE3o da tarifa", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "hall_m2", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "hall_m2", "name", "m2", "placeholder", "Ex: 150", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "hall_pax", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "hall_pax", "name", "pax", "placeholder", "Ex: 100", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "category_id", 1, "form-label", "font-weight-bold"], ["id", "category_id", "name", "category_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "apto_id", 1, "form-label", "font-weight-bold"], ["id", "apto_id", "name", "apto_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "service_id", 1, "form-label", "font-weight-bold"], ["id", "service_id", "name", "service_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "service_type_id", 1, "form-label", "font-weight-bold"], ["id", "service_type_id", "name", "service_type_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "local_id", 1, "form-label", "font-weight-bold"], ["id", "local_id", "name", "local_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "frequency_id", 1, "form-label", "font-weight-bold"], ["id", "frequency_id", "name", "frequency_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "measure_id", 1, "form-label", "font-weight-bold"], ["id", "measure_id", "name", "measure_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "vehicle_id", 1, "form-label", "font-weight-bold"], ["id", "vehicle_id", "name", "vehicle_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "car_model_id", 1, "form-label", "font-weight-bold"], ["id", "car_model_id", "name", "car_model_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "brand_id", 1, "form-label", "font-weight-bold"], ["id", "brand_id", "name", "brand_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "opt_date_range", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "opt_date_range", "placeholder", "Selecione o per\xEDodo...", "readonly", "", "required", "", 1, "form-control", "bg-white"], ["for", "opt_out", 1, "form-label", "font-weight-bold"], ["type", "date", "id", "opt_out", "name", "out", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "outbound_airline_id", 1, "form-label", "font-weight-bold"], ["id", "outbound_airline_id", "name", "outbound_airline_id", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "outbound_flight_number", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "outbound_flight_number", "name", "outbound_flight_number", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "outbound_class", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "outbound_class", "name", "outbound_class", "placeholder", "Ex: Econ\xF4mica, Executiva", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "outbound_date", 1, "form-label", "font-weight-bold"], ["type", "date", "id", "outbound_date", "name", "outbound_date", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "outbound_origin", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "outbound_origin", "name", "outbound_origin", "placeholder", "Ex: GRU", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "outbound_destination", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "outbound_destination", "name", "outbound_destination", "placeholder", "Ex: MIA", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "outbound_departure_time", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "outbound_departure_time", "name", "outbound_departure_time", "placeholder", "Ex: 14:30", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "outbound_arrival_time", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "outbound_arrival_time", "name", "outbound_arrival_time", "placeholder", "Ex: 22:15", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "outbound_connection_details", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "outbound_connection_details", "name", "outbound_connection_details", "placeholder", "Ex: Direto, 1 parada", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "inbound_airline_id", 1, "form-label", "font-weight-bold"], ["id", "inbound_airline_id", "name", "inbound_airline_id", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "inbound_flight_number", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "inbound_flight_number", "name", "inbound_flight_number", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "inbound_class", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "inbound_class", "name", "inbound_class", "placeholder", "Ex: Econ\xF4mica, Executiva", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "inbound_date", 1, "form-label", "font-weight-bold"], ["type", "date", "id", "inbound_date", "name", "inbound_date", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "inbound_origin", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "inbound_origin", "name", "inbound_origin", "placeholder", "Ex: MIA", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "inbound_destination", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "inbound_destination", "name", "inbound_destination", "placeholder", "Ex: GRU", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "inbound_departure_time", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "inbound_departure_time", "name", "inbound_departure_time", "placeholder", "Ex: 23:30", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "inbound_arrival_time", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "inbound_arrival_time", "name", "inbound_arrival_time", "placeholder", "Ex: 06:45", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "inbound_connection_details", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "inbound_connection_details", "name", "inbound_connection_details", "placeholder", "Ex: Direto, 1 parada", 1, "form-control", 3, "ngModelChange", "ngModel"], [1, "fas", "fa-cog", "me-1"], ["for", "baggage_id", 1, "form-label", "font-weight-bold"], ["id", "baggage_id", "name", "baggage_id", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "cabin_id", 1, "form-label", "font-weight-bold"], ["id", "cabin_id", "name", "cabin_id", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "opt_currency_id", 1, "form-label", "font-weight-bold"], ["id", "opt_currency_id", "name", "currency_id", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "compare_website", 1, "form-label", "font-weight-bold"], ["type", "number", "step", "0.01", "id", "compare_website", "name", "compare_website", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "compare_client", 1, "form-label", "font-weight-bold"], ["type", "number", "step", "0.01", "id", "compare_client", "name", "compare_client", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "status", 1, "form-label", "font-weight-bold"], ["id", "status", "name", "status", 1, "form-select", 3, "ngModelChange", "ngModel"], ["value", "created"], ["value", "pending"], ["value", "confirmed"], ["value", "cancelled"], [1, "col-12", "form-group", "mb-3"], ["for", "observation", 1, "form-label", "font-weight-bold"], ["id", "observation", "rows", "2", "name", "observation", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "compare_trivago", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "compare_trivago", "name", "compare_trivago", 1, "form-control", 3, "input", "value"], ["for", "compare_website_htl", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "compare_website_htl", "name", "compare_website_htl", 1, "form-control", 3, "input", "value"], ["for", "compare_omnibess", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "compare_omnibess", "name", "compare_omnibess", 1, "form-control", 3, "input", "value"], ["for", "opt_observation", 1, "form-label", "font-weight-bold"], ["id", "opt_observation", "rows", "2", "name", "observation", 1, "form-control", 3, "ngModelChange", "ngModel"]], template: function EventCreateComponent_Template(rf, ctx) {
+  }, decls: 289, vars: 166, consts: [["dateRangePicker", ""], ["optDateRangePicker", ""], ["class", "position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-75", "style", "z-index: 2000", 4, "ngIf"], ["header", ""], [1, "d-sm-flex", "align-items-center", "justify-content-between", "mb-4", "animate-in"], [1, "h3", "mb-0", "text-gray-800"], [1, "fa", "fa-calendar-check", "me-2", "text-primary"], ["routerLink", "/event-list", 1, "btn", "btn-secondary", "btn-sm", "shadow-sm"], [1, "fas", "fa-arrow-left", "me-1"], [1, "row"], [1, "col-lg-12"], [1, "nav", "nav-tabs", "animate-in", 2, "animation-delay", "0.05s"], [1, "nav-item"], [1, "nav-link", 2, "cursor", "pointer", 3, "click"], [1, "fas", "fa-info-circle", "me-1"], [1, "fas", "fa-hotel", "me-1"], [1, "fas", "fa-utensils", "me-1"], [1, "fas", "fa-door-open", "me-1"], [1, "fas", "fa-concierge-bell", "me-1"], [1, "fas", "fa-bus", "me-1"], [1, "fas", "fa-plane", "me-1"], [1, "card", "shadow-sm", "border-left-primary", "mb-4", "animate-in"], [1, "card-body"], [3, "ngSubmit"], [1, "border-0", "p-0", "m-0", 3, "disabled"], [1, "col-lg-4"], [1, "form-group", "mb-3"], ["for", "name", 1, "form-label", "font-weight-bold"], [1, "text-danger"], ["type", "text", "id", "name", "name", "name", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], ["class", "text-danger mt-1", 4, "ngIf"], ["for", "code", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "code", "name", "code", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], [1, "border", "rounded", "p-3", "bg-light"], [1, "font-weight-bold", "text-primary", "mb-3"], [1, "fas", "fa-map-marker-alt", "me-1"], ["class", "mb-3 p-2 border-bottom", 4, "ngFor", "ngForOf"], ["type", "button", "class", "btn btn-sm btn-info w-100 mt-2", 3, "click", 4, "ngIf"], ["for", "customer", 1, "form-label", "font-weight-bold"], ["id", "customer", "name", "customer", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["value", ""], [3, "ngValue", 4, "ngFor", "ngForOf"], ["for", "requester", 1, "form-label", "font-weight-bold"], ["id", "requester", "name", "requester", "required", "", 1, "form-select", 3, "ngModelChange", "mousedown", "ngModel"], [3, "value", 4, "ngFor", "ngForOf"], ["for", "sector", 1, "form-label", "font-weight-bold"], ["id", "sector", "name", "sector", "required", "", 1, "form-select", 3, "ngModelChange", "mousedown", "ngModel"], ["for", "cc", 1, "form-label", "font-weight-bold"], ["id", "cc", "name", "cc", "required", "", 1, "form-select", 3, "ngModelChange", "mousedown", "ngModel"], ["for", "paxBase", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "paxBase", "name", "paxBase", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "dateRange", 1, "form-label", "font-weight-bold"], [1, "input-group"], [1, "input-group-text", "bg-light"], [1, "fas", "fa-calendar-alt", "text-primary"], ["type", "text", "id", "dateRange", "placeholder", "Selecione o per\xEDodo...", "readonly", "", "required", "", 1, "form-control", "bg-white"], ["for", "crd_id", 1, "form-label", "font-weight-bold"], ["id", "crd_id", "name", "crd_id", "required", "", 1, "form-select", 3, "ngModelChange", "mousedown", "ngModel"], ["for", "hotel_operator", 1, "form-label", "font-weight-bold"], ["id", "hotel_operator", "name", "hotel_operator", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "land_operator", 1, "form-label", "font-weight-bold"], ["id", "land_operator", "name", "land_operator", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "air_operator", 1, "form-label", "font-weight-bold"], ["id", "air_operator", "name", "air_operator", 1, "form-select", 3, "ngModelChange", "ngModel"], ["class", "d-flex justify-content-end gap-2 mt-4", 4, "ngIf"], ["class", "animate-in", 4, "ngIf"], [3, "close", "show", "title", "icon"], [1, "mb-3", 3, "ngClass"], ["id", "provider_id", "valueField", "id", "name", "provider_id", 3, "ngModelChange", "label", "placeholder", "required", "searchFn", "displayFn", "initialText", "ngModel", "errors", "disabled"], ["class", "col-md-4 form-group mb-3", 4, "ngIf"], [1, "form-group", "mb-3", 3, "ngClass"], ["for", "currency_id", 1, "form-label", "font-weight-bold"], ["id", "currency_id", "name", "currency_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["class", "form-group mb-3", 3, "ngClass", 4, "ngIf"], ["for", "iof", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "iof", "name", "iof", 1, "form-control", 3, "input", "value"], ["class", "col-md-2 form-group mb-3", 4, "ngIf"], ["for", "taxa_4bts", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "taxa_4bts", "name", "taxa_4bts", "required", "", 1, "form-control", 3, "input", "value"], ["for", "payment_method", 1, "form-label", "font-weight-bold"], ["id", "payment_method", "name", "payment_method", 1, "form-select", 3, "ngModelChange", "ngModel"], ["value", "Indefinido"], ["value", "Dinheiro"], ["value", "Cart\xE3o"], ["for", "invoice", 1, "form-label", "font-weight-bold"], ["id", "invoice", "name", "invoice", 1, "form-select", 3, "ngModelChange", "ngModel"], [3, "ngValue"], ["for", "deadline_date", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "deadline_date", "placeholder", "dd/mm/aaaa", "appFlatpickr", "", "name", "deadline_date", 1, "form-control", "bg-white", 3, "ngModelChange", "ngModel"], ["class", "col-md-12 mb-3", 4, "ngIf"], [1, "w-100"], [1, "col-md-6", "form-group", "mb-3"], ["for", "internal_observation", 1, "form-label", "font-weight-bold"], ["id", "internal_observation", "rows", "3", "name", "internal_observation", "placeholder", "Observa\xE7\xF5es internas...", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "customer_observation", 1, "form-label", "font-weight-bold"], ["id", "customer_observation", "rows", "3", "name", "customer_observation", "placeholder", "Observa\xE7\xF5es para o cliente...", 1, "form-control", 3, "ngModelChange", "ngModel"], [1, "modal-footer", "px-0", "pb-0", "pt-3", "d-flex", "justify-content-end", "gap-2", "border-top"], ["type", "button", 1, "btn", "btn-secondary", "shadow-sm", 3, "click"], ["type", "submit", 1, "btn", "btn-success", "shadow-sm", 3, "disabled"], ["class", "spinner-border spinner-border-sm me-1", 4, "ngIf"], [1, "fas", "fa-save", "me-1"], ["icon", "fa-edit", 3, "close", "show", "title"], ["class", "col-md-6 form-group mb-3", 4, "ngIf"], ["class", "col-md-12 form-group mb-3", 4, "ngIf"], [4, "ngIf"], ["title", "Editar Markup Geral", "icon", "fa-percentage", 3, "close", "show"], [1, "col-md-12", "form-group", "mb-3"], ["for", "bulk_markup", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "bulk_markup", "name", "bulk_markup", "required", "", 1, "form-control", 3, "input", "value"], [1, "position-fixed", "top-0", "start-0", "w-100", "h-100", "d-flex", "align-items-center", "justify-content-center", "bg-white", "bg-opacity-75", 2, "z-index", "2000"], ["role", "status", 1, "spinner-border", "text-primary", 2, "width", "3rem", "height", "3rem"], [1, "visually-hidden"], [1, "text-danger", "mt-1"], ["class", "d-block", 4, "ngFor", "ngForOf"], [1, "d-block"], [1, "mb-3", "p-2", "border-bottom"], [1, "form-group", "mb-2"], [1, "form-label", "small", "font-weight-bold", 3, "for"], ["type", "text", "required", "", 1, "form-control", "form-control-sm", 3, "ngModelChange", "id", "ngModel", "name"], ["type", "button", "class", "btn btn-sm btn-outline-danger mt-1", 3, "click", 4, "ngIf"], ["type", "button", 1, "btn", "btn-sm", "btn-outline-danger", "mt-1", 3, "click"], [1, "fas", "fa-trash", "me-1"], ["type", "button", 1, "btn", "btn-sm", "btn-info", "w-100", "mt-2", 3, "click"], [1, "fas", "fa-plus", "me-1"], [3, "value"], [1, "d-flex", "justify-content-end", "gap-2", "mt-4"], ["type", "submit", 1, "btn", "btn-primary", "px-4", "shadow-sm", 3, "disabled"], [1, "spinner-border", "spinner-border-sm", "me-1"], [1, "animate-in"], [1, "d-flex", "justify-content-between", "align-items-center", "mb-3"], [1, "m-0", "font-weight-bold", "text-primary"], [1, "fas", "fa-list", "me-1"], [1, "d-flex", "gap-2"], ["type", "button", 1, "btn", "btn-sm", "btn-info", "text-white", "shadow-sm", 3, "click"], [1, "fas", 3, "ngClass"], ["type", "button", "class", "btn btn-sm btn-success shadow-sm", 3, "click", 4, "ngIf"], [4, "ngFor", "ngForOf"], ["class", "alert alert-secondary py-5 text-center shadow-sm", 4, "ngIf"], ["type", "button", 1, "btn", "btn-sm", "btn-success", "shadow-sm", 3, "click"], [1, "card", "card-provider-group", "mb-4", "shadow-sm"], [1, "card-header", "bg-light", "py-3", "d-sm-flex", "align-items-center", "justify-content-between"], [1, "badge", "ms-2", 3, "ngClass"], ["class", "d-flex gap-2", 4, "ngIf"], [1, "card-body", "p-0"], [1, "table-responsive"], [1, "table", "table-bordered", "align-middle", "mb-0", "table-tariffs", 2, "min-width", "1200px"], [1, "text-start", "bg-light", "text-dark", "font-weight-bold"], ["colspan", "3", 1, "bg-success-header", "text-center", "font-weight-bold", "text-white"], ["colspan", "2", 1, "bg-warning-header", "text-center", "font-weight-bold", "text-white"], ["rowspan", "2", 1, "align-middle", "text-center", "bg-light", "text-dark", "font-weight-bold"], ["colspan", "3", "class", "bg-secondary text-white text-center font-weight-bold border-bottom-0", 4, "ngIf"], ["rowspan", "2", "class", "align-middle text-center bg-light text-dark font-weight-bold", "style", "width: 100px", 4, "ngIf"], ["scope", "col", "class", "sticky-col text-start", 4, "ngIf"], ["scope", "col", 1, "sticky-col", "text-start"], ["scope", "col", "class", "text-start", 3, "sticky-col", 4, "ngIf"], ["scope", "col", "class", "text-start", 4, "ngIf"], ["scope", "col", 1, "text-center"], ["scope", "col", 1, "bg-success-header", "text-center", "text-white"], ["scope", "col", 1, "bg-success-header", "text-end", "text-white"], ["scope", "col", 1, "bg-warning-header", "text-end", "text-white"], ["class", "table-subheader", 4, "ngIf"], [1, "observation-row"], ["colspan", "2", 1, "sticky-col", "text-start", "font-weight-bold"], [1, "text-start", "text-dark"], ["colspan", "2", 1, "font-weight-bold", "text-end"], ["colspan", "2", 1, "bg-success-solid", "font-weight-bold", "text-end"], ["colspan", "2", 1, "bg-warning-solid", "font-weight-bold", "text-end"], ["type", "button", "title", "Editar Cadastro do Fornecedor", 1, "btn", "btn-sm", "btn-outline-info", 3, "click"], [1, "fas", "fa-edit", "me-1"], ["type", "button", "title", "Alterar Markup de Todas as Tarifas", 1, "btn", "btn-sm", "btn-outline-primary", 3, "click"], [1, "fas", "fa-percentage", "me-1"], ["type", "button", "title", "Adicionar Nova Tarifa/Op\xE7\xE3o", 1, "btn", "btn-sm", "btn-outline-success", 3, "click"], [3, "confirm", "btnClass", "modalTitle", "message", "okButtonLabel"], ["modal-button", ""], [1, "fas", "fa-trash"], ["colspan", "2", 1, "bg-light", "text-primary", "text-center", "font-weight-bold", "border-bottom-0"], ["colspan", "2", "class", "bg-light text-primary text-center font-weight-bold border-bottom-0", 4, "ngIf"], ["colspan", "3", 1, "bg-secondary", "text-white", "text-center", "font-weight-bold", "border-bottom-0"], ["rowspan", "2", 1, "align-middle", "text-center", "bg-light", "text-dark", "font-weight-bold", 2, "width", "100px"], ["scope", "col", 1, "text-start"], [1, "bg-light", "text-primary", "text-end"], ["class", "bg-light text-primary text-end", 4, "ngIf"], [1, "bg-secondary", "text-white", "text-end"], [1, "py-4", "text-muted"], ["class", "font-weight-bold sticky-col text-dark text-start", 4, "ngIf"], [1, "sticky-col", "text-start"], ["class", "text-start", 3, "sticky-col", 4, "ngIf"], ["class", "text-start", 4, "ngIf"], [1, "text-center"], [1, "bg-success-light", "text-success", "font-weight-bold", "text-center"], [1, "bg-success-light", "text-success", "font-weight-bold", "text-end"], [1, "bg-success-solid", "font-weight-bold", "text-end"], [1, "bg-warning-light", "text-dark", "font-weight-bold", "text-end"], [1, "bg-warning-solid", "font-weight-bold", "text-end"], [1, "text-end"], [1, "font-weight-bold", "sticky-col", "text-dark", "text-start"], [1, "text-start"], [1, "bg-light-tax", "text-primary", "font-weight-bold", "text-end"], [1, "bg-light-tax", "text-primary", "text-end"], ["class", "bg-light-tax text-primary font-weight-bold text-end", 4, "ngIf"], ["class", "bg-light-tax text-primary text-end", 4, "ngIf"], [1, "bg-compare", "text-end", "font-weight-bold"], [1, "d-flex", "justify-content-center", "gap-1"], ["type", "button", "title", "Editar Tarifa", "data-tooltip", "Editar Tarifa", 1, "btn", "btn-info", "text-white", "shadow-sm", "btn-action", 3, "click", "disabled"], [1, "fas", "fa-edit"], ["type", "button", "title", "Clonar Tarifa", "data-tooltip", "Clonar Tarifa", 1, "btn", "btn-secondary", "text-white", "shadow-sm", "btn-action", 3, "click", "disabled"], [1, "fas", "fa-clone"], [3, "confirm", "btnClass", "modalTitle", "message", "okButtonLabel", "tooltip"], [1, "table-subheader"], [1, "sticky-col", "font-weight-bold", "text-start"], [1, "sticky-col", "font-weight-bold", "text-end"], [1, "font-weight-bold", "text-start"], [1, "font-weight-bold", "text-center"], [1, "text-center", "font-weight-bold"], [1, "font-weight-bold", "text-end"], [1, "bg-secondary", "text-white", "text-end", "font-weight-bold"], [1, "alert", "alert-secondary", "py-5", "text-center", "shadow-sm"], [1, "fas", "fa-folder-open", "fa-3x", "mb-3", "text-muted"], [1, "text-secondary", "font-weight-bold"], [1, "text-muted", "mb-0"], [1, "bg-light", "px-3", "py-2", "border-bottom", "d-flex", "flex-wrap", "align-items-center", "justify-content-between", "gap-3", 2, "font-size", "0.85rem"], [1, "font-weight-bold", "text-secondary", "me-1"], [1, "fas", "fa-plane", "me-1", "text-primary"], [1, "badge", "bg-primary", "text-white", "font-weight-bold", 2, "font-size", "0.82rem"], [1, "d-flex", "align-items-center", "gap-1"], [1, "fas", "fa-users", "me-1", "text-primary"], [1, "badge", "bg-light", "text-dark", "border"], [1, "badge", "bg-success", "text-white", "font-weight-bold", "ms-1"], [1, "d-flex", "align-items-center", "gap-3"], [1, "far", "fa-calendar-alt", "me-1", "text-primary"], [1, "text-dark", "font-weight-bold"], [1, "far", "fa-clock", "me-1", "text-warning"], [1, "table", "table-bordered", "align-middle", "mb-0", "table-tariffs", "shadow-sm", 2, "min-width", "1200px"], ["colspan", "7", 1, "text-start", "bg-light", "text-dark", "font-weight-bold"], [1, "fas", "fa-route", "me-1", "text-primary"], [1, "bg-light", "text-center", "font-weight-bold", "text-dark", 2, "width", "90px"], [1, "bg-warning-header", "text-center", "font-weight-bold", "text-white", 2, "width", "140px"], [1, "bg-success-header", "text-center", "font-weight-bold", "text-white", 2, "width", "140px"], ["class", "align-middle text-center bg-light text-dark font-weight-bold", "style", "width: 110px;", 4, "ngIf"], [1, "text-center", "font-weight-bold", 2, "width", "80px"], [1, "text-center", "font-weight-bold", 2, "width", "90px"], [1, "text-center", "font-weight-bold", 2, "width", "110px"], [1, "text-end", "font-weight-bold", "text-warning-emphasis"], [1, "text-end", "font-weight-bold", "text-success"], ["class", "text-center font-weight-bold", "style", "width: 110px;", 4, "ngIf"], ["colspan", "2", 1, "sticky-col", "font-weight-bold", "text-start"], [1, "font-weight-bold", "text-start", "text-dark"], [1, "text-center", "font-weight-bold", "text-dark"], ["colspan", "3", 1, "font-weight-bold", "text-start", "text-primary"], [1, "text-end", "font-weight-bold", "text-primary"], ["colspan", "2", 1, "sticky-col", "text-start", "font-weight-bold", "text-dark"], [1, "fas", "fa-concierge-bell", "me-1", "text-primary"], [1, "text-start", "py-2"], [1, "d-flex", "flex-wrap", "gap-2"], [1, "badge", 3, "ngClass"], [1, "fas", "fa-suitcase", "me-1", "text-primary"], [1, "fas", "fa-briefcase", "me-1", "text-primary"], ["colspan", "3", 1, "text-start", "font-weight-bold", "text-dark"], [1, "badge", "bg-secondary"], ["class", "observation-row", 4, "ngIf"], ["type", "button", "title", "Editar Or\xE7amento de Fretamento", 1, "btn", "btn-sm", "btn-outline-info", 3, "click"], ["type", "button", "title", "Novo Trecho", 1, "btn", "btn-sm", "btn-outline-success", 3, "click"], [1, "align-middle", "text-center", "bg-light", "text-dark", "font-weight-bold", 2, "width", "110px"], [1, "py-4", "text-muted", "text-center"], [1, "text-center", "font-weight-bold", "text-primary"], ["class", "text-center font-weight-bold align-middle bg-light text-primary", "style", "font-size: 0.95rem;", 4, "ngIf"], ["class", "text-end font-weight-bold align-middle bg-warning-light text-dark", "style", "font-size: 0.95rem;", 4, "ngIf"], ["class", "text-end font-weight-bold align-middle bg-success-light text-success", "style", "font-size: 0.95rem;", 4, "ngIf"], ["class", "align-middle text-center", "style", "width: 110px;", 4, "ngIf"], [1, "text-center", "font-weight-bold", "align-middle", "bg-light", "text-primary", 2, "font-size", "0.95rem"], [1, "text-end", "font-weight-bold", "align-middle", "bg-warning-light", "text-dark", 2, "font-size", "0.95rem"], [1, "text-end", "font-weight-bold", "align-middle", "bg-success-light", "text-success", 2, "font-size", "0.95rem"], [1, "align-middle", "text-center", 2, "width", "110px"], [1, "d-flex", "justify-content-center", "align-items-center", "gap-1"], ["type", "button", "title", "Editar Trecho", "data-tooltip", "Editar Trecho", 1, "btn", "btn-info", "text-white", "shadow-sm", "btn-action", 3, "click", "disabled"], ["type", "button", "title", "Clonar Trecho", "data-tooltip", "Clonar Trecho", 1, "btn", "btn-secondary", "text-white", "shadow-sm", "btn-action", 3, "click", "disabled"], [1, "d-flex", "flex-wrap", "gap-2", "align-items-center"], ["target", "_blank", "class", "d-inline-block border rounded p-1 bg-light shadow-sm", 3, "href", 4, "ngIf"], ["target", "_blank", 1, "d-inline-block", "border", "rounded", "p-1", "bg-light", "shadow-sm", 3, "href"], [1, "rounded", 2, "height", "50px", "max-width", "80px", "object-fit", "contain", 3, "src"], [1, "col-md-4", "form-group", "mb-3"], ["for", "equipment", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "equipment", "placeholder", "Ex: Boeing 737-700 / Turboprop", "name", "equipment", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "iss_percent", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "iss_percent", "name", "iss_percent", 1, "form-control", 3, "input", "value"], ["for", "service_percent", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "service_percent", "name", "service_percent", 1, "form-control", 3, "input", "value"], ["for", "iva_percent", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "iva_percent", "name", "iva_percent", 1, "form-control", 3, "input", "value"], [1, "col-md-2", "form-group", "mb-3"], ["for", "service_charge", 1, "form-label", "font-weight-bold"], ["class", "input-group-text bg-light text-muted font-weight-bold", 4, "ngIf"], ["type", "text", "id", "service_charge", "name", "service_charge", 1, "form-control", 3, "input", "value"], [1, "input-group-text", "bg-light", "text-muted", "font-weight-bold"], ["for", "prazo_cia", 1, "form-label", "font-weight-bold"], [1, "fas", "fa-calendar-alt", "text-warning"], ["type", "text", "id", "prazo_cia", "placeholder", "dd/mm/aaaa", "appFlatpickr", "", "name", "prazo_cia", 1, "form-control", "bg-white", 3, "ngModelChange", "ngModel"], [1, "col-md-12", "mb-3"], [1, "card", "p-3", "bg-light", "border", "border-warning", "shadow-sm"], [1, "text-warning-emphasis", "font-weight-bold", "mb-3"], [1, "fas", "fa-plane-departure", "me-2"], [1, "form-label", "font-weight-bold", "text-dark", "mb-1"], [1, "row", "bg-white", "p-2", "border", "rounded"], [1, "col-md-2", "form-group"], [1, "small", "font-weight-bold"], ["type", "number", "min", "0", "name", "pax_first", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["type", "number", "min", "0", "name", "pax_executiva", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["type", "number", "min", "0", "name", "pax_premium", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], [1, "col-md-3", "form-group"], ["type", "number", "min", "0", "name", "pax_economica", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["type", "number", "readonly", "", "name", "total_pax", 1, "form-control", "form-control-sm", "bg-light", "font-weight-bold", "text-primary", 3, "value"], [1, "col-md-3", "form-group", "mb-2"], [1, "small", "font-weight-bold", "d-block"], ["name", "inc_taxa_embarque", 1, "form-select", "form-select-sm", 3, "ngModelChange", "ngModel"], ["name", "inc_servico_bordo", 1, "form-select", "form-select-sm", 3, "ngModelChange", "ngModel"], [1, "input-group", "input-group-sm"], ["type", "number", "min", "0", "step", "1", "name", "inc_porao", "placeholder", "23", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["type", "number", "min", "0", "step", "1", "name", "inc_bagagem_bordo", "placeholder", "10", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["name", "inc_sala_vip", 1, "form-select", "form-select-sm", 3, "ngModelChange", "ngModel"], ["type", "text", "name", "inc_fbo_origem", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["type", "text", "name", "inc_fbo_destino", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["name", "inc_alteracao_nomes", 1, "form-select", "form-select-sm", 3, "ngModelChange", "ngModel"], [1, "fas", "fa-coins", "me-1", "text-warning"], [1, "row", "bg-white", "p-3", "border", "rounded", "shadow-sm"], [1, "col-md-4", "form-group", "mb-2"], [1, "small", "font-weight-bold", "text-primary"], ["type", "text", "name", "total_net_sem_4bts", "placeholder", "0,00", 1, "form-control", "form-control-sm", "font-weight-bold", 3, "input", "value"], [1, "small", "font-weight-bold", "text-dark"], ["type", "number", "step", "0.01", "min", "0.01", "name", "markup", "placeholder", "0.75", 1, "form-control", "form-control-sm", "font-weight-bold", 3, "ngModelChange", "blur", "ngModel"], ["type", "text", "name", "taxa_embarque_unit", "placeholder", "0,00", 1, "form-control", "form-control-sm", 3, "input", "value"], [1, "fas", "fa-file-pdf", "me-1", "text-danger"], ["for", "observations", 1, "small", "font-weight-bold"], ["id", "observations", "rows", "3", "name", "observations", "placeholder", "T\xF3picos de observa\xE7\xF5es da proposta...", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["for", "notes", 1, "small", "font-weight-bold"], ["id", "notes", "rows", "3", "name", "notes", "placeholder", "Notas internas do fretamento...", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], [1, "col-md-12"], [1, "small", "font-weight-bold", "d-block", "mb-2"], ["class", "col-md-3 mb-2", 4, "ngFor", "ngForOf"], [1, "col-md-3", "mb-2"], [1, "border", "p-2", "text-center", "bg-light", "rounded", "h-100", "d-flex", "flex-column", "justify-content-between"], [1, "d-block", "font-weight-bold", "mb-1", 2, "font-size", "0.85rem"], ["class", "mb-2 position-relative d-inline-block mx-auto", 4, "ngIf"], ["class", "mb-2 d-flex align-items-center justify-content-center border rounded bg-white text-muted mx-auto w-100", "style", "height: 80px;", 4, "ngIf"], ["type", "file", "accept", "image/*", 1, "form-control", "form-control-sm", 3, "change", "id"], [1, "mb-2", "position-relative", "d-inline-block", "mx-auto"], [1, "rounded", "border", "bg-white", "shadow-sm", 2, "max-height", "80px", "max-width", "100%", "object-fit", "contain", 3, "src"], ["type", "button", "title", "Remover foto", 1, "btn", "btn-danger", "btn-sm", "position-absolute", "shadow-sm", 2, "top", "-6px", "right", "-6px", "width", "20px", "height", "20px", "padding", "0", "font-size", "11px", "border-radius", "50%", "line-height", "1", 3, "click"], [1, "mb-2", "d-flex", "align-items-center", "justify-content-center", "border", "rounded", "bg-white", "text-muted", "mx-auto", "w-100", 2, "height", "80px"], [1, "fa", "fa-image", "fa-2x", "text-black-50"], [1, "card", "p-3", "bg-light", "border", "border-secondary", "border-opacity-10", "shadow-sm"], [1, "row", "align-items-center"], [1, "col-md-4", "form-check", "mb-0", "d-flex", "align-items-center", "gap-2"], ["type", "checkbox", "id", "change_hotel_times", "name", "change_hotel_times", 1, "form-check-input", "mt-0", 3, "ngModelChange", "ngModel"], ["for", "change_hotel_times", 1, "form-check-label", "font-weight-bold", "text-dark", "mb-0"], [1, "col-md-2", "form-group", "mb-0"], ["for", "checkin_time", 1, "form-label", "font-weight-bold", "text-secondary", "mb-1", 2, "font-size", "0.85rem"], ["type", "time", "id", "checkin_time", "name", "checkin_time", 1, "form-control", 3, "ngModelChange", "ngModel", "disabled"], ["for", "checkin_time_end", 1, "form-label", "font-weight-bold", "text-secondary", "mb-1", 2, "font-size", "0.85rem"], ["type", "time", "id", "checkin_time_end", "name", "checkin_time_end", 1, "form-control", 3, "ngModelChange", "ngModel", "disabled"], ["for", "checkout_time", 1, "form-label", "font-weight-bold", "text-secondary", "mb-1", 2, "font-size", "0.85rem"], ["type", "time", "id", "checkout_time", "name", "checkout_time", 1, "form-control", 3, "ngModelChange", "ngModel", "disabled"], ["for", "checkout_time_end", 1, "form-label", "font-weight-bold", "text-secondary", "mb-1", 2, "font-size", "0.85rem"], ["type", "time", "id", "checkout_time_end", "name", "checkout_time_end", 1, "form-control", 3, "ngModelChange", "ngModel", "disabled"], ["for", "broker_id", 1, "form-label", "font-weight-bold"], ["id", "broker_id", "name", "broker_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "regime_id", 1, "form-label", "font-weight-bold"], ["id", "regime_id", "name", "regime_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "purpose_id", 1, "form-label", "font-weight-bold"], ["id", "purpose_id", "name", "purpose_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "hall_name", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "hall_name", "name", "name", "placeholder", "Ex: Audit\xF3rio A / Descri\xE7\xE3o da tarifa", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "hall_m2", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "hall_m2", "name", "m2", "placeholder", "Ex: 150", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "hall_pax", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "hall_pax", "name", "pax", "placeholder", "Ex: 100", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "category_id", 1, "form-label", "font-weight-bold"], ["id", "category_id", "name", "category_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "apto_id", 1, "form-label", "font-weight-bold"], ["id", "apto_id", "name", "apto_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "service_id", 1, "form-label", "font-weight-bold"], ["id", "service_id", "name", "service_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "service_type_id", 1, "form-label", "font-weight-bold"], ["id", "service_type_id", "name", "service_type_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "local_id", 1, "form-label", "font-weight-bold"], ["id", "local_id", "name", "local_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "frequency_id", 1, "form-label", "font-weight-bold"], ["id", "frequency_id", "name", "frequency_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "measure_id", 1, "form-label", "font-weight-bold"], ["id", "measure_id", "name", "measure_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "vehicle_id", 1, "form-label", "font-weight-bold"], ["id", "vehicle_id", "name", "vehicle_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "car_model_id", 1, "form-label", "font-weight-bold"], ["id", "car_model_id", "name", "car_model_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "brand_id", 1, "form-label", "font-weight-bold"], ["id", "brand_id", "name", "brand_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "opt_date_range", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "opt_date_range", "placeholder", "Selecione o per\xEDodo...", "readonly", "", "required", "", 1, "form-control", "bg-white"], ["for", "opt_out", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "opt_out", "placeholder", "dd/mm/aaaa", "appFlatpickr", "", "name", "out", "required", "", 1, "form-control", "bg-white", 3, "ngModelChange", "ngModel"], ["for", "outbound_airline_id", 1, "form-label", "font-weight-bold"], ["id", "outbound_airline_id", "name", "outbound_airline_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "outbound_flight_number", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "outbound_flight_number", "name", "outbound_flight_number", "placeholder", "Ex: 1851", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], [1, "col-md-6", "mb-3"], ["label", "DE", "id", "outbound_origin", "placeholder", "Digite IATA, cidade ou nome do aeroporto...", "valueField", "formatted", "name", "outbound_origin", 3, "ngModelChange", "required", "searchFn", "displayFn", "ngModel", "initialText", "errors"], ["label", "PARA", "id", "outbound_destination", "placeholder", "Digite IATA, cidade ou nome do aeroporto...", "valueField", "formatted", "name", "outbound_destination", 3, "ngModelChange", "required", "searchFn", "displayFn", "ngModel", "initialText", "errors"], ["for", "outbound_date", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "outbound_date", "placeholder", "dd/mm/aaaa", "appFlatpickr", "", "name", "outbound_date", "required", "", 1, "form-control", "bg-white", 3, "ngModelChange", "ngModel"], ["for", "outbound_departure_time", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "outbound_departure_time", "name", "outbound_departure_time", "placeholder", "Ex: 10:55", "mask", "00:00", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel", "dropSpecialCharacters"], ["for", "outbound_arrival_time", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "outbound_arrival_time", "name", "outbound_arrival_time", "placeholder", "Ex: 12:20", "mask", "00:00", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel", "dropSpecialCharacters"], ["for", "count", 1, "form-label", "font-weight-bold"], ["type", "number", "step", "1", "id", "count", "name", "count", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "kickback", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "kickback", "name", "kickback", 1, "form-control", 3, "input", "value"], ["for", "received_proposal", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "received_proposal", "name", "received_proposal", "required", "", 1, "form-control", 3, "input", "value"], ["for", "received_proposal_percent", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "received_proposal_percent", "name", "received_proposal_percent", "required", "", 1, "form-control", 3, "input", "value"], ["for", "opt_order", 1, "form-label", "font-weight-bold"], ["type", "number", "id", "opt_order", "name", "order", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "compare_trivago", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "compare_trivago", "name", "compare_trivago", 1, "form-control", 3, "input", "value"], ["for", "compare_website_htl", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "compare_website_htl", "name", "compare_website_htl", 1, "form-control", 3, "input", "value"], ["for", "compare_omnibess", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "compare_omnibess", "name", "compare_omnibess", 1, "form-control", 3, "input", "value"], ["for", "opt_observation", 1, "form-label", "font-weight-bold"], ["id", "opt_observation", "rows", "2", "name", "observation", 1, "form-control", 3, "ngModelChange", "ngModel"]], template: function EventCreateComponent_Template(rf, ctx) {
     if (rf & 1) {
       const _r1 = \u0275\u0275getCurrentView();
       \u0275\u0275elementStart(0, "app-authenticated-layout");
@@ -120253,10 +120978,8 @@ var EventCreateComponent = class _EventCreateComponent {
       \u0275\u0275elementEnd()()()()();
       \u0275\u0275template(161, EventCreateComponent_div_161_Template, 5, 2, "div", 64);
       \u0275\u0275elementEnd()()();
-      \u0275\u0275template(162, EventCreateComponent_div_162_Template, 11, 5, "div", 65);
-      \u0275\u0275elementEnd();
-      \u0275\u0275template(163, EventCreateComponent_div_163_Template, 12, 5, "div", 65);
-      \u0275\u0275elementEnd();
+      \u0275\u0275template(162, EventCreateComponent_div_162_Template, 12, 6, "div", 65)(163, EventCreateComponent_div_163_Template, 9, 3, "div", 65);
+      \u0275\u0275elementEnd()();
       \u0275\u0275elementStart(164, "app-modal", 66);
       \u0275\u0275listener("close", function EventCreateComponent_Template_app_modal_close_164_listener() {
         \u0275\u0275restoreView(_r1);
@@ -120278,456 +121001,194 @@ var EventCreateComponent = class _EventCreateComponent {
         return \u0275\u0275resetView(ctx.onProviderChange($event));
       });
       \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(169, "div", 69)(170, "label", 70);
-      \u0275\u0275text(171, " Moeda: ");
-      \u0275\u0275elementStart(172, "span", 28);
-      \u0275\u0275text(173, "*");
+      \u0275\u0275template(169, EventCreateComponent_div_169_Template, 4, 1, "div", 69);
+      \u0275\u0275elementStart(170, "div", 70)(171, "label", 71);
+      \u0275\u0275text(172, " Moeda: ");
+      \u0275\u0275elementStart(173, "span", 28);
+      \u0275\u0275text(174, "*");
       \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(174, "select", 71);
-      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_select_ngModelChange_174_listener($event) {
+      \u0275\u0275elementStart(175, "select", 72);
+      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_select_ngModelChange_175_listener($event) {
         \u0275\u0275restoreView(_r1);
         \u0275\u0275twoWayBindingSet(ctx.providerLinkForm.currency_id, $event) || (ctx.providerLinkForm.currency_id = $event);
         return \u0275\u0275resetView($event);
       });
-      \u0275\u0275listener("ngModelChange", function EventCreateComponent_Template_select_ngModelChange_174_listener($event) {
+      \u0275\u0275listener("ngModelChange", function EventCreateComponent_Template_select_ngModelChange_175_listener($event) {
         \u0275\u0275restoreView(_r1);
         return \u0275\u0275resetView(ctx.onCurrencyChange($event));
       });
-      \u0275\u0275elementStart(175, "option", 40);
-      \u0275\u0275text(176, ".:: Selecione ::.");
+      \u0275\u0275elementStart(176, "option", 40);
+      \u0275\u0275text(177, ".:: Selecione ::.");
       \u0275\u0275elementEnd();
-      \u0275\u0275template(177, EventCreateComponent_option_177_Template, 2, 3, "option", 44);
+      \u0275\u0275template(178, EventCreateComponent_option_178_Template, 2, 3, "option", 44);
       \u0275\u0275elementEnd();
-      \u0275\u0275template(178, EventCreateComponent_div_178_Template, 2, 1, "div", 30);
+      \u0275\u0275template(179, EventCreateComponent_div_179_Template, 2, 1, "div", 30);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(179, "div", 72)(180, "label", 73);
-      \u0275\u0275text(181, "ISS (%):");
+      \u0275\u0275template(180, EventCreateComponent_div_180_Template, 4, 2, "div", 73)(181, EventCreateComponent_div_181_Template, 4, 2, "div", 73)(182, EventCreateComponent_div_182_Template, 4, 2, "div", 73);
+      \u0275\u0275elementStart(183, "div", 70)(184, "label", 74);
+      \u0275\u0275text(185, "IOF (%):");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(182, "input", 74);
-      \u0275\u0275listener("input", function EventCreateComponent_Template_input_input_182_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        return \u0275\u0275resetView(ctx.onPercentInput($event, "iss_percent", "providerLinkForm"));
-      });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(183, "div", 72)(184, "label", 75);
-      \u0275\u0275text(185, "Servi\xE7o (%):");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(186, "input", 76);
+      \u0275\u0275elementStart(186, "input", 75);
       \u0275\u0275listener("input", function EventCreateComponent_Template_input_input_186_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        return \u0275\u0275resetView(ctx.onPercentInput($event, "service_percent", "providerLinkForm"));
-      });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(187, "div", 72)(188, "label", 77);
-      \u0275\u0275text(189, "IVA (%):");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(190, "input", 78);
-      \u0275\u0275listener("input", function EventCreateComponent_Template_input_input_190_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        return \u0275\u0275resetView(ctx.onPercentInput($event, "iva_percent", "providerLinkForm"));
-      });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(191, "div", 72)(192, "label", 79);
-      \u0275\u0275text(193, " Taxa 4BTS (%): ");
-      \u0275\u0275elementStart(194, "span", 28);
-      \u0275\u0275text(195, "*");
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(196, "input", 80);
-      \u0275\u0275listener("input", function EventCreateComponent_Template_input_input_196_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        return \u0275\u0275resetView(ctx.onPercentInput($event, "taxa_4bts", "providerLinkForm"));
-      });
-      \u0275\u0275elementEnd();
-      \u0275\u0275template(197, EventCreateComponent_div_197_Template, 2, 1, "div", 30);
-      \u0275\u0275elementEnd();
-      \u0275\u0275template(198, EventCreateComponent_div_198_Template, 6, 2, "div", 81);
-      \u0275\u0275elementStart(199, "div", 82)(200, "label", 83);
-      \u0275\u0275text(201, "Forma de Pagamento:");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(202, "select", 84);
-      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_select_ngModelChange_202_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        \u0275\u0275twoWayBindingSet(ctx.providerLinkForm.payment_method, $event) || (ctx.providerLinkForm.payment_method = $event);
-        return \u0275\u0275resetView($event);
-      });
-      \u0275\u0275elementStart(203, "option", 85);
-      \u0275\u0275text(204, "Indefinido");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(205, "option", 86);
-      \u0275\u0275text(206, "Dinheiro");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(207, "option", 87);
-      \u0275\u0275text(208, "Cart\xE3o");
-      \u0275\u0275elementEnd()()();
-      \u0275\u0275elementStart(209, "div", 82)(210, "label", 88);
-      \u0275\u0275text(211, "Nota Fiscal:");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(212, "select", 89);
-      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_select_ngModelChange_212_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        \u0275\u0275twoWayBindingSet(ctx.providerLinkForm.invoice, $event) || (ctx.providerLinkForm.invoice = $event);
-        return \u0275\u0275resetView($event);
-      });
-      \u0275\u0275elementStart(213, "option", 90);
-      \u0275\u0275text(214, "Sim");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(215, "option", 90);
-      \u0275\u0275text(216, "N\xE3o");
-      \u0275\u0275elementEnd()()();
-      \u0275\u0275elementStart(217, "div", 82)(218, "label", 91);
-      \u0275\u0275text(219, "IOF (%):");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(220, "input", 92);
-      \u0275\u0275listener("input", function EventCreateComponent_Template_input_input_220_listener($event) {
         \u0275\u0275restoreView(_r1);
         return \u0275\u0275resetView(ctx.onPercentInput($event, "iof", "providerLinkForm"));
       });
       \u0275\u0275elementEnd();
-      \u0275\u0275template(221, EventCreateComponent_div_221_Template, 2, 1, "div", 30);
+      \u0275\u0275template(187, EventCreateComponent_div_187_Template, 2, 1, "div", 30);
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(222, "div", 82)(223, "label", 93);
-      \u0275\u0275text(224, "Prazo:");
+      \u0275\u0275template(188, EventCreateComponent_div_188_Template, 6, 2, "div", 76);
+      \u0275\u0275elementStart(189, "div", 70)(190, "label", 77);
+      \u0275\u0275text(191, " Taxa 4BTS (%): ");
+      \u0275\u0275elementStart(192, "span", 28);
+      \u0275\u0275text(193, "*");
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(194, "input", 78);
+      \u0275\u0275listener("input", function EventCreateComponent_Template_input_input_194_listener($event) {
+        \u0275\u0275restoreView(_r1);
+        return \u0275\u0275resetView(ctx.onPercentInput($event, "taxa_4bts", "providerLinkForm"));
+      });
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(225, "input", 94);
-      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_input_ngModelChange_225_listener($event) {
+      \u0275\u0275template(195, EventCreateComponent_div_195_Template, 2, 1, "div", 30);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(196, "div", 70)(197, "label", 79);
+      \u0275\u0275text(198, "Forma de Pagamento:");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(199, "select", 80);
+      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_select_ngModelChange_199_listener($event) {
+        \u0275\u0275restoreView(_r1);
+        \u0275\u0275twoWayBindingSet(ctx.providerLinkForm.payment_method, $event) || (ctx.providerLinkForm.payment_method = $event);
+        return \u0275\u0275resetView($event);
+      });
+      \u0275\u0275elementStart(200, "option", 81);
+      \u0275\u0275text(201, "Indefinido");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(202, "option", 82);
+      \u0275\u0275text(203, "Dinheiro");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(204, "option", 83);
+      \u0275\u0275text(205, "Cart\xE3o");
+      \u0275\u0275elementEnd()()();
+      \u0275\u0275elementStart(206, "div", 70)(207, "label", 84);
+      \u0275\u0275text(208, "Nota Fiscal:");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(209, "select", 85);
+      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_select_ngModelChange_209_listener($event) {
+        \u0275\u0275restoreView(_r1);
+        \u0275\u0275twoWayBindingSet(ctx.providerLinkForm.invoice, $event) || (ctx.providerLinkForm.invoice = $event);
+        return \u0275\u0275resetView($event);
+      });
+      \u0275\u0275elementStart(210, "option", 86);
+      \u0275\u0275text(211, "Sim");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(212, "option", 86);
+      \u0275\u0275text(213, "N\xE3o");
+      \u0275\u0275elementEnd()()();
+      \u0275\u0275elementStart(214, "div", 70)(215, "label", 87);
+      \u0275\u0275text(216, "Prazo:");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(217, "div", 52)(218, "span", 53);
+      \u0275\u0275element(219, "i", 54);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(220, "input", 88);
+      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_input_ngModelChange_220_listener($event) {
         \u0275\u0275restoreView(_r1);
         \u0275\u0275twoWayBindingSet(ctx.providerLinkForm.deadline_date, $event) || (ctx.providerLinkForm.deadline_date = $event);
         return \u0275\u0275resetView($event);
       });
+      \u0275\u0275elementEnd()();
+      \u0275\u0275template(221, EventCreateComponent_div_221_Template, 2, 1, "div", 30);
       \u0275\u0275elementEnd();
-      \u0275\u0275template(226, EventCreateComponent_div_226_Template, 2, 1, "div", 30);
+      \u0275\u0275template(222, EventCreateComponent_div_222_Template, 7, 1, "div", 69)(223, EventCreateComponent_div_223_Template, 127, 30, "div", 89)(224, EventCreateComponent_div_224_Template, 23, 9, "div", 89);
+      \u0275\u0275element(225, "div", 90);
+      \u0275\u0275elementStart(226, "div", 91)(227, "label", 92);
+      \u0275\u0275text(228, "Observa\xE7\xE3o Interna:");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(227, "div", 95)(228, "label", 96);
-      \u0275\u0275text(229, "Observa\xE7\xE3o Interna:");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(230, "textarea", 97);
-      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_textarea_ngModelChange_230_listener($event) {
+      \u0275\u0275elementStart(229, "textarea", 93);
+      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_textarea_ngModelChange_229_listener($event) {
         \u0275\u0275restoreView(_r1);
         \u0275\u0275twoWayBindingSet(ctx.providerLinkForm.internal_observation, $event) || (ctx.providerLinkForm.internal_observation = $event);
         return \u0275\u0275resetView($event);
       });
       \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(231, "div", 95)(232, "label", 98);
-      \u0275\u0275text(233, "Observa\xE7\xE3o Cliente:");
+      \u0275\u0275elementStart(230, "div", 91)(231, "label", 94);
+      \u0275\u0275text(232, "Observa\xE7\xE3o Cliente:");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(234, "textarea", 99);
-      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_textarea_ngModelChange_234_listener($event) {
+      \u0275\u0275elementStart(233, "textarea", 95);
+      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_textarea_ngModelChange_233_listener($event) {
         \u0275\u0275restoreView(_r1);
         \u0275\u0275twoWayBindingSet(ctx.providerLinkForm.customer_observation, $event) || (ctx.providerLinkForm.customer_observation = $event);
         return \u0275\u0275resetView($event);
       });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275template(235, EventCreateComponent_div_235_Template, 23, 9, "div", 100);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(236, "div", 101)(237, "button", 102);
-      \u0275\u0275listener("click", function EventCreateComponent_Template_button_click_237_listener() {
+      \u0275\u0275elementEnd()()();
+      \u0275\u0275elementStart(234, "div", 96)(235, "button", 97);
+      \u0275\u0275listener("click", function EventCreateComponent_Template_button_click_235_listener() {
         \u0275\u0275restoreView(_r1);
         return \u0275\u0275resetView(ctx.closeProviderLinkForm());
       });
-      \u0275\u0275text(238, "Cancelar");
+      \u0275\u0275text(236, "Cancelar");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(239, "button", 103);
-      \u0275\u0275template(240, EventCreateComponent_span_240_Template, 1, 0, "span", 104);
-      \u0275\u0275element(241, "i", 105);
-      \u0275\u0275text(242, " Confirmar V\xEDnculo ");
+      \u0275\u0275elementStart(237, "button", 98);
+      \u0275\u0275template(238, EventCreateComponent_span_238_Template, 1, 0, "span", 99);
+      \u0275\u0275element(239, "i", 100);
+      \u0275\u0275text(240, " Confirmar V\xEDnculo ");
       \u0275\u0275elementEnd()()()();
-      \u0275\u0275elementStart(243, "app-modal", 106);
-      \u0275\u0275listener("close", function EventCreateComponent_Template_app_modal_close_243_listener() {
+      \u0275\u0275elementStart(241, "app-modal", 101);
+      \u0275\u0275listener("close", function EventCreateComponent_Template_app_modal_close_241_listener() {
         \u0275\u0275restoreView(_r1);
         return \u0275\u0275resetView(ctx.closeOptForm());
       });
-      \u0275\u0275elementStart(244, "form", 23);
-      \u0275\u0275listener("ngSubmit", function EventCreateComponent_Template_form_ngSubmit_244_listener() {
+      \u0275\u0275elementStart(242, "form", 23);
+      \u0275\u0275listener("ngSubmit", function EventCreateComponent_Template_form_ngSubmit_242_listener() {
         \u0275\u0275restoreView(_r1);
         return \u0275\u0275resetView(ctx.saveOpt());
       });
-      \u0275\u0275elementStart(245, "div", 9);
-      \u0275\u0275template(246, EventCreateComponent_div_246_Template, 10, 5, "div", 107)(247, EventCreateComponent_div_247_Template, 10, 5, "div", 107)(248, EventCreateComponent_div_248_Template, 10, 5, "div", 107)(249, EventCreateComponent_div_249_Template, 4, 1, "div", 108)(250, EventCreateComponent_div_250_Template, 4, 1, "div", 107)(251, EventCreateComponent_div_251_Template, 4, 1, "div", 107)(252, EventCreateComponent_div_252_Template, 10, 5, "div", 107)(253, EventCreateComponent_div_253_Template, 10, 5, "div", 107)(254, EventCreateComponent_div_254_Template, 10, 6, "div", 107)(255, EventCreateComponent_div_255_Template, 10, 5, "div", 107)(256, EventCreateComponent_div_256_Template, 10, 5, "div", 107)(257, EventCreateComponent_div_257_Template, 10, 5, "div", 107)(258, EventCreateComponent_div_258_Template, 10, 5, "div", 107)(259, EventCreateComponent_div_259_Template, 10, 5, "div", 109)(260, EventCreateComponent_div_260_Template, 10, 5, "div", 109)(261, EventCreateComponent_div_261_Template, 10, 5, "div", 109)(262, EventCreateComponent_div_262_Template, 11, 3, "div", 107)(263, EventCreateComponent_div_263_Template, 7, 4, "div", 107)(264, EventCreateComponent_ng_container_264_Template, 134, 30, "ng-container", 110);
-      \u0275\u0275elementStart(265, "div", 69)(266, "label", 111);
-      \u0275\u0275text(267, " Quantidade: ");
-      \u0275\u0275elementStart(268, "span", 28);
-      \u0275\u0275text(269, "*");
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(270, "input", 112);
-      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_input_ngModelChange_270_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        \u0275\u0275twoWayBindingSet(ctx.optForm.count, $event) || (ctx.optForm.count = $event);
-        return \u0275\u0275resetView($event);
-      });
+      \u0275\u0275elementStart(243, "div", 9);
+      \u0275\u0275template(244, EventCreateComponent_div_244_Template, 10, 5, "div", 102)(245, EventCreateComponent_div_245_Template, 10, 5, "div", 102)(246, EventCreateComponent_div_246_Template, 10, 5, "div", 102)(247, EventCreateComponent_div_247_Template, 4, 1, "div", 103)(248, EventCreateComponent_div_248_Template, 4, 1, "div", 102)(249, EventCreateComponent_div_249_Template, 4, 1, "div", 102)(250, EventCreateComponent_div_250_Template, 10, 5, "div", 102)(251, EventCreateComponent_div_251_Template, 10, 5, "div", 102)(252, EventCreateComponent_div_252_Template, 10, 6, "div", 102)(253, EventCreateComponent_div_253_Template, 10, 5, "div", 102)(254, EventCreateComponent_div_254_Template, 10, 5, "div", 102)(255, EventCreateComponent_div_255_Template, 10, 5, "div", 102)(256, EventCreateComponent_div_256_Template, 10, 5, "div", 102)(257, EventCreateComponent_div_257_Template, 10, 5, "div", 69)(258, EventCreateComponent_div_258_Template, 10, 5, "div", 69)(259, EventCreateComponent_div_259_Template, 10, 5, "div", 69)(260, EventCreateComponent_div_260_Template, 11, 3, "div", 102)(261, EventCreateComponent_div_261_Template, 10, 4, "div", 102)(262, EventCreateComponent_ng_container_262_Template, 46, 35, "ng-container", 104)(263, EventCreateComponent_ng_container_263_Template, 32, 15, "ng-container", 104)(264, EventCreateComponent_ng_container_264_Template, 19, 6, "ng-container", 104)(265, EventCreateComponent_div_265_Template, 4, 1, "div", 103);
       \u0275\u0275elementEnd();
-      \u0275\u0275template(271, EventCreateComponent_div_271_Template, 2, 1, "div", 30);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(272, "div", 69)(273, "label", 113);
-      \u0275\u0275text(274, "Comiss\xE3o / Kickback (%):");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(275, "input", 114);
-      \u0275\u0275listener("input", function EventCreateComponent_Template_input_input_275_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        return \u0275\u0275resetView(ctx.onPercentInput($event, "kickback", "optForm"));
-      });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(276, "div", 115)(277, "label", 116);
-      \u0275\u0275text(278, " Proposta Recebida (Custo Unit.): ");
-      \u0275\u0275elementStart(279, "span", 28);
-      \u0275\u0275text(280, "*");
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(281, "div", 52);
-      \u0275\u0275template(282, EventCreateComponent_span_282_Template, 2, 1, "span", 117);
-      \u0275\u0275elementStart(283, "input", 118);
-      \u0275\u0275listener("input", function EventCreateComponent_Template_input_input_283_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        return \u0275\u0275resetView(ctx.onMoneyInput($event, "received_proposal", "optForm"));
-      });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275template(284, EventCreateComponent_div_284_Template, 2, 1, "div", 30);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(285, "div", 115)(286, "label", 119);
-      \u0275\u0275text(287, " Markup divisor (%): ");
-      \u0275\u0275elementStart(288, "span", 28);
-      \u0275\u0275text(289, "*");
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(290, "input", 120);
-      \u0275\u0275listener("input", function EventCreateComponent_Template_input_input_290_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        return \u0275\u0275resetView(ctx.onPercentInput($event, "received_proposal_percent", "optForm"));
-      });
-      \u0275\u0275elementEnd();
-      \u0275\u0275template(291, EventCreateComponent_div_291_Template, 2, 1, "div", 30);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(292, "div", 115)(293, "label", 121);
-      \u0275\u0275text(294, "Ordem:");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(295, "input", 122);
-      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_input_ngModelChange_295_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        \u0275\u0275twoWayBindingSet(ctx.optForm.order, $event) || (ctx.optForm.order = $event);
-        return \u0275\u0275resetView($event);
-      });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275template(296, EventCreateComponent_ng_container_296_Template, 19, 6, "ng-container", 110)(297, EventCreateComponent_div_297_Template, 4, 1, "div", 108);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(298, "div", 101)(299, "button", 102);
-      \u0275\u0275listener("click", function EventCreateComponent_Template_button_click_299_listener() {
+      \u0275\u0275elementStart(266, "div", 96)(267, "button", 97);
+      \u0275\u0275listener("click", function EventCreateComponent_Template_button_click_267_listener() {
         \u0275\u0275restoreView(_r1);
         return \u0275\u0275resetView(ctx.closeOptForm());
       });
-      \u0275\u0275text(300, "Cancelar");
+      \u0275\u0275text(268, "Cancelar");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(301, "button", 103);
-      \u0275\u0275template(302, EventCreateComponent_span_302_Template, 1, 0, "span", 104);
-      \u0275\u0275element(303, "i", 105);
-      \u0275\u0275text(304, " Salvar Detalhe ");
+      \u0275\u0275elementStart(269, "button", 98);
+      \u0275\u0275template(270, EventCreateComponent_span_270_Template, 1, 0, "span", 99);
+      \u0275\u0275element(271, "i", 100);
+      \u0275\u0275text(272);
       \u0275\u0275elementEnd()()()();
-      \u0275\u0275elementStart(305, "app-modal", 123);
-      \u0275\u0275listener("close", function EventCreateComponent_Template_app_modal_close_305_listener() {
+      \u0275\u0275elementStart(273, "app-modal", 105);
+      \u0275\u0275listener("close", function EventCreateComponent_Template_app_modal_close_273_listener() {
         \u0275\u0275restoreView(_r1);
         return \u0275\u0275resetView(ctx.closeMarkupForm());
       });
-      \u0275\u0275elementStart(306, "form", 23);
-      \u0275\u0275listener("ngSubmit", function EventCreateComponent_Template_form_ngSubmit_306_listener() {
+      \u0275\u0275elementStart(274, "form", 23);
+      \u0275\u0275listener("ngSubmit", function EventCreateComponent_Template_form_ngSubmit_274_listener() {
         \u0275\u0275restoreView(_r1);
         return \u0275\u0275resetView(ctx.confirmMarkupBulk());
       });
-      \u0275\u0275elementStart(307, "div", 9)(308, "div", 95)(309, "label", 124);
-      \u0275\u0275text(310, " Markup divisor (%) para todas as tarifas: ");
-      \u0275\u0275elementStart(311, "span", 28);
-      \u0275\u0275text(312, "*");
+      \u0275\u0275elementStart(275, "div", 9)(276, "div", 106)(277, "label", 107);
+      \u0275\u0275text(278, " Markup divisor (%) para todas as tarifas: ");
+      \u0275\u0275elementStart(279, "span", 28);
+      \u0275\u0275text(280, "*");
       \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(313, "input", 125);
-      \u0275\u0275listener("input", function EventCreateComponent_Template_input_input_313_listener($event) {
+      \u0275\u0275elementStart(281, "input", 108);
+      \u0275\u0275listener("input", function EventCreateComponent_Template_input_input_281_listener($event) {
         \u0275\u0275restoreView(_r1);
         return \u0275\u0275resetView(ctx.onPercentInput($event, "bulkMarkupValue", "bulkForm"));
       });
       \u0275\u0275elementEnd()()();
-      \u0275\u0275elementStart(314, "div", 101)(315, "button", 102);
-      \u0275\u0275listener("click", function EventCreateComponent_Template_button_click_315_listener() {
+      \u0275\u0275elementStart(282, "div", 96)(283, "button", 97);
+      \u0275\u0275listener("click", function EventCreateComponent_Template_button_click_283_listener() {
         \u0275\u0275restoreView(_r1);
         return \u0275\u0275resetView(ctx.closeMarkupForm());
       });
-      \u0275\u0275text(316, "Cancelar");
+      \u0275\u0275text(284, "Cancelar");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(317, "button", 103);
-      \u0275\u0275template(318, EventCreateComponent_span_318_Template, 1, 0, "span", 104);
-      \u0275\u0275element(319, "i", 105);
-      \u0275\u0275text(320, " Confirmar Atualiza\xE7\xE3o ");
-      \u0275\u0275elementEnd()()()();
-      \u0275\u0275elementStart(321, "app-modal", 126);
-      \u0275\u0275listener("close", function EventCreateComponent_Template_app_modal_close_321_listener() {
-        \u0275\u0275restoreView(_r1);
-        return \u0275\u0275resetView(ctx.closePassengerForm());
-      });
-      \u0275\u0275elementStart(322, "form", 23);
-      \u0275\u0275listener("ngSubmit", function EventCreateComponent_Template_form_ngSubmit_322_listener() {
-        \u0275\u0275restoreView(_r1);
-        return \u0275\u0275resetView(ctx.savePassenger());
-      });
-      \u0275\u0275elementStart(323, "div", 9)(324, "div", 127)(325, "h6", 128);
-      \u0275\u0275element(326, "i", 129);
-      \u0275\u0275text(327, " Dados Pessoais do Passageiro ");
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(328, "div", 69)(329, "label", 130);
-      \u0275\u0275text(330, " Nome Completo: ");
-      \u0275\u0275elementStart(331, "span", 28);
-      \u0275\u0275text(332, "*");
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(333, "input", 131);
-      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_input_ngModelChange_333_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        \u0275\u0275twoWayBindingSet(ctx.passengerForm.name, $event) || (ctx.passengerForm.name = $event);
-        return \u0275\u0275resetView($event);
-      });
-      \u0275\u0275elementEnd();
-      \u0275\u0275template(334, EventCreateComponent_div_334_Template, 2, 1, "div", 30);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(335, "div", 69)(336, "label", 132);
-      \u0275\u0275text(337, "Documento (RG/CPF/Passaporte):");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(338, "input", 133);
-      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_input_ngModelChange_338_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        \u0275\u0275twoWayBindingSet(ctx.passengerForm.document, $event) || (ctx.passengerForm.document = $event);
-        return \u0275\u0275resetView($event);
-      });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(339, "div", 69)(340, "label", 134);
-      \u0275\u0275text(341, "Data de Nascimento:");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(342, "input", 135);
-      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_input_ngModelChange_342_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        \u0275\u0275twoWayBindingSet(ctx.passengerForm.birth_date, $event) || (ctx.passengerForm.birth_date = $event);
-        return \u0275\u0275resetView($event);
-      });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(343, "div", 69)(344, "label", 136);
-      \u0275\u0275text(345, "Validade Passaporte:");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(346, "input", 137);
-      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_input_ngModelChange_346_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        \u0275\u0275twoWayBindingSet(ctx.passengerForm.passport_validity, $event) || (ctx.passengerForm.passport_validity = $event);
-        return \u0275\u0275resetView($event);
-      });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(347, "div", 138)(348, "h6", 128);
-      \u0275\u0275element(349, "i", 139);
-      \u0275\u0275text(350, " Percurso do Voo de Ida (Outbound) ");
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(351, "div", 69)(352, "label", 140);
-      \u0275\u0275text(353, "Data da Ida:");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(354, "input", 141);
-      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_input_ngModelChange_354_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        \u0275\u0275twoWayBindingSet(ctx.passengerForm.outbound_date, $event) || (ctx.passengerForm.outbound_date = $event);
-        return \u0275\u0275resetView($event);
-      });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(355, "div", 72)(356, "label", 142);
-      \u0275\u0275text(357, "Origem:");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(358, "input", 143);
-      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_input_ngModelChange_358_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        \u0275\u0275twoWayBindingSet(ctx.passengerForm.outbound_origin, $event) || (ctx.passengerForm.outbound_origin = $event);
-        return \u0275\u0275resetView($event);
-      });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(359, "div", 72)(360, "label", 144);
-      \u0275\u0275text(361, "Destino:");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(362, "input", 145);
-      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_input_ngModelChange_362_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        \u0275\u0275twoWayBindingSet(ctx.passengerForm.outbound_destination, $event) || (ctx.passengerForm.outbound_destination = $event);
-        return \u0275\u0275resetView($event);
-      });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(363, "div", 69)(364, "label", 146);
-      \u0275\u0275text(365, "Hor\xE1rio de Partida:");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(366, "input", 147);
-      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_input_ngModelChange_366_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        \u0275\u0275twoWayBindingSet(ctx.passengerForm.outbound_departure, $event) || (ctx.passengerForm.outbound_departure = $event);
-        return \u0275\u0275resetView($event);
-      });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(367, "div", 69)(368, "label", 148);
-      \u0275\u0275text(369, "Hor\xE1rio de Chegada:");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(370, "input", 149);
-      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_input_ngModelChange_370_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        \u0275\u0275twoWayBindingSet(ctx.passengerForm.outbound_arrival, $event) || (ctx.passengerForm.outbound_arrival = $event);
-        return \u0275\u0275resetView($event);
-      });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(371, "div", 138)(372, "h6", 128);
-      \u0275\u0275element(373, "i", 150);
-      \u0275\u0275text(374, " Percurso do Voo de Volta (Inbound) ");
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(375, "div", 69)(376, "label", 151);
-      \u0275\u0275text(377, "Data da Volta:");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(378, "input", 152);
-      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_input_ngModelChange_378_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        \u0275\u0275twoWayBindingSet(ctx.passengerForm.inbound_date, $event) || (ctx.passengerForm.inbound_date = $event);
-        return \u0275\u0275resetView($event);
-      });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(379, "div", 72)(380, "label", 153);
-      \u0275\u0275text(381, "Origem:");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(382, "input", 154);
-      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_input_ngModelChange_382_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        \u0275\u0275twoWayBindingSet(ctx.passengerForm.inbound_origin, $event) || (ctx.passengerForm.inbound_origin = $event);
-        return \u0275\u0275resetView($event);
-      });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(383, "div", 72)(384, "label", 155);
-      \u0275\u0275text(385, "Destino:");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(386, "input", 156);
-      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_input_ngModelChange_386_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        \u0275\u0275twoWayBindingSet(ctx.passengerForm.inbound_destination, $event) || (ctx.passengerForm.inbound_destination = $event);
-        return \u0275\u0275resetView($event);
-      });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(387, "div", 69)(388, "label", 157);
-      \u0275\u0275text(389, "Hor\xE1rio de Partida:");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(390, "input", 158);
-      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_input_ngModelChange_390_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        \u0275\u0275twoWayBindingSet(ctx.passengerForm.inbound_departure, $event) || (ctx.passengerForm.inbound_departure = $event);
-        return \u0275\u0275resetView($event);
-      });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(391, "div", 69)(392, "label", 159);
-      \u0275\u0275text(393, "Hor\xE1rio de Chegada:");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(394, "input", 160);
-      \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_Template_input_ngModelChange_394_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        \u0275\u0275twoWayBindingSet(ctx.passengerForm.inbound_arrival, $event) || (ctx.passengerForm.inbound_arrival = $event);
-        return \u0275\u0275resetView($event);
-      });
-      \u0275\u0275elementEnd()()();
-      \u0275\u0275elementStart(395, "div", 101)(396, "button", 102);
-      \u0275\u0275listener("click", function EventCreateComponent_Template_button_click_396_listener() {
-        \u0275\u0275restoreView(_r1);
-        return \u0275\u0275resetView(ctx.closePassengerForm());
-      });
-      \u0275\u0275text(397, "Cancelar");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(398, "button", 103);
-      \u0275\u0275template(399, EventCreateComponent_span_399_Template, 1, 0, "span", 104);
-      \u0275\u0275element(400, "i", 105);
-      \u0275\u0275text(401, " Salvar Passageiro ");
+      \u0275\u0275elementStart(285, "button", 98);
+      \u0275\u0275template(286, EventCreateComponent_span_286_Template, 1, 0, "span", 99);
+      \u0275\u0275element(287, "i", 100);
+      \u0275\u0275text(288, " Confirmar Atualiza\xE7\xE3o ");
       \u0275\u0275elementEnd()()()()();
     }
     if (rf & 2) {
@@ -120832,37 +121293,52 @@ var EventCreateComponent = class _EventCreateComponent {
       \u0275\u0275advance();
       \u0275\u0275property("ngIf", ctx.activeTab === 6);
       \u0275\u0275advance();
-      \u0275\u0275property("show", ctx.showProviderLinkForm)("title", ctx.providerLinkForm.id ? "Editar V\xEDnculo" : "Vincular Novo Fornecedor")("icon", ctx.providerLinkType === "hotel" ? "fa-hotel" : ctx.providerLinkType === "ab" ? "fa-utensils" : ctx.providerLinkType === "hall" ? "fa-door-open" : ctx.providerLinkType === "add" ? "fa-concierge-bell" : ctx.providerLinkType === "transport" ? "fa-bus" : "fa-plane");
-      \u0275\u0275advance(4);
-      \u0275\u0275property("required", true)("searchFn", ctx.searchProviders)("displayFn", ctx.displayProvider)("initialText", ctx.selectedProviderName);
+      \u0275\u0275property("show", ctx.showProviderLinkForm)("title", ctx.providerLinkType === "airfare" ? ctx.providerLinkForm.id ? "Editar Or\xE7amento de Fretamento" : "Novo Or\xE7amento de Fretamento" : ctx.providerLinkForm.id ? "Editar V\xEDnculo" : "Vincular Novo Fornecedor")("icon", ctx.providerLinkType === "hotel" ? "fa-hotel" : ctx.providerLinkType === "ab" ? "fa-utensils" : ctx.providerLinkType === "hall" ? "fa-door-open" : ctx.providerLinkType === "add" ? "fa-concierge-bell" : ctx.providerLinkType === "transport" ? "fa-bus" : "fa-plane");
+      \u0275\u0275advance(3);
+      \u0275\u0275property("ngClass", ctx.providerLinkType === "airfare" ? "col-md-5" : "col-md-6");
+      \u0275\u0275advance();
+      \u0275\u0275property("label", ctx.providerLinkType === "airfare" ? "Companhia A\xE9rea" : "Fornecedor")("placeholder", ctx.providerLinkType === "airfare" ? "Digite para buscar a Companhia A\xE9rea..." : "Digite para buscar o fornecedor...")("required", true)("searchFn", ctx.searchProviders)("displayFn", ctx.displayProvider)("initialText", ctx.selectedProviderName);
       \u0275\u0275twoWayProperty("ngModel", ctx.providerLinkForm.provider_id);
-      \u0275\u0275property("errors", ctx.errors.provider_id)("disabled", ctx.providerLinkForm.id > 0);
-      \u0275\u0275advance(6);
+      \u0275\u0275property("errors", ctx.errors.provider_id || ctx.errors.airline_id)("disabled", ctx.providerLinkForm.id > 0);
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", ctx.providerLinkType === "airfare");
+      \u0275\u0275advance();
+      \u0275\u0275property("ngClass", ctx.providerLinkType === "airfare" ? "col-md-3" : "col-md-6");
+      \u0275\u0275advance(5);
       \u0275\u0275classProp("is-invalid", ctx.errors.currency_id);
       \u0275\u0275twoWayProperty("ngModel", ctx.providerLinkForm.currency_id);
       \u0275\u0275advance(3);
       \u0275\u0275property("ngForOf", ctx.currencies);
       \u0275\u0275advance();
       \u0275\u0275property("ngIf", ctx.errors.currency_id);
-      \u0275\u0275advance(4);
-      \u0275\u0275property("value", ctx.formatPercent(ctx.providerLinkForm.iss_percent));
-      \u0275\u0275advance(4);
-      \u0275\u0275property("value", ctx.formatPercent(ctx.providerLinkForm.service_percent));
-      \u0275\u0275advance(4);
-      \u0275\u0275property("value", ctx.formatPercent(ctx.providerLinkForm.iva_percent));
-      \u0275\u0275advance(6);
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", ctx.providerLinkType !== "airfare");
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", ctx.providerLinkType !== "airfare");
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", ctx.providerLinkType !== "airfare");
+      \u0275\u0275advance();
+      \u0275\u0275property("ngClass", ctx.providerLinkType === "airfare" ? "col-md-4" : ctx.providerLinkType === "hotel" || ctx.providerLinkType === "ab" ? "col-md-2" : "col-md-3");
+      \u0275\u0275advance(3);
+      \u0275\u0275classProp("is-invalid", ctx.errors.iof);
+      \u0275\u0275property("value", ctx.formatPercent(ctx.providerLinkForm.iof));
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", ctx.errors.iof);
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", ctx.providerLinkType === "hotel" || ctx.providerLinkType === "ab");
+      \u0275\u0275advance();
+      \u0275\u0275property("ngClass", ctx.providerLinkType === "airfare" ? "col-md-4" : ctx.providerLinkType === "hotel" || ctx.providerLinkType === "ab" ? "col-md-2" : "col-md-3");
+      \u0275\u0275advance(5);
       \u0275\u0275classProp("is-invalid", ctx.errors.taxa_4bts);
       \u0275\u0275property("value", ctx.formatPercent(ctx.providerLinkForm.taxa_4bts));
       \u0275\u0275advance();
       \u0275\u0275property("ngIf", ctx.errors.taxa_4bts);
       \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.providerLinkType === "hotel" || ctx.providerLinkType === "ab");
-      \u0275\u0275advance();
-      \u0275\u0275property("ngClass", ctx.providerLinkType === "hotel" || ctx.providerLinkType === "ab" ? "col-md-3" : "col-md-4");
+      \u0275\u0275property("ngClass", ctx.providerLinkType === "hotel" || ctx.providerLinkType === "ab" || ctx.providerLinkType === "airfare" ? "col-md-4" : "col-md-3");
       \u0275\u0275advance(3);
       \u0275\u0275twoWayProperty("ngModel", ctx.providerLinkForm.payment_method);
       \u0275\u0275advance(7);
-      \u0275\u0275property("ngClass", ctx.providerLinkType === "hotel" || ctx.providerLinkType === "ab" ? "col-md-3" : "col-md-4");
+      \u0275\u0275property("ngClass", ctx.providerLinkType === "hotel" || ctx.providerLinkType === "ab" || ctx.providerLinkType === "airfare" ? "col-md-4" : "col-md-3");
       \u0275\u0275advance(3);
       \u0275\u0275twoWayProperty("ngModel", ctx.providerLinkForm.invoice);
       \u0275\u0275advance();
@@ -120870,31 +121346,28 @@ var EventCreateComponent = class _EventCreateComponent {
       \u0275\u0275advance(2);
       \u0275\u0275property("ngValue", false);
       \u0275\u0275advance(2);
-      \u0275\u0275property("ngClass", ctx.providerLinkType === "hotel" || ctx.providerLinkType === "ab" ? "col-md-3" : "col-md-4");
-      \u0275\u0275advance(3);
-      \u0275\u0275classProp("is-invalid", ctx.errors.iof);
-      \u0275\u0275property("value", ctx.formatPercent(ctx.providerLinkForm.iof));
-      \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.errors.iof);
-      \u0275\u0275advance();
-      \u0275\u0275property("ngClass", ctx.providerLinkType === "hotel" || ctx.providerLinkType === "ab" ? "col-md-3" : "col-md-4");
-      \u0275\u0275advance(3);
+      \u0275\u0275property("ngClass", ctx.providerLinkType === "hotel" || ctx.providerLinkType === "ab" || ctx.providerLinkType === "airfare" ? "col-md-4" : "col-md-3");
+      \u0275\u0275advance(6);
       \u0275\u0275classProp("is-invalid", ctx.errors.deadline_date);
       \u0275\u0275twoWayProperty("ngModel", ctx.providerLinkForm.deadline_date);
       \u0275\u0275advance();
       \u0275\u0275property("ngIf", ctx.errors.deadline_date);
-      \u0275\u0275advance(4);
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", ctx.providerLinkType === "airfare");
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", ctx.providerLinkType === "airfare");
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", ctx.providerLinkType === "hotel");
+      \u0275\u0275advance(5);
       \u0275\u0275twoWayProperty("ngModel", ctx.providerLinkForm.internal_observation);
       \u0275\u0275advance(4);
       \u0275\u0275twoWayProperty("ngModel", ctx.providerLinkForm.customer_observation);
-      \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.providerLinkType === "hotel");
       \u0275\u0275advance(4);
       \u0275\u0275property("disabled", ctx.processing);
       \u0275\u0275advance();
       \u0275\u0275property("ngIf", ctx.processing);
       \u0275\u0275advance(3);
-      \u0275\u0275property("show", ctx.showOptForm)("title", ctx.optForm.id ? "Editar Tarifa" : "Adicionar Nova Tarifa");
+      \u0275\u0275property("show", ctx.showOptForm)("title", ctx.optFormType === "airfare" ? ctx.optForm.id ? "Editar Trecho" : "Novo Trecho" : ctx.optForm.id ? "Editar Tarifa" : "Adicionar Nova Tarifa");
       \u0275\u0275advance(3);
       \u0275\u0275property("ngIf", ctx.optFormType !== "add" && ctx.optFormType !== "airfare");
       \u0275\u0275advance();
@@ -120933,27 +121406,8 @@ var EventCreateComponent = class _EventCreateComponent {
       \u0275\u0275property("ngIf", ctx.optFormType !== "airfare");
       \u0275\u0275advance();
       \u0275\u0275property("ngIf", ctx.optFormType === "airfare");
-      \u0275\u0275advance(6);
-      \u0275\u0275classProp("is-invalid", ctx.errors.count);
-      \u0275\u0275twoWayProperty("ngModel", ctx.optForm.count);
       \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.errors.count);
-      \u0275\u0275advance(4);
-      \u0275\u0275property("value", ctx.formatPercent(ctx.optForm.kickback));
-      \u0275\u0275advance(7);
-      \u0275\u0275property("ngIf", ctx.getOptCurrencySymbol());
-      \u0275\u0275advance();
-      \u0275\u0275classProp("is-invalid", ctx.errors.received_proposal);
-      \u0275\u0275property("value", ctx.formatMoney(ctx.optForm.received_proposal));
-      \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.errors.received_proposal);
-      \u0275\u0275advance(6);
-      \u0275\u0275classProp("is-invalid", ctx.errors.received_proposal_percent);
-      \u0275\u0275property("value", ctx.formatPercent(ctx.optForm.received_proposal_percent));
-      \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.errors.received_proposal_percent);
-      \u0275\u0275advance(4);
-      \u0275\u0275twoWayProperty("ngModel", ctx.optForm.order);
+      \u0275\u0275property("ngIf", ctx.optFormType !== "airfare");
       \u0275\u0275advance();
       \u0275\u0275property("ngIf", ctx.optFormType === "hotel");
       \u0275\u0275advance();
@@ -120962,7 +121416,9 @@ var EventCreateComponent = class _EventCreateComponent {
       \u0275\u0275property("disabled", ctx.processing);
       \u0275\u0275advance();
       \u0275\u0275property("ngIf", ctx.processing);
-      \u0275\u0275advance(3);
+      \u0275\u0275advance(2);
+      \u0275\u0275textInterpolate1(" ", ctx.optFormType === "airfare" ? "Salvar Trecho" : "Salvar Detalhe", " ");
+      \u0275\u0275advance();
       \u0275\u0275property("show", ctx.showMarkupForm);
       \u0275\u0275advance(8);
       \u0275\u0275property("value", ctx.formatPercent(ctx.bulkMarkupValue));
@@ -120970,50 +121426,13 @@ var EventCreateComponent = class _EventCreateComponent {
       \u0275\u0275property("disabled", ctx.processing);
       \u0275\u0275advance();
       \u0275\u0275property("ngIf", ctx.processing);
-      \u0275\u0275advance(3);
-      \u0275\u0275property("show", ctx.showPassengerForm)("title", ctx.passengerForm.id ? "Editar Passageiro" : "Adicionar Novo Passageiro");
-      \u0275\u0275advance(12);
-      \u0275\u0275classProp("is-invalid", ctx.errors.name);
-      \u0275\u0275twoWayProperty("ngModel", ctx.passengerForm.name);
-      \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.errors.name);
-      \u0275\u0275advance(4);
-      \u0275\u0275twoWayProperty("ngModel", ctx.passengerForm.document);
-      \u0275\u0275advance(4);
-      \u0275\u0275twoWayProperty("ngModel", ctx.passengerForm.birth_date);
-      \u0275\u0275advance(4);
-      \u0275\u0275twoWayProperty("ngModel", ctx.passengerForm.passport_validity);
-      \u0275\u0275advance(8);
-      \u0275\u0275twoWayProperty("ngModel", ctx.passengerForm.outbound_date);
-      \u0275\u0275advance(4);
-      \u0275\u0275twoWayProperty("ngModel", ctx.passengerForm.outbound_origin);
-      \u0275\u0275advance(4);
-      \u0275\u0275twoWayProperty("ngModel", ctx.passengerForm.outbound_destination);
-      \u0275\u0275advance(4);
-      \u0275\u0275twoWayProperty("ngModel", ctx.passengerForm.outbound_departure);
-      \u0275\u0275advance(4);
-      \u0275\u0275twoWayProperty("ngModel", ctx.passengerForm.outbound_arrival);
-      \u0275\u0275advance(8);
-      \u0275\u0275twoWayProperty("ngModel", ctx.passengerForm.inbound_date);
-      \u0275\u0275advance(4);
-      \u0275\u0275twoWayProperty("ngModel", ctx.passengerForm.inbound_origin);
-      \u0275\u0275advance(4);
-      \u0275\u0275twoWayProperty("ngModel", ctx.passengerForm.inbound_destination);
-      \u0275\u0275advance(4);
-      \u0275\u0275twoWayProperty("ngModel", ctx.passengerForm.inbound_departure);
-      \u0275\u0275advance(4);
-      \u0275\u0275twoWayProperty("ngModel", ctx.passengerForm.inbound_arrival);
-      \u0275\u0275advance(4);
-      \u0275\u0275property("disabled", ctx.processing);
-      \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.processing);
     }
-  }, dependencies: [CommonModule, NgClass, NgForOf, NgIf, DecimalPipe, DatePipe, FormsModule, \u0275NgNoValidate, NgSelectOption, \u0275NgSelectMultipleOption, DefaultValueAccessor, NumberValueAccessor, CheckboxControlValueAccessor, SelectControlValueAccessor, NgControlStatus, NgControlStatusGroup, RequiredValidator, NgModel, NgForm, RouterLink, AuthenticatedLayoutComponent, AutocompleteComponent, ConfirmModalComponent, ModalComponent], styles: ['\n\n.nav-tabs[_ngcontent-%COMP%] {\n  border-bottom: 2px solid rgba(78, 115, 223, 0.1);\n  margin-bottom: 1.5rem;\n}\n.nav-tabs[_ngcontent-%COMP%]   .nav-item[_ngcontent-%COMP%] {\n  margin-bottom: -2px;\n}\n.nav-tabs[_ngcontent-%COMP%]   .nav-link[_ngcontent-%COMP%] {\n  border: none;\n  border-bottom: 2px solid transparent;\n  color: #858796;\n  font-weight: 600;\n  padding: 0.75rem 1.25rem;\n  transition: all 0.2s ease-in-out;\n}\n.nav-tabs[_ngcontent-%COMP%]   .nav-link[_ngcontent-%COMP%]:hover:not(.disabled) {\n  color: #4e73df;\n  border-bottom-color: rgba(78, 115, 223, 0.3);\n  background-color: rgba(78, 115, 223, 0.03);\n}\n.nav-tabs[_ngcontent-%COMP%]   .nav-link.active[_ngcontent-%COMP%] {\n  color: #4e73df;\n  background-color: transparent;\n  border-bottom-color: #4e73df;\n}\n.nav-tabs[_ngcontent-%COMP%]   .nav-link.disabled[_ngcontent-%COMP%] {\n  color: #d1d3e2;\n  cursor: not-allowed;\n  opacity: 0.5;\n}\n.sticky-col[_ngcontent-%COMP%] {\n  position: sticky;\n  z-index: 2;\n  background-color: #ffffff;\n}\n.sticky-col[_ngcontent-%COMP%]::before {\n  content: "";\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: inherit;\n  z-index: -1;\n}\n.table-header[_ngcontent-%COMP%] {\n  background-color: #4e73df !important;\n  color: #ffffff !important;\n  font-weight: bold;\n}\n.table-header-c1[_ngcontent-%COMP%] {\n  background-color: #f8f9fc !important;\n  color: #5a5c69 !important;\n  font-weight: bold;\n}\n.table-header-c2[_ngcontent-%COMP%] {\n  background-color: #eaecf4 !important;\n  color: #3a3b45 !important;\n  font-weight: bold;\n}\n.table-subheader[_ngcontent-%COMP%] {\n  background-color: #f8f9fc !important;\n  font-weight: bold;\n  color: #4e73df;\n}\n.cursor-pointer[_ngcontent-%COMP%] {\n  cursor: pointer;\n}\n@keyframes _ngcontent-%COMP%_fadeIn {\n  from {\n    opacity: 0;\n    transform: translateY(10px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n.animate-in[_ngcontent-%COMP%] {\n  animation: _ngcontent-%COMP%_fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;\n}\n.modal-backdrop-blur[_ngcontent-%COMP%] {\n  background: rgba(0, 0, 0, 0.4);\n  backdrop-filter: blur(4px);\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  z-index: 1050;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n.modal-dialog[_ngcontent-%COMP%] {\n  max-width: 800px;\n  width: 90%;\n  margin: 1.75rem auto;\n}\n.card-provider-group[_ngcontent-%COMP%] {\n  border-radius: 1.25rem;\n  overflow: hidden;\n  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);\n  transition: transform 0.2s ease;\n}\n.card-provider-group[_ngcontent-%COMP%]:hover {\n  transform: translateY(-2px);\n}\n.table-tariffs[_ngcontent-%COMP%] {\n  font-size: 0.85rem !important;\n  border-collapse: separate !important;\n  border-spacing: 0 !important;\n  width: 100% !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   th[_ngcontent-%COMP%], \n.table-tariffs[_ngcontent-%COMP%]   td[_ngcontent-%COMP%] {\n  padding: 5px 8px !important;\n  vertical-align: middle !important;\n  border-color: #eaecf4 !important;\n  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;\n}\n.table-tariffs[_ngcontent-%COMP%]   thead[_ngcontent-%COMP%]   th[_ngcontent-%COMP%] {\n  background-color: #f8f9fc !important;\n  color: #4e73df !important;\n  font-weight: 700 !important;\n  text-transform: uppercase !important;\n  font-size: 0.72rem !important;\n  letter-spacing: 0.05em !important;\n  border-bottom: 2px solid #d1d3e2 !important;\n  padding: 8px 8px !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   th.sticky-col[_ngcontent-%COMP%]:nth-child(1), \n.table-tariffs[_ngcontent-%COMP%]   td.sticky-col[_ngcontent-%COMP%]:nth-child(1) {\n  position: sticky !important;\n  left: 0 !important;\n  z-index: 3 !important;\n  background-color: #ffffff !important;\n  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.04) !important;\n  width: 160px !important;\n  min-width: 160px !important;\n  max-width: 160px !important;\n  overflow: hidden !important;\n  text-overflow: ellipsis !important;\n  white-space: nowrap !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   td.sticky-col[colspan="2"][_ngcontent-%COMP%] {\n  position: sticky !important;\n  left: 0 !important;\n  z-index: 3 !important;\n  background-color: #ffffff !important;\n  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.04) !important;\n  width: 290px !important;\n  min-width: 290px !important;\n  max-width: 290px !important;\n  overflow: hidden !important;\n  text-overflow: ellipsis !important;\n  white-space: nowrap !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   th.sticky-col[_ngcontent-%COMP%]:nth-child(2), \n.table-tariffs[_ngcontent-%COMP%]   td.sticky-col[_ngcontent-%COMP%]:nth-child(2) {\n  position: sticky !important;\n  left: 160px !important;\n  z-index: 3 !important;\n  background-color: #ffffff !important;\n  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.04) !important;\n  border-right: 2px solid #d1d3e2 !important;\n  width: 130px !important;\n  min-width: 130px !important;\n  max-width: 130px !important;\n  overflow: hidden !important;\n  text-overflow: ellipsis !important;\n  white-space: nowrap !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-success-light[_ngcontent-%COMP%] {\n  background-color: #eef9f5 !important;\n  color: #1e7046 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-success-solid[_ngcontent-%COMP%] {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-warning-light[_ngcontent-%COMP%] {\n  background-color: #fdf8eb !important;\n  color: #a07018 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-warning-solid[_ngcontent-%COMP%] {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-light-tax[_ngcontent-%COMP%] {\n  background-color: #f4f6fd !important;\n  color: #3f5eb5 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-compare[_ngcontent-%COMP%] {\n  background-color: #727c8d !important;\n  color: #ffffff !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   td[_ngcontent-%COMP%] {\n  background-color: #f1f3f9 !important;\n  color: #3a3b45 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .sticky-col[_ngcontent-%COMP%] {\n  background-color: #f1f3f9 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-success-light[_ngcontent-%COMP%] {\n  background-color: #d5f2e6 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-success-solid[_ngcontent-%COMP%] {\n  background-color: #afe0c7 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-warning-light[_ngcontent-%COMP%] {\n  background-color: #fbedd1 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-warning-solid[_ngcontent-%COMP%] {\n  background-color: #fad291 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-light-tax[_ngcontent-%COMP%] {\n  background-color: #e9ecf8 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-compare[_ngcontent-%COMP%] {\n  background-color: #5c6674 !important;\n  color: #ffffff !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-success-header[_ngcontent-%COMP%] {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n  font-weight: 700 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-warning-header[_ngcontent-%COMP%] {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n  font-weight: 700 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .table-subheader[_ngcontent-%COMP%]   td[_ngcontent-%COMP%] {\n  background-color: #f8f9fc !important;\n  color: #4e73df !important;\n  font-weight: 700 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .table-subheader[_ngcontent-%COMP%]   td.sticky-col[_ngcontent-%COMP%] {\n  background-color: #f8f9fc !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .table-subheader[_ngcontent-%COMP%]   td.bg-success-solid[_ngcontent-%COMP%] {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .table-subheader[_ngcontent-%COMP%]   td.bg-warning-solid[_ngcontent-%COMP%] {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .observation-row[_ngcontent-%COMP%]   td[_ngcontent-%COMP%] {\n  background-color: #ffffff !important;\n  border-top: 1px solid #eaecf4 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .observation-row[_ngcontent-%COMP%]   td.sticky-col[_ngcontent-%COMP%] {\n  background-color: #ffffff !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .observation-row[_ngcontent-%COMP%]   td.bg-success-solid[_ngcontent-%COMP%] {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .observation-row[_ngcontent-%COMP%]   td.bg-warning-solid[_ngcontent-%COMP%] {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .text-start[_ngcontent-%COMP%] {\n  text-align: left !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .text-end[_ngcontent-%COMP%] {\n  text-align: right !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .text-center[_ngcontent-%COMP%] {\n  text-align: center !important;\n}\n.table-responsive[_ngcontent-%COMP%] {\n  overflow-x: auto !important;\n}\n/*# sourceMappingURL=event-create.component.css.map */'] });
+  }, dependencies: [CommonModule, NgClass, NgForOf, NgIf, DecimalPipe, DatePipe, FormsModule, \u0275NgNoValidate, NgSelectOption, \u0275NgSelectMultipleOption, DefaultValueAccessor, NumberValueAccessor, CheckboxControlValueAccessor, SelectControlValueAccessor, NgControlStatus, NgControlStatusGroup, RequiredValidator, MinValidator, NgModel, NgForm, RouterLink, AuthenticatedLayoutComponent, AutocompleteComponent, ConfirmModalComponent, ModalComponent, NgxMaskDirective, FlatpickrDirective], styles: ['\n\n.nav-tabs[_ngcontent-%COMP%] {\n  border-bottom: 2px solid rgba(78, 115, 223, 0.1);\n  margin-bottom: 1.5rem;\n}\n.nav-tabs[_ngcontent-%COMP%]   .nav-item[_ngcontent-%COMP%] {\n  margin-bottom: -2px;\n}\n.nav-tabs[_ngcontent-%COMP%]   .nav-link[_ngcontent-%COMP%] {\n  border: none;\n  border-bottom: 2px solid transparent;\n  color: #858796;\n  font-weight: 600;\n  padding: 0.75rem 1.25rem;\n  transition: all 0.2s ease-in-out;\n}\n.nav-tabs[_ngcontent-%COMP%]   .nav-link[_ngcontent-%COMP%]:hover:not(.disabled) {\n  color: #4e73df;\n  border-bottom-color: rgba(78, 115, 223, 0.3);\n  background-color: rgba(78, 115, 223, 0.03);\n}\n.nav-tabs[_ngcontent-%COMP%]   .nav-link.active[_ngcontent-%COMP%] {\n  color: #4e73df;\n  background-color: transparent;\n  border-bottom-color: #4e73df;\n}\n.nav-tabs[_ngcontent-%COMP%]   .nav-link.disabled[_ngcontent-%COMP%] {\n  color: #d1d3e2;\n  cursor: not-allowed;\n  opacity: 0.5;\n}\n.sticky-col[_ngcontent-%COMP%] {\n  position: sticky;\n  z-index: 2;\n  background-color: #ffffff;\n}\n.sticky-col[_ngcontent-%COMP%]::before {\n  content: "";\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: inherit;\n  z-index: -1;\n}\n.table-header[_ngcontent-%COMP%] {\n  background-color: #4e73df !important;\n  color: #ffffff !important;\n  font-weight: bold;\n}\n.table-header-c1[_ngcontent-%COMP%] {\n  background-color: #f8f9fc !important;\n  color: #5a5c69 !important;\n  font-weight: bold;\n}\n.table-header-c2[_ngcontent-%COMP%] {\n  background-color: #eaecf4 !important;\n  color: #3a3b45 !important;\n  font-weight: bold;\n}\n.table-subheader[_ngcontent-%COMP%] {\n  background-color: #f8f9fc !important;\n  font-weight: bold;\n  color: #4e73df;\n}\n.cursor-pointer[_ngcontent-%COMP%] {\n  cursor: pointer;\n}\n@keyframes _ngcontent-%COMP%_fadeIn {\n  from {\n    opacity: 0;\n    transform: translateY(10px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n.animate-in[_ngcontent-%COMP%] {\n  animation: _ngcontent-%COMP%_fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;\n}\n.modal-backdrop-blur[_ngcontent-%COMP%] {\n  background: rgba(0, 0, 0, 0.4);\n  backdrop-filter: blur(4px);\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  z-index: 1050;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n.modal-dialog[_ngcontent-%COMP%] {\n  max-width: 800px;\n  width: 90%;\n  margin: 1.75rem auto;\n}\n.card-provider-group[_ngcontent-%COMP%] {\n  border-radius: 1.25rem;\n  overflow: hidden;\n  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);\n  transition: transform 0.2s ease;\n}\n.card-provider-group[_ngcontent-%COMP%]:hover {\n  transform: translateY(-2px);\n}\n.table-tariffs[_ngcontent-%COMP%] {\n  font-size: 0.85rem !important;\n  border-collapse: separate !important;\n  border-spacing: 0 !important;\n  width: 100% !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   th[_ngcontent-%COMP%], \n.table-tariffs[_ngcontent-%COMP%]   td[_ngcontent-%COMP%] {\n  padding: 5px 8px !important;\n  vertical-align: middle !important;\n  border-color: #eaecf4 !important;\n  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;\n}\n.table-tariffs[_ngcontent-%COMP%]   thead[_ngcontent-%COMP%]   th[_ngcontent-%COMP%] {\n  background-color: #f8f9fc !important;\n  color: #4e73df !important;\n  font-weight: 700 !important;\n  text-transform: uppercase !important;\n  font-size: 0.72rem !important;\n  letter-spacing: 0.05em !important;\n  border-bottom: 2px solid #d1d3e2 !important;\n  padding: 8px 8px !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   th.sticky-col[_ngcontent-%COMP%]:nth-child(1), \n.table-tariffs[_ngcontent-%COMP%]   td.sticky-col[_ngcontent-%COMP%]:nth-child(1) {\n  position: sticky !important;\n  left: 0 !important;\n  z-index: 3 !important;\n  background-color: #ffffff !important;\n  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.04) !important;\n  width: 160px !important;\n  min-width: 160px !important;\n  max-width: 160px !important;\n  overflow: hidden !important;\n  text-overflow: ellipsis !important;\n  white-space: nowrap !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   td.sticky-col[colspan="2"][_ngcontent-%COMP%] {\n  position: sticky !important;\n  left: 0 !important;\n  z-index: 3 !important;\n  background-color: #ffffff !important;\n  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.04) !important;\n  width: 290px !important;\n  min-width: 290px !important;\n  max-width: 290px !important;\n  overflow: hidden !important;\n  text-overflow: ellipsis !important;\n  white-space: nowrap !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   th.sticky-col[_ngcontent-%COMP%]:nth-child(2), \n.table-tariffs[_ngcontent-%COMP%]   td.sticky-col[_ngcontent-%COMP%]:nth-child(2) {\n  position: sticky !important;\n  left: 160px !important;\n  z-index: 3 !important;\n  background-color: #ffffff !important;\n  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.04) !important;\n  border-right: 2px solid #d1d3e2 !important;\n  width: 130px !important;\n  min-width: 130px !important;\n  max-width: 130px !important;\n  overflow: hidden !important;\n  text-overflow: ellipsis !important;\n  white-space: nowrap !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-success-light[_ngcontent-%COMP%] {\n  background-color: #eef9f5 !important;\n  color: #1e7046 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-success-solid[_ngcontent-%COMP%] {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-warning-light[_ngcontent-%COMP%] {\n  background-color: #fdf8eb !important;\n  color: #a07018 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-warning-solid[_ngcontent-%COMP%] {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-light-tax[_ngcontent-%COMP%] {\n  background-color: #f4f6fd !important;\n  color: #3f5eb5 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-compare[_ngcontent-%COMP%] {\n  background-color: #727c8d !important;\n  color: #ffffff !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   td[_ngcontent-%COMP%] {\n  background-color: #f1f3f9 !important;\n  color: #3a3b45 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .sticky-col[_ngcontent-%COMP%] {\n  background-color: #f1f3f9 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-success-light[_ngcontent-%COMP%] {\n  background-color: #d5f2e6 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-success-solid[_ngcontent-%COMP%] {\n  background-color: #afe0c7 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-warning-light[_ngcontent-%COMP%] {\n  background-color: #fbedd1 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-warning-solid[_ngcontent-%COMP%] {\n  background-color: #fad291 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-light-tax[_ngcontent-%COMP%] {\n  background-color: #e9ecf8 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-compare[_ngcontent-%COMP%] {\n  background-color: #5c6674 !important;\n  color: #ffffff !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-success-header[_ngcontent-%COMP%] {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n  font-weight: 700 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-warning-header[_ngcontent-%COMP%] {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n  font-weight: 700 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .table-subheader[_ngcontent-%COMP%]   td[_ngcontent-%COMP%] {\n  background-color: #f8f9fc !important;\n  color: #4e73df !important;\n  font-weight: 700 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .table-subheader[_ngcontent-%COMP%]   td.sticky-col[_ngcontent-%COMP%] {\n  background-color: #f8f9fc !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .table-subheader[_ngcontent-%COMP%]   td.bg-success-solid[_ngcontent-%COMP%] {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .table-subheader[_ngcontent-%COMP%]   td.bg-warning-solid[_ngcontent-%COMP%] {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .observation-row[_ngcontent-%COMP%]   td[_ngcontent-%COMP%] {\n  background-color: #ffffff !important;\n  border-top: 1px solid #eaecf4 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .observation-row[_ngcontent-%COMP%]   td.sticky-col[_ngcontent-%COMP%] {\n  background-color: #ffffff !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .observation-row[_ngcontent-%COMP%]   td.bg-success-solid[_ngcontent-%COMP%] {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .observation-row[_ngcontent-%COMP%]   td.bg-warning-solid[_ngcontent-%COMP%] {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .text-start[_ngcontent-%COMP%] {\n  text-align: left !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .text-end[_ngcontent-%COMP%] {\n  text-align: right !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .text-center[_ngcontent-%COMP%] {\n  text-align: center !important;\n}\n.table-responsive[_ngcontent-%COMP%] {\n  overflow-x: auto !important;\n}\n/*# sourceMappingURL=event-create.component.css.map */'] });
 };
 (() => {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(EventCreateComponent, [{
     type: Component,
-    args: [{ selector: "app-event-create", standalone: true, imports: [CommonModule, FormsModule, RouterLink, AuthenticatedLayoutComponent, AutocompleteComponent, ConfirmModalComponent, ModalComponent, NgxMaskDirective], template: `<app-authenticated-layout>\r
+    args: [{ selector: "app-event-create", standalone: true, imports: [CommonModule, FormsModule, RouterLink, AuthenticatedLayoutComponent, AutocompleteComponent, ConfirmModalComponent, ModalComponent, NgxMaskDirective, FlatpickrDirective], template: `<app-authenticated-layout>\r
   <!-- Loading overlay -->\r
   <div\r
     *ngIf="isLoader"\r
@@ -122107,6 +122526,16 @@ var EventCreateComponent = class _EventCreateComponent {
           </div>\r
         </ng-container>\r
 \r
+        <!-- Empty Page State -->\r
+        <div\r
+          *ngIf="\r
+            (activeTab === 1 ? eventHotels : activeTab === 2 ? eventABs : activeTab === 3 ? eventHalls : activeTab === 4 ? eventAdds : eventTransports)\r
+              ?.length === 0\r
+          "\r
+          class="alert alert-secondary py-5 text-center shadow-sm">\r
+          <i class="fas fa-folder-open fa-3x mb-3 text-muted"></i>\r
+          <h5 class="text-secondary font-weight-bold">Nenhum fornecedor vinculado</h5>\r
+          <p class="text-muted mb-0">Use o bot\xE3o no topo para vincular um fornecedor a este evento.</p>\r
         </div>\r
       </div>\r
 \r
@@ -122120,15 +122549,6 @@ var EventCreateComponent = class _EventCreateComponent {
           </h5>\r
 \r
           <div class="d-flex gap-2">\r
-            <!-- View Details Toggle Button -->\r
-            <button\r
-              type="button"\r
-              class="btn btn-sm btn-info text-white shadow-sm"\r
-              (click)="toggleDetails('airfare')">\r
-              <i class="fas" [ngClass]="showDetailsAirfare ? 'fa-eye-slash' : 'fa-eye'"></i>\r
-              {{ showDetailsAirfare ? ' Ocultar Detalhes' : ' Exibir Detalhes' }}\r
-            </button>\r
-\r
             <!-- Vincular Fornecedor button -->\r
             <button\r
               *ngIf="!isReadOnly"\r
@@ -122136,7 +122556,7 @@ var EventCreateComponent = class _EventCreateComponent {
               class="btn btn-sm btn-success shadow-sm"\r
               (click)="openAddProviderLink('airfare')">\r
               <i class="fas fa-plus me-1"></i>\r
-              Vincular Novo Fornecedor\r
+              Novo Or\xE7amento de Fretamento\r
             </button>\r
           </div>\r
         </div>\r
@@ -122147,7 +122567,7 @@ var EventCreateComponent = class _EventCreateComponent {
             <div class="card-header bg-light py-3 d-sm-flex align-items-center justify-content-between">\r
               <div>\r
                 <h6 class="m-0 font-weight-bold text-primary">\r
-                  Fornecedor {{ provIdx + 1 }}: {{ item.provider?.name }}\r
+                  Or\xE7amento Fretamento {{ provIdx + 1 }}: {{ item.airline?.name || item.provider?.name || item.equipment || 'Fretamento' }}\r
                   <span\r
                     class="badge ms-2"\r
                     [ngClass]="item.provider?.national ? 'bg-success' : 'bg-info'">\r
@@ -122159,18 +122579,18 @@ var EventCreateComponent = class _EventCreateComponent {
                 <button\r
                   type="button"\r
                   class="btn btn-sm btn-outline-info"\r
-                  title="Editar Cadastro do Fornecedor"\r
+                  title="Editar Or\xE7amento de Fretamento"\r
                   (click)="openAddProviderLink('airfare', item)">\r
                   <i class="fas fa-edit me-1"></i>\r
-                  Editar Cadastro\r
+                  Editar Or\xE7amento\r
                 </button>\r
                 <button\r
                   type="button"\r
                   class="btn btn-sm btn-outline-success"\r
-                  title="Adicionar Op\xE7\xE3o de Voo"\r
+                  title="Novo Trecho"\r
                   (click)="openAddOpt('airfare', item.id)">\r
                   <i class="fas fa-plus me-1"></i>\r
-                  Adicionar Tarifa\r
+                  Novo Trecho\r
                 </button>\r
                 <app-confirm-modal\r
                   [btnClass]="'btn btn-sm btn-outline-danger'"\r
@@ -122186,295 +122606,261 @@ var EventCreateComponent = class _EventCreateComponent {
               </div>\r
             </div>\r
 \r
-            <div class="card-body p-3">\r
-              <!-- Summary Table -->\r
-              <div class="table-responsive mb-3">\r
-                <table class="table table-bordered align-middle mb-0 bg-white shadow-sm" style="font-size: 0.9rem;">\r
-                  <thead class="bg-light text-dark">\r
+            <div class="card-body p-0">\r
+              <!-- Top Info Bar: Charter Airfare Metadata (Equipamento, Pax, Prazos) -->\r
+              <div class="bg-light px-3 py-2 border-bottom d-flex flex-wrap align-items-center justify-content-between gap-3" style="font-size: 0.85rem;">\r
+                <div>\r
+                  <span class="font-weight-bold text-secondary me-1"><i class="fas fa-plane me-1 text-primary"></i>Equipamento:</span>\r
+                  <span class="badge bg-primary text-white font-weight-bold" style="font-size: 0.82rem;">{{ item.equipment || 'N\xE3o informado' }}</span>\r
+                </div>\r
+                <div class="d-flex align-items-center gap-1">\r
+                  <span class="font-weight-bold text-secondary me-1"><i class="fas fa-users me-1 text-primary"></i>Distribui\xE7\xE3o PAX:</span>\r
+                  <span class="badge bg-light text-dark border">First: {{ item.pax_first || 0 }}</span>\r
+                  <span class="badge bg-light text-dark border">Executiva: {{ item.pax_executiva || 0 }}</span>\r
+                  <span class="badge bg-light text-dark border">Premium: {{ item.pax_premium || 0 }}</span>\r
+                  <span class="badge bg-light text-dark border">Econ\xF4mica: {{ item.pax_economica || 0 }}</span>\r
+                  <span class="badge bg-success text-white font-weight-bold ms-1">TOTAL: {{ item.total_pax || 0 }} PAX</span>\r
+                </div>\r
+                <div class="d-flex align-items-center gap-3">\r
+                  <div>\r
+                    <span class="font-weight-bold text-secondary me-1"><i class="far fa-calendar-alt me-1 text-primary"></i>Prazo:</span>\r
+                    <span class="text-dark font-weight-bold">{{ item.deadline_date ? (item.deadline_date | date: 'dd/MM/yyyy') : '-' }}</span>\r
+                  </div>\r
+                  <div>\r
+                    <span class="font-weight-bold text-secondary me-1"><i class="far fa-clock me-1 text-warning"></i>Prazo Cia:</span>\r
+                    <span class="text-dark font-weight-bold">{{ item.prazo_cia ? (item.prazo_cia | date: 'dd/MM/yyyy') : '-' }}</span>\r
+                  </div>\r
+                </div>\r
+              </div>\r
+\r
+              <!-- Main Table: Flight Legs + Financials + Footer Summary -->\r
+              <div class="table-responsive">\r
+                <table class="table table-bordered align-middle mb-0 table-tariffs shadow-sm" style="min-width: 1200px">\r
+                  <thead>\r
+                    <!-- Row 1: Grouped Headers -->\r
                     <tr>\r
-                      <th>Contato</th>\r
-                      <th>E-mail</th>\r
-                      <th>Telefone</th>\r
-                      <th>Moeda</th>\r
-                      <th>ISS (%)</th>\r
-                      <th>Taxa 4BTS (%)</th>\r
-                      <th>Total Custo</th>\r
-                      <th>Total Venda</th>\r
-                      <th>Margem (%)</th>\r
-                      <th>Val. Faturamento (Custo)</th>\r
-                      <th>Val. Faturamento (Venda)</th>\r
+                      <th colspan="7" class="text-start bg-light text-dark font-weight-bold">\r
+                        <i class="fas fa-route me-1 text-primary"></i> Trechos de Voo (Fretamento)\r
+                      </th>\r
+                      <th class="bg-light text-center font-weight-bold text-dark" style="width: 90px;">Mark Up</th>\r
+                      <th class="bg-warning-header text-center font-weight-bold text-white" style="width: 140px;">Valor de Custo</th>\r
+                      <th class="bg-success-header text-center font-weight-bold text-white" style="width: 140px;">Valor de Venda</th>\r
+                      <th class="align-middle text-center bg-light text-dark font-weight-bold" style="width: 110px;" *ngIf="!isReadOnly">A\xE7\xF5es</th>\r
+                    </tr>\r
+\r
+                    <!-- Row 2: Sub-headers -->\r
+                    <tr>\r
+                      <th class="text-center font-weight-bold" style="width: 80px;">CIA</th>\r
+                      <th class="text-center font-weight-bold" style="width: 90px;">VOO</th>\r
+                      <th class="text-center font-weight-bold">DE</th>\r
+                      <th class="text-center font-weight-bold">PARA</th>\r
+                      <th class="text-center font-weight-bold" style="width: 110px;">DATAS</th>\r
+                      <th class="text-center font-weight-bold" style="width: 90px;">SA\xCDDA</th>\r
+                      <th class="text-center font-weight-bold" style="width: 90px;">CHEGADA</th>\r
+                      <th class="text-center font-weight-bold">Custo / Venda</th>\r
+                      <th class="text-end font-weight-bold text-warning-emphasis">Custo Fretamento</th>\r
+                      <th class="text-end font-weight-bold text-success">Venda Fretamento</th>\r
+                      <th class="text-center font-weight-bold" style="width: 110px;" *ngIf="!isReadOnly">Trecho</th>\r
                     </tr>\r
                   </thead>\r
                   <tbody>\r
-                    <tr>\r
-                      <td>{{ item.provider?.contact || '-' }}</td>\r
-                      <td>{{ item.provider?.email || '-' }}</td>\r
-                      <td>{{ item.provider?.phone || '-' }}</td>\r
-                      <td>{{ item.currency?.sigla || '-' }}</td>\r
-                      <td>{{ item.iss_percent || 0 }}%</td>\r
-                      <td>{{ item.taxa_4bts || 0 }}%</td>\r
-                      <td class="font-weight-bold text-warning">{{ formatCurrency(sumCost(item), item.currency?.sigla) }}</td>\r
-                      <td class="font-weight-bold text-success">{{ formatCurrency(sumSale(item), item.currency?.sigla) }}</td>\r
-                      <td class="font-weight-bold">\r
-                        {{ sumSale(item) > 0 ? ((1 - sumCost(item) / sumSale(item)) * 100 | number: '1.2-2') : '0.00' }}%\r
+                    <!-- Empty list placeholder -->\r
+                    <tr *ngIf="(!item.eventAirfareOpts || item.eventAirfareOpts.length === 0) && (!item.event_airfare_opts || item.event_airfare_opts.length === 0)">\r
+                      <td [attr.colspan]="isReadOnly ? 10 : 11" class="py-4 text-muted text-center">\r
+                        <i class="fas fa-info-circle me-1"></i>\r
+                        Nenhum trecho cadastrado para este or\xE7amento de fretamento.\r
                       </td>\r
-                      <td class="font-weight-bold text-warning bg-warning-light">\r
-                        {{ formatCurrency(sumCost(item) + sumTaxes(item, 'iss'), item.currency?.sigla) }}\r
+                    </tr>\r
+\r
+                    <!-- Flight Legs Loop -->\r
+                    <tr *ngFor="let opt of item.eventAirfareOpts || item.event_airfare_opts; let optIdx = index">\r
+                      <td class="text-center font-weight-bold">{{ opt.outbound_airline?.name || item.airline?.name || '-' }}</td>\r
+                      <td class="text-center font-weight-bold text-primary">{{ opt.outbound_flight_number || '-' }}</td>\r
+                      <td class="text-center">{{ opt.outbound_origin || '-' }}</td>\r
+                      <td class="text-center">{{ opt.outbound_destination || '-' }}</td>\r
+                      <td class="text-center">{{ opt.outbound_date ? (opt.outbound_date | date: 'dd/MM/yyyy') : '-' }}</td>\r
+                      <td class="text-center">{{ formatTime(opt.outbound_departure_time) }}</td>\r
+                      <td class="text-center">{{ formatTime(opt.outbound_arrival_time) }}</td>\r
+\r
+                      <!-- Financial Columns (Spans across all segments of this charter) -->\r
+                      <td\r
+                        *ngIf="optIdx === 0"\r
+                        [attr.rowspan]="(item.eventAirfareOpts || item.event_airfare_opts).length"\r
+                        class="text-center font-weight-bold align-middle bg-light text-primary"\r
+                        style="font-size: 0.95rem;">\r
+                        {{ getAirfareMarkup(item) }}\r
                       </td>\r
-                      <td class="font-weight-bold text-success bg-success-light">\r
-                        {{ formatCurrency(sumSale(item) + sumTaxes(item, 'iss'), item.currency?.sigla) }}\r
+                      <td\r
+                        *ngIf="optIdx === 0"\r
+                        [attr.rowspan]="(item.eventAirfareOpts || item.event_airfare_opts).length"\r
+                        class="text-end font-weight-bold align-middle bg-warning-light text-dark"\r
+                        style="font-size: 0.95rem;">\r
+                        {{ formatCurrency(item.total_net_sem_4bts || 0, item.currency?.sigla) }}\r
+                      </td>\r
+                      <td\r
+                        *ngIf="optIdx === 0"\r
+                        [attr.rowspan]="(item.eventAirfareOpts || item.event_airfare_opts).length"\r
+                        class="text-end font-weight-bold align-middle bg-success-light text-success"\r
+                        style="font-size: 0.95rem;">\r
+                        {{ formatCurrency(getAirfareVendaCalc(item), item.currency?.sigla) }}\r
+                      </td>\r
+\r
+                      <!-- Action Buttons per Leg -->\r
+                      <td *ngIf="!isReadOnly" class="align-middle text-center" style="width: 110px;">\r
+                        <div class="d-flex justify-content-center align-items-center gap-1">\r
+                          <button\r
+                            type="button"\r
+                            class="btn btn-info text-white shadow-sm btn-action"\r
+                            title="Editar Trecho"\r
+                            data-tooltip="Editar Trecho"\r
+                            [disabled]="statusBlockEdit(item)"\r
+                            (click)="openAddOpt('airfare', item.id, opt)">\r
+                            <i class="fas fa-edit"></i>\r
+                          </button>\r
+                          <button\r
+                            type="button"\r
+                            class="btn btn-secondary text-white shadow-sm btn-action"\r
+                            title="Clonar Trecho"\r
+                            data-tooltip="Clonar Trecho"\r
+                            [disabled]="statusBlockEdit(item)"\r
+                            (click)="openAddOpt('airfare', item.id, opt, true)">\r
+                            <i class="fas fa-clone"></i>\r
+                          </button>\r
+                          <app-confirm-modal\r
+                            [btnClass]="'btn btn-danger text-white shadow-sm btn-action'"\r
+                            [modalTitle]="'Remover Trecho'"\r
+                            [message]="'Deseja realmente remover este trecho?'"\r
+                            [okButtonLabel]="'Remover'"\r
+                            [tooltip]="'Excluir Trecho'"\r
+                            (confirm)="deleteOpt('airfare', opt.id)">\r
+                            <span modal-button><i class="fas fa-trash"></i></span>\r
+                          </app-confirm-modal>\r
+                        </div>\r
+                      </td>\r
+                    </tr>\r
+\r
+                    <!-- Total / Summary Row 1 (Financials & Taxes) -->\r
+                    <tr class="table-subheader">\r
+                      <td colspan="2" class="sticky-col font-weight-bold text-start">Tx. Embarque (Unit.):</td>\r
+                      <td class="font-weight-bold text-start text-dark">\r
+                        {{ formatCurrency(item.taxa_embarque_unit || 0, item.currency?.sigla) }}\r
+                      </td>\r
+                      <td class="font-weight-bold text-end">Total Tx. Embarque:</td>\r
+                      <td class="text-center font-weight-bold text-dark">\r
+                        {{ formatCurrency(((item.taxa_embarque_unit || 0) * (item.total_pax || 0)), item.currency?.sigla) }}\r
+                      </td>\r
+                      <td colspan="2" class="bg-warning-solid font-weight-bold text-end">Total Custo (c/ Txs):</td>\r
+                      <td class="bg-warning-solid font-weight-bold text-end" colspan="2">\r
+                        {{ formatCurrency(getAirfareNetComTxs(item), item.currency?.sigla) }}\r
+                      </td>\r
+                      <td class="bg-success-solid font-weight-bold text-end">Total Venda (c/ Txs):</td>\r
+                      <td class="bg-success-solid font-weight-bold text-end" [attr.colspan]="isReadOnly ? 1 : 2">\r
+                        {{ formatCurrency(getAirfareVendaComTxs(item), item.currency?.sigla) }}\r
+                      </td>\r
+                    </tr>\r
+\r
+                    <!-- Total / Summary Row 2 (Resultado Bruto / Margem) -->\r
+                    <tr class="table-subheader">\r
+                      <td colspan="2" class="sticky-col font-weight-bold text-start">Resultado Bruto (Lucro):</td>\r
+                      <td class="font-weight-bold text-start text-primary" colspan="3">\r
+                        {{ formatCurrency(getAirfareResultadoBruto(item), item.currency?.sigla) }}\r
+                      </td>\r
+                      <td colspan="2" class="font-weight-bold text-end">Margem Estimada (%):</td>\r
+                      <td class="text-end font-weight-bold text-primary" [attr.colspan]="isReadOnly ? 3 : 4">\r
+                        {{ getAirfareMargemPercent(item) | number: '1.2-2' }}%\r
+                      </td>\r
+                    </tr>\r
+\r
+                    <!-- Inclusions & Services Row (INCLUI / STATUS) -->\r
+                    <tr class="observation-row">\r
+                      <td colspan="2" class="sticky-col text-start font-weight-bold text-dark">\r
+                        <i class="fas fa-concierge-bell me-1 text-primary"></i> INCLUI / SERVI\xC7OS:\r
+                      </td>\r
+                      <td [attr.colspan]="isReadOnly ? 8 : 9" class="text-start py-2">\r
+                        <div class="d-flex flex-wrap gap-2">\r
+                          <span class="badge" [ngClass]="item.inc_taxa_embarque ? 'bg-success' : 'bg-secondary'">\r
+                            Taxas de Embarque: {{ item.inc_taxa_embarque ? 'SIM' : 'N\xC3O' }}\r
+                          </span>\r
+                          <span class="badge" [ngClass]="item.inc_servico_bordo ? 'bg-success' : 'bg-secondary'">\r
+                            Servi\xE7o de Bordo: {{ item.inc_servico_bordo ? 'SIM' : 'N\xC3O' }}\r
+                          </span>\r
+                          <span class="badge bg-light text-dark border">\r
+                            <i class="fas fa-suitcase me-1 text-primary"></i>Por\xE3o: {{ formatKilos(item.inc_porao, 23) }}\r
+                          </span>\r
+                          <span class="badge bg-light text-dark border">\r
+                            <i class="fas fa-briefcase me-1 text-primary"></i>Bagagem a bordo: {{ formatKilos(item.inc_bagagem_bordo, 10) }}\r
+                          </span>\r
+                          <span class="badge" [ngClass]="item.inc_sala_vip ? 'bg-success' : 'bg-secondary'">\r
+                            Sala VIP: {{ item.inc_sala_vip ? 'SIM' : 'N\xC3O' }}\r
+                          </span>\r
+                          <span class="badge bg-light text-dark border">\r
+                            FBO Origem: {{ item.inc_fbo_origem || '0' }}\r
+                          </span>\r
+                          <span class="badge bg-light text-dark border">\r
+                            FBO Destino: {{ item.inc_fbo_destino || '0' }}\r
+                          </span>\r
+                          <span class="badge" [ngClass]="item.inc_alteracao_nomes ? 'bg-success' : 'bg-secondary'">\r
+                            Altera\xE7\xE3o Nomes: {{ item.inc_alteracao_nomes ? 'SIM' : 'N\xC3O' }}\r
+                          </span>\r
+                        </div>\r
+                      </td>\r
+                    </tr>\r
+\r
+                    <!-- Faturamento e Par\xE2metros Row -->\r
+                    <tr class="observation-row">\r
+                      <td colspan="2" class="sticky-col text-start font-weight-bold">TAXA 4BTS:</td>\r
+                      <td class="text-start font-weight-bold text-dark" colspan="3">\r
+                        <span class="badge bg-secondary">Tx 4BTS: {{ item.taxa_4bts || 10 }}%</span>\r
+                      </td>\r
+                      <td colspan="2" class="font-weight-bold text-end">Custo Total:</td>\r
+                      <td colspan="2" class="bg-warning-solid font-weight-bold text-end">\r
+                        {{ formatCurrency(getAirfareNetComTxs(item), item.currency?.sigla) }}\r
+                      </td>\r
+                      <td class="font-weight-bold text-end">Venda Total:</td>\r
+                      <td class="bg-success-solid font-weight-bold text-end" [attr.colspan]="isReadOnly ? 1 : 2">\r
+                        {{ formatCurrency(getAirfareVendaComTxs(item), item.currency?.sigla) }}\r
+                      </td>\r
+                    </tr>\r
+\r
+                    <!-- Notes Row -->\r
+                    <tr class="observation-row" *ngIf="item.notes">\r
+                      <td colspan="2" class="sticky-col text-start font-weight-bold">NOTES (FRETAMENTO):</td>\r
+                      <td [attr.colspan]="isReadOnly ? 8 : 9" class="text-start text-dark">\r
+                        {{ item.notes }}\r
+                      </td>\r
+                    </tr>\r
+\r
+                    <!-- Internal Observation Row -->\r
+                    <tr class="observation-row">\r
+                      <td colspan="2" class="sticky-col text-start font-weight-bold">OBSERVA\xC7\xC3O INTERNA:</td>\r
+                      <td [attr.colspan]="isReadOnly ? 8 : 9" class="text-start text-dark">\r
+                        {{ item.internal_observation || '-' }}\r
+                      </td>\r
+                    </tr>\r
+\r
+                    <!-- Customer Observation Row -->\r
+                    <tr class="observation-row">\r
+                      <td colspan="2" class="sticky-col text-start font-weight-bold">OBSERVA\xC7\xC3O CLIENTE:</td>\r
+                      <td [attr.colspan]="isReadOnly ? 8 : 9" class="text-start text-dark">\r
+                        {{ item.customer_observation || '-' }}\r
+                      </td>\r
+                    </tr>\r
+\r
+                    <!-- Proposta Fotos Row -->\r
+                    <tr class="observation-row" *ngIf="item.photo_1 || item.photo_2 || item.photo_3 || item.photo_4">\r
+                      <td colspan="2" class="sticky-col text-start font-weight-bold">FOTOS DA PROPOSTA:</td>\r
+                      <td [attr.colspan]="isReadOnly ? 8 : 9" class="text-start py-2">\r
+                        <div class="d-flex flex-wrap gap-2 align-items-center">\r
+                          <ng-container *ngFor="let p of [item.photo_1, item.photo_2, item.photo_3, item.photo_4]">\r
+                            <a *ngIf="p" [href]="resolvePhotoUrl(p)" target="_blank" class="d-inline-block border rounded p-1 bg-light shadow-sm">\r
+                              <img [src]="resolvePhotoUrl(p)" style="height: 50px; max-width: 80px; object-fit: contain;" class="rounded">\r
+                            </a>\r
+                          </ng-container>\r
+                        </div>\r
                       </td>\r
                     </tr>\r
                   </tbody>\r
                 </table>\r
-              </div>\r
-\r
-              <!-- Options Table -->\r
-              <div class="mb-4">\r
-                <h6 class="font-weight-bold text-primary mb-2">\r
-                  <i class="fas fa-plane-departure me-1"></i>\r
-                  Cota\xE7\xF5es/Op\xE7\xF5es de Voo\r
-                </h6>\r
-                <div class="table-responsive">\r
-                  <table class="table table-bordered table-striped align-middle mb-0 table-tariffs" style="min-width: 1200px">\r
-                    <thead class="table-dark">\r
-                      <tr>\r
-                        <th colspan="7" class="text-center font-weight-bold border-bottom-0 bg-primary">Ida (Outbound)</th>\r
-                        <th colspan="7" class="text-center font-weight-bold border-bottom-0 bg-info">Volta (Inbound)</th>\r
-                        <th colspan="5" class="text-center font-weight-bold border-bottom-0 bg-success">Dados Financeiros e Regras</th>\r
-                        <ng-container *ngIf="showDetailsAirfare">\r
-                          <th colspan="6" class="text-center font-weight-bold border-bottom-0 bg-secondary">Detalhes Adicionais</th>\r
-                        </ng-container>\r
-                        <th rowspan="2" class="align-middle text-center" *ngIf="!isReadOnly">A\xE7\xF5es</th>\r
-                      </tr>\r
-                      <tr>\r
-                        <!-- Ida -->\r
-                        <th>Cia</th>\r
-                        <th>Voo</th>\r
-                        <th>Classe</th>\r
-                        <th>Data</th>\r
-                        <th>Origem</th>\r
-                        <th>Destino</th>\r
-                        <th>Dep/Arr</th>\r
-                        <!-- Volta -->\r
-                        <th>Cia</th>\r
-                        <th>Voo</th>\r
-                        <th>Classe</th>\r
-                        <th>Data</th>\r
-                        <th>Origem</th>\r
-                        <th>Destino</th>\r
-                        <th>Dep/Arr</th>\r
-                        <!-- Fin & Regras -->\r
-                        <th>Qtd/Pax</th>\r
-                        <th>Custo Unit.</th>\r
-                        <th>Total Custo</th>\r
-                        <th>Venda Unit.</th>\r
-                        <th>Total Venda</th>\r
-                        <!-- Details -->\r
-                        <ng-container *ngIf="showDetailsAirfare">\r
-                          <th>Cabine</th>\r
-                          <th>Bagagem</th>\r
-                          <th>Prop. Rec. (%)</th>\r
-                          <th>Kickback (%)</th>\r
-                          <th>Comp. Site</th>\r
-                          <th>Comp. Cliente</th>\r
-                        </ng-container>\r
-                        <th>Status</th>\r
-                      </tr>\r
-                    </thead>\r
-                    <tbody>\r
-                      <!-- Empty list placeholder -->\r
-                      <tr *ngIf="(!item.eventAirfareOpts || item.eventAirfareOpts.length === 0) && (!item.event_airfare_opts || item.event_airfare_opts.length === 0)">\r
-                        <td [attr.colspan]="showDetailsAirfare ? 26 : 20" class="py-4 text-muted text-center">\r
-                          <i class="fas fa-info-circle me-1"></i>\r
-                          Nenhuma tarifa ou detalhe cadastrado para este fornecedor.\r
-                        </td>\r
-                      </tr>\r
-\r
-                      <!-- Options Loop -->\r
-                      <tr *ngFor="let opt of item.eventAirfareOpts || item.event_airfare_opts">\r
-                        <!-- Ida -->\r
-                        <td>{{ opt.outbound_airline?.name || '-' }}</td>\r
-                        <td>{{ opt.outbound_flight_number || '-' }}</td>\r
-                        <td>{{ opt.outbound_class || '-' }}</td>\r
-                        <td>{{ opt.outbound_date | date: 'dd/MM/yyyy' }}</td>\r
-                        <td>{{ opt.outbound_origin || '-' }}</td>\r
-                        <td>{{ opt.outbound_destination || '-' }}</td>\r
-                        <td>{{ opt.outbound_departure_time || '-' }} / {{ opt.outbound_arrival_time || '-' }}</td>\r
-\r
-                        <!-- Volta -->\r
-                        <td>{{ opt.inbound_airline?.name || '-' }}</td>\r
-                        <td>{{ opt.inbound_flight_number || '-' }}</td>\r
-                        <td>{{ opt.inbound_class || '-' }}</td>\r
-                        <td>{{ opt.inbound_date | date: 'dd/MM/yyyy' }}</td>\r
-                        <td>{{ opt.inbound_origin || '-' }}</td>\r
-                        <td>{{ opt.inbound_destination || '-' }}</td>\r
-                        <td>{{ opt.inbound_departure_time || '-' }} / {{ opt.inbound_arrival_time || '-' }}</td>\r
-\r
-                        <!-- Fin & Regras -->\r
-                        <td class="text-center">{{ opt.count || 0 }}</td>\r
-                        <td class="text-end">{{ formatCurrency(unitCost(opt), item.currency?.sigla) }}</td>\r
-                        <td class="bg-warning-solid font-weight-bold text-end">\r
-                          {{ formatCurrency(unitCost(opt) * opt.count, item.currency?.sigla) }}\r
-                        </td>\r
-                        <td class="text-end">{{ formatCurrency(unitSale(opt), item.currency?.sigla) }}</td>\r
-                        <td class="bg-success-solid font-weight-bold text-end">\r
-                          {{ formatCurrency(unitSale(opt) * opt.count, item.currency?.sigla) }}\r
-                        </td>\r
-\r
-                        <!-- Details -->\r
-                        <ng-container *ngIf="showDetailsAirfare">\r
-                          <td>{{ opt.cabin?.name || '-' }}</td>\r
-                          <td>{{ opt.baggage?.name || '-' }}</td>\r
-                          <td class="text-center">{{ opt.received_proposal_percent }}%</td>\r
-                          <td class="text-center">{{ opt.kickback }}%</td>\r
-                          <td class="text-end">{{ formatCurrency(opt.compare_website || 0, item.currency?.sigla) }}</td>\r
-                          <td class="text-end">{{ formatCurrency(opt.compare_client || 0, item.currency?.sigla) }}</td>\r
-                        </ng-container>\r
-\r
-                        <td class="text-center">\r
-                          <span class="badge" [ngClass]="{\r
-                            'bg-secondary': opt.status === 'created' || !opt.status,\r
-                            'bg-warning': opt.status === 'pending',\r
-                            'bg-success': opt.status === 'confirmed',\r
-                            'bg-danger': opt.status === 'cancelled'\r
-                          }">\r
-                            {{\r
-                              opt.status === 'created' ? 'Criado' :\r
-                              opt.status === 'pending' ? 'Pendente' :\r
-                              opt.status === 'confirmed' ? 'Confirmado' :\r
-                              opt.status === 'cancelled' ? 'Cancelado' : (opt.status || 'Criado')\r
-                            }}\r
-                          </span>\r
-                        </td>\r
-\r
-                        <!-- Action Buttons -->\r
-                        <td *ngIf="!isReadOnly">\r
-                          <div class="d-flex justify-content-center gap-1">\r
-                            <button\r
-                              type="button"\r
-                              class="btn btn-info text-white shadow-sm btn-action btn-sm"\r
-                              title="Editar Tarifa"\r
-                              [disabled]="statusBlockEdit(item)"\r
-                              (click)="openAddOpt('airfare', item.id, opt)">\r
-                              <i class="fas fa-edit"></i>\r
-                            </button>\r
-                            <button\r
-                              type="button"\r
-                              class="btn btn-secondary text-white shadow-sm btn-action btn-sm"\r
-                              title="Clonar Tarifa"\r
-                              [disabled]="statusBlockEdit(item)"\r
-                              (click)="openAddOpt('airfare', item.id, opt, true)">\r
-                              <i class="fas fa-clone"></i>\r
-                            </button>\r
-                            <app-confirm-modal\r
-                              [btnClass]="'btn btn-danger text-white shadow-sm btn-action btn-sm'"\r
-                              [modalTitle]="'Remover Tarifa'"\r
-                              [message]="'Deseja realmente remover esta tarifa?'"\r
-                              [okButtonLabel]="'Remover'"\r
-                              (confirm)="deleteOpt('airfare', opt.id)">\r
-                              <span modal-button><i class="fas fa-trash"></i></span>\r
-                            </app-confirm-modal>\r
-                          </div>\r
-                        </td>\r
-                      </tr>\r
-                    </tbody>\r
-                  </table>\r
-                </div>\r
-              </div>\r
-\r
-              <!-- Ficha de Voo (Passageiros) Section -->\r
-              <div class="mt-4 border-top pt-4">\r
-                <div class="d-flex justify-content-between align-items-center mb-3">\r
-                  <h6 class="font-weight-bold text-primary mb-0">\r
-                    <i class="fas fa-users me-1"></i>\r
-                    Ficha de Voo (Lista de Passageiros)\r
-                  </h6>\r
-                  <button\r
-                    *ngIf="!isReadOnly"\r
-                    type="button"\r
-                    class="btn btn-sm btn-success shadow-sm"\r
-                    (click)="openAddPassenger(item.id)">\r
-                    <i class="fas fa-user-plus me-1"></i>\r
-                    Adicionar Passageiro\r
-                  </button>\r
-                </div>\r
-\r
-                <div class="table-responsive">\r
-                  <table class="table table-bordered table-hover align-middle mb-0 bg-white" style="min-width: 1200px; font-size: 0.9rem;">\r
-                    <thead class="table-secondary text-dark">\r
-                      <tr>\r
-                        <th rowspan="2" class="align-middle text-start">Nome Completo</th>\r
-                        <th rowspan="2" class="align-middle text-center">Documento</th>\r
-                        <th rowspan="2" class="align-middle text-center">Nascimento</th>\r
-                        <th rowspan="2" class="align-middle text-center">Val. Passaporte</th>\r
-                        <th colspan="4" class="text-center bg-primary text-white font-weight-bold">Ida (Outbound)</th>\r
-                        <th colspan="4" class="text-center bg-info text-white font-weight-bold">Volta (Inbound)</th>\r
-                        <th rowspan="2" class="align-middle text-center" style="width: 100px" *ngIf="!isReadOnly">A\xE7\xF5es</th>\r
-                      </tr>\r
-                      <tr>\r
-                        <th>Data</th>\r
-                        <th>Origem</th>\r
-                        <th>Destino</th>\r
-                        <th>Hor\xE1rio (Dep/Arr)</th>\r
-                        <th>Data</th>\r
-                        <th>Origem</th>\r
-                        <th>Destino</th>\r
-                        <th>Hor\xE1rio (Dep/Arr)</th>\r
-                      </tr>\r
-                    </thead>\r
-                    <tbody>\r
-                      <tr *ngIf="!item.passengers || item.passengers.length === 0">\r
-                        <td colspan="13" class="py-3 text-muted text-center">\r
-                          Nenhum passageiro cadastrado para este voo.\r
-                        </td>\r
-                      </tr>\r
-                      <tr *ngFor="let pax of item.passengers">\r
-                        <td class="font-weight-bold text-dark text-start">{{ pax.name }}</td>\r
-                        <td class="text-center">{{ pax.document || '-' }}</td>\r
-                        <td class="text-center">{{ pax.birth_date | date: 'dd/MM/yyyy' }}</td>\r
-                        <td class="text-center">{{ pax.passport_validity | date: 'dd/MM/yyyy' }}</td>\r
-\r
-                        <!-- Outbound -->\r
-                        <td class="text-center">{{ pax.outbound_date | date: 'dd/MM/yyyy' }}</td>\r
-                        <td>{{ pax.outbound_origin || '-' }}</td>\r
-                        <td>{{ pax.outbound_destination || '-' }}</td>\r
-                        <td class="text-center">\r
-                          {{ pax.outbound_departure || '-' }} <span *ngIf="pax.outbound_departure && pax.outbound_arrival">/</span> {{ pax.outbound_arrival || '-' }}\r
-                        </td>\r
-\r
-                        <!-- Inbound -->\r
-                        <td class="text-center">{{ pax.inbound_date | date: 'dd/MM/yyyy' }}</td>\r
-                        <td>{{ pax.inbound_origin || '-' }}</td>\r
-                        <td>{{ pax.inbound_destination || '-' }}</td>\r
-                        <td class="text-center">\r
-                          {{ pax.inbound_departure || '-' }} <span *ngIf="pax.inbound_departure && pax.inbound_arrival">/</span> {{ pax.inbound_arrival || '-' }}\r
-                        </td>\r
-\r
-                        <!-- Passenger Actions -->\r
-                        <td *ngIf="!isReadOnly">\r
-                          <div class="d-flex justify-content-center gap-1">\r
-                            <button\r
-                              type="button"\r
-                              class="btn btn-outline-info btn-sm btn-action"\r
-                              title="Editar Passageiro"\r
-                              (click)="openAddPassenger(item.id, pax)">\r
-                              <i class="fas fa-edit"></i>\r
-                            </button>\r
-                            <app-confirm-modal\r
-                              [btnClass]="'btn btn-outline-danger btn-sm btn-action'"\r
-                              [modalTitle]="'Remover Passageiro'"\r
-                              [message]="'Tem certeza de que deseja remover o passageiro ' + pax.name + '?'"\r
-                              [okButtonLabel]="'Remover'"\r
-                              (confirm)="deletePassenger(pax.id)">\r
-                              <span modal-button><i class="fas fa-trash"></i></span>\r
-                            </app-confirm-modal>\r
-                          </div>\r
-                        </td>\r
-                      </tr>\r
-                    </tbody>\r
-                  </table>\r
-                </div>\r
               </div>\r
             </div>\r
           </div>\r
@@ -122488,6 +122874,7 @@ var EventCreateComponent = class _EventCreateComponent {
         </div>\r
       </div>\r
     </div>\r
+  </div>\r
 \r
   <!-- ==================== DIALOG MODALS ==================== -->\r
 \r
@@ -122495,7 +122882,11 @@ var EventCreateComponent = class _EventCreateComponent {
   <app-modal\r
     [show]="showProviderLinkForm"\r
     (close)="closeProviderLinkForm()"\r
-    [title]="providerLinkForm.id ? 'Editar V\xEDnculo' : 'Vincular Novo Fornecedor'"\r
+    [title]="\r
+      providerLinkType === 'airfare'\r
+        ? (providerLinkForm.id ? 'Editar Or\xE7amento de Fretamento' : 'Novo Or\xE7amento de Fretamento')\r
+        : (providerLinkForm.id ? 'Editar V\xEDnculo' : 'Vincular Novo Fornecedor')\r
+    "\r
     [icon]="\r
       providerLinkType === 'hotel'\r
         ? 'fa-hotel'\r
@@ -122512,11 +122903,11 @@ var EventCreateComponent = class _EventCreateComponent {
     <form (ngSubmit)="saveProviderLink()">\r
       <div class="row">\r
         <!-- Select Fornecedor (Autocomplete) -->\r
-        <div class="col-md-6 mb-3">\r
+        <div [ngClass]="providerLinkType === 'airfare' ? 'col-md-5' : 'col-md-6'" class="mb-3">\r
           <app-autocomplete\r
             id="provider_id"\r
-            label="Fornecedor"\r
-            placeholder="Digite para buscar o fornecedor..."\r
+            [label]="providerLinkType === 'airfare' ? 'Companhia A\xE9rea' : 'Fornecedor'"\r
+            [placeholder]="providerLinkType === 'airfare' ? 'Digite para buscar a Companhia A\xE9rea...' : 'Digite para buscar o fornecedor...'"\r
             [required]="true"\r
             [searchFn]="searchProviders"\r
             [displayFn]="displayProvider"\r
@@ -122525,12 +122916,24 @@ var EventCreateComponent = class _EventCreateComponent {
             [(ngModel)]="providerLinkForm.provider_id"\r
             (ngModelChange)="onProviderChange($event)"\r
             name="provider_id"\r
-            [errors]="errors.provider_id"\r
+            [errors]="errors.provider_id || errors.airline_id"\r
             [disabled]="providerLinkForm.id > 0"></app-autocomplete>\r
         </div>\r
 \r
+        <!-- Equipamento (A\xE9reo only - ao lado de Companhia A\xE9rea) -->\r
+        <div class="col-md-4 form-group mb-3" *ngIf="providerLinkType === 'airfare'">\r
+          <label for="equipment" class="form-label font-weight-bold">Equipamento:</label>\r
+          <input\r
+            type="text"\r
+            id="equipment"\r
+            class="form-control"\r
+            placeholder="Ex: Boeing 737-700 / Turboprop"\r
+            [(ngModel)]="providerLinkForm.equipment"\r
+            name="equipment" />\r
+        </div>\r
+\r
         <!-- Select Moeda -->\r
-        <div class="col-md-6 form-group mb-3">\r
+        <div [ngClass]="providerLinkType === 'airfare' ? 'col-md-3' : 'col-md-6'" class="form-group mb-3">\r
           <label for="currency_id" class="form-label font-weight-bold">\r
             Moeda:\r
             <span class="text-danger">*</span>\r
@@ -122552,7 +122955,7 @@ var EventCreateComponent = class _EventCreateComponent {
         </div>\r
 \r
         <!-- Inputs Percentuais -->\r
-        <div class="col-md-3 form-group mb-3">\r
+        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-2' : 'col-md-3'" class="form-group mb-3" *ngIf="providerLinkType !== 'airfare'">\r
           <label for="iss_percent" class="form-label font-weight-bold">ISS (%):</label>\r
           <input\r
             type="text"\r
@@ -122563,7 +122966,7 @@ var EventCreateComponent = class _EventCreateComponent {
             name="iss_percent" />\r
         </div>\r
 \r
-        <div class="col-md-3 form-group mb-3">\r
+        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-2' : 'col-md-3'" class="form-group mb-3" *ngIf="providerLinkType !== 'airfare'">\r
           <label for="service_percent" class="form-label font-weight-bold">Servi\xE7o (%):</label>\r
           <input\r
             type="text"\r
@@ -122574,7 +122977,7 @@ var EventCreateComponent = class _EventCreateComponent {
             name="service_percent" />\r
         </div>\r
 \r
-        <div class="col-md-3 form-group mb-3">\r
+        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-2' : 'col-md-3'" class="form-group mb-3" *ngIf="providerLinkType !== 'airfare'">\r
           <label for="iva_percent" class="form-label font-weight-bold">IVA (%):</label>\r
           <input\r
             type="text"\r
@@ -122585,7 +122988,40 @@ var EventCreateComponent = class _EventCreateComponent {
             name="iva_percent" />\r
         </div>\r
 \r
-        <div class="col-md-3 form-group mb-3">\r
+        <!-- IOF (%) -->\r
+        <div [ngClass]="providerLinkType === 'airfare' ? 'col-md-4' : (providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-2' : 'col-md-3')" class="form-group mb-3">\r
+          <label for="iof" class="form-label font-weight-bold">IOF (%):</label>\r
+          <input\r
+            type="text"\r
+            id="iof"\r
+            class="form-control"\r
+            [class.is-invalid]="errors.iof"\r
+            [value]="formatPercent(providerLinkForm.iof)"\r
+            (input)="onPercentInput($event, 'iof', 'providerLinkForm')"\r
+            name="iof" />\r
+          <div *ngIf="errors.iof" class="text-danger mt-1">\r
+            <small *ngFor="let err of errors.iof" class="d-block">{{ err }}</small>\r
+          </div>\r
+        </div>\r
+\r
+        <!-- Service Charge (Turismo) - Hotel/AB only -->\r
+        <div class="col-md-2 form-group mb-3" *ngIf="providerLinkType === 'hotel' || providerLinkType === 'ab'">\r
+          <label for="service_charge" class="form-label font-weight-bold">Taxa Turismo:</label>\r
+          <div class="input-group">\r
+            <span class="input-group-text bg-light text-muted font-weight-bold" *ngIf="getSelectedCurrencySymbol()">\r
+              {{ getSelectedCurrencySymbol() }}\r
+            </span>\r
+            <input\r
+              type="text"\r
+              id="service_charge"\r
+              class="form-control"\r
+              [value]="formatMoney(providerLinkForm.service_charge)"\r
+              (input)="onMoneyInput($event, 'service_charge', 'providerLinkForm')"\r
+              name="service_charge" />\r
+          </div>\r
+        </div>\r
+\r
+        <div [ngClass]="providerLinkType === 'airfare' ? 'col-md-4' : (providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-2' : 'col-md-3')" class="form-group mb-3">\r
           <label for="taxa_4bts" class="form-label font-weight-bold">\r
             Taxa 4BTS (%):\r
             <span class="text-danger">*</span>\r
@@ -122604,25 +123040,8 @@ var EventCreateComponent = class _EventCreateComponent {
           </div>\r
         </div>\r
 \r
-        <!-- Service Charge (Turismo) - Hotel/AB only -->\r
-        <div class="col-md-3 form-group mb-3" *ngIf="providerLinkType === 'hotel' || providerLinkType === 'ab'">\r
-          <label for="service_charge" class="form-label font-weight-bold">Taxa Turismo:</label>\r
-          <div class="input-group">\r
-            <span class="input-group-text bg-light text-muted font-weight-bold" *ngIf="getSelectedCurrencySymbol()">\r
-              {{ getSelectedCurrencySymbol() }}\r
-            </span>\r
-            <input\r
-              type="text"\r
-              id="service_charge"\r
-              class="form-control"\r
-              [value]="formatMoney(providerLinkForm.service_charge)"\r
-              (input)="onMoneyInput($event, 'service_charge', 'providerLinkForm')"\r
-              name="service_charge" />\r
-          </div>\r
-        </div>\r
-\r
         <!-- Forma de Pagamento -->\r
-        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-3' : 'col-md-4'" class="form-group mb-3">\r
+        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' || providerLinkType === 'airfare' ? 'col-md-4' : 'col-md-3'" class="form-group mb-3">\r
           <label for="payment_method" class="form-label font-weight-bold">Forma de Pagamento:</label>\r
           <select id="payment_method" class="form-select" [(ngModel)]="providerLinkForm.payment_method" name="payment_method">\r
             <option value="Indefinido">Indefinido</option>\r
@@ -122632,7 +123051,7 @@ var EventCreateComponent = class _EventCreateComponent {
         </div>\r
 \r
         <!-- Nota Fiscal -->\r
-        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-3' : 'col-md-4'" class="form-group mb-3">\r
+        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' || providerLinkType === 'airfare' ? 'col-md-4' : 'col-md-3'" class="form-group mb-3">\r
           <label for="invoice" class="form-label font-weight-bold">Nota Fiscal:</label>\r
           <select id="invoice" class="form-select" [(ngModel)]="providerLinkForm.invoice" name="invoice">\r
             <option [ngValue]="true">Sim</option>\r
@@ -122640,56 +123059,231 @@ var EventCreateComponent = class _EventCreateComponent {
           </select>\r
         </div>\r
 \r
-        <!-- IOF -->\r
-        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-3' : 'col-md-4'" class="form-group mb-3">\r
-          <label for="iof" class="form-label font-weight-bold">IOF (%):</label>\r
-          <input\r
-            type="text"\r
-            id="iof"\r
-            class="form-control"\r
-            [class.is-invalid]="errors.iof"\r
-            [value]="formatPercent(providerLinkForm.iof)"\r
-            (input)="onPercentInput($event, 'iof', 'providerLinkForm')"\r
-            name="iof" />\r
-          <div *ngIf="errors.iof" class="text-danger mt-1">\r
-            <small *ngFor="let err of errors.iof" class="d-block">{{ err }}</small>\r
-          </div>\r
-        </div>\r
-\r
         <!-- Prazo -->\r
-        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' ? 'col-md-3' : 'col-md-4'" class="form-group mb-3">\r
+        <div [ngClass]="providerLinkType === 'hotel' || providerLinkType === 'ab' || providerLinkType === 'airfare' ? 'col-md-4' : 'col-md-3'" class="form-group mb-3">\r
           <label for="deadline_date" class="form-label font-weight-bold">Prazo:</label>\r
-          <input\r
-            type="date"\r
-            id="deadline_date"\r
-            class="form-control"\r
-            [class.is-invalid]="errors.deadline_date"\r
-            [(ngModel)]="providerLinkForm.deadline_date"\r
-            name="deadline_date" />\r
+          <div class="input-group">\r
+            <span class="input-group-text bg-light"><i class="fas fa-calendar-alt text-primary"></i></span>\r
+            <input\r
+              type="text"\r
+              id="deadline_date"\r
+              class="form-control bg-white"\r
+              [class.is-invalid]="errors.deadline_date"\r
+              placeholder="dd/mm/aaaa"\r
+              [(ngModel)]="providerLinkForm.deadline_date"\r
+              appFlatpickr\r
+              name="deadline_date" />\r
+          </div>\r
           <div *ngIf="errors.deadline_date" class="text-danger mt-1">\r
             <small *ngFor="let err of errors.deadline_date" class="d-block">{{ err }}</small>\r
           </div>\r
         </div>\r
 \r
-        <!-- Observa\xE7\xF5es -->\r
-        <div class="col-md-12 form-group mb-3">\r
-          <label for="internal_observation" class="form-label font-weight-bold">Observa\xE7\xE3o Interna:</label>\r
-          <textarea\r
-            id="internal_observation"\r
-            rows="2"\r
-            class="form-control"\r
-            [(ngModel)]="providerLinkForm.internal_observation"\r
-            name="internal_observation"></textarea>\r
+        <!-- Prazo da Cia (A\xE9reo only - ao lado de Prazo) -->\r
+        <div class="col-md-4 form-group mb-3" *ngIf="providerLinkType === 'airfare'">\r
+          <label for="prazo_cia" class="form-label font-weight-bold">Prazo da Cia:</label>\r
+          <div class="input-group">\r
+            <span class="input-group-text bg-light"><i class="fas fa-calendar-alt text-warning"></i></span>\r
+            <input\r
+              type="text"\r
+              id="prazo_cia"\r
+              class="form-control bg-white"\r
+              placeholder="dd/mm/aaaa"\r
+              [(ngModel)]="providerLinkForm.prazo_cia"\r
+              appFlatpickr\r
+              name="prazo_cia" />\r
+          </div>\r
         </div>\r
 \r
-        <div class="col-md-12 form-group mb-3">\r
-          <label for="customer_observation" class="form-label font-weight-bold">Observa\xE7\xE3o Cliente:</label>\r
-          <textarea\r
-            id="customer_observation"\r
-            rows="2"\r
-            class="form-control"\r
-            [(ngModel)]="providerLinkForm.customer_observation"\r
-            name="customer_observation"></textarea>\r
+        <!-- Se\xE7\xE3o Espec\xEDfica para Proposta de A\xE9reo / Fretamento -->\r
+        <div class="col-md-12 mb-3" *ngIf="providerLinkType === 'airfare'">\r
+          <div class="card p-3 bg-light border border-warning shadow-sm">\r
+            <h6 class="text-warning-emphasis font-weight-bold mb-3">\r
+              <i class="fas fa-plane-departure me-2"></i> Or\xE7amento Fretamento / Cia A\xE9rea\r
+            </h6>\r
+            \r
+            <div class="row">\r
+              <!-- Distribui\xE7\xE3o de Pax / Assentos -->\r
+              <div class="col-md-12 mb-3">\r
+                <label class="form-label font-weight-bold text-dark mb-1">Distribui\xE7\xE3o de Assentos (PAX):</label>\r
+                <div class="row bg-white p-2 border rounded">\r
+                  <div class="col-md-2 form-group">\r
+                    <label class="small font-weight-bold">FIRST:</label>\r
+                    <input type="number" min="0" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.pax_first" (ngModelChange)="calculatePaxTotal()" name="pax_first" />\r
+                  </div>\r
+                  <div class="col-md-2 form-group">\r
+                    <label class="small font-weight-bold">EXECUTIVA:</label>\r
+                    <input type="number" min="0" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.pax_executiva" (ngModelChange)="calculatePaxTotal()" name="pax_executiva" />\r
+                  </div>\r
+                  <div class="col-md-2 form-group">\r
+                    <label class="small font-weight-bold">PREMIUM:</label>\r
+                    <input type="number" min="0" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.pax_premium" (ngModelChange)="calculatePaxTotal()" name="pax_premium" />\r
+                  </div>\r
+                  <div class="col-md-3 form-group">\r
+                    <label class="small font-weight-bold">ECON\xD4MICA:</label>\r
+                    <input type="number" min="0" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.pax_economica" (ngModelChange)="calculatePaxTotal()" name="pax_economica" />\r
+                  </div>\r
+                  <div class="col-md-3 form-group">\r
+                    <label class="small font-weight-bold">TOTAL PAX:</label>\r
+                    <input type="number" readonly class="form-control form-control-sm bg-light font-weight-bold text-primary" [value]="providerLinkForm.total_pax" name="total_pax" />\r
+                  </div>\r
+                </div>\r
+              </div>\r
+\r
+              <!-- Inclus\xF5es / Servi\xE7os do Frete -->\r
+              <div class="col-md-12 mb-3">\r
+                <label class="form-label font-weight-bold text-dark mb-1">Inclus\xF5es & Servi\xE7os:</label>\r
+                <div class="row bg-white p-2 border rounded">\r
+                  <div class="col-md-3 form-group mb-2">\r
+                    <label class="small font-weight-bold d-block">Taxa de Embarque:</label>\r
+                    <select class="form-select form-select-sm" [(ngModel)]="providerLinkForm.inc_taxa_embarque" name="inc_taxa_embarque">\r
+                      <option [ngValue]="true">SIM</option>\r
+                      <option [ngValue]="false">N\xC3O</option>\r
+                    </select>\r
+                  </div>\r
+                  <div class="col-md-3 form-group mb-2">\r
+                    <label class="small font-weight-bold d-block">Servi\xE7o de Bordo:</label>\r
+                    <select class="form-select form-select-sm" [(ngModel)]="providerLinkForm.inc_servico_bordo" name="inc_servico_bordo">\r
+                      <option [ngValue]="true">SIM</option>\r
+                      <option [ngValue]="false">N\xC3O</option>\r
+                    </select>\r
+                  </div>\r
+                  <div class="col-md-3 form-group mb-2">\r
+                    <label class="small font-weight-bold">Por\xE3o:</label>\r
+                    <div class="input-group input-group-sm">\r
+                      <input type="number" min="0" step="1" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.inc_porao" name="inc_porao" placeholder="23" />\r
+                      <span class="input-group-text bg-light">kg</span>\r
+                    </div>\r
+                  </div>\r
+                  <div class="col-md-3 form-group mb-2">\r
+                    <label class="small font-weight-bold">Bagagem a bordo:</label>\r
+                    <div class="input-group input-group-sm">\r
+                      <input type="number" min="0" step="1" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.inc_bagagem_bordo" name="inc_bagagem_bordo" placeholder="10" />\r
+                      <span class="input-group-text bg-light">kg</span>\r
+                    </div>\r
+                  </div>\r
+                  <div class="col-md-3 form-group">\r
+                    <label class="small font-weight-bold d-block">Sala VIP Aeroporto:</label>\r
+                    <select class="form-select form-select-sm" [(ngModel)]="providerLinkForm.inc_sala_vip" name="inc_sala_vip">\r
+                      <option [ngValue]="true">SIM</option>\r
+                      <option [ngValue]="false">N\xC3O</option>\r
+                    </select>\r
+                  </div>\r
+                  <div class="col-md-3 form-group">\r
+                    <label class="small font-weight-bold">FBO Origem:</label>\r
+                    <input type="text" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.inc_fbo_origem" name="inc_fbo_origem" />\r
+                  </div>\r
+                  <div class="col-md-3 form-group">\r
+                    <label class="small font-weight-bold">FBO Destino:</label>\r
+                    <input type="text" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.inc_fbo_destino" name="inc_fbo_destino" />\r
+                  </div>\r
+                  <div class="col-md-3 form-group">\r
+                    <label class="small font-weight-bold d-block">Altera\xE7\xE3o de Nomes:</label>\r
+                    <select class="form-select form-select-sm" [(ngModel)]="providerLinkForm.inc_alteracao_nomes" name="inc_alteracao_nomes">\r
+                      <option [ngValue]="true">SIM</option>\r
+                      <option [ngValue]="false">N\xC3O</option>\r
+                    </select>\r
+                  </div>\r
+                </div>\r
+              </div>\r
+\r
+              <!-- Valores Financeiros do Fretamento (Planilha Bloco Financeiro) -->\r
+              <div class="col-md-12 mb-3">\r
+                <label class="form-label font-weight-bold text-dark mb-1">\r
+                  <i class="fas fa-coins me-1 text-warning"></i> Valores do Fretamento & Taxas:\r
+                </label>\r
+                <div class="row bg-white p-3 border rounded shadow-sm">\r
+                  <div class="col-md-4 form-group mb-2">\r
+                    <label class="small font-weight-bold text-primary">Custo do Fretamento (Net):</label>\r
+                    <div class="input-group input-group-sm">\r
+                      <span class="input-group-text bg-light text-muted font-weight-bold" *ngIf="getSelectedCurrencySymbol()">\r
+                        {{ getSelectedCurrencySymbol() }}\r
+                      </span>\r
+                      <input\r
+                        type="text"\r
+                        class="form-control form-control-sm font-weight-bold"\r
+                        [value]="formatMoney(providerLinkForm.total_net_sem_4bts)"\r
+                        (input)="onMoneyInput($event, 'total_net_sem_4bts', 'providerLinkForm')"\r
+                        name="total_net_sem_4bts"\r
+                        placeholder="0,00" />\r
+                    </div>\r
+                  </div>\r
+                  <div class="col-md-4 form-group mb-2">\r
+                    <label class="small font-weight-bold text-dark">Mark Up:</label>\r
+                    <input\r
+                      type="number"\r
+                      step="0.01"\r
+                      min="0.01"\r
+                      class="form-control form-control-sm font-weight-bold"\r
+                      [(ngModel)]="providerLinkForm.markup"\r
+                      (blur)="onMarkupBlur()"\r
+                      name="markup"\r
+                      placeholder="0.75" />\r
+                  </div>\r
+                  <div class="col-md-4 form-group mb-2">\r
+                    <label class="small font-weight-bold">Taxa de Embarque (Unit.):</label>\r
+                    <div class="input-group input-group-sm">\r
+                      <span class="input-group-text bg-light text-muted font-weight-bold" *ngIf="getSelectedCurrencySymbol()">\r
+                        {{ getSelectedCurrencySymbol() }}\r
+                      </span>\r
+                      <input\r
+                        type="text"\r
+                        class="form-control form-control-sm"\r
+                        [value]="formatMoney(providerLinkForm.taxa_embarque_unit)"\r
+                        (input)="onMoneyInput($event, 'taxa_embarque_unit', 'providerLinkForm')"\r
+                        name="taxa_embarque_unit"\r
+                        placeholder="0,00" />\r
+                    </div>\r
+                  </div>\r
+                </div>\r
+              </div>\r
+\r
+              <!-- Sub-bloco: Campos para Montagem da Proposta (PDF) -->\r
+              <div class="col-md-12 mb-3">\r
+                <label class="form-label font-weight-bold text-dark mb-1">\r
+                  <i class="fas fa-file-pdf me-1 text-danger"></i> Campos para Montagem da Proposta (PDF):\r
+                </label>\r
+                <div class="row bg-white p-3 border rounded shadow-sm">\r
+                  <!-- Observa\xE7\xF5es (Proposta) -->\r
+                  <div class="col-md-6 form-group mb-3">\r
+                    <label for="observations" class="small font-weight-bold">Observa\xE7\xF5es (Proposta):</label>\r
+                    <textarea id="observations" rows="3" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.observations" name="observations" placeholder="T\xF3picos de observa\xE7\xF5es da proposta..."></textarea>\r
+                  </div>\r
+\r
+                  <!-- Notes (Fretamento) -->\r
+                  <div class="col-md-6 form-group mb-3">\r
+                    <label for="notes" class="small font-weight-bold">Notes (Fretamento):</label>\r
+                    <textarea id="notes" rows="3" class="form-control form-control-sm" [(ngModel)]="providerLinkForm.notes" name="notes" placeholder="Notas internas do fretamento..."></textarea>\r
+                  </div>\r
+\r
+                  <!-- Upload/Sele\xE7\xE3o de 4 Fotos -->\r
+                  <div class="col-md-12">\r
+                    <label class="small font-weight-bold d-block mb-2">Fotos da Proposta (At\xE9 4 Imagens):</label>\r
+                    <div class="row">\r
+                      <div class="col-md-3 mb-2" *ngFor="let pNum of [1, 2, 3, 4]">\r
+                        <div class="border p-2 text-center bg-light rounded h-100 d-flex flex-column justify-content-between">\r
+                          <span class="d-block font-weight-bold mb-1" style="font-size: 0.85rem;">Foto {{ pNum }}</span>\r
+                          \r
+                          <div *ngIf="getPhotoValue(pNum)" class="mb-2 position-relative d-inline-block mx-auto">\r
+                            <img [src]="getPhotoValue(pNum)" style="max-height: 80px; max-width: 100%; object-fit: contain;" class="rounded border bg-white shadow-sm">\r
+                            <button type="button" class="btn btn-danger btn-sm position-absolute shadow-sm" style="top: -6px; right: -6px; width: 20px; height: 20px; padding: 0; font-size: 11px; border-radius: 50%; line-height: 1;" (click)="removePhoto(pNum, $event)" title="Remover foto">\r
+                              &times;\r
+                            </button>\r
+                          </div>\r
+                          \r
+                          <div *ngIf="!getPhotoValue(pNum)" class="mb-2 d-flex align-items-center justify-content-center border rounded bg-white text-muted mx-auto w-100" style="height: 80px;">\r
+                            <i class="fa fa-image fa-2x text-black-50"></i>\r
+                          </div>\r
+\r
+                          <input [id]="'photo_input_' + pNum" type="file" accept="image/*" class="form-control form-control-sm" (change)="onPhotoFileChange($event, pNum)">\r
+                        </div>\r
+                      </div>\r
+                    </div>\r
+                  </div>\r
+                </div>\r
+              </div>\r
+            </div>\r
+          </div>\r
         </div>\r
 \r
         <!-- Check-in/Check-out Times - Hotel only -->\r
@@ -122755,6 +123349,30 @@ var EventCreateComponent = class _EventCreateComponent {
             </div>\r
           </div>\r
         </div>\r
+\r
+        <!-- Observa\xE7\xF5es Gerais (Todos os fornecedores - Final do Formul\xE1rio) -->\r
+        <div class="w-100"></div>\r
+        <div class="col-md-6 form-group mb-3">\r
+          <label for="internal_observation" class="form-label font-weight-bold">Observa\xE7\xE3o Interna:</label>\r
+          <textarea\r
+            id="internal_observation"\r
+            rows="3"\r
+            class="form-control"\r
+            [(ngModel)]="providerLinkForm.internal_observation"\r
+            name="internal_observation"\r
+            placeholder="Observa\xE7\xF5es internas..."></textarea>\r
+        </div>\r
+\r
+        <div class="col-md-6 form-group mb-3">\r
+          <label for="customer_observation" class="form-label font-weight-bold">Observa\xE7\xE3o Cliente:</label>\r
+          <textarea\r
+            id="customer_observation"\r
+            rows="3"\r
+            class="form-control"\r
+            [(ngModel)]="providerLinkForm.customer_observation"\r
+            name="customer_observation"\r
+            placeholder="Observa\xE7\xF5es para o cliente..."></textarea>\r
+        </div>\r
       </div>\r
 \r
       <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">\r
@@ -122768,8 +123386,12 @@ var EventCreateComponent = class _EventCreateComponent {
     </form>\r
   </app-modal>\r
 \r
-  <!-- MODAL 2: ADICIONAR/EDITAR TARIFA (OPTION) -->\r
-  <app-modal [show]="showOptForm" (close)="closeOptForm()" [title]="optForm.id ? 'Editar Tarifa' : 'Adicionar Nova Tarifa'" icon="fa-edit">\r
+  <!-- MODAL 2: ADICIONAR/EDITAR TARIFA OU TRECHO (OPTION) -->\r
+  <app-modal\r
+    [show]="showOptForm"\r
+    (close)="closeOptForm()"\r
+    [title]="optFormType === 'airfare' ? (optForm.id ? 'Editar Trecho' : 'Novo Trecho') : (optForm.id ? 'Editar Tarifa' : 'Adicionar Nova Tarifa')"\r
+    icon="fa-edit">\r
     <form (ngSubmit)="saveOpt()">\r
       <div class="row">\r
         <!-- BROKER (except tab 4) -->\r
@@ -123015,231 +123637,249 @@ var EventCreateComponent = class _EventCreateComponent {
             Data Sa\xEDda (OUT):\r
             <span class="text-danger">*</span>\r
           </label>\r
-          <input type="date" id="opt_out" class="form-control" [class.is-invalid]="errors.out" [(ngModel)]="optForm.out" name="out" required />\r
+          <div class="input-group">\r
+            <span class="input-group-text bg-light"><i class="fas fa-calendar-alt text-primary"></i></span>\r
+            <input\r
+              type="text"\r
+              id="opt_out"\r
+              class="form-control bg-white"\r
+              [class.is-invalid]="errors.out"\r
+              placeholder="dd/mm/aaaa"\r
+              [(ngModel)]="optForm.out"\r
+              appFlatpickr\r
+              name="out"\r
+              required />\r
+          </div>\r
           <div *ngIf="errors.out" class="text-danger mt-1">\r
             <small *ngFor="let err of errors.out" class="d-block">{{ err }}</small>\r
           </div>\r
         </div>\r
 \r
-        <!-- AIRFARE-SPECIFIC FIELDS -->\r
+        <!-- AIRFARE-SPECIFIC FIELDS (TRECHO DE VOO) -->\r
         <ng-container *ngIf="optFormType === 'airfare'">\r
-          <!-- Section title: Ida -->\r
-          <div class="col-12">\r
-            <h6 class="font-weight-bold text-primary border-bottom pb-2 mb-3">\r
-              <i class="fas fa-plane-departure me-1"></i> Detalhes do Voo de Ida (Outbound)\r
-            </h6>\r
-          </div>\r
-          <div class="col-md-4 form-group mb-3">\r
-            <label for="outbound_airline_id" class="form-label font-weight-bold">Companhia A\xE9rea (Ida):</label>\r
-            <select id="outbound_airline_id" class="form-select" [(ngModel)]="optForm.outbound_airline_id" name="outbound_airline_id">\r
-              <option value="">.:: Selecione ::.</option>\r
+          <!-- CIA -->\r
+          <div class="col-md-6 form-group mb-3">\r
+            <label for="outbound_airline_id" class="form-label font-weight-bold">\r
+              CIA:\r
+              <span class="text-danger">*</span>\r
+            </label>\r
+            <select\r
+              id="outbound_airline_id"\r
+              class="form-select"\r
+              [class.is-invalid]="errors.outbound_airline_id"\r
+              [(ngModel)]="optForm.outbound_airline_id"\r
+              name="outbound_airline_id"\r
+              required>\r
+              <option value="">.:: Selecione a Cia ::.</option>\r
               <option *ngFor="let option of airlines" [value]="option.id">{{ option.name }}</option>\r
             </select>\r
-          </div>\r
-          <div class="col-md-4 form-group mb-3">\r
-            <label for="outbound_flight_number" class="form-label font-weight-bold">N\xFAmero do Voo (Ida):</label>\r
-            <input type="text" id="outbound_flight_number" class="form-control" [(ngModel)]="optForm.outbound_flight_number" name="outbound_flight_number" />\r
-          </div>\r
-          <div class="col-md-4 form-group mb-3">\r
-            <label for="outbound_class" class="form-label font-weight-bold">Classe (Ida):</label>\r
-            <input type="text" id="outbound_class" class="form-control" [(ngModel)]="optForm.outbound_class" name="outbound_class" placeholder="Ex: Econ\xF4mica, Executiva" />\r
-          </div>\r
-          <div class="col-md-4 form-group mb-3">\r
-            <label for="outbound_date" class="form-label font-weight-bold">Data da Ida:</label>\r
-            <input type="date" id="outbound_date" class="form-control" [(ngModel)]="optForm.outbound_date" name="outbound_date" />\r
-          </div>\r
-          <div class="col-md-4 form-group mb-3">\r
-            <label for="outbound_origin" class="form-label font-weight-bold">Origem (Ida):</label>\r
-            <input type="text" id="outbound_origin" class="form-control" [(ngModel)]="optForm.outbound_origin" name="outbound_origin" placeholder="Ex: GRU" />\r
-          </div>\r
-          <div class="col-md-4 form-group mb-3">\r
-            <label for="outbound_destination" class="form-label font-weight-bold">Destino (Ida):</label>\r
-            <input type="text" id="outbound_destination" class="form-control" [(ngModel)]="optForm.outbound_destination" name="outbound_destination" placeholder="Ex: MIA" />\r
-          </div>\r
-          <div class="col-md-4 form-group mb-3">\r
-            <label for="outbound_departure_time" class="form-label font-weight-bold">Hor\xE1rio Partida (Ida):</label>\r
-            <input type="text" id="outbound_departure_time" class="form-control" [(ngModel)]="optForm.outbound_departure_time" name="outbound_departure_time" placeholder="Ex: 14:30" />\r
-          </div>\r
-          <div class="col-md-4 form-group mb-3">\r
-            <label for="outbound_arrival_time" class="form-label font-weight-bold">Hor\xE1rio Chegada (Ida):</label>\r
-            <input type="text" id="outbound_arrival_time" class="form-control" [(ngModel)]="optForm.outbound_arrival_time" name="outbound_arrival_time" placeholder="Ex: 22:15" />\r
-          </div>\r
-          <div class="col-md-4 form-group mb-3">\r
-            <label for="outbound_connection_details" class="form-label font-weight-bold">Conex\xF5es/Detalhes (Ida):</label>\r
-            <input type="text" id="outbound_connection_details" class="form-control" [(ngModel)]="optForm.outbound_connection_details" name="outbound_connection_details" placeholder="Ex: Direto, 1 parada" />\r
+            <div *ngIf="errors.outbound_airline_id" class="text-danger mt-1">\r
+              <small *ngFor="let err of errors.outbound_airline_id" class="d-block">{{ err }}</small>\r
+            </div>\r
           </div>\r
 \r
-          <!-- Section title: Volta -->\r
-          <div class="col-12 mt-2">\r
-            <h6 class="font-weight-bold text-primary border-bottom pb-2 mb-3">\r
-              <i class="fas fa-plane-arrival me-1"></i> Detalhes do Voo de Volta (Inbound)\r
-            </h6>\r
-          </div>\r
-          <div class="col-md-4 form-group mb-3">\r
-            <label for="inbound_airline_id" class="form-label font-weight-bold">Companhia A\xE9rea (Volta):</label>\r
-            <select id="inbound_airline_id" class="form-select" [(ngModel)]="optForm.inbound_airline_id" name="inbound_airline_id">\r
-              <option value="">.:: Selecione ::.</option>\r
-              <option *ngFor="let option of airlines" [value]="option.id">{{ option.name }}</option>\r
-            </select>\r
-          </div>\r
-          <div class="col-md-4 form-group mb-3">\r
-            <label for="inbound_flight_number" class="form-label font-weight-bold">N\xFAmero do Voo (Volta):</label>\r
-            <input type="text" id="inbound_flight_number" class="form-control" [(ngModel)]="optForm.inbound_flight_number" name="inbound_flight_number" />\r
-          </div>\r
-          <div class="col-md-4 form-group mb-3">\r
-            <label for="inbound_class" class="form-label font-weight-bold">Classe (Volta):</label>\r
-            <input type="text" id="inbound_class" class="form-control" [(ngModel)]="optForm.inbound_class" name="inbound_class" placeholder="Ex: Econ\xF4mica, Executiva" />\r
-          </div>\r
-          <div class="col-md-4 form-group mb-3">\r
-            <label for="inbound_date" class="form-label font-weight-bold">Data da Volta:</label>\r
-            <input type="date" id="inbound_date" class="form-control" [(ngModel)]="optForm.inbound_date" name="inbound_date" />\r
-          </div>\r
-          <div class="col-md-4 form-group mb-3">\r
-            <label for="inbound_origin" class="form-label font-weight-bold">Origem (Volta):</label>\r
-            <input type="text" id="inbound_origin" class="form-control" [(ngModel)]="optForm.inbound_origin" name="inbound_origin" placeholder="Ex: MIA" />\r
-          </div>\r
-          <div class="col-md-4 form-group mb-3">\r
-            <label for="inbound_destination" class="form-label font-weight-bold">Destino (Volta):</label>\r
-            <input type="text" id="inbound_destination" class="form-control" [(ngModel)]="optForm.inbound_destination" name="inbound_destination" placeholder="Ex: GRU" />\r
-          </div>\r
-          <div class="col-md-4 form-group mb-3">\r
-            <label for="inbound_departure_time" class="form-label font-weight-bold">Hor\xE1rio Partida (Volta):</label>\r
-            <input type="text" id="inbound_departure_time" class="form-control" [(ngModel)]="optForm.inbound_departure_time" name="inbound_departure_time" placeholder="Ex: 23:30" />\r
-          </div>\r
-          <div class="col-md-4 form-group mb-3">\r
-            <label for="inbound_arrival_time" class="form-label font-weight-bold">Hor\xE1rio Chegada (Volta):</label>\r
-            <input type="text" id="inbound_arrival_time" class="form-control" [(ngModel)]="optForm.inbound_arrival_time" name="inbound_arrival_time" placeholder="Ex: 06:45" />\r
-          </div>\r
-          <div class="col-md-4 form-group mb-3">\r
-            <label for="inbound_connection_details" class="form-label font-weight-bold">Conex\xF5es/Detalhes (Volta):</label>\r
-            <input type="text" id="inbound_connection_details" class="form-control" [(ngModel)]="optForm.inbound_connection_details" name="inbound_connection_details" placeholder="Ex: Direto, 1 parada" />\r
+          <!-- VOO -->\r
+          <div class="col-md-6 form-group mb-3">\r
+            <label for="outbound_flight_number" class="form-label font-weight-bold">\r
+              VOO:\r
+              <span class="text-danger">*</span>\r
+            </label>\r
+            <input\r
+              type="text"\r
+              id="outbound_flight_number"\r
+              class="form-control"\r
+              [class.is-invalid]="errors.outbound_flight_number"\r
+              [(ngModel)]="optForm.outbound_flight_number"\r
+              name="outbound_flight_number"\r
+              placeholder="Ex: 1851"\r
+              required />\r
+            <div *ngIf="errors.outbound_flight_number" class="text-danger mt-1">\r
+              <small *ngFor="let err of errors.outbound_flight_number" class="d-block">{{ err }}</small>\r
+            </div>\r
           </div>\r
 \r
-          <!-- Rules and comparison -->\r
-          <div class="col-12 mt-2">\r
-            <h6 class="font-weight-bold text-primary border-bottom pb-2 mb-3">\r
-              <i class="fas fa-cog me-1"></i> Regras e Comparativos\r
-            </h6>\r
+          <!-- DE -->\r
+          <div class="col-md-6 mb-3">\r
+            <app-autocomplete\r
+              label="DE"\r
+              id="outbound_origin"\r
+              placeholder="Digite IATA, cidade ou nome do aeroporto..."\r
+              [required]="true"\r
+              [searchFn]="searchAirports"\r
+              [displayFn]="displayAirport"\r
+              valueField="formatted"\r
+              [(ngModel)]="optForm.outbound_origin"\r
+              [initialText]="optForm.outbound_origin"\r
+              name="outbound_origin"\r
+              [errors]="errors['outbound_origin']">\r
+            </app-autocomplete>\r
           </div>\r
+\r
+          <!-- PARA -->\r
+          <div class="col-md-6 mb-3">\r
+            <app-autocomplete\r
+              label="PARA"\r
+              id="outbound_destination"\r
+              placeholder="Digite IATA, cidade ou nome do aeroporto..."\r
+              [required]="true"\r
+              [searchFn]="searchAirports"\r
+              [displayFn]="displayAirport"\r
+              valueField="formatted"\r
+              [(ngModel)]="optForm.outbound_destination"\r
+              [initialText]="optForm.outbound_destination"\r
+              name="outbound_destination"\r
+              [errors]="errors['outbound_destination']">\r
+            </app-autocomplete>\r
+          </div>\r
+\r
+          <!-- DATAS -->\r
           <div class="col-md-4 form-group mb-3">\r
-            <label for="baggage_id" class="form-label font-weight-bold">Bagagem:</label>\r
-            <select id="baggage_id" class="form-select" [(ngModel)]="optForm.baggage_id" name="baggage_id">\r
-              <option value="">.:: Selecione ::.</option>\r
-              <option *ngFor="let option of baggages" [value]="option.id">{{ option.name }}</option>\r
-            </select>\r
+            <label for="outbound_date" class="form-label font-weight-bold">\r
+              DATAS:\r
+              <span class="text-danger">*</span>\r
+            </label>\r
+            <div class="input-group">\r
+              <span class="input-group-text bg-light"><i class="fas fa-calendar-alt text-primary"></i></span>\r
+              <input\r
+                type="text"\r
+                id="outbound_date"\r
+                class="form-control bg-white"\r
+                [class.is-invalid]="errors.outbound_date"\r
+                placeholder="dd/mm/aaaa"\r
+                [(ngModel)]="optForm.outbound_date"\r
+                appFlatpickr\r
+                name="outbound_date"\r
+                required />\r
+            </div>\r
+            <div *ngIf="errors.outbound_date" class="text-danger mt-1">\r
+              <small *ngFor="let err of errors.outbound_date" class="d-block">{{ err }}</small>\r
+            </div>\r
           </div>\r
+\r
+          <!-- SA\xCDDA -->\r
           <div class="col-md-4 form-group mb-3">\r
-            <label for="cabin_id" class="form-label font-weight-bold">Cabine:</label>\r
-            <select id="cabin_id" class="form-select" [(ngModel)]="optForm.cabin_id" name="cabin_id">\r
-              <option value="">.:: Selecione ::.</option>\r
-              <option *ngFor="let option of cabins" [value]="option.id">{{ option.name }}</option>\r
-            </select>\r
+            <label for="outbound_departure_time" class="form-label font-weight-bold">\r
+              SA\xCDDA:\r
+              <span class="text-danger">*</span>\r
+            </label>\r
+            <input\r
+              type="text"\r
+              id="outbound_departure_time"\r
+              class="form-control"\r
+              [class.is-invalid]="errors.outbound_departure_time"\r
+              [(ngModel)]="optForm.outbound_departure_time"\r
+              name="outbound_departure_time"\r
+              placeholder="Ex: 10:55"\r
+              mask="00:00"\r
+              [dropSpecialCharacters]="false"\r
+              required />\r
+            <div *ngIf="errors.outbound_departure_time" class="text-danger mt-1">\r
+              <small *ngFor="let err of errors.outbound_departure_time" class="d-block">{{ err }}</small>\r
+            </div>\r
           </div>\r
+\r
+          <!-- CHEGADA -->\r
           <div class="col-md-4 form-group mb-3">\r
-            <label for="opt_currency_id" class="form-label font-weight-bold">Moeda:</label>\r
-            <select id="opt_currency_id" class="form-select" [(ngModel)]="optForm.currency_id" name="currency_id">\r
-              <option *ngFor="let option of currencies" [value]="option.id">{{ option.name }} ({{ option.sigla }})</option>\r
-            </select>\r
-          </div>\r
-          <div class="col-md-4 form-group mb-3">\r
-            <label for="compare_website" class="form-label font-weight-bold">Compara\xE7\xE3o Website:</label>\r
-            <input type="number" step="0.01" id="compare_website" class="form-control" [(ngModel)]="optForm.compare_website" name="compare_website" />\r
-          </div>\r
-          <div class="col-md-4 form-group mb-3">\r
-            <label for="compare_client" class="form-label font-weight-bold">Compara\xE7\xE3o Cliente:</label>\r
-            <input type="number" step="0.01" id="compare_client" class="form-control" [(ngModel)]="optForm.compare_client" name="compare_client" />\r
-          </div>\r
-          <div class="col-md-4 form-group mb-3">\r
-            <label for="status" class="form-label font-weight-bold">Status da Cota\xE7\xE3o:</label>\r
-            <select id="status" class="form-select" [(ngModel)]="optForm.status" name="status">\r
-              <option value="created">Criado</option>\r
-              <option value="pending">Pendente</option>\r
-              <option value="confirmed">Confirmado</option>\r
-              <option value="cancelled">Cancelado</option>\r
-            </select>\r
-          </div>\r
-          <div class="col-12 form-group mb-3">\r
-            <label for="observation" class="form-label font-weight-bold">Observa\xE7\xF5es:</label>\r
-            <textarea id="observation" rows="2" class="form-control" [(ngModel)]="optForm.observation" name="observation"></textarea>\r
+            <label for="outbound_arrival_time" class="form-label font-weight-bold">\r
+              CHEGADA:\r
+              <span class="text-danger">*</span>\r
+            </label>\r
+            <input\r
+              type="text"\r
+              id="outbound_arrival_time"\r
+              class="form-control"\r
+              [class.is-invalid]="errors.outbound_arrival_time"\r
+              [(ngModel)]="optForm.outbound_arrival_time"\r
+              name="outbound_arrival_time"\r
+              placeholder="Ex: 12:20"\r
+              mask="00:00"\r
+              [dropSpecialCharacters]="false"\r
+              required />\r
+            <div *ngIf="errors.outbound_arrival_time" class="text-danger mt-1">\r
+              <small *ngFor="let err of errors.outbound_arrival_time" class="d-block">{{ err }}</small>\r
+            </div>\r
           </div>\r
         </ng-container>\r
 \r
-        <!-- QUANTIDADE, COMISS\xC3O / KICKBACK -->\r
-        <div class="col-md-6 form-group mb-3">\r
-          <label for="count" class="form-label font-weight-bold">\r
-            Quantidade:\r
-            <span class="text-danger">*</span>\r
-          </label>\r
-          <input type="number" step="1" id="count" class="form-control" [class.is-invalid]="errors.count" [(ngModel)]="optForm.count" name="count" required />\r
-          <div *ngIf="errors.count" class="text-danger mt-1">\r
-            <small *ngFor="let err of errors.count" class="d-block">{{ err }}</small>\r
+        <!-- CAMPOS FINANCEIROS E QUANTIDADE (OUTROS SERVI\xC7OS, EXCETO A\xC9REO) -->\r
+        <ng-container *ngIf="optFormType !== 'airfare'">\r
+          <!-- QUANTIDADE, COMISS\xC3O / KICKBACK -->\r
+          <div class="col-md-6 form-group mb-3">\r
+            <label for="count" class="form-label font-weight-bold">\r
+              Quantidade:\r
+              <span class="text-danger">*</span>\r
+            </label>\r
+            <input type="number" step="1" id="count" class="form-control" [class.is-invalid]="errors.count" [(ngModel)]="optForm.count" name="count" required />\r
+            <div *ngIf="errors.count" class="text-danger mt-1">\r
+              <small *ngFor="let err of errors.count" class="d-block">{{ err }}</small>\r
+            </div>\r
           </div>\r
-        </div>\r
 \r
-        <div class="col-md-6 form-group mb-3">\r
-          <label for="kickback" class="form-label font-weight-bold">Comiss\xE3o / Kickback (%):</label>\r
-          <input\r
-            type="text"\r
-            id="kickback"\r
-            class="form-control"\r
-            [value]="formatPercent(optForm.kickback)"\r
-            (input)="onPercentInput($event, 'kickback', 'optForm')"\r
-            name="kickback" />\r
-        </div>\r
-\r
-        <!-- PROPOSTA RECEBIDA (COST), PROPOSAL PERCENT, ORDEM -->\r
-        <div class="col-md-4 form-group mb-3">\r
-          <label for="received_proposal" class="form-label font-weight-bold">\r
-            Proposta Recebida (Custo Unit.):\r
-            <span class="text-danger">*</span>\r
-          </label>\r
-          <div class="input-group">\r
-            <span class="input-group-text bg-light text-muted font-weight-bold" *ngIf="getOptCurrencySymbol()">\r
-              {{ getOptCurrencySymbol() }}\r
-            </span>\r
+          <div class="col-md-6 form-group mb-3">\r
+            <label for="kickback" class="form-label font-weight-bold">Comiss\xE3o / Kickback (%):</label>\r
             <input\r
               type="text"\r
-              id="received_proposal"\r
+              id="kickback"\r
               class="form-control"\r
-              [class.is-invalid]="errors.received_proposal"\r
-              [value]="formatMoney(optForm.received_proposal)"\r
-              (input)="onMoneyInput($event, 'received_proposal', 'optForm')"\r
-              name="received_proposal"\r
+              [value]="formatPercent(optForm.kickback)"\r
+              (input)="onPercentInput($event, 'kickback', 'optForm')"\r
+              name="kickback" />\r
+          </div>\r
+\r
+          <!-- PROPOSTA RECEBIDA (COST), PROPOSAL PERCENT, ORDEM -->\r
+          <div class="col-md-4 form-group mb-3">\r
+            <label for="received_proposal" class="form-label font-weight-bold">\r
+              Proposta Recebida (Custo Unit.):\r
+              <span class="text-danger">*</span>\r
+            </label>\r
+            <div class="input-group">\r
+              <span class="input-group-text bg-light text-muted font-weight-bold" *ngIf="getOptCurrencySymbol()">\r
+                {{ getOptCurrencySymbol() }}\r
+              </span>\r
+              <input\r
+                type="text"\r
+                id="received_proposal"\r
+                class="form-control"\r
+                [class.is-invalid]="errors.received_proposal"\r
+                [value]="formatMoney(optForm.received_proposal)"\r
+                (input)="onMoneyInput($event, 'received_proposal', 'optForm')"\r
+                name="received_proposal"\r
+                required />\r
+            </div>\r
+            <div *ngIf="errors.received_proposal" class="text-danger mt-1">\r
+              <small *ngFor="let err of errors.received_proposal" class="d-block">{{ err }}</small>\r
+            </div>\r
+          </div>\r
+\r
+          <div class="col-md-4 form-group mb-3">\r
+            <label for="received_proposal_percent" class="form-label font-weight-bold">\r
+              Markup divisor (%):\r
+              <span class="text-danger">*</span>\r
+            </label>\r
+            <input\r
+              type="text"\r
+              id="received_proposal_percent"\r
+              class="form-control"\r
+              [class.is-invalid]="errors.received_proposal_percent"\r
+              [value]="formatPercent(optForm.received_proposal_percent)"\r
+              (input)="onPercentInput($event, 'received_proposal_percent', 'optForm')"\r
+              name="received_proposal_percent"\r
               required />\r
+            <div *ngIf="errors.received_proposal_percent" class="text-danger mt-1">\r
+              <small *ngFor="let err of errors.received_proposal_percent" class="d-block">{{ err }}</small>\r
+            </div>\r
           </div>\r
-          <div *ngIf="errors.received_proposal" class="text-danger mt-1">\r
-            <small *ngFor="let err of errors.received_proposal" class="d-block">{{ err }}</small>\r
-          </div>\r
-        </div>\r
 \r
-        <div class="col-md-4 form-group mb-3">\r
-          <label for="received_proposal_percent" class="form-label font-weight-bold">\r
-            Markup divisor (%):\r
-            <span class="text-danger">*</span>\r
-          </label>\r
-          <input\r
-            type="text"\r
-            id="received_proposal_percent"\r
-            class="form-control"\r
-            [class.is-invalid]="errors.received_proposal_percent"\r
-            [value]="formatPercent(optForm.received_proposal_percent)"\r
-            (input)="onPercentInput($event, 'received_proposal_percent', 'optForm')"\r
-            name="received_proposal_percent"\r
-            required />\r
-          <div *ngIf="errors.received_proposal_percent" class="text-danger mt-1">\r
-            <small *ngFor="let err of errors.received_proposal_percent" class="d-block">{{ err }}</small>\r
+          <div class="col-md-4 form-group mb-3">\r
+            <label for="opt_order" class="form-label font-weight-bold">Ordem:</label>\r
+            <input\r
+              type="number"\r
+              id="opt_order"\r
+              class="form-control"\r
+              [(ngModel)]="optForm.order"\r
+              name="order" />\r
           </div>\r
-        </div>\r
-\r
-        <div class="col-md-4 form-group mb-3">\r
-          <label for="opt_order" class="form-label font-weight-bold">Ordem:</label>\r
-          <input\r
-            type="number"\r
-            id="opt_order"\r
-            class="form-control"\r
-            [(ngModel)]="optForm.order"\r
-            name="order" />\r
-        </div>\r
+        </ng-container>\r
 \r
         <!-- COMPARATIVOS (hotel only) -->\r
         <ng-container *ngIf="optFormType === 'hotel'">\r
@@ -123302,7 +123942,7 @@ var EventCreateComponent = class _EventCreateComponent {
         <button type="submit" class="btn btn-success shadow-sm" [disabled]="processing">\r
           <span *ngIf="processing" class="spinner-border spinner-border-sm me-1"></span>\r
           <i class="fas fa-save me-1"></i>\r
-          Salvar Detalhe\r
+          {{ optFormType === 'airfare' ? 'Salvar Trecho' : 'Salvar Detalhe' }}\r
         </button>\r
       </div>\r
     </form>\r
@@ -123342,104 +123982,6 @@ var EventCreateComponent = class _EventCreateComponent {
       </div>\r
     </form>\r
   </app-modal>\r
-\r
-  <!-- MODAL 3: ADICIONAR/EDITAR PASSAGEIRO -->\r
-  <app-modal [show]="showPassengerForm" (close)="closePassengerForm()" [title]="passengerForm.id ? 'Editar Passageiro' : 'Adicionar Novo Passageiro'" icon="fa-user">\r
-    <form (ngSubmit)="savePassenger()">\r
-      <div class="row">\r
-        <div class="col-12">\r
-          <h6 class="font-weight-bold text-primary border-bottom pb-2 mb-3">\r
-            <i class="fas fa-user me-1"></i> Dados Pessoais do Passageiro\r
-          </h6>\r
-        </div>\r
-        <div class="col-md-6 form-group mb-3">\r
-          <label for="pax_name" class="form-label font-weight-bold">\r
-            Nome Completo:\r
-            <span class="text-danger">*</span>\r
-          </label>\r
-          <input type="text" id="pax_name" class="form-control" [class.is-invalid]="errors.name" [(ngModel)]="passengerForm.name" name="name" required />\r
-          <div *ngIf="errors.name" class="text-danger mt-1">\r
-            <small *ngFor="let err of errors.name" class="d-block">{{ err }}</small>\r
-          </div>\r
-        </div>\r
-        <div class="col-md-6 form-group mb-3">\r
-          <label for="pax_document" class="form-label font-weight-bold">Documento (RG/CPF/Passaporte):</label>\r
-          <input type="text" id="pax_document" class="form-control" [(ngModel)]="passengerForm.document" name="document" />\r
-        </div>\r
-        <div class="col-md-6 form-group mb-3">\r
-          <label for="pax_birth_date" class="form-label font-weight-bold">Data de Nascimento:</label>\r
-          <input type="date" id="pax_birth_date" class="form-control" [(ngModel)]="passengerForm.birth_date" name="birth_date" />\r
-        </div>\r
-        <div class="col-md-6 form-group mb-3">\r
-          <label for="pax_passport_validity" class="form-label font-weight-bold">Validade Passaporte:</label>\r
-          <input type="date" id="pax_passport_validity" class="form-control" [(ngModel)]="passengerForm.passport_validity" name="passport_validity" />\r
-        </div>\r
-\r
-        <!-- Outbound Segment -->\r
-        <div class="col-12 mt-2">\r
-          <h6 class="font-weight-bold text-primary border-bottom pb-2 mb-3">\r
-            <i class="fas fa-plane-departure me-1"></i> Percurso do Voo de Ida (Outbound)\r
-          </h6>\r
-        </div>\r
-        <div class="col-md-6 form-group mb-3">\r
-          <label for="pax_outbound_date" class="form-label font-weight-bold">Data da Ida:</label>\r
-          <input type="date" id="pax_outbound_date" class="form-control" [(ngModel)]="passengerForm.outbound_date" name="outbound_date" />\r
-        </div>\r
-        <div class="col-md-3 form-group mb-3">\r
-          <label for="pax_outbound_origin" class="form-label font-weight-bold">Origem:</label>\r
-          <input type="text" id="pax_outbound_origin" class="form-control" [(ngModel)]="passengerForm.outbound_origin" name="outbound_origin" placeholder="Ex: GRU" />\r
-        </div>\r
-        <div class="col-md-3 form-group mb-3">\r
-          <label for="pax_outbound_destination" class="form-label font-weight-bold">Destino:</label>\r
-          <input type="text" id="pax_outbound_destination" class="form-control" [(ngModel)]="passengerForm.outbound_destination" name="outbound_destination" placeholder="Ex: MIA" />\r
-        </div>\r
-        <div class="col-md-6 form-group mb-3">\r
-          <label for="pax_outbound_departure" class="form-label font-weight-bold">Hor\xE1rio de Partida:</label>\r
-          <input type="text" id="pax_outbound_departure" class="form-control" [(ngModel)]="passengerForm.outbound_departure" name="outbound_departure" placeholder="Ex: 14:30" />\r
-        </div>\r
-        <div class="col-md-6 form-group mb-3">\r
-          <label for="pax_outbound_arrival" class="form-label font-weight-bold">Hor\xE1rio de Chegada:</label>\r
-          <input type="text" id="pax_outbound_arrival" class="form-control" [(ngModel)]="passengerForm.outbound_arrival" name="outbound_arrival" placeholder="Ex: 22:15" />\r
-        </div>\r
-\r
-        <!-- Inbound Segment -->\r
-        <div class="col-12 mt-2">\r
-          <h6 class="font-weight-bold text-primary border-bottom pb-2 mb-3">\r
-            <i class="fas fa-plane-arrival me-1"></i> Percurso do Voo de Volta (Inbound)\r
-          </h6>\r
-        </div>\r
-        <div class="col-md-6 form-group mb-3">\r
-          <label for="pax_inbound_date" class="form-label font-weight-bold">Data da Volta:</label>\r
-          <input type="date" id="pax_inbound_date" class="form-control" [(ngModel)]="passengerForm.inbound_date" name="inbound_date" />\r
-        </div>\r
-        <div class="col-md-3 form-group mb-3">\r
-          <label for="pax_inbound_origin" class="form-label font-weight-bold">Origem:</label>\r
-          <input type="text" id="pax_inbound_origin" class="form-control" [(ngModel)]="passengerForm.inbound_origin" name="inbound_origin" placeholder="Ex: MIA" />\r
-        </div>\r
-        <div class="col-md-3 form-group mb-3">\r
-          <label for="pax_inbound_destination" class="form-label font-weight-bold">Destino:</label>\r
-          <input type="text" id="pax_inbound_destination" class="form-control" [(ngModel)]="passengerForm.inbound_destination" name="inbound_destination" placeholder="Ex: GRU" />\r
-        </div>\r
-        <div class="col-md-6 form-group mb-3">\r
-          <label for="pax_inbound_departure" class="form-label font-weight-bold">Hor\xE1rio de Partida:</label>\r
-          <input type="text" id="pax_inbound_departure" class="form-control" [(ngModel)]="passengerForm.inbound_departure" name="inbound_departure" placeholder="Ex: 23:30" />\r
-        </div>\r
-        <div class="col-md-6 form-group mb-3">\r
-          <label for="pax_inbound_arrival" class="form-label font-weight-bold">Hor\xE1rio de Chegada:</label>\r
-          <input type="text" id="pax_inbound_arrival" class="form-control" [(ngModel)]="passengerForm.inbound_arrival" name="inbound_arrival" placeholder="Ex: 06:45" />\r
-        </div>\r
-      </div>\r
-\r
-      <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">\r
-        <button type="button" class="btn btn-secondary shadow-sm" (click)="closePassengerForm()">Cancelar</button>\r
-        <button type="submit" class="btn btn-success shadow-sm" [disabled]="processing">\r
-          <span *ngIf="processing" class="spinner-border spinner-border-sm me-1"></span>\r
-          <i class="fas fa-save me-1"></i>\r
-          Salvar Passageiro\r
-        </button>\r
-      </div>\r
-    </form>\r
-  </app-modal>\r
 </app-authenticated-layout>\r
 `, styles: ['/* src/app/pages/event/event-create/event-create.component.scss */\n.nav-tabs {\n  border-bottom: 2px solid rgba(78, 115, 223, 0.1);\n  margin-bottom: 1.5rem;\n}\n.nav-tabs .nav-item {\n  margin-bottom: -2px;\n}\n.nav-tabs .nav-link {\n  border: none;\n  border-bottom: 2px solid transparent;\n  color: #858796;\n  font-weight: 600;\n  padding: 0.75rem 1.25rem;\n  transition: all 0.2s ease-in-out;\n}\n.nav-tabs .nav-link:hover:not(.disabled) {\n  color: #4e73df;\n  border-bottom-color: rgba(78, 115, 223, 0.3);\n  background-color: rgba(78, 115, 223, 0.03);\n}\n.nav-tabs .nav-link.active {\n  color: #4e73df;\n  background-color: transparent;\n  border-bottom-color: #4e73df;\n}\n.nav-tabs .nav-link.disabled {\n  color: #d1d3e2;\n  cursor: not-allowed;\n  opacity: 0.5;\n}\n.sticky-col {\n  position: sticky;\n  z-index: 2;\n  background-color: #ffffff;\n}\n.sticky-col::before {\n  content: "";\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: inherit;\n  z-index: -1;\n}\n.table-header {\n  background-color: #4e73df !important;\n  color: #ffffff !important;\n  font-weight: bold;\n}\n.table-header-c1 {\n  background-color: #f8f9fc !important;\n  color: #5a5c69 !important;\n  font-weight: bold;\n}\n.table-header-c2 {\n  background-color: #eaecf4 !important;\n  color: #3a3b45 !important;\n  font-weight: bold;\n}\n.table-subheader {\n  background-color: #f8f9fc !important;\n  font-weight: bold;\n  color: #4e73df;\n}\n.cursor-pointer {\n  cursor: pointer;\n}\n@keyframes fadeIn {\n  from {\n    opacity: 0;\n    transform: translateY(10px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n.animate-in {\n  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;\n}\n.modal-backdrop-blur {\n  background: rgba(0, 0, 0, 0.4);\n  backdrop-filter: blur(4px);\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  z-index: 1050;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n.modal-dialog {\n  max-width: 800px;\n  width: 90%;\n  margin: 1.75rem auto;\n}\n.card-provider-group {\n  border-radius: 1.25rem;\n  overflow: hidden;\n  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);\n  transition: transform 0.2s ease;\n}\n.card-provider-group:hover {\n  transform: translateY(-2px);\n}\n.table-tariffs {\n  font-size: 0.85rem !important;\n  border-collapse: separate !important;\n  border-spacing: 0 !important;\n  width: 100% !important;\n}\n.table-tariffs th,\n.table-tariffs td {\n  padding: 5px 8px !important;\n  vertical-align: middle !important;\n  border-color: #eaecf4 !important;\n  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;\n}\n.table-tariffs thead th {\n  background-color: #f8f9fc !important;\n  color: #4e73df !important;\n  font-weight: 700 !important;\n  text-transform: uppercase !important;\n  font-size: 0.72rem !important;\n  letter-spacing: 0.05em !important;\n  border-bottom: 2px solid #d1d3e2 !important;\n  padding: 8px 8px !important;\n}\n.table-tariffs th.sticky-col:nth-child(1),\n.table-tariffs td.sticky-col:nth-child(1) {\n  position: sticky !important;\n  left: 0 !important;\n  z-index: 3 !important;\n  background-color: #ffffff !important;\n  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.04) !important;\n  width: 160px !important;\n  min-width: 160px !important;\n  max-width: 160px !important;\n  overflow: hidden !important;\n  text-overflow: ellipsis !important;\n  white-space: nowrap !important;\n}\n.table-tariffs td.sticky-col[colspan="2"] {\n  position: sticky !important;\n  left: 0 !important;\n  z-index: 3 !important;\n  background-color: #ffffff !important;\n  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.04) !important;\n  width: 290px !important;\n  min-width: 290px !important;\n  max-width: 290px !important;\n  overflow: hidden !important;\n  text-overflow: ellipsis !important;\n  white-space: nowrap !important;\n}\n.table-tariffs th.sticky-col:nth-child(2),\n.table-tariffs td.sticky-col:nth-child(2) {\n  position: sticky !important;\n  left: 160px !important;\n  z-index: 3 !important;\n  background-color: #ffffff !important;\n  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.04) !important;\n  border-right: 2px solid #d1d3e2 !important;\n  width: 130px !important;\n  min-width: 130px !important;\n  max-width: 130px !important;\n  overflow: hidden !important;\n  text-overflow: ellipsis !important;\n  white-space: nowrap !important;\n}\n.table-tariffs .bg-success-light {\n  background-color: #eef9f5 !important;\n  color: #1e7046 !important;\n}\n.table-tariffs .bg-success-solid {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n}\n.table-tariffs .bg-warning-light {\n  background-color: #fdf8eb !important;\n  color: #a07018 !important;\n}\n.table-tariffs .bg-warning-solid {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n}\n.table-tariffs .bg-light-tax {\n  background-color: #f4f6fd !important;\n  color: #3f5eb5 !important;\n}\n.table-tariffs .bg-compare {\n  background-color: #727c8d !important;\n  color: #ffffff !important;\n}\n.table-tariffs tbody tr:hover td {\n  background-color: #f1f3f9 !important;\n  color: #3a3b45 !important;\n}\n.table-tariffs tbody tr:hover .sticky-col {\n  background-color: #f1f3f9 !important;\n}\n.table-tariffs tbody tr:hover .bg-success-light {\n  background-color: #d5f2e6 !important;\n}\n.table-tariffs tbody tr:hover .bg-success-solid {\n  background-color: #afe0c7 !important;\n}\n.table-tariffs tbody tr:hover .bg-warning-light {\n  background-color: #fbedd1 !important;\n}\n.table-tariffs tbody tr:hover .bg-warning-solid {\n  background-color: #fad291 !important;\n}\n.table-tariffs tbody tr:hover .bg-light-tax {\n  background-color: #e9ecf8 !important;\n}\n.table-tariffs tbody tr:hover .bg-compare {\n  background-color: #5c6674 !important;\n  color: #ffffff !important;\n}\n.table-tariffs .bg-success-header {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n  font-weight: 700 !important;\n}\n.table-tariffs .bg-warning-header {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n  font-weight: 700 !important;\n}\n.table-tariffs .table-subheader td {\n  background-color: #f8f9fc !important;\n  color: #4e73df !important;\n  font-weight: 700 !important;\n}\n.table-tariffs .table-subheader td.sticky-col {\n  background-color: #f8f9fc !important;\n}\n.table-tariffs .table-subheader td.bg-success-solid {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n}\n.table-tariffs .table-subheader td.bg-warning-solid {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n}\n.table-tariffs .observation-row td {\n  background-color: #ffffff !important;\n  border-top: 1px solid #eaecf4 !important;\n}\n.table-tariffs .observation-row td.sticky-col {\n  background-color: #ffffff !important;\n}\n.table-tariffs .observation-row td.bg-success-solid {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n}\n.table-tariffs .observation-row td.bg-warning-solid {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n}\n.table-tariffs .text-start {\n  text-align: left !important;\n}\n.table-tariffs .text-end {\n  text-align: right !important;\n}\n.table-tariffs .text-center {\n  text-align: center !important;\n}\n.table-responsive {\n  overflow-x: auto !important;\n}\n/*# sourceMappingURL=event-create.component.css.map */\n'] }]
   }], null, { dateRangePicker: [{
@@ -123448,7 +123990,7 @@ var EventCreateComponent = class _EventCreateComponent {
   }] });
 })();
 (() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(EventCreateComponent, { className: "EventCreateComponent", filePath: "src/app/pages/event/event-create/event-create.component.ts", lineNumber: 26 });
+  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(EventCreateComponent, { className: "EventCreateComponent", filePath: "src/app/pages/event/event-create/event-create.component.ts", lineNumber: 29 });
 })();
 
 // src/app/services/budget.service.ts
@@ -125243,39 +125785,6 @@ var BudgetComponent = class _BudgetComponent {
   (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(BudgetComponent, { className: "BudgetComponent", filePath: "src/app/pages/event/budget/budget.component.ts", lineNumber: 15 });
 })();
 
-// src/app/services/airfare-airline.service.ts
-var AirfareAirlineService = class _AirfareAirlineService {
-  http = inject(HttpClient);
-  apiUrl = environment.apiUrl;
-  getAirlines(params = {}) {
-    return this.http.get(`${this.apiUrl}/api/airfare-airlines`, { params });
-  }
-  saveAirline(data) {
-    return this.http.post(`${this.apiUrl}/api/airfare-airlines`, data);
-  }
-  deleteAirline(id) {
-    return this.http.delete(`${this.apiUrl}/api/airfare-airlines/${id}`);
-  }
-  activateAirline(id) {
-    return this.http.put(`${this.apiUrl}/api/airfare-airlines/${id}/activate`, {});
-  }
-  deactivateAirline(id) {
-    return this.http.put(`${this.apiUrl}/api/airfare-airlines/${id}/deactivate`, {});
-  }
-  static \u0275fac = function AirfareAirlineService_Factory(__ngFactoryType__) {
-    return new (__ngFactoryType__ || _AirfareAirlineService)();
-  };
-  static \u0275prov = /* @__PURE__ */ \u0275\u0275defineInjectable({ token: _AirfareAirlineService, factory: _AirfareAirlineService.\u0275fac, providedIn: "root" });
-};
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(AirfareAirlineService, [{
-    type: Injectable,
-    args: [{
-      providedIn: "root"
-    }]
-  }], null, null);
-})();
-
 // src/app/pages/airfare/airline/airline.component.ts
 var _c043 = (a0, a1) => ({ "fa-sort-up text-primary": a0, "fa-sort-down text-primary": a1 });
 var _c139 = () => [1, 2, 3, 4, 5];
@@ -125896,2435 +126405,6 @@ var AirlineComponent = class _AirlineComponent {
   (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(AirlineComponent, { className: "AirlineComponent", filePath: "src/app/pages/airfare/airline/airline.component.ts", lineNumber: 20 });
 })();
 
-// src/app/services/airfare-baggage.service.ts
-var AirfareBaggageService = class _AirfareBaggageService {
-  http = inject(HttpClient);
-  apiUrl = environment.apiUrl;
-  getBaggages(params = {}) {
-    return this.http.get(`${this.apiUrl}/api/airfare-baggages`, { params });
-  }
-  saveBaggage(data) {
-    return this.http.post(`${this.apiUrl}/api/airfare-baggages`, data);
-  }
-  deleteBaggage(id) {
-    return this.http.delete(`${this.apiUrl}/api/airfare-baggages/${id}`);
-  }
-  activateBaggage(id) {
-    return this.http.put(`${this.apiUrl}/api/airfare-baggages/${id}/activate`, {});
-  }
-  deactivateBaggage(id) {
-    return this.http.put(`${this.apiUrl}/api/airfare-baggages/${id}/deactivate`, {});
-  }
-  static \u0275fac = function AirfareBaggageService_Factory(__ngFactoryType__) {
-    return new (__ngFactoryType__ || _AirfareBaggageService)();
-  };
-  static \u0275prov = /* @__PURE__ */ \u0275\u0275defineInjectable({ token: _AirfareBaggageService, factory: _AirfareBaggageService.\u0275fac, providedIn: "root" });
-};
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(AirfareBaggageService, [{
-    type: Injectable,
-    args: [{
-      providedIn: "root"
-    }]
-  }], null, null);
-})();
-
-// src/app/pages/airfare/baggage/baggage.component.ts
-var _c044 = (a0, a1) => ({ "fa-sort-up text-primary": a0, "fa-sort-down text-primary": a1 });
-var _c140 = () => [1, 2, 3, 4, 5];
-function BaggageComponent_div_14_small_1_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 39);
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const err_r1 = ctx.$implicit;
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r1);
-  }
-}
-function BaggageComponent_div_14_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 37);
-    \u0275\u0275template(1, BaggageComponent_div_14_small_1_Template, 2, 1, "small", 38);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const ctx_r1 = \u0275\u0275nextContext();
-    \u0275\u0275advance();
-    \u0275\u0275property("ngForOf", ctx_r1.errors["name"]);
-  }
-}
-function BaggageComponent_span_20_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275element(0, "span", 40);
-  }
-}
-function BaggageComponent_i_21_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275element(0, "i", 41);
-  }
-}
-function BaggageComponent_tr_49_span_6_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 53);
-    \u0275\u0275text(1, "Inativo");
-    \u0275\u0275elementEnd();
-  }
-}
-function BaggageComponent_tr_49_button_11_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r5 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 54);
-    \u0275\u0275listener("click", function BaggageComponent_tr_49_button_11_Template_button_click_0_listener() {
-      \u0275\u0275restoreView(_r5);
-      const baggage_r4 = \u0275\u0275nextContext().$implicit;
-      const ctx_r1 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r1.activateBaggage(baggage_r4.id));
-    });
-    \u0275\u0275element(1, "i", 55);
-    \u0275\u0275elementEnd();
-  }
-}
-function BaggageComponent_tr_49_app_confirm_modal_12_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r6 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "app-confirm-modal", 50);
-    \u0275\u0275listener("confirm", function BaggageComponent_tr_49_app_confirm_modal_12_Template_app_confirm_modal_confirm_0_listener() {
-      \u0275\u0275restoreView(_r6);
-      const baggage_r4 = \u0275\u0275nextContext().$implicit;
-      const ctx_r1 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r1.deactivateBaggage(baggage_r4.id));
-    });
-    \u0275\u0275elementStart(1, "span", 51);
-    \u0275\u0275element(2, "i", 56);
-    \u0275\u0275elementEnd()();
-  }
-  if (rf & 2) {
-    const baggage_r4 = \u0275\u0275nextContext().$implicit;
-    \u0275\u0275property("btnClass", "btn btn-warning shadow-sm btn-action")("modalTitle", "Inativar Bagagem")("message", "Tem certeza que deseja inativar a regra de bagagem " + baggage_r4.name + "?")("okButtonLabel", "Confirmar")("tooltip", "Inativar Bagagem");
-  }
-}
-function BaggageComponent_tr_49_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r3 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "tr")(1, "th", 42);
-    \u0275\u0275text(2);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td")(4, "span");
-    \u0275\u0275text(5);
-    \u0275\u0275elementEnd();
-    \u0275\u0275template(6, BaggageComponent_tr_49_span_6_Template, 2, 0, "span", 43);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(7, "td", 44)(8, "div", 45)(9, "button", 46);
-    \u0275\u0275listener("click", function BaggageComponent_tr_49_Template_button_click_9_listener() {
-      const baggage_r4 = \u0275\u0275restoreView(_r3).$implicit;
-      const ctx_r1 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r1.edit(baggage_r4));
-    });
-    \u0275\u0275element(10, "i", 47);
-    \u0275\u0275elementEnd();
-    \u0275\u0275template(11, BaggageComponent_tr_49_button_11_Template, 2, 0, "button", 48)(12, BaggageComponent_tr_49_app_confirm_modal_12_Template, 3, 5, "app-confirm-modal", 49);
-    \u0275\u0275elementStart(13, "app-confirm-modal", 50);
-    \u0275\u0275listener("confirm", function BaggageComponent_tr_49_Template_app_confirm_modal_confirm_13_listener() {
-      const baggage_r4 = \u0275\u0275restoreView(_r3).$implicit;
-      const ctx_r1 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r1.deleteBaggage(baggage_r4.id));
-    });
-    \u0275\u0275elementStart(14, "span", 51);
-    \u0275\u0275element(15, "i", 52);
-    \u0275\u0275elementEnd()()()()();
-  }
-  if (rf & 2) {
-    const baggage_r4 = ctx.$implicit;
-    const ctx_r1 = \u0275\u0275nextContext();
-    \u0275\u0275classProp("table-info", ctx_r1.isBaggageInEdition(baggage_r4.id));
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(baggage_r4.id);
-    \u0275\u0275advance(2);
-    \u0275\u0275classProp("text-muted", !baggage_r4.active);
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate(baggage_r4.name);
-    \u0275\u0275advance();
-    \u0275\u0275property("ngIf", !baggage_r4.active);
-    \u0275\u0275advance(5);
-    \u0275\u0275property("ngIf", !baggage_r4.active);
-    \u0275\u0275advance();
-    \u0275\u0275property("ngIf", baggage_r4.active);
-    \u0275\u0275advance();
-    \u0275\u0275property("btnClass", "btn btn-danger shadow-sm btn-action")("modalTitle", "Excluir Bagagem")("message", "A\xE7\xE3o irrevers\xEDvel! Deseja realmente excluir a regra de bagagem " + baggage_r4.name + "?")("okButtonLabel", "Excluir")("tooltip", "Excluir Bagagem");
-  }
-}
-function BaggageComponent_tr_50_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr")(1, "td", 57)(2, "div", 58);
-    \u0275\u0275element(3, "span", 59);
-    \u0275\u0275elementEnd()()();
-  }
-}
-function BaggageComponent_tr_51_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr")(1, "td", 60);
-    \u0275\u0275element(2, "i", 61);
-    \u0275\u0275text(3, " Nenhuma regra de bagagem encontrada. ");
-    \u0275\u0275elementEnd()();
-  }
-}
-var BaggageComponent = class _BaggageComponent {
-  baggageService = inject(AirfareBaggageService);
-  toastService = inject(ToastService);
-  baggages = [];
-  inEdition = 0;
-  isLoader = false;
-  processing = false;
-  errors = {};
-  showModal = false;
-  // Pagination and Filtering state
-  pagination = {
-    current_page: 1,
-    per_page: 10,
-    total: 0,
-    last_page: 1,
-    from: 0,
-    to: 0
-  };
-  searchQuery = "";
-  sortColumn = "id";
-  sortDirection = "desc";
-  form = {
-    id: 0,
-    name: ""
-  };
-  ngOnInit() {
-    this.loadBaggages();
-  }
-  loadBaggages() {
-    this.isLoader = true;
-    const params = {
-      page: this.pagination.current_page,
-      per_page: this.pagination.per_page,
-      search: this.searchQuery,
-      sort_column: this.sortColumn,
-      sort_direction: this.sortDirection
-    };
-    this.baggageService.getBaggages(params).subscribe({
-      next: (response) => {
-        this.baggages = response.data || [];
-        this.pagination = {
-          current_page: response.current_page,
-          per_page: response.per_page,
-          total: response.total,
-          last_page: response.last_page,
-          from: response.from,
-          to: response.to
-        };
-        this.isLoader = false;
-      },
-      error: (error) => {
-        this.isLoader = false;
-        this.toastService.error("Erro ao carregar bagagens");
-        console.error("Erro ao carregar bagagens:", error);
-      }
-    });
-  }
-  onSearch(query) {
-    this.searchQuery = query;
-    this.pagination.current_page = 1;
-    this.loadBaggages();
-  }
-  onPageChange(page) {
-    this.pagination.current_page = page;
-    this.loadBaggages();
-  }
-  onPerPageChange(perPage) {
-    this.pagination.per_page = perPage;
-    this.pagination.current_page = 1;
-    this.loadBaggages();
-  }
-  sortBy(column) {
-    if (this.sortColumn === column) {
-      this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
-    } else {
-      this.sortColumn = column;
-      this.sortDirection = "asc";
-    }
-    this.loadBaggages();
-  }
-  openModal() {
-    this.resetForm();
-    this.showModal = true;
-  }
-  closeModal() {
-    this.showModal = false;
-    this.resetForm();
-  }
-  edit(baggage) {
-    this.inEdition = baggage.id;
-    this.form.id = baggage.id;
-    this.form.name = baggage.name;
-    this.errors = {};
-    this.showModal = true;
-  }
-  cancelEdit() {
-    this.closeModal();
-  }
-  resetForm() {
-    this.form = {
-      id: 0,
-      name: ""
-    };
-    this.errors = {};
-    this.inEdition = 0;
-  }
-  validateForm() {
-    this.errors = {};
-    if (!this.form.name || this.form.name.trim() === "") {
-      this.errors.name = ["A descri\xE7\xE3o \xE9 obrigat\xF3ria"];
-      return false;
-    }
-    return true;
-  }
-  submit() {
-    if (!this.validateForm()) {
-      return;
-    }
-    this.processing = true;
-    const data = {
-      id: this.form.id,
-      name: this.form.name
-    };
-    this.baggageService.saveBaggage(data).subscribe({
-      next: (response) => {
-        this.processing = false;
-        this.toastService.success(response.message || "Bagagem salva com sucesso");
-        this.closeModal();
-        this.loadBaggages();
-      },
-      error: (error) => {
-        this.processing = false;
-        if (error.status === 422) {
-          this.errors = error.error.errors || {};
-        } else {
-          this.toastService.error("Erro ao salvar bagagem");
-        }
-        console.error("Erro ao salvar bagagem:", error);
-      }
-    });
-  }
-  deleteBaggage(baggageId) {
-    this.isLoader = true;
-    this.baggageService.deleteBaggage(baggageId).subscribe({
-      next: (response) => {
-        this.isLoader = false;
-        this.toastService.success(response.message || "Bagagem apagada com sucesso");
-        this.loadBaggages();
-      },
-      error: (error) => {
-        this.isLoader = false;
-        this.toastService.error("Erro ao apagar bagagem");
-        console.error("Erro ao deletar bagagem:", error);
-      }
-    });
-  }
-  activateBaggage(baggageId) {
-    this.isLoader = true;
-    this.baggageService.activateBaggage(baggageId).subscribe({
-      next: (response) => {
-        this.isLoader = false;
-        this.toastService.success(response.message || "Bagagem ativada com sucesso");
-        this.loadBaggages();
-      },
-      error: (error) => {
-        this.isLoader = false;
-        this.toastService.error("Erro ao ativar bagagem");
-        console.error("Erro ao ativar bagagem:", error);
-      }
-    });
-  }
-  deactivateBaggage(baggageId) {
-    this.isLoader = true;
-    this.baggageService.deactivateBaggage(baggageId).subscribe({
-      next: (response) => {
-        this.isLoader = false;
-        this.toastService.success(response.message || "Bagagem inativada com sucesso");
-        this.loadBaggages();
-      },
-      error: (error) => {
-        this.isLoader = false;
-        this.toastService.error("Erro ao inativar bagagem");
-        console.error("Erro ao inativar bagagem:", error);
-      }
-    });
-  }
-  isBaggageInEdition(baggageId) {
-    return this.inEdition === baggageId;
-  }
-  static \u0275fac = function BaggageComponent_Factory(__ngFactoryType__) {
-    return new (__ngFactoryType__ || _BaggageComponent)();
-  };
-  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _BaggageComponent, selectors: [["app-baggage"]], decls: 52, vars: 25, consts: [["header", ""], [1, "d-sm-flex", "align-items-center", "justify-content-between", "mb-4", "animate-in"], [1, "h3", "mb-0", "text-gray-800"], [1, "row", "position-relative"], ["icon", "fa-edit", "size", "md", 3, "close", "show", "title"], [1, "d-flex", "flex-column", "flex-grow-1", "min-h-0", 3, "ngSubmit"], [1, "form-group", "mb-3"], ["for", "name", 1, "form-label"], [1, "text-danger"], ["type", "text", "id", "name", "name", "name", "placeholder", "Ex: M\xC3O (10KG)", "required", "", "autofocus", "", 1, "form-control", 3, "ngModelChange", "ngModel"], ["class", "text-danger mt-1", 4, "ngIf"], [1, "modal-footer", "px-0", "pb-0", "pt-3", "d-flex", "justify-content-end", "gap-2", "border-top"], ["type", "button", 1, "btn", "btn-outline-secondary", 3, "click", "disabled"], [1, "fas", "fa-times", "me-1"], ["type", "submit", 1, "btn", "btn-primary", "shadow-sm", 3, "disabled"], ["class", "spinner-border spinner-border-sm me-1", "role", "status", "aria-hidden", "true", 4, "ngIf"], ["class", "fas fa-save me-1", 4, "ngIf"], [1, "col-lg-12", "animate-in", 2, "animation-delay", "0.2s"], [1, "card", "mb-4", "border-left-secondary"], [1, "card-body"], [1, "d-flex", "align-items-center", "justify-content-between", "mb-4"], [1, "card-title", "mb-0", "text-secondary", "font-weight-bold"], [1, "fas", "fa-list", "me-2"], [1, "btn", "btn-primary", "btn-sm", "shadow-sm", 3, "click", "disabled"], [1, "fas", "fa-plus", "me-1"], [3, "search", "pageChange", "perPageChange", "pagination", "loading"], [1, "table-responsive"], ["width", "100%", "cellspacing", "0", 1, "table", "table-hover"], [1, "table-light"], ["scope", "col", 2, "cursor", "pointer", "width", "80px", 3, "click"], [1, "d-flex", "align-items-center"], [1, "fas", "fa-sort", "ms-2", "text-muted", 3, "ngClass"], ["scope", "col", 2, "cursor", "pointer", 3, "click"], ["scope", "col", 1, "text-end"], [3, "table-info", 4, "ngFor", "ngForOf"], [4, "ngFor", "ngForOf"], [4, "ngIf"], [1, "text-danger", "mt-1"], ["class", "d-block", 4, "ngFor", "ngForOf"], [1, "d-block"], ["role", "status", "aria-hidden", "true", 1, "spinner-border", "spinner-border-sm", "me-1"], [1, "fas", "fa-save", "me-1"], ["scope", "row", 1, "font-weight-bold"], ["class", "badge bg-light text-muted ms-2", 4, "ngIf"], [1, "text-end"], [1, "d-flex", "justify-content-end", "gap-2", "flex-wrap"], ["data-tooltip", "Editar Bagagem", 1, "btn", "btn-info", "text-white", "shadow-sm", "btn-action", 3, "click"], [1, "fas", "fa-edit"], ["class", "btn btn-success shadow-sm btn-action", "data-tooltip", "Ativar Bagagem", 3, "click", 4, "ngIf"], [3, "btnClass", "modalTitle", "message", "okButtonLabel", "tooltip", "confirm", 4, "ngIf"], [3, "confirm", "btnClass", "modalTitle", "message", "okButtonLabel", "tooltip"], ["modal-button", ""], [1, "fas", "fa-trash"], [1, "badge", "bg-light", "text-muted", "ms-2"], ["data-tooltip", "Ativar Bagagem", 1, "btn", "btn-success", "shadow-sm", "btn-action", 3, "click"], [1, "fas", "fa-check"], [1, "fas", "fa-ban"], ["colspan", "3", 1, "text-center", "py-3"], [1, "placeholder-glow"], [1, "placeholder", "col-12", "rounded"], ["colspan", "3", 1, "text-center", "py-5", "text-muted"], [1, "fas", "fa-folder-open", "fa-3x", "mb-3", "d-block", "opacity-25"]], template: function BaggageComponent_Template(rf, ctx) {
-    if (rf & 1) {
-      \u0275\u0275elementStart(0, "app-authenticated-layout");
-      \u0275\u0275elementContainerStart(1, 0);
-      \u0275\u0275elementStart(2, "div", 1)(3, "h1", 2);
-      \u0275\u0275text(4, "Gerenciamento de Regras de Bagagem");
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementContainerEnd();
-      \u0275\u0275elementStart(5, "div", 3)(6, "app-modal", 4);
-      \u0275\u0275listener("close", function BaggageComponent_Template_app_modal_close_6_listener() {
-        return ctx.closeModal();
-      });
-      \u0275\u0275elementStart(7, "form", 5);
-      \u0275\u0275listener("ngSubmit", function BaggageComponent_Template_form_ngSubmit_7_listener() {
-        return ctx.submit();
-      });
-      \u0275\u0275elementStart(8, "div", 6)(9, "label", 7);
-      \u0275\u0275text(10, " Descri\xE7\xE3o da Regra de Bagagem: ");
-      \u0275\u0275elementStart(11, "span", 8);
-      \u0275\u0275text(12, "*");
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(13, "input", 9);
-      \u0275\u0275twoWayListener("ngModelChange", function BaggageComponent_Template_input_ngModelChange_13_listener($event) {
-        \u0275\u0275twoWayBindingSet(ctx.form.name, $event) || (ctx.form.name = $event);
-        return $event;
-      });
-      \u0275\u0275elementEnd();
-      \u0275\u0275template(14, BaggageComponent_div_14_Template, 2, 1, "div", 10);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(15, "div", 11)(16, "button", 12);
-      \u0275\u0275listener("click", function BaggageComponent_Template_button_click_16_listener() {
-        return ctx.closeModal();
-      });
-      \u0275\u0275element(17, "i", 13);
-      \u0275\u0275text(18, " Cancelar ");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(19, "button", 14);
-      \u0275\u0275template(20, BaggageComponent_span_20_Template, 1, 0, "span", 15)(21, BaggageComponent_i_21_Template, 1, 0, "i", 16);
-      \u0275\u0275text(22, " Salvar ");
-      \u0275\u0275elementEnd()()()();
-      \u0275\u0275elementStart(23, "div", 17)(24, "div", 18)(25, "div", 19)(26, "div", 20)(27, "h5", 21);
-      \u0275\u0275element(28, "i", 22);
-      \u0275\u0275text(29, " Lista de Regras de Bagagem ");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(30, "button", 23);
-      \u0275\u0275listener("click", function BaggageComponent_Template_button_click_30_listener() {
-        return ctx.openModal();
-      });
-      \u0275\u0275element(31, "i", 24);
-      \u0275\u0275text(32, " Nova Bagagem ");
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(33, "app-datatable", 25);
-      \u0275\u0275listener("search", function BaggageComponent_Template_app_datatable_search_33_listener($event) {
-        return ctx.onSearch($event);
-      })("pageChange", function BaggageComponent_Template_app_datatable_pageChange_33_listener($event) {
-        return ctx.onPageChange($event);
-      })("perPageChange", function BaggageComponent_Template_app_datatable_perPageChange_33_listener($event) {
-        return ctx.onPerPageChange($event);
-      });
-      \u0275\u0275elementStart(34, "div", 26)(35, "table", 27)(36, "thead", 28)(37, "tr")(38, "th", 29);
-      \u0275\u0275listener("click", function BaggageComponent_Template_th_click_38_listener() {
-        return ctx.sortBy("id");
-      });
-      \u0275\u0275elementStart(39, "div", 30);
-      \u0275\u0275text(40, " ID ");
-      \u0275\u0275element(41, "i", 31);
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(42, "th", 32);
-      \u0275\u0275listener("click", function BaggageComponent_Template_th_click_42_listener() {
-        return ctx.sortBy("name");
-      });
-      \u0275\u0275elementStart(43, "div", 30);
-      \u0275\u0275text(44, " Descri\xE7\xE3o ");
-      \u0275\u0275element(45, "i", 31);
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(46, "th", 33);
-      \u0275\u0275text(47, "A\xE7\xF5es");
-      \u0275\u0275elementEnd()()();
-      \u0275\u0275elementStart(48, "tbody");
-      \u0275\u0275template(49, BaggageComponent_tr_49_Template, 16, 14, "tr", 34)(50, BaggageComponent_tr_50_Template, 4, 0, "tr", 35)(51, BaggageComponent_tr_51_Template, 4, 0, "tr", 36);
-      \u0275\u0275elementEnd()()()()()()()()();
-    }
-    if (rf & 2) {
-      \u0275\u0275advance(6);
-      \u0275\u0275property("show", ctx.showModal)("title", ctx.inEdition > 0 ? "Editar Regra de Bagagem" : "Cadastrar Nova Regra de Bagagem");
-      \u0275\u0275advance(7);
-      \u0275\u0275classProp("is-invalid", ctx.errors["name"]);
-      \u0275\u0275twoWayProperty("ngModel", ctx.form.name);
-      \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.errors["name"]);
-      \u0275\u0275advance(2);
-      \u0275\u0275property("disabled", ctx.processing);
-      \u0275\u0275advance(3);
-      \u0275\u0275property("disabled", ctx.processing);
-      \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.processing);
-      \u0275\u0275advance();
-      \u0275\u0275property("ngIf", !ctx.processing);
-      \u0275\u0275advance(9);
-      \u0275\u0275property("disabled", ctx.processing);
-      \u0275\u0275advance(3);
-      \u0275\u0275property("pagination", ctx.pagination)("loading", ctx.isLoader);
-      \u0275\u0275advance(8);
-      \u0275\u0275property("ngClass", \u0275\u0275pureFunction2(18, _c044, ctx.sortColumn === "id" && ctx.sortDirection === "asc", ctx.sortColumn === "id" && ctx.sortDirection === "desc"));
-      \u0275\u0275advance(4);
-      \u0275\u0275property("ngClass", \u0275\u0275pureFunction2(21, _c044, ctx.sortColumn === "name" && ctx.sortDirection === "asc", ctx.sortColumn === "name" && ctx.sortDirection === "desc"));
-      \u0275\u0275advance(4);
-      \u0275\u0275property("ngForOf", ctx.baggages);
-      \u0275\u0275advance();
-      \u0275\u0275property("ngForOf", \u0275\u0275pureFunction0(24, _c140).slice(0, ctx.isLoader ? 5 : 0));
-      \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.baggages.length === 0 && !ctx.isLoader);
-    }
-  }, dependencies: [CommonModule, NgClass, NgForOf, NgIf, FormsModule, \u0275NgNoValidate, DefaultValueAccessor, NgControlStatus, NgControlStatusGroup, RequiredValidator, NgModel, NgForm, AuthenticatedLayoutComponent, ConfirmModalComponent, DatatableComponent, ModalComponent], styles: ["\n\n.btn-action[_ngcontent-%COMP%] {\n  padding: 0.25rem 0.5rem;\n  font-size: 0.875rem;\n}\n/*# sourceMappingURL=baggage.component.css.map */"] });
-};
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(BaggageComponent, [{
-    type: Component,
-    args: [{ selector: "app-baggage", standalone: true, imports: [CommonModule, FormsModule, AuthenticatedLayoutComponent, ConfirmModalComponent, DatatableComponent, ModalComponent], template: `<app-authenticated-layout>\r
-  <ng-container header>\r
-    <div class="d-sm-flex align-items-center justify-content-between mb-4 animate-in">\r
-      <h1 class="h3 mb-0 text-gray-800">Gerenciamento de Regras de Bagagem</h1>\r
-    </div>\r
-  </ng-container>\r
-\r
-  <div class="row position-relative">\r
-    <!-- Modal de Cadastro/Edi\xE7\xE3o -->\r
-    <app-modal [show]="showModal" (close)="closeModal()" [title]="inEdition > 0 ? 'Editar Regra de Bagagem' : 'Cadastrar Nova Regra de Bagagem'" icon="fa-edit" size="md">\r
-      <form (ngSubmit)="submit()" class="d-flex flex-column flex-grow-1 min-h-0">\r
-        <div class="form-group mb-3">\r
-          <label for="name" class="form-label">\r
-            Descri\xE7\xE3o da Regra de Bagagem:\r
-            <span class="text-danger">*</span>\r
-          </label>\r
-          <input\r
-            type="text"\r
-            id="name"\r
-            class="form-control"\r
-            [class.is-invalid]="errors['name']"\r
-            [(ngModel)]="form.name"\r
-            name="name"\r
-            placeholder="Ex: M\xC3O (10KG)"\r
-            required\r
-            autofocus />\r
-\r
-          <div *ngIf="errors['name']" class="text-danger mt-1">\r
-            <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>\r
-          </div>\r
-        </div>\r
-        <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">\r
-          <button type="button" class="btn btn-outline-secondary" (click)="closeModal()" [disabled]="processing">\r
-            <i class="fas fa-times me-1"></i>\r
-            Cancelar\r
-          </button>\r
-          <button type="submit" class="btn btn-primary shadow-sm" [disabled]="processing">\r
-            <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>\r
-            <i *ngIf="!processing" class="fas fa-save me-1"></i>\r
-            Salvar\r
-          </button>\r
-        </div>\r
-      </form>\r
-    </app-modal>\r
-\r
-    <!-- Table Section -->\r
-    <div class="col-lg-12 animate-in" style="animation-delay: 0.2s">\r
-      <div class="card mb-4 border-left-secondary">\r
-        <div class="card-body">\r
-          <div class="d-flex align-items-center justify-content-between mb-4">\r
-            <h5 class="card-title mb-0 text-secondary font-weight-bold">\r
-              <i class="fas fa-list me-2"></i>\r
-              Lista de Regras de Bagagem\r
-            </h5>\r
-            <button class="btn btn-primary btn-sm shadow-sm" (click)="openModal()" [disabled]="processing">\r
-              <i class="fas fa-plus me-1"></i>\r
-              Nova Bagagem\r
-            </button>\r
-          </div>\r
-\r
-          <app-datatable\r
-            [pagination]="pagination"\r
-            [loading]="isLoader"\r
-            (search)="onSearch($event)"\r
-            (pageChange)="onPageChange($event)"\r
-            (perPageChange)="onPerPageChange($event)">\r
-            <div class="table-responsive">\r
-              <table class="table table-hover" width="100%" cellspacing="0">\r
-                <thead class="table-light">\r
-                  <tr>\r
-                    <th scope="col" (click)="sortBy('id')" style="cursor: pointer; width: 80px">\r
-                      <div class="d-flex align-items-center">\r
-                        ID\r
-                        <i\r
-                          class="fas fa-sort ms-2 text-muted"\r
-                          [ngClass]="{\r
-                            'fa-sort-up text-primary': sortColumn === 'id' && sortDirection === 'asc',\r
-                            'fa-sort-down text-primary': sortColumn === 'id' && sortDirection === 'desc',\r
-                          }"></i>\r
-                      </div>\r
-                    </th>\r
-                    <th scope="col" (click)="sortBy('name')" style="cursor: pointer">\r
-                      <div class="d-flex align-items-center">\r
-                        Descri\xE7\xE3o\r
-                        <i\r
-                          class="fas fa-sort ms-2 text-muted"\r
-                          [ngClass]="{\r
-                            'fa-sort-up text-primary': sortColumn === 'name' && sortDirection === 'asc',\r
-                            'fa-sort-down text-primary': sortColumn === 'name' && sortDirection === 'desc',\r
-                          }"></i>\r
-                      </div>\r
-                    </th>\r
-                    <th scope="col" class="text-end">A\xE7\xF5es</th>\r
-                  </tr>\r
-                </thead>\r
-                <tbody>\r
-                  <tr *ngFor="let baggage of baggages" [class.table-info]="isBaggageInEdition(baggage.id)">\r
-                    <th scope="row" class="font-weight-bold">{{ baggage.id }}</th>\r
-                    <td>\r
-                      <span [class.text-muted]="!baggage.active">{{ baggage.name }}</span>\r
-                      <span *ngIf="!baggage.active" class="badge bg-light text-muted ms-2">Inativo</span>\r
-                    </td>\r
-                    <td class="text-end">\r
-                      <div class="d-flex justify-content-end gap-2 flex-wrap">\r
-                        <button class="btn btn-info text-white shadow-sm btn-action" (click)="edit(baggage)" data-tooltip="Editar Bagagem">\r
-                          <i class="fas fa-edit"></i>\r
-                        </button>\r
-\r
-                        <button *ngIf="!baggage.active" class="btn btn-success shadow-sm btn-action" (click)="activateBaggage(baggage.id)" data-tooltip="Ativar Bagagem">\r
-                          <i class="fas fa-check"></i>\r
-                        </button>\r
-\r
-                        <app-confirm-modal\r
-                          *ngIf="baggage.active"\r
-                          [btnClass]="'btn btn-warning shadow-sm btn-action'"\r
-                          [modalTitle]="'Inativar Bagagem'"\r
-                          [message]="'Tem certeza que deseja inativar a regra de bagagem ' + baggage.name + '?'"\r
-                          [okButtonLabel]="'Confirmar'"\r
-                          [tooltip]="'Inativar Bagagem'"\r
-                          (confirm)="deactivateBaggage(baggage.id)">\r
-                          <span modal-button>\r
-                            <i class="fas fa-ban"></i>\r
-                          </span>\r
-                        </app-confirm-modal>\r
-\r
-                        <app-confirm-modal\r
-                          [btnClass]="'btn btn-danger shadow-sm btn-action'"\r
-                          [modalTitle]="'Excluir Bagagem'"\r
-                          [message]="'A\xE7\xE3o irrevers\xEDvel! Deseja realmente excluir a regra de bagagem ' + baggage.name + '?'"\r
-                          [okButtonLabel]="'Excluir'"\r
-                          [tooltip]="'Excluir Bagagem'"\r
-                          (confirm)="deleteBaggage(baggage.id)">\r
-                          <span modal-button>\r
-                            <i class="fas fa-trash"></i>\r
-                          </span>\r
-                        </app-confirm-modal>\r
-                      </div>\r
-                    </td>\r
-                  </tr>\r
-                  <tr *ngFor="let i of [1, 2, 3, 4, 5].slice(0, isLoader ? 5 : 0)">\r
-                    <td colspan="3" class="text-center py-3">\r
-                      <div class="placeholder-glow">\r
-                        <span class="placeholder col-12 rounded"></span>\r
-                      </div>\r
-                    </td>\r
-                  </tr>\r
-                  <tr *ngIf="baggages.length === 0 && !isLoader">\r
-                    <td colspan="3" class="text-center py-5 text-muted">\r
-                      <i class="fas fa-folder-open fa-3x mb-3 d-block opacity-25"></i>\r
-                      Nenhuma regra de bagagem encontrada.\r
-                    </td>\r
-                  </tr>\r
-                </tbody>\r
-              </table>\r
-            </div>\r
-          </app-datatable>\r
-        </div>\r
-      </div>\r
-    </div>\r
-  </div>\r
-</app-authenticated-layout>\r
-`, styles: ["/* src/app/pages/airfare/baggage/baggage.component.scss */\n.btn-action {\n  padding: 0.25rem 0.5rem;\n  font-size: 0.875rem;\n}\n/*# sourceMappingURL=baggage.component.css.map */\n"] }]
-  }], null, null);
-})();
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(BaggageComponent, { className: "BaggageComponent", filePath: "src/app/pages/airfare/baggage/baggage.component.ts", lineNumber: 20 });
-})();
-
-// src/app/services/airfare-cabin.service.ts
-var AirfareCabinService = class _AirfareCabinService {
-  http = inject(HttpClient);
-  apiUrl = environment.apiUrl;
-  getCabins(params = {}) {
-    return this.http.get(`${this.apiUrl}/api/airfare-cabins`, { params });
-  }
-  saveCabin(data) {
-    return this.http.post(`${this.apiUrl}/api/airfare-cabins`, data);
-  }
-  deleteCabin(id) {
-    return this.http.delete(`${this.apiUrl}/api/airfare-cabins/${id}`);
-  }
-  activateCabin(id) {
-    return this.http.put(`${this.apiUrl}/api/airfare-cabins/${id}/activate`, {});
-  }
-  deactivateCabin(id) {
-    return this.http.put(`${this.apiUrl}/api/airfare-cabins/${id}/deactivate`, {});
-  }
-  static \u0275fac = function AirfareCabinService_Factory(__ngFactoryType__) {
-    return new (__ngFactoryType__ || _AirfareCabinService)();
-  };
-  static \u0275prov = /* @__PURE__ */ \u0275\u0275defineInjectable({ token: _AirfareCabinService, factory: _AirfareCabinService.\u0275fac, providedIn: "root" });
-};
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(AirfareCabinService, [{
-    type: Injectable,
-    args: [{
-      providedIn: "root"
-    }]
-  }], null, null);
-})();
-
-// src/app/pages/airfare/cabin/cabin.component.ts
-var _c045 = (a0, a1) => ({ "fa-sort-up text-primary": a0, "fa-sort-down text-primary": a1 });
-var _c141 = () => [1, 2, 3, 4, 5];
-function CabinComponent_div_14_small_1_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 39);
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const err_r1 = ctx.$implicit;
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r1);
-  }
-}
-function CabinComponent_div_14_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 37);
-    \u0275\u0275template(1, CabinComponent_div_14_small_1_Template, 2, 1, "small", 38);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const ctx_r1 = \u0275\u0275nextContext();
-    \u0275\u0275advance();
-    \u0275\u0275property("ngForOf", ctx_r1.errors["name"]);
-  }
-}
-function CabinComponent_span_20_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275element(0, "span", 40);
-  }
-}
-function CabinComponent_i_21_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275element(0, "i", 41);
-  }
-}
-function CabinComponent_tr_49_span_6_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 53);
-    \u0275\u0275text(1, "Inativo");
-    \u0275\u0275elementEnd();
-  }
-}
-function CabinComponent_tr_49_button_11_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r5 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 54);
-    \u0275\u0275listener("click", function CabinComponent_tr_49_button_11_Template_button_click_0_listener() {
-      \u0275\u0275restoreView(_r5);
-      const cabin_r4 = \u0275\u0275nextContext().$implicit;
-      const ctx_r1 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r1.activateCabin(cabin_r4.id));
-    });
-    \u0275\u0275element(1, "i", 55);
-    \u0275\u0275elementEnd();
-  }
-}
-function CabinComponent_tr_49_app_confirm_modal_12_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r6 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "app-confirm-modal", 50);
-    \u0275\u0275listener("confirm", function CabinComponent_tr_49_app_confirm_modal_12_Template_app_confirm_modal_confirm_0_listener() {
-      \u0275\u0275restoreView(_r6);
-      const cabin_r4 = \u0275\u0275nextContext().$implicit;
-      const ctx_r1 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r1.deactivateCabin(cabin_r4.id));
-    });
-    \u0275\u0275elementStart(1, "span", 51);
-    \u0275\u0275element(2, "i", 56);
-    \u0275\u0275elementEnd()();
-  }
-  if (rf & 2) {
-    const cabin_r4 = \u0275\u0275nextContext().$implicit;
-    \u0275\u0275property("btnClass", "btn btn-warning shadow-sm btn-action")("modalTitle", "Inativar Cabine")("message", "Tem certeza que deseja inativar a cabine a\xE9reo " + cabin_r4.name + "?")("okButtonLabel", "Confirmar")("tooltip", "Inativar Cabine");
-  }
-}
-function CabinComponent_tr_49_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r3 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "tr")(1, "th", 42);
-    \u0275\u0275text(2);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td")(4, "span");
-    \u0275\u0275text(5);
-    \u0275\u0275elementEnd();
-    \u0275\u0275template(6, CabinComponent_tr_49_span_6_Template, 2, 0, "span", 43);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(7, "td", 44)(8, "div", 45)(9, "button", 46);
-    \u0275\u0275listener("click", function CabinComponent_tr_49_Template_button_click_9_listener() {
-      const cabin_r4 = \u0275\u0275restoreView(_r3).$implicit;
-      const ctx_r1 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r1.edit(cabin_r4));
-    });
-    \u0275\u0275element(10, "i", 47);
-    \u0275\u0275elementEnd();
-    \u0275\u0275template(11, CabinComponent_tr_49_button_11_Template, 2, 0, "button", 48)(12, CabinComponent_tr_49_app_confirm_modal_12_Template, 3, 5, "app-confirm-modal", 49);
-    \u0275\u0275elementStart(13, "app-confirm-modal", 50);
-    \u0275\u0275listener("confirm", function CabinComponent_tr_49_Template_app_confirm_modal_confirm_13_listener() {
-      const cabin_r4 = \u0275\u0275restoreView(_r3).$implicit;
-      const ctx_r1 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r1.deleteCabin(cabin_r4.id));
-    });
-    \u0275\u0275elementStart(14, "span", 51);
-    \u0275\u0275element(15, "i", 52);
-    \u0275\u0275elementEnd()()()()();
-  }
-  if (rf & 2) {
-    const cabin_r4 = ctx.$implicit;
-    const ctx_r1 = \u0275\u0275nextContext();
-    \u0275\u0275classProp("table-info", ctx_r1.isCabinInEdition(cabin_r4.id));
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(cabin_r4.id);
-    \u0275\u0275advance(2);
-    \u0275\u0275classProp("text-muted", !cabin_r4.active);
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate(cabin_r4.name);
-    \u0275\u0275advance();
-    \u0275\u0275property("ngIf", !cabin_r4.active);
-    \u0275\u0275advance(5);
-    \u0275\u0275property("ngIf", !cabin_r4.active);
-    \u0275\u0275advance();
-    \u0275\u0275property("ngIf", cabin_r4.active);
-    \u0275\u0275advance();
-    \u0275\u0275property("btnClass", "btn btn-danger shadow-sm btn-action")("modalTitle", "Excluir Cabine")("message", "A\xE7\xE3o irrevers\xEDvel! Deseja realmente excluir a cabine " + cabin_r4.name + "?")("okButtonLabel", "Excluir")("tooltip", "Excluir Cabine");
-  }
-}
-function CabinComponent_tr_50_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr")(1, "td", 57)(2, "div", 58);
-    \u0275\u0275element(3, "span", 59);
-    \u0275\u0275elementEnd()()();
-  }
-}
-function CabinComponent_tr_51_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr")(1, "td", 60);
-    \u0275\u0275element(2, "i", 61);
-    \u0275\u0275text(3, " Nenhuma cabine encontrada. ");
-    \u0275\u0275elementEnd()();
-  }
-}
-var CabinComponent = class _CabinComponent {
-  cabinService = inject(AirfareCabinService);
-  toastService = inject(ToastService);
-  cabins = [];
-  inEdition = 0;
-  isLoader = false;
-  processing = false;
-  errors = {};
-  showModal = false;
-  // Pagination and Filtering state
-  pagination = {
-    current_page: 1,
-    per_page: 10,
-    total: 0,
-    last_page: 1,
-    from: 0,
-    to: 0
-  };
-  searchQuery = "";
-  sortColumn = "id";
-  sortDirection = "desc";
-  form = {
-    id: 0,
-    name: ""
-  };
-  ngOnInit() {
-    this.loadCabins();
-  }
-  loadCabins() {
-    this.isLoader = true;
-    const params = {
-      page: this.pagination.current_page,
-      per_page: this.pagination.per_page,
-      search: this.searchQuery,
-      sort_column: this.sortColumn,
-      sort_direction: this.sortDirection
-    };
-    this.cabinService.getCabins(params).subscribe({
-      next: (response) => {
-        this.cabins = response.data || [];
-        this.pagination = {
-          current_page: response.current_page,
-          per_page: response.per_page,
-          total: response.total,
-          last_page: response.last_page,
-          from: response.from,
-          to: response.to
-        };
-        this.isLoader = false;
-      },
-      error: (error) => {
-        this.isLoader = false;
-        this.toastService.error("Erro ao carregar cabines");
-        console.error("Erro ao carregar cabines:", error);
-      }
-    });
-  }
-  onSearch(query) {
-    this.searchQuery = query;
-    this.pagination.current_page = 1;
-    this.loadCabins();
-  }
-  onPageChange(page) {
-    this.pagination.current_page = page;
-    this.loadCabins();
-  }
-  onPerPageChange(perPage) {
-    this.pagination.per_page = perPage;
-    this.pagination.current_page = 1;
-    this.loadCabins();
-  }
-  sortBy(column) {
-    if (this.sortColumn === column) {
-      this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
-    } else {
-      this.sortColumn = column;
-      this.sortDirection = "asc";
-    }
-    this.loadCabins();
-  }
-  openModal() {
-    this.resetForm();
-    this.showModal = true;
-  }
-  closeModal() {
-    this.showModal = false;
-    this.resetForm();
-  }
-  edit(cabin) {
-    this.inEdition = cabin.id;
-    this.form.id = cabin.id;
-    this.form.name = cabin.name;
-    this.errors = {};
-    this.showModal = true;
-  }
-  cancelEdit() {
-    this.closeModal();
-  }
-  resetForm() {
-    this.form = {
-      id: 0,
-      name: ""
-    };
-    this.errors = {};
-    this.inEdition = 0;
-  }
-  validateForm() {
-    this.errors = {};
-    if (!this.form.name || this.form.name.trim() === "") {
-      this.errors.name = ["O nome da cabine \xE9 obrigat\xF3rio"];
-      return false;
-    }
-    return true;
-  }
-  submit() {
-    if (!this.validateForm()) {
-      return;
-    }
-    this.processing = true;
-    const data = {
-      id: this.form.id,
-      name: this.form.name
-    };
-    this.cabinService.saveCabin(data).subscribe({
-      next: (response) => {
-        this.processing = false;
-        this.toastService.success(response.message || "Cabine salva com sucesso");
-        this.closeModal();
-        this.loadCabins();
-      },
-      error: (error) => {
-        this.processing = false;
-        if (error.status === 422) {
-          this.errors = error.error.errors || {};
-        } else {
-          this.toastService.error("Erro ao salvar cabine");
-        }
-        console.error("Erro ao salvar cabine:", error);
-      }
-    });
-  }
-  deleteCabin(cabinId) {
-    this.isLoader = true;
-    this.cabinService.deleteCabin(cabinId).subscribe({
-      next: (response) => {
-        this.isLoader = false;
-        this.toastService.success(response.message || "Cabine apagada com sucesso");
-        this.loadCabins();
-      },
-      error: (error) => {
-        this.isLoader = false;
-        this.toastService.error("Erro ao apagar cabine");
-        console.error("Erro ao deletar cabine:", error);
-      }
-    });
-  }
-  activateCabin(cabinId) {
-    this.isLoader = true;
-    this.cabinService.activateCabin(cabinId).subscribe({
-      next: (response) => {
-        this.isLoader = false;
-        this.toastService.success(response.message || "Cabine ativada com sucesso");
-        this.loadCabins();
-      },
-      error: (error) => {
-        this.isLoader = false;
-        this.toastService.error("Erro ao ativar cabine");
-        console.error("Erro ao ativar cabine:", error);
-      }
-    });
-  }
-  deactivateCabin(cabinId) {
-    this.isLoader = true;
-    this.cabinService.deactivateCabin(cabinId).subscribe({
-      next: (response) => {
-        this.isLoader = false;
-        this.toastService.success(response.message || "Cabine inativada com sucesso");
-        this.loadCabins();
-      },
-      error: (error) => {
-        this.isLoader = false;
-        this.toastService.error("Erro ao inativar cabine");
-        console.error("Erro ao inativar cabine:", error);
-      }
-    });
-  }
-  isCabinInEdition(cabinId) {
-    return this.inEdition === cabinId;
-  }
-  static \u0275fac = function CabinComponent_Factory(__ngFactoryType__) {
-    return new (__ngFactoryType__ || _CabinComponent)();
-  };
-  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _CabinComponent, selectors: [["app-cabin"]], decls: 52, vars: 25, consts: [["header", ""], [1, "d-sm-flex", "align-items-center", "justify-content-between", "mb-4", "animate-in"], [1, "h3", "mb-0", "text-gray-800"], [1, "row", "position-relative"], ["icon", "fa-edit", "size", "md", 3, "close", "show", "title"], [1, "d-flex", "flex-column", "flex-grow-1", "min-h-0", 3, "ngSubmit"], [1, "form-group", "mb-3"], ["for", "name", 1, "form-label"], [1, "text-danger"], ["type", "text", "id", "name", "name", "name", "placeholder", "Ex: Executiva", "required", "", "autofocus", "", 1, "form-control", 3, "ngModelChange", "ngModel"], ["class", "text-danger mt-1", 4, "ngIf"], [1, "modal-footer", "px-0", "pb-0", "pt-3", "d-flex", "justify-content-end", "gap-2", "border-top"], ["type", "button", 1, "btn", "btn-outline-secondary", 3, "click", "disabled"], [1, "fas", "fa-times", "me-1"], ["type", "submit", 1, "btn", "btn-primary", "shadow-sm", 3, "disabled"], ["class", "spinner-border spinner-border-sm me-1", "role", "status", "aria-hidden", "true", 4, "ngIf"], ["class", "fas fa-save me-1", 4, "ngIf"], [1, "col-lg-12", "animate-in", 2, "animation-delay", "0.2s"], [1, "card", "mb-4", "border-left-secondary"], [1, "card-body"], [1, "d-flex", "align-items-center", "justify-content-between", "mb-4"], [1, "card-title", "mb-0", "text-secondary", "font-weight-bold"], [1, "fas", "fa-list", "me-2"], [1, "btn", "btn-primary", "btn-sm", "shadow-sm", 3, "click", "disabled"], [1, "fas", "fa-plus", "me-1"], [3, "search", "pageChange", "perPageChange", "pagination", "loading"], [1, "table-responsive"], ["width", "100%", "cellspacing", "0", 1, "table", "table-hover"], [1, "table-light"], ["scope", "col", 2, "cursor", "pointer", "width", "80px", 3, "click"], [1, "d-flex", "align-items-center"], [1, "fas", "fa-sort", "ms-2", "text-muted", 3, "ngClass"], ["scope", "col", 2, "cursor", "pointer", 3, "click"], ["scope", "col", 1, "text-end"], [3, "table-info", 4, "ngFor", "ngForOf"], [4, "ngFor", "ngForOf"], [4, "ngIf"], [1, "text-danger", "mt-1"], ["class", "d-block", 4, "ngFor", "ngForOf"], [1, "d-block"], ["role", "status", "aria-hidden", "true", 1, "spinner-border", "spinner-border-sm", "me-1"], [1, "fas", "fa-save", "me-1"], ["scope", "row", 1, "font-weight-bold"], ["class", "badge bg-light text-muted ms-2", 4, "ngIf"], [1, "text-end"], [1, "d-flex", "justify-content-end", "gap-2", "flex-wrap"], ["data-tooltip", "Editar Cabine", 1, "btn", "btn-info", "text-white", "shadow-sm", "btn-action", 3, "click"], [1, "fas", "fa-edit"], ["class", "btn btn-success shadow-sm btn-action", "data-tooltip", "Ativar Cabine", 3, "click", 4, "ngIf"], [3, "btnClass", "modalTitle", "message", "okButtonLabel", "tooltip", "confirm", 4, "ngIf"], [3, "confirm", "btnClass", "modalTitle", "message", "okButtonLabel", "tooltip"], ["modal-button", ""], [1, "fas", "fa-trash"], [1, "badge", "bg-light", "text-muted", "ms-2"], ["data-tooltip", "Ativar Cabine", 1, "btn", "btn-success", "shadow-sm", "btn-action", 3, "click"], [1, "fas", "fa-check"], [1, "fas", "fa-ban"], ["colspan", "3", 1, "text-center", "py-3"], [1, "placeholder-glow"], [1, "placeholder", "col-12", "rounded"], ["colspan", "3", 1, "text-center", "py-5", "text-muted"], [1, "fas", "fa-folder-open", "fa-3x", "mb-3", "d-block", "opacity-25"]], template: function CabinComponent_Template(rf, ctx) {
-    if (rf & 1) {
-      \u0275\u0275elementStart(0, "app-authenticated-layout");
-      \u0275\u0275elementContainerStart(1, 0);
-      \u0275\u0275elementStart(2, "div", 1)(3, "h1", 2);
-      \u0275\u0275text(4, "Gerenciamento de Cabines A\xE9reas");
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementContainerEnd();
-      \u0275\u0275elementStart(5, "div", 3)(6, "app-modal", 4);
-      \u0275\u0275listener("close", function CabinComponent_Template_app_modal_close_6_listener() {
-        return ctx.closeModal();
-      });
-      \u0275\u0275elementStart(7, "form", 5);
-      \u0275\u0275listener("ngSubmit", function CabinComponent_Template_form_ngSubmit_7_listener() {
-        return ctx.submit();
-      });
-      \u0275\u0275elementStart(8, "div", 6)(9, "label", 7);
-      \u0275\u0275text(10, " Nome da Cabine: ");
-      \u0275\u0275elementStart(11, "span", 8);
-      \u0275\u0275text(12, "*");
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(13, "input", 9);
-      \u0275\u0275twoWayListener("ngModelChange", function CabinComponent_Template_input_ngModelChange_13_listener($event) {
-        \u0275\u0275twoWayBindingSet(ctx.form.name, $event) || (ctx.form.name = $event);
-        return $event;
-      });
-      \u0275\u0275elementEnd();
-      \u0275\u0275template(14, CabinComponent_div_14_Template, 2, 1, "div", 10);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(15, "div", 11)(16, "button", 12);
-      \u0275\u0275listener("click", function CabinComponent_Template_button_click_16_listener() {
-        return ctx.closeModal();
-      });
-      \u0275\u0275element(17, "i", 13);
-      \u0275\u0275text(18, " Cancelar ");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(19, "button", 14);
-      \u0275\u0275template(20, CabinComponent_span_20_Template, 1, 0, "span", 15)(21, CabinComponent_i_21_Template, 1, 0, "i", 16);
-      \u0275\u0275text(22, " Salvar ");
-      \u0275\u0275elementEnd()()()();
-      \u0275\u0275elementStart(23, "div", 17)(24, "div", 18)(25, "div", 19)(26, "div", 20)(27, "h5", 21);
-      \u0275\u0275element(28, "i", 22);
-      \u0275\u0275text(29, " Lista de Cabines A\xE9reas ");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(30, "button", 23);
-      \u0275\u0275listener("click", function CabinComponent_Template_button_click_30_listener() {
-        return ctx.openModal();
-      });
-      \u0275\u0275element(31, "i", 24);
-      \u0275\u0275text(32, " Nova Cabine ");
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(33, "app-datatable", 25);
-      \u0275\u0275listener("search", function CabinComponent_Template_app_datatable_search_33_listener($event) {
-        return ctx.onSearch($event);
-      })("pageChange", function CabinComponent_Template_app_datatable_pageChange_33_listener($event) {
-        return ctx.onPageChange($event);
-      })("perPageChange", function CabinComponent_Template_app_datatable_perPageChange_33_listener($event) {
-        return ctx.onPerPageChange($event);
-      });
-      \u0275\u0275elementStart(34, "div", 26)(35, "table", 27)(36, "thead", 28)(37, "tr")(38, "th", 29);
-      \u0275\u0275listener("click", function CabinComponent_Template_th_click_38_listener() {
-        return ctx.sortBy("id");
-      });
-      \u0275\u0275elementStart(39, "div", 30);
-      \u0275\u0275text(40, " ID ");
-      \u0275\u0275element(41, "i", 31);
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(42, "th", 32);
-      \u0275\u0275listener("click", function CabinComponent_Template_th_click_42_listener() {
-        return ctx.sortBy("name");
-      });
-      \u0275\u0275elementStart(43, "div", 30);
-      \u0275\u0275text(44, " Nome ");
-      \u0275\u0275element(45, "i", 31);
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(46, "th", 33);
-      \u0275\u0275text(47, "A\xE7\xF5es");
-      \u0275\u0275elementEnd()()();
-      \u0275\u0275elementStart(48, "tbody");
-      \u0275\u0275template(49, CabinComponent_tr_49_Template, 16, 14, "tr", 34)(50, CabinComponent_tr_50_Template, 4, 0, "tr", 35)(51, CabinComponent_tr_51_Template, 4, 0, "tr", 36);
-      \u0275\u0275elementEnd()()()()()()()()();
-    }
-    if (rf & 2) {
-      \u0275\u0275advance(6);
-      \u0275\u0275property("show", ctx.showModal)("title", ctx.inEdition > 0 ? "Editar Cabine" : "Cadastrar Nova Cabine");
-      \u0275\u0275advance(7);
-      \u0275\u0275classProp("is-invalid", ctx.errors["name"]);
-      \u0275\u0275twoWayProperty("ngModel", ctx.form.name);
-      \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.errors["name"]);
-      \u0275\u0275advance(2);
-      \u0275\u0275property("disabled", ctx.processing);
-      \u0275\u0275advance(3);
-      \u0275\u0275property("disabled", ctx.processing);
-      \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.processing);
-      \u0275\u0275advance();
-      \u0275\u0275property("ngIf", !ctx.processing);
-      \u0275\u0275advance(9);
-      \u0275\u0275property("disabled", ctx.processing);
-      \u0275\u0275advance(3);
-      \u0275\u0275property("pagination", ctx.pagination)("loading", ctx.isLoader);
-      \u0275\u0275advance(8);
-      \u0275\u0275property("ngClass", \u0275\u0275pureFunction2(18, _c045, ctx.sortColumn === "id" && ctx.sortDirection === "asc", ctx.sortColumn === "id" && ctx.sortDirection === "desc"));
-      \u0275\u0275advance(4);
-      \u0275\u0275property("ngClass", \u0275\u0275pureFunction2(21, _c045, ctx.sortColumn === "name" && ctx.sortDirection === "asc", ctx.sortColumn === "name" && ctx.sortDirection === "desc"));
-      \u0275\u0275advance(4);
-      \u0275\u0275property("ngForOf", ctx.cabins);
-      \u0275\u0275advance();
-      \u0275\u0275property("ngForOf", \u0275\u0275pureFunction0(24, _c141).slice(0, ctx.isLoader ? 5 : 0));
-      \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.cabins.length === 0 && !ctx.isLoader);
-    }
-  }, dependencies: [CommonModule, NgClass, NgForOf, NgIf, FormsModule, \u0275NgNoValidate, DefaultValueAccessor, NgControlStatus, NgControlStatusGroup, RequiredValidator, NgModel, NgForm, AuthenticatedLayoutComponent, ConfirmModalComponent, DatatableComponent, ModalComponent], styles: ["\n\n.btn-action[_ngcontent-%COMP%] {\n  padding: 0.25rem 0.5rem;\n  font-size: 0.875rem;\n}\n/*# sourceMappingURL=cabin.component.css.map */"] });
-};
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(CabinComponent, [{
-    type: Component,
-    args: [{ selector: "app-cabin", standalone: true, imports: [CommonModule, FormsModule, AuthenticatedLayoutComponent, ConfirmModalComponent, DatatableComponent, ModalComponent], template: `<app-authenticated-layout>\r
-  <ng-container header>\r
-    <div class="d-sm-flex align-items-center justify-content-between mb-4 animate-in">\r
-      <h1 class="h3 mb-0 text-gray-800">Gerenciamento de Cabines A\xE9reas</h1>\r
-    </div>\r
-  </ng-container>\r
-\r
-  <div class="row position-relative">\r
-    <!-- Modal de Cadastro/Edi\xE7\xE3o -->\r
-    <app-modal [show]="showModal" (close)="closeModal()" [title]="inEdition > 0 ? 'Editar Cabine' : 'Cadastrar Nova Cabine'" icon="fa-edit" size="md">\r
-      <form (ngSubmit)="submit()" class="d-flex flex-column flex-grow-1 min-h-0">\r
-        <div class="form-group mb-3">\r
-          <label for="name" class="form-label">\r
-            Nome da Cabine:\r
-            <span class="text-danger">*</span>\r
-          </label>\r
-          <input\r
-            type="text"\r
-            id="name"\r
-            class="form-control"\r
-            [class.is-invalid]="errors['name']"\r
-            [(ngModel)]="form.name"\r
-            name="name"\r
-            placeholder="Ex: Executiva"\r
-            required\r
-            autofocus />\r
-\r
-          <div *ngIf="errors['name']" class="text-danger mt-1">\r
-            <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>\r
-          </div>\r
-        </div>\r
-        <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">\r
-          <button type="button" class="btn btn-outline-secondary" (click)="closeModal()" [disabled]="processing">\r
-            <i class="fas fa-times me-1"></i>\r
-            Cancelar\r
-          </button>\r
-          <button type="submit" class="btn btn-primary shadow-sm" [disabled]="processing">\r
-            <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>\r
-            <i *ngIf="!processing" class="fas fa-save me-1"></i>\r
-            Salvar\r
-          </button>\r
-        </div>\r
-      </form>\r
-    </app-modal>\r
-\r
-    <!-- Table Section -->\r
-    <div class="col-lg-12 animate-in" style="animation-delay: 0.2s">\r
-      <div class="card mb-4 border-left-secondary">\r
-        <div class="card-body">\r
-          <div class="d-flex align-items-center justify-content-between mb-4">\r
-            <h5 class="card-title mb-0 text-secondary font-weight-bold">\r
-              <i class="fas fa-list me-2"></i>\r
-              Lista de Cabines A\xE9reas\r
-            </h5>\r
-            <button class="btn btn-primary btn-sm shadow-sm" (click)="openModal()" [disabled]="processing">\r
-              <i class="fas fa-plus me-1"></i>\r
-              Nova Cabine\r
-            </button>\r
-          </div>\r
-\r
-          <app-datatable\r
-            [pagination]="pagination"\r
-            [loading]="isLoader"\r
-            (search)="onSearch($event)"\r
-            (pageChange)="onPageChange($event)"\r
-            (perPageChange)="onPerPageChange($event)">\r
-            <div class="table-responsive">\r
-              <table class="table table-hover" width="100%" cellspacing="0">\r
-                <thead class="table-light">\r
-                  <tr>\r
-                    <th scope="col" (click)="sortBy('id')" style="cursor: pointer; width: 80px">\r
-                      <div class="d-flex align-items-center">\r
-                        ID\r
-                        <i\r
-                          class="fas fa-sort ms-2 text-muted"\r
-                          [ngClass]="{\r
-                            'fa-sort-up text-primary': sortColumn === 'id' && sortDirection === 'asc',\r
-                            'fa-sort-down text-primary': sortColumn === 'id' && sortDirection === 'desc',\r
-                          }"></i>\r
-                      </div>\r
-                    </th>\r
-                    <th scope="col" (click)="sortBy('name')" style="cursor: pointer">\r
-                      <div class="d-flex align-items-center">\r
-                        Nome\r
-                        <i\r
-                          class="fas fa-sort ms-2 text-muted"\r
-                          [ngClass]="{\r
-                            'fa-sort-up text-primary': sortColumn === 'name' && sortDirection === 'asc',\r
-                            'fa-sort-down text-primary': sortColumn === 'name' && sortDirection === 'desc',\r
-                          }"></i>\r
-                      </div>\r
-                    </th>\r
-                    <th scope="col" class="text-end">A\xE7\xF5es</th>\r
-                  </tr>\r
-                </thead>\r
-                <tbody>\r
-                  <tr *ngFor="let cabin of cabins" [class.table-info]="isCabinInEdition(cabin.id)">\r
-                    <th scope="row" class="font-weight-bold">{{ cabin.id }}</th>\r
-                    <td>\r
-                      <span [class.text-muted]="!cabin.active">{{ cabin.name }}</span>\r
-                      <span *ngIf="!cabin.active" class="badge bg-light text-muted ms-2">Inativo</span>\r
-                    </td>\r
-                    <td class="text-end">\r
-                      <div class="d-flex justify-content-end gap-2 flex-wrap">\r
-                        <button class="btn btn-info text-white shadow-sm btn-action" (click)="edit(cabin)" data-tooltip="Editar Cabine">\r
-                          <i class="fas fa-edit"></i>\r
-                        </button>\r
-\r
-                        <button *ngIf="!cabin.active" class="btn btn-success shadow-sm btn-action" (click)="activateCabin(cabin.id)" data-tooltip="Ativar Cabine">\r
-                          <i class="fas fa-check"></i>\r
-                        </button>\r
-\r
-                        <app-confirm-modal\r
-                          *ngIf="cabin.active"\r
-                          [btnClass]="'btn btn-warning shadow-sm btn-action'"\r
-                          [modalTitle]="'Inativar Cabine'"\r
-                          [message]="'Tem certeza que deseja inativar a cabine a\xE9reo ' + cabin.name + '?'"\r
-                          [okButtonLabel]="'Confirmar'"\r
-                          [tooltip]="'Inativar Cabine'"\r
-                          (confirm)="deactivateCabin(cabin.id)">\r
-                          <span modal-button>\r
-                            <i class="fas fa-ban"></i>\r
-                          </span>\r
-                        </app-confirm-modal>\r
-\r
-                        <app-confirm-modal\r
-                          [btnClass]="'btn btn-danger shadow-sm btn-action'"\r
-                          [modalTitle]="'Excluir Cabine'"\r
-                          [message]="'A\xE7\xE3o irrevers\xEDvel! Deseja realmente excluir a cabine ' + cabin.name + '?'"\r
-                          [okButtonLabel]="'Excluir'"\r
-                          [tooltip]="'Excluir Cabine'"\r
-                          (confirm)="deleteCabin(cabin.id)">\r
-                          <span modal-button>\r
-                            <i class="fas fa-trash"></i>\r
-                          </span>\r
-                        </app-confirm-modal>\r
-                      </div>\r
-                    </td>\r
-                  </tr>\r
-                  <tr *ngFor="let i of [1, 2, 3, 4, 5].slice(0, isLoader ? 5 : 0)">\r
-                    <td colspan="3" class="text-center py-3">\r
-                      <div class="placeholder-glow">\r
-                        <span class="placeholder col-12 rounded"></span>\r
-                      </div>\r
-                    </td>\r
-                  </tr>\r
-                  <tr *ngIf="cabins.length === 0 && !isLoader">\r
-                    <td colspan="3" class="text-center py-5 text-muted">\r
-                      <i class="fas fa-folder-open fa-3x mb-3 d-block opacity-25"></i>\r
-                      Nenhuma cabine encontrada.\r
-                    </td>\r
-                  </tr>\r
-                </tbody>\r
-              </table>\r
-            </div>\r
-          </app-datatable>\r
-        </div>\r
-      </div>\r
-    </div>\r
-  </div>\r
-</app-authenticated-layout>\r
-`, styles: ["/* src/app/pages/airfare/cabin/cabin.component.scss */\n.btn-action {\n  padding: 0.25rem 0.5rem;\n  font-size: 0.875rem;\n}\n/*# sourceMappingURL=cabin.component.css.map */\n"] }]
-  }], null, null);
-})();
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(CabinComponent, { className: "CabinComponent", filePath: "src/app/pages/airfare/cabin/cabin.component.ts", lineNumber: 20 });
-})();
-
-// src/app/services/provider-airfare.service.ts
-var ProviderAirfareService = class _ProviderAirfareService {
-  http = inject(HttpClient);
-  apiUrl = environment.apiUrl;
-  getProviders(params = {}) {
-    return this.http.get(`${this.apiUrl}/api/provider-airfares`, { params });
-  }
-  saveProvider(data) {
-    return this.http.post(`${this.apiUrl}/api/provider-airfares`, data);
-  }
-  deleteProvider(id) {
-    return this.http.delete(`${this.apiUrl}/api/provider-airfares/${id}`);
-  }
-  activateProvider(id) {
-    return this.http.put(`${this.apiUrl}/api/provider-airfares/${id}/activate`, {});
-  }
-  deactivateProvider(id) {
-    return this.http.put(`${this.apiUrl}/api/provider-airfares/${id}/deactivate`, {});
-  }
-  static \u0275fac = function ProviderAirfareService_Factory(__ngFactoryType__) {
-    return new (__ngFactoryType__ || _ProviderAirfareService)();
-  };
-  static \u0275prov = /* @__PURE__ */ \u0275\u0275defineInjectable({ token: _ProviderAirfareService, factory: _ProviderAirfareService.\u0275fac, providedIn: "root" });
-};
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ProviderAirfareService, [{
-    type: Injectable,
-    args: [{
-      providedIn: "root"
-    }]
-  }], null, null);
-})();
-
-// src/app/pages/airfare/provider-airfare/provider-airfare.component.ts
-var _c046 = (a0, a1) => ({ "fa-sort-up text-primary": a0, "fa-sort-down text-primary": a1 });
-var _c142 = () => [1, 2, 3, 4, 5];
-function ProviderAirfareComponent_div_15_small_1_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 62);
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const err_r1 = ctx.$implicit;
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r1);
-  }
-}
-function ProviderAirfareComponent_div_15_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 60);
-    \u0275\u0275template(1, ProviderAirfareComponent_div_15_small_1_Template, 2, 1, "small", 61);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const ctx_r1 = \u0275\u0275nextContext();
-    \u0275\u0275advance();
-    \u0275\u0275property("ngForOf", ctx_r1.errors["name"]);
-  }
-}
-function ProviderAirfareComponent_div_29_small_1_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 62);
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const err_r3 = ctx.$implicit;
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r3);
-  }
-}
-function ProviderAirfareComponent_div_29_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 60);
-    \u0275\u0275template(1, ProviderAirfareComponent_div_29_small_1_Template, 2, 1, "small", 61);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const ctx_r1 = \u0275\u0275nextContext();
-    \u0275\u0275advance();
-    \u0275\u0275property("ngForOf", ctx_r1.errors["contact"]);
-  }
-}
-function ProviderAirfareComponent_div_36_small_1_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 62);
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const err_r4 = ctx.$implicit;
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r4);
-  }
-}
-function ProviderAirfareComponent_div_36_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 60);
-    \u0275\u0275template(1, ProviderAirfareComponent_div_36_small_1_Template, 2, 1, "small", 61);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const ctx_r1 = \u0275\u0275nextContext();
-    \u0275\u0275advance();
-    \u0275\u0275property("ngForOf", ctx_r1.errors["phone"]);
-  }
-}
-function ProviderAirfareComponent_div_44_small_1_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 62);
-    \u0275\u0275text(1);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const err_r5 = ctx.$implicit;
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate(err_r5);
-  }
-}
-function ProviderAirfareComponent_div_44_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 60);
-    \u0275\u0275template(1, ProviderAirfareComponent_div_44_small_1_Template, 2, 1, "small", 61);
-    \u0275\u0275elementEnd();
-  }
-  if (rf & 2) {
-    const ctx_r1 = \u0275\u0275nextContext();
-    \u0275\u0275advance();
-    \u0275\u0275property("ngForOf", ctx_r1.errors["email"]);
-  }
-}
-function ProviderAirfareComponent_span_72_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275element(0, "span", 63);
-  }
-}
-function ProviderAirfareComponent_i_73_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275element(0, "i", 64);
-  }
-}
-function ProviderAirfareComponent_tr_109_span_6_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 76);
-    \u0275\u0275text(1, "Inativo");
-    \u0275\u0275elementEnd();
-  }
-}
-function ProviderAirfareComponent_tr_109_button_19_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r8 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 77);
-    \u0275\u0275listener("click", function ProviderAirfareComponent_tr_109_button_19_Template_button_click_0_listener() {
-      \u0275\u0275restoreView(_r8);
-      const provider_r7 = \u0275\u0275nextContext().$implicit;
-      const ctx_r1 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r1.activateProvider(provider_r7.id));
-    });
-    \u0275\u0275element(1, "i", 78);
-    \u0275\u0275elementEnd();
-  }
-}
-function ProviderAirfareComponent_tr_109_app_confirm_modal_20_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r9 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "app-confirm-modal", 73);
-    \u0275\u0275listener("confirm", function ProviderAirfareComponent_tr_109_app_confirm_modal_20_Template_app_confirm_modal_confirm_0_listener() {
-      \u0275\u0275restoreView(_r9);
-      const provider_r7 = \u0275\u0275nextContext().$implicit;
-      const ctx_r1 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r1.deactivateProvider(provider_r7.id));
-    });
-    \u0275\u0275elementStart(1, "span", 74);
-    \u0275\u0275element(2, "i", 79);
-    \u0275\u0275elementEnd()();
-  }
-  if (rf & 2) {
-    const provider_r7 = \u0275\u0275nextContext().$implicit;
-    \u0275\u0275property("btnClass", "btn btn-warning shadow-sm btn-action")("modalTitle", "Inativar Fornecedor")("message", "Tem certeza que deseja inativar o fornecedor a\xE9reo " + provider_r7.name + "?")("okButtonLabel", "Confirmar")("tooltip", "Inativar Fornecedor");
-  }
-}
-function ProviderAirfareComponent_tr_109_Template(rf, ctx) {
-  if (rf & 1) {
-    const _r6 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "tr")(1, "th", 65);
-    \u0275\u0275text(2);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td")(4, "span");
-    \u0275\u0275text(5);
-    \u0275\u0275elementEnd();
-    \u0275\u0275template(6, ProviderAirfareComponent_tr_109_span_6_Template, 2, 0, "span", 66);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(7, "td");
-    \u0275\u0275text(8);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(9, "td");
-    \u0275\u0275text(10);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(11, "td");
-    \u0275\u0275text(12);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(13, "td");
-    \u0275\u0275text(14);
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(15, "td", 67)(16, "div", 68)(17, "button", 69);
-    \u0275\u0275listener("click", function ProviderAirfareComponent_tr_109_Template_button_click_17_listener() {
-      const provider_r7 = \u0275\u0275restoreView(_r6).$implicit;
-      const ctx_r1 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r1.edit(provider_r7));
-    });
-    \u0275\u0275element(18, "i", 70);
-    \u0275\u0275elementEnd();
-    \u0275\u0275template(19, ProviderAirfareComponent_tr_109_button_19_Template, 2, 0, "button", 71)(20, ProviderAirfareComponent_tr_109_app_confirm_modal_20_Template, 3, 5, "app-confirm-modal", 72);
-    \u0275\u0275elementStart(21, "app-confirm-modal", 73);
-    \u0275\u0275listener("confirm", function ProviderAirfareComponent_tr_109_Template_app_confirm_modal_confirm_21_listener() {
-      const provider_r7 = \u0275\u0275restoreView(_r6).$implicit;
-      const ctx_r1 = \u0275\u0275nextContext();
-      return \u0275\u0275resetView(ctx_r1.deleteProvider(provider_r7.id));
-    });
-    \u0275\u0275elementStart(22, "span", 74);
-    \u0275\u0275element(23, "i", 75);
-    \u0275\u0275elementEnd()()()()();
-  }
-  if (rf & 2) {
-    const provider_r7 = ctx.$implicit;
-    const ctx_r1 = \u0275\u0275nextContext();
-    \u0275\u0275classProp("table-info", ctx_r1.isProviderInEdition(provider_r7.id));
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(provider_r7.id);
-    \u0275\u0275advance(2);
-    \u0275\u0275classProp("text-muted", !provider_r7.active);
-    \u0275\u0275advance();
-    \u0275\u0275textInterpolate(provider_r7.name);
-    \u0275\u0275advance();
-    \u0275\u0275property("ngIf", !provider_r7.active);
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate2("", provider_r7.city == null ? null : provider_r7.city.name, " - ", (provider_r7.city == null ? null : provider_r7.city.states) || (provider_r7.city == null ? null : provider_r7.city.country), "");
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(provider_r7.contact);
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(provider_r7.phone);
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(provider_r7.email);
-    \u0275\u0275advance(5);
-    \u0275\u0275property("ngIf", !provider_r7.active);
-    \u0275\u0275advance();
-    \u0275\u0275property("ngIf", provider_r7.active);
-    \u0275\u0275advance();
-    \u0275\u0275property("btnClass", "btn btn-danger shadow-sm btn-action")("modalTitle", "Excluir Fornecedor")("message", "A\xE7\xE3o irrevers\xEDvel! Deseja realmente excluir o fornecedor a\xE9reo " + provider_r7.name + "?")("okButtonLabel", "Excluir")("tooltip", "Excluir Fornecedor");
-  }
-}
-function ProviderAirfareComponent_tr_110_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr")(1, "td", 80)(2, "div", 81);
-    \u0275\u0275element(3, "span", 82);
-    \u0275\u0275elementEnd()()();
-  }
-}
-function ProviderAirfareComponent_tr_111_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr")(1, "td", 83);
-    \u0275\u0275element(2, "i", 84);
-    \u0275\u0275text(3, " Nenhum fornecedor a\xE9reo encontrado. ");
-    \u0275\u0275elementEnd()();
-  }
-}
-var ProviderAirfareComponent = class _ProviderAirfareComponent {
-  providerAirfareService = inject(ProviderAirfareService);
-  cityService = inject(CityService);
-  toastService = inject(ToastService);
-  providers = [];
-  inEdition = 0;
-  isLoader = false;
-  processing = false;
-  errors = {};
-  showModal = false;
-  // Pagination and Filtering state
-  pagination = {
-    current_page: 1,
-    per_page: 10,
-    total: 0,
-    last_page: 1,
-    from: 0,
-    to: 0
-  };
-  searchQuery = "";
-  sortColumn = "id";
-  sortDirection = "desc";
-  selectedCityName = "";
-  // Autocomplete Functions
-  searchCities = (term) => this.cityService.searchCities(term);
-  displayCity = (city) => city ? `${city.name} - ${city.states ? city.states : city.country}` : "";
-  form = {
-    id: 0,
-    name: "",
-    city_id: void 0,
-    contact: "",
-    phone: "",
-    email: "",
-    national: true,
-    iss_percent: null,
-    service_percent: null,
-    iva_percent: null,
-    payment_method: ""
-  };
-  ngOnInit() {
-    this.loadProviders();
-  }
-  loadProviders() {
-    this.isLoader = true;
-    const params = {
-      page: this.pagination.current_page,
-      per_page: this.pagination.per_page,
-      search: this.searchQuery,
-      sort_column: this.sortColumn,
-      sort_direction: this.sortDirection
-    };
-    this.providerAirfareService.getProviders(params).subscribe({
-      next: (response) => {
-        this.providers = response.data || [];
-        this.pagination = {
-          current_page: response.current_page,
-          per_page: response.per_page,
-          total: response.total,
-          last_page: response.last_page,
-          from: response.from,
-          to: response.to
-        };
-        this.isLoader = false;
-      },
-      error: (error) => {
-        this.isLoader = false;
-        this.toastService.error("Erro ao carregar fornecedores de a\xE9reo");
-        console.error("Erro ao carregar fornecedores de a\xE9reo:", error);
-      }
-    });
-  }
-  onSearch(query) {
-    this.searchQuery = query;
-    this.pagination.current_page = 1;
-    this.loadProviders();
-  }
-  onPageChange(page) {
-    this.pagination.current_page = page;
-    this.loadProviders();
-  }
-  onPerPageChange(perPage) {
-    this.pagination.per_page = perPage;
-    this.pagination.current_page = 1;
-    this.loadProviders();
-  }
-  sortBy(column) {
-    if (this.sortColumn === column) {
-      this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
-    } else {
-      this.sortColumn = column;
-      this.sortDirection = "asc";
-    }
-    this.loadProviders();
-  }
-  openModal() {
-    this.resetForm();
-    this.showModal = true;
-  }
-  closeModal() {
-    this.showModal = false;
-    this.resetForm();
-  }
-  edit(provider) {
-    this.inEdition = provider.id;
-    this.form = {
-      id: provider.id,
-      name: provider.name,
-      city_id: provider.city_id,
-      contact: provider.contact,
-      phone: provider.phone,
-      email: provider.email,
-      national: String(provider.national) === "1" || String(provider.national) === "true",
-      iss_percent: provider.iss_percent ?? null,
-      service_percent: provider.service_percent ?? null,
-      iva_percent: provider.iva_percent ?? null,
-      payment_method: provider.payment_method ?? ""
-    };
-    this.selectedCityName = provider.city ? `${provider.city.name} - ${provider.city.states ? provider.city.states : provider.city.country}` : "";
-    this.errors = {};
-    this.showModal = true;
-  }
-  cancelEdit() {
-    this.closeModal();
-  }
-  resetForm() {
-    this.form = {
-      id: 0,
-      name: "",
-      city_id: void 0,
-      contact: "",
-      phone: "",
-      email: "",
-      national: true,
-      iss_percent: null,
-      service_percent: null,
-      iva_percent: null,
-      payment_method: ""
-    };
-    this.selectedCityName = "";
-    this.errors = {};
-    this.inEdition = 0;
-  }
-  validateForm() {
-    this.errors = {};
-    let isValid2 = true;
-    if (!this.form.name || this.form.name.trim() === "") {
-      this.errors.name = ["O nome \xE9 obrigat\xF3rio"];
-      isValid2 = false;
-    }
-    if (!this.form.contact || this.form.contact.trim() === "") {
-      this.errors.contact = ["O contato \xE9 obrigat\xF3rio"];
-      isValid2 = false;
-    }
-    if (!this.form.phone || this.form.phone.trim() === "") {
-      this.errors.phone = ["O telefone \xE9 obrigat\xF3rio"];
-      isValid2 = false;
-    }
-    if (!this.form.email || this.form.email.trim() === "") {
-      this.errors.email = ["O e-mail \xE9 obrigat\xF3rio"];
-      isValid2 = false;
-    } else {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(this.form.email)) {
-        this.errors.email = ["O e-mail informado \xE9 inv\xE1lido"];
-        isValid2 = false;
-      }
-    }
-    if (!this.form.city_id) {
-      this.errors.city_id = ["A cidade \xE9 obrigat\xF3ria"];
-      isValid2 = false;
-    }
-    return isValid2;
-  }
-  submit() {
-    if (!this.validateForm()) {
-      return;
-    }
-    this.processing = true;
-    const data = {
-      id: this.form.id,
-      name: this.form.name,
-      city_id: this.form.city_id,
-      contact: this.form.contact,
-      phone: this.form.phone,
-      email: this.form.email,
-      national: this.form.national,
-      iss_percent: this.form.iss_percent,
-      service_percent: this.form.service_percent,
-      iva_percent: this.form.iva_percent,
-      payment_method: this.form.payment_method || null
-    };
-    this.providerAirfareService.saveProvider(data).subscribe({
-      next: (response) => {
-        this.processing = false;
-        this.toastService.success(response.message || "Fornecedor de a\xE9reo salvo com sucesso");
-        this.closeModal();
-        this.loadProviders();
-      },
-      error: (error) => {
-        this.processing = false;
-        if (error.status === 422) {
-          this.errors = error.error.errors || {};
-        } else {
-          this.toastService.error("Erro ao salvar fornecedor de a\xE9reo");
-        }
-        console.error("Erro ao salvar fornecedor de a\xE9reo:", error);
-      }
-    });
-  }
-  deleteProvider(id) {
-    this.isLoader = true;
-    this.providerAirfareService.deleteProvider(id).subscribe({
-      next: (response) => {
-        this.isLoader = false;
-        this.toastService.success(response.message || "Fornecedor de a\xE9reo apagado com sucesso");
-        this.loadProviders();
-      },
-      error: (error) => {
-        this.isLoader = false;
-        this.toastService.error("Erro ao apagar fornecedor de a\xE9reo");
-        console.error("Erro ao deletar fornecedor de a\xE9reo:", error);
-      }
-    });
-  }
-  activateProvider(id) {
-    this.isLoader = true;
-    this.providerAirfareService.activateProvider(id).subscribe({
-      next: (response) => {
-        this.isLoader = false;
-        this.toastService.success(response.message || "Fornecedor de a\xE9reo ativada com sucesso");
-        this.loadProviders();
-      },
-      error: (error) => {
-        this.isLoader = false;
-        this.toastService.error("Erro ao ativar fornecedor de a\xE9reo");
-        console.error("Erro ao ativar fornecedor de a\xE9reo:", error);
-      }
-    });
-  }
-  deactivateProvider(id) {
-    this.isLoader = true;
-    this.providerAirfareService.deactivateProvider(id).subscribe({
-      next: (response) => {
-        this.isLoader = false;
-        this.toastService.success(response.message || "Fornecedor de a\xE9reo inativado com sucesso");
-        this.loadProviders();
-      },
-      error: (error) => {
-        this.isLoader = false;
-        this.toastService.error("Erro ao inativar fornecedor de a\xE9reo");
-        console.error("Erro ao inativar fornecedor de a\xE9reo:", error);
-      }
-    });
-  }
-  isProviderInEdition(id) {
-    return this.inEdition === id;
-  }
-  static \u0275fac = function ProviderAirfareComponent_Factory(__ngFactoryType__) {
-    return new (__ngFactoryType__ || _ProviderAirfareComponent)();
-  };
-  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _ProviderAirfareComponent, selectors: [["app-provider-airfare"]], decls: 112, vars: 48, consts: [["header", ""], [1, "d-sm-flex", "align-items-center", "justify-content-between", "mb-4", "animate-in"], [1, "h3", "mb-0", "text-gray-800"], [1, "row", "position-relative"], ["icon", "fa-edit", "size", "lg", 3, "close", "show", "title"], [1, "d-flex", "flex-column", "flex-grow-1", "min-h-0", 3, "ngSubmit"], [1, "row"], [1, "form-group", "col-md-6", "mb-3"], ["for", "name", 1, "form-label"], [1, "text-danger"], ["type", "text", "id", "name", "name", "name", "placeholder", "Ex: Fornecedor de Voos Ltda", "required", "", "autofocus", "", 1, "form-control", 3, "ngModelChange", "ngModel"], ["class", "text-danger mt-1", 4, "ngIf"], [1, "form-label"], ["id", "city", "placeholder", "Pesquisar cidade...", "valueField", "id", "name", "city", 3, "ngModelChange", "required", "searchFn", "displayFn", "initialText", "ngModel", "errors"], ["for", "contact", 1, "form-label"], ["type", "text", "id", "contact", "name", "contact", "placeholder", "Ex: Maria Souza", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "phone", 1, "form-label"], ["type", "text", "id", "phone", "mask", "(00) 0 0000-0000||(00) 0000-0000", "name", "phone", "placeholder", "Ex: (11) 98888-8888", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "email", 1, "form-label"], ["type", "email", "id", "email", "name", "email", "placeholder", "Ex: contato@fornecedor.com.br", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "payment_method", 1, "form-label"], ["type", "text", "id", "payment_method", "name", "payment_method", "placeholder", "Ex: Faturado 30 dias", 1, "form-control", 3, "ngModelChange", "ngModel"], [1, "form-group", "col-md-3", "mb-3"], ["for", "iss_percent", 1, "form-label"], ["type", "number", "id", "iss_percent", "min", "0", "max", "100", "step", "0.01", "name", "iss_percent", "placeholder", "0.00", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "service_percent", 1, "form-label"], ["type", "number", "id", "service_percent", "min", "0", "max", "100", "step", "0.01", "name", "service_percent", "placeholder", "0.00", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "iva_percent", 1, "form-label"], ["type", "number", "id", "iva_percent", "min", "0", "max", "100", "step", "0.01", "name", "iva_percent", "placeholder", "0.00", 1, "form-control", 3, "ngModelChange", "ngModel"], [1, "form-group", "col-md-3", "mb-3", "d-flex", "align-items-end"], [1, "form-check", "mb-2"], ["type", "checkbox", "id", "national", "name", "national", 1, "form-check-input", 3, "ngModelChange", "ngModel"], ["for", "national", 1, "form-check-label", "font-weight-bold"], [1, "modal-footer", "px-0", "pb-0", "pt-3", "d-flex", "justify-content-end", "gap-2", "border-top"], ["type", "button", 1, "btn", "btn-outline-secondary", 3, "click", "disabled"], [1, "fas", "fa-times", "me-1"], ["type", "submit", 1, "btn", "btn-primary", "shadow-sm", 3, "disabled"], ["class", "spinner-border spinner-border-sm me-1", "role", "status", "aria-hidden", "true", 4, "ngIf"], ["class", "fas fa-save me-1", 4, "ngIf"], [1, "col-lg-12", "animate-in", 2, "animation-delay", "0.2s"], [1, "card", "mb-4", "border-left-secondary"], [1, "card-body"], [1, "d-flex", "align-items-center", "justify-content-between", "mb-4"], [1, "card-title", "mb-0", "text-secondary", "font-weight-bold"], [1, "fas", "fa-list", "me-2"], [1, "btn", "btn-primary", "btn-sm", "shadow-sm", 3, "click", "disabled"], [1, "fas", "fa-plus", "me-1"], [3, "search", "pageChange", "perPageChange", "pagination", "loading"], [1, "table-responsive"], ["width", "100%", "cellspacing", "0", 1, "table", "table-hover"], [1, "table-light"], ["scope", "col", 2, "cursor", "pointer", "width", "80px", 3, "click"], [1, "d-flex", "align-items-center"], [1, "fas", "fa-sort", "ms-2", "text-muted", 3, "ngClass"], ["scope", "col", 2, "cursor", "pointer", 3, "click"], ["scope", "col"], ["scope", "col", 1, "text-end"], [3, "table-info", 4, "ngFor", "ngForOf"], [4, "ngFor", "ngForOf"], [4, "ngIf"], [1, "text-danger", "mt-1"], ["class", "d-block", 4, "ngFor", "ngForOf"], [1, "d-block"], ["role", "status", "aria-hidden", "true", 1, "spinner-border", "spinner-border-sm", "me-1"], [1, "fas", "fa-save", "me-1"], ["scope", "row", 1, "font-weight-bold"], ["class", "badge bg-light text-muted ms-2", 4, "ngIf"], [1, "text-end"], [1, "d-flex", "justify-content-end", "gap-2", "flex-wrap"], ["data-tooltip", "Editar Fornecedor", 1, "btn", "btn-info", "text-white", "shadow-sm", "btn-action", 3, "click"], [1, "fas", "fa-edit"], ["class", "btn btn-success shadow-sm btn-action", "data-tooltip", "Ativar Fornecedor", 3, "click", 4, "ngIf"], [3, "btnClass", "modalTitle", "message", "okButtonLabel", "tooltip", "confirm", 4, "ngIf"], [3, "confirm", "btnClass", "modalTitle", "message", "okButtonLabel", "tooltip"], ["modal-button", ""], [1, "fas", "fa-trash"], [1, "badge", "bg-light", "text-muted", "ms-2"], ["data-tooltip", "Ativar Fornecedor", 1, "btn", "btn-success", "shadow-sm", "btn-action", 3, "click"], [1, "fas", "fa-check"], [1, "fas", "fa-ban"], ["colspan", "7", 1, "text-center", "py-3"], [1, "placeholder-glow"], [1, "placeholder", "col-12", "rounded"], ["colspan", "7", 1, "text-center", "py-5", "text-muted"], [1, "fas", "fa-folder-open", "fa-3x", "mb-3", "d-block", "opacity-25"]], template: function ProviderAirfareComponent_Template(rf, ctx) {
-    if (rf & 1) {
-      \u0275\u0275elementStart(0, "app-authenticated-layout");
-      \u0275\u0275elementContainerStart(1, 0);
-      \u0275\u0275elementStart(2, "div", 1)(3, "h1", 2);
-      \u0275\u0275text(4, "Gerenciamento de Fornecedores de A\xE9reo");
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementContainerEnd();
-      \u0275\u0275elementStart(5, "div", 3)(6, "app-modal", 4);
-      \u0275\u0275listener("close", function ProviderAirfareComponent_Template_app_modal_close_6_listener() {
-        return ctx.closeModal();
-      });
-      \u0275\u0275elementStart(7, "form", 5);
-      \u0275\u0275listener("ngSubmit", function ProviderAirfareComponent_Template_form_ngSubmit_7_listener() {
-        return ctx.submit();
-      });
-      \u0275\u0275elementStart(8, "div", 6)(9, "div", 7)(10, "label", 8);
-      \u0275\u0275text(11, "Nome: ");
-      \u0275\u0275elementStart(12, "span", 9);
-      \u0275\u0275text(13, "*");
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(14, "input", 10);
-      \u0275\u0275twoWayListener("ngModelChange", function ProviderAirfareComponent_Template_input_ngModelChange_14_listener($event) {
-        \u0275\u0275twoWayBindingSet(ctx.form.name, $event) || (ctx.form.name = $event);
-        return $event;
-      });
-      \u0275\u0275elementEnd();
-      \u0275\u0275template(15, ProviderAirfareComponent_div_15_Template, 2, 1, "div", 11);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(16, "div", 7)(17, "label", 12);
-      \u0275\u0275text(18, "Cidade: ");
-      \u0275\u0275elementStart(19, "span", 9);
-      \u0275\u0275text(20, "*");
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(21, "app-autocomplete", 13);
-      \u0275\u0275twoWayListener("ngModelChange", function ProviderAirfareComponent_Template_app_autocomplete_ngModelChange_21_listener($event) {
-        \u0275\u0275twoWayBindingSet(ctx.form.city_id, $event) || (ctx.form.city_id = $event);
-        return $event;
-      });
-      \u0275\u0275elementEnd()()();
-      \u0275\u0275elementStart(22, "div", 6)(23, "div", 7)(24, "label", 14);
-      \u0275\u0275text(25, "Contato: ");
-      \u0275\u0275elementStart(26, "span", 9);
-      \u0275\u0275text(27, "*");
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(28, "input", 15);
-      \u0275\u0275twoWayListener("ngModelChange", function ProviderAirfareComponent_Template_input_ngModelChange_28_listener($event) {
-        \u0275\u0275twoWayBindingSet(ctx.form.contact, $event) || (ctx.form.contact = $event);
-        return $event;
-      });
-      \u0275\u0275elementEnd();
-      \u0275\u0275template(29, ProviderAirfareComponent_div_29_Template, 2, 1, "div", 11);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(30, "div", 7)(31, "label", 16);
-      \u0275\u0275text(32, "Telefone: ");
-      \u0275\u0275elementStart(33, "span", 9);
-      \u0275\u0275text(34, "*");
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(35, "input", 17);
-      \u0275\u0275twoWayListener("ngModelChange", function ProviderAirfareComponent_Template_input_ngModelChange_35_listener($event) {
-        \u0275\u0275twoWayBindingSet(ctx.form.phone, $event) || (ctx.form.phone = $event);
-        return $event;
-      });
-      \u0275\u0275elementEnd();
-      \u0275\u0275template(36, ProviderAirfareComponent_div_36_Template, 2, 1, "div", 11);
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(37, "div", 6)(38, "div", 7)(39, "label", 18);
-      \u0275\u0275text(40, "E-mail: ");
-      \u0275\u0275elementStart(41, "span", 9);
-      \u0275\u0275text(42, "*");
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(43, "input", 19);
-      \u0275\u0275twoWayListener("ngModelChange", function ProviderAirfareComponent_Template_input_ngModelChange_43_listener($event) {
-        \u0275\u0275twoWayBindingSet(ctx.form.email, $event) || (ctx.form.email = $event);
-        return $event;
-      });
-      \u0275\u0275elementEnd();
-      \u0275\u0275template(44, ProviderAirfareComponent_div_44_Template, 2, 1, "div", 11);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(45, "div", 7)(46, "label", 20);
-      \u0275\u0275text(47, "Forma de Pagamento:");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(48, "input", 21);
-      \u0275\u0275twoWayListener("ngModelChange", function ProviderAirfareComponent_Template_input_ngModelChange_48_listener($event) {
-        \u0275\u0275twoWayBindingSet(ctx.form.payment_method, $event) || (ctx.form.payment_method = $event);
-        return $event;
-      });
-      \u0275\u0275elementEnd()()();
-      \u0275\u0275elementStart(49, "div", 6)(50, "div", 22)(51, "label", 23);
-      \u0275\u0275text(52, "ISS (%):");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(53, "input", 24);
-      \u0275\u0275twoWayListener("ngModelChange", function ProviderAirfareComponent_Template_input_ngModelChange_53_listener($event) {
-        \u0275\u0275twoWayBindingSet(ctx.form.iss_percent, $event) || (ctx.form.iss_percent = $event);
-        return $event;
-      });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(54, "div", 22)(55, "label", 25);
-      \u0275\u0275text(56, "Servi\xE7o (%):");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(57, "input", 26);
-      \u0275\u0275twoWayListener("ngModelChange", function ProviderAirfareComponent_Template_input_ngModelChange_57_listener($event) {
-        \u0275\u0275twoWayBindingSet(ctx.form.service_percent, $event) || (ctx.form.service_percent = $event);
-        return $event;
-      });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(58, "div", 22)(59, "label", 27);
-      \u0275\u0275text(60, "IVA (%):");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(61, "input", 28);
-      \u0275\u0275twoWayListener("ngModelChange", function ProviderAirfareComponent_Template_input_ngModelChange_61_listener($event) {
-        \u0275\u0275twoWayBindingSet(ctx.form.iva_percent, $event) || (ctx.form.iva_percent = $event);
-        return $event;
-      });
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(62, "div", 29)(63, "div", 30)(64, "input", 31);
-      \u0275\u0275twoWayListener("ngModelChange", function ProviderAirfareComponent_Template_input_ngModelChange_64_listener($event) {
-        \u0275\u0275twoWayBindingSet(ctx.form.national, $event) || (ctx.form.national = $event);
-        return $event;
-      });
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(65, "label", 32);
-      \u0275\u0275text(66, "Fornecedor Nacional");
-      \u0275\u0275elementEnd()()()();
-      \u0275\u0275elementStart(67, "div", 33)(68, "button", 34);
-      \u0275\u0275listener("click", function ProviderAirfareComponent_Template_button_click_68_listener() {
-        return ctx.closeModal();
-      });
-      \u0275\u0275element(69, "i", 35);
-      \u0275\u0275text(70, " Cancelar ");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(71, "button", 36);
-      \u0275\u0275template(72, ProviderAirfareComponent_span_72_Template, 1, 0, "span", 37)(73, ProviderAirfareComponent_i_73_Template, 1, 0, "i", 38);
-      \u0275\u0275text(74, " Salvar ");
-      \u0275\u0275elementEnd()()()();
-      \u0275\u0275elementStart(75, "div", 39)(76, "div", 40)(77, "div", 41)(78, "div", 42)(79, "h5", 43);
-      \u0275\u0275element(80, "i", 44);
-      \u0275\u0275text(81, " Lista de Fornecedores A\xE9reos ");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(82, "button", 45);
-      \u0275\u0275listener("click", function ProviderAirfareComponent_Template_button_click_82_listener() {
-        return ctx.openModal();
-      });
-      \u0275\u0275element(83, "i", 46);
-      \u0275\u0275text(84, " Novo Fornecedor ");
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(85, "app-datatable", 47);
-      \u0275\u0275listener("search", function ProviderAirfareComponent_Template_app_datatable_search_85_listener($event) {
-        return ctx.onSearch($event);
-      })("pageChange", function ProviderAirfareComponent_Template_app_datatable_pageChange_85_listener($event) {
-        return ctx.onPageChange($event);
-      })("perPageChange", function ProviderAirfareComponent_Template_app_datatable_perPageChange_85_listener($event) {
-        return ctx.onPerPageChange($event);
-      });
-      \u0275\u0275elementStart(86, "div", 48)(87, "table", 49)(88, "thead", 50)(89, "tr")(90, "th", 51);
-      \u0275\u0275listener("click", function ProviderAirfareComponent_Template_th_click_90_listener() {
-        return ctx.sortBy("id");
-      });
-      \u0275\u0275elementStart(91, "div", 52);
-      \u0275\u0275text(92, " ID ");
-      \u0275\u0275element(93, "i", 53);
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(94, "th", 54);
-      \u0275\u0275listener("click", function ProviderAirfareComponent_Template_th_click_94_listener() {
-        return ctx.sortBy("name");
-      });
-      \u0275\u0275elementStart(95, "div", 52);
-      \u0275\u0275text(96, " Nome ");
-      \u0275\u0275element(97, "i", 53);
-      \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(98, "th", 55);
-      \u0275\u0275text(99, "Cidade");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(100, "th", 55);
-      \u0275\u0275text(101, "Contato");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(102, "th", 55);
-      \u0275\u0275text(103, "Telefone");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(104, "th", 55);
-      \u0275\u0275text(105, "E-mail");
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(106, "th", 56);
-      \u0275\u0275text(107, "A\xE7\xF5es");
-      \u0275\u0275elementEnd()()();
-      \u0275\u0275elementStart(108, "tbody");
-      \u0275\u0275template(109, ProviderAirfareComponent_tr_109_Template, 24, 19, "tr", 57)(110, ProviderAirfareComponent_tr_110_Template, 4, 0, "tr", 58)(111, ProviderAirfareComponent_tr_111_Template, 4, 0, "tr", 59);
-      \u0275\u0275elementEnd()()()()()()()()();
-    }
-    if (rf & 2) {
-      \u0275\u0275advance(6);
-      \u0275\u0275property("show", ctx.showModal)("title", ctx.inEdition > 0 ? "Editar Fornecedor A\xE9reo" : "Cadastrar Novo Fornecedor A\xE9reo");
-      \u0275\u0275advance(8);
-      \u0275\u0275classProp("is-invalid", ctx.errors["name"]);
-      \u0275\u0275twoWayProperty("ngModel", ctx.form.name);
-      \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.errors["name"]);
-      \u0275\u0275advance(6);
-      \u0275\u0275property("required", true)("searchFn", ctx.searchCities)("displayFn", ctx.displayCity)("initialText", ctx.selectedCityName);
-      \u0275\u0275twoWayProperty("ngModel", ctx.form.city_id);
-      \u0275\u0275property("errors", ctx.errors["city_id"]);
-      \u0275\u0275advance(7);
-      \u0275\u0275classProp("is-invalid", ctx.errors["contact"]);
-      \u0275\u0275twoWayProperty("ngModel", ctx.form.contact);
-      \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.errors["contact"]);
-      \u0275\u0275advance(6);
-      \u0275\u0275classProp("is-invalid", ctx.errors["phone"]);
-      \u0275\u0275twoWayProperty("ngModel", ctx.form.phone);
-      \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.errors["phone"]);
-      \u0275\u0275advance(7);
-      \u0275\u0275classProp("is-invalid", ctx.errors["email"]);
-      \u0275\u0275twoWayProperty("ngModel", ctx.form.email);
-      \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.errors["email"]);
-      \u0275\u0275advance(4);
-      \u0275\u0275twoWayProperty("ngModel", ctx.form.payment_method);
-      \u0275\u0275advance(5);
-      \u0275\u0275twoWayProperty("ngModel", ctx.form.iss_percent);
-      \u0275\u0275advance(4);
-      \u0275\u0275twoWayProperty("ngModel", ctx.form.service_percent);
-      \u0275\u0275advance(4);
-      \u0275\u0275twoWayProperty("ngModel", ctx.form.iva_percent);
-      \u0275\u0275advance(3);
-      \u0275\u0275twoWayProperty("ngModel", ctx.form.national);
-      \u0275\u0275advance(4);
-      \u0275\u0275property("disabled", ctx.processing);
-      \u0275\u0275advance(3);
-      \u0275\u0275property("disabled", ctx.processing);
-      \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.processing);
-      \u0275\u0275advance();
-      \u0275\u0275property("ngIf", !ctx.processing);
-      \u0275\u0275advance(9);
-      \u0275\u0275property("disabled", ctx.processing);
-      \u0275\u0275advance(3);
-      \u0275\u0275property("pagination", ctx.pagination)("loading", ctx.isLoader);
-      \u0275\u0275advance(8);
-      \u0275\u0275property("ngClass", \u0275\u0275pureFunction2(41, _c046, ctx.sortColumn === "id" && ctx.sortDirection === "asc", ctx.sortColumn === "id" && ctx.sortDirection === "desc"));
-      \u0275\u0275advance(4);
-      \u0275\u0275property("ngClass", \u0275\u0275pureFunction2(44, _c046, ctx.sortColumn === "name" && ctx.sortDirection === "asc", ctx.sortColumn === "name" && ctx.sortDirection === "desc"));
-      \u0275\u0275advance(12);
-      \u0275\u0275property("ngForOf", ctx.providers);
-      \u0275\u0275advance();
-      \u0275\u0275property("ngForOf", \u0275\u0275pureFunction0(47, _c142).slice(0, ctx.isLoader ? 5 : 0));
-      \u0275\u0275advance();
-      \u0275\u0275property("ngIf", ctx.providers.length === 0 && !ctx.isLoader);
-    }
-  }, dependencies: [
-    CommonModule,
-    NgClass,
-    NgForOf,
-    NgIf,
-    FormsModule,
-    \u0275NgNoValidate,
-    DefaultValueAccessor,
-    NumberValueAccessor,
-    CheckboxControlValueAccessor,
-    NgControlStatus,
-    NgControlStatusGroup,
-    RequiredValidator,
-    MinValidator,
-    MaxValidator,
-    NgModel,
-    NgForm,
-    AuthenticatedLayoutComponent,
-    ConfirmModalComponent,
-    DatatableComponent,
-    AutocompleteComponent,
-    ModalComponent,
-    NgxMaskDirective
-  ], styles: ["\n\n.btn-action[_ngcontent-%COMP%] {\n  padding: 0.25rem 0.5rem;\n  font-size: 0.875rem;\n}\n/*# sourceMappingURL=provider-airfare.component.css.map */"] });
-};
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(ProviderAirfareComponent, [{
-    type: Component,
-    args: [{ selector: "app-provider-airfare", standalone: true, imports: [
-      CommonModule,
-      FormsModule,
-      AuthenticatedLayoutComponent,
-      ConfirmModalComponent,
-      DatatableComponent,
-      AutocompleteComponent,
-      ModalComponent,
-      NgxMaskDirective
-    ], template: `<app-authenticated-layout>\r
-  <ng-container header>\r
-    <div class="d-sm-flex align-items-center justify-content-between mb-4 animate-in">\r
-      <h1 class="h3 mb-0 text-gray-800">Gerenciamento de Fornecedores de A\xE9reo</h1>\r
-    </div>\r
-  </ng-container>\r
-\r
-  <div class="row position-relative">\r
-    <!-- Modal de Cadastro/Edi\xE7\xE3o -->\r
-    <app-modal [show]="showModal" (close)="closeModal()" [title]="inEdition > 0 ? 'Editar Fornecedor A\xE9reo' : 'Cadastrar Novo Fornecedor A\xE9reo'" icon="fa-edit" size="lg">\r
-      <form (ngSubmit)="submit()" class="d-flex flex-column flex-grow-1 min-h-0">\r
-        <div class="row">\r
-          <div class="form-group col-md-6 mb-3">\r
-            <label for="name" class="form-label">Nome: <span class="text-danger">*</span></label>\r
-            <input\r
-              type="text"\r
-              id="name"\r
-              class="form-control"\r
-              [class.is-invalid]="errors['name']"\r
-              [(ngModel)]="form.name"\r
-              name="name"\r
-              placeholder="Ex: Fornecedor de Voos Ltda"\r
-              required\r
-              autofocus />\r
-            <div *ngIf="errors['name']" class="text-danger mt-1">\r
-              <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>\r
-            </div>\r
-          </div>\r
-\r
-          <div class="form-group col-md-6 mb-3">\r
-            <label class="form-label">Cidade: <span class="text-danger">*</span></label>\r
-            <app-autocomplete\r
-              id="city"\r
-              placeholder="Pesquisar cidade..."\r
-              [required]="true"\r
-              [searchFn]="searchCities"\r
-              [displayFn]="displayCity"\r
-              valueField="id"\r
-              [initialText]="selectedCityName"\r
-              [(ngModel)]="form.city_id"\r
-              name="city"\r
-              [errors]="errors['city_id']"></app-autocomplete>\r
-          </div>\r
-        </div>\r
-\r
-        <div class="row">\r
-          <div class="form-group col-md-6 mb-3">\r
-            <label for="contact" class="form-label">Contato: <span class="text-danger">*</span></label>\r
-            <input\r
-              type="text"\r
-              id="contact"\r
-              class="form-control"\r
-              [class.is-invalid]="errors['contact']"\r
-              [(ngModel)]="form.contact"\r
-              name="contact"\r
-              placeholder="Ex: Maria Souza"\r
-              required />\r
-            <div *ngIf="errors['contact']" class="text-danger mt-1">\r
-              <small *ngFor="let err of errors['contact']" class="d-block">{{ err }}</small>\r
-            </div>\r
-          </div>\r
-\r
-          <div class="form-group col-md-6 mb-3">\r
-            <label for="phone" class="form-label">Telefone: <span class="text-danger">*</span></label>\r
-            <input\r
-              type="text"\r
-              id="phone"\r
-              class="form-control"\r
-              mask="(00) 0 0000-0000||(00) 0000-0000"\r
-              [class.is-invalid]="errors['phone']"\r
-              [(ngModel)]="form.phone"\r
-              name="phone"\r
-              placeholder="Ex: (11) 98888-8888"\r
-              required />\r
-            <div *ngIf="errors['phone']" class="text-danger mt-1">\r
-              <small *ngFor="let err of errors['phone']" class="d-block">{{ err }}</small>\r
-            </div>\r
-          </div>\r
-        </div>\r
-\r
-        <div class="row">\r
-          <div class="form-group col-md-6 mb-3">\r
-            <label for="email" class="form-label">E-mail: <span class="text-danger">*</span></label>\r
-            <input\r
-              type="email"\r
-              id="email"\r
-              class="form-control"\r
-              [class.is-invalid]="errors['email']"\r
-              [(ngModel)]="form.email"\r
-              name="email"\r
-              placeholder="Ex: contato@fornecedor.com.br"\r
-              required />\r
-            <div *ngIf="errors['email']" class="text-danger mt-1">\r
-              <small *ngFor="let err of errors['email']" class="d-block">{{ err }}</small>\r
-            </div>\r
-          </div>\r
-\r
-          <div class="form-group col-md-6 mb-3">\r
-            <label for="payment_method" class="form-label">Forma de Pagamento:</label>\r
-            <input\r
-              type="text"\r
-              id="payment_method"\r
-              class="form-control"\r
-              [(ngModel)]="form.payment_method"\r
-              name="payment_method"\r
-              placeholder="Ex: Faturado 30 dias" />\r
-          </div>\r
-        </div>\r
-\r
-        <div class="row">\r
-          <div class="form-group col-md-3 mb-3">\r
-            <label for="iss_percent" class="form-label">ISS (%):</label>\r
-            <input\r
-              type="number"\r
-              id="iss_percent"\r
-              class="form-control"\r
-              min="0"\r
-              max="100"\r
-              step="0.01"\r
-              [(ngModel)]="form.iss_percent"\r
-              name="iss_percent"\r
-              placeholder="0.00" />\r
-          </div>\r
-\r
-          <div class="form-group col-md-3 mb-3">\r
-            <label for="service_percent" class="form-label">Servi\xE7o (%):</label>\r
-            <input\r
-              type="number"\r
-              id="service_percent"\r
-              class="form-control"\r
-              min="0"\r
-              max="100"\r
-              step="0.01"\r
-              [(ngModel)]="form.service_percent"\r
-              name="service_percent"\r
-              placeholder="0.00" />\r
-          </div>\r
-\r
-          <div class="form-group col-md-3 mb-3">\r
-            <label for="iva_percent" class="form-label">IVA (%):</label>\r
-            <input\r
-              type="number"\r
-              id="iva_percent"\r
-              class="form-control"\r
-              min="0"\r
-              max="100"\r
-              step="0.01"\r
-              [(ngModel)]="form.iva_percent"\r
-              name="iva_percent"\r
-              placeholder="0.00" />\r
-          </div>\r
-\r
-          <div class="form-group col-md-3 mb-3 d-flex align-items-end">\r
-            <div class="form-check mb-2">\r
-              <input\r
-                type="checkbox"\r
-                id="national"\r
-                class="form-check-input"\r
-                [(ngModel)]="form.national"\r
-                name="national" />\r
-              <label for="national" class="form-check-label font-weight-bold">Fornecedor Nacional</label>\r
-            </div>\r
-          </div>\r
-        </div>\r
-\r
-        <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">\r
-          <button type="button" class="btn btn-outline-secondary" (click)="closeModal()" [disabled]="processing">\r
-            <i class="fas fa-times me-1"></i>\r
-            Cancelar\r
-          </button>\r
-          <button type="submit" class="btn btn-primary shadow-sm" [disabled]="processing">\r
-            <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>\r
-            <i *ngIf="!processing" class="fas fa-save me-1"></i>\r
-            Salvar\r
-          </button>\r
-        </div>\r
-      </form>\r
-    </app-modal>\r
-\r
-    <!-- Table Section -->\r
-    <div class="col-lg-12 animate-in" style="animation-delay: 0.2s">\r
-      <div class="card mb-4 border-left-secondary">\r
-        <div class="card-body">\r
-          <div class="d-flex align-items-center justify-content-between mb-4">\r
-            <h5 class="card-title mb-0 text-secondary font-weight-bold">\r
-              <i class="fas fa-list me-2"></i>\r
-              Lista de Fornecedores A\xE9reos\r
-            </h5>\r
-            <button class="btn btn-primary btn-sm shadow-sm" (click)="openModal()" [disabled]="processing">\r
-              <i class="fas fa-plus me-1"></i>\r
-              Novo Fornecedor\r
-            </button>\r
-          </div>\r
-\r
-          <app-datatable\r
-            [pagination]="pagination"\r
-            [loading]="isLoader"\r
-            (search)="onSearch($event)"\r
-            (pageChange)="onPageChange($event)"\r
-            (perPageChange)="onPerPageChange($event)">\r
-            <div class="table-responsive">\r
-              <table class="table table-hover" width="100%" cellspacing="0">\r
-                <thead class="table-light">\r
-                  <tr>\r
-                    <th scope="col" (click)="sortBy('id')" style="cursor: pointer; width: 80px">\r
-                      <div class="d-flex align-items-center">\r
-                        ID\r
-                        <i\r
-                          class="fas fa-sort ms-2 text-muted"\r
-                          [ngClass]="{\r
-                            'fa-sort-up text-primary': sortColumn === 'id' && sortDirection === 'asc',\r
-                            'fa-sort-down text-primary': sortColumn === 'id' && sortDirection === 'desc',\r
-                          }"></i>\r
-                      </div>\r
-                    </th>\r
-                    <th scope="col" (click)="sortBy('name')" style="cursor: pointer">\r
-                      <div class="d-flex align-items-center">\r
-                        Nome\r
-                        <i\r
-                          class="fas fa-sort ms-2 text-muted"\r
-                          [ngClass]="{\r
-                            'fa-sort-up text-primary': sortColumn === 'name' && sortDirection === 'asc',\r
-                            'fa-sort-down text-primary': sortColumn === 'name' && sortDirection === 'desc',\r
-                          }"></i>\r
-                      </div>\r
-                    </th>\r
-                    <th scope="col">Cidade</th>\r
-                    <th scope="col">Contato</th>\r
-                    <th scope="col">Telefone</th>\r
-                    <th scope="col">E-mail</th>\r
-                    <th scope="col" class="text-end">A\xE7\xF5es</th>\r
-                  </tr>\r
-                </thead>\r
-                <tbody>\r
-                  <tr *ngFor="let provider of providers" [class.table-info]="isProviderInEdition(provider.id)">\r
-                    <th scope="row" class="font-weight-bold">{{ provider.id }}</th>\r
-                    <td>\r
-                      <span [class.text-muted]="!provider.active">{{ provider.name }}</span>\r
-                      <span *ngIf="!provider.active" class="badge bg-light text-muted ms-2">Inativo</span>\r
-                    </td>\r
-                    <td>{{ provider.city?.name }} - {{ provider.city?.states || provider.city?.country }}</td>\r
-                    <td>{{ provider.contact }}</td>\r
-                    <td>{{ provider.phone }}</td>\r
-                    <td>{{ provider.email }}</td>\r
-                    <td class="text-end">\r
-                      <div class="d-flex justify-content-end gap-2 flex-wrap">\r
-                        <button class="btn btn-info text-white shadow-sm btn-action" (click)="edit(provider)" data-tooltip="Editar Fornecedor">\r
-                          <i class="fas fa-edit"></i>\r
-                        </button>\r
-\r
-                        <button *ngIf="!provider.active" class="btn btn-success shadow-sm btn-action" (click)="activateProvider(provider.id)" data-tooltip="Ativar Fornecedor">\r
-                          <i class="fas fa-check"></i>\r
-                        </button>\r
-\r
-                        <app-confirm-modal\r
-                          *ngIf="provider.active"\r
-                          [btnClass]="'btn btn-warning shadow-sm btn-action'"\r
-                          [modalTitle]="'Inativar Fornecedor'"\r
-                          [message]="'Tem certeza que deseja inativar o fornecedor a\xE9reo ' + provider.name + '?'"\r
-                          [okButtonLabel]="'Confirmar'"\r
-                          [tooltip]="'Inativar Fornecedor'"\r
-                          (confirm)="deactivateProvider(provider.id)">\r
-                          <span modal-button>\r
-                            <i class="fas fa-ban"></i>\r
-                          </span>\r
-                        </app-confirm-modal>\r
-\r
-                        <app-confirm-modal\r
-                          [btnClass]="'btn btn-danger shadow-sm btn-action'"\r
-                          [modalTitle]="'Excluir Fornecedor'"\r
-                          [message]="'A\xE7\xE3o irrevers\xEDvel! Deseja realmente excluir o fornecedor a\xE9reo ' + provider.name + '?'"\r
-                          [okButtonLabel]="'Excluir'"\r
-                          [tooltip]="'Excluir Fornecedor'"\r
-                          (confirm)="deleteProvider(provider.id)">\r
-                          <span modal-button>\r
-                            <i class="fas fa-trash"></i>\r
-                          </span>\r
-                        </app-confirm-modal>\r
-                      </div>\r
-                    </td>\r
-                  </tr>\r
-                  <tr *ngFor="let i of [1, 2, 3, 4, 5].slice(0, isLoader ? 5 : 0)">\r
-                    <td colspan="7" class="text-center py-3">\r
-                      <div class="placeholder-glow">\r
-                        <span class="placeholder col-12 rounded"></span>\r
-                      </div>\r
-                    </td>\r
-                  </tr>\r
-                  <tr *ngIf="providers.length === 0 && !isLoader">\r
-                    <td colspan="7" class="text-center py-5 text-muted">\r
-                      <i class="fas fa-folder-open fa-3x mb-3 d-block opacity-25"></i>\r
-                      Nenhum fornecedor a\xE9reo encontrado.\r
-                    </td>\r
-                  </tr>\r
-                </tbody>\r
-              </table>\r
-            </div>\r
-          </app-datatable>\r
-        </div>\r
-      </div>\r
-    </div>\r
-  </div>\r
-</app-authenticated-layout>\r
-`, styles: ["/* src/app/pages/airfare/provider-airfare/provider-airfare.component.scss */\n.btn-action {\n  padding: 0.25rem 0.5rem;\n  font-size: 0.875rem;\n}\n/*# sourceMappingURL=provider-airfare.component.css.map */\n"] }]
-  }], null, null);
-})();
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(ProviderAirfareComponent, { className: "ProviderAirfareComponent", filePath: "src/app/pages/airfare/provider-airfare/provider-airfare.component.ts", lineNumber: 32 });
-})();
-
 // src/app/guards/auth.guard.ts
 var authGuard = (route, state) => {
   const authService = inject(AuthService);
@@ -128396,9 +126476,8 @@ var routes = [
   { path: "broker-trans", component: BrokerTransComponent, canActivate: [authGuard], title: "Brokers de Transporte - SmartApp" },
   { path: "provider-transport", component: ProviderTransportComponent, canActivate: [authGuard], title: "Fornecedores de Transporte - SmartApp" },
   { path: "airline", component: AirlineComponent, canActivate: [authGuard], title: "Cias A\xE9reas - SmartApp" },
-  { path: "baggage", component: BaggageComponent, canActivate: [authGuard], title: "Bagagem - SmartApp" },
-  { path: "cabin", component: CabinComponent, canActivate: [authGuard], title: "Cabines - SmartApp" },
-  { path: "provider-airfare", component: ProviderAirfareComponent, canActivate: [authGuard], title: "Fornecedores A\xE9reo - SmartApp" },
+  // { path: 'baggage', component: BaggageComponent, canActivate: [authGuard], title: 'Bagagem - SmartApp' },
+  // { path: 'cabin', component: CabinComponent, canActivate: [authGuard], title: 'Cabines - SmartApp' },
   { path: "event-list", component: EventListComponent, canActivate: [authGuard], title: "Eventos - SmartApp" },
   { path: "event", component: EventCreateComponent, canActivate: [authGuard], title: "Criar Evento - SmartApp" },
   { path: "event/:id", component: EventCreateComponent, canActivate: [authGuard], title: "Editar Evento - SmartApp" },

@@ -806,8 +806,8 @@ export class EventCreateComponent implements OnInit {
         prazo_cia: editItem.prazo_cia ? editItem.prazo_cia.split('T')[0] : '',
         inc_taxa_embarque: editItem.inc_taxa_embarque !== undefined ? !!editItem.inc_taxa_embarque : true,
         inc_servico_bordo: editItem.inc_servico_bordo !== undefined ? !!editItem.inc_servico_bordo : true,
-        inc_porao: editItem.inc_porao || '23 kg por pessoa',
-        inc_bagagem_bordo: editItem.inc_bagagem_bordo || '10 kg por pessoa',
+        inc_porao: this.parseKilos(editItem.inc_porao, 23),
+        inc_bagagem_bordo: this.parseKilos(editItem.inc_bagagem_bordo, 10),
         inc_sala_vip: editItem.inc_sala_vip !== undefined ? !!editItem.inc_sala_vip : false,
         inc_fbo_origem: editItem.inc_fbo_origem || '0',
         inc_fbo_destino: editItem.inc_fbo_destino || '0',
@@ -855,8 +855,8 @@ export class EventCreateComponent implements OnInit {
         prazo_cia: '',
         inc_taxa_embarque: true,
         inc_servico_bordo: true,
-        inc_porao: '23 kg por pessoa',
-        inc_bagagem_bordo: '10 kg por pessoa',
+        inc_porao: 23,
+        inc_bagagem_bordo: 10,
         inc_sala_vip: false,
         inc_fbo_origem: '0',
         inc_fbo_destino: '0',
@@ -878,6 +878,26 @@ export class EventCreateComponent implements OnInit {
     }
 
     this.showProviderLinkForm = true;
+  }
+
+  parseKilos(val: any, defaultKg: number = 23): number {
+    if (val === null || val === undefined || val === '') return defaultKg;
+    if (typeof val === 'number') return Math.floor(val);
+    const match = String(val).match(/\d+/);
+    return match ? parseInt(match[0], 10) : defaultKg;
+  }
+
+  formatKilos(val: any, defaultKg: number = 23): string {
+    if (val === null || val === undefined || val === '') return `${defaultKg} kg por pessoa`;
+    const str = String(val).trim();
+    if (/^\d+$/.test(str)) {
+      return `${str} kg por pessoa`;
+    }
+    if (str.toLowerCase().includes('kg')) {
+      return str;
+    }
+    const match = str.match(/\d+/);
+    return match ? `${match[0]} kg por pessoa` : `${defaultKg} kg por pessoa`;
   }
 
   calculatePaxTotal() {

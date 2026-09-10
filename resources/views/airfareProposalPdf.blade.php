@@ -212,26 +212,77 @@ function formatTimePdf($timeStr) {
             display: inline-table;
         }
 
-        /* Seção de Trechos / Pernas de Voo */
-        .tbl-flight-legs {
+        /* Seção de Trechos / Pernas de Voo (Card Executivo) */
+        .flight-legs-box {
             width: 100%;
+            margin-top: 12px;
+            margin-bottom: 14px;
+            border: 1px solid #CBD5E1;
             border-collapse: collapse;
-            margin-top: 15px;
-            margin-bottom: 15px;
         }
-        .tbl-flight-legs td {
-            vertical-align: top;
-            padding: 3px 6px;
+        .flight-legs-box th {
+            background-color: #F1F5F9;
+            color: #1E293B;
+            font-size: 7.5pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 6px 8px;
+            border-bottom: 2px solid #CBD5E1;
+            text-align: left;
         }
-        .leg-hdr {
+        .flight-legs-box td {
+            vertical-align: middle;
+            padding: 7px 8px;
+            border-bottom: 1px solid #E2E8F0;
+            background-color: #FFFFFF;
+        }
+        .flight-legs-box tr.leg-even td {
+            background-color: #F8FAFC;
+        }
+        .flight-legs-box tr:last-child td {
+            border-bottom: none;
+        }
+        .leg-date-title {
             font-weight: bold;
             font-size: 8.5pt;
-            color: #111111;
-            text-transform: uppercase;
+            color: #0F172A;
+            line-height: 1.2;
         }
-        .leg-val {
+        .leg-flight-num {
+            font-size: 6.8pt;
+            color: #0284C7;
+            font-weight: bold;
+            margin-top: 2px;
+        }
+        .leg-iata {
+            font-weight: bold;
+            font-size: 11pt;
+            color: #0F172A;
+            line-height: 1;
+        }
+        .leg-airport {
+            font-size: 7.2pt;
+            color: #475569;
+            margin-top: 2px;
+            line-height: 1.2;
+        }
+        .leg-arrow {
+            text-align: center;
+            font-size: 11pt;
+            color: #2563EB;
+            font-weight: bold;
+        }
+        .leg-time-main {
+            font-weight: bold;
             font-size: 8.5pt;
-            color: #222222;
+            color: #0F172A;
+            line-height: 1.2;
+        }
+        .leg-time-sub {
+            font-size: 6.5pt;
+            color: #64748B;
+            text-transform: uppercase;
             margin-top: 2px;
         }
 
@@ -446,45 +497,98 @@ function formatTimePdf($timeStr) {
 
             <div class="charter-block" style="{{ $index > 0 ? 'page-break-before: always; margin-top: 15px;' : '' }}">
                 
-                <!-- 1. Linha de Trechos (DATA, TRECHO Origem, TRECHO Destino, Horario) -->
-                <table class="tbl-flight-legs">
-                    @forelse($opts as $opt)
-                    <tr>
-                        <td style="width: 25%;">
-                            <div class="leg-hdr">DATA</div>
-                            <div class="leg-val">{{ formatDateExtensoBr($opt->outbound_date) }}</div>
-                        </td>
-                        <td style="width: 25%;">
-                            <div class="leg-hdr">TRECHO</div>
-                            <div class="leg-val">{{ $opt->outbound_origin ?: '-' }}</div>
-                        </td>
-                        <td style="width: 25%;">
-                            <div class="leg-hdr">TRECHO</div>
-                            <div class="leg-val">{{ $opt->outbound_destination ?: '-' }}</div>
-                        </td>
-                        <td style="width: 25%;">
-                            <div class="leg-hdr">Horario: <span style="font-weight: normal; text-transform: none;">{{ ($opt->outbound_departure_time && $opt->outbound_arrival_time) ? formatTimePdf($opt->outbound_departure_time) . ' às ' . formatTimePdf($opt->outbound_arrival_time) : 'À confirmar' }}</span></div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td style="width: 25%;">
-                            <div class="leg-hdr">DATA</div>
-                            <div class="leg-val">{{ formatDateExtensoBr($event->date) }}</div>
-                        </td>
-                        <td style="width: 25%;">
-                            <div class="leg-hdr">TRECHO</div>
-                            <div class="leg-val">Origem a confirmar</div>
-                        </td>
-                        <td style="width: 25%;">
-                            <div class="leg-hdr">TRECHO</div>
-                            <div class="leg-val">Destino a confirmar</div>
-                        </td>
-                        <td style="width: 25%;">
-                            <div class="leg-hdr">Horario: <span style="font-weight: normal; text-transform: none;">À confirmar</span></div>
-                        </td>
-                    </tr>
-                    @endforelse
+                <!-- 1. Linha de Trechos (Card Executivo de Voo) -->
+                <table class="flight-legs-box">
+                    <thead>
+                        <tr>
+                            <th style="width: 20%;">DATA</th>
+                            <th style="width: 31%;">ORIGEM</th>
+                            <th style="width: 3%; text-align: center;">&nbsp;</th>
+                            <th style="width: 31%;">DESTINO</th>
+                            <th style="width: 15%; text-align: right;">HORÁRIO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($opts as $optIdx => $opt)
+                        @php
+                            $origemRaw = $opt->outbound_origin ?: '-';
+                            $origemCode = '';
+                            $origemName = $origemRaw;
+                            if (preg_match('/^(.*?)\s*\(([A-Z0-9]{3})\)$/i', trim($origemRaw), $m)) {
+                                $origemName = trim($m[1]);
+                                $origemCode = strtoupper($m[2]);
+                            } elseif (preg_match('/\(([A-Z0-9]{3})\)/i', trim($origemRaw), $m)) {
+                                $origemCode = strtoupper($m[1]);
+                            }
+
+                            $destRaw = $opt->outbound_destination ?: '-';
+                            $destCode = '';
+                            $destName = $destRaw;
+                            if (preg_match('/^(.*?)\s*\(([A-Z0-9]{3})\)$/i', trim($destRaw), $m)) {
+                                $destName = trim($m[1]);
+                                $destCode = strtoupper($m[2]);
+                            } elseif (preg_match('/\(([A-Z0-9]{3})\)/i', trim($destRaw), $m)) {
+                                $destCode = strtoupper($m[1]);
+                            }
+                        @endphp
+                        <tr class="{{ $optIdx % 2 == 1 ? 'leg-even' : '' }}">
+                            <td>
+                                <div class="leg-date-title">{{ formatDateExtensoBr($opt->outbound_date) }}</div>
+                                @if(!empty($opt->outbound_flight_number))
+                                    <div class="leg-flight-num">Voo: {{ $opt->outbound_flight_number }}</div>
+                                @endif
+                            </td>
+                            <td>
+                                @if($origemCode)
+                                    <div class="leg-iata">{{ $origemCode }}</div>
+                                    <div class="leg-airport">{{ $origemName }}</div>
+                                @else
+                                    <div class="leg-date-title">{{ $origemRaw }}</div>
+                                @endif
+                            </td>
+                            <td class="leg-arrow">
+                                &rarr;
+                            </td>
+                            <td>
+                                @if($destCode)
+                                    <div class="leg-iata">{{ $destCode }}</div>
+                                    <div class="leg-airport">{{ $destName }}</div>
+                                @else
+                                    <div class="leg-date-title">{{ $destRaw }}</div>
+                                @endif
+                            </td>
+                            <td style="text-align: right;">
+                                @if($opt->outbound_departure_time && $opt->outbound_arrival_time)
+                                    <div class="leg-time-main">
+                                        {{ formatTimePdf($opt->outbound_departure_time) }} <span style="color: #94A3B8; font-weight: normal;">às</span> {{ formatTimePdf($opt->outbound_arrival_time) }}
+                                    </div>
+                                    <div class="leg-time-sub">Partida &bull; Chegada</div>
+                                @elseif($opt->outbound_departure_time)
+                                    <div class="leg-time-main">{{ formatTimePdf($opt->outbound_departure_time) }}</div>
+                                    <div class="leg-time-sub">Partida</div>
+                                @else
+                                    <div style="font-size: 7.5pt; color: #64748B; font-style: italic;">A confirmar</div>
+                                @endif
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td>
+                                <div class="leg-date-title">{{ formatDateExtensoBr($event->date) }}</div>
+                            </td>
+                            <td>
+                                <div class="leg-date-title">Origem a confirmar</div>
+                            </td>
+                            <td class="leg-arrow">&rarr;</td>
+                            <td>
+                                <div class="leg-date-title">Destino a confirmar</div>
+                            </td>
+                            <td style="text-align: right;">
+                                <div style="font-size: 7.5pt; color: #64748B; font-style: italic;">A confirmar</div>
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
                 </table>
 
                 <!-- 2. Especificações da Aeronave + Valor vs Observações -->
@@ -511,7 +615,27 @@ function formatTimePdf($timeStr) {
                                 </tr>
                                 <tr class="spec-row">
                                     <td class="spec-label" style="font-weight: normal;">Bagagem:</td>
-                                    <td class="spec-val">{{ $airfare->inc_porao ?: '23 kg por pessoa' }}</td>
+                                    <td class="spec-val">
+                                        @php
+                                            $formatKgPessoa = function($val, $fallback) {
+                                                if (empty($val)) return $fallback . ' kg por pessoa';
+                                                $trimmed = trim((string)$val);
+                                                if (preg_match('/^\d+$/', $trimmed)) {
+                                                    return $trimmed . ' kg por pessoa';
+                                                }
+                                                if (stripos($trimmed, 'kg') !== false) {
+                                                    return $trimmed;
+                                                }
+                                                if (preg_match('/\d+/', $trimmed, $m)) {
+                                                    return $m[0] . ' kg por pessoa';
+                                                }
+                                                return $trimmed;
+                                            };
+                                            $poraoTxt = $formatKgPessoa($airfare->inc_porao ?? null, '23');
+                                            $bordoTxt = !empty($airfare->inc_bagagem_bordo) ? $formatKgPessoa($airfare->inc_bagagem_bordo, '10') : null;
+                                        @endphp
+                                        {{ $poraoTxt }}@if($bordoTxt) (Bordo: {{ $bordoTxt }})@endif
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td colspan="2" style="padding-top: 6px;">
