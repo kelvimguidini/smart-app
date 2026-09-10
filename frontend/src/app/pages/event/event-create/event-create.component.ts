@@ -967,6 +967,38 @@ export class EventCreateComponent implements OnInit {
     return venda > 0 ? (((venda - custo) / venda) * 100) : 0;
   }
 
+  getAirfareTax(item: any, taxType: 'iss' | 'serv' | 'iva' | 'sc', side: 'cost' | 'sale'): number {
+    const base = side === 'cost' ? this.getAirfareNetComTxs(item) : this.getAirfareVendaComTxs(item);
+    switch (taxType) {
+      case 'iss':
+        return (base * (parseFloat(item.iss_percent) || 0)) / 100;
+      case 'serv':
+        return (base * (parseFloat(item.service_percent) || 0)) / 100;
+      case 'iva':
+        return (base * (parseFloat(item.iva_percent) || 0)) / 100;
+      case 'sc':
+        return parseFloat(item.service_charge) || 0;
+    }
+  }
+
+  getAirfareFaturamentoVenda(item: any): number {
+    const baseVenda = this.getAirfareVendaComTxs(item);
+    const iss = this.getAirfareTax(item, 'iss', 'sale');
+    const serv = this.getAirfareTax(item, 'serv', 'sale');
+    const iva = this.getAirfareTax(item, 'iva', 'sale');
+    const sc = this.getAirfareTax(item, 'sc', 'sale');
+    return baseVenda + iss + serv + iva + sc;
+  }
+
+  getAirfareFaturamentoCusto(item: any): number {
+    const baseCusto = this.getAirfareNetComTxs(item);
+    const iss = this.getAirfareTax(item, 'iss', 'cost');
+    const serv = this.getAirfareTax(item, 'serv', 'cost');
+    const iva = this.getAirfareTax(item, 'iva', 'cost');
+    const sc = this.getAirfareTax(item, 'sc', 'cost');
+    return baseCusto + iss + serv + iva + sc;
+  }
+
   resolvePhotoUrl(val: string | null | undefined): string {
     if (!val || typeof val !== 'string' || val.trim() === '') return '';
     if (val.startsWith('data:image') && val.length < 500) {
@@ -1208,16 +1240,23 @@ export class EventCreateComponent implements OnInit {
       case 'airfare': options = item.event_airfare_opts || item.eventAirfareOpts || []; break;
     }
 
-    if (options.length === 0) {
+    if (options.length === 0 && type !== 'airfare') {
       this.toastService.warning('Este fornecedor não possui tarifas cadastradas.');
       return;
     }
 
     this.bulkMarkupTargetItem = item;
     this.bulkMarkupTargetType = type;
-    this.bulkMarkupValue = options[0].received_proposal_percent !== undefined
-      ? options[0].received_proposal_percent
-      : 100.00;
+
+    if (type === 'airfare') {
+      this.bulkMarkupValue = item && item.markup !== undefined && item.markup !== null && item.markup !== ''
+        ? Number(item.markup)
+        : 0.75;
+    } else {
+      this.bulkMarkupValue = options[0]?.received_proposal_percent !== undefined
+        ? options[0].received_proposal_percent
+        : 100.00;
+    }
 
     this.showMarkupForm = true;
   }
@@ -1231,7 +1270,58 @@ export class EventCreateComponent implements OnInit {
     if (!this.bulkMarkupTargetItem) return;
     const item = this.bulkMarkupTargetItem;
     const type = this.bulkMarkupTargetType;
-    const parsedPercent = this.bulkMarkupValue;
+    const parsedPercent = Number(this.bulkMarkupValue);
+
+    if (type === 'airfare') {
+      if (isNaN(parsedPercent) || parsedPercent <= 0) {
+        this.toastService.error('O markup divisor deve ser maior que 0.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('id', item.id);
+      formData.append('event_id', this.eventId.toString());
+      formData.append('currency', item.currency_id || item.currency?.id || '1');
+      formData.append('taxa_4bts', (item.taxa_4bts !== undefined && item.taxa_4bts !== null ? item.taxa_4bts : 10).toString());
+      formData.append('airline_id', (item.airline_id || item.provider_id || item.airline?.id || '').toString());
+      formData.append('markup', parsedPercent.toString());
+
+      const fieldsToKeep = [
+        'equipment', 'pax_first', 'pax_executiva', 'pax_premium', 'pax_economica', 'total_pax',
+        'prazo_cia', 'inc_taxa_embarque', 'inc_servico_bordo', 'inc_porao', 'inc_bagagem_bordo',
+        'inc_sala_vip', 'inc_fbo_origem', 'inc_fbo_destino', 'inc_alteracao_nomes',
+        'taxa_embarque_unit', 'total_net_sem_4bts', 'observations', 'notes',
+        'iss_percent', 'service_percent', 'iva_percent', 'iof', 'service_charge', 'invoice',
+        'internal_observation', 'customer_observation', 'deadline_date', 'payment_method'
+      ];
+
+      fieldsToKeep.forEach(field => {
+        if (item[field] !== undefined && item[field] !== null) {
+          formData.append(field, item[field].toString());
+        }
+      });
+
+      this.processing = true;
+      this.isLoader = true;
+
+      this.eventService.saveEventAirfare(formData).subscribe({
+        next: () => {
+          this.isLoader = false;
+          this.processing = false;
+          this.toastService.success('Markup do fretamento atualizado com sucesso!');
+          this.closeMarkupForm();
+          this.loadInitialData();
+        },
+        error: (err) => {
+          this.isLoader = false;
+          this.processing = false;
+          const message = err?.error?.message || err?.error?.error || err?.message || 'Erro ao atualizar o markup do fretamento.';
+          this.toastService.error(message);
+          console.error(err);
+        }
+      });
+      return;
+    }
 
     if (parsedPercent <= 0 || parsedPercent > 100) {
       this.toastService.error('O markup divisor deve ser maior que 0% e no máximo 100%.');
@@ -1245,7 +1335,6 @@ export class EventCreateComponent implements OnInit {
       case 'hall': options = item.event_hall_opts || []; break;
       case 'add': options = item.event_add_opts || []; break;
       case 'transport': options = item.event_transport_opts || []; break;
-      case 'airfare': options = item.event_airfare_opts || item.eventAirfareOpts || []; break;
     }
 
     this.processing = true;
@@ -1315,10 +1404,6 @@ export class EventCreateComponent implements OnInit {
           payload.service = opt.service_id;
           payload.brand = opt.brand_id;
           requests.push(this.eventService.saveTransportOpt(payload));
-          break;
-        case 'airfare':
-          payload.event_airfare_id = item.id;
-          requests.push(this.eventService.saveAirfareOpt(payload));
           break;
       }
     });

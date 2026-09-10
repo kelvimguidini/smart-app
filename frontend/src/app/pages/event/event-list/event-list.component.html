@@ -427,7 +427,7 @@
                 <td>{{ item.user?.name || 'Desconhecido' }}</td>
                 <td>{{ formatDate(item.created_at, true) }}</td>
                 <td>
-                  <span class="badge bg-secondary">{{ tableLabels[item.table_name] || item.table_name }}</span>
+                  <span class="badge bg-secondary">{{ getTableLabel(item.table_name) }}</span>
                 </td>
                 <td>
                   <span [class]="badgeClass(item.action)">

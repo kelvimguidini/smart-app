@@ -1152,6 +1152,14 @@
                 </button>
                 <button
                   type="button"
+                  class="btn btn-sm btn-outline-primary"
+                  title="Alterar Markup do Fretamento"
+                  (click)="updateMarkupBulk(item, 'airfare')">
+                  <i class="fas fa-percentage me-1"></i>
+                  Editar Markup Geral
+                </button>
+                <button
+                  type="button"
                   class="btn btn-sm btn-outline-success"
                   title="Novo Trecho"
                   (click)="openAddOpt('airfare', item.id)">
@@ -1399,16 +1407,24 @@
                     <!-- Internal Observation Row -->
                     <tr class="observation-row">
                       <td colspan="2" class="sticky-col text-start font-weight-bold">OBSERVAÇÃO INTERNA:</td>
-                      <td [attr.colspan]="isReadOnly ? 8 : 9" class="text-start text-dark">
+                      <td class="text-start text-dark" [attr.colspan]="isReadOnly ? 5 : 6">
                         {{ item.internal_observation || '-' }}
+                      </td>
+                      <td class="font-weight-bold text-end" colspan="2">Faturamento Venda:</td>
+                      <td class="bg-success-solid font-weight-bold text-end" [attr.colspan]="isReadOnly ? 1 : 2">
+                        {{ formatCurrency(getAirfareFaturamentoVenda(item), item.currency?.sigla) }}
                       </td>
                     </tr>
 
                     <!-- Customer Observation Row -->
                     <tr class="observation-row">
                       <td colspan="2" class="sticky-col text-start font-weight-bold">OBSERVAÇÃO CLIENTE:</td>
-                      <td [attr.colspan]="isReadOnly ? 8 : 9" class="text-start text-dark">
+                      <td class="text-start text-dark" [attr.colspan]="isReadOnly ? 5 : 6">
                         {{ item.customer_observation || '-' }}
+                      </td>
+                      <td class="font-weight-bold text-end" colspan="2">Faturamento Custo:</td>
+                      <td class="bg-warning-solid font-weight-bold text-end" [attr.colspan]="isReadOnly ? 1 : 2">
+                        {{ formatCurrency(getAirfareFaturamentoCusto(item), item.currency?.sigla) }}
                       </td>
                     </tr>
 
@@ -2524,16 +2540,28 @@
       <div class="row">
         <div class="col-md-12 form-group mb-3">
           <label for="bulk_markup" class="form-label font-weight-bold">
-            Markup divisor (%) para todas as tarifas:
+            {{ bulkMarkupTargetType === 'airfare' ? 'Markup divisor para o fretamento:' : 'Markup divisor (%) para todas as tarifas:' }}
             <span class="text-danger">*</span>
           </label>
           <input
+            *ngIf="bulkMarkupTargetType !== 'airfare'"
             type="text"
             id="bulk_markup"
             class="form-control"
             [value]="formatPercent(bulkMarkupValue)"
             (input)="onPercentInput($event, 'bulkMarkupValue', 'bulkForm')"
             name="bulk_markup"
+            required />
+          <input
+            *ngIf="bulkMarkupTargetType === 'airfare'"
+            type="number"
+            step="0.01"
+            min="0.01"
+            id="bulk_markup_airfare"
+            class="form-control"
+            [(ngModel)]="bulkMarkupValue"
+            name="bulk_markup_airfare"
+            placeholder="0.75"
             required />
         </div>
       </div>

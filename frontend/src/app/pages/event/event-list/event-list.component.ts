@@ -80,9 +80,15 @@ export class EventListComponent implements OnInit, AfterViewInit {
     event_transport_opt: 'Transporte - Detalhes',
     event_airfare: 'Aéreo',
     event_airfares: 'Aéreo',
-    event_airfare_opt: 'Aéreo - Trecho',
-    event_airfare_opts: 'Aéreo - Trecho',
+    event_airfare_opt: 'Aéreo - Detalhes',
+    event_airfare_opts: 'Aéreo - Detalhes',
   };
+
+  getTableLabel(tableName: string): string {
+    if (!tableName) return '';
+    const clean = tableName.trim().toLowerCase();
+    return this.tableLabels[clean] || this.tableLabels[tableName] || tableName;
+  }
 
   fieldLabels: { [key: string]: string } = {
     airline_id: 'Companhia Aérea',
