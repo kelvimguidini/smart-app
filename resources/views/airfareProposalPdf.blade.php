@@ -617,24 +617,48 @@ function formatTimePdf($timeStr) {
                                     <td class="spec-label" style="font-weight: normal;">Bagagem:</td>
                                     <td class="spec-val">
                                         @php
-                                            $formatKgPessoa = function($val, $fallback) {
-                                                if (empty($val)) return $fallback . ' kg por pessoa';
-                                                $trimmed = trim((string)$val);
-                                                if (preg_match('/^\d+$/', $trimmed)) {
-                                                    return $trimmed . ' kg por pessoa';
+                                            $formatLuggage = function($val, $fallback = '') {
+                                                if (empty($val)) {
+                                                    return !empty($fallback) ? $fallback : '-';
                                                 }
-                                                if (stripos($trimmed, 'kg') !== false) {
-                                                    return $trimmed;
+                                                $str = trim((string)$val);
+                                                // Remove legacy "por pessoa" or "/pessoa"
+                                                $str = trim(preg_replace('/(?:\/|\s*por\s*)pessoa/i', '', $str));
+                                                if (empty($str)) {
+                                                    return !empty($fallback) ? $fallback : '-';
                                                 }
-                                                if (preg_match('/\d+/', $trimmed, $m)) {
-                                                    return $m[0] . ' kg por pessoa';
+
+                                                // Check for pure number + kg, e.g. "3000kg" or "3000 kg" or "23kg"
+                                                if (preg_match('/^(\d+)\s*(kg)$/i', $str, $m)) {
+                                                    $num = (int)$m[1];
+                                                    return ($num >= 1000 ? number_format($num, 0, ',', '.') : $num) . ' kg';
                                                 }
-                                                return $trimmed;
+
+                                                // If already has unit (kg, ton, tonelada, etc.)
+                                                if (preg_match('/(kg|ton|tonelada)/i', $str)) {
+                                                    return preg_replace('/(\d+)\s*(kg)/i', '$1 kg', $str);
+                                                }
+
+                                                // Pure integer, e.g. 23 or 3000
+                                                if (preg_match('/^\d+$/', $str)) {
+                                                    $num = (int)$str;
+                                                    if ($num >= 1000) {
+                                                        return number_format($num, 0, ',', '.') . ' kg';
+                                                    }
+                                                    return $num . ' kg';
+                                                }
+
+                                                // Number with decimal/thousand separator (e.g. 3.000 or 3,000)
+                                                if (preg_match('/^\d+[\.,]\d+$/', $str)) {
+                                                    return $str . ' kg';
+                                                }
+
+                                                return $str . ' kg';
                                             };
-                                            $poraoTxt = $formatKgPessoa($airfare->inc_porao ?? null, '23');
-                                            $bordoTxt = !empty($airfare->inc_bagagem_bordo) ? $formatKgPessoa($airfare->inc_bagagem_bordo, '10') : null;
+                                            $poraoTxt = $formatLuggage($airfare->inc_porao ?? null, '23 kg');
+                                            $bordoTxt = !empty($airfare->inc_bagagem_bordo) ? $formatLuggage($airfare->inc_bagagem_bordo, '') : null;
                                         @endphp
-                                        {{ $poraoTxt }}@if($bordoTxt) (Bordo: {{ $bordoTxt }})@endif
+                                        {{ $poraoTxt }}@if($bordoTxt && $bordoTxt !== '-' && $bordoTxt !== '0 kg') (Bordo: {{ $bordoTxt }})@endif
                                     </td>
                                 </tr>
                                 <tr>
