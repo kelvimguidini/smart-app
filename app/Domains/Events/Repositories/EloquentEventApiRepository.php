@@ -65,6 +65,14 @@ class EloquentEventApiRepository implements EventApiRepositoryInterface
             'event_transports.eventTransportOpts.model',
             'event_transports.currency',
             'event_transports.status_his.user',
+
+            // Aéreos
+            'event_airfares.airline',
+            'event_airfares.provider',
+            'event_airfares.eventAirfareOpts' => fn($q) => $q->orderBy('id', 'asc'),
+            'event_airfares.eventAirfareOpts.outbound_airline',
+            'event_airfares.currency',
+            'event_airfares.status_his.user',
         ])
             ->where(function ($query) use ($startDate, $endDate) {
                 $query->whereHas('event_hotels', function ($q) use ($startDate, $endDate) {
@@ -109,6 +117,15 @@ class EloquentEventApiRepository implements EventApiRepositoryInterface
                             ->from('status_history')
                             ->whereColumn('status_history.table_id', 'event_transport.id')
                             ->where('status_history.table', 'event_transports')
+                            ->where('status_history.status', 'dating_with_customer')
+                            ->whereBetween('status_history.created_at', [$startDate, $endDate]);
+                    });
+                })->orWhereHas('event_airfares', function ($q) use ($startDate, $endDate) {
+                    $q->whereExists(function ($sub) use ($startDate, $endDate) {
+                        $sub->select(DB::raw(1))
+                            ->from('status_history')
+                            ->whereColumn('status_history.table_id', 'event_airfare.id')
+                            ->whereIn('status_history.table', ['event_airfares', 'event_airfare'])
                             ->where('status_history.status', 'dating_with_customer')
                             ->whereBetween('status_history.created_at', [$startDate, $endDate]);
                     });
@@ -161,6 +178,16 @@ class EloquentEventApiRepository implements EventApiRepositoryInterface
             // Filtra event_transports
             if (isset($evento->event_transports)) {
                 $evento->event_transports = $evento->event_transports->filter(function ($item) use ($startDate, $endDate) {
+                    return $item->status_his->contains(function ($status) use ($startDate, $endDate) {
+                        return $status->status === 'dating_with_customer'
+                            && $status->created_at >= $startDate
+                            && $status->created_at <= $endDate;
+                    });
+                })->values();
+            }
+            // Filtra event_airfares
+            if (isset($evento->event_airfares)) {
+                $evento->event_airfares = $evento->event_airfares->filter(function ($item) use ($startDate, $endDate) {
                     return $item->status_his->contains(function ($status) use ($startDate, $endDate) {
                         return $status->status === 'dating_with_customer'
                             && $status->created_at >= $startDate

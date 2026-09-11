@@ -89,6 +89,15 @@ class DefaultEventApiService implements EventApiServiceInterface
                     'tipoctarec' => '01/0019',
                     'tipoctapag' => '01/0002',
                 ],
+                [
+                    'rel' => 'event_airfares',
+                    'id' => 'aereo',
+                    'tipoProvider' => 'airline',
+                    'fornecedor' => fn($item) => $item->airline ?: $item->provider,
+                    'model' => \App\Models\AirfareAirline::class,
+                    'tipoctarec' => '02/0016',
+                    'tipoctapag' => '02/0013',
+                ],
             ];
 
             foreach ($tipos as $tipo) {
@@ -150,8 +159,10 @@ class DefaultEventApiService implements EventApiServiceInterface
         $venda->addChild('origem', 'SMART4BTS');
         $venda->addChild('idvenda', htmlspecialchars($evento->id . '-' . $fornecedor->id . '-' . $tipo['id']));
         $venda->addChild('idvendapai', htmlspecialchars($evento->code));
-        $venda->addChild('tipoproduto', $tipo['rel'] == 'event_hotels' ? 'HOTEL' : 'DIVERSOS');
-        $national = $fornecedor->{$tipo['tipoProvider']}->national ?? true;
+        $tipoProduto = $tipo['rel'] == 'event_hotels' ? 'HOTEL' : ($tipo['rel'] == 'event_airfares' ? 'PASSAGEM' : 'DIVERSOS');
+        $venda->addChild('tipoproduto', $tipoProduto);
+        $providerObj = $tipo['fornecedor']($fornecedor);
+        $national = $providerObj->national ?? true;
 
         switch ($tipo['rel']) {
             case 'event_hotels':
@@ -163,6 +174,9 @@ class DefaultEventApiService implements EventApiServiceInterface
             case 'event_halls':
                 $idProduto = $national ? 'SL' : 'LOC';
                 break;
+            case 'event_airfares':
+                $idProduto = $national ? 'AERN' : 'AERI';
+                break;
             default:
                 $idProduto = $national ? 'DIVN' : 'DIVI';
                 break;
@@ -171,26 +185,28 @@ class DefaultEventApiService implements EventApiServiceInterface
 
         $venda->addChild('clasproduto', htmlspecialchars($national ? 'NACIONAL' : 'INTERNACIONAL'));
 
-        $venda->addChild(
-            'idpromotor',
-            htmlspecialchars(
-                $fornecedor->table == 'event_transport'
-                    ? $evento->land_operator
-                    : ($evento->hotel_operator ?? '')
-            )
-        );
-        $venda->addChild('idemissor', htmlspecialchars($fornecedor->table == 'event_transport'
-            ? $evento->landOperator?->codigo_stur
-            : ($evento->hotelOperator?->codigo_stur ?? '')));
+        if ($tipo['rel'] === 'event_airfares') {
+            $idPromotor = $evento->air_operator ?? '';
+            $idEmissor = $evento->airOperator?->codigo_stur ?? '';
+        } elseif ($tipo['rel'] === 'event_transports') {
+            $idPromotor = $evento->land_operator ?? '';
+            $idEmissor = $evento->landOperator?->codigo_stur ?? '';
+        } else {
+            $idPromotor = $evento->hotel_operator ?? '';
+            $idEmissor = $evento->hotelOperator?->codigo_stur ?? '';
+        }
+
+        $venda->addChild('idpromotor', htmlspecialchars((string)$idPromotor));
+        $venda->addChild('idemissor', htmlspecialchars((string)$idEmissor));
 
 
         $venda->addChild('dtemissao', htmlspecialchars(Carbon::parse($evento->date)->format('d/m/Y')));
         $venda->addChild('idcliente', htmlspecialchars($evento->customer?->codestur ?? $evento->customer?->id ?? ''));
         $venda->addChild('idoperador', htmlspecialchars($fornecedor?->broker?->name ?? ''));
-        $venda->addChild('idfornecedor', htmlspecialchars($tipo['fornecedor']($fornecedor)->codestur ?? $tipo['fornecedor']($fornecedor)->id ?? ''));
+        $venda->addChild('idfornecedor', htmlspecialchars($providerObj->codestur ?? $providerObj->id ?? ''));
         $venda->addChild('formrec', '2');
 
-        $venda->addChild('vencrec', htmlspecialchars(Carbon::parse($fornecedor->deadline_date)->format('d/m/Y')));
+        $venda->addChild('vencrec', htmlspecialchars(!empty($fornecedor->deadline_date) ? Carbon::parse($fornecedor->deadline_date)->format('d/m/Y') : Carbon::parse($evento->date)->format('d/m/Y')));
         $venda->addChild('centrocustocli', htmlspecialchars($evento->cost_center ?? ''));
         $venda->addChild('setorcli', htmlspecialchars($evento->sector ?? ''));
         $venda->addChild('filialagencia', htmlspecialchars($evento->crd?->number ?? ''));
@@ -238,11 +254,28 @@ class DefaultEventApiService implements EventApiServiceInterface
 
         $movimentosXml = $venda->addChild('movimentos');
 
-        foreach ($fornecedor->eventHotelsOpt ?? $fornecedor->eventAbOpts ?? $fornecedor->eventHallOpts ?? $fornecedor->eventAddOpts ?? $fornecedor->eventTransportOpts ?? [] as $opt) {
+        $opts = $fornecedor->eventHotelsOpt 
+            ?? $fornecedor->eventAbOpts 
+            ?? $fornecedor->eventHallOpts 
+            ?? $fornecedor->eventAddOpts 
+            ?? $fornecedor->eventTransportOpts 
+            ?? $fornecedor->eventAirfareOpts;
 
+        if ($tipo['rel'] === 'event_airfares') {
+            if (!$opts || (is_countable($opts) && count($opts) === 0)) {
+                $opts = [$fornecedor];
+            }
+        } else {
+            $opts = $opts ?? [];
+        }
+
+        foreach ($opts as $opt) {
             switch ($tipo['rel']) {
                 case 'event_hotels':
                     $this->movimentoHotelariaXML($opt, $fornecedor, $evento, $movimentosXml);
+                    break;
+                case 'event_airfares':
+                    $this->movimentoAereoXML($opt, $fornecedor, $evento, $movimentosXml);
                     break;
                 default:
                     $this->movimentoDiversosXML($opt, $fornecedor, $evento, $movimentosXml, $tipo['rel']);
@@ -366,6 +399,95 @@ class DefaultEventApiService implements EventApiServiceInterface
             $movimento->addChild('dataconfirmacao', '');
             $movimento->addChild('numconfirmacao', '');
         }
+    }
+
+    private function movimentoAereoXML($opt, $fornecedor, $evento, $movimentoXml)
+    {
+        $movimento = $movimentoXml->addChild('passagem');
+        $movimento->addChild('pax', htmlspecialchars(mb_substr($evento->name ?? '', 0, 40)));
+        $movimento->addChild('tipo', 'ADT');
+        $movimento->addChild('moeda', htmlspecialchars($fornecedor->currency?->sigla ?? 'BRL'));
+        $movimento->addChild('cambio', htmlspecialchars((string)($evento->exchange_rate ?? '1')));
+
+        $ciaCode = $opt->outbound_airline?->code 
+            ?? $fornecedor->airline?->code 
+            ?? $fornecedor->airline?->name 
+            ?? '';
+        $movimento->addChild('cia', htmlspecialchars(mb_substr($ciaCode, 0, 10)));
+
+        $flightNo = $opt->outbound_flight_number ?? '';
+        $movimento->addChild('voo', htmlspecialchars(mb_substr($flightNo, 0, 10)));
+
+        $origem = $opt->outbound_origin ?? '';
+        $movimento->addChild('origem', htmlspecialchars(mb_substr($origem, 0, 5)));
+
+        $destino = $opt->outbound_destination ?? '';
+        $movimento->addChild('destino', htmlspecialchars(mb_substr($destino, 0, 5)));
+
+        $dtSaida = !empty($opt->outbound_date)
+            ? Carbon::parse($opt->outbound_date)->format('d/m/Y')
+            : (!empty($evento->date) ? Carbon::parse($evento->date)->format('d/m/Y') : '');
+        $movimento->addChild('dtsaida', htmlspecialchars($dtSaida));
+
+        $totais = $this->computeTotalsAirfare($evento, $fornecedor, $opt);
+
+        $movimento->addChild('tarifa', htmlspecialchars((string)$totais['tarifa']));
+        $movimento->addChild('tarifabalcao', htmlspecialchars((string)$totais['tarifa']));
+        $movimento->addChild('tarifafornecedor', htmlspecialchars((string)$totais['tarifa_fornecedor']));
+        $movimento->addChild('taxaembarque', htmlspecialchars((string)$totais['taxa_embarque']));
+        $movimento->addChild('observacao', htmlspecialchars($fornecedor->internal_observation ?? ''));
+        $movimento->addChild('observacao2', htmlspecialchars($fornecedor->customer_observation ?? ''));
+
+        if (isset($fornecedor->status_his)) {
+            $movimento->addChild('confirmadopor', '');
+            $movimento->addChild('dataconfirmacao', '');
+            $movimento->addChild('numconfirmacao', '');
+        }
+    }
+
+    private function computeTotalsAirfare($evento, $fornecedor, $opt): array
+    {
+        $cost = floatval($opt->received_proposal ?? $fornecedor->total_net_sem_4bts ?? 0);
+        $taxaEmbarque = floatval($fornecedor->taxa_embarque_unit ?? 0);
+
+        $taxes = $this->sumTaxesProvider($fornecedor, $opt);
+        $taxesCost = $this->sumTaxesProviderCost($fornecedor, $opt);
+
+        $saleBase = $this->unitSaleAirfare($fornecedor, $opt);
+
+        $totalCost = $cost + $taxesCost;
+        $totalSale = $saleBase + $taxes;
+
+        $iofs = [];
+        if (isset($fornecedor->iof) && $fornecedor->iof > 0) $iofs[] = $fornecedor->iof;
+        if (isset($evento->iof) && $evento->iof > 0) $iofs[] = $evento->iof;
+        $percIOF = count($iofs) ? max($iofs) : 0;
+
+        $totalSaleIOF = ((($totalSale * $percIOF) / 100) + $totalSale);
+        $totalCostIOF = ((($totalCost * $percIOF) / 100) + $totalCost);
+
+        return [
+            'tarifa_fornecedor' => round($totalCostIOF, 2),
+            'tarifa' => round($totalSaleIOF, 2),
+            'taxa_embarque' => round($taxaEmbarque, 2),
+        ];
+    }
+
+    private function unitSaleAirfare($fornecedor, $opt)
+    {
+        $cost = floatval($opt->received_proposal ?? $fornecedor->total_net_sem_4bts ?? 0);
+        if (isset($fornecedor->markup) && floatval($fornecedor->markup) > 0) {
+            return $cost * (1 + (floatval($fornecedor->markup) / 100));
+        }
+        $percent = floatval($opt->received_proposal_percent ?? 0);
+        if ($percent > 0) {
+            $factor = $percent > 2 ? $percent / 100 : $percent;
+            return ceil($cost / $factor);
+        }
+        if (isset($fornecedor->taxa_4bts) && floatval($fornecedor->taxa_4bts) > 0) {
+            return $cost * (1 + (floatval($fornecedor->taxa_4bts) / 100));
+        }
+        return $cost;
     }
 
     private function fornecedoresXML($fornecedorId, $xml, $modelClass = \App\Models\Provider::class)

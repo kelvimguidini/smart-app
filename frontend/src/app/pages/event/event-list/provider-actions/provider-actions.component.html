@@ -72,7 +72,7 @@
 
   <!-- 7. Faturamento -->
   <button
-    *ngIf="(hasPermission('event_admin') || (prov.isAirfare && hasPermission('air_operator')) || hasPermission('hotel_operator')) && prov.status === 'dating_with_customer'"
+    *ngIf="(hasPermission('event_admin') || (prov.isAirfare && hasPermission('air_operator')) || hasPermission('hotel_operator')) && (prov.status === 'dating_with_customer' || prov.status === 'approved_by_manager')"
     type="button"
     class="btn btn-info text-white shadow-sm btn-action animate-in"
     title="Faturamento"

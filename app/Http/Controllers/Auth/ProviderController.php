@@ -230,10 +230,10 @@ class ProviderController extends Controller
         $data = $this->eventRepository->getProposalData($request->event_id, $request->provider_id, $request->type);
         
         $view = 'proposalPdf';
-        if ($data['table'] == 'event_airfares' || $data['table'] == 'event_airfare') {
-            $view = 'airfareProposalPdf';
-        } elseif ($type === 2) {
+        if ($type === 2) {
             $view = 'invoicePDF';
+        } elseif ($data['table'] == 'event_airfares' || $data['table'] == 'event_airfare') {
+            $view = 'airfareProposalPdf';
         } elseif ($type === 3) {
             $view = 'proposalPdfWithoutValues';
         }
