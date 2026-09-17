@@ -585,11 +585,13 @@
                     <!-- Row 2: Sub-headers -->
                     <tr>
                       <!-- Metadata Columns -->
-                      <th scope="col" class="sticky-col text-start" *ngIf="activeTab !== 1">Serviço/Detalhe</th>
-                      <th scope="col" class="sticky-col text-start" [class.sticky-col]="activeTab === 1">Broker</th>
+                      <th scope="col" class="sticky-col col-service-detail text-start" *ngIf="activeTab !== 1">
+                        {{ activeTab === 3 ? 'Salão / Serviço' : 'Serviço/Detalhe' }}
+                      </th>
+                      <th scope="col" class="text-start" [class.sticky-col]="activeTab === 1">Broker</th>
                       <th scope="col" class="text-start" [class.sticky-col]="activeTab === 1" *ngIf="activeTab === 1">Regime</th>
-                      <th scope="col" class="text-start" *ngIf="activeTab === 3">Metragem</th>
-                      <th scope="col" class="text-start" *ngIf="activeTab === 3">Pax</th>
+                      <th scope="col" class="text-center" *ngIf="activeTab === 3">Metragem</th>
+                      <th scope="col" class="text-center" *ngIf="activeTab === 3">Qtd. Pax</th>
                       <th scope="col" class="text-start" *ngIf="activeTab === 1 || activeTab === 3">Propósito</th>
                       <th scope="col" class="text-start" *ngIf="activeTab === 1">CAT.</th>
                       <th scope="col" class="text-start" *ngIf="activeTab === 1">APTO</th>
@@ -685,15 +687,27 @@
                         let opt of item.event_hotels_opt || item.event_ab_opts || item.event_hall_opts || item.event_add_opts || item.event_transport_opts
                       ">
                       <!-- Service/Type Display -->
-                      <td class="font-weight-bold sticky-col text-dark text-start" *ngIf="activeTab !== 1">
-                        {{ opt.name ? (opt.service?.name ? opt.service.name + ' (' + opt.name + ')' : opt.name) : (opt.service?.name || '-') }}
+                      <td class="font-weight-bold sticky-col col-service-detail text-dark text-start" *ngIf="activeTab !== 1">
+                        <ng-container *ngIf="activeTab === 3">
+                          <div class="text-truncate fw-bold text-dark" style="max-width: 240px" [title]="opt.name || opt.service?.name || '-'">
+                            <i class="fas fa-door-open me-1 text-primary"></i>{{ opt.name || opt.service?.name || '-' }}
+                          </div>
+                          <div class="text-truncate small text-muted font-weight-normal mt-1" style="max-width: 240px" *ngIf="opt.name && opt.service?.name" [title]="opt.service.name">
+                            <i class="fas fa-tag me-1 text-secondary" style="font-size: 0.75rem"></i>{{ opt.service.name }}
+                          </div>
+                        </ng-container>
+                        <ng-container *ngIf="activeTab !== 3">
+                          <div class="text-truncate" style="max-width: 240px" [title]="opt.name ? (opt.service?.name ? opt.service.name + ' (' + opt.name + ')' : opt.name) : (opt.service?.name || '-')">
+                            {{ opt.name ? (opt.service?.name ? opt.service.name + ' (' + opt.name + ')' : opt.name) : (opt.service?.name || '-') }}
+                          </div>
+                        </ng-container>
                       </td>
-                      <td class="sticky-col text-start" [class.sticky-col]="activeTab === 1">{{ opt.broker?.name || '-' }}</td>
+                      <td class="text-start" [class.sticky-col]="activeTab === 1">{{ opt.broker?.name || '-' }}</td>
 
                       <!-- Tab Specific Columns -->
                       <td class="text-start" [class.sticky-col]="activeTab === 1" *ngIf="activeTab === 1">{{ opt.regime?.name || '-' }}</td>
-                      <td class="text-start" *ngIf="activeTab === 3">{{ opt.m2 || '-' }}</td>
-                      <td class="text-start" *ngIf="activeTab === 3">{{ opt.pax || '-' }}</td>
+                      <td class="text-center" *ngIf="activeTab === 3">{{ opt.m2 ? opt.m2 + ' m²' : '-' }}</td>
+                      <td class="text-center" *ngIf="activeTab === 3">{{ opt.pax || '-' }}</td>
                       <td class="text-start" *ngIf="activeTab === 1 || activeTab === 3">{{ opt.purpose?.name || '-' }}</td>
                       <td class="text-start" *ngIf="activeTab === 1">{{ opt.category_hotel?.name || opt.category?.name || '-' }}</td>
                       <td class="text-start" *ngIf="activeTab === 1">{{ opt.apto_hotel?.name || opt.apto?.name || '-' }}</td>
@@ -936,7 +950,7 @@
 
                     <!-- Total / Summary Row (Other tabs) -->
                     <tr class="table-subheader" *ngIf="activeTab !== 1">
-                      <td class="sticky-col font-weight-bold text-start">Diária Média:</td>
+                      <td class="sticky-col col-service-detail font-weight-bold text-start">Diária Média:</td>
                       <td class="font-weight-bold text-end">
                         {{ formatCurrency(average(item, activeTab === 2), item.currency?.sigla) }}
                       </td>
@@ -1683,7 +1697,7 @@
             <h6 class="text-warning-emphasis font-weight-bold mb-3">
               <i class="fas fa-plane-departure me-2"></i> Orçamento Fretamento / Cia Aérea
             </h6>
-            
+
             <div class="row">
               <!-- Distribuição de Pax / Assentos -->
               <div class="col-md-12 mb-3">
@@ -1845,14 +1859,14 @@
                       <div class="col-md-3 mb-2" *ngFor="let pNum of [1, 2, 3, 4]">
                         <div class="border p-2 text-center bg-light rounded h-100 d-flex flex-column justify-content-between">
                           <span class="d-block font-weight-bold mb-1" style="font-size: 0.85rem;">Foto {{ pNum }}</span>
-                          
+
                           <div *ngIf="getPhotoValue(pNum)" class="mb-2 position-relative d-inline-block mx-auto">
                             <img [src]="getPhotoValue(pNum)" style="max-height: 80px; max-width: 100%; object-fit: contain;" class="rounded border bg-white shadow-sm">
                             <button type="button" class="btn btn-danger btn-sm position-absolute shadow-sm" style="top: -6px; right: -6px; width: 20px; height: 20px; padding: 0; font-size: 11px; border-radius: 50%; line-height: 1;" (click)="removePhoto(pNum, $event)" title="Remover foto">
                               &times;
                             </button>
                           </div>
-                          
+
                           <div *ngIf="!getPhotoValue(pNum)" class="mb-2 d-flex align-items-center justify-content-center border rounded bg-white text-muted mx-auto w-100" style="height: 80px;">
                             <i class="fa fa-image fa-2x text-black-50"></i>
                           </div>
@@ -2021,12 +2035,13 @@
           </div>
         </div>
 
-        <!-- DESCRIÇÃO, METRAGEM, PAX (hall only) -->
+        <!-- DESCRIÇÃO / NOME DO SALÃO, METRAGEM, PAX (hall only) -->
         <div class="col-md-12 form-group mb-3" *ngIf="optFormType === 'hall'">
           <label for="hall_name" class="form-label font-weight-bold">
-            Descrição:
+            Nome do Salão:
+            <span class="text-danger">*</span>
           </label>
-          <input type="text" id="hall_name" class="form-control" [(ngModel)]="optForm.name" name="name" placeholder="Ex: Auditório A / Descrição da tarifa" />
+          <input type="text" id="hall_name" class="form-control" [(ngModel)]="optForm.name" name="name" placeholder="Ex: Auditório A" />
         </div>
 
         <div class="col-md-6 form-group mb-3" *ngIf="optFormType === 'hall'">

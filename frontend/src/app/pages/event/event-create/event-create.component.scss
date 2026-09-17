@@ -166,6 +166,18 @@
     white-space: nowrap !important;
   }
 
+  // Service / Hall Detail column (used in non-hotel tabs: A&B, Salões, Adicionais, Transporte)
+  th.sticky-col.col-service-detail,
+  td.sticky-col.col-service-detail {
+    width: 260px !important;
+    min-width: 260px !important;
+    max-width: 280px !important;
+    border-right: 2px solid #d1d3e2 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
   td.sticky-col[colspan="2"] {
     position: sticky !important;
     left: 0 !important;
