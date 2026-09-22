@@ -86,6 +86,9 @@ class EventHotelApiController extends Controller
             ]);
             $providerData['currency_id'] = $request->currency;
             $providerData['hotel_id'] = $request->provider_id;
+            if (empty($providerData['deadline_date'])) {
+                $providerData['deadline_date'] = null;
+            }
 
             $provider = $request->id > 0 
                 ? $this->eventHotelRepository->update($request->id, $providerData) 

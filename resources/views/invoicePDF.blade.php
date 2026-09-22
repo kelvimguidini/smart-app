@@ -188,7 +188,7 @@ $airfareEvent = null;
 if ($provider != null && $event != null) {
 
     if ($table == 'event_hotels' || $table == 'event_abs' || $table == 'event_halls') {
-        $hotelEvent = $event->event_hotels->firstWhere('hotel_id', $provider->id);
+        $hotelEvent = $event->event_hotels->firstWhere('hotel_id', $provider->id) ?? $event->event_hotels->first();
     }
 
     if ($table == 'event_hotels' || $table == 'event_abs' || $table == 'event_halls') {
@@ -619,7 +619,8 @@ function quebraTexto($texto, $limite = 40)
                                             <td class="" colspan="2">{{ $hotelEvent->checkin_time }} - {{ $hotelEvent->checkin_time_end }}</td>
                                             <th class="align-middle custom-bg-success-text-white">Check-out:</th>
                                             <td class="" colspan="2">{{ $hotelEvent->checkout_time }} - {{ $hotelEvent->checkout_time_end }}</td>
-                                            <th class="custom-bg-success-text-white" colspan="4"></th>
+                                            <th class="align-middle custom-bg-success-text-white">Prazo:</th>
+                                            <td class="align-middle" colspan="3">{{ empty($hotelEvent->deadline_date) || $hotelEvent->deadline_date === '0000-00-00' ? "--" : date("d/m/Y", strtotime($hotelEvent->deadline_date)) }}</td>
                                         </tr>
                                     </table>
                                 </td>

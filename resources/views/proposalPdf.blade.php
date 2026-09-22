@@ -141,7 +141,7 @@ $table = $table ?? null;
 
 if ($provider != null && $event != null && $table != null) {
     if ($table == 'event_hotels' || $table == 'event_abs' || $table == 'event_halls') {
-        $hotelEvent = $event->event_hotels->firstWhere('hotel_id', $provider->id);
+        $hotelEvent = $event->event_hotels->firstWhere('hotel_id', $provider->id) ?? $event->event_hotels->first();
     }
 
     if ($table == 'event_hotels' || $table == 'event_abs' || $table == 'event_halls') {
@@ -595,15 +595,17 @@ function quebraTexto($texto, $limite = 40)
                             <?php $hotelTaxa4BTS = ((($sumTotalHotelSale * $percIOF) / 100) + $sumTotalHotelSale) * ($hotelEvent->taxa_4bts / 100); ?>
                             <tr style="background-color: #ffe0b1">
                                 <td colspan="1"><b>Comentários:</b></td>
-                                <td colspan="3">{{ $hotelEvent->customer_observation }}</td>
-                                <td colspan="2">
-                                    <b>Check-in:</b> {{ $hotelEvent->checkin_time }} - {{ $hotelEvent->checkin_time_end }} <br>
+                                <td colspan="5">{{ $hotelEvent->customer_observation }}</td>
+                                <td colspan="4">
+                                    <b>Check-in:</b> {{ $hotelEvent->checkin_time }} - {{ $hotelEvent->checkin_time_end }} &nbsp;&nbsp;|&nbsp;&nbsp;
                                     <b>Check-out:</b> {{ $hotelEvent->checkout_time }} - {{ $hotelEvent->checkout_time_end }}
                                 </td>
-                                <td><b>Serviço 4BTS ({{ number_format($hotelEvent->taxa_4bts, 2) }}%)</b></td>
-                                <td>{{ formatCurrency($hotelTaxa4BTS, $hotelEvent->currency->symbol) }}</td>
-                                <td><b>Prazo</b></td>
-                                <td>{{ empty($hotelEvent->deadline_date) || $hotelEvent->deadline_date === '0000-00-00' ? "--" : date("d/m/Y", strtotime($hotelEvent->deadline_date)) }}</td>
+                            </tr>
+                            <tr style="background-color: #ffe0b1">
+                                <td colspan="3"><b>Serviço 4BTS ({{ number_format($hotelEvent->taxa_4bts, 2) }}%)</b></td>
+                                <td colspan="3">{{ formatCurrency($hotelTaxa4BTS, $hotelEvent->currency->symbol) }}</td>
+                                <td colspan="2"><b>Prazo:</b></td>
+                                <td colspan="2">{{ empty($hotelEvent->deadline_date) || $hotelEvent->deadline_date === '0000-00-00' ? "--" : date("d/m/Y", strtotime($hotelEvent->deadline_date)) }}</td>
                             </tr>
                         </tfoot>
 
