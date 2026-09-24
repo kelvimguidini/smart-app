@@ -41,6 +41,7 @@ import { EventCreateComponent } from './pages/event/event-create/event-create.co
 import { BudgetComponent } from './pages/event/budget/budget.component';
 
 import { AirlineComponent } from './pages/airfare/airline/airline.component';
+import { AirportComponent } from './pages/airfare/airport/airport.component';
 import { BaggageComponent } from './pages/airfare/baggage/baggage.component';
 import { CabinComponent } from './pages/airfare/cabin/cabin.component';
 
@@ -79,6 +80,7 @@ export const routes: Routes = [
   { path: 'broker-trans', component: BrokerTransComponent, canActivate: [authGuard], title: 'Brokers de Transporte - SmartApp' },
   { path: 'provider-transport', component: ProviderTransportComponent, canActivate: [authGuard], title: 'Fornecedores de Transporte - SmartApp' },
   { path: 'airline', component: AirlineComponent, canActivate: [authGuard], title: 'Cias Aéreas - SmartApp' },
+  { path: 'airport', component: AirportComponent, canActivate: [authGuard], title: 'Aeroportos - SmartApp' },
   // { path: 'baggage', component: BaggageComponent, canActivate: [authGuard], title: 'Bagagem - SmartApp' },
   // { path: 'cabin', component: CabinComponent, canActivate: [authGuard], title: 'Cabines - SmartApp' },
   { path: 'event-list', component: EventListComponent, canActivate: [authGuard], title: 'Eventos - SmartApp' },

@@ -45,6 +45,7 @@ class Constants extends Middleware
         ['name' => "admin_provider_service", "title" => "Administrar Fornecedor Serviço"],
         ['name' => "admin_provider_transport", "title" => "Administrar Fornecedor Transporte"],
         ['name' => "airfare_airline_admin", "title" => "Administrar Cias Aéreas"],
+        ['name' => "airfare_airport_admin", "title" => "Administrar Aeroportos"],
         ['name' => "airfare_baggage_admin", "title" => "Administrar Bagagem Aérea"],
         ['name' => "airfare_cabin_admin", "title" => "Administrar Cabine Aérea"],
         ['name' => "admin_provider_airfare", "title" => "Administrar Fornecedor Aéreo"],

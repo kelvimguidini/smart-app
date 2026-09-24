@@ -257,6 +257,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('airfare-airlines/{id}/activate', [\App\Http\Controllers\Api\AirfareAirlineApiController::class, 'activateItem']);
     Route::put('airfare-airlines/{id}/deactivate', [\App\Http\Controllers\Api\AirfareAirlineApiController::class, 'deactivateItem']);
 
+    Route::get('airports', [\App\Http\Controllers\Api\AirportApiController::class, 'index']);
+    Route::post('airports', [\App\Http\Controllers\Api\AirportApiController::class, 'store']);
+    Route::delete('airports/{id}', [\App\Http\Controllers\Api\AirportApiController::class, 'destroy']);
+    Route::put('airports/{id}/activate', [\App\Http\Controllers\Api\AirportApiController::class, 'activateItem']);
+    Route::put('airports/{id}/deactivate', [\App\Http\Controllers\Api\AirportApiController::class, 'deactivateItem']);
+
     // Route::get('airfare-baggages', [\App\Http\Controllers\Api\AirfareBaggageApiController::class, 'index']);
     // Route::post('airfare-baggages', [\App\Http\Controllers\Api\AirfareBaggageApiController::class, 'store']);
     // Route::delete('airfare-baggages/{id}', [\App\Http\Controllers\Api\AirfareBaggageApiController::class, 'destroy']);

@@ -69899,7 +69899,8 @@ var MenuComponent = class _MenuComponent {
       collapseHeader: "Tabelas auxiliares",
       collapsed: true,
       subMenu: [
-        { link: "/airline", name: "Cias A\xE9reas", role: ["airfare_airline_admin", "air_operator"] }
+        { link: "/airline", name: "Cias A\xE9reas", role: ["airfare_airline_admin", "air_operator"] },
+        { link: "/airport", name: "Aeroportos", role: ["airfare_airport_admin", "air_operator"] }
         // { link: '/baggage', name: 'Bagagem', role: ['airfare_baggage_admin', 'air_operator'] },
         // { link: '/cabin', name: 'Cabine', role: ['airfare_cabin_admin', 'air_operator'] },
       ]
@@ -69985,6 +69986,7 @@ var MenuComponent = class _MenuComponent {
       "/broker-trans",
       "/provider-transport",
       "/airline",
+      "/airport",
       "/baggage",
       "/cabin",
       "/event",
@@ -108790,7 +108792,7 @@ var ProviderActionsComponent = class _ProviderActionsComponent {
       \u0275\u0275advance();
       \u0275\u0275property("ngIf", ctx.prov && (ctx.prov.isAirfare || ctx.prov.providerBudget) && (ctx.hasPermission("event_admin") || ctx.prov.isAirfare && ctx.hasPermission("air_operator") || ctx.hasPermission("hotel_operator")) && (\u0275\u0275pureFunction0(58, _c039).includes(ctx.prov.status) || !ctx.prov.status));
       \u0275\u0275advance();
-      \u0275\u0275property("ngIf", (ctx.hasPermission("event_admin") || ctx.prov.isAirfare && ctx.hasPermission("air_operator") || ctx.hasPermission("hotel_operator")) && ctx.prov.status === "dating_with_customer");
+      \u0275\u0275property("ngIf", (ctx.hasPermission("event_admin") || ctx.prov.isAirfare && ctx.hasPermission("air_operator") || ctx.hasPermission("hotel_operator")) && (ctx.prov.status === "dating_with_customer" || ctx.prov.status === "approved_by_manager"));
       \u0275\u0275advance();
       \u0275\u0275property("show", ctx.showFollowUpModal);
       \u0275\u0275advance();
@@ -108965,7 +108967,7 @@ var ProviderActionsComponent = class _ProviderActionsComponent {
 \r
   <!-- 7. Faturamento -->\r
   <button\r
-    *ngIf="(hasPermission('event_admin') || (prov.isAirfare && hasPermission('air_operator')) || hasPermission('hotel_operator')) && prov.status === 'dating_with_customer'"\r
+    *ngIf="(hasPermission('event_admin') || (prov.isAirfare && hasPermission('air_operator')) || hasPermission('hotel_operator')) && (prov.status === 'dating_with_customer' || prov.status === 'approved_by_manager')"\r
     type="button"\r
     class="btn btn-info text-white shadow-sm btn-action animate-in"\r
     title="Faturamento"\r
@@ -112063,7 +112065,7 @@ function EventListComponent_div_113_div_1_ng_container_15_Template(rf, ctx) {
     \u0275\u0275advance(2);
     \u0275\u0275textInterpolate(ctx_r4.formatDate(item_r15.created_at, true));
     \u0275\u0275advance(3);
-    \u0275\u0275textInterpolate(ctx_r4.tableLabels[item_r15.table_name] || item_r15.table_name);
+    \u0275\u0275textInterpolate(ctx_r4.getTableLabel(item_r15.table_name));
     \u0275\u0275advance(2);
     \u0275\u0275classMap(ctx_r4.badgeClass(item_r15.action));
     \u0275\u0275advance();
@@ -112214,9 +112216,15 @@ var EventListComponent = class _EventListComponent {
     event_transport_opt: "Transporte - Detalhes",
     event_airfare: "A\xE9reo",
     event_airfares: "A\xE9reo",
-    event_airfare_opt: "A\xE9reo - Trecho",
-    event_airfare_opts: "A\xE9reo - Trecho"
+    event_airfare_opt: "A\xE9reo - Detalhes",
+    event_airfare_opts: "A\xE9reo - Detalhes"
   };
+  getTableLabel(tableName) {
+    if (!tableName)
+      return "";
+    const clean = tableName.trim().toLowerCase();
+    return this.tableLabels[clean] || this.tableLabels[tableName] || tableName;
+  }
   fieldLabels = {
     airline_id: "Companhia A\xE9rea",
     equipment: "Equipamento",
@@ -113587,7 +113595,7 @@ var EventListComponent = class _EventListComponent {
                 <td>{{ item.user?.name || 'Desconhecido' }}</td>\r
                 <td>{{ formatDate(item.created_at, true) }}</td>\r
                 <td>\r
-                  <span class="badge bg-secondary">{{ tableLabels[item.table_name] || item.table_name }}</span>\r
+                  <span class="badge bg-secondary">{{ getTableLabel(item.table_name) }}</span>\r
                 </td>\r
                 <td>\r
                   <span [class]="badgeClass(item.action)">\r
@@ -113913,14 +113921,14 @@ var _c137 = (a0, a1, a2, a3) => [a0, a1, a2, a3];
 var _c24 = () => [1, 2, 3, 4];
 function EventCreateComponent_div_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 109)(1, "div", 110)(2, "span", 111);
+    \u0275\u0275elementStart(0, "div", 110)(1, "div", 111)(2, "span", 112);
     \u0275\u0275text(3, "Carregando...");
     \u0275\u0275elementEnd()()();
   }
 }
 function EventCreateComponent_div_55_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -113932,8 +113940,8 @@ function EventCreateComponent_div_55_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_55_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_55_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_55_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -113944,7 +113952,7 @@ function EventCreateComponent_div_55_Template(rf, ctx) {
 }
 function EventCreateComponent_div_62_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -113956,8 +113964,8 @@ function EventCreateComponent_div_62_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_62_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_62_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_62_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -113969,14 +113977,14 @@ function EventCreateComponent_div_62_Template(rf, ctx) {
 function EventCreateComponent_div_67_button_9_Template(rf, ctx) {
   if (rf & 1) {
     const _r7 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 120);
+    \u0275\u0275elementStart(0, "button", 121);
     \u0275\u0275listener("click", function EventCreateComponent_div_67_button_9_Template_button_click_0_listener() {
       \u0275\u0275restoreView(_r7);
       const i_r8 = \u0275\u0275nextContext().index;
       const ctx_r2 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r2.removeCountry(i_r8));
     });
-    \u0275\u0275element(1, "i", 121);
+    \u0275\u0275element(1, "i", 122);
     \u0275\u0275text(2, " Remover Local ");
     \u0275\u0275elementEnd();
   }
@@ -113984,27 +113992,27 @@ function EventCreateComponent_div_67_button_9_Template(rf, ctx) {
 function EventCreateComponent_div_67_Template(rf, ctx) {
   if (rf & 1) {
     const _r5 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 115)(1, "div", 116)(2, "label", 117);
+    \u0275\u0275elementStart(0, "div", 116)(1, "div", 117)(2, "label", 118);
     \u0275\u0275text(3, "Pa\xEDs:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(4, "input", 118);
+    \u0275\u0275elementStart(4, "input", 119);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_67_Template_input_ngModelChange_4_listener($event) {
       const country_r6 = \u0275\u0275restoreView(_r5).$implicit;
       \u0275\u0275twoWayBindingSet(country_r6.pais, $event) || (country_r6.pais = $event);
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "div", 116)(6, "label", 117);
+    \u0275\u0275elementStart(5, "div", 117)(6, "label", 118);
     \u0275\u0275text(7, "Cidade:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(8, "input", 118);
+    \u0275\u0275elementStart(8, "input", 119);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_67_Template_input_ngModelChange_8_listener($event) {
       const country_r6 = \u0275\u0275restoreView(_r5).$implicit;
       \u0275\u0275twoWayBindingSet(country_r6.cidade, $event) || (country_r6.cidade = $event);
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275template(9, EventCreateComponent_div_67_button_9_Template, 3, 0, "button", 119);
+    \u0275\u0275template(9, EventCreateComponent_div_67_button_9_Template, 3, 0, "button", 120);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -114030,13 +114038,13 @@ function EventCreateComponent_div_67_Template(rf, ctx) {
 function EventCreateComponent_button_68_Template(rf, ctx) {
   if (rf & 1) {
     const _r9 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 122);
+    \u0275\u0275elementStart(0, "button", 123);
     \u0275\u0275listener("click", function EventCreateComponent_button_68_Template_button_click_0_listener() {
       \u0275\u0275restoreView(_r9);
       const ctx_r2 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r2.addCountry());
     });
-    \u0275\u0275element(1, "i", 123);
+    \u0275\u0275element(1, "i", 124);
     \u0275\u0275text(2, " Adicionar Local ");
     \u0275\u0275elementEnd();
   }
@@ -114056,7 +114064,7 @@ function EventCreateComponent_option_78_Template(rf, ctx) {
 }
 function EventCreateComponent_div_79_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114068,8 +114076,8 @@ function EventCreateComponent_div_79_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_79_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_79_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_79_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -114080,7 +114088,7 @@ function EventCreateComponent_div_79_Template(rf, ctx) {
 }
 function EventCreateComponent_option_88_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 124);
+    \u0275\u0275elementStart(0, "option", 125);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114093,7 +114101,7 @@ function EventCreateComponent_option_88_Template(rf, ctx) {
 }
 function EventCreateComponent_div_89_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114105,8 +114113,8 @@ function EventCreateComponent_div_89_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_89_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_89_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_89_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -114117,7 +114125,7 @@ function EventCreateComponent_div_89_Template(rf, ctx) {
 }
 function EventCreateComponent_option_98_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 124);
+    \u0275\u0275elementStart(0, "option", 125);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114130,7 +114138,7 @@ function EventCreateComponent_option_98_Template(rf, ctx) {
 }
 function EventCreateComponent_div_99_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114142,8 +114150,8 @@ function EventCreateComponent_div_99_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_99_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_99_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_99_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -114154,7 +114162,7 @@ function EventCreateComponent_div_99_Template(rf, ctx) {
 }
 function EventCreateComponent_option_108_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 124);
+    \u0275\u0275elementStart(0, "option", 125);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114167,7 +114175,7 @@ function EventCreateComponent_option_108_Template(rf, ctx) {
 }
 function EventCreateComponent_div_109_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114179,8 +114187,8 @@ function EventCreateComponent_div_109_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_109_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_109_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_109_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -114191,7 +114199,7 @@ function EventCreateComponent_div_109_Template(rf, ctx) {
 }
 function EventCreateComponent_div_116_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114203,8 +114211,8 @@ function EventCreateComponent_div_116_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_116_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_116_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_116_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -114215,7 +114223,7 @@ function EventCreateComponent_div_116_Template(rf, ctx) {
 }
 function EventCreateComponent_div_128_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114227,8 +114235,8 @@ function EventCreateComponent_div_128_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_128_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_128_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_128_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -114239,7 +114247,7 @@ function EventCreateComponent_div_128_Template(rf, ctx) {
 }
 function EventCreateComponent_div_129_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114251,8 +114259,8 @@ function EventCreateComponent_div_129_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_129_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_129_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_129_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -114276,7 +114284,7 @@ function EventCreateComponent_option_138_Template(rf, ctx) {
 }
 function EventCreateComponent_div_139_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114288,8 +114296,8 @@ function EventCreateComponent_div_139_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_139_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_139_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_139_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -114300,7 +114308,7 @@ function EventCreateComponent_div_139_Template(rf, ctx) {
 }
 function EventCreateComponent_option_146_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 124);
+    \u0275\u0275elementStart(0, "option", 125);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114313,7 +114321,7 @@ function EventCreateComponent_option_146_Template(rf, ctx) {
 }
 function EventCreateComponent_option_153_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 124);
+    \u0275\u0275elementStart(0, "option", 125);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114326,7 +114334,7 @@ function EventCreateComponent_option_153_Template(rf, ctx) {
 }
 function EventCreateComponent_option_160_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 124);
+    \u0275\u0275elementStart(0, "option", 125);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114339,12 +114347,12 @@ function EventCreateComponent_option_160_Template(rf, ctx) {
 }
 function EventCreateComponent_div_161_span_2_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275element(0, "span", 127);
+    \u0275\u0275element(0, "span", 128);
   }
 }
 function EventCreateComponent_div_161_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 125)(1, "button", 126);
+    \u0275\u0275elementStart(0, "div", 126)(1, "button", 127);
     \u0275\u0275template(2, EventCreateComponent_div_161_span_2_Template, 1, 0, "span", 99);
     \u0275\u0275element(3, "i", 100);
     \u0275\u0275text(4, " Salvar e Avan\xE7ar ");
@@ -114361,13 +114369,13 @@ function EventCreateComponent_div_161_Template(rf, ctx) {
 function EventCreateComponent_div_162_button_9_Template(rf, ctx) {
   if (rf & 1) {
     const _r27 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 138);
+    \u0275\u0275elementStart(0, "button", 139);
     \u0275\u0275listener("click", function EventCreateComponent_div_162_button_9_Template_button_click_0_listener() {
       \u0275\u0275restoreView(_r27);
       const ctx_r2 = \u0275\u0275nextContext(2);
       return \u0275\u0275resetView(ctx_r2.openAddProviderLink(ctx_r2.activeTab === 1 ? "hotel" : ctx_r2.activeTab === 2 ? "ab" : ctx_r2.activeTab === 3 ? "hall" : ctx_r2.activeTab === 4 ? "add" : "transport"));
     });
-    \u0275\u0275element(1, "i", 123);
+    \u0275\u0275element(1, "i", 124);
     \u0275\u0275text(2, " Vincular Novo Fornecedor ");
     \u0275\u0275elementEnd();
   }
@@ -114375,45 +114383,45 @@ function EventCreateComponent_div_162_button_9_Template(rf, ctx) {
 function EventCreateComponent_div_162_ng_container_10_div_8_Template(rf, ctx) {
   if (rf & 1) {
     const _r28 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 132)(1, "button", 167);
+    \u0275\u0275elementStart(0, "div", 133)(1, "button", 169);
     \u0275\u0275listener("click", function EventCreateComponent_div_162_ng_container_10_div_8_Template_button_click_1_listener() {
       \u0275\u0275restoreView(_r28);
       const item_r29 = \u0275\u0275nextContext().$implicit;
       const ctx_r2 = \u0275\u0275nextContext(2);
       return \u0275\u0275resetView(ctx_r2.openAddProviderLink(ctx_r2.activeTab === 1 ? "hotel" : ctx_r2.activeTab === 2 ? "ab" : ctx_r2.activeTab === 3 ? "hall" : ctx_r2.activeTab === 4 ? "add" : "transport", item_r29));
     });
-    \u0275\u0275element(2, "i", 168);
+    \u0275\u0275element(2, "i", 170);
     \u0275\u0275text(3, " Editar Cadastro ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(4, "button", 169);
+    \u0275\u0275elementStart(4, "button", 171);
     \u0275\u0275listener("click", function EventCreateComponent_div_162_ng_container_10_div_8_Template_button_click_4_listener() {
       \u0275\u0275restoreView(_r28);
       const item_r29 = \u0275\u0275nextContext().$implicit;
       const ctx_r2 = \u0275\u0275nextContext(2);
       return \u0275\u0275resetView(ctx_r2.updateMarkupBulk(item_r29, ctx_r2.activeTab === 1 ? "hotel" : ctx_r2.activeTab === 2 ? "ab" : ctx_r2.activeTab === 3 ? "hall" : ctx_r2.activeTab === 4 ? "add" : "transport"));
     });
-    \u0275\u0275element(5, "i", 170);
+    \u0275\u0275element(5, "i", 172);
     \u0275\u0275text(6, " Editar Markup Geral ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(7, "button", 171);
+    \u0275\u0275elementStart(7, "button", 173);
     \u0275\u0275listener("click", function EventCreateComponent_div_162_ng_container_10_div_8_Template_button_click_7_listener() {
       \u0275\u0275restoreView(_r28);
       const item_r29 = \u0275\u0275nextContext().$implicit;
       const ctx_r2 = \u0275\u0275nextContext(2);
       return \u0275\u0275resetView(ctx_r2.openAddOpt(ctx_r2.activeTab === 1 ? "hotel" : ctx_r2.activeTab === 2 ? "ab" : ctx_r2.activeTab === 3 ? "hall" : ctx_r2.activeTab === 4 ? "add" : "transport", item_r29.id));
     });
-    \u0275\u0275element(8, "i", 123);
+    \u0275\u0275element(8, "i", 124);
     \u0275\u0275text(9, " Adicionar Tarifa ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(10, "app-confirm-modal", 172);
+    \u0275\u0275elementStart(10, "app-confirm-modal", 174);
     \u0275\u0275listener("confirm", function EventCreateComponent_div_162_ng_container_10_div_8_Template_app_confirm_modal_confirm_10_listener() {
       \u0275\u0275restoreView(_r28);
       const item_r29 = \u0275\u0275nextContext().$implicit;
       const ctx_r2 = \u0275\u0275nextContext(2);
       return \u0275\u0275resetView(ctx_r2.deleteProviderLink(ctx_r2.activeTab === 1 ? "hotel" : ctx_r2.activeTab === 2 ? "ab" : ctx_r2.activeTab === 3 ? "hall" : ctx_r2.activeTab === 4 ? "add" : "transport", item_r29.id));
     });
-    \u0275\u0275elementStart(11, "span", 173);
-    \u0275\u0275element(12, "i", 174);
+    \u0275\u0275elementStart(11, "span", 175);
+    \u0275\u0275element(12, "i", 176);
     \u0275\u0275text(13, " Excluir V\xEDnculo ");
     \u0275\u0275elementEnd()()();
   }
@@ -114425,7 +114433,7 @@ function EventCreateComponent_div_162_ng_container_10_div_8_Template(rf, ctx) {
 }
 function EventCreateComponent_div_162_ng_container_10_ng_container_23_th_7_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 175);
+    \u0275\u0275elementStart(0, "th", 177);
     \u0275\u0275text(1, " Tx. Turismo ");
     \u0275\u0275elementEnd();
   }
@@ -114433,16 +114441,16 @@ function EventCreateComponent_div_162_ng_container_10_ng_container_23_th_7_Templ
 function EventCreateComponent_div_162_ng_container_10_ng_container_23_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "th", 175);
+    \u0275\u0275elementStart(1, "th", 177);
     \u0275\u0275text(2, "ISS");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "th", 175);
+    \u0275\u0275elementStart(3, "th", 177);
     \u0275\u0275text(4, "Servi\xE7o");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "th", 175);
+    \u0275\u0275elementStart(5, "th", 177);
     \u0275\u0275text(6, "IVA");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(7, EventCreateComponent_div_162_ng_container_10_ng_container_23_th_7_Template, 2, 0, "th", 176);
+    \u0275\u0275template(7, EventCreateComponent_div_162_ng_container_10_ng_container_23_th_7_Template, 2, 0, "th", 178);
     \u0275\u0275elementContainerEnd();
   }
   if (rf & 2) {
@@ -114453,28 +114461,33 @@ function EventCreateComponent_div_162_ng_container_10_ng_container_23_Template(r
 }
 function EventCreateComponent_div_162_ng_container_10_th_24_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 177);
+    \u0275\u0275elementStart(0, "th", 179);
     \u0275\u0275text(1, "Comparativo");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_25_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 178);
+    \u0275\u0275elementStart(0, "th", 180);
     \u0275\u0275text(1, "A\xE7\xF5es");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_27_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 153);
-    \u0275\u0275text(1, "Servi\xE7o/Detalhe");
+    \u0275\u0275elementStart(0, "th", 181);
+    \u0275\u0275text(1);
     \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext(3);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", ctx_r2.activeTab === 3 ? "Sal\xE3o / Servi\xE7o" : "Servi\xE7o/Detalhe", " ");
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_30_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 179);
+    \u0275\u0275elementStart(0, "th", 154);
     \u0275\u0275text(1, "Regime");
     \u0275\u0275elementEnd();
   }
@@ -114485,98 +114498,98 @@ function EventCreateComponent_div_162_ng_container_10_th_30_Template(rf, ctx) {
 }
 function EventCreateComponent_div_162_ng_container_10_th_31_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 179);
+    \u0275\u0275elementStart(0, "th", 158);
     \u0275\u0275text(1, "Metragem");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_32_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 179);
-    \u0275\u0275text(1, "Pax");
+    \u0275\u0275elementStart(0, "th", 158);
+    \u0275\u0275text(1, "Qtd. Pax");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_33_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 179);
+    \u0275\u0275elementStart(0, "th", 154);
     \u0275\u0275text(1, "Prop\xF3sito");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_34_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 179);
+    \u0275\u0275elementStart(0, "th", 154);
     \u0275\u0275text(1, "CAT.");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_35_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 179);
+    \u0275\u0275elementStart(0, "th", 154);
     \u0275\u0275text(1, "APTO");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_36_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 179);
+    \u0275\u0275elementStart(0, "th", 154);
     \u0275\u0275text(1, "Tipo Servi\xE7o");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_37_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 179);
+    \u0275\u0275elementStart(0, "th", 154);
     \u0275\u0275text(1, "Local");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_38_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 179);
+    \u0275\u0275elementStart(0, "th", 154);
     \u0275\u0275text(1, "Frequ\xEAncia");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_39_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 179);
+    \u0275\u0275elementStart(0, "th", 154);
     \u0275\u0275text(1, "Medida");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_40_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 179);
+    \u0275\u0275elementStart(0, "th", 154);
     \u0275\u0275text(1, "Ve\xEDculo");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_41_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 179);
+    \u0275\u0275elementStart(0, "th", 154);
     \u0275\u0275text(1, "Modelo");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_th_42_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 179);
+    \u0275\u0275elementStart(0, "th", 154);
     \u0275\u0275text(1, "Marca");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_ng_container_61_th_13_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 180);
+    \u0275\u0275elementStart(0, "th", 182);
     \u0275\u0275text(1, "Cliente");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_162_ng_container_10_ng_container_61_th_14_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 180);
+    \u0275\u0275elementStart(0, "th", 182);
     \u0275\u0275text(1, "Custo");
     \u0275\u0275elementEnd();
   }
@@ -114584,25 +114597,25 @@ function EventCreateComponent_div_162_ng_container_10_ng_container_61_th_14_Temp
 function EventCreateComponent_div_162_ng_container_10_ng_container_61_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "th", 180);
+    \u0275\u0275elementStart(1, "th", 182);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "th", 180);
+    \u0275\u0275elementStart(3, "th", 182);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "th", 180);
+    \u0275\u0275elementStart(5, "th", 182);
     \u0275\u0275text(6);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(7, "th", 180);
+    \u0275\u0275elementStart(7, "th", 182);
     \u0275\u0275text(8);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(9, "th", 180);
+    \u0275\u0275elementStart(9, "th", 182);
     \u0275\u0275text(10);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(11, "th", 180);
+    \u0275\u0275elementStart(11, "th", 182);
     \u0275\u0275text(12);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(13, EventCreateComponent_div_162_ng_container_10_ng_container_61_th_13_Template, 2, 0, "th", 181)(14, EventCreateComponent_div_162_ng_container_10_ng_container_61_th_14_Template, 2, 0, "th", 181);
+    \u0275\u0275template(13, EventCreateComponent_div_162_ng_container_10_ng_container_61_th_13_Template, 2, 0, "th", 183)(14, EventCreateComponent_div_162_ng_container_10_ng_container_61_th_14_Template, 2, 0, "th", 183);
     \u0275\u0275elementContainerEnd();
   }
   if (rf & 2) {
@@ -114629,13 +114642,13 @@ function EventCreateComponent_div_162_ng_container_10_ng_container_61_Template(r
 function EventCreateComponent_div_162_ng_container_10_ng_container_62_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "th", 182);
+    \u0275\u0275elementStart(1, "th", 184);
     \u0275\u0275text(2, "Trivago");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "th", 182);
+    \u0275\u0275elementStart(3, "th", 184);
     \u0275\u0275text(4, "Website HTL");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "th", 182);
+    \u0275\u0275elementStart(5, "th", 184);
     \u0275\u0275text(6, "Omnibess");
     \u0275\u0275elementEnd();
     \u0275\u0275elementContainerEnd();
@@ -114643,7 +114656,7 @@ function EventCreateComponent_div_162_ng_container_10_ng_container_62_Template(r
 }
 function EventCreateComponent_div_162_ng_container_10_tr_64_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr")(1, "td", 183);
+    \u0275\u0275elementStart(0, "tr")(1, "td", 185);
     \u0275\u0275element(2, "i", 14);
     \u0275\u0275text(3, " Nenhuma tarifa ou detalhe cadastrado para este fornecedor. ");
     \u0275\u0275elementEnd()();
@@ -114654,21 +114667,73 @@ function EventCreateComponent_div_162_ng_container_10_tr_64_Template(rf, ctx) {
     \u0275\u0275attribute("colspan", (ctx_r2.activeTab === 1 || ctx_r2.activeTab === 3 || ctx_r2.activeTab === 5 ? 9 : 8) + 7 + ((ctx_r2.activeTab === 1 ? ctx_r2.showDetailsHotel : ctx_r2.activeTab === 2 ? ctx_r2.showDetailsAB : ctx_r2.activeTab === 3 ? ctx_r2.showDetailsHall : ctx_r2.activeTab === 4 ? ctx_r2.showDetailsAdd : ctx_r2.showDetailsTransport) ? ctx_r2.activeTab === 1 || ctx_r2.activeTab === 2 ? 8 : 6 : 0) + (ctx_r2.activeTab === 1 && ctx_r2.showDetailsHotel ? 3 : 0) + (ctx_r2.isReadOnly ? 0 : 1));
   }
 }
-function EventCreateComponent_div_162_ng_container_10_tr_65_td_1_Template(rf, ctx) {
+function EventCreateComponent_div_162_ng_container_10_tr_65_td_1_ng_container_1_div_4_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 195);
-    \u0275\u0275text(1);
+    \u0275\u0275elementStart(0, "div", 202);
+    \u0275\u0275element(1, "i", 203);
+    \u0275\u0275text(2);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
-    const opt_r30 = \u0275\u0275nextContext().$implicit;
+    const opt_r30 = \u0275\u0275nextContext(3).$implicit;
+    \u0275\u0275property("title", opt_r30.service.name);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1("", opt_r30.service.name, " ");
+  }
+}
+function EventCreateComponent_div_162_ng_container_10_tr_65_td_1_ng_container_1_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementContainerStart(0);
+    \u0275\u0275elementStart(1, "div", 199);
+    \u0275\u0275element(2, "i", 200);
+    \u0275\u0275text(3);
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(4, EventCreateComponent_div_162_ng_container_10_tr_65_td_1_ng_container_1_div_4_Template, 3, 2, "div", 201);
+    \u0275\u0275elementContainerEnd();
+  }
+  if (rf & 2) {
+    const opt_r30 = \u0275\u0275nextContext(2).$implicit;
+    \u0275\u0275advance();
+    \u0275\u0275property("title", opt_r30.name || (opt_r30.service == null ? null : opt_r30.service.name) || "-");
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1("", opt_r30.name || (opt_r30.service == null ? null : opt_r30.service.name) || "-", " ");
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", opt_r30.name && (opt_r30.service == null ? null : opt_r30.service.name));
+  }
+}
+function EventCreateComponent_div_162_ng_container_10_tr_65_td_1_ng_container_2_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementContainerStart(0);
+    \u0275\u0275elementStart(1, "div", 204);
+    \u0275\u0275text(2);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementContainerEnd();
+  }
+  if (rf & 2) {
+    const opt_r30 = \u0275\u0275nextContext(2).$implicit;
+    \u0275\u0275advance();
+    \u0275\u0275property("title", opt_r30.name ? (opt_r30.service == null ? null : opt_r30.service.name) ? opt_r30.service.name + " (" + opt_r30.name + ")" : opt_r30.name : (opt_r30.service == null ? null : opt_r30.service.name) || "-");
     \u0275\u0275advance();
     \u0275\u0275textInterpolate1(" ", opt_r30.name ? (opt_r30.service == null ? null : opt_r30.service.name) ? opt_r30.service.name + " (" + opt_r30.name + ")" : opt_r30.name : (opt_r30.service == null ? null : opt_r30.service.name) || "-", " ");
   }
 }
+function EventCreateComponent_div_162_ng_container_10_tr_65_td_1_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "td", 198);
+    \u0275\u0275template(1, EventCreateComponent_div_162_ng_container_10_tr_65_td_1_ng_container_1_Template, 5, 3, "ng-container", 104)(2, EventCreateComponent_div_162_ng_container_10_tr_65_td_1_ng_container_2_Template, 3, 2, "ng-container", 104);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext(4);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx_r2.activeTab === 3);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", ctx_r2.activeTab !== 3);
+  }
+}
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_4_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 196);
+    \u0275\u0275elementStart(0, "td", 187);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114682,19 +114747,19 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_4_Template(rf, ct
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_5_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 196);
+    \u0275\u0275elementStart(0, "td", 191);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
     const opt_r30 = \u0275\u0275nextContext().$implicit;
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate(opt_r30.m2 || "-");
+    \u0275\u0275textInterpolate(opt_r30.m2 ? opt_r30.m2 + " m\xB2" : "-");
   }
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_6_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 196);
+    \u0275\u0275elementStart(0, "td", 191);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114706,7 +114771,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_6_Template(rf, ct
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_7_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 196);
+    \u0275\u0275elementStart(0, "td", 187);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114718,7 +114783,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_7_Template(rf, ct
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 196);
+    \u0275\u0275elementStart(0, "td", 187);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114730,7 +114795,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_8_Template(rf, ct
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 196);
+    \u0275\u0275elementStart(0, "td", 187);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114742,7 +114807,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_9_Template(rf, ct
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_10_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 196);
+    \u0275\u0275elementStart(0, "td", 187);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114754,7 +114819,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_10_Template(rf, c
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_11_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 196);
+    \u0275\u0275elementStart(0, "td", 187);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114766,7 +114831,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_11_Template(rf, c
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_12_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 196);
+    \u0275\u0275elementStart(0, "td", 187);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114778,7 +114843,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_12_Template(rf, c
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_13_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 196);
+    \u0275\u0275elementStart(0, "td", 187);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114790,7 +114855,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_13_Template(rf, c
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_14_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 196);
+    \u0275\u0275elementStart(0, "td", 187);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114802,7 +114867,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_14_Template(rf, c
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_15_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 196);
+    \u0275\u0275elementStart(0, "td", 187);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114814,7 +114879,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_15_Template(rf, c
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_16_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 196);
+    \u0275\u0275elementStart(0, "td", 187);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114826,7 +114891,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_16_Template(rf, c
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_43_td_13_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 197);
+    \u0275\u0275elementStart(0, "td", 205);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114840,7 +114905,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_43_td_1
 }
 function EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_43_td_14_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 198);
+    \u0275\u0275elementStart(0, "td", 206);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -114855,25 +114920,25 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_43_td_1
 function EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_43_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "td", 197);
+    \u0275\u0275elementStart(1, "td", 205);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td", 198);
+    \u0275\u0275elementStart(3, "td", 206);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "td", 197);
+    \u0275\u0275elementStart(5, "td", 205);
     \u0275\u0275text(6);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(7, "td", 198);
+    \u0275\u0275elementStart(7, "td", 206);
     \u0275\u0275text(8);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(9, "td", 197);
+    \u0275\u0275elementStart(9, "td", 205);
     \u0275\u0275text(10);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(11, "td", 198);
+    \u0275\u0275elementStart(11, "td", 206);
     \u0275\u0275text(12);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(13, EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_43_td_13_Template, 2, 1, "td", 199)(14, EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_43_td_14_Template, 2, 1, "td", 200);
+    \u0275\u0275template(13, EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_43_td_13_Template, 2, 1, "td", 207)(14, EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_43_td_14_Template, 2, 1, "td", 208);
     \u0275\u0275elementContainerEnd();
   }
   if (rf & 2) {
@@ -114901,13 +114966,13 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_43_Temp
 function EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_44_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "td", 201);
+    \u0275\u0275elementStart(1, "td", 209);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td", 201);
+    \u0275\u0275elementStart(3, "td", 209);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "td", 201);
+    \u0275\u0275elementStart(5, "td", 209);
     \u0275\u0275text(6);
     \u0275\u0275elementEnd();
     \u0275\u0275elementContainerEnd();
@@ -114927,7 +114992,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_44_Temp
 function EventCreateComponent_div_162_ng_container_10_tr_65_td_45_Template(rf, ctx) {
   if (rf & 1) {
     const _r31 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "td")(1, "div", 202)(2, "button", 203);
+    \u0275\u0275elementStart(0, "td")(1, "div", 210)(2, "button", 211);
     \u0275\u0275listener("click", function EventCreateComponent_div_162_ng_container_10_tr_65_td_45_Template_button_click_2_listener() {
       \u0275\u0275restoreView(_r31);
       const opt_r30 = \u0275\u0275nextContext().$implicit;
@@ -114935,9 +115000,9 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_45_Template(rf, c
       const ctx_r2 = \u0275\u0275nextContext(2);
       return \u0275\u0275resetView(ctx_r2.openAddOpt(ctx_r2.activeTab === 1 ? "hotel" : ctx_r2.activeTab === 2 ? "ab" : ctx_r2.activeTab === 3 ? "hall" : ctx_r2.activeTab === 4 ? "add" : "transport", item_r29.id, opt_r30));
     });
-    \u0275\u0275element(3, "i", 204);
+    \u0275\u0275element(3, "i", 212);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(4, "button", 205);
+    \u0275\u0275elementStart(4, "button", 213);
     \u0275\u0275listener("click", function EventCreateComponent_div_162_ng_container_10_tr_65_td_45_Template_button_click_4_listener() {
       \u0275\u0275restoreView(_r31);
       const opt_r30 = \u0275\u0275nextContext().$implicit;
@@ -114945,17 +115010,17 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_45_Template(rf, c
       const ctx_r2 = \u0275\u0275nextContext(2);
       return \u0275\u0275resetView(ctx_r2.openAddOpt(ctx_r2.activeTab === 1 ? "hotel" : ctx_r2.activeTab === 2 ? "ab" : ctx_r2.activeTab === 3 ? "hall" : ctx_r2.activeTab === 4 ? "add" : "transport", item_r29.id, opt_r30, true));
     });
-    \u0275\u0275element(5, "i", 206);
+    \u0275\u0275element(5, "i", 214);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(6, "app-confirm-modal", 207);
+    \u0275\u0275elementStart(6, "app-confirm-modal", 215);
     \u0275\u0275listener("confirm", function EventCreateComponent_div_162_ng_container_10_tr_65_td_45_Template_app_confirm_modal_confirm_6_listener() {
       \u0275\u0275restoreView(_r31);
       const opt_r30 = \u0275\u0275nextContext().$implicit;
       const ctx_r2 = \u0275\u0275nextContext(3);
       return \u0275\u0275resetView(ctx_r2.deleteOpt(ctx_r2.activeTab === 1 ? "hotel" : ctx_r2.activeTab === 2 ? "ab" : ctx_r2.activeTab === 3 ? "hall" : ctx_r2.activeTab === 4 ? "add" : "transport", opt_r30.id));
     });
-    \u0275\u0275elementStart(7, "span", 173);
-    \u0275\u0275element(8, "i", 174);
+    \u0275\u0275elementStart(7, "span", 175);
+    \u0275\u0275element(8, "i", 176);
     \u0275\u0275elementEnd()()()();
   }
   if (rf & 2) {
@@ -114972,46 +115037,46 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_td_45_Template(rf, c
 function EventCreateComponent_div_162_ng_container_10_tr_65_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementStart(0, "tr");
-    \u0275\u0275template(1, EventCreateComponent_div_162_ng_container_10_tr_65_td_1_Template, 2, 1, "td", 184);
-    \u0275\u0275elementStart(2, "td", 185);
+    \u0275\u0275template(1, EventCreateComponent_div_162_ng_container_10_tr_65_td_1_Template, 3, 2, "td", 186);
+    \u0275\u0275elementStart(2, "td", 187);
     \u0275\u0275text(3);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(4, EventCreateComponent_div_162_ng_container_10_tr_65_td_4_Template, 2, 3, "td", 186)(5, EventCreateComponent_div_162_ng_container_10_tr_65_td_5_Template, 2, 1, "td", 187)(6, EventCreateComponent_div_162_ng_container_10_tr_65_td_6_Template, 2, 1, "td", 187)(7, EventCreateComponent_div_162_ng_container_10_tr_65_td_7_Template, 2, 1, "td", 187)(8, EventCreateComponent_div_162_ng_container_10_tr_65_td_8_Template, 2, 1, "td", 187)(9, EventCreateComponent_div_162_ng_container_10_tr_65_td_9_Template, 2, 1, "td", 187)(10, EventCreateComponent_div_162_ng_container_10_tr_65_td_10_Template, 2, 1, "td", 187)(11, EventCreateComponent_div_162_ng_container_10_tr_65_td_11_Template, 2, 1, "td", 187)(12, EventCreateComponent_div_162_ng_container_10_tr_65_td_12_Template, 2, 1, "td", 187)(13, EventCreateComponent_div_162_ng_container_10_tr_65_td_13_Template, 2, 1, "td", 187)(14, EventCreateComponent_div_162_ng_container_10_tr_65_td_14_Template, 2, 1, "td", 187)(15, EventCreateComponent_div_162_ng_container_10_tr_65_td_15_Template, 2, 1, "td", 187)(16, EventCreateComponent_div_162_ng_container_10_tr_65_td_16_Template, 2, 1, "td", 187);
-    \u0275\u0275elementStart(17, "td", 188);
+    \u0275\u0275template(4, EventCreateComponent_div_162_ng_container_10_tr_65_td_4_Template, 2, 3, "td", 188)(5, EventCreateComponent_div_162_ng_container_10_tr_65_td_5_Template, 2, 1, "td", 189)(6, EventCreateComponent_div_162_ng_container_10_tr_65_td_6_Template, 2, 1, "td", 189)(7, EventCreateComponent_div_162_ng_container_10_tr_65_td_7_Template, 2, 1, "td", 190)(8, EventCreateComponent_div_162_ng_container_10_tr_65_td_8_Template, 2, 1, "td", 190)(9, EventCreateComponent_div_162_ng_container_10_tr_65_td_9_Template, 2, 1, "td", 190)(10, EventCreateComponent_div_162_ng_container_10_tr_65_td_10_Template, 2, 1, "td", 190)(11, EventCreateComponent_div_162_ng_container_10_tr_65_td_11_Template, 2, 1, "td", 190)(12, EventCreateComponent_div_162_ng_container_10_tr_65_td_12_Template, 2, 1, "td", 190)(13, EventCreateComponent_div_162_ng_container_10_tr_65_td_13_Template, 2, 1, "td", 190)(14, EventCreateComponent_div_162_ng_container_10_tr_65_td_14_Template, 2, 1, "td", 190)(15, EventCreateComponent_div_162_ng_container_10_tr_65_td_15_Template, 2, 1, "td", 190)(16, EventCreateComponent_div_162_ng_container_10_tr_65_td_16_Template, 2, 1, "td", 190);
+    \u0275\u0275elementStart(17, "td", 191);
     \u0275\u0275text(18);
     \u0275\u0275pipe(19, "date");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(20, "td", 188);
+    \u0275\u0275elementStart(20, "td", 191);
     \u0275\u0275text(21);
     \u0275\u0275pipe(22, "date");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(23, "td", 188);
+    \u0275\u0275elementStart(23, "td", 191);
     \u0275\u0275text(24);
     \u0275\u0275pipe(25, "number");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(26, "td", 188);
+    \u0275\u0275elementStart(26, "td", 191);
     \u0275\u0275text(27);
     \u0275\u0275pipe(28, "number");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(29, "td", 189);
+    \u0275\u0275elementStart(29, "td", 192);
     \u0275\u0275text(30);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(31, "td", 190);
+    \u0275\u0275elementStart(31, "td", 193);
     \u0275\u0275text(32);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(33, "td", 191);
+    \u0275\u0275elementStart(33, "td", 194);
     \u0275\u0275text(34);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(35, "td", 192);
+    \u0275\u0275elementStart(35, "td", 195);
     \u0275\u0275text(36);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(37, "td", 193);
+    \u0275\u0275elementStart(37, "td", 196);
     \u0275\u0275text(38);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(39, "td", 194);
+    \u0275\u0275elementStart(39, "td", 197);
     \u0275\u0275text(40);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(41, "td", 188);
+    \u0275\u0275elementStart(41, "td", 191);
     \u0275\u0275text(42);
     \u0275\u0275elementEnd();
     \u0275\u0275template(43, EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_43_Template, 15, 8, "ng-container", 104)(44, EventCreateComponent_div_162_ng_container_10_tr_65_ng_container_44_Template, 7, 3, "ng-container", 104)(45, EventCreateComponent_div_162_ng_container_10_tr_65_td_45_Template, 9, 7, "td", 104);
@@ -115086,28 +115151,28 @@ function EventCreateComponent_div_162_ng_container_10_tr_65_Template(rf, ctx) {
 function EventCreateComponent_div_162_ng_container_10_tr_66_ng_container_33_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "td", 197);
+    \u0275\u0275elementStart(1, "td", 205);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td", 197);
+    \u0275\u0275elementStart(3, "td", 205);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "td", 197);
+    \u0275\u0275elementStart(5, "td", 205);
     \u0275\u0275text(6);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(7, "td", 197);
+    \u0275\u0275elementStart(7, "td", 205);
     \u0275\u0275text(8);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(9, "td", 197);
+    \u0275\u0275elementStart(9, "td", 205);
     \u0275\u0275text(10);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(11, "td", 197);
+    \u0275\u0275elementStart(11, "td", 205);
     \u0275\u0275text(12);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(13, "td", 197);
+    \u0275\u0275elementStart(13, "td", 205);
     \u0275\u0275text(14);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(15, "td", 197);
+    \u0275\u0275elementStart(15, "td", 205);
     \u0275\u0275text(16);
     \u0275\u0275elementEnd();
     \u0275\u0275elementContainerEnd();
@@ -115136,13 +115201,13 @@ function EventCreateComponent_div_162_ng_container_10_tr_66_ng_container_33_Temp
 function EventCreateComponent_div_162_ng_container_10_tr_66_ng_container_34_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "td", 215);
+    \u0275\u0275elementStart(1, "td", 223);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td", 215);
+    \u0275\u0275elementStart(3, "td", 223);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "td", 215);
+    \u0275\u0275elementStart(5, "td", 223);
     \u0275\u0275text(6);
     \u0275\u0275elementEnd();
     \u0275\u0275elementContainerEnd();
@@ -115165,48 +115230,48 @@ function EventCreateComponent_div_162_ng_container_10_tr_66_td_35_Template(rf, c
 }
 function EventCreateComponent_div_162_ng_container_10_tr_66_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr", 208)(1, "td", 209);
+    \u0275\u0275elementStart(0, "tr", 216)(1, "td", 217);
     \u0275\u0275text(2, "Di\xE1ria M\xE9dia:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td", 210);
+    \u0275\u0275elementStart(3, "td", 218);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
     \u0275\u0275element(5, "td");
-    \u0275\u0275elementStart(6, "td", 211);
+    \u0275\u0275elementStart(6, "td", 219);
     \u0275\u0275text(7, "Room Nights:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(8, "td", 212);
+    \u0275\u0275elementStart(8, "td", 220);
     \u0275\u0275text(9);
     \u0275\u0275pipe(10, "number");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(11, "td", 211);
+    \u0275\u0275elementStart(11, "td", 219);
     \u0275\u0275text(12, "# Aptos:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(13, "td", 213);
+    \u0275\u0275elementStart(13, "td", 221);
     \u0275\u0275text(14);
     \u0275\u0275pipe(15, "number");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(16, "td", 213);
+    \u0275\u0275elementStart(16, "td", 221);
     \u0275\u0275text(17);
     \u0275\u0275pipe(18, "number");
     \u0275\u0275elementEnd();
     \u0275\u0275element(19, "td");
-    \u0275\u0275elementStart(20, "td", 191);
+    \u0275\u0275elementStart(20, "td", 194);
     \u0275\u0275text(21, "Total venda:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(22, "td", 165);
+    \u0275\u0275elementStart(22, "td", 167);
     \u0275\u0275text(23);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(24, "td", 193);
+    \u0275\u0275elementStart(24, "td", 196);
     \u0275\u0275text(25, "Total Custo:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(26, "td", 193);
+    \u0275\u0275elementStart(26, "td", 196);
     \u0275\u0275text(27);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(28, "td", 214);
+    \u0275\u0275elementStart(28, "td", 222);
     \u0275\u0275text(29, "M\xE9dia %");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(30, "td", 212);
+    \u0275\u0275elementStart(30, "td", 220);
     \u0275\u0275text(31);
     \u0275\u0275pipe(32, "number");
     \u0275\u0275elementEnd();
@@ -115253,7 +115318,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_67_td_5_Template(rf, ct
 }
 function EventCreateComponent_div_162_ng_container_10_tr_67_ng_container_27_td_13_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 197);
+    \u0275\u0275elementStart(0, "td", 205);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -115266,7 +115331,7 @@ function EventCreateComponent_div_162_ng_container_10_tr_67_ng_container_27_td_1
 }
 function EventCreateComponent_div_162_ng_container_10_tr_67_ng_container_27_td_14_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 197);
+    \u0275\u0275elementStart(0, "td", 205);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -115280,25 +115345,25 @@ function EventCreateComponent_div_162_ng_container_10_tr_67_ng_container_27_td_1
 function EventCreateComponent_div_162_ng_container_10_tr_67_ng_container_27_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "td", 197);
+    \u0275\u0275elementStart(1, "td", 205);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td", 197);
+    \u0275\u0275elementStart(3, "td", 205);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "td", 197);
+    \u0275\u0275elementStart(5, "td", 205);
     \u0275\u0275text(6);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(7, "td", 197);
+    \u0275\u0275elementStart(7, "td", 205);
     \u0275\u0275text(8);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(9, "td", 197);
+    \u0275\u0275elementStart(9, "td", 205);
     \u0275\u0275text(10);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(11, "td", 197);
+    \u0275\u0275elementStart(11, "td", 205);
     \u0275\u0275text(12);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(13, EventCreateComponent_div_162_ng_container_10_tr_67_ng_container_27_td_13_Template, 2, 1, "td", 199)(14, EventCreateComponent_div_162_ng_container_10_tr_67_ng_container_27_td_14_Template, 2, 1, "td", 199);
+    \u0275\u0275template(13, EventCreateComponent_div_162_ng_container_10_tr_67_ng_container_27_td_13_Template, 2, 1, "td", 207)(14, EventCreateComponent_div_162_ng_container_10_tr_67_ng_container_27_td_14_Template, 2, 1, "td", 207);
     \u0275\u0275elementContainerEnd();
   }
   if (rf & 2) {
@@ -115329,40 +115394,40 @@ function EventCreateComponent_div_162_ng_container_10_tr_67_td_28_Template(rf, c
 }
 function EventCreateComponent_div_162_ng_container_10_tr_67_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr", 208)(1, "td", 209);
+    \u0275\u0275elementStart(0, "tr", 216)(1, "td", 224);
     \u0275\u0275text(2, "Di\xE1ria M\xE9dia:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td", 214);
+    \u0275\u0275elementStart(3, "td", 222);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
     \u0275\u0275template(5, EventCreateComponent_div_162_ng_container_10_tr_67_td_5_Template, 1, 1, "td", 104);
-    \u0275\u0275elementStart(6, "td", 211);
+    \u0275\u0275elementStart(6, "td", 219);
     \u0275\u0275text(7, "# Qtd:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(8, "td", 213);
+    \u0275\u0275elementStart(8, "td", 221);
     \u0275\u0275text(9);
     \u0275\u0275pipe(10, "number");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(11, "td", 213);
+    \u0275\u0275elementStart(11, "td", 221);
     \u0275\u0275text(12);
     \u0275\u0275pipe(13, "number");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(14, "td", 191);
+    \u0275\u0275elementStart(14, "td", 194);
     \u0275\u0275text(15, "Total Venda:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(16, "td", 165);
+    \u0275\u0275elementStart(16, "td", 167);
     \u0275\u0275text(17);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(18, "td", 193);
+    \u0275\u0275elementStart(18, "td", 196);
     \u0275\u0275text(19, "Total Custo:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(20, "td", 193);
+    \u0275\u0275elementStart(20, "td", 196);
     \u0275\u0275text(21);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(22, "td", 214);
+    \u0275\u0275elementStart(22, "td", 222);
     \u0275\u0275text(23, "Margem %");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(24, "td", 212);
+    \u0275\u0275elementStart(24, "td", 220);
     \u0275\u0275text(25);
     \u0275\u0275pipe(26, "number");
     \u0275\u0275elementEnd();
@@ -115437,98 +115502,98 @@ function EventCreateComponent_div_162_ng_container_10_td_97_Template(rf, ctx) {
 function EventCreateComponent_div_162_ng_container_10_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "div", 139)(2, "div", 140)(3, "div")(4, "h6", 130);
+    \u0275\u0275elementStart(1, "div", 140)(2, "div", 141)(3, "div")(4, "h6", 131);
     \u0275\u0275text(5);
-    \u0275\u0275elementStart(6, "span", 141);
+    \u0275\u0275elementStart(6, "span", 142);
     \u0275\u0275text(7);
     \u0275\u0275elementEnd()()();
-    \u0275\u0275template(8, EventCreateComponent_div_162_ng_container_10_div_8_Template, 14, 4, "div", 142);
+    \u0275\u0275template(8, EventCreateComponent_div_162_ng_container_10_div_8_Template, 14, 4, "div", 143);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(9, "div", 143)(10, "div", 144)(11, "table", 145)(12, "thead")(13, "tr");
-    \u0275\u0275element(14, "th", 146);
-    \u0275\u0275elementStart(15, "th", 147);
+    \u0275\u0275elementStart(9, "div", 144)(10, "div", 145)(11, "table", 146)(12, "thead")(13, "tr");
+    \u0275\u0275element(14, "th", 147);
+    \u0275\u0275elementStart(15, "th", 148);
     \u0275\u0275text(16, "Valor de Venda");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(17, "th", 148);
+    \u0275\u0275elementStart(17, "th", 149);
     \u0275\u0275text(18, "Valor de Custo");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(19, "th", 149);
+    \u0275\u0275elementStart(19, "th", 150);
     \u0275\u0275text(20, "Proposta Recebida");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(21, "th", 149);
+    \u0275\u0275elementStart(21, "th", 150);
     \u0275\u0275text(22, "%");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(23, EventCreateComponent_div_162_ng_container_10_ng_container_23_Template, 8, 1, "ng-container", 104)(24, EventCreateComponent_div_162_ng_container_10_th_24_Template, 2, 0, "th", 150)(25, EventCreateComponent_div_162_ng_container_10_th_25_Template, 2, 0, "th", 151);
+    \u0275\u0275template(23, EventCreateComponent_div_162_ng_container_10_ng_container_23_Template, 8, 1, "ng-container", 104)(24, EventCreateComponent_div_162_ng_container_10_th_24_Template, 2, 0, "th", 151)(25, EventCreateComponent_div_162_ng_container_10_th_25_Template, 2, 0, "th", 152);
     \u0275\u0275elementEnd();
     \u0275\u0275elementStart(26, "tr");
-    \u0275\u0275template(27, EventCreateComponent_div_162_ng_container_10_th_27_Template, 2, 0, "th", 152);
-    \u0275\u0275elementStart(28, "th", 153);
+    \u0275\u0275template(27, EventCreateComponent_div_162_ng_container_10_th_27_Template, 2, 1, "th", 153);
+    \u0275\u0275elementStart(28, "th", 154);
     \u0275\u0275text(29, "Broker");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(30, EventCreateComponent_div_162_ng_container_10_th_30_Template, 2, 2, "th", 154)(31, EventCreateComponent_div_162_ng_container_10_th_31_Template, 2, 0, "th", 155)(32, EventCreateComponent_div_162_ng_container_10_th_32_Template, 2, 0, "th", 155)(33, EventCreateComponent_div_162_ng_container_10_th_33_Template, 2, 0, "th", 155)(34, EventCreateComponent_div_162_ng_container_10_th_34_Template, 2, 0, "th", 155)(35, EventCreateComponent_div_162_ng_container_10_th_35_Template, 2, 0, "th", 155)(36, EventCreateComponent_div_162_ng_container_10_th_36_Template, 2, 0, "th", 155)(37, EventCreateComponent_div_162_ng_container_10_th_37_Template, 2, 0, "th", 155)(38, EventCreateComponent_div_162_ng_container_10_th_38_Template, 2, 0, "th", 155)(39, EventCreateComponent_div_162_ng_container_10_th_39_Template, 2, 0, "th", 155)(40, EventCreateComponent_div_162_ng_container_10_th_40_Template, 2, 0, "th", 155)(41, EventCreateComponent_div_162_ng_container_10_th_41_Template, 2, 0, "th", 155)(42, EventCreateComponent_div_162_ng_container_10_th_42_Template, 2, 0, "th", 155);
-    \u0275\u0275elementStart(43, "th", 156);
+    \u0275\u0275template(30, EventCreateComponent_div_162_ng_container_10_th_30_Template, 2, 2, "th", 155)(31, EventCreateComponent_div_162_ng_container_10_th_31_Template, 2, 0, "th", 156)(32, EventCreateComponent_div_162_ng_container_10_th_32_Template, 2, 0, "th", 156)(33, EventCreateComponent_div_162_ng_container_10_th_33_Template, 2, 0, "th", 157)(34, EventCreateComponent_div_162_ng_container_10_th_34_Template, 2, 0, "th", 157)(35, EventCreateComponent_div_162_ng_container_10_th_35_Template, 2, 0, "th", 157)(36, EventCreateComponent_div_162_ng_container_10_th_36_Template, 2, 0, "th", 157)(37, EventCreateComponent_div_162_ng_container_10_th_37_Template, 2, 0, "th", 157)(38, EventCreateComponent_div_162_ng_container_10_th_38_Template, 2, 0, "th", 157)(39, EventCreateComponent_div_162_ng_container_10_th_39_Template, 2, 0, "th", 157)(40, EventCreateComponent_div_162_ng_container_10_th_40_Template, 2, 0, "th", 157)(41, EventCreateComponent_div_162_ng_container_10_th_41_Template, 2, 0, "th", 157)(42, EventCreateComponent_div_162_ng_container_10_th_42_Template, 2, 0, "th", 157);
+    \u0275\u0275elementStart(43, "th", 158);
     \u0275\u0275text(44, "IN");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(45, "th", 156);
+    \u0275\u0275elementStart(45, "th", 158);
     \u0275\u0275text(46, "OUT");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(47, "th", 156);
+    \u0275\u0275elementStart(47, "th", 158);
     \u0275\u0275text(48, "QTD");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(49, "th", 156);
+    \u0275\u0275elementStart(49, "th", 158);
     \u0275\u0275text(50);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(51, "th", 157);
+    \u0275\u0275elementStart(51, "th", 159);
     \u0275\u0275text(52, "Comiss\xE3o (%)");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(53, "th", 158);
+    \u0275\u0275elementStart(53, "th", 160);
     \u0275\u0275text(54, "Unidade");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(55, "th", 158);
+    \u0275\u0275elementStart(55, "th", 160);
     \u0275\u0275text(56, "Total");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(57, "th", 159);
+    \u0275\u0275elementStart(57, "th", 161);
     \u0275\u0275text(58, "Unidade");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(59, "th", 159);
+    \u0275\u0275elementStart(59, "th", 161);
     \u0275\u0275text(60, "Custo TTL");
     \u0275\u0275elementEnd();
     \u0275\u0275template(61, EventCreateComponent_div_162_ng_container_10_ng_container_61_Template, 15, 8, "ng-container", 104)(62, EventCreateComponent_div_162_ng_container_10_ng_container_62_Template, 7, 0, "ng-container", 104);
     \u0275\u0275elementEnd()();
     \u0275\u0275elementStart(63, "tbody");
-    \u0275\u0275template(64, EventCreateComponent_div_162_ng_container_10_tr_64_Template, 4, 1, "tr", 104)(65, EventCreateComponent_div_162_ng_container_10_tr_65_Template, 46, 43, "tr", 136)(66, EventCreateComponent_div_162_ng_container_10_tr_66_Template, 36, 26, "tr", 160)(67, EventCreateComponent_div_162_ng_container_10_tr_67_Template, 29, 18, "tr", 160);
-    \u0275\u0275elementStart(68, "tr", 161)(69, "td", 162);
+    \u0275\u0275template(64, EventCreateComponent_div_162_ng_container_10_tr_64_Template, 4, 1, "tr", 104)(65, EventCreateComponent_div_162_ng_container_10_tr_65_Template, 46, 43, "tr", 137)(66, EventCreateComponent_div_162_ng_container_10_tr_66_Template, 36, 26, "tr", 162)(67, EventCreateComponent_div_162_ng_container_10_tr_67_Template, 29, 18, "tr", 162);
+    \u0275\u0275elementStart(68, "tr", 163)(69, "td", 164);
     \u0275\u0275text(70, "OBSERVA\xC7\xC3O INTERNA:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(71, "td", 163);
+    \u0275\u0275elementStart(71, "td", 165);
     \u0275\u0275text(72);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(73, "td", 164);
+    \u0275\u0275elementStart(73, "td", 166);
     \u0275\u0275text(74, "Faturamento Venda:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(75, "td", 165);
+    \u0275\u0275elementStart(75, "td", 167);
     \u0275\u0275text(76);
     \u0275\u0275elementEnd();
     \u0275\u0275template(77, EventCreateComponent_div_162_ng_container_10_td_77_Template, 1, 1, "td", 104)(78, EventCreateComponent_div_162_ng_container_10_td_78_Template, 1, 0, "td", 104);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(79, "tr", 161)(80, "td", 162);
+    \u0275\u0275elementStart(79, "tr", 163)(80, "td", 164);
     \u0275\u0275text(81, "OBSERVA\xC7\xC3O CLIENTE:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(82, "td", 163);
+    \u0275\u0275elementStart(82, "td", 165);
     \u0275\u0275text(83);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(84, "td", 164);
+    \u0275\u0275elementStart(84, "td", 166);
     \u0275\u0275text(85, "Faturamento Custo:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(86, "td", 166);
+    \u0275\u0275elementStart(86, "td", 168);
     \u0275\u0275text(87);
     \u0275\u0275elementEnd();
     \u0275\u0275template(88, EventCreateComponent_div_162_ng_container_10_td_88_Template, 1, 1, "td", 104)(89, EventCreateComponent_div_162_ng_container_10_td_89_Template, 1, 0, "td", 104);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(90, "tr", 161)(91, "td", 162);
+    \u0275\u0275elementStart(90, "tr", 163)(91, "td", 164);
     \u0275\u0275text(92, "PRAZO / DATA LIMITE:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(93, "td", 163);
+    \u0275\u0275elementStart(93, "td", 165);
     \u0275\u0275text(94);
     \u0275\u0275pipe(95, "date");
     \u0275\u0275elementEnd();
@@ -115632,12 +115697,12 @@ function EventCreateComponent_div_162_ng_container_10_Template(rf, ctx) {
 }
 function EventCreateComponent_div_162_div_11_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 216);
-    \u0275\u0275element(1, "i", 217);
-    \u0275\u0275elementStart(2, "h5", 218);
+    \u0275\u0275elementStart(0, "div", 225);
+    \u0275\u0275element(1, "i", 226);
+    \u0275\u0275elementStart(2, "h5", 227);
     \u0275\u0275text(3, "Nenhum fornecedor vinculado");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(4, "p", 219);
+    \u0275\u0275elementStart(4, "p", 228);
     \u0275\u0275text(5, "Use o bot\xE3o no topo para vincular um fornecedor a este evento.");
     \u0275\u0275elementEnd()();
   }
@@ -115645,22 +115710,22 @@ function EventCreateComponent_div_162_div_11_Template(rf, ctx) {
 function EventCreateComponent_div_162_Template(rf, ctx) {
   if (rf & 1) {
     const _r26 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 128)(1, "div", 129)(2, "h5", 130);
-    \u0275\u0275element(3, "i", 131);
+    \u0275\u0275elementStart(0, "div", 129)(1, "div", 130)(2, "h5", 131);
+    \u0275\u0275element(3, "i", 132);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "div", 132)(6, "button", 133);
+    \u0275\u0275elementStart(5, "div", 133)(6, "button", 134);
     \u0275\u0275listener("click", function EventCreateComponent_div_162_Template_button_click_6_listener() {
       \u0275\u0275restoreView(_r26);
       const ctx_r2 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r2.toggleDetails(ctx_r2.activeTab === 1 ? "hotel" : ctx_r2.activeTab === 2 ? "ab" : ctx_r2.activeTab === 3 ? "hall" : ctx_r2.activeTab === 4 ? "add" : "transport"));
     });
-    \u0275\u0275element(7, "i", 134);
+    \u0275\u0275element(7, "i", 135);
     \u0275\u0275text(8);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(9, EventCreateComponent_div_162_button_9_Template, 3, 0, "button", 135);
+    \u0275\u0275template(9, EventCreateComponent_div_162_button_9_Template, 3, 0, "button", 136);
     \u0275\u0275elementEnd()();
-    \u0275\u0275template(10, EventCreateComponent_div_162_ng_container_10_Template, 98, 49, "ng-container", 136)(11, EventCreateComponent_div_162_div_11_Template, 6, 0, "div", 137);
+    \u0275\u0275template(10, EventCreateComponent_div_162_ng_container_10_Template, 98, 49, "ng-container", 137)(11, EventCreateComponent_div_162_div_11_Template, 6, 0, "div", 138);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -115682,13 +115747,13 @@ function EventCreateComponent_div_162_Template(rf, ctx) {
 function EventCreateComponent_div_163_button_6_Template(rf, ctx) {
   if (rf & 1) {
     const _r33 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 138);
+    \u0275\u0275elementStart(0, "button", 139);
     \u0275\u0275listener("click", function EventCreateComponent_div_163_button_6_Template_button_click_0_listener() {
       \u0275\u0275restoreView(_r33);
       const ctx_r2 = \u0275\u0275nextContext(2);
       return \u0275\u0275resetView(ctx_r2.openAddProviderLink("airfare"));
     });
-    \u0275\u0275element(1, "i", 123);
+    \u0275\u0275element(1, "i", 124);
     \u0275\u0275text(2, " Novo Or\xE7amento de Fretamento ");
     \u0275\u0275elementEnd();
   }
@@ -115696,61 +115761,71 @@ function EventCreateComponent_div_163_button_6_Template(rf, ctx) {
 function EventCreateComponent_div_163_ng_container_7_div_8_Template(rf, ctx) {
   if (rf & 1) {
     const _r34 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 132)(1, "button", 260);
+    \u0275\u0275elementStart(0, "div", 133)(1, "button", 269);
     \u0275\u0275listener("click", function EventCreateComponent_div_163_ng_container_7_div_8_Template_button_click_1_listener() {
       \u0275\u0275restoreView(_r34);
       const item_r35 = \u0275\u0275nextContext().$implicit;
       const ctx_r2 = \u0275\u0275nextContext(2);
       return \u0275\u0275resetView(ctx_r2.openAddProviderLink("airfare", item_r35));
     });
-    \u0275\u0275element(2, "i", 168);
+    \u0275\u0275element(2, "i", 170);
     \u0275\u0275text(3, " Editar Or\xE7amento ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(4, "button", 261);
+    \u0275\u0275elementStart(4, "button", 270);
     \u0275\u0275listener("click", function EventCreateComponent_div_163_ng_container_7_div_8_Template_button_click_4_listener() {
+      \u0275\u0275restoreView(_r34);
+      const item_r35 = \u0275\u0275nextContext().$implicit;
+      const ctx_r2 = \u0275\u0275nextContext(2);
+      return \u0275\u0275resetView(ctx_r2.updateMarkupBulk(item_r35, "airfare"));
+    });
+    \u0275\u0275element(5, "i", 172);
+    \u0275\u0275text(6, " Editar Markup Geral ");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(7, "button", 271);
+    \u0275\u0275listener("click", function EventCreateComponent_div_163_ng_container_7_div_8_Template_button_click_7_listener() {
       \u0275\u0275restoreView(_r34);
       const item_r35 = \u0275\u0275nextContext().$implicit;
       const ctx_r2 = \u0275\u0275nextContext(2);
       return \u0275\u0275resetView(ctx_r2.openAddOpt("airfare", item_r35.id));
     });
-    \u0275\u0275element(5, "i", 123);
-    \u0275\u0275text(6, " Novo Trecho ");
+    \u0275\u0275element(8, "i", 124);
+    \u0275\u0275text(9, " Novo Trecho ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(7, "app-confirm-modal", 172);
-    \u0275\u0275listener("confirm", function EventCreateComponent_div_163_ng_container_7_div_8_Template_app_confirm_modal_confirm_7_listener() {
+    \u0275\u0275elementStart(10, "app-confirm-modal", 174);
+    \u0275\u0275listener("confirm", function EventCreateComponent_div_163_ng_container_7_div_8_Template_app_confirm_modal_confirm_10_listener() {
       \u0275\u0275restoreView(_r34);
       const item_r35 = \u0275\u0275nextContext().$implicit;
       const ctx_r2 = \u0275\u0275nextContext(2);
       return \u0275\u0275resetView(ctx_r2.deleteProviderLink("airfare", item_r35.id));
     });
-    \u0275\u0275elementStart(8, "span", 173);
-    \u0275\u0275element(9, "i", 174);
-    \u0275\u0275text(10, " Excluir V\xEDnculo ");
+    \u0275\u0275elementStart(11, "span", 175);
+    \u0275\u0275element(12, "i", 176);
+    \u0275\u0275text(13, " Excluir V\xEDnculo ");
     \u0275\u0275elementEnd()()();
   }
   if (rf & 2) {
     const item_r35 = \u0275\u0275nextContext().$implicit;
-    \u0275\u0275advance(7);
+    \u0275\u0275advance(10);
     \u0275\u0275property("btnClass", "btn btn-sm btn-outline-danger")("modalTitle", "Remover V\xEDnculo")("message", "Tem certeza de que deseja remover " + ((item_r35.provider == null ? null : item_r35.provider.name) || "este fornecedor") + " do evento?")("okButtonLabel", "Remover");
   }
 }
 function EventCreateComponent_div_163_ng_container_7_th_59_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 262);
+    \u0275\u0275elementStart(0, "th", 272);
     \u0275\u0275text(1, "A\xE7\xF5es");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_163_ng_container_7_th_81_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "th", 241);
+    \u0275\u0275elementStart(0, "th", 250);
     \u0275\u0275text(1, "Trecho");
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_163_ng_container_7_tr_83_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr")(1, "td", 263);
+    \u0275\u0275elementStart(0, "tr")(1, "td", 273);
     \u0275\u0275element(2, "i", 14);
     \u0275\u0275text(3, " Nenhum trecho cadastrado para este or\xE7amento de fretamento. ");
     \u0275\u0275elementEnd()();
@@ -115763,7 +115838,7 @@ function EventCreateComponent_div_163_ng_container_7_tr_83_Template(rf, ctx) {
 }
 function EventCreateComponent_div_163_ng_container_7_tr_84_td_16_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 269);
+    \u0275\u0275elementStart(0, "td", 279);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -115777,7 +115852,7 @@ function EventCreateComponent_div_163_ng_container_7_tr_84_td_16_Template(rf, ct
 }
 function EventCreateComponent_div_163_ng_container_7_tr_84_td_17_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 270);
+    \u0275\u0275elementStart(0, "td", 280);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -115791,7 +115866,7 @@ function EventCreateComponent_div_163_ng_container_7_tr_84_td_17_Template(rf, ct
 }
 function EventCreateComponent_div_163_ng_container_7_tr_84_td_18_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "td", 271);
+    \u0275\u0275elementStart(0, "td", 281);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -115806,7 +115881,7 @@ function EventCreateComponent_div_163_ng_container_7_tr_84_td_18_Template(rf, ct
 function EventCreateComponent_div_163_ng_container_7_tr_84_td_19_Template(rf, ctx) {
   if (rf & 1) {
     const _r36 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "td", 272)(1, "div", 273)(2, "button", 274);
+    \u0275\u0275elementStart(0, "td", 282)(1, "div", 283)(2, "button", 284);
     \u0275\u0275listener("click", function EventCreateComponent_div_163_ng_container_7_tr_84_td_19_Template_button_click_2_listener() {
       \u0275\u0275restoreView(_r36);
       const opt_r37 = \u0275\u0275nextContext().$implicit;
@@ -115814,9 +115889,9 @@ function EventCreateComponent_div_163_ng_container_7_tr_84_td_19_Template(rf, ct
       const ctx_r2 = \u0275\u0275nextContext(2);
       return \u0275\u0275resetView(ctx_r2.openAddOpt("airfare", item_r35.id, opt_r37));
     });
-    \u0275\u0275element(3, "i", 204);
+    \u0275\u0275element(3, "i", 212);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(4, "button", 275);
+    \u0275\u0275elementStart(4, "button", 285);
     \u0275\u0275listener("click", function EventCreateComponent_div_163_ng_container_7_tr_84_td_19_Template_button_click_4_listener() {
       \u0275\u0275restoreView(_r36);
       const opt_r37 = \u0275\u0275nextContext().$implicit;
@@ -115824,17 +115899,17 @@ function EventCreateComponent_div_163_ng_container_7_tr_84_td_19_Template(rf, ct
       const ctx_r2 = \u0275\u0275nextContext(2);
       return \u0275\u0275resetView(ctx_r2.openAddOpt("airfare", item_r35.id, opt_r37, true));
     });
-    \u0275\u0275element(5, "i", 206);
+    \u0275\u0275element(5, "i", 214);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(6, "app-confirm-modal", 207);
+    \u0275\u0275elementStart(6, "app-confirm-modal", 215);
     \u0275\u0275listener("confirm", function EventCreateComponent_div_163_ng_container_7_tr_84_td_19_Template_app_confirm_modal_confirm_6_listener() {
       \u0275\u0275restoreView(_r36);
       const opt_r37 = \u0275\u0275nextContext().$implicit;
       const ctx_r2 = \u0275\u0275nextContext(3);
       return \u0275\u0275resetView(ctx_r2.deleteOpt("airfare", opt_r37.id));
     });
-    \u0275\u0275elementStart(7, "span", 173);
-    \u0275\u0275element(8, "i", 174);
+    \u0275\u0275elementStart(7, "span", 175);
+    \u0275\u0275element(8, "i", 176);
     \u0275\u0275elementEnd()()()();
   }
   if (rf & 2) {
@@ -115850,29 +115925,29 @@ function EventCreateComponent_div_163_ng_container_7_tr_84_td_19_Template(rf, ct
 }
 function EventCreateComponent_div_163_ng_container_7_tr_84_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr")(1, "td", 213);
+    \u0275\u0275elementStart(0, "tr")(1, "td", 221);
     \u0275\u0275text(2);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td", 264);
+    \u0275\u0275elementStart(3, "td", 274);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "td", 188);
+    \u0275\u0275elementStart(5, "td", 191);
     \u0275\u0275text(6);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(7, "td", 188);
+    \u0275\u0275elementStart(7, "td", 191);
     \u0275\u0275text(8);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(9, "td", 188);
+    \u0275\u0275elementStart(9, "td", 191);
     \u0275\u0275text(10);
     \u0275\u0275pipe(11, "date");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(12, "td", 188);
+    \u0275\u0275elementStart(12, "td", 191);
     \u0275\u0275text(13);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(14, "td", 188);
+    \u0275\u0275elementStart(14, "td", 191);
     \u0275\u0275text(15);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(16, EventCreateComponent_div_163_ng_container_7_tr_84_td_16_Template, 2, 2, "td", 265)(17, EventCreateComponent_div_163_ng_container_7_tr_84_td_17_Template, 2, 2, "td", 266)(18, EventCreateComponent_div_163_ng_container_7_tr_84_td_18_Template, 2, 2, "td", 267)(19, EventCreateComponent_div_163_ng_container_7_tr_84_td_19_Template, 9, 7, "td", 268);
+    \u0275\u0275template(16, EventCreateComponent_div_163_ng_container_7_tr_84_td_16_Template, 2, 2, "td", 275)(17, EventCreateComponent_div_163_ng_container_7_tr_84_td_17_Template, 2, 2, "td", 276)(18, EventCreateComponent_div_163_ng_container_7_tr_84_td_18_Template, 2, 2, "td", 277)(19, EventCreateComponent_div_163_ng_container_7_tr_84_td_19_Template, 9, 7, "td", 278);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -115906,10 +115981,10 @@ function EventCreateComponent_div_163_ng_container_7_tr_84_Template(rf, ctx) {
 }
 function EventCreateComponent_div_163_ng_container_7_tr_150_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr", 161)(1, "td", 162);
+    \u0275\u0275elementStart(0, "tr", 163)(1, "td", 164);
     \u0275\u0275text(2, "NOTES (FRETAMENTO):");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td", 163);
+    \u0275\u0275elementStart(3, "td", 165);
     \u0275\u0275text(4);
     \u0275\u0275elementEnd()();
   }
@@ -115922,10 +115997,10 @@ function EventCreateComponent_div_163_ng_container_7_tr_150_Template(rf, ctx) {
     \u0275\u0275textInterpolate1(" ", item_r35.notes, " ");
   }
 }
-function EventCreateComponent_div_163_ng_container_7_tr_161_ng_container_5_a_1_Template(rf, ctx) {
+function EventCreateComponent_div_163_ng_container_7_tr_169_ng_container_5_a_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "a", 278);
-    \u0275\u0275element(1, "img", 279);
+    \u0275\u0275elementStart(0, "a", 288);
+    \u0275\u0275element(1, "img", 289);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -115936,10 +116011,10 @@ function EventCreateComponent_div_163_ng_container_7_tr_161_ng_container_5_a_1_T
     \u0275\u0275property("src", ctx_r2.resolvePhotoUrl(p_r39), \u0275\u0275sanitizeUrl);
   }
 }
-function EventCreateComponent_div_163_ng_container_7_tr_161_ng_container_5_Template(rf, ctx) {
+function EventCreateComponent_div_163_ng_container_7_tr_169_ng_container_5_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275template(1, EventCreateComponent_div_163_ng_container_7_tr_161_ng_container_5_a_1_Template, 2, 2, "a", 277);
+    \u0275\u0275template(1, EventCreateComponent_div_163_ng_container_7_tr_169_ng_container_5_a_1_Template, 2, 2, "a", 287);
     \u0275\u0275elementContainerEnd();
   }
   if (rf & 2) {
@@ -115948,13 +116023,13 @@ function EventCreateComponent_div_163_ng_container_7_tr_161_ng_container_5_Templ
     \u0275\u0275property("ngIf", p_r39);
   }
 }
-function EventCreateComponent_div_163_ng_container_7_tr_161_Template(rf, ctx) {
+function EventCreateComponent_div_163_ng_container_7_tr_169_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "tr", 161)(1, "td", 162);
+    \u0275\u0275elementStart(0, "tr", 163)(1, "td", 164);
     \u0275\u0275text(2, "FOTOS DA PROPOSTA:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "td", 252)(4, "div", 276);
-    \u0275\u0275template(5, EventCreateComponent_div_163_ng_container_7_tr_161_ng_container_5_Template, 2, 1, "ng-container", 136);
+    \u0275\u0275elementStart(3, "td", 261)(4, "div", 286);
+    \u0275\u0275template(5, EventCreateComponent_div_163_ng_container_7_tr_169_ng_container_5_Template, 2, 1, "ng-container", 137);
     \u0275\u0275elementEnd()()();
   }
   if (rf & 2) {
@@ -115969,203 +116044,215 @@ function EventCreateComponent_div_163_ng_container_7_tr_161_Template(rf, ctx) {
 function EventCreateComponent_div_163_ng_container_7_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "div", 139)(2, "div", 140)(3, "div")(4, "h6", 130);
+    \u0275\u0275elementStart(1, "div", 140)(2, "div", 141)(3, "div")(4, "h6", 131);
     \u0275\u0275text(5);
-    \u0275\u0275elementStart(6, "span", 141);
+    \u0275\u0275elementStart(6, "span", 142);
     \u0275\u0275text(7);
     \u0275\u0275elementEnd()()();
-    \u0275\u0275template(8, EventCreateComponent_div_163_ng_container_7_div_8_Template, 11, 4, "div", 142);
+    \u0275\u0275template(8, EventCreateComponent_div_163_ng_container_7_div_8_Template, 14, 4, "div", 143);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(9, "div", 143)(10, "div", 220)(11, "div")(12, "span", 221);
-    \u0275\u0275element(13, "i", 222);
+    \u0275\u0275elementStart(9, "div", 144)(10, "div", 229)(11, "div")(12, "span", 230);
+    \u0275\u0275element(13, "i", 231);
     \u0275\u0275text(14, "Equipamento:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(15, "span", 223);
+    \u0275\u0275elementStart(15, "span", 232);
     \u0275\u0275text(16);
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(17, "div", 224)(18, "span", 221);
-    \u0275\u0275element(19, "i", 225);
+    \u0275\u0275elementStart(17, "div", 233)(18, "span", 230);
+    \u0275\u0275element(19, "i", 234);
     \u0275\u0275text(20, "Distribui\xE7\xE3o PAX:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(21, "span", 226);
+    \u0275\u0275elementStart(21, "span", 235);
     \u0275\u0275text(22);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(23, "span", 226);
+    \u0275\u0275elementStart(23, "span", 235);
     \u0275\u0275text(24);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(25, "span", 226);
+    \u0275\u0275elementStart(25, "span", 235);
     \u0275\u0275text(26);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(27, "span", 226);
+    \u0275\u0275elementStart(27, "span", 235);
     \u0275\u0275text(28);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(29, "span", 227);
+    \u0275\u0275elementStart(29, "span", 236);
     \u0275\u0275text(30);
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(31, "div", 228)(32, "div")(33, "span", 221);
-    \u0275\u0275element(34, "i", 229);
+    \u0275\u0275elementStart(31, "div", 237)(32, "div")(33, "span", 230);
+    \u0275\u0275element(34, "i", 238);
     \u0275\u0275text(35, "Prazo:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(36, "span", 230);
+    \u0275\u0275elementStart(36, "span", 239);
     \u0275\u0275text(37);
     \u0275\u0275pipe(38, "date");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(39, "div")(40, "span", 221);
-    \u0275\u0275element(41, "i", 231);
+    \u0275\u0275elementStart(39, "div")(40, "span", 230);
+    \u0275\u0275element(41, "i", 240);
     \u0275\u0275text(42, "Prazo Cia:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(43, "span", 230);
+    \u0275\u0275elementStart(43, "span", 239);
     \u0275\u0275text(44);
     \u0275\u0275pipe(45, "date");
     \u0275\u0275elementEnd()()()();
-    \u0275\u0275elementStart(46, "div", 144)(47, "table", 232)(48, "thead")(49, "tr")(50, "th", 233);
-    \u0275\u0275element(51, "i", 234);
+    \u0275\u0275elementStart(46, "div", 145)(47, "table", 241)(48, "thead")(49, "tr")(50, "th", 242);
+    \u0275\u0275element(51, "i", 243);
     \u0275\u0275text(52, " Trechos de Voo (Fretamento) ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(53, "th", 235);
+    \u0275\u0275elementStart(53, "th", 244);
     \u0275\u0275text(54, "Mark Up");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(55, "th", 236);
+    \u0275\u0275elementStart(55, "th", 245);
     \u0275\u0275text(56, "Valor de Custo");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(57, "th", 237);
+    \u0275\u0275elementStart(57, "th", 246);
     \u0275\u0275text(58, "Valor de Venda");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(59, EventCreateComponent_div_163_ng_container_7_th_59_Template, 2, 0, "th", 238);
+    \u0275\u0275template(59, EventCreateComponent_div_163_ng_container_7_th_59_Template, 2, 0, "th", 247);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(60, "tr")(61, "th", 239);
+    \u0275\u0275elementStart(60, "tr")(61, "th", 248);
     \u0275\u0275text(62, "CIA");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(63, "th", 240);
+    \u0275\u0275elementStart(63, "th", 249);
     \u0275\u0275text(64, "VOO");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(65, "th", 213);
+    \u0275\u0275elementStart(65, "th", 221);
     \u0275\u0275text(66, "DE");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(67, "th", 213);
+    \u0275\u0275elementStart(67, "th", 221);
     \u0275\u0275text(68, "PARA");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(69, "th", 241);
+    \u0275\u0275elementStart(69, "th", 250);
     \u0275\u0275text(70, "DATAS");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(71, "th", 240);
+    \u0275\u0275elementStart(71, "th", 249);
     \u0275\u0275text(72, "SA\xCDDA");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(73, "th", 240);
+    \u0275\u0275elementStart(73, "th", 249);
     \u0275\u0275text(74, "CHEGADA");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(75, "th", 213);
+    \u0275\u0275elementStart(75, "th", 221);
     \u0275\u0275text(76, "Custo / Venda");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(77, "th", 242);
+    \u0275\u0275elementStart(77, "th", 251);
     \u0275\u0275text(78, "Custo Fretamento");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(79, "th", 243);
+    \u0275\u0275elementStart(79, "th", 252);
     \u0275\u0275text(80, "Venda Fretamento");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(81, EventCreateComponent_div_163_ng_container_7_th_81_Template, 2, 0, "th", 244);
+    \u0275\u0275template(81, EventCreateComponent_div_163_ng_container_7_th_81_Template, 2, 0, "th", 253);
     \u0275\u0275elementEnd()();
     \u0275\u0275elementStart(82, "tbody");
-    \u0275\u0275template(83, EventCreateComponent_div_163_ng_container_7_tr_83_Template, 4, 1, "tr", 104)(84, EventCreateComponent_div_163_ng_container_7_tr_84_Template, 20, 14, "tr", 136);
-    \u0275\u0275elementStart(85, "tr", 208)(86, "td", 245);
+    \u0275\u0275template(83, EventCreateComponent_div_163_ng_container_7_tr_83_Template, 4, 1, "tr", 104)(84, EventCreateComponent_div_163_ng_container_7_tr_84_Template, 20, 14, "tr", 137);
+    \u0275\u0275elementStart(85, "tr", 216)(86, "td", 254);
     \u0275\u0275text(87, "Tx. Embarque (Unit.):");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(88, "td", 246);
+    \u0275\u0275elementStart(88, "td", 255);
     \u0275\u0275text(89);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(90, "td", 214);
+    \u0275\u0275elementStart(90, "td", 222);
     \u0275\u0275text(91, "Total Tx. Embarque:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(92, "td", 247);
+    \u0275\u0275elementStart(92, "td", 256);
     \u0275\u0275text(93);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(94, "td", 166);
+    \u0275\u0275elementStart(94, "td", 168);
     \u0275\u0275text(95, "Total Custo (c/ Txs):");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(96, "td", 166);
+    \u0275\u0275elementStart(96, "td", 168);
     \u0275\u0275text(97);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(98, "td", 191);
+    \u0275\u0275elementStart(98, "td", 194);
     \u0275\u0275text(99, "Total Venda (c/ Txs):");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(100, "td", 191);
+    \u0275\u0275elementStart(100, "td", 194);
     \u0275\u0275text(101);
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(102, "tr", 208)(103, "td", 245);
+    \u0275\u0275elementStart(102, "tr", 216)(103, "td", 254);
     \u0275\u0275text(104, "Resultado Bruto (Lucro):");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(105, "td", 248);
+    \u0275\u0275elementStart(105, "td", 257);
     \u0275\u0275text(106);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(107, "td", 164);
+    \u0275\u0275elementStart(107, "td", 166);
     \u0275\u0275text(108, "Margem Estimada (%):");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(109, "td", 249);
+    \u0275\u0275elementStart(109, "td", 258);
     \u0275\u0275text(110);
     \u0275\u0275pipe(111, "number");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(112, "tr", 161)(113, "td", 250);
-    \u0275\u0275element(114, "i", 251);
+    \u0275\u0275elementStart(112, "tr", 163)(113, "td", 259);
+    \u0275\u0275element(114, "i", 260);
     \u0275\u0275text(115, " INCLUI / SERVI\xC7OS: ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(116, "td", 252)(117, "div", 253)(118, "span", 254);
+    \u0275\u0275elementStart(116, "td", 261)(117, "div", 262)(118, "span", 263);
     \u0275\u0275text(119);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(120, "span", 254);
+    \u0275\u0275elementStart(120, "span", 263);
     \u0275\u0275text(121);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(122, "span", 226);
-    \u0275\u0275element(123, "i", 255);
+    \u0275\u0275elementStart(122, "span", 235);
+    \u0275\u0275element(123, "i", 264);
     \u0275\u0275text(124);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(125, "span", 226);
-    \u0275\u0275element(126, "i", 256);
+    \u0275\u0275elementStart(125, "span", 235);
+    \u0275\u0275element(126, "i", 265);
     \u0275\u0275text(127);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(128, "span", 254);
+    \u0275\u0275elementStart(128, "span", 263);
     \u0275\u0275text(129);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(130, "span", 226);
+    \u0275\u0275elementStart(130, "span", 235);
     \u0275\u0275text(131);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(132, "span", 226);
+    \u0275\u0275elementStart(132, "span", 235);
     \u0275\u0275text(133);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(134, "span", 254);
+    \u0275\u0275elementStart(134, "span", 263);
     \u0275\u0275text(135);
     \u0275\u0275elementEnd()()()();
-    \u0275\u0275elementStart(136, "tr", 161)(137, "td", 162);
+    \u0275\u0275elementStart(136, "tr", 163)(137, "td", 164);
     \u0275\u0275text(138, "TAXA 4BTS:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(139, "td", 257)(140, "span", 258);
+    \u0275\u0275elementStart(139, "td", 266)(140, "span", 267);
     \u0275\u0275text(141);
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(142, "td", 164);
+    \u0275\u0275elementStart(142, "td", 166);
     \u0275\u0275text(143, "Custo Total:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(144, "td", 166);
+    \u0275\u0275elementStart(144, "td", 168);
     \u0275\u0275text(145);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(146, "td", 214);
+    \u0275\u0275elementStart(146, "td", 222);
     \u0275\u0275text(147, "Venda Total:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(148, "td", 191);
+    \u0275\u0275elementStart(148, "td", 194);
     \u0275\u0275text(149);
     \u0275\u0275elementEnd()();
-    \u0275\u0275template(150, EventCreateComponent_div_163_ng_container_7_tr_150_Template, 5, 2, "tr", 259);
-    \u0275\u0275elementStart(151, "tr", 161)(152, "td", 162);
+    \u0275\u0275template(150, EventCreateComponent_div_163_ng_container_7_tr_150_Template, 5, 2, "tr", 268);
+    \u0275\u0275elementStart(151, "tr", 163)(152, "td", 164);
     \u0275\u0275text(153, "OBSERVA\xC7\xC3O INTERNA:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(154, "td", 163);
+    \u0275\u0275elementStart(154, "td", 165);
     \u0275\u0275text(155);
-    \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(156, "tr", 161)(157, "td", 162);
-    \u0275\u0275text(158, "OBSERVA\xC7\xC3O CLIENTE:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(159, "td", 163);
-    \u0275\u0275text(160);
+    \u0275\u0275elementStart(156, "td", 166);
+    \u0275\u0275text(157, "Faturamento Venda:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(158, "td", 194);
+    \u0275\u0275text(159);
     \u0275\u0275elementEnd()();
-    \u0275\u0275template(161, EventCreateComponent_div_163_ng_container_7_tr_161_Template, 6, 7, "tr", 259);
+    \u0275\u0275elementStart(160, "tr", 163)(161, "td", 164);
+    \u0275\u0275text(162, "OBSERVA\xC7\xC3O CLIENTE:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(163, "td", 165);
+    \u0275\u0275text(164);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(165, "td", 166);
+    \u0275\u0275text(166, "Faturamento Custo:");
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(167, "td", 196);
+    \u0275\u0275text(168);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275template(169, EventCreateComponent_div_163_ng_container_7_tr_169_Template, 6, 7, "tr", 268);
     \u0275\u0275elementEnd()()()()();
     \u0275\u0275elementContainerEnd();
   }
@@ -116194,9 +116281,9 @@ function EventCreateComponent_div_163_ng_container_7_Template(rf, ctx) {
     \u0275\u0275advance(2);
     \u0275\u0275textInterpolate1("TOTAL: ", item_r35.total_pax || 0, " PAX");
     \u0275\u0275advance(7);
-    \u0275\u0275textInterpolate(item_r35.deadline_date ? \u0275\u0275pipeBind2(38, 48, item_r35.deadline_date, "dd/MM/yyyy") : "-");
+    \u0275\u0275textInterpolate(item_r35.deadline_date ? \u0275\u0275pipeBind2(38, 52, item_r35.deadline_date, "dd/MM/yyyy") : "-");
     \u0275\u0275advance(7);
-    \u0275\u0275textInterpolate(item_r35.prazo_cia ? \u0275\u0275pipeBind2(45, 51, item_r35.prazo_cia, "dd/MM/yyyy") : "-");
+    \u0275\u0275textInterpolate(item_r35.prazo_cia ? \u0275\u0275pipeBind2(45, 55, item_r35.prazo_cia, "dd/MM/yyyy") : "-");
     \u0275\u0275advance(15);
     \u0275\u0275property("ngIf", !ctx_r2.isReadOnly);
     \u0275\u0275advance(22);
@@ -116220,7 +116307,7 @@ function EventCreateComponent_div_163_ng_container_7_Template(rf, ctx) {
     \u0275\u0275advance(3);
     \u0275\u0275attribute("colspan", ctx_r2.isReadOnly ? 3 : 4);
     \u0275\u0275advance();
-    \u0275\u0275textInterpolate1(" ", \u0275\u0275pipeBind2(111, 54, ctx_r2.getAirfareMargemPercent(item_r35), "1.2-2"), "% ");
+    \u0275\u0275textInterpolate1(" ", \u0275\u0275pipeBind2(111, 58, ctx_r2.getAirfareMargemPercent(item_r35), "1.2-2"), "% ");
     \u0275\u0275advance(6);
     \u0275\u0275attribute("colspan", ctx_r2.isReadOnly ? 8 : 9);
     \u0275\u0275advance(2);
@@ -116258,39 +116345,47 @@ function EventCreateComponent_div_163_ng_container_7_Template(rf, ctx) {
     \u0275\u0275advance();
     \u0275\u0275property("ngIf", item_r35.notes);
     \u0275\u0275advance(4);
-    \u0275\u0275attribute("colspan", ctx_r2.isReadOnly ? 8 : 9);
+    \u0275\u0275attribute("colspan", ctx_r2.isReadOnly ? 5 : 6);
     \u0275\u0275advance();
     \u0275\u0275textInterpolate1(" ", item_r35.internal_observation || "-", " ");
+    \u0275\u0275advance(3);
+    \u0275\u0275attribute("colspan", ctx_r2.isReadOnly ? 1 : 2);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", ctx_r2.formatCurrency(ctx_r2.getAirfareFaturamentoVenda(item_r35), item_r35.currency == null ? null : item_r35.currency.sigla), " ");
     \u0275\u0275advance(4);
-    \u0275\u0275attribute("colspan", ctx_r2.isReadOnly ? 8 : 9);
+    \u0275\u0275attribute("colspan", ctx_r2.isReadOnly ? 5 : 6);
     \u0275\u0275advance();
     \u0275\u0275textInterpolate1(" ", item_r35.customer_observation || "-", " ");
+    \u0275\u0275advance(3);
+    \u0275\u0275attribute("colspan", ctx_r2.isReadOnly ? 1 : 2);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", ctx_r2.formatCurrency(ctx_r2.getAirfareFaturamentoCusto(item_r35), item_r35.currency == null ? null : item_r35.currency.sigla), " ");
     \u0275\u0275advance();
     \u0275\u0275property("ngIf", item_r35.photo_1 || item_r35.photo_2 || item_r35.photo_3 || item_r35.photo_4);
   }
 }
 function EventCreateComponent_div_163_div_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 216);
-    \u0275\u0275element(1, "i", 217);
-    \u0275\u0275elementStart(2, "h5", 218);
+    \u0275\u0275elementStart(0, "div", 225);
+    \u0275\u0275element(1, "i", 226);
+    \u0275\u0275elementStart(2, "h5", 227);
     \u0275\u0275text(3, "Nenhum fornecedor a\xE9reo vinculado");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(4, "p", 219);
+    \u0275\u0275elementStart(4, "p", 228);
     \u0275\u0275text(5, "Use o bot\xE3o no topo para vincular um fornecedor a\xE9reo a este evento.");
     \u0275\u0275elementEnd()();
   }
 }
 function EventCreateComponent_div_163_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 128)(1, "div", 129)(2, "h5", 130);
+    \u0275\u0275elementStart(0, "div", 129)(1, "div", 130)(2, "h5", 131);
     \u0275\u0275element(3, "i", 20);
     \u0275\u0275text(4, " Fornecedores A\xE9reos Vinculados ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "div", 132);
-    \u0275\u0275template(6, EventCreateComponent_div_163_button_6_Template, 3, 0, "button", 135);
+    \u0275\u0275elementStart(5, "div", 133);
+    \u0275\u0275template(6, EventCreateComponent_div_163_button_6_Template, 3, 0, "button", 136);
     \u0275\u0275elementEnd()();
-    \u0275\u0275template(7, EventCreateComponent_div_163_ng_container_7_Template, 162, 57, "ng-container", 136)(8, EventCreateComponent_div_163_div_8_Template, 6, 0, "div", 137);
+    \u0275\u0275template(7, EventCreateComponent_div_163_ng_container_7_Template, 170, 61, "ng-container", 137)(8, EventCreateComponent_div_163_div_8_Template, 6, 0, "div", 138);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -116306,10 +116401,10 @@ function EventCreateComponent_div_163_Template(rf, ctx) {
 function EventCreateComponent_div_169_Template(rf, ctx) {
   if (rf & 1) {
     const _r41 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 280)(1, "label", 281);
+    \u0275\u0275elementStart(0, "div", 290)(1, "label", 291);
     \u0275\u0275text(2, "Equipamento:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "input", 282);
+    \u0275\u0275elementStart(3, "input", 292);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_169_Template_input_ngModelChange_3_listener($event) {
       \u0275\u0275restoreView(_r41);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -116326,7 +116421,7 @@ function EventCreateComponent_div_169_Template(rf, ctx) {
 }
 function EventCreateComponent_option_178_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 124);
+    \u0275\u0275elementStart(0, "option", 125);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -116339,7 +116434,7 @@ function EventCreateComponent_option_178_Template(rf, ctx) {
 }
 function EventCreateComponent_div_179_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -116351,8 +116446,8 @@ function EventCreateComponent_div_179_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_179_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_179_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_179_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -116364,10 +116459,10 @@ function EventCreateComponent_div_179_Template(rf, ctx) {
 function EventCreateComponent_div_180_Template(rf, ctx) {
   if (rf & 1) {
     const _r44 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 70)(1, "label", 283);
+    \u0275\u0275elementStart(0, "div", 70)(1, "label", 293);
     \u0275\u0275text(2, "ISS (%):");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "input", 284);
+    \u0275\u0275elementStart(3, "input", 294);
     \u0275\u0275listener("input", function EventCreateComponent_div_180_Template_input_input_3_listener($event) {
       \u0275\u0275restoreView(_r44);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -116385,10 +116480,10 @@ function EventCreateComponent_div_180_Template(rf, ctx) {
 function EventCreateComponent_div_181_Template(rf, ctx) {
   if (rf & 1) {
     const _r45 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 70)(1, "label", 285);
+    \u0275\u0275elementStart(0, "div", 70)(1, "label", 295);
     \u0275\u0275text(2, "Servi\xE7o (%):");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "input", 286);
+    \u0275\u0275elementStart(3, "input", 296);
     \u0275\u0275listener("input", function EventCreateComponent_div_181_Template_input_input_3_listener($event) {
       \u0275\u0275restoreView(_r45);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -116406,10 +116501,10 @@ function EventCreateComponent_div_181_Template(rf, ctx) {
 function EventCreateComponent_div_182_Template(rf, ctx) {
   if (rf & 1) {
     const _r46 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 70)(1, "label", 287);
+    \u0275\u0275elementStart(0, "div", 70)(1, "label", 297);
     \u0275\u0275text(2, "IVA (%):");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "input", 288);
+    \u0275\u0275elementStart(3, "input", 298);
     \u0275\u0275listener("input", function EventCreateComponent_div_182_Template_input_input_3_listener($event) {
       \u0275\u0275restoreView(_r46);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -116426,7 +116521,7 @@ function EventCreateComponent_div_182_Template(rf, ctx) {
 }
 function EventCreateComponent_div_187_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -116438,8 +116533,8 @@ function EventCreateComponent_div_187_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_187_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_187_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_187_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -116450,7 +116545,7 @@ function EventCreateComponent_div_187_Template(rf, ctx) {
 }
 function EventCreateComponent_div_188_span_4_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 293);
+    \u0275\u0275elementStart(0, "span", 303);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -116463,12 +116558,12 @@ function EventCreateComponent_div_188_span_4_Template(rf, ctx) {
 function EventCreateComponent_div_188_Template(rf, ctx) {
   if (rf & 1) {
     const _r48 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 289)(1, "label", 290);
+    \u0275\u0275elementStart(0, "div", 299)(1, "label", 300);
     \u0275\u0275text(2, "Taxa Turismo:");
     \u0275\u0275elementEnd();
     \u0275\u0275elementStart(3, "div", 52);
-    \u0275\u0275template(4, EventCreateComponent_div_188_span_4_Template, 2, 1, "span", 291);
-    \u0275\u0275elementStart(5, "input", 292);
+    \u0275\u0275template(4, EventCreateComponent_div_188_span_4_Template, 2, 1, "span", 301);
+    \u0275\u0275elementStart(5, "input", 302);
     \u0275\u0275listener("input", function EventCreateComponent_div_188_Template_input_input_5_listener($event) {
       \u0275\u0275restoreView(_r48);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -116486,7 +116581,7 @@ function EventCreateComponent_div_188_Template(rf, ctx) {
 }
 function EventCreateComponent_div_195_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -116498,8 +116593,8 @@ function EventCreateComponent_div_195_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_195_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_195_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_195_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -116510,7 +116605,7 @@ function EventCreateComponent_div_195_Template(rf, ctx) {
 }
 function EventCreateComponent_div_221_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -116522,8 +116617,8 @@ function EventCreateComponent_div_221_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_221_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_221_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_221_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -116535,13 +116630,13 @@ function EventCreateComponent_div_221_Template(rf, ctx) {
 function EventCreateComponent_div_222_Template(rf, ctx) {
   if (rf & 1) {
     const _r51 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 280)(1, "label", 294);
+    \u0275\u0275elementStart(0, "div", 290)(1, "label", 304);
     \u0275\u0275text(2, "Prazo da Cia:");
     \u0275\u0275elementEnd();
     \u0275\u0275elementStart(3, "div", 52)(4, "span", 53);
-    \u0275\u0275element(5, "i", 295);
+    \u0275\u0275element(5, "i", 305);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(6, "input", 296);
+    \u0275\u0275elementStart(6, "input", 306);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_222_Template_input_ngModelChange_6_listener($event) {
       \u0275\u0275restoreView(_r51);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -116558,7 +116653,7 @@ function EventCreateComponent_div_222_Template(rf, ctx) {
 }
 function EventCreateComponent_div_223_span_97_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 293);
+    \u0275\u0275elementStart(0, "span", 303);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -116570,7 +116665,7 @@ function EventCreateComponent_div_223_span_97_Template(rf, ctx) {
 }
 function EventCreateComponent_div_223_span_107_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 293);
+    \u0275\u0275elementStart(0, "span", 303);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -116583,9 +116678,9 @@ function EventCreateComponent_div_223_span_107_Template(rf, ctx) {
 function EventCreateComponent_div_223_div_126_div_4_Template(rf, ctx) {
   if (rf & 1) {
     const _r54 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 344);
-    \u0275\u0275element(1, "img", 345);
-    \u0275\u0275elementStart(2, "button", 346);
+    \u0275\u0275elementStart(0, "div", 354);
+    \u0275\u0275element(1, "img", 355);
+    \u0275\u0275elementStart(2, "button", 356);
     \u0275\u0275listener("click", function EventCreateComponent_div_223_div_126_div_4_Template_button_click_2_listener($event) {
       \u0275\u0275restoreView(_r54);
       const pNum_r55 = \u0275\u0275nextContext().$implicit;
@@ -116604,19 +116699,19 @@ function EventCreateComponent_div_223_div_126_div_4_Template(rf, ctx) {
 }
 function EventCreateComponent_div_223_div_126_div_5_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 347);
-    \u0275\u0275element(1, "i", 348);
+    \u0275\u0275elementStart(0, "div", 357);
+    \u0275\u0275element(1, "i", 358);
     \u0275\u0275elementEnd();
   }
 }
 function EventCreateComponent_div_223_div_126_Template(rf, ctx) {
   if (rf & 1) {
     const _r53 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 338)(1, "div", 339)(2, "span", 340);
+    \u0275\u0275elementStart(0, "div", 348)(1, "div", 349)(2, "span", 350);
     \u0275\u0275text(3);
     \u0275\u0275elementEnd();
-    \u0275\u0275template(4, EventCreateComponent_div_223_div_126_div_4_Template, 4, 1, "div", 341)(5, EventCreateComponent_div_223_div_126_div_5_Template, 2, 0, "div", 342);
-    \u0275\u0275elementStart(6, "input", 343);
+    \u0275\u0275template(4, EventCreateComponent_div_223_div_126_div_4_Template, 4, 1, "div", 351)(5, EventCreateComponent_div_223_div_126_div_5_Template, 2, 0, "div", 352);
+    \u0275\u0275elementStart(6, "input", 353);
     \u0275\u0275listener("change", function EventCreateComponent_div_223_div_126_Template_input_change_6_listener($event) {
       const pNum_r55 = \u0275\u0275restoreView(_r53).$implicit;
       const ctx_r2 = \u0275\u0275nextContext(2);
@@ -116640,17 +116735,17 @@ function EventCreateComponent_div_223_div_126_Template(rf, ctx) {
 function EventCreateComponent_div_223_Template(rf, ctx) {
   if (rf & 1) {
     const _r52 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 297)(1, "div", 298)(2, "h6", 299);
-    \u0275\u0275element(3, "i", 300);
+    \u0275\u0275elementStart(0, "div", 307)(1, "div", 308)(2, "h6", 309);
+    \u0275\u0275element(3, "i", 310);
     \u0275\u0275text(4, " Or\xE7amento Fretamento / Cia A\xE9rea ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "div", 9)(6, "div", 297)(7, "label", 301);
+    \u0275\u0275elementStart(5, "div", 9)(6, "div", 307)(7, "label", 311);
     \u0275\u0275text(8, "Distribui\xE7\xE3o de Assentos (PAX):");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(9, "div", 302)(10, "div", 303)(11, "label", 304);
+    \u0275\u0275elementStart(9, "div", 312)(10, "div", 313)(11, "label", 314);
     \u0275\u0275text(12, "FIRST:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(13, "input", 305);
+    \u0275\u0275elementStart(13, "input", 315);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_input_ngModelChange_13_listener($event) {
       \u0275\u0275restoreView(_r52);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -116663,10 +116758,10 @@ function EventCreateComponent_div_223_Template(rf, ctx) {
       return \u0275\u0275resetView(ctx_r2.calculatePaxTotal());
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(14, "div", 303)(15, "label", 304);
+    \u0275\u0275elementStart(14, "div", 313)(15, "label", 314);
     \u0275\u0275text(16, "EXECUTIVA:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(17, "input", 306);
+    \u0275\u0275elementStart(17, "input", 316);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_input_ngModelChange_17_listener($event) {
       \u0275\u0275restoreView(_r52);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -116679,10 +116774,10 @@ function EventCreateComponent_div_223_Template(rf, ctx) {
       return \u0275\u0275resetView(ctx_r2.calculatePaxTotal());
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(18, "div", 303)(19, "label", 304);
+    \u0275\u0275elementStart(18, "div", 313)(19, "label", 314);
     \u0275\u0275text(20, "PREMIUM:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(21, "input", 307);
+    \u0275\u0275elementStart(21, "input", 317);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_input_ngModelChange_21_listener($event) {
       \u0275\u0275restoreView(_r52);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -116695,10 +116790,10 @@ function EventCreateComponent_div_223_Template(rf, ctx) {
       return \u0275\u0275resetView(ctx_r2.calculatePaxTotal());
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(22, "div", 308)(23, "label", 304);
+    \u0275\u0275elementStart(22, "div", 318)(23, "label", 314);
     \u0275\u0275text(24, "ECON\xD4MICA:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(25, "input", 309);
+    \u0275\u0275elementStart(25, "input", 319);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_input_ngModelChange_25_listener($event) {
       \u0275\u0275restoreView(_r52);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -116711,18 +116806,18 @@ function EventCreateComponent_div_223_Template(rf, ctx) {
       return \u0275\u0275resetView(ctx_r2.calculatePaxTotal());
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(26, "div", 308)(27, "label", 304);
+    \u0275\u0275elementStart(26, "div", 318)(27, "label", 314);
     \u0275\u0275text(28, "TOTAL PAX:");
     \u0275\u0275elementEnd();
-    \u0275\u0275element(29, "input", 310);
+    \u0275\u0275element(29, "input", 320);
     \u0275\u0275elementEnd()()();
-    \u0275\u0275elementStart(30, "div", 297)(31, "label", 301);
+    \u0275\u0275elementStart(30, "div", 307)(31, "label", 311);
     \u0275\u0275text(32, "Inclus\xF5es & Servi\xE7os:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(33, "div", 302)(34, "div", 311)(35, "label", 312);
+    \u0275\u0275elementStart(33, "div", 312)(34, "div", 321)(35, "label", 322);
     \u0275\u0275text(36, "Taxa de Embarque:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(37, "select", 313);
+    \u0275\u0275elementStart(37, "select", 323);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_select_ngModelChange_37_listener($event) {
       \u0275\u0275restoreView(_r52);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -116735,10 +116830,10 @@ function EventCreateComponent_div_223_Template(rf, ctx) {
     \u0275\u0275elementStart(40, "option", 86);
     \u0275\u0275text(41, "N\xC3O");
     \u0275\u0275elementEnd()()();
-    \u0275\u0275elementStart(42, "div", 311)(43, "label", 312);
+    \u0275\u0275elementStart(42, "div", 321)(43, "label", 322);
     \u0275\u0275text(44, "Servi\xE7o de Bordo:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(45, "select", 314);
+    \u0275\u0275elementStart(45, "select", 324);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_select_ngModelChange_45_listener($event) {
       \u0275\u0275restoreView(_r52);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -116751,10 +116846,10 @@ function EventCreateComponent_div_223_Template(rf, ctx) {
     \u0275\u0275elementStart(48, "option", 86);
     \u0275\u0275text(49, "N\xC3O");
     \u0275\u0275elementEnd()()();
-    \u0275\u0275elementStart(50, "div", 311)(51, "label", 304);
+    \u0275\u0275elementStart(50, "div", 321)(51, "label", 314);
     \u0275\u0275text(52, "Por\xE3o:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(53, "div", 315)(54, "input", 316);
+    \u0275\u0275elementStart(53, "div", 325)(54, "input", 326);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_input_ngModelChange_54_listener($event) {
       \u0275\u0275restoreView(_r52);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -116765,10 +116860,10 @@ function EventCreateComponent_div_223_Template(rf, ctx) {
     \u0275\u0275elementStart(55, "span", 53);
     \u0275\u0275text(56, "kg");
     \u0275\u0275elementEnd()()();
-    \u0275\u0275elementStart(57, "div", 311)(58, "label", 304);
+    \u0275\u0275elementStart(57, "div", 321)(58, "label", 314);
     \u0275\u0275text(59, "Bagagem a bordo:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(60, "div", 315)(61, "input", 317);
+    \u0275\u0275elementStart(60, "div", 325)(61, "input", 327);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_input_ngModelChange_61_listener($event) {
       \u0275\u0275restoreView(_r52);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -116779,10 +116874,10 @@ function EventCreateComponent_div_223_Template(rf, ctx) {
     \u0275\u0275elementStart(62, "span", 53);
     \u0275\u0275text(63, "kg");
     \u0275\u0275elementEnd()()();
-    \u0275\u0275elementStart(64, "div", 308)(65, "label", 312);
+    \u0275\u0275elementStart(64, "div", 318)(65, "label", 322);
     \u0275\u0275text(66, "Sala VIP Aeroporto:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(67, "select", 318);
+    \u0275\u0275elementStart(67, "select", 328);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_select_ngModelChange_67_listener($event) {
       \u0275\u0275restoreView(_r52);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -116795,10 +116890,10 @@ function EventCreateComponent_div_223_Template(rf, ctx) {
     \u0275\u0275elementStart(70, "option", 86);
     \u0275\u0275text(71, "N\xC3O");
     \u0275\u0275elementEnd()()();
-    \u0275\u0275elementStart(72, "div", 308)(73, "label", 304);
+    \u0275\u0275elementStart(72, "div", 318)(73, "label", 314);
     \u0275\u0275text(74, "FBO Origem:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(75, "input", 319);
+    \u0275\u0275elementStart(75, "input", 329);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_input_ngModelChange_75_listener($event) {
       \u0275\u0275restoreView(_r52);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -116806,10 +116901,10 @@ function EventCreateComponent_div_223_Template(rf, ctx) {
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(76, "div", 308)(77, "label", 304);
+    \u0275\u0275elementStart(76, "div", 318)(77, "label", 314);
     \u0275\u0275text(78, "FBO Destino:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(79, "input", 320);
+    \u0275\u0275elementStart(79, "input", 330);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_input_ngModelChange_79_listener($event) {
       \u0275\u0275restoreView(_r52);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -116817,10 +116912,10 @@ function EventCreateComponent_div_223_Template(rf, ctx) {
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(80, "div", 308)(81, "label", 312);
+    \u0275\u0275elementStart(80, "div", 318)(81, "label", 322);
     \u0275\u0275text(82, "Altera\xE7\xE3o de Nomes:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(83, "select", 321);
+    \u0275\u0275elementStart(83, "select", 331);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_select_ngModelChange_83_listener($event) {
       \u0275\u0275restoreView(_r52);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -116833,26 +116928,26 @@ function EventCreateComponent_div_223_Template(rf, ctx) {
     \u0275\u0275elementStart(86, "option", 86);
     \u0275\u0275text(87, "N\xC3O");
     \u0275\u0275elementEnd()()()()();
-    \u0275\u0275elementStart(88, "div", 297)(89, "label", 301);
-    \u0275\u0275element(90, "i", 322);
+    \u0275\u0275elementStart(88, "div", 307)(89, "label", 311);
+    \u0275\u0275element(90, "i", 332);
     \u0275\u0275text(91, " Valores do Fretamento & Taxas: ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(92, "div", 323)(93, "div", 324)(94, "label", 325);
+    \u0275\u0275elementStart(92, "div", 333)(93, "div", 334)(94, "label", 335);
     \u0275\u0275text(95, "Custo do Fretamento (Net):");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(96, "div", 315);
-    \u0275\u0275template(97, EventCreateComponent_div_223_span_97_Template, 2, 1, "span", 291);
-    \u0275\u0275elementStart(98, "input", 326);
+    \u0275\u0275elementStart(96, "div", 325);
+    \u0275\u0275template(97, EventCreateComponent_div_223_span_97_Template, 2, 1, "span", 301);
+    \u0275\u0275elementStart(98, "input", 336);
     \u0275\u0275listener("input", function EventCreateComponent_div_223_Template_input_input_98_listener($event) {
       \u0275\u0275restoreView(_r52);
       const ctx_r2 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r2.onMoneyInput($event, "total_net_sem_4bts", "providerLinkForm"));
     });
     \u0275\u0275elementEnd()()();
-    \u0275\u0275elementStart(99, "div", 324)(100, "label", 327);
+    \u0275\u0275elementStart(99, "div", 334)(100, "label", 337);
     \u0275\u0275text(101, "Mark Up:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(102, "input", 328);
+    \u0275\u0275elementStart(102, "input", 338);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_input_ngModelChange_102_listener($event) {
       \u0275\u0275restoreView(_r52);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -116865,26 +116960,26 @@ function EventCreateComponent_div_223_Template(rf, ctx) {
       return \u0275\u0275resetView(ctx_r2.onMarkupBlur());
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(103, "div", 324)(104, "label", 304);
+    \u0275\u0275elementStart(103, "div", 334)(104, "label", 314);
     \u0275\u0275text(105, "Taxa de Embarque (Unit.):");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(106, "div", 315);
-    \u0275\u0275template(107, EventCreateComponent_div_223_span_107_Template, 2, 1, "span", 291);
-    \u0275\u0275elementStart(108, "input", 329);
+    \u0275\u0275elementStart(106, "div", 325);
+    \u0275\u0275template(107, EventCreateComponent_div_223_span_107_Template, 2, 1, "span", 301);
+    \u0275\u0275elementStart(108, "input", 339);
     \u0275\u0275listener("input", function EventCreateComponent_div_223_Template_input_input_108_listener($event) {
       \u0275\u0275restoreView(_r52);
       const ctx_r2 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r2.onMoneyInput($event, "taxa_embarque_unit", "providerLinkForm"));
     });
     \u0275\u0275elementEnd()()()()();
-    \u0275\u0275elementStart(109, "div", 297)(110, "label", 301);
-    \u0275\u0275element(111, "i", 330);
+    \u0275\u0275elementStart(109, "div", 307)(110, "label", 311);
+    \u0275\u0275element(111, "i", 340);
     \u0275\u0275text(112, " Campos para Montagem da Proposta (PDF): ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(113, "div", 323)(114, "div", 91)(115, "label", 331);
+    \u0275\u0275elementStart(113, "div", 333)(114, "div", 91)(115, "label", 341);
     \u0275\u0275text(116, "Observa\xE7\xF5es (Proposta):");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(117, "textarea", 332);
+    \u0275\u0275elementStart(117, "textarea", 342);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_textarea_ngModelChange_117_listener($event) {
       \u0275\u0275restoreView(_r52);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -116892,10 +116987,10 @@ function EventCreateComponent_div_223_Template(rf, ctx) {
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(118, "div", 91)(119, "label", 333);
+    \u0275\u0275elementStart(118, "div", 91)(119, "label", 343);
     \u0275\u0275text(120, "Notes (Fretamento):");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(121, "textarea", 334);
+    \u0275\u0275elementStart(121, "textarea", 344);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_223_Template_textarea_ngModelChange_121_listener($event) {
       \u0275\u0275restoreView(_r52);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -116903,11 +116998,11 @@ function EventCreateComponent_div_223_Template(rf, ctx) {
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(122, "div", 335)(123, "label", 336);
+    \u0275\u0275elementStart(122, "div", 345)(123, "label", 346);
     \u0275\u0275text(124, "Fotos da Proposta (At\xE9 4 Imagens):");
     \u0275\u0275elementEnd();
     \u0275\u0275elementStart(125, "div", 9);
-    \u0275\u0275template(126, EventCreateComponent_div_223_div_126_Template, 7, 4, "div", 337);
+    \u0275\u0275template(126, EventCreateComponent_div_223_div_126_Template, 7, 4, "div", 347);
     \u0275\u0275elementEnd()()()()()()();
   }
   if (rf & 2) {
@@ -116975,7 +117070,7 @@ function EventCreateComponent_div_223_Template(rf, ctx) {
 function EventCreateComponent_div_224_Template(rf, ctx) {
   if (rf & 1) {
     const _r56 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 297)(1, "div", 349)(2, "div", 350)(3, "div", 351)(4, "input", 352);
+    \u0275\u0275elementStart(0, "div", 307)(1, "div", 359)(2, "div", 360)(3, "div", 361)(4, "input", 362);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_224_Template_input_ngModelChange_4_listener($event) {
       \u0275\u0275restoreView(_r56);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -116988,13 +117083,13 @@ function EventCreateComponent_div_224_Template(rf, ctx) {
       return \u0275\u0275resetView(ctx_r2.onChangeHotelTimesToggle());
     });
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "label", 353);
+    \u0275\u0275elementStart(5, "label", 363);
     \u0275\u0275text(6, " Alterar hor\xE1rios padr\xE3o do hotel? ");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(7, "div", 354)(8, "label", 355);
+    \u0275\u0275elementStart(7, "div", 364)(8, "label", 365);
     \u0275\u0275text(9, "Check-in In\xEDcio:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(10, "input", 356);
+    \u0275\u0275elementStart(10, "input", 366);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_224_Template_input_ngModelChange_10_listener($event) {
       \u0275\u0275restoreView(_r56);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -117002,10 +117097,10 @@ function EventCreateComponent_div_224_Template(rf, ctx) {
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(11, "div", 354)(12, "label", 357);
+    \u0275\u0275elementStart(11, "div", 364)(12, "label", 367);
     \u0275\u0275text(13, "Check-in Fim:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(14, "input", 358);
+    \u0275\u0275elementStart(14, "input", 368);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_224_Template_input_ngModelChange_14_listener($event) {
       \u0275\u0275restoreView(_r56);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -117013,10 +117108,10 @@ function EventCreateComponent_div_224_Template(rf, ctx) {
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(15, "div", 354)(16, "label", 359);
+    \u0275\u0275elementStart(15, "div", 364)(16, "label", 369);
     \u0275\u0275text(17, "Check-out In\xEDcio:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(18, "input", 360);
+    \u0275\u0275elementStart(18, "input", 370);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_224_Template_input_ngModelChange_18_listener($event) {
       \u0275\u0275restoreView(_r56);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -117024,10 +117119,10 @@ function EventCreateComponent_div_224_Template(rf, ctx) {
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(19, "div", 354)(20, "label", 361);
+    \u0275\u0275elementStart(19, "div", 364)(20, "label", 371);
     \u0275\u0275text(21, "Check-out Fim:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(22, "input", 362);
+    \u0275\u0275elementStart(22, "input", 372);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_224_Template_input_ngModelChange_22_listener($event) {
       \u0275\u0275restoreView(_r56);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -117056,12 +117151,12 @@ function EventCreateComponent_div_224_Template(rf, ctx) {
 }
 function EventCreateComponent_span_238_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275element(0, "span", 127);
+    \u0275\u0275element(0, "span", 128);
   }
 }
 function EventCreateComponent_div_244_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 124);
+    \u0275\u0275elementStart(0, "option", 125);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117074,7 +117169,7 @@ function EventCreateComponent_div_244_option_8_Template(rf, ctx) {
 }
 function EventCreateComponent_div_244_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117086,8 +117181,8 @@ function EventCreateComponent_div_244_div_9_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_244_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_244_div_9_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_244_div_9_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117099,12 +117194,12 @@ function EventCreateComponent_div_244_div_9_Template(rf, ctx) {
 function EventCreateComponent_div_244_Template(rf, ctx) {
   if (rf & 1) {
     const _r57 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 91)(1, "label", 363);
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 373);
     \u0275\u0275text(2, " Broker: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 364);
+    \u0275\u0275elementStart(5, "select", 374);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_244_Template_select_ngModelChange_5_listener($event) {
       \u0275\u0275restoreView(_r57);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -117132,7 +117227,7 @@ function EventCreateComponent_div_244_Template(rf, ctx) {
 }
 function EventCreateComponent_div_245_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 124);
+    \u0275\u0275elementStart(0, "option", 125);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117145,7 +117240,7 @@ function EventCreateComponent_div_245_option_8_Template(rf, ctx) {
 }
 function EventCreateComponent_div_245_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117157,8 +117252,8 @@ function EventCreateComponent_div_245_div_9_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_245_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_245_div_9_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_245_div_9_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117170,12 +117265,12 @@ function EventCreateComponent_div_245_div_9_Template(rf, ctx) {
 function EventCreateComponent_div_245_Template(rf, ctx) {
   if (rf & 1) {
     const _r60 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 91)(1, "label", 365);
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 375);
     \u0275\u0275text(2, " Regime: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 366);
+    \u0275\u0275elementStart(5, "select", 376);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_245_Template_select_ngModelChange_5_listener($event) {
       \u0275\u0275restoreView(_r60);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -117203,7 +117298,7 @@ function EventCreateComponent_div_245_Template(rf, ctx) {
 }
 function EventCreateComponent_div_246_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 124);
+    \u0275\u0275elementStart(0, "option", 125);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117216,7 +117311,7 @@ function EventCreateComponent_div_246_option_8_Template(rf, ctx) {
 }
 function EventCreateComponent_div_246_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117228,8 +117323,8 @@ function EventCreateComponent_div_246_div_9_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_246_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_246_div_9_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_246_div_9_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117241,12 +117336,12 @@ function EventCreateComponent_div_246_div_9_Template(rf, ctx) {
 function EventCreateComponent_div_246_Template(rf, ctx) {
   if (rf & 1) {
     const _r63 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 91)(1, "label", 367);
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 377);
     \u0275\u0275text(2, " Prop\xF3sito: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 368);
+    \u0275\u0275elementStart(5, "select", 378);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_246_Template_select_ngModelChange_5_listener($event) {
       \u0275\u0275restoreView(_r63);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -117275,11 +117370,13 @@ function EventCreateComponent_div_246_Template(rf, ctx) {
 function EventCreateComponent_div_247_Template(rf, ctx) {
   if (rf & 1) {
     const _r66 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 106)(1, "label", 369);
-    \u0275\u0275text(2, " Descri\xE7\xE3o: ");
-    \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "input", 370);
-    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_247_Template_input_ngModelChange_3_listener($event) {
+    \u0275\u0275elementStart(0, "div", 106)(1, "label", 379);
+    \u0275\u0275text(2, " Nome do Sal\xE3o: ");
+    \u0275\u0275elementStart(3, "span", 28);
+    \u0275\u0275text(4, "*");
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(5, "input", 380);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_247_Template_input_ngModelChange_5_listener($event) {
       \u0275\u0275restoreView(_r66);
       const ctx_r2 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r2.optForm.name, $event) || (ctx_r2.optForm.name = $event);
@@ -117289,17 +117386,17 @@ function EventCreateComponent_div_247_Template(rf, ctx) {
   }
   if (rf & 2) {
     const ctx_r2 = \u0275\u0275nextContext();
-    \u0275\u0275advance(3);
+    \u0275\u0275advance(5);
     \u0275\u0275twoWayProperty("ngModel", ctx_r2.optForm.name);
   }
 }
 function EventCreateComponent_div_248_Template(rf, ctx) {
   if (rf & 1) {
     const _r67 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 91)(1, "label", 371);
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 381);
     \u0275\u0275text(2, " Metragem (m\xB2): ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "input", 372);
+    \u0275\u0275elementStart(3, "input", 382);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_248_Template_input_ngModelChange_3_listener($event) {
       \u0275\u0275restoreView(_r67);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -117317,10 +117414,10 @@ function EventCreateComponent_div_248_Template(rf, ctx) {
 function EventCreateComponent_div_249_Template(rf, ctx) {
   if (rf & 1) {
     const _r68 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 91)(1, "label", 373);
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 383);
     \u0275\u0275text(2, " Qtd. Pax: ");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "input", 374);
+    \u0275\u0275elementStart(3, "input", 384);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_249_Template_input_ngModelChange_3_listener($event) {
       \u0275\u0275restoreView(_r68);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -117337,7 +117434,7 @@ function EventCreateComponent_div_249_Template(rf, ctx) {
 }
 function EventCreateComponent_div_250_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 124);
+    \u0275\u0275elementStart(0, "option", 125);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117350,7 +117447,7 @@ function EventCreateComponent_div_250_option_8_Template(rf, ctx) {
 }
 function EventCreateComponent_div_250_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117362,8 +117459,8 @@ function EventCreateComponent_div_250_div_9_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_250_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_250_div_9_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_250_div_9_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117375,12 +117472,12 @@ function EventCreateComponent_div_250_div_9_Template(rf, ctx) {
 function EventCreateComponent_div_250_Template(rf, ctx) {
   if (rf & 1) {
     const _r69 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 91)(1, "label", 375);
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 385);
     \u0275\u0275text(2, " Categoria Apto: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 376);
+    \u0275\u0275elementStart(5, "select", 386);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_250_Template_select_ngModelChange_5_listener($event) {
       \u0275\u0275restoreView(_r69);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -117408,7 +117505,7 @@ function EventCreateComponent_div_250_Template(rf, ctx) {
 }
 function EventCreateComponent_div_251_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 124);
+    \u0275\u0275elementStart(0, "option", 125);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117421,7 +117518,7 @@ function EventCreateComponent_div_251_option_8_Template(rf, ctx) {
 }
 function EventCreateComponent_div_251_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117433,8 +117530,8 @@ function EventCreateComponent_div_251_div_9_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_251_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_251_div_9_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_251_div_9_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117446,12 +117543,12 @@ function EventCreateComponent_div_251_div_9_Template(rf, ctx) {
 function EventCreateComponent_div_251_Template(rf, ctx) {
   if (rf & 1) {
     const _r72 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 91)(1, "label", 377);
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 387);
     \u0275\u0275text(2, " Tipo Apto: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 378);
+    \u0275\u0275elementStart(5, "select", 388);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_251_Template_select_ngModelChange_5_listener($event) {
       \u0275\u0275restoreView(_r72);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -117479,7 +117576,7 @@ function EventCreateComponent_div_251_Template(rf, ctx) {
 }
 function EventCreateComponent_div_252_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 124);
+    \u0275\u0275elementStart(0, "option", 125);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117492,7 +117589,7 @@ function EventCreateComponent_div_252_option_8_Template(rf, ctx) {
 }
 function EventCreateComponent_div_252_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117504,8 +117601,8 @@ function EventCreateComponent_div_252_div_9_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_252_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_252_div_9_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_252_div_9_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117517,12 +117614,12 @@ function EventCreateComponent_div_252_div_9_Template(rf, ctx) {
 function EventCreateComponent_div_252_Template(rf, ctx) {
   if (rf & 1) {
     const _r75 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 91)(1, "label", 379);
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 389);
     \u0275\u0275text(2);
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 380);
+    \u0275\u0275elementStart(5, "select", 390);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_252_Template_select_ngModelChange_5_listener($event) {
       \u0275\u0275restoreView(_r75);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -117552,7 +117649,7 @@ function EventCreateComponent_div_252_Template(rf, ctx) {
 }
 function EventCreateComponent_div_253_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 124);
+    \u0275\u0275elementStart(0, "option", 125);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117565,7 +117662,7 @@ function EventCreateComponent_div_253_option_8_Template(rf, ctx) {
 }
 function EventCreateComponent_div_253_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117577,8 +117674,8 @@ function EventCreateComponent_div_253_div_9_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_253_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_253_div_9_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_253_div_9_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117590,12 +117687,12 @@ function EventCreateComponent_div_253_div_9_Template(rf, ctx) {
 function EventCreateComponent_div_253_Template(rf, ctx) {
   if (rf & 1) {
     const _r78 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 91)(1, "label", 381);
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 391);
     \u0275\u0275text(2, " Tipo de Servi\xE7o: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 382);
+    \u0275\u0275elementStart(5, "select", 392);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_253_Template_select_ngModelChange_5_listener($event) {
       \u0275\u0275restoreView(_r78);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -117623,7 +117720,7 @@ function EventCreateComponent_div_253_Template(rf, ctx) {
 }
 function EventCreateComponent_div_254_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 124);
+    \u0275\u0275elementStart(0, "option", 125);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117636,7 +117733,7 @@ function EventCreateComponent_div_254_option_8_Template(rf, ctx) {
 }
 function EventCreateComponent_div_254_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117648,8 +117745,8 @@ function EventCreateComponent_div_254_div_9_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_254_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_254_div_9_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_254_div_9_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117661,12 +117758,12 @@ function EventCreateComponent_div_254_div_9_Template(rf, ctx) {
 function EventCreateComponent_div_254_Template(rf, ctx) {
   if (rf & 1) {
     const _r81 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 91)(1, "label", 383);
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 393);
     \u0275\u0275text(2, " Local: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 384);
+    \u0275\u0275elementStart(5, "select", 394);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_254_Template_select_ngModelChange_5_listener($event) {
       \u0275\u0275restoreView(_r81);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -117694,7 +117791,7 @@ function EventCreateComponent_div_254_Template(rf, ctx) {
 }
 function EventCreateComponent_div_255_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 124);
+    \u0275\u0275elementStart(0, "option", 125);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117707,7 +117804,7 @@ function EventCreateComponent_div_255_option_8_Template(rf, ctx) {
 }
 function EventCreateComponent_div_255_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117719,8 +117816,8 @@ function EventCreateComponent_div_255_div_9_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_255_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_255_div_9_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_255_div_9_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117732,12 +117829,12 @@ function EventCreateComponent_div_255_div_9_Template(rf, ctx) {
 function EventCreateComponent_div_255_Template(rf, ctx) {
   if (rf & 1) {
     const _r84 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 91)(1, "label", 385);
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 395);
     \u0275\u0275text(2, " Frequ\xEAncia: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 386);
+    \u0275\u0275elementStart(5, "select", 396);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_255_Template_select_ngModelChange_5_listener($event) {
       \u0275\u0275restoreView(_r84);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -117765,7 +117862,7 @@ function EventCreateComponent_div_255_Template(rf, ctx) {
 }
 function EventCreateComponent_div_256_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 124);
+    \u0275\u0275elementStart(0, "option", 125);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117778,7 +117875,7 @@ function EventCreateComponent_div_256_option_8_Template(rf, ctx) {
 }
 function EventCreateComponent_div_256_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117790,8 +117887,8 @@ function EventCreateComponent_div_256_div_9_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_256_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_256_div_9_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_256_div_9_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117803,12 +117900,12 @@ function EventCreateComponent_div_256_div_9_Template(rf, ctx) {
 function EventCreateComponent_div_256_Template(rf, ctx) {
   if (rf & 1) {
     const _r87 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 91)(1, "label", 387);
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 397);
     \u0275\u0275text(2, " Medida: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 388);
+    \u0275\u0275elementStart(5, "select", 398);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_256_Template_select_ngModelChange_5_listener($event) {
       \u0275\u0275restoreView(_r87);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -117836,7 +117933,7 @@ function EventCreateComponent_div_256_Template(rf, ctx) {
 }
 function EventCreateComponent_div_257_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 124);
+    \u0275\u0275elementStart(0, "option", 125);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117849,7 +117946,7 @@ function EventCreateComponent_div_257_option_8_Template(rf, ctx) {
 }
 function EventCreateComponent_div_257_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117861,8 +117958,8 @@ function EventCreateComponent_div_257_div_9_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_257_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_257_div_9_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_257_div_9_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117874,12 +117971,12 @@ function EventCreateComponent_div_257_div_9_Template(rf, ctx) {
 function EventCreateComponent_div_257_Template(rf, ctx) {
   if (rf & 1) {
     const _r90 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 280)(1, "label", 389);
+    \u0275\u0275elementStart(0, "div", 290)(1, "label", 399);
     \u0275\u0275text(2, " Tipo Ve\xEDculo: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 390);
+    \u0275\u0275elementStart(5, "select", 400);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_257_Template_select_ngModelChange_5_listener($event) {
       \u0275\u0275restoreView(_r90);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -117907,7 +118004,7 @@ function EventCreateComponent_div_257_Template(rf, ctx) {
 }
 function EventCreateComponent_div_258_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 124);
+    \u0275\u0275elementStart(0, "option", 125);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117920,7 +118017,7 @@ function EventCreateComponent_div_258_option_8_Template(rf, ctx) {
 }
 function EventCreateComponent_div_258_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117932,8 +118029,8 @@ function EventCreateComponent_div_258_div_9_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_258_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_258_div_9_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_258_div_9_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -117945,12 +118042,12 @@ function EventCreateComponent_div_258_div_9_Template(rf, ctx) {
 function EventCreateComponent_div_258_Template(rf, ctx) {
   if (rf & 1) {
     const _r93 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 280)(1, "label", 391);
+    \u0275\u0275elementStart(0, "div", 290)(1, "label", 401);
     \u0275\u0275text(2, " Modelo Ve\xEDculo: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 392);
+    \u0275\u0275elementStart(5, "select", 402);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_258_Template_select_ngModelChange_5_listener($event) {
       \u0275\u0275restoreView(_r93);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -117978,7 +118075,7 @@ function EventCreateComponent_div_258_Template(rf, ctx) {
 }
 function EventCreateComponent_div_259_option_8_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 124);
+    \u0275\u0275elementStart(0, "option", 125);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -117991,7 +118088,7 @@ function EventCreateComponent_div_259_option_8_Template(rf, ctx) {
 }
 function EventCreateComponent_div_259_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -118003,8 +118100,8 @@ function EventCreateComponent_div_259_div_9_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_259_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_259_div_9_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_259_div_9_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -118016,12 +118113,12 @@ function EventCreateComponent_div_259_div_9_Template(rf, ctx) {
 function EventCreateComponent_div_259_Template(rf, ctx) {
   if (rf & 1) {
     const _r96 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 280)(1, "label", 393);
+    \u0275\u0275elementStart(0, "div", 290)(1, "label", 403);
     \u0275\u0275text(2, " Marca Ve\xEDculo: ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(5, "select", 394);
+    \u0275\u0275elementStart(5, "select", 404);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_259_Template_select_ngModelChange_5_listener($event) {
       \u0275\u0275restoreView(_r96);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -118049,7 +118146,7 @@ function EventCreateComponent_div_259_Template(rf, ctx) {
 }
 function EventCreateComponent_div_260_div_10_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -118061,8 +118158,8 @@ function EventCreateComponent_div_260_div_10_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_260_div_10_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_260_div_10_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_260_div_10_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -118073,7 +118170,7 @@ function EventCreateComponent_div_260_div_10_Template(rf, ctx) {
 }
 function EventCreateComponent_div_260_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 91)(1, "label", 395);
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 405);
     \u0275\u0275text(2, " Per\xEDodo (IN / OUT): ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
@@ -118081,7 +118178,7 @@ function EventCreateComponent_div_260_Template(rf, ctx) {
     \u0275\u0275elementStart(5, "div", 52)(6, "span", 53);
     \u0275\u0275element(7, "i", 54);
     \u0275\u0275elementEnd();
-    \u0275\u0275element(8, "input", 396, 1);
+    \u0275\u0275element(8, "input", 406, 1);
     \u0275\u0275elementEnd();
     \u0275\u0275template(10, EventCreateComponent_div_260_div_10_Template, 2, 1, "div", 30);
     \u0275\u0275elementEnd();
@@ -118096,7 +118193,7 @@ function EventCreateComponent_div_260_Template(rf, ctx) {
 }
 function EventCreateComponent_div_261_div_9_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -118108,8 +118205,8 @@ function EventCreateComponent_div_261_div_9_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_div_261_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_div_261_div_9_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_div_261_div_9_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -118121,7 +118218,7 @@ function EventCreateComponent_div_261_div_9_Template(rf, ctx) {
 function EventCreateComponent_div_261_Template(rf, ctx) {
   if (rf & 1) {
     const _r100 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 91)(1, "label", 397);
+    \u0275\u0275elementStart(0, "div", 91)(1, "label", 407);
     \u0275\u0275text(2, " Data Sa\xEDda (OUT): ");
     \u0275\u0275elementStart(3, "span", 28);
     \u0275\u0275text(4, "*");
@@ -118129,7 +118226,7 @@ function EventCreateComponent_div_261_Template(rf, ctx) {
     \u0275\u0275elementStart(5, "div", 52)(6, "span", 53);
     \u0275\u0275element(7, "i", 54);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(8, "input", 398);
+    \u0275\u0275elementStart(8, "input", 408);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_261_Template_input_ngModelChange_8_listener($event) {
       \u0275\u0275restoreView(_r100);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -118151,7 +118248,7 @@ function EventCreateComponent_div_261_Template(rf, ctx) {
 }
 function EventCreateComponent_ng_container_262_option_9_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "option", 124);
+    \u0275\u0275elementStart(0, "option", 125);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -118164,7 +118261,7 @@ function EventCreateComponent_ng_container_262_option_9_Template(rf, ctx) {
 }
 function EventCreateComponent_ng_container_262_div_10_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -118176,8 +118273,8 @@ function EventCreateComponent_ng_container_262_div_10_small_1_Template(rf, ctx) 
 }
 function EventCreateComponent_ng_container_262_div_10_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_ng_container_262_div_10_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_ng_container_262_div_10_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -118188,7 +118285,7 @@ function EventCreateComponent_ng_container_262_div_10_Template(rf, ctx) {
 }
 function EventCreateComponent_ng_container_262_div_17_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -118200,8 +118297,8 @@ function EventCreateComponent_ng_container_262_div_17_small_1_Template(rf, ctx) 
 }
 function EventCreateComponent_ng_container_262_div_17_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_ng_container_262_div_17_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_ng_container_262_div_17_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -118212,7 +118309,7 @@ function EventCreateComponent_ng_container_262_div_17_Template(rf, ctx) {
 }
 function EventCreateComponent_ng_container_262_div_31_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -118224,8 +118321,8 @@ function EventCreateComponent_ng_container_262_div_31_small_1_Template(rf, ctx) 
 }
 function EventCreateComponent_ng_container_262_div_31_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_ng_container_262_div_31_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_ng_container_262_div_31_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -118236,7 +118333,7 @@ function EventCreateComponent_ng_container_262_div_31_Template(rf, ctx) {
 }
 function EventCreateComponent_ng_container_262_div_38_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -118248,8 +118345,8 @@ function EventCreateComponent_ng_container_262_div_38_small_1_Template(rf, ctx) 
 }
 function EventCreateComponent_ng_container_262_div_38_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_ng_container_262_div_38_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_ng_container_262_div_38_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -118260,7 +118357,7 @@ function EventCreateComponent_ng_container_262_div_38_Template(rf, ctx) {
 }
 function EventCreateComponent_ng_container_262_div_45_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -118272,8 +118369,8 @@ function EventCreateComponent_ng_container_262_div_45_small_1_Template(rf, ctx) 
 }
 function EventCreateComponent_ng_container_262_div_45_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_ng_container_262_div_45_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_ng_container_262_div_45_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -118286,12 +118383,12 @@ function EventCreateComponent_ng_container_262_Template(rf, ctx) {
   if (rf & 1) {
     const _r102 = \u0275\u0275getCurrentView();
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "div", 91)(2, "label", 399);
+    \u0275\u0275elementStart(1, "div", 91)(2, "label", 409);
     \u0275\u0275text(3, " CIA: ");
     \u0275\u0275elementStart(4, "span", 28);
     \u0275\u0275text(5, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(6, "select", 400);
+    \u0275\u0275elementStart(6, "select", 410);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_262_Template_select_ngModelChange_6_listener($event) {
       \u0275\u0275restoreView(_r102);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -118305,12 +118402,12 @@ function EventCreateComponent_ng_container_262_Template(rf, ctx) {
     \u0275\u0275elementEnd();
     \u0275\u0275template(10, EventCreateComponent_ng_container_262_div_10_Template, 2, 1, "div", 30);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(11, "div", 91)(12, "label", 401);
+    \u0275\u0275elementStart(11, "div", 91)(12, "label", 411);
     \u0275\u0275text(13, " VOO: ");
     \u0275\u0275elementStart(14, "span", 28);
     \u0275\u0275text(15, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(16, "input", 402);
+    \u0275\u0275elementStart(16, "input", 412);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_262_Template_input_ngModelChange_16_listener($event) {
       \u0275\u0275restoreView(_r102);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -118320,7 +118417,7 @@ function EventCreateComponent_ng_container_262_Template(rf, ctx) {
     \u0275\u0275elementEnd();
     \u0275\u0275template(17, EventCreateComponent_ng_container_262_div_17_Template, 2, 1, "div", 30);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(18, "div", 403)(19, "app-autocomplete", 404);
+    \u0275\u0275elementStart(18, "div", 413)(19, "app-autocomplete", 414);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_262_Template_app_autocomplete_ngModelChange_19_listener($event) {
       \u0275\u0275restoreView(_r102);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -118328,7 +118425,7 @@ function EventCreateComponent_ng_container_262_Template(rf, ctx) {
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(20, "div", 403)(21, "app-autocomplete", 405);
+    \u0275\u0275elementStart(20, "div", 413)(21, "app-autocomplete", 415);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_262_Template_app_autocomplete_ngModelChange_21_listener($event) {
       \u0275\u0275restoreView(_r102);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -118336,7 +118433,7 @@ function EventCreateComponent_ng_container_262_Template(rf, ctx) {
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(22, "div", 280)(23, "label", 406);
+    \u0275\u0275elementStart(22, "div", 290)(23, "label", 416);
     \u0275\u0275text(24, " DATAS: ");
     \u0275\u0275elementStart(25, "span", 28);
     \u0275\u0275text(26, "*");
@@ -118344,7 +118441,7 @@ function EventCreateComponent_ng_container_262_Template(rf, ctx) {
     \u0275\u0275elementStart(27, "div", 52)(28, "span", 53);
     \u0275\u0275element(29, "i", 54);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(30, "input", 407);
+    \u0275\u0275elementStart(30, "input", 417);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_262_Template_input_ngModelChange_30_listener($event) {
       \u0275\u0275restoreView(_r102);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -118354,12 +118451,12 @@ function EventCreateComponent_ng_container_262_Template(rf, ctx) {
     \u0275\u0275elementEnd()();
     \u0275\u0275template(31, EventCreateComponent_ng_container_262_div_31_Template, 2, 1, "div", 30);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(32, "div", 280)(33, "label", 408);
+    \u0275\u0275elementStart(32, "div", 290)(33, "label", 418);
     \u0275\u0275text(34, " SA\xCDDA: ");
     \u0275\u0275elementStart(35, "span", 28);
     \u0275\u0275text(36, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(37, "input", 409);
+    \u0275\u0275elementStart(37, "input", 419);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_262_Template_input_ngModelChange_37_listener($event) {
       \u0275\u0275restoreView(_r102);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -118369,12 +118466,12 @@ function EventCreateComponent_ng_container_262_Template(rf, ctx) {
     \u0275\u0275elementEnd();
     \u0275\u0275template(38, EventCreateComponent_ng_container_262_div_38_Template, 2, 1, "div", 30);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(39, "div", 280)(40, "label", 410);
+    \u0275\u0275elementStart(39, "div", 290)(40, "label", 420);
     \u0275\u0275text(41, " CHEGADA: ");
     \u0275\u0275elementStart(42, "span", 28);
     \u0275\u0275text(43, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(44, "input", 411);
+    \u0275\u0275elementStart(44, "input", 421);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_262_Template_input_ngModelChange_44_listener($event) {
       \u0275\u0275restoreView(_r102);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -118429,7 +118526,7 @@ function EventCreateComponent_ng_container_262_Template(rf, ctx) {
 }
 function EventCreateComponent_ng_container_263_div_7_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -118441,8 +118538,8 @@ function EventCreateComponent_ng_container_263_div_7_small_1_Template(rf, ctx) {
 }
 function EventCreateComponent_ng_container_263_div_7_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_ng_container_263_div_7_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_ng_container_263_div_7_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -118453,7 +118550,7 @@ function EventCreateComponent_ng_container_263_div_7_Template(rf, ctx) {
 }
 function EventCreateComponent_ng_container_263_span_18_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 293);
+    \u0275\u0275elementStart(0, "span", 303);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -118465,7 +118562,7 @@ function EventCreateComponent_ng_container_263_span_18_Template(rf, ctx) {
 }
 function EventCreateComponent_ng_container_263_div_20_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -118477,8 +118574,8 @@ function EventCreateComponent_ng_container_263_div_20_small_1_Template(rf, ctx) 
 }
 function EventCreateComponent_ng_container_263_div_20_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_ng_container_263_div_20_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_ng_container_263_div_20_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -118489,7 +118586,7 @@ function EventCreateComponent_ng_container_263_div_20_Template(rf, ctx) {
 }
 function EventCreateComponent_ng_container_263_div_27_small_1_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "small", 114);
+    \u0275\u0275elementStart(0, "small", 115);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -118501,8 +118598,8 @@ function EventCreateComponent_ng_container_263_div_27_small_1_Template(rf, ctx) 
 }
 function EventCreateComponent_ng_container_263_div_27_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 112);
-    \u0275\u0275template(1, EventCreateComponent_ng_container_263_div_27_small_1_Template, 2, 1, "small", 113);
+    \u0275\u0275elementStart(0, "div", 113);
+    \u0275\u0275template(1, EventCreateComponent_ng_container_263_div_27_small_1_Template, 2, 1, "small", 114);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -118515,12 +118612,12 @@ function EventCreateComponent_ng_container_263_Template(rf, ctx) {
   if (rf & 1) {
     const _r109 = \u0275\u0275getCurrentView();
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "div", 91)(2, "label", 412);
+    \u0275\u0275elementStart(1, "div", 91)(2, "label", 422);
     \u0275\u0275text(3, " Quantidade: ");
     \u0275\u0275elementStart(4, "span", 28);
     \u0275\u0275text(5, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(6, "input", 413);
+    \u0275\u0275elementStart(6, "input", 423);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_263_Template_input_ngModelChange_6_listener($event) {
       \u0275\u0275restoreView(_r109);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -118530,24 +118627,24 @@ function EventCreateComponent_ng_container_263_Template(rf, ctx) {
     \u0275\u0275elementEnd();
     \u0275\u0275template(7, EventCreateComponent_ng_container_263_div_7_Template, 2, 1, "div", 30);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(8, "div", 91)(9, "label", 414);
+    \u0275\u0275elementStart(8, "div", 91)(9, "label", 424);
     \u0275\u0275text(10, "Comiss\xE3o / Kickback (%):");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(11, "input", 415);
+    \u0275\u0275elementStart(11, "input", 425);
     \u0275\u0275listener("input", function EventCreateComponent_ng_container_263_Template_input_input_11_listener($event) {
       \u0275\u0275restoreView(_r109);
       const ctx_r2 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r2.onPercentInput($event, "kickback", "optForm"));
     });
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(12, "div", 280)(13, "label", 416);
+    \u0275\u0275elementStart(12, "div", 290)(13, "label", 426);
     \u0275\u0275text(14, " Proposta Recebida (Custo Unit.): ");
     \u0275\u0275elementStart(15, "span", 28);
     \u0275\u0275text(16, "*");
     \u0275\u0275elementEnd()();
     \u0275\u0275elementStart(17, "div", 52);
-    \u0275\u0275template(18, EventCreateComponent_ng_container_263_span_18_Template, 2, 1, "span", 291);
-    \u0275\u0275elementStart(19, "input", 417);
+    \u0275\u0275template(18, EventCreateComponent_ng_container_263_span_18_Template, 2, 1, "span", 301);
+    \u0275\u0275elementStart(19, "input", 427);
     \u0275\u0275listener("input", function EventCreateComponent_ng_container_263_Template_input_input_19_listener($event) {
       \u0275\u0275restoreView(_r109);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -118556,12 +118653,12 @@ function EventCreateComponent_ng_container_263_Template(rf, ctx) {
     \u0275\u0275elementEnd()();
     \u0275\u0275template(20, EventCreateComponent_ng_container_263_div_20_Template, 2, 1, "div", 30);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(21, "div", 280)(22, "label", 418);
+    \u0275\u0275elementStart(21, "div", 290)(22, "label", 428);
     \u0275\u0275text(23, " Markup divisor (%): ");
     \u0275\u0275elementStart(24, "span", 28);
     \u0275\u0275text(25, "*");
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(26, "input", 419);
+    \u0275\u0275elementStart(26, "input", 429);
     \u0275\u0275listener("input", function EventCreateComponent_ng_container_263_Template_input_input_26_listener($event) {
       \u0275\u0275restoreView(_r109);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -118570,10 +118667,10 @@ function EventCreateComponent_ng_container_263_Template(rf, ctx) {
     \u0275\u0275elementEnd();
     \u0275\u0275template(27, EventCreateComponent_ng_container_263_div_27_Template, 2, 1, "div", 30);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(28, "div", 280)(29, "label", 420);
+    \u0275\u0275elementStart(28, "div", 290)(29, "label", 430);
     \u0275\u0275text(30, "Ordem:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(31, "input", 421);
+    \u0275\u0275elementStart(31, "input", 431);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_ng_container_263_Template_input_ngModelChange_31_listener($event) {
       \u0275\u0275restoreView(_r109);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -118610,7 +118707,7 @@ function EventCreateComponent_ng_container_263_Template(rf, ctx) {
 }
 function EventCreateComponent_ng_container_264_span_5_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 293);
+    \u0275\u0275elementStart(0, "span", 303);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -118622,7 +118719,7 @@ function EventCreateComponent_ng_container_264_span_5_Template(rf, ctx) {
 }
 function EventCreateComponent_ng_container_264_span_11_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 293);
+    \u0275\u0275elementStart(0, "span", 303);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -118634,7 +118731,7 @@ function EventCreateComponent_ng_container_264_span_11_Template(rf, ctx) {
 }
 function EventCreateComponent_ng_container_264_span_17_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "span", 293);
+    \u0275\u0275elementStart(0, "span", 303);
     \u0275\u0275text(1);
     \u0275\u0275elementEnd();
   }
@@ -118648,36 +118745,36 @@ function EventCreateComponent_ng_container_264_Template(rf, ctx) {
   if (rf & 1) {
     const _r113 = \u0275\u0275getCurrentView();
     \u0275\u0275elementContainerStart(0);
-    \u0275\u0275elementStart(1, "div", 280)(2, "label", 422);
+    \u0275\u0275elementStart(1, "div", 290)(2, "label", 432);
     \u0275\u0275text(3, "Compara\xE7\xE3o Trivago:");
     \u0275\u0275elementEnd();
     \u0275\u0275elementStart(4, "div", 52);
-    \u0275\u0275template(5, EventCreateComponent_ng_container_264_span_5_Template, 2, 1, "span", 291);
-    \u0275\u0275elementStart(6, "input", 423);
+    \u0275\u0275template(5, EventCreateComponent_ng_container_264_span_5_Template, 2, 1, "span", 301);
+    \u0275\u0275elementStart(6, "input", 433);
     \u0275\u0275listener("input", function EventCreateComponent_ng_container_264_Template_input_input_6_listener($event) {
       \u0275\u0275restoreView(_r113);
       const ctx_r2 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r2.onMoneyInput($event, "compare_trivago", "optForm"));
     });
     \u0275\u0275elementEnd()()();
-    \u0275\u0275elementStart(7, "div", 280)(8, "label", 424);
+    \u0275\u0275elementStart(7, "div", 290)(8, "label", 434);
     \u0275\u0275text(9, "Compara\xE7\xE3o Website HTL:");
     \u0275\u0275elementEnd();
     \u0275\u0275elementStart(10, "div", 52);
-    \u0275\u0275template(11, EventCreateComponent_ng_container_264_span_11_Template, 2, 1, "span", 291);
-    \u0275\u0275elementStart(12, "input", 425);
+    \u0275\u0275template(11, EventCreateComponent_ng_container_264_span_11_Template, 2, 1, "span", 301);
+    \u0275\u0275elementStart(12, "input", 435);
     \u0275\u0275listener("input", function EventCreateComponent_ng_container_264_Template_input_input_12_listener($event) {
       \u0275\u0275restoreView(_r113);
       const ctx_r2 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r2.onMoneyInput($event, "compare_website_htl", "optForm"));
     });
     \u0275\u0275elementEnd()()();
-    \u0275\u0275elementStart(13, "div", 280)(14, "label", 426);
+    \u0275\u0275elementStart(13, "div", 290)(14, "label", 436);
     \u0275\u0275text(15, "Compara\xE7\xE3o Omnibess:");
     \u0275\u0275elementEnd();
     \u0275\u0275elementStart(16, "div", 52);
-    \u0275\u0275template(17, EventCreateComponent_ng_container_264_span_17_Template, 2, 1, "span", 291);
-    \u0275\u0275elementStart(18, "input", 427);
+    \u0275\u0275template(17, EventCreateComponent_ng_container_264_span_17_Template, 2, 1, "span", 301);
+    \u0275\u0275elementStart(18, "input", 437);
     \u0275\u0275listener("input", function EventCreateComponent_ng_container_264_Template_input_input_18_listener($event) {
       \u0275\u0275restoreView(_r113);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -118705,10 +118802,10 @@ function EventCreateComponent_ng_container_264_Template(rf, ctx) {
 function EventCreateComponent_div_265_Template(rf, ctx) {
   if (rf & 1) {
     const _r114 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 106)(1, "label", 428);
+    \u0275\u0275elementStart(0, "div", 106)(1, "label", 438);
     \u0275\u0275text(2, "Observa\xE7\xF5es:");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "textarea", 429);
+    \u0275\u0275elementStart(3, "textarea", 439);
     \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_div_265_Template_textarea_ngModelChange_3_listener($event) {
       \u0275\u0275restoreView(_r114);
       const ctx_r2 = \u0275\u0275nextContext();
@@ -118725,12 +118822,45 @@ function EventCreateComponent_div_265_Template(rf, ctx) {
 }
 function EventCreateComponent_span_270_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275element(0, "span", 127);
+    \u0275\u0275element(0, "span", 128);
   }
 }
-function EventCreateComponent_span_286_Template(rf, ctx) {
+function EventCreateComponent_input_281_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275element(0, "span", 127);
+    const _r115 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "input", 440);
+    \u0275\u0275listener("input", function EventCreateComponent_input_281_Template_input_input_0_listener($event) {
+      \u0275\u0275restoreView(_r115);
+      const ctx_r2 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r2.onPercentInput($event, "bulkMarkupValue", "bulkForm"));
+    });
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext();
+    \u0275\u0275property("value", ctx_r2.formatPercent(ctx_r2.bulkMarkupValue));
+  }
+}
+function EventCreateComponent_input_282_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r116 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "input", 441);
+    \u0275\u0275twoWayListener("ngModelChange", function EventCreateComponent_input_282_Template_input_ngModelChange_0_listener($event) {
+      \u0275\u0275restoreView(_r116);
+      const ctx_r2 = \u0275\u0275nextContext();
+      \u0275\u0275twoWayBindingSet(ctx_r2.bulkMarkupValue, $event) || (ctx_r2.bulkMarkupValue = $event);
+      return \u0275\u0275resetView($event);
+    });
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r2 = \u0275\u0275nextContext();
+    \u0275\u0275twoWayProperty("ngModel", ctx_r2.bulkMarkupValue);
+  }
+}
+function EventCreateComponent_span_287_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275element(0, "span", 128);
   }
 }
 var EventCreateComponent = class _EventCreateComponent {
@@ -119595,6 +119725,35 @@ var EventCreateComponent = class _EventCreateComponent {
     const custo = Number(item.total_net_sem_4bts || 0);
     return venda > 0 ? (venda - custo) / venda * 100 : 0;
   }
+  getAirfareTax(item, taxType, side) {
+    const base = side === "cost" ? this.getAirfareNetComTxs(item) : this.getAirfareVendaComTxs(item);
+    switch (taxType) {
+      case "iss":
+        return base * (parseFloat(item.iss_percent) || 0) / 100;
+      case "serv":
+        return base * (parseFloat(item.service_percent) || 0) / 100;
+      case "iva":
+        return base * (parseFloat(item.iva_percent) || 0) / 100;
+      case "sc":
+        return parseFloat(item.service_charge) || 0;
+    }
+  }
+  getAirfareFaturamentoVenda(item) {
+    const baseVenda = this.getAirfareVendaComTxs(item);
+    const iss = this.getAirfareTax(item, "iss", "sale");
+    const serv = this.getAirfareTax(item, "serv", "sale");
+    const iva = this.getAirfareTax(item, "iva", "sale");
+    const sc = this.getAirfareTax(item, "sc", "sale");
+    return baseVenda + iss + serv + iva + sc;
+  }
+  getAirfareFaturamentoCusto(item) {
+    const baseCusto = this.getAirfareNetComTxs(item);
+    const iss = this.getAirfareTax(item, "iss", "cost");
+    const serv = this.getAirfareTax(item, "serv", "cost");
+    const iva = this.getAirfareTax(item, "iva", "cost");
+    const sc = this.getAirfareTax(item, "sc", "cost");
+    return baseCusto + iss + serv + iva + sc;
+  }
   resolvePhotoUrl(val) {
     if (!val || typeof val !== "string" || val.trim() === "")
       return "";
@@ -119825,13 +119984,17 @@ var EventCreateComponent = class _EventCreateComponent {
         options = item.event_airfare_opts || item.eventAirfareOpts || [];
         break;
     }
-    if (options.length === 0) {
+    if (options.length === 0 && type !== "airfare") {
       this.toastService.warning("Este fornecedor n\xE3o possui tarifas cadastradas.");
       return;
     }
     this.bulkMarkupTargetItem = item;
     this.bulkMarkupTargetType = type;
-    this.bulkMarkupValue = options[0].received_proposal_percent !== void 0 ? options[0].received_proposal_percent : 100;
+    if (type === "airfare") {
+      this.bulkMarkupValue = item && item.markup !== void 0 && item.markup !== null && item.markup !== "" ? Number(item.markup) : 0.75;
+    } else {
+      this.bulkMarkupValue = options[0]?.received_proposal_percent !== void 0 ? options[0].received_proposal_percent : 100;
+    }
     this.showMarkupForm = true;
   }
   closeMarkupForm() {
@@ -119843,7 +120006,75 @@ var EventCreateComponent = class _EventCreateComponent {
       return;
     const item = this.bulkMarkupTargetItem;
     const type = this.bulkMarkupTargetType;
-    const parsedPercent = this.bulkMarkupValue;
+    const parsedPercent = Number(this.bulkMarkupValue);
+    if (type === "airfare") {
+      if (isNaN(parsedPercent) || parsedPercent <= 0) {
+        this.toastService.error("O markup divisor deve ser maior que 0.");
+        return;
+      }
+      const formData = new FormData();
+      formData.append("id", item.id);
+      formData.append("event_id", this.eventId.toString());
+      formData.append("currency", item.currency_id || item.currency?.id || "1");
+      formData.append("taxa_4bts", (item.taxa_4bts !== void 0 && item.taxa_4bts !== null ? item.taxa_4bts : 10).toString());
+      formData.append("airline_id", (item.airline_id || item.provider_id || item.airline?.id || "").toString());
+      formData.append("markup", parsedPercent.toString());
+      const fieldsToKeep = [
+        "equipment",
+        "pax_first",
+        "pax_executiva",
+        "pax_premium",
+        "pax_economica",
+        "total_pax",
+        "prazo_cia",
+        "inc_taxa_embarque",
+        "inc_servico_bordo",
+        "inc_porao",
+        "inc_bagagem_bordo",
+        "inc_sala_vip",
+        "inc_fbo_origem",
+        "inc_fbo_destino",
+        "inc_alteracao_nomes",
+        "taxa_embarque_unit",
+        "total_net_sem_4bts",
+        "observations",
+        "notes",
+        "iss_percent",
+        "service_percent",
+        "iva_percent",
+        "iof",
+        "service_charge",
+        "invoice",
+        "internal_observation",
+        "customer_observation",
+        "deadline_date",
+        "payment_method"
+      ];
+      fieldsToKeep.forEach((field) => {
+        if (item[field] !== void 0 && item[field] !== null) {
+          formData.append(field, item[field].toString());
+        }
+      });
+      this.processing = true;
+      this.isLoader = true;
+      this.eventService.saveEventAirfare(formData).subscribe({
+        next: () => {
+          this.isLoader = false;
+          this.processing = false;
+          this.toastService.success("Markup do fretamento atualizado com sucesso!");
+          this.closeMarkupForm();
+          this.loadInitialData();
+        },
+        error: (err) => {
+          this.isLoader = false;
+          this.processing = false;
+          const message2 = err?.error?.message || err?.error?.error || err?.message || "Erro ao atualizar o markup do fretamento.";
+          this.toastService.error(message2);
+          console.error(err);
+        }
+      });
+      return;
+    }
     if (parsedPercent <= 0 || parsedPercent > 100) {
       this.toastService.error("O markup divisor deve ser maior que 0% e no m\xE1ximo 100%.");
       return;
@@ -119864,9 +120095,6 @@ var EventCreateComponent = class _EventCreateComponent {
         break;
       case "transport":
         options = item.event_transport_opts || [];
-        break;
-      case "airfare":
-        options = item.event_airfare_opts || item.eventAirfareOpts || [];
         break;
     }
     this.processing = true;
@@ -119934,10 +120162,6 @@ var EventCreateComponent = class _EventCreateComponent {
           payload.service = opt.service_id;
           payload.brand = opt.brand_id;
           requests.push(this.eventService.saveTransportOpt(payload));
-          break;
-        case "airfare":
-          payload.event_airfare_id = item.id;
-          requests.push(this.eventService.saveAirfareOpt(payload));
           break;
       }
     });
@@ -120688,7 +120912,7 @@ var EventCreateComponent = class _EventCreateComponent {
       let _t;
       \u0275\u0275queryRefresh(_t = \u0275\u0275loadQuery()) && (ctx.dateRangePicker = _t.first);
     }
-  }, decls: 289, vars: 166, consts: [["dateRangePicker", ""], ["optDateRangePicker", ""], ["class", "position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-75", "style", "z-index: 2000", 4, "ngIf"], ["header", ""], [1, "d-sm-flex", "align-items-center", "justify-content-between", "mb-4", "animate-in"], [1, "h3", "mb-0", "text-gray-800"], [1, "fa", "fa-calendar-check", "me-2", "text-primary"], ["routerLink", "/event-list", 1, "btn", "btn-secondary", "btn-sm", "shadow-sm"], [1, "fas", "fa-arrow-left", "me-1"], [1, "row"], [1, "col-lg-12"], [1, "nav", "nav-tabs", "animate-in", 2, "animation-delay", "0.05s"], [1, "nav-item"], [1, "nav-link", 2, "cursor", "pointer", 3, "click"], [1, "fas", "fa-info-circle", "me-1"], [1, "fas", "fa-hotel", "me-1"], [1, "fas", "fa-utensils", "me-1"], [1, "fas", "fa-door-open", "me-1"], [1, "fas", "fa-concierge-bell", "me-1"], [1, "fas", "fa-bus", "me-1"], [1, "fas", "fa-plane", "me-1"], [1, "card", "shadow-sm", "border-left-primary", "mb-4", "animate-in"], [1, "card-body"], [3, "ngSubmit"], [1, "border-0", "p-0", "m-0", 3, "disabled"], [1, "col-lg-4"], [1, "form-group", "mb-3"], ["for", "name", 1, "form-label", "font-weight-bold"], [1, "text-danger"], ["type", "text", "id", "name", "name", "name", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], ["class", "text-danger mt-1", 4, "ngIf"], ["for", "code", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "code", "name", "code", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], [1, "border", "rounded", "p-3", "bg-light"], [1, "font-weight-bold", "text-primary", "mb-3"], [1, "fas", "fa-map-marker-alt", "me-1"], ["class", "mb-3 p-2 border-bottom", 4, "ngFor", "ngForOf"], ["type", "button", "class", "btn btn-sm btn-info w-100 mt-2", 3, "click", 4, "ngIf"], ["for", "customer", 1, "form-label", "font-weight-bold"], ["id", "customer", "name", "customer", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["value", ""], [3, "ngValue", 4, "ngFor", "ngForOf"], ["for", "requester", 1, "form-label", "font-weight-bold"], ["id", "requester", "name", "requester", "required", "", 1, "form-select", 3, "ngModelChange", "mousedown", "ngModel"], [3, "value", 4, "ngFor", "ngForOf"], ["for", "sector", 1, "form-label", "font-weight-bold"], ["id", "sector", "name", "sector", "required", "", 1, "form-select", 3, "ngModelChange", "mousedown", "ngModel"], ["for", "cc", 1, "form-label", "font-weight-bold"], ["id", "cc", "name", "cc", "required", "", 1, "form-select", 3, "ngModelChange", "mousedown", "ngModel"], ["for", "paxBase", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "paxBase", "name", "paxBase", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "dateRange", 1, "form-label", "font-weight-bold"], [1, "input-group"], [1, "input-group-text", "bg-light"], [1, "fas", "fa-calendar-alt", "text-primary"], ["type", "text", "id", "dateRange", "placeholder", "Selecione o per\xEDodo...", "readonly", "", "required", "", 1, "form-control", "bg-white"], ["for", "crd_id", 1, "form-label", "font-weight-bold"], ["id", "crd_id", "name", "crd_id", "required", "", 1, "form-select", 3, "ngModelChange", "mousedown", "ngModel"], ["for", "hotel_operator", 1, "form-label", "font-weight-bold"], ["id", "hotel_operator", "name", "hotel_operator", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "land_operator", 1, "form-label", "font-weight-bold"], ["id", "land_operator", "name", "land_operator", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "air_operator", 1, "form-label", "font-weight-bold"], ["id", "air_operator", "name", "air_operator", 1, "form-select", 3, "ngModelChange", "ngModel"], ["class", "d-flex justify-content-end gap-2 mt-4", 4, "ngIf"], ["class", "animate-in", 4, "ngIf"], [3, "close", "show", "title", "icon"], [1, "mb-3", 3, "ngClass"], ["id", "provider_id", "valueField", "id", "name", "provider_id", 3, "ngModelChange", "label", "placeholder", "required", "searchFn", "displayFn", "initialText", "ngModel", "errors", "disabled"], ["class", "col-md-4 form-group mb-3", 4, "ngIf"], [1, "form-group", "mb-3", 3, "ngClass"], ["for", "currency_id", 1, "form-label", "font-weight-bold"], ["id", "currency_id", "name", "currency_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["class", "form-group mb-3", 3, "ngClass", 4, "ngIf"], ["for", "iof", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "iof", "name", "iof", 1, "form-control", 3, "input", "value"], ["class", "col-md-2 form-group mb-3", 4, "ngIf"], ["for", "taxa_4bts", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "taxa_4bts", "name", "taxa_4bts", "required", "", 1, "form-control", 3, "input", "value"], ["for", "payment_method", 1, "form-label", "font-weight-bold"], ["id", "payment_method", "name", "payment_method", 1, "form-select", 3, "ngModelChange", "ngModel"], ["value", "Indefinido"], ["value", "Dinheiro"], ["value", "Cart\xE3o"], ["for", "invoice", 1, "form-label", "font-weight-bold"], ["id", "invoice", "name", "invoice", 1, "form-select", 3, "ngModelChange", "ngModel"], [3, "ngValue"], ["for", "deadline_date", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "deadline_date", "placeholder", "dd/mm/aaaa", "appFlatpickr", "", "name", "deadline_date", 1, "form-control", "bg-white", 3, "ngModelChange", "ngModel"], ["class", "col-md-12 mb-3", 4, "ngIf"], [1, "w-100"], [1, "col-md-6", "form-group", "mb-3"], ["for", "internal_observation", 1, "form-label", "font-weight-bold"], ["id", "internal_observation", "rows", "3", "name", "internal_observation", "placeholder", "Observa\xE7\xF5es internas...", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "customer_observation", 1, "form-label", "font-weight-bold"], ["id", "customer_observation", "rows", "3", "name", "customer_observation", "placeholder", "Observa\xE7\xF5es para o cliente...", 1, "form-control", 3, "ngModelChange", "ngModel"], [1, "modal-footer", "px-0", "pb-0", "pt-3", "d-flex", "justify-content-end", "gap-2", "border-top"], ["type", "button", 1, "btn", "btn-secondary", "shadow-sm", 3, "click"], ["type", "submit", 1, "btn", "btn-success", "shadow-sm", 3, "disabled"], ["class", "spinner-border spinner-border-sm me-1", 4, "ngIf"], [1, "fas", "fa-save", "me-1"], ["icon", "fa-edit", 3, "close", "show", "title"], ["class", "col-md-6 form-group mb-3", 4, "ngIf"], ["class", "col-md-12 form-group mb-3", 4, "ngIf"], [4, "ngIf"], ["title", "Editar Markup Geral", "icon", "fa-percentage", 3, "close", "show"], [1, "col-md-12", "form-group", "mb-3"], ["for", "bulk_markup", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "bulk_markup", "name", "bulk_markup", "required", "", 1, "form-control", 3, "input", "value"], [1, "position-fixed", "top-0", "start-0", "w-100", "h-100", "d-flex", "align-items-center", "justify-content-center", "bg-white", "bg-opacity-75", 2, "z-index", "2000"], ["role", "status", 1, "spinner-border", "text-primary", 2, "width", "3rem", "height", "3rem"], [1, "visually-hidden"], [1, "text-danger", "mt-1"], ["class", "d-block", 4, "ngFor", "ngForOf"], [1, "d-block"], [1, "mb-3", "p-2", "border-bottom"], [1, "form-group", "mb-2"], [1, "form-label", "small", "font-weight-bold", 3, "for"], ["type", "text", "required", "", 1, "form-control", "form-control-sm", 3, "ngModelChange", "id", "ngModel", "name"], ["type", "button", "class", "btn btn-sm btn-outline-danger mt-1", 3, "click", 4, "ngIf"], ["type", "button", 1, "btn", "btn-sm", "btn-outline-danger", "mt-1", 3, "click"], [1, "fas", "fa-trash", "me-1"], ["type", "button", 1, "btn", "btn-sm", "btn-info", "w-100", "mt-2", 3, "click"], [1, "fas", "fa-plus", "me-1"], [3, "value"], [1, "d-flex", "justify-content-end", "gap-2", "mt-4"], ["type", "submit", 1, "btn", "btn-primary", "px-4", "shadow-sm", 3, "disabled"], [1, "spinner-border", "spinner-border-sm", "me-1"], [1, "animate-in"], [1, "d-flex", "justify-content-between", "align-items-center", "mb-3"], [1, "m-0", "font-weight-bold", "text-primary"], [1, "fas", "fa-list", "me-1"], [1, "d-flex", "gap-2"], ["type", "button", 1, "btn", "btn-sm", "btn-info", "text-white", "shadow-sm", 3, "click"], [1, "fas", 3, "ngClass"], ["type", "button", "class", "btn btn-sm btn-success shadow-sm", 3, "click", 4, "ngIf"], [4, "ngFor", "ngForOf"], ["class", "alert alert-secondary py-5 text-center shadow-sm", 4, "ngIf"], ["type", "button", 1, "btn", "btn-sm", "btn-success", "shadow-sm", 3, "click"], [1, "card", "card-provider-group", "mb-4", "shadow-sm"], [1, "card-header", "bg-light", "py-3", "d-sm-flex", "align-items-center", "justify-content-between"], [1, "badge", "ms-2", 3, "ngClass"], ["class", "d-flex gap-2", 4, "ngIf"], [1, "card-body", "p-0"], [1, "table-responsive"], [1, "table", "table-bordered", "align-middle", "mb-0", "table-tariffs", 2, "min-width", "1200px"], [1, "text-start", "bg-light", "text-dark", "font-weight-bold"], ["colspan", "3", 1, "bg-success-header", "text-center", "font-weight-bold", "text-white"], ["colspan", "2", 1, "bg-warning-header", "text-center", "font-weight-bold", "text-white"], ["rowspan", "2", 1, "align-middle", "text-center", "bg-light", "text-dark", "font-weight-bold"], ["colspan", "3", "class", "bg-secondary text-white text-center font-weight-bold border-bottom-0", 4, "ngIf"], ["rowspan", "2", "class", "align-middle text-center bg-light text-dark font-weight-bold", "style", "width: 100px", 4, "ngIf"], ["scope", "col", "class", "sticky-col text-start", 4, "ngIf"], ["scope", "col", 1, "sticky-col", "text-start"], ["scope", "col", "class", "text-start", 3, "sticky-col", 4, "ngIf"], ["scope", "col", "class", "text-start", 4, "ngIf"], ["scope", "col", 1, "text-center"], ["scope", "col", 1, "bg-success-header", "text-center", "text-white"], ["scope", "col", 1, "bg-success-header", "text-end", "text-white"], ["scope", "col", 1, "bg-warning-header", "text-end", "text-white"], ["class", "table-subheader", 4, "ngIf"], [1, "observation-row"], ["colspan", "2", 1, "sticky-col", "text-start", "font-weight-bold"], [1, "text-start", "text-dark"], ["colspan", "2", 1, "font-weight-bold", "text-end"], ["colspan", "2", 1, "bg-success-solid", "font-weight-bold", "text-end"], ["colspan", "2", 1, "bg-warning-solid", "font-weight-bold", "text-end"], ["type", "button", "title", "Editar Cadastro do Fornecedor", 1, "btn", "btn-sm", "btn-outline-info", 3, "click"], [1, "fas", "fa-edit", "me-1"], ["type", "button", "title", "Alterar Markup de Todas as Tarifas", 1, "btn", "btn-sm", "btn-outline-primary", 3, "click"], [1, "fas", "fa-percentage", "me-1"], ["type", "button", "title", "Adicionar Nova Tarifa/Op\xE7\xE3o", 1, "btn", "btn-sm", "btn-outline-success", 3, "click"], [3, "confirm", "btnClass", "modalTitle", "message", "okButtonLabel"], ["modal-button", ""], [1, "fas", "fa-trash"], ["colspan", "2", 1, "bg-light", "text-primary", "text-center", "font-weight-bold", "border-bottom-0"], ["colspan", "2", "class", "bg-light text-primary text-center font-weight-bold border-bottom-0", 4, "ngIf"], ["colspan", "3", 1, "bg-secondary", "text-white", "text-center", "font-weight-bold", "border-bottom-0"], ["rowspan", "2", 1, "align-middle", "text-center", "bg-light", "text-dark", "font-weight-bold", 2, "width", "100px"], ["scope", "col", 1, "text-start"], [1, "bg-light", "text-primary", "text-end"], ["class", "bg-light text-primary text-end", 4, "ngIf"], [1, "bg-secondary", "text-white", "text-end"], [1, "py-4", "text-muted"], ["class", "font-weight-bold sticky-col text-dark text-start", 4, "ngIf"], [1, "sticky-col", "text-start"], ["class", "text-start", 3, "sticky-col", 4, "ngIf"], ["class", "text-start", 4, "ngIf"], [1, "text-center"], [1, "bg-success-light", "text-success", "font-weight-bold", "text-center"], [1, "bg-success-light", "text-success", "font-weight-bold", "text-end"], [1, "bg-success-solid", "font-weight-bold", "text-end"], [1, "bg-warning-light", "text-dark", "font-weight-bold", "text-end"], [1, "bg-warning-solid", "font-weight-bold", "text-end"], [1, "text-end"], [1, "font-weight-bold", "sticky-col", "text-dark", "text-start"], [1, "text-start"], [1, "bg-light-tax", "text-primary", "font-weight-bold", "text-end"], [1, "bg-light-tax", "text-primary", "text-end"], ["class", "bg-light-tax text-primary font-weight-bold text-end", 4, "ngIf"], ["class", "bg-light-tax text-primary text-end", 4, "ngIf"], [1, "bg-compare", "text-end", "font-weight-bold"], [1, "d-flex", "justify-content-center", "gap-1"], ["type", "button", "title", "Editar Tarifa", "data-tooltip", "Editar Tarifa", 1, "btn", "btn-info", "text-white", "shadow-sm", "btn-action", 3, "click", "disabled"], [1, "fas", "fa-edit"], ["type", "button", "title", "Clonar Tarifa", "data-tooltip", "Clonar Tarifa", 1, "btn", "btn-secondary", "text-white", "shadow-sm", "btn-action", 3, "click", "disabled"], [1, "fas", "fa-clone"], [3, "confirm", "btnClass", "modalTitle", "message", "okButtonLabel", "tooltip"], [1, "table-subheader"], [1, "sticky-col", "font-weight-bold", "text-start"], [1, "sticky-col", "font-weight-bold", "text-end"], [1, "font-weight-bold", "text-start"], [1, "font-weight-bold", "text-center"], [1, "text-center", "font-weight-bold"], [1, "font-weight-bold", "text-end"], [1, "bg-secondary", "text-white", "text-end", "font-weight-bold"], [1, "alert", "alert-secondary", "py-5", "text-center", "shadow-sm"], [1, "fas", "fa-folder-open", "fa-3x", "mb-3", "text-muted"], [1, "text-secondary", "font-weight-bold"], [1, "text-muted", "mb-0"], [1, "bg-light", "px-3", "py-2", "border-bottom", "d-flex", "flex-wrap", "align-items-center", "justify-content-between", "gap-3", 2, "font-size", "0.85rem"], [1, "font-weight-bold", "text-secondary", "me-1"], [1, "fas", "fa-plane", "me-1", "text-primary"], [1, "badge", "bg-primary", "text-white", "font-weight-bold", 2, "font-size", "0.82rem"], [1, "d-flex", "align-items-center", "gap-1"], [1, "fas", "fa-users", "me-1", "text-primary"], [1, "badge", "bg-light", "text-dark", "border"], [1, "badge", "bg-success", "text-white", "font-weight-bold", "ms-1"], [1, "d-flex", "align-items-center", "gap-3"], [1, "far", "fa-calendar-alt", "me-1", "text-primary"], [1, "text-dark", "font-weight-bold"], [1, "far", "fa-clock", "me-1", "text-warning"], [1, "table", "table-bordered", "align-middle", "mb-0", "table-tariffs", "shadow-sm", 2, "min-width", "1200px"], ["colspan", "7", 1, "text-start", "bg-light", "text-dark", "font-weight-bold"], [1, "fas", "fa-route", "me-1", "text-primary"], [1, "bg-light", "text-center", "font-weight-bold", "text-dark", 2, "width", "90px"], [1, "bg-warning-header", "text-center", "font-weight-bold", "text-white", 2, "width", "140px"], [1, "bg-success-header", "text-center", "font-weight-bold", "text-white", 2, "width", "140px"], ["class", "align-middle text-center bg-light text-dark font-weight-bold", "style", "width: 110px;", 4, "ngIf"], [1, "text-center", "font-weight-bold", 2, "width", "80px"], [1, "text-center", "font-weight-bold", 2, "width", "90px"], [1, "text-center", "font-weight-bold", 2, "width", "110px"], [1, "text-end", "font-weight-bold", "text-warning-emphasis"], [1, "text-end", "font-weight-bold", "text-success"], ["class", "text-center font-weight-bold", "style", "width: 110px;", 4, "ngIf"], ["colspan", "2", 1, "sticky-col", "font-weight-bold", "text-start"], [1, "font-weight-bold", "text-start", "text-dark"], [1, "text-center", "font-weight-bold", "text-dark"], ["colspan", "3", 1, "font-weight-bold", "text-start", "text-primary"], [1, "text-end", "font-weight-bold", "text-primary"], ["colspan", "2", 1, "sticky-col", "text-start", "font-weight-bold", "text-dark"], [1, "fas", "fa-concierge-bell", "me-1", "text-primary"], [1, "text-start", "py-2"], [1, "d-flex", "flex-wrap", "gap-2"], [1, "badge", 3, "ngClass"], [1, "fas", "fa-suitcase", "me-1", "text-primary"], [1, "fas", "fa-briefcase", "me-1", "text-primary"], ["colspan", "3", 1, "text-start", "font-weight-bold", "text-dark"], [1, "badge", "bg-secondary"], ["class", "observation-row", 4, "ngIf"], ["type", "button", "title", "Editar Or\xE7amento de Fretamento", 1, "btn", "btn-sm", "btn-outline-info", 3, "click"], ["type", "button", "title", "Novo Trecho", 1, "btn", "btn-sm", "btn-outline-success", 3, "click"], [1, "align-middle", "text-center", "bg-light", "text-dark", "font-weight-bold", 2, "width", "110px"], [1, "py-4", "text-muted", "text-center"], [1, "text-center", "font-weight-bold", "text-primary"], ["class", "text-center font-weight-bold align-middle bg-light text-primary", "style", "font-size: 0.95rem;", 4, "ngIf"], ["class", "text-end font-weight-bold align-middle bg-warning-light text-dark", "style", "font-size: 0.95rem;", 4, "ngIf"], ["class", "text-end font-weight-bold align-middle bg-success-light text-success", "style", "font-size: 0.95rem;", 4, "ngIf"], ["class", "align-middle text-center", "style", "width: 110px;", 4, "ngIf"], [1, "text-center", "font-weight-bold", "align-middle", "bg-light", "text-primary", 2, "font-size", "0.95rem"], [1, "text-end", "font-weight-bold", "align-middle", "bg-warning-light", "text-dark", 2, "font-size", "0.95rem"], [1, "text-end", "font-weight-bold", "align-middle", "bg-success-light", "text-success", 2, "font-size", "0.95rem"], [1, "align-middle", "text-center", 2, "width", "110px"], [1, "d-flex", "justify-content-center", "align-items-center", "gap-1"], ["type", "button", "title", "Editar Trecho", "data-tooltip", "Editar Trecho", 1, "btn", "btn-info", "text-white", "shadow-sm", "btn-action", 3, "click", "disabled"], ["type", "button", "title", "Clonar Trecho", "data-tooltip", "Clonar Trecho", 1, "btn", "btn-secondary", "text-white", "shadow-sm", "btn-action", 3, "click", "disabled"], [1, "d-flex", "flex-wrap", "gap-2", "align-items-center"], ["target", "_blank", "class", "d-inline-block border rounded p-1 bg-light shadow-sm", 3, "href", 4, "ngIf"], ["target", "_blank", 1, "d-inline-block", "border", "rounded", "p-1", "bg-light", "shadow-sm", 3, "href"], [1, "rounded", 2, "height", "50px", "max-width", "80px", "object-fit", "contain", 3, "src"], [1, "col-md-4", "form-group", "mb-3"], ["for", "equipment", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "equipment", "placeholder", "Ex: Boeing 737-700 / Turboprop", "name", "equipment", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "iss_percent", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "iss_percent", "name", "iss_percent", 1, "form-control", 3, "input", "value"], ["for", "service_percent", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "service_percent", "name", "service_percent", 1, "form-control", 3, "input", "value"], ["for", "iva_percent", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "iva_percent", "name", "iva_percent", 1, "form-control", 3, "input", "value"], [1, "col-md-2", "form-group", "mb-3"], ["for", "service_charge", 1, "form-label", "font-weight-bold"], ["class", "input-group-text bg-light text-muted font-weight-bold", 4, "ngIf"], ["type", "text", "id", "service_charge", "name", "service_charge", 1, "form-control", 3, "input", "value"], [1, "input-group-text", "bg-light", "text-muted", "font-weight-bold"], ["for", "prazo_cia", 1, "form-label", "font-weight-bold"], [1, "fas", "fa-calendar-alt", "text-warning"], ["type", "text", "id", "prazo_cia", "placeholder", "dd/mm/aaaa", "appFlatpickr", "", "name", "prazo_cia", 1, "form-control", "bg-white", 3, "ngModelChange", "ngModel"], [1, "col-md-12", "mb-3"], [1, "card", "p-3", "bg-light", "border", "border-warning", "shadow-sm"], [1, "text-warning-emphasis", "font-weight-bold", "mb-3"], [1, "fas", "fa-plane-departure", "me-2"], [1, "form-label", "font-weight-bold", "text-dark", "mb-1"], [1, "row", "bg-white", "p-2", "border", "rounded"], [1, "col-md-2", "form-group"], [1, "small", "font-weight-bold"], ["type", "number", "min", "0", "name", "pax_first", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["type", "number", "min", "0", "name", "pax_executiva", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["type", "number", "min", "0", "name", "pax_premium", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], [1, "col-md-3", "form-group"], ["type", "number", "min", "0", "name", "pax_economica", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["type", "number", "readonly", "", "name", "total_pax", 1, "form-control", "form-control-sm", "bg-light", "font-weight-bold", "text-primary", 3, "value"], [1, "col-md-3", "form-group", "mb-2"], [1, "small", "font-weight-bold", "d-block"], ["name", "inc_taxa_embarque", 1, "form-select", "form-select-sm", 3, "ngModelChange", "ngModel"], ["name", "inc_servico_bordo", 1, "form-select", "form-select-sm", 3, "ngModelChange", "ngModel"], [1, "input-group", "input-group-sm"], ["type", "number", "min", "0", "step", "1", "name", "inc_porao", "placeholder", "23", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["type", "number", "min", "0", "step", "1", "name", "inc_bagagem_bordo", "placeholder", "10", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["name", "inc_sala_vip", 1, "form-select", "form-select-sm", 3, "ngModelChange", "ngModel"], ["type", "text", "name", "inc_fbo_origem", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["type", "text", "name", "inc_fbo_destino", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["name", "inc_alteracao_nomes", 1, "form-select", "form-select-sm", 3, "ngModelChange", "ngModel"], [1, "fas", "fa-coins", "me-1", "text-warning"], [1, "row", "bg-white", "p-3", "border", "rounded", "shadow-sm"], [1, "col-md-4", "form-group", "mb-2"], [1, "small", "font-weight-bold", "text-primary"], ["type", "text", "name", "total_net_sem_4bts", "placeholder", "0,00", 1, "form-control", "form-control-sm", "font-weight-bold", 3, "input", "value"], [1, "small", "font-weight-bold", "text-dark"], ["type", "number", "step", "0.01", "min", "0.01", "name", "markup", "placeholder", "0.75", 1, "form-control", "form-control-sm", "font-weight-bold", 3, "ngModelChange", "blur", "ngModel"], ["type", "text", "name", "taxa_embarque_unit", "placeholder", "0,00", 1, "form-control", "form-control-sm", 3, "input", "value"], [1, "fas", "fa-file-pdf", "me-1", "text-danger"], ["for", "observations", 1, "small", "font-weight-bold"], ["id", "observations", "rows", "3", "name", "observations", "placeholder", "T\xF3picos de observa\xE7\xF5es da proposta...", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["for", "notes", 1, "small", "font-weight-bold"], ["id", "notes", "rows", "3", "name", "notes", "placeholder", "Notas internas do fretamento...", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], [1, "col-md-12"], [1, "small", "font-weight-bold", "d-block", "mb-2"], ["class", "col-md-3 mb-2", 4, "ngFor", "ngForOf"], [1, "col-md-3", "mb-2"], [1, "border", "p-2", "text-center", "bg-light", "rounded", "h-100", "d-flex", "flex-column", "justify-content-between"], [1, "d-block", "font-weight-bold", "mb-1", 2, "font-size", "0.85rem"], ["class", "mb-2 position-relative d-inline-block mx-auto", 4, "ngIf"], ["class", "mb-2 d-flex align-items-center justify-content-center border rounded bg-white text-muted mx-auto w-100", "style", "height: 80px;", 4, "ngIf"], ["type", "file", "accept", "image/*", 1, "form-control", "form-control-sm", 3, "change", "id"], [1, "mb-2", "position-relative", "d-inline-block", "mx-auto"], [1, "rounded", "border", "bg-white", "shadow-sm", 2, "max-height", "80px", "max-width", "100%", "object-fit", "contain", 3, "src"], ["type", "button", "title", "Remover foto", 1, "btn", "btn-danger", "btn-sm", "position-absolute", "shadow-sm", 2, "top", "-6px", "right", "-6px", "width", "20px", "height", "20px", "padding", "0", "font-size", "11px", "border-radius", "50%", "line-height", "1", 3, "click"], [1, "mb-2", "d-flex", "align-items-center", "justify-content-center", "border", "rounded", "bg-white", "text-muted", "mx-auto", "w-100", 2, "height", "80px"], [1, "fa", "fa-image", "fa-2x", "text-black-50"], [1, "card", "p-3", "bg-light", "border", "border-secondary", "border-opacity-10", "shadow-sm"], [1, "row", "align-items-center"], [1, "col-md-4", "form-check", "mb-0", "d-flex", "align-items-center", "gap-2"], ["type", "checkbox", "id", "change_hotel_times", "name", "change_hotel_times", 1, "form-check-input", "mt-0", 3, "ngModelChange", "ngModel"], ["for", "change_hotel_times", 1, "form-check-label", "font-weight-bold", "text-dark", "mb-0"], [1, "col-md-2", "form-group", "mb-0"], ["for", "checkin_time", 1, "form-label", "font-weight-bold", "text-secondary", "mb-1", 2, "font-size", "0.85rem"], ["type", "time", "id", "checkin_time", "name", "checkin_time", 1, "form-control", 3, "ngModelChange", "ngModel", "disabled"], ["for", "checkin_time_end", 1, "form-label", "font-weight-bold", "text-secondary", "mb-1", 2, "font-size", "0.85rem"], ["type", "time", "id", "checkin_time_end", "name", "checkin_time_end", 1, "form-control", 3, "ngModelChange", "ngModel", "disabled"], ["for", "checkout_time", 1, "form-label", "font-weight-bold", "text-secondary", "mb-1", 2, "font-size", "0.85rem"], ["type", "time", "id", "checkout_time", "name", "checkout_time", 1, "form-control", 3, "ngModelChange", "ngModel", "disabled"], ["for", "checkout_time_end", 1, "form-label", "font-weight-bold", "text-secondary", "mb-1", 2, "font-size", "0.85rem"], ["type", "time", "id", "checkout_time_end", "name", "checkout_time_end", 1, "form-control", 3, "ngModelChange", "ngModel", "disabled"], ["for", "broker_id", 1, "form-label", "font-weight-bold"], ["id", "broker_id", "name", "broker_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "regime_id", 1, "form-label", "font-weight-bold"], ["id", "regime_id", "name", "regime_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "purpose_id", 1, "form-label", "font-weight-bold"], ["id", "purpose_id", "name", "purpose_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "hall_name", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "hall_name", "name", "name", "placeholder", "Ex: Audit\xF3rio A / Descri\xE7\xE3o da tarifa", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "hall_m2", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "hall_m2", "name", "m2", "placeholder", "Ex: 150", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "hall_pax", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "hall_pax", "name", "pax", "placeholder", "Ex: 100", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "category_id", 1, "form-label", "font-weight-bold"], ["id", "category_id", "name", "category_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "apto_id", 1, "form-label", "font-weight-bold"], ["id", "apto_id", "name", "apto_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "service_id", 1, "form-label", "font-weight-bold"], ["id", "service_id", "name", "service_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "service_type_id", 1, "form-label", "font-weight-bold"], ["id", "service_type_id", "name", "service_type_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "local_id", 1, "form-label", "font-weight-bold"], ["id", "local_id", "name", "local_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "frequency_id", 1, "form-label", "font-weight-bold"], ["id", "frequency_id", "name", "frequency_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "measure_id", 1, "form-label", "font-weight-bold"], ["id", "measure_id", "name", "measure_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "vehicle_id", 1, "form-label", "font-weight-bold"], ["id", "vehicle_id", "name", "vehicle_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "car_model_id", 1, "form-label", "font-weight-bold"], ["id", "car_model_id", "name", "car_model_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "brand_id", 1, "form-label", "font-weight-bold"], ["id", "brand_id", "name", "brand_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "opt_date_range", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "opt_date_range", "placeholder", "Selecione o per\xEDodo...", "readonly", "", "required", "", 1, "form-control", "bg-white"], ["for", "opt_out", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "opt_out", "placeholder", "dd/mm/aaaa", "appFlatpickr", "", "name", "out", "required", "", 1, "form-control", "bg-white", 3, "ngModelChange", "ngModel"], ["for", "outbound_airline_id", 1, "form-label", "font-weight-bold"], ["id", "outbound_airline_id", "name", "outbound_airline_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "outbound_flight_number", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "outbound_flight_number", "name", "outbound_flight_number", "placeholder", "Ex: 1851", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], [1, "col-md-6", "mb-3"], ["label", "DE", "id", "outbound_origin", "placeholder", "Digite IATA, cidade ou nome do aeroporto...", "valueField", "formatted", "name", "outbound_origin", 3, "ngModelChange", "required", "searchFn", "displayFn", "ngModel", "initialText", "errors"], ["label", "PARA", "id", "outbound_destination", "placeholder", "Digite IATA, cidade ou nome do aeroporto...", "valueField", "formatted", "name", "outbound_destination", 3, "ngModelChange", "required", "searchFn", "displayFn", "ngModel", "initialText", "errors"], ["for", "outbound_date", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "outbound_date", "placeholder", "dd/mm/aaaa", "appFlatpickr", "", "name", "outbound_date", "required", "", 1, "form-control", "bg-white", 3, "ngModelChange", "ngModel"], ["for", "outbound_departure_time", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "outbound_departure_time", "name", "outbound_departure_time", "placeholder", "Ex: 10:55", "mask", "00:00", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel", "dropSpecialCharacters"], ["for", "outbound_arrival_time", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "outbound_arrival_time", "name", "outbound_arrival_time", "placeholder", "Ex: 12:20", "mask", "00:00", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel", "dropSpecialCharacters"], ["for", "count", 1, "form-label", "font-weight-bold"], ["type", "number", "step", "1", "id", "count", "name", "count", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "kickback", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "kickback", "name", "kickback", 1, "form-control", 3, "input", "value"], ["for", "received_proposal", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "received_proposal", "name", "received_proposal", "required", "", 1, "form-control", 3, "input", "value"], ["for", "received_proposal_percent", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "received_proposal_percent", "name", "received_proposal_percent", "required", "", 1, "form-control", 3, "input", "value"], ["for", "opt_order", 1, "form-label", "font-weight-bold"], ["type", "number", "id", "opt_order", "name", "order", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "compare_trivago", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "compare_trivago", "name", "compare_trivago", 1, "form-control", 3, "input", "value"], ["for", "compare_website_htl", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "compare_website_htl", "name", "compare_website_htl", 1, "form-control", 3, "input", "value"], ["for", "compare_omnibess", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "compare_omnibess", "name", "compare_omnibess", 1, "form-control", 3, "input", "value"], ["for", "opt_observation", 1, "form-label", "font-weight-bold"], ["id", "opt_observation", "rows", "2", "name", "observation", 1, "form-control", 3, "ngModelChange", "ngModel"]], template: function EventCreateComponent_Template(rf, ctx) {
+  }, decls: 290, vars: 168, consts: [["dateRangePicker", ""], ["optDateRangePicker", ""], ["class", "position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-75", "style", "z-index: 2000", 4, "ngIf"], ["header", ""], [1, "d-sm-flex", "align-items-center", "justify-content-between", "mb-4", "animate-in"], [1, "h3", "mb-0", "text-gray-800"], [1, "fa", "fa-calendar-check", "me-2", "text-primary"], ["routerLink", "/event-list", 1, "btn", "btn-secondary", "btn-sm", "shadow-sm"], [1, "fas", "fa-arrow-left", "me-1"], [1, "row"], [1, "col-lg-12"], [1, "nav", "nav-tabs", "animate-in", 2, "animation-delay", "0.05s"], [1, "nav-item"], [1, "nav-link", 2, "cursor", "pointer", 3, "click"], [1, "fas", "fa-info-circle", "me-1"], [1, "fas", "fa-hotel", "me-1"], [1, "fas", "fa-utensils", "me-1"], [1, "fas", "fa-door-open", "me-1"], [1, "fas", "fa-concierge-bell", "me-1"], [1, "fas", "fa-bus", "me-1"], [1, "fas", "fa-plane", "me-1"], [1, "card", "shadow-sm", "border-left-primary", "mb-4", "animate-in"], [1, "card-body"], [3, "ngSubmit"], [1, "border-0", "p-0", "m-0", 3, "disabled"], [1, "col-lg-4"], [1, "form-group", "mb-3"], ["for", "name", 1, "form-label", "font-weight-bold"], [1, "text-danger"], ["type", "text", "id", "name", "name", "name", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], ["class", "text-danger mt-1", 4, "ngIf"], ["for", "code", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "code", "name", "code", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], [1, "border", "rounded", "p-3", "bg-light"], [1, "font-weight-bold", "text-primary", "mb-3"], [1, "fas", "fa-map-marker-alt", "me-1"], ["class", "mb-3 p-2 border-bottom", 4, "ngFor", "ngForOf"], ["type", "button", "class", "btn btn-sm btn-info w-100 mt-2", 3, "click", 4, "ngIf"], ["for", "customer", 1, "form-label", "font-weight-bold"], ["id", "customer", "name", "customer", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["value", ""], [3, "ngValue", 4, "ngFor", "ngForOf"], ["for", "requester", 1, "form-label", "font-weight-bold"], ["id", "requester", "name", "requester", "required", "", 1, "form-select", 3, "ngModelChange", "mousedown", "ngModel"], [3, "value", 4, "ngFor", "ngForOf"], ["for", "sector", 1, "form-label", "font-weight-bold"], ["id", "sector", "name", "sector", "required", "", 1, "form-select", 3, "ngModelChange", "mousedown", "ngModel"], ["for", "cc", 1, "form-label", "font-weight-bold"], ["id", "cc", "name", "cc", "required", "", 1, "form-select", 3, "ngModelChange", "mousedown", "ngModel"], ["for", "paxBase", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "paxBase", "name", "paxBase", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "dateRange", 1, "form-label", "font-weight-bold"], [1, "input-group"], [1, "input-group-text", "bg-light"], [1, "fas", "fa-calendar-alt", "text-primary"], ["type", "text", "id", "dateRange", "placeholder", "Selecione o per\xEDodo...", "readonly", "", "required", "", 1, "form-control", "bg-white"], ["for", "crd_id", 1, "form-label", "font-weight-bold"], ["id", "crd_id", "name", "crd_id", "required", "", 1, "form-select", 3, "ngModelChange", "mousedown", "ngModel"], ["for", "hotel_operator", 1, "form-label", "font-weight-bold"], ["id", "hotel_operator", "name", "hotel_operator", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "land_operator", 1, "form-label", "font-weight-bold"], ["id", "land_operator", "name", "land_operator", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "air_operator", 1, "form-label", "font-weight-bold"], ["id", "air_operator", "name", "air_operator", 1, "form-select", 3, "ngModelChange", "ngModel"], ["class", "d-flex justify-content-end gap-2 mt-4", 4, "ngIf"], ["class", "animate-in", 4, "ngIf"], [3, "close", "show", "title", "icon"], [1, "mb-3", 3, "ngClass"], ["id", "provider_id", "valueField", "id", "name", "provider_id", 3, "ngModelChange", "label", "placeholder", "required", "searchFn", "displayFn", "initialText", "ngModel", "errors", "disabled"], ["class", "col-md-4 form-group mb-3", 4, "ngIf"], [1, "form-group", "mb-3", 3, "ngClass"], ["for", "currency_id", 1, "form-label", "font-weight-bold"], ["id", "currency_id", "name", "currency_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["class", "form-group mb-3", 3, "ngClass", 4, "ngIf"], ["for", "iof", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "iof", "name", "iof", 1, "form-control", 3, "input", "value"], ["class", "col-md-2 form-group mb-3", 4, "ngIf"], ["for", "taxa_4bts", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "taxa_4bts", "name", "taxa_4bts", "required", "", 1, "form-control", 3, "input", "value"], ["for", "payment_method", 1, "form-label", "font-weight-bold"], ["id", "payment_method", "name", "payment_method", 1, "form-select", 3, "ngModelChange", "ngModel"], ["value", "Indefinido"], ["value", "Dinheiro"], ["value", "Cart\xE3o"], ["for", "invoice", 1, "form-label", "font-weight-bold"], ["id", "invoice", "name", "invoice", 1, "form-select", 3, "ngModelChange", "ngModel"], [3, "ngValue"], ["for", "deadline_date", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "deadline_date", "placeholder", "dd/mm/aaaa", "appFlatpickr", "", "name", "deadline_date", 1, "form-control", "bg-white", 3, "ngModelChange", "ngModel"], ["class", "col-md-12 mb-3", 4, "ngIf"], [1, "w-100"], [1, "col-md-6", "form-group", "mb-3"], ["for", "internal_observation", 1, "form-label", "font-weight-bold"], ["id", "internal_observation", "rows", "3", "name", "internal_observation", "placeholder", "Observa\xE7\xF5es internas...", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "customer_observation", 1, "form-label", "font-weight-bold"], ["id", "customer_observation", "rows", "3", "name", "customer_observation", "placeholder", "Observa\xE7\xF5es para o cliente...", 1, "form-control", 3, "ngModelChange", "ngModel"], [1, "modal-footer", "px-0", "pb-0", "pt-3", "d-flex", "justify-content-end", "gap-2", "border-top"], ["type", "button", 1, "btn", "btn-secondary", "shadow-sm", 3, "click"], ["type", "submit", 1, "btn", "btn-success", "shadow-sm", 3, "disabled"], ["class", "spinner-border spinner-border-sm me-1", 4, "ngIf"], [1, "fas", "fa-save", "me-1"], ["icon", "fa-edit", 3, "close", "show", "title"], ["class", "col-md-6 form-group mb-3", 4, "ngIf"], ["class", "col-md-12 form-group mb-3", 4, "ngIf"], [4, "ngIf"], ["title", "Editar Markup Geral", "icon", "fa-percentage", 3, "close", "show"], [1, "col-md-12", "form-group", "mb-3"], ["for", "bulk_markup", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "bulk_markup", "class", "form-control", "name", "bulk_markup", "required", "", 3, "value", "input", 4, "ngIf"], ["type", "number", "step", "0.01", "min", "0.01", "id", "bulk_markup_airfare", "class", "form-control", "name", "bulk_markup_airfare", "placeholder", "0.75", "required", "", 3, "ngModel", "ngModelChange", 4, "ngIf"], [1, "position-fixed", "top-0", "start-0", "w-100", "h-100", "d-flex", "align-items-center", "justify-content-center", "bg-white", "bg-opacity-75", 2, "z-index", "2000"], ["role", "status", 1, "spinner-border", "text-primary", 2, "width", "3rem", "height", "3rem"], [1, "visually-hidden"], [1, "text-danger", "mt-1"], ["class", "d-block", 4, "ngFor", "ngForOf"], [1, "d-block"], [1, "mb-3", "p-2", "border-bottom"], [1, "form-group", "mb-2"], [1, "form-label", "small", "font-weight-bold", 3, "for"], ["type", "text", "required", "", 1, "form-control", "form-control-sm", 3, "ngModelChange", "id", "ngModel", "name"], ["type", "button", "class", "btn btn-sm btn-outline-danger mt-1", 3, "click", 4, "ngIf"], ["type", "button", 1, "btn", "btn-sm", "btn-outline-danger", "mt-1", 3, "click"], [1, "fas", "fa-trash", "me-1"], ["type", "button", 1, "btn", "btn-sm", "btn-info", "w-100", "mt-2", 3, "click"], [1, "fas", "fa-plus", "me-1"], [3, "value"], [1, "d-flex", "justify-content-end", "gap-2", "mt-4"], ["type", "submit", 1, "btn", "btn-primary", "px-4", "shadow-sm", 3, "disabled"], [1, "spinner-border", "spinner-border-sm", "me-1"], [1, "animate-in"], [1, "d-flex", "justify-content-between", "align-items-center", "mb-3"], [1, "m-0", "font-weight-bold", "text-primary"], [1, "fas", "fa-list", "me-1"], [1, "d-flex", "gap-2"], ["type", "button", 1, "btn", "btn-sm", "btn-info", "text-white", "shadow-sm", 3, "click"], [1, "fas", 3, "ngClass"], ["type", "button", "class", "btn btn-sm btn-success shadow-sm", 3, "click", 4, "ngIf"], [4, "ngFor", "ngForOf"], ["class", "alert alert-secondary py-5 text-center shadow-sm", 4, "ngIf"], ["type", "button", 1, "btn", "btn-sm", "btn-success", "shadow-sm", 3, "click"], [1, "card", "card-provider-group", "mb-4", "shadow-sm"], [1, "card-header", "bg-light", "py-3", "d-sm-flex", "align-items-center", "justify-content-between"], [1, "badge", "ms-2", 3, "ngClass"], ["class", "d-flex gap-2", 4, "ngIf"], [1, "card-body", "p-0"], [1, "table-responsive"], [1, "table", "table-bordered", "align-middle", "mb-0", "table-tariffs", 2, "min-width", "1200px"], [1, "text-start", "bg-light", "text-dark", "font-weight-bold"], ["colspan", "3", 1, "bg-success-header", "text-center", "font-weight-bold", "text-white"], ["colspan", "2", 1, "bg-warning-header", "text-center", "font-weight-bold", "text-white"], ["rowspan", "2", 1, "align-middle", "text-center", "bg-light", "text-dark", "font-weight-bold"], ["colspan", "3", "class", "bg-secondary text-white text-center font-weight-bold border-bottom-0", 4, "ngIf"], ["rowspan", "2", "class", "align-middle text-center bg-light text-dark font-weight-bold", "style", "width: 100px", 4, "ngIf"], ["scope", "col", "class", "sticky-col col-service-detail text-start", 4, "ngIf"], ["scope", "col", 1, "text-start"], ["scope", "col", "class", "text-start", 3, "sticky-col", 4, "ngIf"], ["scope", "col", "class", "text-center", 4, "ngIf"], ["scope", "col", "class", "text-start", 4, "ngIf"], ["scope", "col", 1, "text-center"], ["scope", "col", 1, "bg-success-header", "text-center", "text-white"], ["scope", "col", 1, "bg-success-header", "text-end", "text-white"], ["scope", "col", 1, "bg-warning-header", "text-end", "text-white"], ["class", "table-subheader", 4, "ngIf"], [1, "observation-row"], ["colspan", "2", 1, "sticky-col", "text-start", "font-weight-bold"], [1, "text-start", "text-dark"], ["colspan", "2", 1, "font-weight-bold", "text-end"], ["colspan", "2", 1, "bg-success-solid", "font-weight-bold", "text-end"], ["colspan", "2", 1, "bg-warning-solid", "font-weight-bold", "text-end"], ["type", "button", "title", "Editar Cadastro do Fornecedor", 1, "btn", "btn-sm", "btn-outline-info", 3, "click"], [1, "fas", "fa-edit", "me-1"], ["type", "button", "title", "Alterar Markup de Todas as Tarifas", 1, "btn", "btn-sm", "btn-outline-primary", 3, "click"], [1, "fas", "fa-percentage", "me-1"], ["type", "button", "title", "Adicionar Nova Tarifa/Op\xE7\xE3o", 1, "btn", "btn-sm", "btn-outline-success", 3, "click"], [3, "confirm", "btnClass", "modalTitle", "message", "okButtonLabel"], ["modal-button", ""], [1, "fas", "fa-trash"], ["colspan", "2", 1, "bg-light", "text-primary", "text-center", "font-weight-bold", "border-bottom-0"], ["colspan", "2", "class", "bg-light text-primary text-center font-weight-bold border-bottom-0", 4, "ngIf"], ["colspan", "3", 1, "bg-secondary", "text-white", "text-center", "font-weight-bold", "border-bottom-0"], ["rowspan", "2", 1, "align-middle", "text-center", "bg-light", "text-dark", "font-weight-bold", 2, "width", "100px"], ["scope", "col", 1, "sticky-col", "col-service-detail", "text-start"], [1, "bg-light", "text-primary", "text-end"], ["class", "bg-light text-primary text-end", 4, "ngIf"], [1, "bg-secondary", "text-white", "text-end"], [1, "py-4", "text-muted"], ["class", "font-weight-bold sticky-col col-service-detail text-dark text-start", 4, "ngIf"], [1, "text-start"], ["class", "text-start", 3, "sticky-col", 4, "ngIf"], ["class", "text-center", 4, "ngIf"], ["class", "text-start", 4, "ngIf"], [1, "text-center"], [1, "bg-success-light", "text-success", "font-weight-bold", "text-center"], [1, "bg-success-light", "text-success", "font-weight-bold", "text-end"], [1, "bg-success-solid", "font-weight-bold", "text-end"], [1, "bg-warning-light", "text-dark", "font-weight-bold", "text-end"], [1, "bg-warning-solid", "font-weight-bold", "text-end"], [1, "text-end"], [1, "font-weight-bold", "sticky-col", "col-service-detail", "text-dark", "text-start"], [1, "text-truncate", "fw-bold", "text-dark", 2, "max-width", "240px", 3, "title"], [1, "fas", "fa-door-open", "me-1", "text-primary"], ["class", "text-truncate small text-muted font-weight-normal mt-1", "style", "max-width: 240px", 3, "title", 4, "ngIf"], [1, "text-truncate", "small", "text-muted", "font-weight-normal", "mt-1", 2, "max-width", "240px", 3, "title"], [1, "fas", "fa-tag", "me-1", "text-secondary", 2, "font-size", "0.75rem"], [1, "text-truncate", 2, "max-width", "240px", 3, "title"], [1, "bg-light-tax", "text-primary", "font-weight-bold", "text-end"], [1, "bg-light-tax", "text-primary", "text-end"], ["class", "bg-light-tax text-primary font-weight-bold text-end", 4, "ngIf"], ["class", "bg-light-tax text-primary text-end", 4, "ngIf"], [1, "bg-compare", "text-end", "font-weight-bold"], [1, "d-flex", "justify-content-center", "gap-1"], ["type", "button", "title", "Editar Tarifa", "data-tooltip", "Editar Tarifa", 1, "btn", "btn-info", "text-white", "shadow-sm", "btn-action", 3, "click", "disabled"], [1, "fas", "fa-edit"], ["type", "button", "title", "Clonar Tarifa", "data-tooltip", "Clonar Tarifa", 1, "btn", "btn-secondary", "text-white", "shadow-sm", "btn-action", 3, "click", "disabled"], [1, "fas", "fa-clone"], [3, "confirm", "btnClass", "modalTitle", "message", "okButtonLabel", "tooltip"], [1, "table-subheader"], [1, "sticky-col", "font-weight-bold", "text-start"], [1, "sticky-col", "font-weight-bold", "text-end"], [1, "font-weight-bold", "text-start"], [1, "font-weight-bold", "text-center"], [1, "text-center", "font-weight-bold"], [1, "font-weight-bold", "text-end"], [1, "bg-secondary", "text-white", "text-end", "font-weight-bold"], [1, "sticky-col", "col-service-detail", "font-weight-bold", "text-start"], [1, "alert", "alert-secondary", "py-5", "text-center", "shadow-sm"], [1, "fas", "fa-folder-open", "fa-3x", "mb-3", "text-muted"], [1, "text-secondary", "font-weight-bold"], [1, "text-muted", "mb-0"], [1, "bg-light", "px-3", "py-2", "border-bottom", "d-flex", "flex-wrap", "align-items-center", "justify-content-between", "gap-3", 2, "font-size", "0.85rem"], [1, "font-weight-bold", "text-secondary", "me-1"], [1, "fas", "fa-plane", "me-1", "text-primary"], [1, "badge", "bg-primary", "text-white", "font-weight-bold", 2, "font-size", "0.82rem"], [1, "d-flex", "align-items-center", "gap-1"], [1, "fas", "fa-users", "me-1", "text-primary"], [1, "badge", "bg-light", "text-dark", "border"], [1, "badge", "bg-success", "text-white", "font-weight-bold", "ms-1"], [1, "d-flex", "align-items-center", "gap-3"], [1, "far", "fa-calendar-alt", "me-1", "text-primary"], [1, "text-dark", "font-weight-bold"], [1, "far", "fa-clock", "me-1", "text-warning"], [1, "table", "table-bordered", "align-middle", "mb-0", "table-tariffs", "shadow-sm", 2, "min-width", "1200px"], ["colspan", "7", 1, "text-start", "bg-light", "text-dark", "font-weight-bold"], [1, "fas", "fa-route", "me-1", "text-primary"], [1, "bg-light", "text-center", "font-weight-bold", "text-dark", 2, "width", "90px"], [1, "bg-warning-header", "text-center", "font-weight-bold", "text-white", 2, "width", "140px"], [1, "bg-success-header", "text-center", "font-weight-bold", "text-white", 2, "width", "140px"], ["class", "align-middle text-center bg-light text-dark font-weight-bold", "style", "width: 110px;", 4, "ngIf"], [1, "text-center", "font-weight-bold", 2, "width", "80px"], [1, "text-center", "font-weight-bold", 2, "width", "90px"], [1, "text-center", "font-weight-bold", 2, "width", "110px"], [1, "text-end", "font-weight-bold", "text-warning-emphasis"], [1, "text-end", "font-weight-bold", "text-success"], ["class", "text-center font-weight-bold", "style", "width: 110px;", 4, "ngIf"], ["colspan", "2", 1, "sticky-col", "font-weight-bold", "text-start"], [1, "font-weight-bold", "text-start", "text-dark"], [1, "text-center", "font-weight-bold", "text-dark"], ["colspan", "3", 1, "font-weight-bold", "text-start", "text-primary"], [1, "text-end", "font-weight-bold", "text-primary"], ["colspan", "2", 1, "sticky-col", "text-start", "font-weight-bold", "text-dark"], [1, "fas", "fa-concierge-bell", "me-1", "text-primary"], [1, "text-start", "py-2"], [1, "d-flex", "flex-wrap", "gap-2"], [1, "badge", 3, "ngClass"], [1, "fas", "fa-suitcase", "me-1", "text-primary"], [1, "fas", "fa-briefcase", "me-1", "text-primary"], ["colspan", "3", 1, "text-start", "font-weight-bold", "text-dark"], [1, "badge", "bg-secondary"], ["class", "observation-row", 4, "ngIf"], ["type", "button", "title", "Editar Or\xE7amento de Fretamento", 1, "btn", "btn-sm", "btn-outline-info", 3, "click"], ["type", "button", "title", "Alterar Markup do Fretamento", 1, "btn", "btn-sm", "btn-outline-primary", 3, "click"], ["type", "button", "title", "Novo Trecho", 1, "btn", "btn-sm", "btn-outline-success", 3, "click"], [1, "align-middle", "text-center", "bg-light", "text-dark", "font-weight-bold", 2, "width", "110px"], [1, "py-4", "text-muted", "text-center"], [1, "text-center", "font-weight-bold", "text-primary"], ["class", "text-center font-weight-bold align-middle bg-light text-primary", "style", "font-size: 0.95rem;", 4, "ngIf"], ["class", "text-end font-weight-bold align-middle bg-warning-light text-dark", "style", "font-size: 0.95rem;", 4, "ngIf"], ["class", "text-end font-weight-bold align-middle bg-success-light text-success", "style", "font-size: 0.95rem;", 4, "ngIf"], ["class", "align-middle text-center", "style", "width: 110px;", 4, "ngIf"], [1, "text-center", "font-weight-bold", "align-middle", "bg-light", "text-primary", 2, "font-size", "0.95rem"], [1, "text-end", "font-weight-bold", "align-middle", "bg-warning-light", "text-dark", 2, "font-size", "0.95rem"], [1, "text-end", "font-weight-bold", "align-middle", "bg-success-light", "text-success", 2, "font-size", "0.95rem"], [1, "align-middle", "text-center", 2, "width", "110px"], [1, "d-flex", "justify-content-center", "align-items-center", "gap-1"], ["type", "button", "title", "Editar Trecho", "data-tooltip", "Editar Trecho", 1, "btn", "btn-info", "text-white", "shadow-sm", "btn-action", 3, "click", "disabled"], ["type", "button", "title", "Clonar Trecho", "data-tooltip", "Clonar Trecho", 1, "btn", "btn-secondary", "text-white", "shadow-sm", "btn-action", 3, "click", "disabled"], [1, "d-flex", "flex-wrap", "gap-2", "align-items-center"], ["target", "_blank", "class", "d-inline-block border rounded p-1 bg-light shadow-sm", 3, "href", 4, "ngIf"], ["target", "_blank", 1, "d-inline-block", "border", "rounded", "p-1", "bg-light", "shadow-sm", 3, "href"], [1, "rounded", 2, "height", "50px", "max-width", "80px", "object-fit", "contain", 3, "src"], [1, "col-md-4", "form-group", "mb-3"], ["for", "equipment", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "equipment", "placeholder", "Ex: Boeing 737-700 / Turboprop", "name", "equipment", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "iss_percent", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "iss_percent", "name", "iss_percent", 1, "form-control", 3, "input", "value"], ["for", "service_percent", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "service_percent", "name", "service_percent", 1, "form-control", 3, "input", "value"], ["for", "iva_percent", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "iva_percent", "name", "iva_percent", 1, "form-control", 3, "input", "value"], [1, "col-md-2", "form-group", "mb-3"], ["for", "service_charge", 1, "form-label", "font-weight-bold"], ["class", "input-group-text bg-light text-muted font-weight-bold", 4, "ngIf"], ["type", "text", "id", "service_charge", "name", "service_charge", 1, "form-control", 3, "input", "value"], [1, "input-group-text", "bg-light", "text-muted", "font-weight-bold"], ["for", "prazo_cia", 1, "form-label", "font-weight-bold"], [1, "fas", "fa-calendar-alt", "text-warning"], ["type", "text", "id", "prazo_cia", "placeholder", "dd/mm/aaaa", "appFlatpickr", "", "name", "prazo_cia", 1, "form-control", "bg-white", 3, "ngModelChange", "ngModel"], [1, "col-md-12", "mb-3"], [1, "card", "p-3", "bg-light", "border", "border-warning", "shadow-sm"], [1, "text-warning-emphasis", "font-weight-bold", "mb-3"], [1, "fas", "fa-plane-departure", "me-2"], [1, "form-label", "font-weight-bold", "text-dark", "mb-1"], [1, "row", "bg-white", "p-2", "border", "rounded"], [1, "col-md-2", "form-group"], [1, "small", "font-weight-bold"], ["type", "number", "min", "0", "name", "pax_first", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["type", "number", "min", "0", "name", "pax_executiva", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["type", "number", "min", "0", "name", "pax_premium", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], [1, "col-md-3", "form-group"], ["type", "number", "min", "0", "name", "pax_economica", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["type", "number", "readonly", "", "name", "total_pax", 1, "form-control", "form-control-sm", "bg-light", "font-weight-bold", "text-primary", 3, "value"], [1, "col-md-3", "form-group", "mb-2"], [1, "small", "font-weight-bold", "d-block"], ["name", "inc_taxa_embarque", 1, "form-select", "form-select-sm", 3, "ngModelChange", "ngModel"], ["name", "inc_servico_bordo", 1, "form-select", "form-select-sm", 3, "ngModelChange", "ngModel"], [1, "input-group", "input-group-sm"], ["type", "number", "min", "0", "step", "1", "name", "inc_porao", "placeholder", "23", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["type", "number", "min", "0", "step", "1", "name", "inc_bagagem_bordo", "placeholder", "10", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["name", "inc_sala_vip", 1, "form-select", "form-select-sm", 3, "ngModelChange", "ngModel"], ["type", "text", "name", "inc_fbo_origem", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["type", "text", "name", "inc_fbo_destino", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["name", "inc_alteracao_nomes", 1, "form-select", "form-select-sm", 3, "ngModelChange", "ngModel"], [1, "fas", "fa-coins", "me-1", "text-warning"], [1, "row", "bg-white", "p-3", "border", "rounded", "shadow-sm"], [1, "col-md-4", "form-group", "mb-2"], [1, "small", "font-weight-bold", "text-primary"], ["type", "text", "name", "total_net_sem_4bts", "placeholder", "0,00", 1, "form-control", "form-control-sm", "font-weight-bold", 3, "input", "value"], [1, "small", "font-weight-bold", "text-dark"], ["type", "number", "step", "0.01", "min", "0.01", "name", "markup", "placeholder", "0.75", 1, "form-control", "form-control-sm", "font-weight-bold", 3, "ngModelChange", "blur", "ngModel"], ["type", "text", "name", "taxa_embarque_unit", "placeholder", "0,00", 1, "form-control", "form-control-sm", 3, "input", "value"], [1, "fas", "fa-file-pdf", "me-1", "text-danger"], ["for", "observations", 1, "small", "font-weight-bold"], ["id", "observations", "rows", "3", "name", "observations", "placeholder", "T\xF3picos de observa\xE7\xF5es da proposta...", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], ["for", "notes", 1, "small", "font-weight-bold"], ["id", "notes", "rows", "3", "name", "notes", "placeholder", "Notas internas do fretamento...", 1, "form-control", "form-control-sm", 3, "ngModelChange", "ngModel"], [1, "col-md-12"], [1, "small", "font-weight-bold", "d-block", "mb-2"], ["class", "col-md-3 mb-2", 4, "ngFor", "ngForOf"], [1, "col-md-3", "mb-2"], [1, "border", "p-2", "text-center", "bg-light", "rounded", "h-100", "d-flex", "flex-column", "justify-content-between"], [1, "d-block", "font-weight-bold", "mb-1", 2, "font-size", "0.85rem"], ["class", "mb-2 position-relative d-inline-block mx-auto", 4, "ngIf"], ["class", "mb-2 d-flex align-items-center justify-content-center border rounded bg-white text-muted mx-auto w-100", "style", "height: 80px;", 4, "ngIf"], ["type", "file", "accept", "image/*", 1, "form-control", "form-control-sm", 3, "change", "id"], [1, "mb-2", "position-relative", "d-inline-block", "mx-auto"], [1, "rounded", "border", "bg-white", "shadow-sm", 2, "max-height", "80px", "max-width", "100%", "object-fit", "contain", 3, "src"], ["type", "button", "title", "Remover foto", 1, "btn", "btn-danger", "btn-sm", "position-absolute", "shadow-sm", 2, "top", "-6px", "right", "-6px", "width", "20px", "height", "20px", "padding", "0", "font-size", "11px", "border-radius", "50%", "line-height", "1", 3, "click"], [1, "mb-2", "d-flex", "align-items-center", "justify-content-center", "border", "rounded", "bg-white", "text-muted", "mx-auto", "w-100", 2, "height", "80px"], [1, "fa", "fa-image", "fa-2x", "text-black-50"], [1, "card", "p-3", "bg-light", "border", "border-secondary", "border-opacity-10", "shadow-sm"], [1, "row", "align-items-center"], [1, "col-md-4", "form-check", "mb-0", "d-flex", "align-items-center", "gap-2"], ["type", "checkbox", "id", "change_hotel_times", "name", "change_hotel_times", 1, "form-check-input", "mt-0", 3, "ngModelChange", "ngModel"], ["for", "change_hotel_times", 1, "form-check-label", "font-weight-bold", "text-dark", "mb-0"], [1, "col-md-2", "form-group", "mb-0"], ["for", "checkin_time", 1, "form-label", "font-weight-bold", "text-secondary", "mb-1", 2, "font-size", "0.85rem"], ["type", "time", "id", "checkin_time", "name", "checkin_time", 1, "form-control", 3, "ngModelChange", "ngModel", "disabled"], ["for", "checkin_time_end", 1, "form-label", "font-weight-bold", "text-secondary", "mb-1", 2, "font-size", "0.85rem"], ["type", "time", "id", "checkin_time_end", "name", "checkin_time_end", 1, "form-control", 3, "ngModelChange", "ngModel", "disabled"], ["for", "checkout_time", 1, "form-label", "font-weight-bold", "text-secondary", "mb-1", 2, "font-size", "0.85rem"], ["type", "time", "id", "checkout_time", "name", "checkout_time", 1, "form-control", 3, "ngModelChange", "ngModel", "disabled"], ["for", "checkout_time_end", 1, "form-label", "font-weight-bold", "text-secondary", "mb-1", 2, "font-size", "0.85rem"], ["type", "time", "id", "checkout_time_end", "name", "checkout_time_end", 1, "form-control", 3, "ngModelChange", "ngModel", "disabled"], ["for", "broker_id", 1, "form-label", "font-weight-bold"], ["id", "broker_id", "name", "broker_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "regime_id", 1, "form-label", "font-weight-bold"], ["id", "regime_id", "name", "regime_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "purpose_id", 1, "form-label", "font-weight-bold"], ["id", "purpose_id", "name", "purpose_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "hall_name", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "hall_name", "name", "name", "placeholder", "Ex: Audit\xF3rio A", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "hall_m2", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "hall_m2", "name", "m2", "placeholder", "Ex: 150", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "hall_pax", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "hall_pax", "name", "pax", "placeholder", "Ex: 100", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "category_id", 1, "form-label", "font-weight-bold"], ["id", "category_id", "name", "category_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "apto_id", 1, "form-label", "font-weight-bold"], ["id", "apto_id", "name", "apto_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "service_id", 1, "form-label", "font-weight-bold"], ["id", "service_id", "name", "service_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "service_type_id", 1, "form-label", "font-weight-bold"], ["id", "service_type_id", "name", "service_type_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "local_id", 1, "form-label", "font-weight-bold"], ["id", "local_id", "name", "local_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "frequency_id", 1, "form-label", "font-weight-bold"], ["id", "frequency_id", "name", "frequency_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "measure_id", 1, "form-label", "font-weight-bold"], ["id", "measure_id", "name", "measure_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "vehicle_id", 1, "form-label", "font-weight-bold"], ["id", "vehicle_id", "name", "vehicle_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "car_model_id", 1, "form-label", "font-weight-bold"], ["id", "car_model_id", "name", "car_model_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "brand_id", 1, "form-label", "font-weight-bold"], ["id", "brand_id", "name", "brand_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "opt_date_range", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "opt_date_range", "placeholder", "Selecione o per\xEDodo...", "readonly", "", "required", "", 1, "form-control", "bg-white"], ["for", "opt_out", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "opt_out", "placeholder", "dd/mm/aaaa", "appFlatpickr", "", "name", "out", "required", "", 1, "form-control", "bg-white", 3, "ngModelChange", "ngModel"], ["for", "outbound_airline_id", 1, "form-label", "font-weight-bold"], ["id", "outbound_airline_id", "name", "outbound_airline_id", "required", "", 1, "form-select", 3, "ngModelChange", "ngModel"], ["for", "outbound_flight_number", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "outbound_flight_number", "name", "outbound_flight_number", "placeholder", "Ex: 1851", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], [1, "col-md-6", "mb-3"], ["label", "DE", "id", "outbound_origin", "placeholder", "Digite IATA, cidade ou nome do aeroporto...", "valueField", "formatted", "name", "outbound_origin", 3, "ngModelChange", "required", "searchFn", "displayFn", "ngModel", "initialText", "errors"], ["label", "PARA", "id", "outbound_destination", "placeholder", "Digite IATA, cidade ou nome do aeroporto...", "valueField", "formatted", "name", "outbound_destination", 3, "ngModelChange", "required", "searchFn", "displayFn", "ngModel", "initialText", "errors"], ["for", "outbound_date", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "outbound_date", "placeholder", "dd/mm/aaaa", "appFlatpickr", "", "name", "outbound_date", "required", "", 1, "form-control", "bg-white", 3, "ngModelChange", "ngModel"], ["for", "outbound_departure_time", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "outbound_departure_time", "name", "outbound_departure_time", "placeholder", "Ex: 10:55", "mask", "00:00", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel", "dropSpecialCharacters"], ["for", "outbound_arrival_time", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "outbound_arrival_time", "name", "outbound_arrival_time", "placeholder", "Ex: 12:20", "mask", "00:00", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel", "dropSpecialCharacters"], ["for", "count", 1, "form-label", "font-weight-bold"], ["type", "number", "step", "1", "id", "count", "name", "count", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "kickback", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "kickback", "name", "kickback", 1, "form-control", 3, "input", "value"], ["for", "received_proposal", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "received_proposal", "name", "received_proposal", "required", "", 1, "form-control", 3, "input", "value"], ["for", "received_proposal_percent", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "received_proposal_percent", "name", "received_proposal_percent", "required", "", 1, "form-control", 3, "input", "value"], ["for", "opt_order", 1, "form-label", "font-weight-bold"], ["type", "number", "id", "opt_order", "name", "order", 1, "form-control", 3, "ngModelChange", "ngModel"], ["for", "compare_trivago", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "compare_trivago", "name", "compare_trivago", 1, "form-control", 3, "input", "value"], ["for", "compare_website_htl", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "compare_website_htl", "name", "compare_website_htl", 1, "form-control", 3, "input", "value"], ["for", "compare_omnibess", 1, "form-label", "font-weight-bold"], ["type", "text", "id", "compare_omnibess", "name", "compare_omnibess", 1, "form-control", 3, "input", "value"], ["for", "opt_observation", 1, "form-label", "font-weight-bold"], ["id", "opt_observation", "rows", "2", "name", "observation", 1, "form-control", 3, "ngModelChange", "ngModel"], ["type", "text", "id", "bulk_markup", "name", "bulk_markup", "required", "", 1, "form-control", 3, "input", "value"], ["type", "number", "step", "0.01", "min", "0.01", "id", "bulk_markup_airfare", "name", "bulk_markup_airfare", "placeholder", "0.75", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"]], template: function EventCreateComponent_Template(rf, ctx) {
     if (rf & 1) {
       const _r1 = \u0275\u0275getCurrentView();
       \u0275\u0275elementStart(0, "app-authenticated-layout");
@@ -121143,7 +121367,7 @@ var EventCreateComponent = class _EventCreateComponent {
         return \u0275\u0275resetView(ctx.saveOpt());
       });
       \u0275\u0275elementStart(243, "div", 9);
-      \u0275\u0275template(244, EventCreateComponent_div_244_Template, 10, 5, "div", 102)(245, EventCreateComponent_div_245_Template, 10, 5, "div", 102)(246, EventCreateComponent_div_246_Template, 10, 5, "div", 102)(247, EventCreateComponent_div_247_Template, 4, 1, "div", 103)(248, EventCreateComponent_div_248_Template, 4, 1, "div", 102)(249, EventCreateComponent_div_249_Template, 4, 1, "div", 102)(250, EventCreateComponent_div_250_Template, 10, 5, "div", 102)(251, EventCreateComponent_div_251_Template, 10, 5, "div", 102)(252, EventCreateComponent_div_252_Template, 10, 6, "div", 102)(253, EventCreateComponent_div_253_Template, 10, 5, "div", 102)(254, EventCreateComponent_div_254_Template, 10, 5, "div", 102)(255, EventCreateComponent_div_255_Template, 10, 5, "div", 102)(256, EventCreateComponent_div_256_Template, 10, 5, "div", 102)(257, EventCreateComponent_div_257_Template, 10, 5, "div", 69)(258, EventCreateComponent_div_258_Template, 10, 5, "div", 69)(259, EventCreateComponent_div_259_Template, 10, 5, "div", 69)(260, EventCreateComponent_div_260_Template, 11, 3, "div", 102)(261, EventCreateComponent_div_261_Template, 10, 4, "div", 102)(262, EventCreateComponent_ng_container_262_Template, 46, 35, "ng-container", 104)(263, EventCreateComponent_ng_container_263_Template, 32, 15, "ng-container", 104)(264, EventCreateComponent_ng_container_264_Template, 19, 6, "ng-container", 104)(265, EventCreateComponent_div_265_Template, 4, 1, "div", 103);
+      \u0275\u0275template(244, EventCreateComponent_div_244_Template, 10, 5, "div", 102)(245, EventCreateComponent_div_245_Template, 10, 5, "div", 102)(246, EventCreateComponent_div_246_Template, 10, 5, "div", 102)(247, EventCreateComponent_div_247_Template, 6, 1, "div", 103)(248, EventCreateComponent_div_248_Template, 4, 1, "div", 102)(249, EventCreateComponent_div_249_Template, 4, 1, "div", 102)(250, EventCreateComponent_div_250_Template, 10, 5, "div", 102)(251, EventCreateComponent_div_251_Template, 10, 5, "div", 102)(252, EventCreateComponent_div_252_Template, 10, 6, "div", 102)(253, EventCreateComponent_div_253_Template, 10, 5, "div", 102)(254, EventCreateComponent_div_254_Template, 10, 5, "div", 102)(255, EventCreateComponent_div_255_Template, 10, 5, "div", 102)(256, EventCreateComponent_div_256_Template, 10, 5, "div", 102)(257, EventCreateComponent_div_257_Template, 10, 5, "div", 69)(258, EventCreateComponent_div_258_Template, 10, 5, "div", 69)(259, EventCreateComponent_div_259_Template, 10, 5, "div", 69)(260, EventCreateComponent_div_260_Template, 11, 3, "div", 102)(261, EventCreateComponent_div_261_Template, 10, 4, "div", 102)(262, EventCreateComponent_ng_container_262_Template, 46, 35, "ng-container", 104)(263, EventCreateComponent_ng_container_263_Template, 32, 15, "ng-container", 104)(264, EventCreateComponent_ng_container_264_Template, 19, 6, "ng-container", 104)(265, EventCreateComponent_div_265_Template, 4, 1, "div", 103);
       \u0275\u0275elementEnd();
       \u0275\u0275elementStart(266, "div", 96)(267, "button", 97);
       \u0275\u0275listener("click", function EventCreateComponent_Template_button_click_267_listener() {
@@ -121168,27 +121392,23 @@ var EventCreateComponent = class _EventCreateComponent {
         return \u0275\u0275resetView(ctx.confirmMarkupBulk());
       });
       \u0275\u0275elementStart(275, "div", 9)(276, "div", 106)(277, "label", 107);
-      \u0275\u0275text(278, " Markup divisor (%) para todas as tarifas: ");
+      \u0275\u0275text(278);
       \u0275\u0275elementStart(279, "span", 28);
       \u0275\u0275text(280, "*");
       \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(281, "input", 108);
-      \u0275\u0275listener("input", function EventCreateComponent_Template_input_input_281_listener($event) {
-        \u0275\u0275restoreView(_r1);
-        return \u0275\u0275resetView(ctx.onPercentInput($event, "bulkMarkupValue", "bulkForm"));
-      });
-      \u0275\u0275elementEnd()()();
-      \u0275\u0275elementStart(282, "div", 96)(283, "button", 97);
-      \u0275\u0275listener("click", function EventCreateComponent_Template_button_click_283_listener() {
+      \u0275\u0275template(281, EventCreateComponent_input_281_Template, 1, 1, "input", 108)(282, EventCreateComponent_input_282_Template, 1, 1, "input", 109);
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(283, "div", 96)(284, "button", 97);
+      \u0275\u0275listener("click", function EventCreateComponent_Template_button_click_284_listener() {
         \u0275\u0275restoreView(_r1);
         return \u0275\u0275resetView(ctx.closeMarkupForm());
       });
-      \u0275\u0275text(284, "Cancelar");
+      \u0275\u0275text(285, "Cancelar");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(285, "button", 98);
-      \u0275\u0275template(286, EventCreateComponent_span_286_Template, 1, 0, "span", 99);
-      \u0275\u0275element(287, "i", 100);
-      \u0275\u0275text(288, " Confirmar Atualiza\xE7\xE3o ");
+      \u0275\u0275elementStart(286, "button", 98);
+      \u0275\u0275template(287, EventCreateComponent_span_287_Template, 1, 0, "span", 99);
+      \u0275\u0275element(288, "i", 100);
+      \u0275\u0275text(289, " Confirmar Atualiza\xE7\xE3o ");
       \u0275\u0275elementEnd()()()()();
     }
     if (rf & 2) {
@@ -121420,14 +121640,18 @@ var EventCreateComponent = class _EventCreateComponent {
       \u0275\u0275textInterpolate1(" ", ctx.optFormType === "airfare" ? "Salvar Trecho" : "Salvar Detalhe", " ");
       \u0275\u0275advance();
       \u0275\u0275property("show", ctx.showMarkupForm);
-      \u0275\u0275advance(8);
-      \u0275\u0275property("value", ctx.formatPercent(ctx.bulkMarkupValue));
+      \u0275\u0275advance(5);
+      \u0275\u0275textInterpolate1(" ", ctx.bulkMarkupTargetType === "airfare" ? "Markup divisor para o fretamento:" : "Markup divisor (%) para todas as tarifas:", " ");
+      \u0275\u0275advance(3);
+      \u0275\u0275property("ngIf", ctx.bulkMarkupTargetType !== "airfare");
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", ctx.bulkMarkupTargetType === "airfare");
       \u0275\u0275advance(4);
       \u0275\u0275property("disabled", ctx.processing);
       \u0275\u0275advance();
       \u0275\u0275property("ngIf", ctx.processing);
     }
-  }, dependencies: [CommonModule, NgClass, NgForOf, NgIf, DecimalPipe, DatePipe, FormsModule, \u0275NgNoValidate, NgSelectOption, \u0275NgSelectMultipleOption, DefaultValueAccessor, NumberValueAccessor, CheckboxControlValueAccessor, SelectControlValueAccessor, NgControlStatus, NgControlStatusGroup, RequiredValidator, MinValidator, NgModel, NgForm, RouterLink, AuthenticatedLayoutComponent, AutocompleteComponent, ConfirmModalComponent, ModalComponent, NgxMaskDirective, FlatpickrDirective], styles: ['\n\n.nav-tabs[_ngcontent-%COMP%] {\n  border-bottom: 2px solid rgba(78, 115, 223, 0.1);\n  margin-bottom: 1.5rem;\n}\n.nav-tabs[_ngcontent-%COMP%]   .nav-item[_ngcontent-%COMP%] {\n  margin-bottom: -2px;\n}\n.nav-tabs[_ngcontent-%COMP%]   .nav-link[_ngcontent-%COMP%] {\n  border: none;\n  border-bottom: 2px solid transparent;\n  color: #858796;\n  font-weight: 600;\n  padding: 0.75rem 1.25rem;\n  transition: all 0.2s ease-in-out;\n}\n.nav-tabs[_ngcontent-%COMP%]   .nav-link[_ngcontent-%COMP%]:hover:not(.disabled) {\n  color: #4e73df;\n  border-bottom-color: rgba(78, 115, 223, 0.3);\n  background-color: rgba(78, 115, 223, 0.03);\n}\n.nav-tabs[_ngcontent-%COMP%]   .nav-link.active[_ngcontent-%COMP%] {\n  color: #4e73df;\n  background-color: transparent;\n  border-bottom-color: #4e73df;\n}\n.nav-tabs[_ngcontent-%COMP%]   .nav-link.disabled[_ngcontent-%COMP%] {\n  color: #d1d3e2;\n  cursor: not-allowed;\n  opacity: 0.5;\n}\n.sticky-col[_ngcontent-%COMP%] {\n  position: sticky;\n  z-index: 2;\n  background-color: #ffffff;\n}\n.sticky-col[_ngcontent-%COMP%]::before {\n  content: "";\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: inherit;\n  z-index: -1;\n}\n.table-header[_ngcontent-%COMP%] {\n  background-color: #4e73df !important;\n  color: #ffffff !important;\n  font-weight: bold;\n}\n.table-header-c1[_ngcontent-%COMP%] {\n  background-color: #f8f9fc !important;\n  color: #5a5c69 !important;\n  font-weight: bold;\n}\n.table-header-c2[_ngcontent-%COMP%] {\n  background-color: #eaecf4 !important;\n  color: #3a3b45 !important;\n  font-weight: bold;\n}\n.table-subheader[_ngcontent-%COMP%] {\n  background-color: #f8f9fc !important;\n  font-weight: bold;\n  color: #4e73df;\n}\n.cursor-pointer[_ngcontent-%COMP%] {\n  cursor: pointer;\n}\n@keyframes _ngcontent-%COMP%_fadeIn {\n  from {\n    opacity: 0;\n    transform: translateY(10px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n.animate-in[_ngcontent-%COMP%] {\n  animation: _ngcontent-%COMP%_fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;\n}\n.modal-backdrop-blur[_ngcontent-%COMP%] {\n  background: rgba(0, 0, 0, 0.4);\n  backdrop-filter: blur(4px);\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  z-index: 1050;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n.modal-dialog[_ngcontent-%COMP%] {\n  max-width: 800px;\n  width: 90%;\n  margin: 1.75rem auto;\n}\n.card-provider-group[_ngcontent-%COMP%] {\n  border-radius: 1.25rem;\n  overflow: hidden;\n  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);\n  transition: transform 0.2s ease;\n}\n.card-provider-group[_ngcontent-%COMP%]:hover {\n  transform: translateY(-2px);\n}\n.table-tariffs[_ngcontent-%COMP%] {\n  font-size: 0.85rem !important;\n  border-collapse: separate !important;\n  border-spacing: 0 !important;\n  width: 100% !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   th[_ngcontent-%COMP%], \n.table-tariffs[_ngcontent-%COMP%]   td[_ngcontent-%COMP%] {\n  padding: 5px 8px !important;\n  vertical-align: middle !important;\n  border-color: #eaecf4 !important;\n  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;\n}\n.table-tariffs[_ngcontent-%COMP%]   thead[_ngcontent-%COMP%]   th[_ngcontent-%COMP%] {\n  background-color: #f8f9fc !important;\n  color: #4e73df !important;\n  font-weight: 700 !important;\n  text-transform: uppercase !important;\n  font-size: 0.72rem !important;\n  letter-spacing: 0.05em !important;\n  border-bottom: 2px solid #d1d3e2 !important;\n  padding: 8px 8px !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   th.sticky-col[_ngcontent-%COMP%]:nth-child(1), \n.table-tariffs[_ngcontent-%COMP%]   td.sticky-col[_ngcontent-%COMP%]:nth-child(1) {\n  position: sticky !important;\n  left: 0 !important;\n  z-index: 3 !important;\n  background-color: #ffffff !important;\n  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.04) !important;\n  width: 160px !important;\n  min-width: 160px !important;\n  max-width: 160px !important;\n  overflow: hidden !important;\n  text-overflow: ellipsis !important;\n  white-space: nowrap !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   td.sticky-col[colspan="2"][_ngcontent-%COMP%] {\n  position: sticky !important;\n  left: 0 !important;\n  z-index: 3 !important;\n  background-color: #ffffff !important;\n  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.04) !important;\n  width: 290px !important;\n  min-width: 290px !important;\n  max-width: 290px !important;\n  overflow: hidden !important;\n  text-overflow: ellipsis !important;\n  white-space: nowrap !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   th.sticky-col[_ngcontent-%COMP%]:nth-child(2), \n.table-tariffs[_ngcontent-%COMP%]   td.sticky-col[_ngcontent-%COMP%]:nth-child(2) {\n  position: sticky !important;\n  left: 160px !important;\n  z-index: 3 !important;\n  background-color: #ffffff !important;\n  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.04) !important;\n  border-right: 2px solid #d1d3e2 !important;\n  width: 130px !important;\n  min-width: 130px !important;\n  max-width: 130px !important;\n  overflow: hidden !important;\n  text-overflow: ellipsis !important;\n  white-space: nowrap !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-success-light[_ngcontent-%COMP%] {\n  background-color: #eef9f5 !important;\n  color: #1e7046 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-success-solid[_ngcontent-%COMP%] {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-warning-light[_ngcontent-%COMP%] {\n  background-color: #fdf8eb !important;\n  color: #a07018 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-warning-solid[_ngcontent-%COMP%] {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-light-tax[_ngcontent-%COMP%] {\n  background-color: #f4f6fd !important;\n  color: #3f5eb5 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-compare[_ngcontent-%COMP%] {\n  background-color: #727c8d !important;\n  color: #ffffff !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   td[_ngcontent-%COMP%] {\n  background-color: #f1f3f9 !important;\n  color: #3a3b45 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .sticky-col[_ngcontent-%COMP%] {\n  background-color: #f1f3f9 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-success-light[_ngcontent-%COMP%] {\n  background-color: #d5f2e6 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-success-solid[_ngcontent-%COMP%] {\n  background-color: #afe0c7 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-warning-light[_ngcontent-%COMP%] {\n  background-color: #fbedd1 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-warning-solid[_ngcontent-%COMP%] {\n  background-color: #fad291 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-light-tax[_ngcontent-%COMP%] {\n  background-color: #e9ecf8 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-compare[_ngcontent-%COMP%] {\n  background-color: #5c6674 !important;\n  color: #ffffff !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-success-header[_ngcontent-%COMP%] {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n  font-weight: 700 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-warning-header[_ngcontent-%COMP%] {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n  font-weight: 700 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .table-subheader[_ngcontent-%COMP%]   td[_ngcontent-%COMP%] {\n  background-color: #f8f9fc !important;\n  color: #4e73df !important;\n  font-weight: 700 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .table-subheader[_ngcontent-%COMP%]   td.sticky-col[_ngcontent-%COMP%] {\n  background-color: #f8f9fc !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .table-subheader[_ngcontent-%COMP%]   td.bg-success-solid[_ngcontent-%COMP%] {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .table-subheader[_ngcontent-%COMP%]   td.bg-warning-solid[_ngcontent-%COMP%] {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .observation-row[_ngcontent-%COMP%]   td[_ngcontent-%COMP%] {\n  background-color: #ffffff !important;\n  border-top: 1px solid #eaecf4 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .observation-row[_ngcontent-%COMP%]   td.sticky-col[_ngcontent-%COMP%] {\n  background-color: #ffffff !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .observation-row[_ngcontent-%COMP%]   td.bg-success-solid[_ngcontent-%COMP%] {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .observation-row[_ngcontent-%COMP%]   td.bg-warning-solid[_ngcontent-%COMP%] {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .text-start[_ngcontent-%COMP%] {\n  text-align: left !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .text-end[_ngcontent-%COMP%] {\n  text-align: right !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .text-center[_ngcontent-%COMP%] {\n  text-align: center !important;\n}\n.table-responsive[_ngcontent-%COMP%] {\n  overflow-x: auto !important;\n}\n/*# sourceMappingURL=event-create.component.css.map */'] });
+  }, dependencies: [CommonModule, NgClass, NgForOf, NgIf, DecimalPipe, DatePipe, FormsModule, \u0275NgNoValidate, NgSelectOption, \u0275NgSelectMultipleOption, DefaultValueAccessor, NumberValueAccessor, CheckboxControlValueAccessor, SelectControlValueAccessor, NgControlStatus, NgControlStatusGroup, RequiredValidator, MinValidator, NgModel, NgForm, RouterLink, AuthenticatedLayoutComponent, AutocompleteComponent, ConfirmModalComponent, ModalComponent, NgxMaskDirective, FlatpickrDirective], styles: ['\n\n.nav-tabs[_ngcontent-%COMP%] {\n  border-bottom: 2px solid rgba(78, 115, 223, 0.1);\n  margin-bottom: 1.5rem;\n}\n.nav-tabs[_ngcontent-%COMP%]   .nav-item[_ngcontent-%COMP%] {\n  margin-bottom: -2px;\n}\n.nav-tabs[_ngcontent-%COMP%]   .nav-link[_ngcontent-%COMP%] {\n  border: none;\n  border-bottom: 2px solid transparent;\n  color: #858796;\n  font-weight: 600;\n  padding: 0.75rem 1.25rem;\n  transition: all 0.2s ease-in-out;\n}\n.nav-tabs[_ngcontent-%COMP%]   .nav-link[_ngcontent-%COMP%]:hover:not(.disabled) {\n  color: #4e73df;\n  border-bottom-color: rgba(78, 115, 223, 0.3);\n  background-color: rgba(78, 115, 223, 0.03);\n}\n.nav-tabs[_ngcontent-%COMP%]   .nav-link.active[_ngcontent-%COMP%] {\n  color: #4e73df;\n  background-color: transparent;\n  border-bottom-color: #4e73df;\n}\n.nav-tabs[_ngcontent-%COMP%]   .nav-link.disabled[_ngcontent-%COMP%] {\n  color: #d1d3e2;\n  cursor: not-allowed;\n  opacity: 0.5;\n}\n.sticky-col[_ngcontent-%COMP%] {\n  position: sticky;\n  z-index: 2;\n  background-color: #ffffff;\n}\n.sticky-col[_ngcontent-%COMP%]::before {\n  content: "";\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: inherit;\n  z-index: -1;\n}\n.table-header[_ngcontent-%COMP%] {\n  background-color: #4e73df !important;\n  color: #ffffff !important;\n  font-weight: bold;\n}\n.table-header-c1[_ngcontent-%COMP%] {\n  background-color: #f8f9fc !important;\n  color: #5a5c69 !important;\n  font-weight: bold;\n}\n.table-header-c2[_ngcontent-%COMP%] {\n  background-color: #eaecf4 !important;\n  color: #3a3b45 !important;\n  font-weight: bold;\n}\n.table-subheader[_ngcontent-%COMP%] {\n  background-color: #f8f9fc !important;\n  font-weight: bold;\n  color: #4e73df;\n}\n.cursor-pointer[_ngcontent-%COMP%] {\n  cursor: pointer;\n}\n@keyframes _ngcontent-%COMP%_fadeIn {\n  from {\n    opacity: 0;\n    transform: translateY(10px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n.animate-in[_ngcontent-%COMP%] {\n  animation: _ngcontent-%COMP%_fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;\n}\n.modal-backdrop-blur[_ngcontent-%COMP%] {\n  background: rgba(0, 0, 0, 0.4);\n  backdrop-filter: blur(4px);\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  z-index: 1050;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n.modal-dialog[_ngcontent-%COMP%] {\n  max-width: 800px;\n  width: 90%;\n  margin: 1.75rem auto;\n}\n.card-provider-group[_ngcontent-%COMP%] {\n  border-radius: 1.25rem;\n  overflow: hidden;\n  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);\n  transition: transform 0.2s ease;\n}\n.card-provider-group[_ngcontent-%COMP%]:hover {\n  transform: translateY(-2px);\n}\n.table-tariffs[_ngcontent-%COMP%] {\n  font-size: 0.85rem !important;\n  border-collapse: separate !important;\n  border-spacing: 0 !important;\n  width: 100% !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   th[_ngcontent-%COMP%], \n.table-tariffs[_ngcontent-%COMP%]   td[_ngcontent-%COMP%] {\n  padding: 5px 8px !important;\n  vertical-align: middle !important;\n  border-color: #eaecf4 !important;\n  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;\n}\n.table-tariffs[_ngcontent-%COMP%]   thead[_ngcontent-%COMP%]   th[_ngcontent-%COMP%] {\n  background-color: #f8f9fc !important;\n  color: #4e73df !important;\n  font-weight: 700 !important;\n  text-transform: uppercase !important;\n  font-size: 0.72rem !important;\n  letter-spacing: 0.05em !important;\n  border-bottom: 2px solid #d1d3e2 !important;\n  padding: 8px 8px !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   th.sticky-col[_ngcontent-%COMP%]:nth-child(1), \n.table-tariffs[_ngcontent-%COMP%]   td.sticky-col[_ngcontent-%COMP%]:nth-child(1) {\n  position: sticky !important;\n  left: 0 !important;\n  z-index: 3 !important;\n  background-color: #ffffff !important;\n  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.04) !important;\n  width: 160px !important;\n  min-width: 160px !important;\n  max-width: 160px !important;\n  overflow: hidden !important;\n  text-overflow: ellipsis !important;\n  white-space: nowrap !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   th.sticky-col.col-service-detail[_ngcontent-%COMP%], \n.table-tariffs[_ngcontent-%COMP%]   td.sticky-col.col-service-detail[_ngcontent-%COMP%] {\n  width: 260px !important;\n  min-width: 260px !important;\n  max-width: 280px !important;\n  border-right: 2px solid #d1d3e2 !important;\n  white-space: normal !important;\n  overflow: visible !important;\n  text-overflow: clip !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   td.sticky-col[colspan="2"][_ngcontent-%COMP%] {\n  position: sticky !important;\n  left: 0 !important;\n  z-index: 3 !important;\n  background-color: #ffffff !important;\n  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.04) !important;\n  width: 290px !important;\n  min-width: 290px !important;\n  max-width: 290px !important;\n  overflow: hidden !important;\n  text-overflow: ellipsis !important;\n  white-space: nowrap !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   th.sticky-col[_ngcontent-%COMP%]:nth-child(2), \n.table-tariffs[_ngcontent-%COMP%]   td.sticky-col[_ngcontent-%COMP%]:nth-child(2) {\n  position: sticky !important;\n  left: 160px !important;\n  z-index: 3 !important;\n  background-color: #ffffff !important;\n  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.04) !important;\n  border-right: 2px solid #d1d3e2 !important;\n  width: 130px !important;\n  min-width: 130px !important;\n  max-width: 130px !important;\n  overflow: hidden !important;\n  text-overflow: ellipsis !important;\n  white-space: nowrap !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-success-light[_ngcontent-%COMP%] {\n  background-color: #eef9f5 !important;\n  color: #1e7046 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-success-solid[_ngcontent-%COMP%] {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-warning-light[_ngcontent-%COMP%] {\n  background-color: #fdf8eb !important;\n  color: #a07018 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-warning-solid[_ngcontent-%COMP%] {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-light-tax[_ngcontent-%COMP%] {\n  background-color: #f4f6fd !important;\n  color: #3f5eb5 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-compare[_ngcontent-%COMP%] {\n  background-color: #727c8d !important;\n  color: #ffffff !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   td[_ngcontent-%COMP%] {\n  background-color: #f1f3f9 !important;\n  color: #3a3b45 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .sticky-col[_ngcontent-%COMP%] {\n  background-color: #f1f3f9 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-success-light[_ngcontent-%COMP%] {\n  background-color: #d5f2e6 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-success-solid[_ngcontent-%COMP%] {\n  background-color: #afe0c7 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-warning-light[_ngcontent-%COMP%] {\n  background-color: #fbedd1 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-warning-solid[_ngcontent-%COMP%] {\n  background-color: #fad291 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-light-tax[_ngcontent-%COMP%] {\n  background-color: #e9ecf8 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   tbody[_ngcontent-%COMP%]   tr[_ngcontent-%COMP%]:hover   .bg-compare[_ngcontent-%COMP%] {\n  background-color: #5c6674 !important;\n  color: #ffffff !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-success-header[_ngcontent-%COMP%] {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n  font-weight: 700 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .bg-warning-header[_ngcontent-%COMP%] {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n  font-weight: 700 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .table-subheader[_ngcontent-%COMP%]   td[_ngcontent-%COMP%] {\n  background-color: #f8f9fc !important;\n  color: #4e73df !important;\n  font-weight: 700 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .table-subheader[_ngcontent-%COMP%]   td.sticky-col[_ngcontent-%COMP%] {\n  background-color: #f8f9fc !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .table-subheader[_ngcontent-%COMP%]   td.bg-success-solid[_ngcontent-%COMP%] {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .table-subheader[_ngcontent-%COMP%]   td.bg-warning-solid[_ngcontent-%COMP%] {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .observation-row[_ngcontent-%COMP%]   td[_ngcontent-%COMP%] {\n  background-color: #ffffff !important;\n  border-top: 1px solid #eaecf4 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .observation-row[_ngcontent-%COMP%]   td.sticky-col[_ngcontent-%COMP%] {\n  background-color: #ffffff !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .observation-row[_ngcontent-%COMP%]   td.bg-success-solid[_ngcontent-%COMP%] {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .observation-row[_ngcontent-%COMP%]   td.bg-warning-solid[_ngcontent-%COMP%] {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .text-start[_ngcontent-%COMP%] {\n  text-align: left !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .text-end[_ngcontent-%COMP%] {\n  text-align: right !important;\n}\n.table-tariffs[_ngcontent-%COMP%]   .text-center[_ngcontent-%COMP%] {\n  text-align: center !important;\n}\n.table-responsive[_ngcontent-%COMP%] {\n  overflow-x: auto !important;\n}\n/*# sourceMappingURL=event-create.component.css.map */'] });
 };
 (() => {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(EventCreateComponent, [{
@@ -122019,11 +122243,13 @@ var EventCreateComponent = class _EventCreateComponent {
                     <!-- Row 2: Sub-headers -->\r
                     <tr>\r
                       <!-- Metadata Columns -->\r
-                      <th scope="col" class="sticky-col text-start" *ngIf="activeTab !== 1">Servi\xE7o/Detalhe</th>\r
-                      <th scope="col" class="sticky-col text-start" [class.sticky-col]="activeTab === 1">Broker</th>\r
+                      <th scope="col" class="sticky-col col-service-detail text-start" *ngIf="activeTab !== 1">\r
+                        {{ activeTab === 3 ? 'Sal\xE3o / Servi\xE7o' : 'Servi\xE7o/Detalhe' }}\r
+                      </th>\r
+                      <th scope="col" class="text-start" [class.sticky-col]="activeTab === 1">Broker</th>\r
                       <th scope="col" class="text-start" [class.sticky-col]="activeTab === 1" *ngIf="activeTab === 1">Regime</th>\r
-                      <th scope="col" class="text-start" *ngIf="activeTab === 3">Metragem</th>\r
-                      <th scope="col" class="text-start" *ngIf="activeTab === 3">Pax</th>\r
+                      <th scope="col" class="text-center" *ngIf="activeTab === 3">Metragem</th>\r
+                      <th scope="col" class="text-center" *ngIf="activeTab === 3">Qtd. Pax</th>\r
                       <th scope="col" class="text-start" *ngIf="activeTab === 1 || activeTab === 3">Prop\xF3sito</th>\r
                       <th scope="col" class="text-start" *ngIf="activeTab === 1">CAT.</th>\r
                       <th scope="col" class="text-start" *ngIf="activeTab === 1">APTO</th>\r
@@ -122119,15 +122345,27 @@ var EventCreateComponent = class _EventCreateComponent {
                         let opt of item.event_hotels_opt || item.event_ab_opts || item.event_hall_opts || item.event_add_opts || item.event_transport_opts\r
                       ">\r
                       <!-- Service/Type Display -->\r
-                      <td class="font-weight-bold sticky-col text-dark text-start" *ngIf="activeTab !== 1">\r
-                        {{ opt.name ? (opt.service?.name ? opt.service.name + ' (' + opt.name + ')' : opt.name) : (opt.service?.name || '-') }}\r
+                      <td class="font-weight-bold sticky-col col-service-detail text-dark text-start" *ngIf="activeTab !== 1">\r
+                        <ng-container *ngIf="activeTab === 3">\r
+                          <div class="text-truncate fw-bold text-dark" style="max-width: 240px" [title]="opt.name || opt.service?.name || '-'">\r
+                            <i class="fas fa-door-open me-1 text-primary"></i>{{ opt.name || opt.service?.name || '-' }}\r
+                          </div>\r
+                          <div class="text-truncate small text-muted font-weight-normal mt-1" style="max-width: 240px" *ngIf="opt.name && opt.service?.name" [title]="opt.service.name">\r
+                            <i class="fas fa-tag me-1 text-secondary" style="font-size: 0.75rem"></i>{{ opt.service.name }}\r
+                          </div>\r
+                        </ng-container>\r
+                        <ng-container *ngIf="activeTab !== 3">\r
+                          <div class="text-truncate" style="max-width: 240px" [title]="opt.name ? (opt.service?.name ? opt.service.name + ' (' + opt.name + ')' : opt.name) : (opt.service?.name || '-')">\r
+                            {{ opt.name ? (opt.service?.name ? opt.service.name + ' (' + opt.name + ')' : opt.name) : (opt.service?.name || '-') }}\r
+                          </div>\r
+                        </ng-container>\r
                       </td>\r
-                      <td class="sticky-col text-start" [class.sticky-col]="activeTab === 1">{{ opt.broker?.name || '-' }}</td>\r
+                      <td class="text-start" [class.sticky-col]="activeTab === 1">{{ opt.broker?.name || '-' }}</td>\r
 \r
                       <!-- Tab Specific Columns -->\r
                       <td class="text-start" [class.sticky-col]="activeTab === 1" *ngIf="activeTab === 1">{{ opt.regime?.name || '-' }}</td>\r
-                      <td class="text-start" *ngIf="activeTab === 3">{{ opt.m2 || '-' }}</td>\r
-                      <td class="text-start" *ngIf="activeTab === 3">{{ opt.pax || '-' }}</td>\r
+                      <td class="text-center" *ngIf="activeTab === 3">{{ opt.m2 ? opt.m2 + ' m\xB2' : '-' }}</td>\r
+                      <td class="text-center" *ngIf="activeTab === 3">{{ opt.pax || '-' }}</td>\r
                       <td class="text-start" *ngIf="activeTab === 1 || activeTab === 3">{{ opt.purpose?.name || '-' }}</td>\r
                       <td class="text-start" *ngIf="activeTab === 1">{{ opt.category_hotel?.name || opt.category?.name || '-' }}</td>\r
                       <td class="text-start" *ngIf="activeTab === 1">{{ opt.apto_hotel?.name || opt.apto?.name || '-' }}</td>\r
@@ -122370,7 +122608,7 @@ var EventCreateComponent = class _EventCreateComponent {
 \r
                     <!-- Total / Summary Row (Other tabs) -->\r
                     <tr class="table-subheader" *ngIf="activeTab !== 1">\r
-                      <td class="sticky-col font-weight-bold text-start">Di\xE1ria M\xE9dia:</td>\r
+                      <td class="sticky-col col-service-detail font-weight-bold text-start">Di\xE1ria M\xE9dia:</td>\r
                       <td class="font-weight-bold text-end">\r
                         {{ formatCurrency(average(item, activeTab === 2), item.currency?.sigla) }}\r
                       </td>\r
@@ -122583,6 +122821,14 @@ var EventCreateComponent = class _EventCreateComponent {
                   (click)="openAddProviderLink('airfare', item)">\r
                   <i class="fas fa-edit me-1"></i>\r
                   Editar Or\xE7amento\r
+                </button>\r
+                <button\r
+                  type="button"\r
+                  class="btn btn-sm btn-outline-primary"\r
+                  title="Alterar Markup do Fretamento"\r
+                  (click)="updateMarkupBulk(item, 'airfare')">\r
+                  <i class="fas fa-percentage me-1"></i>\r
+                  Editar Markup Geral\r
                 </button>\r
                 <button\r
                   type="button"\r
@@ -122833,16 +123079,24 @@ var EventCreateComponent = class _EventCreateComponent {
                     <!-- Internal Observation Row -->\r
                     <tr class="observation-row">\r
                       <td colspan="2" class="sticky-col text-start font-weight-bold">OBSERVA\xC7\xC3O INTERNA:</td>\r
-                      <td [attr.colspan]="isReadOnly ? 8 : 9" class="text-start text-dark">\r
+                      <td class="text-start text-dark" [attr.colspan]="isReadOnly ? 5 : 6">\r
                         {{ item.internal_observation || '-' }}\r
+                      </td>\r
+                      <td class="font-weight-bold text-end" colspan="2">Faturamento Venda:</td>\r
+                      <td class="bg-success-solid font-weight-bold text-end" [attr.colspan]="isReadOnly ? 1 : 2">\r
+                        {{ formatCurrency(getAirfareFaturamentoVenda(item), item.currency?.sigla) }}\r
                       </td>\r
                     </tr>\r
 \r
                     <!-- Customer Observation Row -->\r
                     <tr class="observation-row">\r
                       <td colspan="2" class="sticky-col text-start font-weight-bold">OBSERVA\xC7\xC3O CLIENTE:</td>\r
-                      <td [attr.colspan]="isReadOnly ? 8 : 9" class="text-start text-dark">\r
+                      <td class="text-start text-dark" [attr.colspan]="isReadOnly ? 5 : 6">\r
                         {{ item.customer_observation || '-' }}\r
+                      </td>\r
+                      <td class="font-weight-bold text-end" colspan="2">Faturamento Custo:</td>\r
+                      <td class="bg-warning-solid font-weight-bold text-end" [attr.colspan]="isReadOnly ? 1 : 2">\r
+                        {{ formatCurrency(getAirfareFaturamentoCusto(item), item.currency?.sigla) }}\r
                       </td>\r
                     </tr>\r
 \r
@@ -123101,7 +123355,7 @@ var EventCreateComponent = class _EventCreateComponent {
             <h6 class="text-warning-emphasis font-weight-bold mb-3">\r
               <i class="fas fa-plane-departure me-2"></i> Or\xE7amento Fretamento / Cia A\xE9rea\r
             </h6>\r
-            \r
+\r
             <div class="row">\r
               <!-- Distribui\xE7\xE3o de Pax / Assentos -->\r
               <div class="col-md-12 mb-3">\r
@@ -123263,14 +123517,14 @@ var EventCreateComponent = class _EventCreateComponent {
                       <div class="col-md-3 mb-2" *ngFor="let pNum of [1, 2, 3, 4]">\r
                         <div class="border p-2 text-center bg-light rounded h-100 d-flex flex-column justify-content-between">\r
                           <span class="d-block font-weight-bold mb-1" style="font-size: 0.85rem;">Foto {{ pNum }}</span>\r
-                          \r
+\r
                           <div *ngIf="getPhotoValue(pNum)" class="mb-2 position-relative d-inline-block mx-auto">\r
                             <img [src]="getPhotoValue(pNum)" style="max-height: 80px; max-width: 100%; object-fit: contain;" class="rounded border bg-white shadow-sm">\r
                             <button type="button" class="btn btn-danger btn-sm position-absolute shadow-sm" style="top: -6px; right: -6px; width: 20px; height: 20px; padding: 0; font-size: 11px; border-radius: 50%; line-height: 1;" (click)="removePhoto(pNum, $event)" title="Remover foto">\r
                               &times;\r
                             </button>\r
                           </div>\r
-                          \r
+\r
                           <div *ngIf="!getPhotoValue(pNum)" class="mb-2 d-flex align-items-center justify-content-center border rounded bg-white text-muted mx-auto w-100" style="height: 80px;">\r
                             <i class="fa fa-image fa-2x text-black-50"></i>\r
                           </div>\r
@@ -123439,12 +123693,13 @@ var EventCreateComponent = class _EventCreateComponent {
           </div>\r
         </div>\r
 \r
-        <!-- DESCRI\xC7\xC3O, METRAGEM, PAX (hall only) -->\r
+        <!-- DESCRI\xC7\xC3O / NOME DO SAL\xC3O, METRAGEM, PAX (hall only) -->\r
         <div class="col-md-12 form-group mb-3" *ngIf="optFormType === 'hall'">\r
           <label for="hall_name" class="form-label font-weight-bold">\r
-            Descri\xE7\xE3o:\r
+            Nome do Sal\xE3o:\r
+            <span class="text-danger">*</span>\r
           </label>\r
-          <input type="text" id="hall_name" class="form-control" [(ngModel)]="optForm.name" name="name" placeholder="Ex: Audit\xF3rio A / Descri\xE7\xE3o da tarifa" />\r
+          <input type="text" id="hall_name" class="form-control" [(ngModel)]="optForm.name" name="name" placeholder="Ex: Audit\xF3rio A" />\r
         </div>\r
 \r
         <div class="col-md-6 form-group mb-3" *ngIf="optFormType === 'hall'">\r
@@ -123958,16 +124213,28 @@ var EventCreateComponent = class _EventCreateComponent {
       <div class="row">\r
         <div class="col-md-12 form-group mb-3">\r
           <label for="bulk_markup" class="form-label font-weight-bold">\r
-            Markup divisor (%) para todas as tarifas:\r
+            {{ bulkMarkupTargetType === 'airfare' ? 'Markup divisor para o fretamento:' : 'Markup divisor (%) para todas as tarifas:' }}\r
             <span class="text-danger">*</span>\r
           </label>\r
           <input\r
+            *ngIf="bulkMarkupTargetType !== 'airfare'"\r
             type="text"\r
             id="bulk_markup"\r
             class="form-control"\r
             [value]="formatPercent(bulkMarkupValue)"\r
             (input)="onPercentInput($event, 'bulkMarkupValue', 'bulkForm')"\r
             name="bulk_markup"\r
+            required />\r
+          <input\r
+            *ngIf="bulkMarkupTargetType === 'airfare'"\r
+            type="number"\r
+            step="0.01"\r
+            min="0.01"\r
+            id="bulk_markup_airfare"\r
+            class="form-control"\r
+            [(ngModel)]="bulkMarkupValue"\r
+            name="bulk_markup_airfare"\r
+            placeholder="0.75"\r
             required />\r
         </div>\r
       </div>\r
@@ -123983,7 +124250,7 @@ var EventCreateComponent = class _EventCreateComponent {
     </form>\r
   </app-modal>\r
 </app-authenticated-layout>\r
-`, styles: ['/* src/app/pages/event/event-create/event-create.component.scss */\n.nav-tabs {\n  border-bottom: 2px solid rgba(78, 115, 223, 0.1);\n  margin-bottom: 1.5rem;\n}\n.nav-tabs .nav-item {\n  margin-bottom: -2px;\n}\n.nav-tabs .nav-link {\n  border: none;\n  border-bottom: 2px solid transparent;\n  color: #858796;\n  font-weight: 600;\n  padding: 0.75rem 1.25rem;\n  transition: all 0.2s ease-in-out;\n}\n.nav-tabs .nav-link:hover:not(.disabled) {\n  color: #4e73df;\n  border-bottom-color: rgba(78, 115, 223, 0.3);\n  background-color: rgba(78, 115, 223, 0.03);\n}\n.nav-tabs .nav-link.active {\n  color: #4e73df;\n  background-color: transparent;\n  border-bottom-color: #4e73df;\n}\n.nav-tabs .nav-link.disabled {\n  color: #d1d3e2;\n  cursor: not-allowed;\n  opacity: 0.5;\n}\n.sticky-col {\n  position: sticky;\n  z-index: 2;\n  background-color: #ffffff;\n}\n.sticky-col::before {\n  content: "";\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: inherit;\n  z-index: -1;\n}\n.table-header {\n  background-color: #4e73df !important;\n  color: #ffffff !important;\n  font-weight: bold;\n}\n.table-header-c1 {\n  background-color: #f8f9fc !important;\n  color: #5a5c69 !important;\n  font-weight: bold;\n}\n.table-header-c2 {\n  background-color: #eaecf4 !important;\n  color: #3a3b45 !important;\n  font-weight: bold;\n}\n.table-subheader {\n  background-color: #f8f9fc !important;\n  font-weight: bold;\n  color: #4e73df;\n}\n.cursor-pointer {\n  cursor: pointer;\n}\n@keyframes fadeIn {\n  from {\n    opacity: 0;\n    transform: translateY(10px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n.animate-in {\n  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;\n}\n.modal-backdrop-blur {\n  background: rgba(0, 0, 0, 0.4);\n  backdrop-filter: blur(4px);\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  z-index: 1050;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n.modal-dialog {\n  max-width: 800px;\n  width: 90%;\n  margin: 1.75rem auto;\n}\n.card-provider-group {\n  border-radius: 1.25rem;\n  overflow: hidden;\n  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);\n  transition: transform 0.2s ease;\n}\n.card-provider-group:hover {\n  transform: translateY(-2px);\n}\n.table-tariffs {\n  font-size: 0.85rem !important;\n  border-collapse: separate !important;\n  border-spacing: 0 !important;\n  width: 100% !important;\n}\n.table-tariffs th,\n.table-tariffs td {\n  padding: 5px 8px !important;\n  vertical-align: middle !important;\n  border-color: #eaecf4 !important;\n  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;\n}\n.table-tariffs thead th {\n  background-color: #f8f9fc !important;\n  color: #4e73df !important;\n  font-weight: 700 !important;\n  text-transform: uppercase !important;\n  font-size: 0.72rem !important;\n  letter-spacing: 0.05em !important;\n  border-bottom: 2px solid #d1d3e2 !important;\n  padding: 8px 8px !important;\n}\n.table-tariffs th.sticky-col:nth-child(1),\n.table-tariffs td.sticky-col:nth-child(1) {\n  position: sticky !important;\n  left: 0 !important;\n  z-index: 3 !important;\n  background-color: #ffffff !important;\n  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.04) !important;\n  width: 160px !important;\n  min-width: 160px !important;\n  max-width: 160px !important;\n  overflow: hidden !important;\n  text-overflow: ellipsis !important;\n  white-space: nowrap !important;\n}\n.table-tariffs td.sticky-col[colspan="2"] {\n  position: sticky !important;\n  left: 0 !important;\n  z-index: 3 !important;\n  background-color: #ffffff !important;\n  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.04) !important;\n  width: 290px !important;\n  min-width: 290px !important;\n  max-width: 290px !important;\n  overflow: hidden !important;\n  text-overflow: ellipsis !important;\n  white-space: nowrap !important;\n}\n.table-tariffs th.sticky-col:nth-child(2),\n.table-tariffs td.sticky-col:nth-child(2) {\n  position: sticky !important;\n  left: 160px !important;\n  z-index: 3 !important;\n  background-color: #ffffff !important;\n  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.04) !important;\n  border-right: 2px solid #d1d3e2 !important;\n  width: 130px !important;\n  min-width: 130px !important;\n  max-width: 130px !important;\n  overflow: hidden !important;\n  text-overflow: ellipsis !important;\n  white-space: nowrap !important;\n}\n.table-tariffs .bg-success-light {\n  background-color: #eef9f5 !important;\n  color: #1e7046 !important;\n}\n.table-tariffs .bg-success-solid {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n}\n.table-tariffs .bg-warning-light {\n  background-color: #fdf8eb !important;\n  color: #a07018 !important;\n}\n.table-tariffs .bg-warning-solid {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n}\n.table-tariffs .bg-light-tax {\n  background-color: #f4f6fd !important;\n  color: #3f5eb5 !important;\n}\n.table-tariffs .bg-compare {\n  background-color: #727c8d !important;\n  color: #ffffff !important;\n}\n.table-tariffs tbody tr:hover td {\n  background-color: #f1f3f9 !important;\n  color: #3a3b45 !important;\n}\n.table-tariffs tbody tr:hover .sticky-col {\n  background-color: #f1f3f9 !important;\n}\n.table-tariffs tbody tr:hover .bg-success-light {\n  background-color: #d5f2e6 !important;\n}\n.table-tariffs tbody tr:hover .bg-success-solid {\n  background-color: #afe0c7 !important;\n}\n.table-tariffs tbody tr:hover .bg-warning-light {\n  background-color: #fbedd1 !important;\n}\n.table-tariffs tbody tr:hover .bg-warning-solid {\n  background-color: #fad291 !important;\n}\n.table-tariffs tbody tr:hover .bg-light-tax {\n  background-color: #e9ecf8 !important;\n}\n.table-tariffs tbody tr:hover .bg-compare {\n  background-color: #5c6674 !important;\n  color: #ffffff !important;\n}\n.table-tariffs .bg-success-header {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n  font-weight: 700 !important;\n}\n.table-tariffs .bg-warning-header {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n  font-weight: 700 !important;\n}\n.table-tariffs .table-subheader td {\n  background-color: #f8f9fc !important;\n  color: #4e73df !important;\n  font-weight: 700 !important;\n}\n.table-tariffs .table-subheader td.sticky-col {\n  background-color: #f8f9fc !important;\n}\n.table-tariffs .table-subheader td.bg-success-solid {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n}\n.table-tariffs .table-subheader td.bg-warning-solid {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n}\n.table-tariffs .observation-row td {\n  background-color: #ffffff !important;\n  border-top: 1px solid #eaecf4 !important;\n}\n.table-tariffs .observation-row td.sticky-col {\n  background-color: #ffffff !important;\n}\n.table-tariffs .observation-row td.bg-success-solid {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n}\n.table-tariffs .observation-row td.bg-warning-solid {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n}\n.table-tariffs .text-start {\n  text-align: left !important;\n}\n.table-tariffs .text-end {\n  text-align: right !important;\n}\n.table-tariffs .text-center {\n  text-align: center !important;\n}\n.table-responsive {\n  overflow-x: auto !important;\n}\n/*# sourceMappingURL=event-create.component.css.map */\n'] }]
+`, styles: ['/* src/app/pages/event/event-create/event-create.component.scss */\n.nav-tabs {\n  border-bottom: 2px solid rgba(78, 115, 223, 0.1);\n  margin-bottom: 1.5rem;\n}\n.nav-tabs .nav-item {\n  margin-bottom: -2px;\n}\n.nav-tabs .nav-link {\n  border: none;\n  border-bottom: 2px solid transparent;\n  color: #858796;\n  font-weight: 600;\n  padding: 0.75rem 1.25rem;\n  transition: all 0.2s ease-in-out;\n}\n.nav-tabs .nav-link:hover:not(.disabled) {\n  color: #4e73df;\n  border-bottom-color: rgba(78, 115, 223, 0.3);\n  background-color: rgba(78, 115, 223, 0.03);\n}\n.nav-tabs .nav-link.active {\n  color: #4e73df;\n  background-color: transparent;\n  border-bottom-color: #4e73df;\n}\n.nav-tabs .nav-link.disabled {\n  color: #d1d3e2;\n  cursor: not-allowed;\n  opacity: 0.5;\n}\n.sticky-col {\n  position: sticky;\n  z-index: 2;\n  background-color: #ffffff;\n}\n.sticky-col::before {\n  content: "";\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: inherit;\n  z-index: -1;\n}\n.table-header {\n  background-color: #4e73df !important;\n  color: #ffffff !important;\n  font-weight: bold;\n}\n.table-header-c1 {\n  background-color: #f8f9fc !important;\n  color: #5a5c69 !important;\n  font-weight: bold;\n}\n.table-header-c2 {\n  background-color: #eaecf4 !important;\n  color: #3a3b45 !important;\n  font-weight: bold;\n}\n.table-subheader {\n  background-color: #f8f9fc !important;\n  font-weight: bold;\n  color: #4e73df;\n}\n.cursor-pointer {\n  cursor: pointer;\n}\n@keyframes fadeIn {\n  from {\n    opacity: 0;\n    transform: translateY(10px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n.animate-in {\n  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;\n}\n.modal-backdrop-blur {\n  background: rgba(0, 0, 0, 0.4);\n  backdrop-filter: blur(4px);\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  z-index: 1050;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n.modal-dialog {\n  max-width: 800px;\n  width: 90%;\n  margin: 1.75rem auto;\n}\n.card-provider-group {\n  border-radius: 1.25rem;\n  overflow: hidden;\n  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);\n  transition: transform 0.2s ease;\n}\n.card-provider-group:hover {\n  transform: translateY(-2px);\n}\n.table-tariffs {\n  font-size: 0.85rem !important;\n  border-collapse: separate !important;\n  border-spacing: 0 !important;\n  width: 100% !important;\n}\n.table-tariffs th,\n.table-tariffs td {\n  padding: 5px 8px !important;\n  vertical-align: middle !important;\n  border-color: #eaecf4 !important;\n  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;\n}\n.table-tariffs thead th {\n  background-color: #f8f9fc !important;\n  color: #4e73df !important;\n  font-weight: 700 !important;\n  text-transform: uppercase !important;\n  font-size: 0.72rem !important;\n  letter-spacing: 0.05em !important;\n  border-bottom: 2px solid #d1d3e2 !important;\n  padding: 8px 8px !important;\n}\n.table-tariffs th.sticky-col:nth-child(1),\n.table-tariffs td.sticky-col:nth-child(1) {\n  position: sticky !important;\n  left: 0 !important;\n  z-index: 3 !important;\n  background-color: #ffffff !important;\n  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.04) !important;\n  width: 160px !important;\n  min-width: 160px !important;\n  max-width: 160px !important;\n  overflow: hidden !important;\n  text-overflow: ellipsis !important;\n  white-space: nowrap !important;\n}\n.table-tariffs th.sticky-col.col-service-detail,\n.table-tariffs td.sticky-col.col-service-detail {\n  width: 260px !important;\n  min-width: 260px !important;\n  max-width: 280px !important;\n  border-right: 2px solid #d1d3e2 !important;\n  white-space: normal !important;\n  overflow: visible !important;\n  text-overflow: clip !important;\n}\n.table-tariffs td.sticky-col[colspan="2"] {\n  position: sticky !important;\n  left: 0 !important;\n  z-index: 3 !important;\n  background-color: #ffffff !important;\n  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.04) !important;\n  width: 290px !important;\n  min-width: 290px !important;\n  max-width: 290px !important;\n  overflow: hidden !important;\n  text-overflow: ellipsis !important;\n  white-space: nowrap !important;\n}\n.table-tariffs th.sticky-col:nth-child(2),\n.table-tariffs td.sticky-col:nth-child(2) {\n  position: sticky !important;\n  left: 160px !important;\n  z-index: 3 !important;\n  background-color: #ffffff !important;\n  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.04) !important;\n  border-right: 2px solid #d1d3e2 !important;\n  width: 130px !important;\n  min-width: 130px !important;\n  max-width: 130px !important;\n  overflow: hidden !important;\n  text-overflow: ellipsis !important;\n  white-space: nowrap !important;\n}\n.table-tariffs .bg-success-light {\n  background-color: #eef9f5 !important;\n  color: #1e7046 !important;\n}\n.table-tariffs .bg-success-solid {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n}\n.table-tariffs .bg-warning-light {\n  background-color: #fdf8eb !important;\n  color: #a07018 !important;\n}\n.table-tariffs .bg-warning-solid {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n}\n.table-tariffs .bg-light-tax {\n  background-color: #f4f6fd !important;\n  color: #3f5eb5 !important;\n}\n.table-tariffs .bg-compare {\n  background-color: #727c8d !important;\n  color: #ffffff !important;\n}\n.table-tariffs tbody tr:hover td {\n  background-color: #f1f3f9 !important;\n  color: #3a3b45 !important;\n}\n.table-tariffs tbody tr:hover .sticky-col {\n  background-color: #f1f3f9 !important;\n}\n.table-tariffs tbody tr:hover .bg-success-light {\n  background-color: #d5f2e6 !important;\n}\n.table-tariffs tbody tr:hover .bg-success-solid {\n  background-color: #afe0c7 !important;\n}\n.table-tariffs tbody tr:hover .bg-warning-light {\n  background-color: #fbedd1 !important;\n}\n.table-tariffs tbody tr:hover .bg-warning-solid {\n  background-color: #fad291 !important;\n}\n.table-tariffs tbody tr:hover .bg-light-tax {\n  background-color: #e9ecf8 !important;\n}\n.table-tariffs tbody tr:hover .bg-compare {\n  background-color: #5c6674 !important;\n  color: #ffffff !important;\n}\n.table-tariffs .bg-success-header {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n  font-weight: 700 !important;\n}\n.table-tariffs .bg-warning-header {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n  font-weight: 700 !important;\n}\n.table-tariffs .table-subheader td {\n  background-color: #f8f9fc !important;\n  color: #4e73df !important;\n  font-weight: 700 !important;\n}\n.table-tariffs .table-subheader td.sticky-col {\n  background-color: #f8f9fc !important;\n}\n.table-tariffs .table-subheader td.bg-success-solid {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n}\n.table-tariffs .table-subheader td.bg-warning-solid {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n}\n.table-tariffs .observation-row td {\n  background-color: #ffffff !important;\n  border-top: 1px solid #eaecf4 !important;\n}\n.table-tariffs .observation-row td.sticky-col {\n  background-color: #ffffff !important;\n}\n.table-tariffs .observation-row td.bg-success-solid {\n  background-color: #c3ebd7 !important;\n  color: #155724 !important;\n}\n.table-tariffs .observation-row td.bg-warning-solid {\n  background-color: #fce6b8 !important;\n  color: #856404 !important;\n}\n.table-tariffs .text-start {\n  text-align: left !important;\n}\n.table-tariffs .text-end {\n  text-align: right !important;\n}\n.table-tariffs .text-center {\n  text-align: center !important;\n}\n.table-responsive {\n  overflow-x: auto !important;\n}\n/*# sourceMappingURL=event-create.component.css.map */\n'] }]
   }], null, { dateRangePicker: [{
     type: ViewChild,
     args: ["dateRangePicker"]
@@ -126405,6 +126672,1044 @@ var AirlineComponent = class _AirlineComponent {
   (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(AirlineComponent, { className: "AirlineComponent", filePath: "src/app/pages/airfare/airline/airline.component.ts", lineNumber: 20 });
 })();
 
+// src/app/services/airfare-airport.service.ts
+var AirfareAirportService = class _AirfareAirportService {
+  http = inject(HttpClient);
+  apiUrl = environment.apiUrl;
+  getAirports(params = {}) {
+    return this.http.get(`${this.apiUrl}/api/airports`, { params });
+  }
+  saveAirport(data) {
+    return this.http.post(`${this.apiUrl}/api/airports`, data);
+  }
+  deleteAirport(id) {
+    return this.http.delete(`${this.apiUrl}/api/airports/${id}`);
+  }
+  activateAirport(id) {
+    return this.http.put(`${this.apiUrl}/api/airports/${id}/activate`, {});
+  }
+  deactivateAirport(id) {
+    return this.http.put(`${this.apiUrl}/api/airports/${id}/deactivate`, {});
+  }
+  static \u0275fac = function AirfareAirportService_Factory(__ngFactoryType__) {
+    return new (__ngFactoryType__ || _AirfareAirportService)();
+  };
+  static \u0275prov = /* @__PURE__ */ \u0275\u0275defineInjectable({ token: _AirfareAirportService, factory: _AirfareAirportService.\u0275fac, providedIn: "root" });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(AirfareAirportService, [{
+    type: Injectable,
+    args: [{
+      providedIn: "root"
+    }]
+  }], null, null);
+})();
+
+// src/app/pages/airfare/airport/airport.component.ts
+var _c044 = (a0, a1) => ({ "fa-sort-up text-primary": a0, "fa-sort-down text-primary": a1 });
+var _c140 = () => [1, 2, 3, 4, 5];
+function AirportComponent_div_15_small_1_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 53);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const err_r1 = ctx.$implicit;
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(err_r1);
+  }
+}
+function AirportComponent_div_15_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 51);
+    \u0275\u0275template(1, AirportComponent_div_15_small_1_Template, 2, 1, "small", 52);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r1 = \u0275\u0275nextContext();
+    \u0275\u0275advance();
+    \u0275\u0275property("ngForOf", ctx_r1.errors["iata_code"]);
+  }
+}
+function AirportComponent_div_22_small_1_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 53);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const err_r3 = ctx.$implicit;
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(err_r3);
+  }
+}
+function AirportComponent_div_22_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 51);
+    \u0275\u0275template(1, AirportComponent_div_22_small_1_Template, 2, 1, "small", 52);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r1 = \u0275\u0275nextContext();
+    \u0275\u0275advance();
+    \u0275\u0275property("ngForOf", ctx_r1.errors["name"]);
+  }
+}
+function AirportComponent_div_30_small_1_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 53);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const err_r4 = ctx.$implicit;
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(err_r4);
+  }
+}
+function AirportComponent_div_30_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 51);
+    \u0275\u0275template(1, AirportComponent_div_30_small_1_Template, 2, 1, "small", 52);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r1 = \u0275\u0275nextContext();
+    \u0275\u0275advance();
+    \u0275\u0275property("ngForOf", ctx_r1.errors["city"]);
+  }
+}
+function AirportComponent_div_35_small_1_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 53);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const err_r5 = ctx.$implicit;
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(err_r5);
+  }
+}
+function AirportComponent_div_35_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 51);
+    \u0275\u0275template(1, AirportComponent_div_35_small_1_Template, 2, 1, "small", 52);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r1 = \u0275\u0275nextContext();
+    \u0275\u0275advance();
+    \u0275\u0275property("ngForOf", ctx_r1.errors["state"]);
+  }
+}
+function AirportComponent_div_40_small_1_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "small", 53);
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const err_r6 = ctx.$implicit;
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(err_r6);
+  }
+}
+function AirportComponent_div_40_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 51);
+    \u0275\u0275template(1, AirportComponent_div_40_small_1_Template, 2, 1, "small", 52);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const ctx_r1 = \u0275\u0275nextContext();
+    \u0275\u0275advance();
+    \u0275\u0275property("ngForOf", ctx_r1.errors["country"]);
+  }
+}
+function AirportComponent_span_46_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275element(0, "span", 54);
+  }
+}
+function AirportComponent_i_47_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275element(0, "i", 55);
+  }
+}
+function AirportComponent_tr_87_span_9_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span", 69);
+    \u0275\u0275text(1, "Inativo");
+    \u0275\u0275elementEnd();
+  }
+}
+function AirportComponent_tr_87_span_12_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "span");
+    \u0275\u0275text(1);
+    \u0275\u0275elementEnd();
+  }
+  if (rf & 2) {
+    const airport_r8 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" / ", airport_r8.state, "");
+  }
+}
+function AirportComponent_tr_87_button_19_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r9 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "button", 70);
+    \u0275\u0275listener("click", function AirportComponent_tr_87_button_19_Template_button_click_0_listener() {
+      \u0275\u0275restoreView(_r9);
+      const airport_r8 = \u0275\u0275nextContext().$implicit;
+      const ctx_r1 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r1.activateAirport(airport_r8.id));
+    });
+    \u0275\u0275element(1, "i", 71);
+    \u0275\u0275elementEnd();
+  }
+}
+function AirportComponent_tr_87_app_confirm_modal_20_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r10 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "app-confirm-modal", 66);
+    \u0275\u0275listener("confirm", function AirportComponent_tr_87_app_confirm_modal_20_Template_app_confirm_modal_confirm_0_listener() {
+      \u0275\u0275restoreView(_r10);
+      const airport_r8 = \u0275\u0275nextContext().$implicit;
+      const ctx_r1 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r1.deactivateAirport(airport_r8.id));
+    });
+    \u0275\u0275elementStart(1, "span", 67);
+    \u0275\u0275element(2, "i", 72);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const airport_r8 = \u0275\u0275nextContext().$implicit;
+    \u0275\u0275property("btnClass", "btn btn-warning shadow-sm btn-action")("modalTitle", "Inativar Aeroporto")("message", "Tem certeza que deseja inativar o aeroporto " + airport_r8.name + " (" + airport_r8.iata_code + ")?")("okButtonLabel", "Confirmar")("tooltip", "Inativar Aeroporto");
+  }
+}
+function AirportComponent_tr_87_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r7 = \u0275\u0275getCurrentView();
+    \u0275\u0275elementStart(0, "tr")(1, "th", 56);
+    \u0275\u0275text(2);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(3, "td")(4, "span", 57);
+    \u0275\u0275text(5);
+    \u0275\u0275elementEnd()();
+    \u0275\u0275elementStart(6, "td")(7, "span", 58);
+    \u0275\u0275text(8);
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(9, AirportComponent_tr_87_span_9_Template, 2, 0, "span", 59);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(10, "td");
+    \u0275\u0275text(11);
+    \u0275\u0275template(12, AirportComponent_tr_87_span_12_Template, 2, 1, "span", 50);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(13, "td");
+    \u0275\u0275text(14);
+    \u0275\u0275elementEnd();
+    \u0275\u0275elementStart(15, "td", 60)(16, "div", 61)(17, "button", 62);
+    \u0275\u0275listener("click", function AirportComponent_tr_87_Template_button_click_17_listener() {
+      const airport_r8 = \u0275\u0275restoreView(_r7).$implicit;
+      const ctx_r1 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r1.edit(airport_r8));
+    });
+    \u0275\u0275element(18, "i", 63);
+    \u0275\u0275elementEnd();
+    \u0275\u0275template(19, AirportComponent_tr_87_button_19_Template, 2, 0, "button", 64)(20, AirportComponent_tr_87_app_confirm_modal_20_Template, 3, 5, "app-confirm-modal", 65);
+    \u0275\u0275elementStart(21, "app-confirm-modal", 66);
+    \u0275\u0275listener("confirm", function AirportComponent_tr_87_Template_app_confirm_modal_confirm_21_listener() {
+      const airport_r8 = \u0275\u0275restoreView(_r7).$implicit;
+      const ctx_r1 = \u0275\u0275nextContext();
+      return \u0275\u0275resetView(ctx_r1.deleteAirport(airport_r8.id));
+    });
+    \u0275\u0275elementStart(22, "span", 67);
+    \u0275\u0275element(23, "i", 68);
+    \u0275\u0275elementEnd()()()()();
+  }
+  if (rf & 2) {
+    const airport_r8 = ctx.$implicit;
+    const ctx_r1 = \u0275\u0275nextContext();
+    \u0275\u0275classProp("table-info", ctx_r1.isAirportInEdition(airport_r8.id));
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate(airport_r8.id);
+    \u0275\u0275advance(3);
+    \u0275\u0275textInterpolate(airport_r8.iata_code);
+    \u0275\u0275advance(2);
+    \u0275\u0275classProp("text-muted", !airport_r8.active);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate(airport_r8.name);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", !airport_r8.active);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1(" ", airport_r8.city, "");
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", airport_r8.state);
+    \u0275\u0275advance(2);
+    \u0275\u0275textInterpolate1(" ", airport_r8.country || "Brasil", " ");
+    \u0275\u0275advance(5);
+    \u0275\u0275property("ngIf", !airport_r8.active);
+    \u0275\u0275advance();
+    \u0275\u0275property("ngIf", airport_r8.active);
+    \u0275\u0275advance();
+    \u0275\u0275property("btnClass", "btn btn-danger shadow-sm btn-action")("modalTitle", "Excluir Aeroporto")("message", "A\xE7\xE3o irrevers\xEDvel! Deseja realmente excluir o aeroporto " + airport_r8.name + " (" + airport_r8.iata_code + ")?")("okButtonLabel", "Excluir")("tooltip", "Excluir Aeroporto");
+  }
+}
+function AirportComponent_tr_88_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "tr")(1, "td", 73)(2, "div", 74);
+    \u0275\u0275element(3, "span", 75);
+    \u0275\u0275elementEnd()()();
+  }
+}
+function AirportComponent_tr_89_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "tr")(1, "td", 76);
+    \u0275\u0275element(2, "i", 77);
+    \u0275\u0275text(3, " Nenhum aeroporto encontrado. ");
+    \u0275\u0275elementEnd()();
+  }
+}
+var AirportComponent = class _AirportComponent {
+  airportService = inject(AirfareAirportService);
+  toastService = inject(ToastService);
+  airports = [];
+  inEdition = 0;
+  isLoader = false;
+  processing = false;
+  errors = {};
+  showModal = false;
+  // Pagination and Filtering state
+  pagination = {
+    current_page: 1,
+    per_page: 10,
+    total: 0,
+    last_page: 1,
+    from: 0,
+    to: 0
+  };
+  searchQuery = "";
+  sortColumn = "iata_code";
+  sortDirection = "asc";
+  form = {
+    id: 0,
+    iata_code: "",
+    name: "",
+    city: "",
+    state: "",
+    country: "Brasil"
+  };
+  ngOnInit() {
+    this.loadAirports();
+  }
+  loadAirports() {
+    this.isLoader = true;
+    const params = {
+      page: this.pagination.current_page,
+      per_page: this.pagination.per_page,
+      search: this.searchQuery,
+      sort_column: this.sortColumn,
+      sort_direction: this.sortDirection
+    };
+    this.airportService.getAirports(params).subscribe({
+      next: (response) => {
+        this.airports = response.data || [];
+        this.pagination = {
+          current_page: response.current_page,
+          per_page: response.per_page,
+          total: response.total,
+          last_page: response.last_page,
+          from: response.from,
+          to: response.to
+        };
+        this.isLoader = false;
+      },
+      error: (error) => {
+        this.isLoader = false;
+        this.toastService.error("Erro ao carregar aeroportos");
+        console.error("Erro ao carregar aeroportos:", error);
+      }
+    });
+  }
+  onSearch(query) {
+    this.searchQuery = query;
+    this.pagination.current_page = 1;
+    this.loadAirports();
+  }
+  onPageChange(page) {
+    this.pagination.current_page = page;
+    this.loadAirports();
+  }
+  onPerPageChange(perPage) {
+    this.pagination.per_page = perPage;
+    this.pagination.current_page = 1;
+    this.loadAirports();
+  }
+  sortBy(column) {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = "asc";
+    }
+    this.loadAirports();
+  }
+  openModal() {
+    this.resetForm();
+    this.showModal = true;
+  }
+  closeModal() {
+    this.showModal = false;
+    this.resetForm();
+  }
+  edit(airport) {
+    this.inEdition = airport.id;
+    this.form.id = airport.id;
+    this.form.iata_code = airport.iata_code;
+    this.form.name = airport.name;
+    this.form.city = airport.city;
+    this.form.state = airport.state || "";
+    this.form.country = airport.country || "Brasil";
+    this.errors = {};
+    this.showModal = true;
+  }
+  cancelEdit() {
+    this.closeModal();
+  }
+  resetForm() {
+    this.form = {
+      id: 0,
+      iata_code: "",
+      name: "",
+      city: "",
+      state: "",
+      country: "Brasil"
+    };
+    this.errors = {};
+    this.inEdition = 0;
+  }
+  validateForm() {
+    this.errors = {};
+    let isValid2 = true;
+    if (!this.form.iata_code || this.form.iata_code.trim() === "") {
+      this.errors.iata_code = ["O c\xF3digo IATA \xE9 obrigat\xF3rio"];
+      isValid2 = false;
+    } else if (this.form.iata_code.trim().length !== 3) {
+      this.errors.iata_code = ["O c\xF3digo IATA deve ter exatamente 3 letras"];
+      isValid2 = false;
+    }
+    if (!this.form.name || this.form.name.trim() === "") {
+      this.errors.name = ["O nome do aeroporto \xE9 obrigat\xF3rio"];
+      isValid2 = false;
+    }
+    if (!this.form.city || this.form.city.trim() === "") {
+      this.errors.city = ["A cidade \xE9 obrigat\xF3ria"];
+      isValid2 = false;
+    }
+    return isValid2;
+  }
+  submit() {
+    if (!this.validateForm()) {
+      return;
+    }
+    this.processing = true;
+    const data = {
+      id: this.form.id,
+      iata_code: this.form.iata_code.trim().toUpperCase(),
+      name: this.form.name.trim(),
+      city: this.form.city.trim(),
+      state: this.form.state ? this.form.state.trim().toUpperCase() : void 0,
+      country: this.form.country ? this.form.country.trim() : "Brasil"
+    };
+    this.airportService.saveAirport(data).subscribe({
+      next: (response) => {
+        this.processing = false;
+        this.toastService.success(response.message || "Aeroporto salvo com sucesso");
+        this.closeModal();
+        this.loadAirports();
+      },
+      error: (error) => {
+        this.processing = false;
+        if (error.status === 422) {
+          this.errors = error.error.errors || {};
+          if (error.error.message && !this.errors.iata_code && !this.errors.name && !this.errors.city) {
+            this.toastService.error(error.error.message);
+          }
+        } else {
+          this.toastService.error("Erro ao salvar aeroporto");
+        }
+        console.error("Erro ao salvar aeroporto:", error);
+      }
+    });
+  }
+  deleteAirport(airportId) {
+    this.isLoader = true;
+    this.airportService.deleteAirport(airportId).subscribe({
+      next: (response) => {
+        this.isLoader = false;
+        this.toastService.success(response.message || "Aeroporto apagado com sucesso");
+        this.loadAirports();
+      },
+      error: (error) => {
+        this.isLoader = false;
+        this.toastService.error("Erro ao apagar aeroporto");
+        console.error("Erro ao deletar aeroporto:", error);
+      }
+    });
+  }
+  activateAirport(airportId) {
+    this.isLoader = true;
+    this.airportService.activateAirport(airportId).subscribe({
+      next: (response) => {
+        this.isLoader = false;
+        this.toastService.success(response.message || "Aeroporto ativado com sucesso");
+        this.loadAirports();
+      },
+      error: (error) => {
+        this.isLoader = false;
+        this.toastService.error("Erro ao ativar aeroporto");
+        console.error("Erro ao ativar aeroporto:", error);
+      }
+    });
+  }
+  deactivateAirport(airportId) {
+    this.isLoader = true;
+    this.airportService.deactivateAirport(airportId).subscribe({
+      next: (response) => {
+        this.isLoader = false;
+        this.toastService.success(response.message || "Aeroporto inativado com sucesso");
+        this.loadAirports();
+      },
+      error: (error) => {
+        this.isLoader = false;
+        this.toastService.error("Erro ao inativar aeroporto");
+        console.error("Erro ao inativar aeroporto:", error);
+      }
+    });
+  }
+  isAirportInEdition(airportId) {
+    return this.inEdition === airportId;
+  }
+  static \u0275fac = function AirportComponent_Factory(__ngFactoryType__) {
+    return new (__ngFactoryType__ || _AirportComponent)();
+  };
+  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _AirportComponent, selectors: [["app-airport"]], decls: 90, vars: 53, consts: [["header", ""], [1, "d-sm-flex", "align-items-center", "justify-content-between", "mb-4", "animate-in"], [1, "h3", "mb-0", "text-gray-800"], [1, "row", "position-relative"], ["icon", "fa-plane-departure", "size", "lg", 3, "close", "show", "title"], [1, "d-flex", "flex-column", "flex-grow-1", "min-h-0", 3, "ngSubmit"], [1, "row"], [1, "col-md-4", "form-group", "mb-3"], ["for", "iata_code", 1, "form-label"], [1, "text-danger"], ["type", "text", "id", "iata_code", "name", "iata_code", "placeholder", "Ex: GRU", "maxlength", "3", "required", "", "autofocus", "", 1, "form-control", "text-uppercase", 3, "ngModelChange", "ngModel"], ["class", "text-danger mt-1", 4, "ngIf"], [1, "col-md-8", "form-group", "mb-3"], ["for", "name", 1, "form-label"], ["type", "text", "id", "name", "name", "name", "placeholder", "Ex: Aeroporto Internacional de Guarulhos", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], [1, "col-md-6", "form-group", "mb-3"], ["for", "city", 1, "form-label"], ["type", "text", "id", "city", "name", "city", "placeholder", "Ex: Guarulhos", "required", "", 1, "form-control", 3, "ngModelChange", "ngModel"], [1, "col-md-2", "form-group", "mb-3"], ["for", "state", 1, "form-label"], ["type", "text", "id", "state", "name", "state", "placeholder", "Ex: SP", "maxlength", "10", 1, "form-control", "text-uppercase", 3, "ngModelChange", "ngModel"], ["for", "country", 1, "form-label"], ["type", "text", "id", "country", "name", "country", "placeholder", "Ex: Brasil", 1, "form-control", 3, "ngModelChange", "ngModel"], [1, "modal-footer", "px-0", "pb-0", "pt-3", "d-flex", "justify-content-end", "gap-2", "border-top"], ["type", "button", 1, "btn", "btn-outline-secondary", 3, "click", "disabled"], [1, "fas", "fa-times", "me-1"], ["type", "submit", 1, "btn", "btn-primary", "shadow-sm", 3, "disabled"], ["class", "spinner-border spinner-border-sm me-1", "role", "status", "aria-hidden", "true", 4, "ngIf"], ["class", "fas fa-save me-1", 4, "ngIf"], [1, "col-lg-12", "animate-in", 2, "animation-delay", "0.2s"], [1, "card", "mb-4", "border-left-secondary"], [1, "card-body"], [1, "d-flex", "align-items-center", "justify-content-between", "mb-4"], [1, "card-title", "mb-0", "text-secondary", "font-weight-bold"], [1, "fas", "fa-list", "me-2"], [1, "btn", "btn-primary", "btn-sm", "shadow-sm", 3, "click", "disabled"], [1, "fas", "fa-plus", "me-1"], [3, "search", "pageChange", "perPageChange", "pagination", "loading"], [1, "table-responsive"], ["width", "100%", "cellspacing", "0", 1, "table", "table-hover"], [1, "table-light"], ["scope", "col", 2, "cursor", "pointer", "width", "70px", 3, "click"], [1, "d-flex", "align-items-center"], [1, "fas", "fa-sort", "ms-2", "text-muted", 3, "ngClass"], ["scope", "col", 2, "cursor", "pointer", "width", "90px", 3, "click"], ["scope", "col", 2, "cursor", "pointer", 3, "click"], ["scope", "col", 2, "cursor", "pointer", "width", "140px", 3, "click"], ["scope", "col", 1, "text-end", 2, "width", "160px"], [3, "table-info", 4, "ngFor", "ngForOf"], [4, "ngFor", "ngForOf"], [4, "ngIf"], [1, "text-danger", "mt-1"], ["class", "d-block", 4, "ngFor", "ngForOf"], [1, "d-block"], ["role", "status", "aria-hidden", "true", 1, "spinner-border", "spinner-border-sm", "me-1"], [1, "fas", "fa-save", "me-1"], ["scope", "row", 1, "font-weight-bold"], [1, "badge", "bg-primary", "text-white", "font-monospace"], [1, "fw-semibold"], ["class", "badge bg-light text-muted ms-2", 4, "ngIf"], [1, "text-end"], [1, "d-flex", "justify-content-end", "gap-2", "flex-wrap"], ["data-tooltip", "Editar Aeroporto", 1, "btn", "btn-info", "text-white", "shadow-sm", "btn-action", 3, "click"], [1, "fas", "fa-edit"], ["class", "btn btn-success shadow-sm btn-action", "data-tooltip", "Ativar Aeroporto", 3, "click", 4, "ngIf"], [3, "btnClass", "modalTitle", "message", "okButtonLabel", "tooltip", "confirm", 4, "ngIf"], [3, "confirm", "btnClass", "modalTitle", "message", "okButtonLabel", "tooltip"], ["modal-button", ""], [1, "fas", "fa-trash"], [1, "badge", "bg-light", "text-muted", "ms-2"], ["data-tooltip", "Ativar Aeroporto", 1, "btn", "btn-success", "shadow-sm", "btn-action", 3, "click"], [1, "fas", "fa-check"], [1, "fas", "fa-ban"], ["colspan", "6", 1, "text-center", "py-3"], [1, "placeholder-glow"], [1, "placeholder", "col-12", "rounded"], ["colspan", "6", 1, "text-center", "py-5", "text-muted"], [1, "fas", "fa-plane", "fa-3x", "mb-3", "d-block", "opacity-25"]], template: function AirportComponent_Template(rf, ctx) {
+    if (rf & 1) {
+      \u0275\u0275elementStart(0, "app-authenticated-layout");
+      \u0275\u0275elementContainerStart(1, 0);
+      \u0275\u0275elementStart(2, "div", 1)(3, "h1", 2);
+      \u0275\u0275text(4, "Gerenciamento de Aeroportos");
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementContainerEnd();
+      \u0275\u0275elementStart(5, "div", 3)(6, "app-modal", 4);
+      \u0275\u0275listener("close", function AirportComponent_Template_app_modal_close_6_listener() {
+        return ctx.closeModal();
+      });
+      \u0275\u0275elementStart(7, "form", 5);
+      \u0275\u0275listener("ngSubmit", function AirportComponent_Template_form_ngSubmit_7_listener() {
+        return ctx.submit();
+      });
+      \u0275\u0275elementStart(8, "div", 6)(9, "div", 7)(10, "label", 8);
+      \u0275\u0275text(11, " C\xF3digo IATA: ");
+      \u0275\u0275elementStart(12, "span", 9);
+      \u0275\u0275text(13, "*");
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(14, "input", 10);
+      \u0275\u0275twoWayListener("ngModelChange", function AirportComponent_Template_input_ngModelChange_14_listener($event) {
+        \u0275\u0275twoWayBindingSet(ctx.form.iata_code, $event) || (ctx.form.iata_code = $event);
+        return $event;
+      });
+      \u0275\u0275elementEnd();
+      \u0275\u0275template(15, AirportComponent_div_15_Template, 2, 1, "div", 11);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(16, "div", 12)(17, "label", 13);
+      \u0275\u0275text(18, " Nome do Aeroporto: ");
+      \u0275\u0275elementStart(19, "span", 9);
+      \u0275\u0275text(20, "*");
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(21, "input", 14);
+      \u0275\u0275twoWayListener("ngModelChange", function AirportComponent_Template_input_ngModelChange_21_listener($event) {
+        \u0275\u0275twoWayBindingSet(ctx.form.name, $event) || (ctx.form.name = $event);
+        return $event;
+      });
+      \u0275\u0275elementEnd();
+      \u0275\u0275template(22, AirportComponent_div_22_Template, 2, 1, "div", 11);
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(23, "div", 6)(24, "div", 15)(25, "label", 16);
+      \u0275\u0275text(26, " Cidade: ");
+      \u0275\u0275elementStart(27, "span", 9);
+      \u0275\u0275text(28, "*");
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(29, "input", 17);
+      \u0275\u0275twoWayListener("ngModelChange", function AirportComponent_Template_input_ngModelChange_29_listener($event) {
+        \u0275\u0275twoWayBindingSet(ctx.form.city, $event) || (ctx.form.city = $event);
+        return $event;
+      });
+      \u0275\u0275elementEnd();
+      \u0275\u0275template(30, AirportComponent_div_30_Template, 2, 1, "div", 11);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(31, "div", 18)(32, "label", 19);
+      \u0275\u0275text(33, " UF: ");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(34, "input", 20);
+      \u0275\u0275twoWayListener("ngModelChange", function AirportComponent_Template_input_ngModelChange_34_listener($event) {
+        \u0275\u0275twoWayBindingSet(ctx.form.state, $event) || (ctx.form.state = $event);
+        return $event;
+      });
+      \u0275\u0275elementEnd();
+      \u0275\u0275template(35, AirportComponent_div_35_Template, 2, 1, "div", 11);
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(36, "div", 7)(37, "label", 21);
+      \u0275\u0275text(38, " Pa\xEDs: ");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(39, "input", 22);
+      \u0275\u0275twoWayListener("ngModelChange", function AirportComponent_Template_input_ngModelChange_39_listener($event) {
+        \u0275\u0275twoWayBindingSet(ctx.form.country, $event) || (ctx.form.country = $event);
+        return $event;
+      });
+      \u0275\u0275elementEnd();
+      \u0275\u0275template(40, AirportComponent_div_40_Template, 2, 1, "div", 11);
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(41, "div", 23)(42, "button", 24);
+      \u0275\u0275listener("click", function AirportComponent_Template_button_click_42_listener() {
+        return ctx.closeModal();
+      });
+      \u0275\u0275element(43, "i", 25);
+      \u0275\u0275text(44, " Cancelar ");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(45, "button", 26);
+      \u0275\u0275template(46, AirportComponent_span_46_Template, 1, 0, "span", 27)(47, AirportComponent_i_47_Template, 1, 0, "i", 28);
+      \u0275\u0275text(48, " Salvar ");
+      \u0275\u0275elementEnd()()()();
+      \u0275\u0275elementStart(49, "div", 29)(50, "div", 30)(51, "div", 31)(52, "div", 32)(53, "h5", 33);
+      \u0275\u0275element(54, "i", 34);
+      \u0275\u0275text(55, " Lista de Aeroportos ");
+      \u0275\u0275elementEnd();
+      \u0275\u0275elementStart(56, "button", 35);
+      \u0275\u0275listener("click", function AirportComponent_Template_button_click_56_listener() {
+        return ctx.openModal();
+      });
+      \u0275\u0275element(57, "i", 36);
+      \u0275\u0275text(58, " Novo Aeroporto ");
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(59, "app-datatable", 37);
+      \u0275\u0275listener("search", function AirportComponent_Template_app_datatable_search_59_listener($event) {
+        return ctx.onSearch($event);
+      })("pageChange", function AirportComponent_Template_app_datatable_pageChange_59_listener($event) {
+        return ctx.onPageChange($event);
+      })("perPageChange", function AirportComponent_Template_app_datatable_perPageChange_59_listener($event) {
+        return ctx.onPerPageChange($event);
+      });
+      \u0275\u0275elementStart(60, "div", 38)(61, "table", 39)(62, "thead", 40)(63, "tr")(64, "th", 41);
+      \u0275\u0275listener("click", function AirportComponent_Template_th_click_64_listener() {
+        return ctx.sortBy("id");
+      });
+      \u0275\u0275elementStart(65, "div", 42);
+      \u0275\u0275text(66, " ID ");
+      \u0275\u0275element(67, "i", 43);
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(68, "th", 44);
+      \u0275\u0275listener("click", function AirportComponent_Template_th_click_68_listener() {
+        return ctx.sortBy("iata_code");
+      });
+      \u0275\u0275elementStart(69, "div", 42);
+      \u0275\u0275text(70, " IATA ");
+      \u0275\u0275element(71, "i", 43);
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(72, "th", 45);
+      \u0275\u0275listener("click", function AirportComponent_Template_th_click_72_listener() {
+        return ctx.sortBy("name");
+      });
+      \u0275\u0275elementStart(73, "div", 42);
+      \u0275\u0275text(74, " Nome ");
+      \u0275\u0275element(75, "i", 43);
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(76, "th", 45);
+      \u0275\u0275listener("click", function AirportComponent_Template_th_click_76_listener() {
+        return ctx.sortBy("city");
+      });
+      \u0275\u0275elementStart(77, "div", 42);
+      \u0275\u0275text(78, " Cidade / UF ");
+      \u0275\u0275element(79, "i", 43);
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(80, "th", 46);
+      \u0275\u0275listener("click", function AirportComponent_Template_th_click_80_listener() {
+        return ctx.sortBy("country");
+      });
+      \u0275\u0275elementStart(81, "div", 42);
+      \u0275\u0275text(82, " Pa\xEDs ");
+      \u0275\u0275element(83, "i", 43);
+      \u0275\u0275elementEnd()();
+      \u0275\u0275elementStart(84, "th", 47);
+      \u0275\u0275text(85, "A\xE7\xF5es");
+      \u0275\u0275elementEnd()()();
+      \u0275\u0275elementStart(86, "tbody");
+      \u0275\u0275template(87, AirportComponent_tr_87_Template, 24, 18, "tr", 48)(88, AirportComponent_tr_88_Template, 4, 0, "tr", 49)(89, AirportComponent_tr_89_Template, 4, 0, "tr", 50);
+      \u0275\u0275elementEnd()()()()()()()()();
+    }
+    if (rf & 2) {
+      \u0275\u0275advance(6);
+      \u0275\u0275property("show", ctx.showModal)("title", ctx.inEdition > 0 ? "Editar Aeroporto" : "Cadastrar Novo Aeroporto");
+      \u0275\u0275advance(8);
+      \u0275\u0275classProp("is-invalid", ctx.errors["iata_code"]);
+      \u0275\u0275twoWayProperty("ngModel", ctx.form.iata_code);
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", ctx.errors["iata_code"]);
+      \u0275\u0275advance(6);
+      \u0275\u0275classProp("is-invalid", ctx.errors["name"]);
+      \u0275\u0275twoWayProperty("ngModel", ctx.form.name);
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", ctx.errors["name"]);
+      \u0275\u0275advance(7);
+      \u0275\u0275classProp("is-invalid", ctx.errors["city"]);
+      \u0275\u0275twoWayProperty("ngModel", ctx.form.city);
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", ctx.errors["city"]);
+      \u0275\u0275advance(4);
+      \u0275\u0275classProp("is-invalid", ctx.errors["state"]);
+      \u0275\u0275twoWayProperty("ngModel", ctx.form.state);
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", ctx.errors["state"]);
+      \u0275\u0275advance(4);
+      \u0275\u0275classProp("is-invalid", ctx.errors["country"]);
+      \u0275\u0275twoWayProperty("ngModel", ctx.form.country);
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", ctx.errors["country"]);
+      \u0275\u0275advance(2);
+      \u0275\u0275property("disabled", ctx.processing);
+      \u0275\u0275advance(3);
+      \u0275\u0275property("disabled", ctx.processing);
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", ctx.processing);
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", !ctx.processing);
+      \u0275\u0275advance(9);
+      \u0275\u0275property("disabled", ctx.processing);
+      \u0275\u0275advance(3);
+      \u0275\u0275property("pagination", ctx.pagination)("loading", ctx.isLoader);
+      \u0275\u0275advance(8);
+      \u0275\u0275property("ngClass", \u0275\u0275pureFunction2(37, _c044, ctx.sortColumn === "id" && ctx.sortDirection === "asc", ctx.sortColumn === "id" && ctx.sortDirection === "desc"));
+      \u0275\u0275advance(4);
+      \u0275\u0275property("ngClass", \u0275\u0275pureFunction2(40, _c044, ctx.sortColumn === "iata_code" && ctx.sortDirection === "asc", ctx.sortColumn === "iata_code" && ctx.sortDirection === "desc"));
+      \u0275\u0275advance(4);
+      \u0275\u0275property("ngClass", \u0275\u0275pureFunction2(43, _c044, ctx.sortColumn === "name" && ctx.sortDirection === "asc", ctx.sortColumn === "name" && ctx.sortDirection === "desc"));
+      \u0275\u0275advance(4);
+      \u0275\u0275property("ngClass", \u0275\u0275pureFunction2(46, _c044, ctx.sortColumn === "city" && ctx.sortDirection === "asc", ctx.sortColumn === "city" && ctx.sortDirection === "desc"));
+      \u0275\u0275advance(4);
+      \u0275\u0275property("ngClass", \u0275\u0275pureFunction2(49, _c044, ctx.sortColumn === "country" && ctx.sortDirection === "asc", ctx.sortColumn === "country" && ctx.sortDirection === "desc"));
+      \u0275\u0275advance(4);
+      \u0275\u0275property("ngForOf", ctx.airports);
+      \u0275\u0275advance();
+      \u0275\u0275property("ngForOf", \u0275\u0275pureFunction0(52, _c140).slice(0, ctx.isLoader ? 5 : 0));
+      \u0275\u0275advance();
+      \u0275\u0275property("ngIf", ctx.airports.length === 0 && !ctx.isLoader);
+    }
+  }, dependencies: [CommonModule, NgClass, NgForOf, NgIf, FormsModule, \u0275NgNoValidate, DefaultValueAccessor, NgControlStatus, NgControlStatusGroup, RequiredValidator, MaxLengthValidator, NgModel, NgForm, AuthenticatedLayoutComponent, ConfirmModalComponent, DatatableComponent, ModalComponent], styles: ["\n\n.btn-action[_ngcontent-%COMP%] {\n  padding: 0.25rem 0.5rem;\n  font-size: 0.875rem;\n}\n/*# sourceMappingURL=airport.component.css.map */"] });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(AirportComponent, [{
+    type: Component,
+    args: [{ selector: "app-airport", standalone: true, imports: [CommonModule, FormsModule, AuthenticatedLayoutComponent, ConfirmModalComponent, DatatableComponent, ModalComponent], template: `<app-authenticated-layout>
+  <ng-container header>
+    <div class="d-sm-flex align-items-center justify-content-between mb-4 animate-in">
+      <h1 class="h3 mb-0 text-gray-800">Gerenciamento de Aeroportos</h1>
+    </div>
+  </ng-container>
+
+  <div class="row position-relative">
+    <!-- Modal de Cadastro/Edi\xE7\xE3o -->
+    <app-modal [show]="showModal" (close)="closeModal()" [title]="inEdition > 0 ? 'Editar Aeroporto' : 'Cadastrar Novo Aeroporto'" icon="fa-plane-departure" size="lg">
+      <form (ngSubmit)="submit()" class="d-flex flex-column flex-grow-1 min-h-0">
+        <div class="row">
+          <!-- C\xF3digo IATA -->
+          <div class="col-md-4 form-group mb-3">
+            <label for="iata_code" class="form-label">
+              C\xF3digo IATA:
+              <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              id="iata_code"
+              class="form-control text-uppercase"
+              [class.is-invalid]="errors['iata_code']"
+              [(ngModel)]="form.iata_code"
+              name="iata_code"
+              placeholder="Ex: GRU"
+              maxlength="3"
+              required
+              autofocus />
+
+            <div *ngIf="errors['iata_code']" class="text-danger mt-1">
+              <small *ngFor="let err of errors['iata_code']" class="d-block">{{ err }}</small>
+            </div>
+          </div>
+
+          <!-- Nome do Aeroporto -->
+          <div class="col-md-8 form-group mb-3">
+            <label for="name" class="form-label">
+              Nome do Aeroporto:
+              <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              id="name"
+              class="form-control"
+              [class.is-invalid]="errors['name']"
+              [(ngModel)]="form.name"
+              name="name"
+              placeholder="Ex: Aeroporto Internacional de Guarulhos"
+              required />
+
+            <div *ngIf="errors['name']" class="text-danger mt-1">
+              <small *ngFor="let err of errors['name']" class="d-block">{{ err }}</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- Cidade -->
+          <div class="col-md-6 form-group mb-3">
+            <label for="city" class="form-label">
+              Cidade:
+              <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              id="city"
+              class="form-control"
+              [class.is-invalid]="errors['city']"
+              [(ngModel)]="form.city"
+              name="city"
+              placeholder="Ex: Guarulhos"
+              required />
+
+            <div *ngIf="errors['city']" class="text-danger mt-1">
+              <small *ngFor="let err of errors['city']" class="d-block">{{ err }}</small>
+            </div>
+          </div>
+
+          <!-- Estado / UF -->
+          <div class="col-md-2 form-group mb-3">
+            <label for="state" class="form-label">
+              UF:
+            </label>
+            <input
+              type="text"
+              id="state"
+              class="form-control text-uppercase"
+              [class.is-invalid]="errors['state']"
+              [(ngModel)]="form.state"
+              name="state"
+              placeholder="Ex: SP"
+              maxlength="10" />
+
+            <div *ngIf="errors['state']" class="text-danger mt-1">
+              <small *ngFor="let err of errors['state']" class="d-block">{{ err }}</small>
+            </div>
+          </div>
+
+          <!-- Pa\xEDs -->
+          <div class="col-md-4 form-group mb-3">
+            <label for="country" class="form-label">
+              Pa\xEDs:
+            </label>
+            <input
+              type="text"
+              id="country"
+              class="form-control"
+              [class.is-invalid]="errors['country']"
+              [(ngModel)]="form.country"
+              name="country"
+              placeholder="Ex: Brasil" />
+
+            <div *ngIf="errors['country']" class="text-danger mt-1">
+              <small *ngFor="let err of errors['country']" class="d-block">{{ err }}</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer px-0 pb-0 pt-3 d-flex justify-content-end gap-2 border-top">
+          <button type="button" class="btn btn-outline-secondary" (click)="closeModal()" [disabled]="processing">
+            <i class="fas fa-times me-1"></i>
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary shadow-sm" [disabled]="processing">
+            <span *ngIf="processing" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            <i *ngIf="!processing" class="fas fa-save me-1"></i>
+            Salvar
+          </button>
+        </div>
+      </form>
+    </app-modal>
+
+    <!-- Table Section -->
+    <div class="col-lg-12 animate-in" style="animation-delay: 0.2s">
+      <div class="card mb-4 border-left-secondary">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-4">
+            <h5 class="card-title mb-0 text-secondary font-weight-bold">
+              <i class="fas fa-list me-2"></i>
+              Lista de Aeroportos
+            </h5>
+            <button class="btn btn-primary btn-sm shadow-sm" (click)="openModal()" [disabled]="processing">
+              <i class="fas fa-plus me-1"></i>
+              Novo Aeroporto
+            </button>
+          </div>
+
+          <app-datatable
+            [pagination]="pagination"
+            [loading]="isLoader"
+            (search)="onSearch($event)"
+            (pageChange)="onPageChange($event)"
+            (perPageChange)="onPerPageChange($event)">
+            <div class="table-responsive">
+              <table class="table table-hover" width="100%" cellspacing="0">
+                <thead class="table-light">
+                  <tr>
+                    <th scope="col" (click)="sortBy('id')" style="cursor: pointer; width: 70px">
+                      <div class="d-flex align-items-center">
+                        ID
+                        <i
+                          class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'id' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'id' && sortDirection === 'desc',
+                          }"></i>
+                      </div>
+                    </th>
+                    <th scope="col" (click)="sortBy('iata_code')" style="cursor: pointer; width: 90px">
+                      <div class="d-flex align-items-center">
+                        IATA
+                        <i
+                          class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'iata_code' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'iata_code' && sortDirection === 'desc',
+                          }"></i>
+                      </div>
+                    </th>
+                    <th scope="col" (click)="sortBy('name')" style="cursor: pointer">
+                      <div class="d-flex align-items-center">
+                        Nome
+                        <i
+                          class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'name' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'name' && sortDirection === 'desc',
+                          }"></i>
+                      </div>
+                    </th>
+                    <th scope="col" (click)="sortBy('city')" style="cursor: pointer">
+                      <div class="d-flex align-items-center">
+                        Cidade / UF
+                        <i
+                          class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'city' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'city' && sortDirection === 'desc',
+                          }"></i>
+                      </div>
+                    </th>
+                    <th scope="col" (click)="sortBy('country')" style="cursor: pointer; width: 140px">
+                      <div class="d-flex align-items-center">
+                        Pa\xEDs
+                        <i
+                          class="fas fa-sort ms-2 text-muted"
+                          [ngClass]="{
+                            'fa-sort-up text-primary': sortColumn === 'country' && sortDirection === 'asc',
+                            'fa-sort-down text-primary': sortColumn === 'country' && sortDirection === 'desc',
+                          }"></i>
+                      </div>
+                    </th>
+                    <th scope="col" class="text-end" style="width: 160px">A\xE7\xF5es</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let airport of airports" [class.table-info]="isAirportInEdition(airport.id)">
+                    <th scope="row" class="font-weight-bold">{{ airport.id }}</th>
+                    <td>
+                      <span class="badge bg-primary text-white font-monospace">{{ airport.iata_code }}</span>
+                    </td>
+                    <td>
+                      <span [class.text-muted]="!airport.active" class="fw-semibold">{{ airport.name }}</span>
+                      <span *ngIf="!airport.active" class="badge bg-light text-muted ms-2">Inativo</span>
+                    </td>
+                    <td>
+                      {{ airport.city }}<span *ngIf="airport.state"> / {{ airport.state }}</span>
+                    </td>
+                    <td>
+                      {{ airport.country || 'Brasil' }}
+                    </td>
+                    <td class="text-end">
+                      <div class="d-flex justify-content-end gap-2 flex-wrap">
+                        <button class="btn btn-info text-white shadow-sm btn-action" (click)="edit(airport)" data-tooltip="Editar Aeroporto">
+                          <i class="fas fa-edit"></i>
+                        </button>
+
+                        <button *ngIf="!airport.active" class="btn btn-success shadow-sm btn-action" (click)="activateAirport(airport.id)" data-tooltip="Ativar Aeroporto">
+                          <i class="fas fa-check"></i>
+                        </button>
+
+                        <app-confirm-modal
+                          *ngIf="airport.active"
+                          [btnClass]="'btn btn-warning shadow-sm btn-action'"
+                          [modalTitle]="'Inativar Aeroporto'"
+                          [message]="'Tem certeza que deseja inativar o aeroporto ' + airport.name + ' (' + airport.iata_code + ')?'"
+                          [okButtonLabel]="'Confirmar'"
+                          [tooltip]="'Inativar Aeroporto'"
+                          (confirm)="deactivateAirport(airport.id)">
+                          <span modal-button>
+                            <i class="fas fa-ban"></i>
+                          </span>
+                        </app-confirm-modal>
+
+                        <app-confirm-modal
+                          [btnClass]="'btn btn-danger shadow-sm btn-action'"
+                          [modalTitle]="'Excluir Aeroporto'"
+                          [message]="'A\xE7\xE3o irrevers\xEDvel! Deseja realmente excluir o aeroporto ' + airport.name + ' (' + airport.iata_code + ')?'"
+                          [okButtonLabel]="'Excluir'"
+                          [tooltip]="'Excluir Aeroporto'"
+                          (confirm)="deleteAirport(airport.id)">
+                          <span modal-button>
+                            <i class="fas fa-trash"></i>
+                          </span>
+                        </app-confirm-modal>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr *ngFor="let i of [1, 2, 3, 4, 5].slice(0, isLoader ? 5 : 0)">
+                    <td colspan="6" class="text-center py-3">
+                      <div class="placeholder-glow">
+                        <span class="placeholder col-12 rounded"></span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr *ngIf="airports.length === 0 && !isLoader">
+                    <td colspan="6" class="text-center py-5 text-muted">
+                      <i class="fas fa-plane fa-3x mb-3 d-block opacity-25"></i>
+                      Nenhum aeroporto encontrado.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </app-datatable>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-authenticated-layout>
+`, styles: ["/* src/app/pages/airfare/airport/airport.component.scss */\n.btn-action {\n  padding: 0.25rem 0.5rem;\n  font-size: 0.875rem;\n}\n/*# sourceMappingURL=airport.component.css.map */\n"] }]
+  }], null, null);
+})();
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(AirportComponent, { className: "AirportComponent", filePath: "src/app/pages/airfare/airport/airport.component.ts", lineNumber: 20 });
+})();
+
 // src/app/guards/auth.guard.ts
 var authGuard = (route, state) => {
   const authService = inject(AuthService);
@@ -126476,6 +127781,7 @@ var routes = [
   { path: "broker-trans", component: BrokerTransComponent, canActivate: [authGuard], title: "Brokers de Transporte - SmartApp" },
   { path: "provider-transport", component: ProviderTransportComponent, canActivate: [authGuard], title: "Fornecedores de Transporte - SmartApp" },
   { path: "airline", component: AirlineComponent, canActivate: [authGuard], title: "Cias A\xE9reas - SmartApp" },
+  { path: "airport", component: AirportComponent, canActivate: [authGuard], title: "Aeroportos - SmartApp" },
   // { path: 'baggage', component: BaggageComponent, canActivate: [authGuard], title: 'Bagagem - SmartApp' },
   // { path: 'cabin', component: CabinComponent, canActivate: [authGuard], title: 'Cabines - SmartApp' },
   { path: "event-list", component: EventListComponent, canActivate: [authGuard], title: "Eventos - SmartApp" },

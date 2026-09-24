@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/pages/airfare/airport/airport.component.scss"],
+  "sourcesContent": ["// Styles for airport component\n.btn-action {\n  padding: 0.25rem 0.5rem;\n  font-size: 0.875rem;\n}\n"],
+  "mappings": ";AACA,CAAA;AACE,WAAA,QAAA;AACA,aAAA;;",
+  "names": []
+}
