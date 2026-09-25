@@ -174,6 +174,11 @@ $sumAirfareSale = 0;
 $sumQtdDaylesAirfare = 0;
 $totalKickbackAirfare = 0;
 $sumTotalAirfareCostTaxa = 0;
+$hotelTaxa4BTS = 0;
+$abTaxa4BTS = 0;
+$hallTaxa4BTS = 0;
+$addTaxa4BTS = 0;
+$transportTaxa4BTS = 0;
 $airfareTaxa4BTS = 0;
 
 $strip = false;
@@ -1210,7 +1215,177 @@ function quebraTexto($texto, $limite = 40)
                 @endif
 
                 @if($transportEvent != null && $transportEvent->eventTransportOpts != null && count($transportEvent->eventTransportOpts) > 0)
-                ...
+
+                <div class="event-section">
+                    <table>
+                        <thead style="display: table-header-group;">
+                            <tr style="page-break-after: avoid;">
+                                <th colspan="12" style="padding: 0.3rem; text-align: center;">TRANSPORTE TERRESTRE</th>
+                            </tr>
+                            <tr style="background-color: #e9540d; color: rgb(250, 249, 249);">
+                                <th>Marca</th>
+                                <th>Veículo</th>
+                                <th>Modelo</th>
+                                <th>Serviço</th>
+                                <th>De</th>
+                                <th>Até</th>
+                                <th>Qtd</th>
+                                <th>Diárias</th>
+                                <th>Valor</th>
+                                <th>Taxas</th>
+                                <th>TTL com Taxa</th>
+                                <th>Total Geral</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($transportEvent->eventTransportOpts as $key => $item)
+                            <?php
+
+                            $taxesTransport = sumTaxesProvider($transportEvent, $item);
+                            $qtdDayleTransport = $item->count * daysBetween1($item->in, $item->out);
+
+                            $taxesCostTransport = sumTaxesProviderCost($transportEvent, $item);
+
+                            $sumQtdDaylesTransport += $qtdDayleTransport;
+
+                            $totalKickbackTransport += ($item->received_proposal * $qtdDayleTransport * $item->kickback) / 100;
+
+                            $sumTransportCost += $item->received_proposal * $qtdDayleTransport;
+                            $sumTransportSale += unitSale($item) * $qtdDayleTransport;
+                            $sumTotalTransportCost += sumTotal($item->received_proposal, $taxesCostTransport, $qtdDayleTransport);
+                            $sumTotalTransportSale += sumTotal(unitSale($item), $taxesTransport, $qtdDayleTransport);
+
+
+                            $sumTaxeTransportCost += ($taxesCostTransport * $qtdDayleTransport);
+                            $sumTaxeTransportSale += ($taxesTransport * $qtdDayleTransport);
+                            ?>
+                            <tr style="background-color: <?= $key % 2 == 0 ? '#ffffff' : '#f7fafc' ?>">
+                                <td>{{ $item->brand->name }}</td>
+                                <td>{{ $item->vehicle->name }}</td>
+                                <td>{{ $item->model->name }}</td>
+                                <td>{{ $item->service->name }}</td>
+                                <td>{{ date("d/m/Y", strtotime($item->in)) }}</td>
+                                <td>{{ date("d/m/Y", strtotime($item->out)) }}</td>
+                                <td>
+                                    {{ rtrim(rtrim(number_format($item->count, 2, ',', '.'), '0'), ',') }}
+                                </td>
+                                <td>{{ daysBetween1($item->in, $item->out) }}</td>
+
+                                <td>{{ formatCurrency(unitSale($item), $transportEvent->currency->symbol) }}</td>
+                                <td>{{ formatCurrency(sumTaxesProvider($transportEvent, $item), $transportEvent->currency->symbol) }}</td>
+                                <td>{{ formatCurrency(unitSale($item) + sumTaxesProvider($transportEvent, $item), $transportEvent->currency->symbol) }}</td>
+                                <td>{{ formatCurrency(sumTotal(unitSale($item), sumTaxesProvider($transportEvent, $item), $item->count * daysBetween1($item->in, $item->out)), $transportEvent->currency->symbol) }}</td>
+
+                            </tr>
+                            @endforeach
+                        </tbody>
+
+                        <?php
+                        $sumTotalTransportSaleTaxa = ((($sumTotalTransportSale * $percIOF) / 100) + $sumTotalTransportSale) *  (1 + ($transportEvent->taxa_4bts / 100));
+                        $sumTotalTransportCostTaxa = ((($sumTotalTransportCost * $percIOF) / 100) + $sumTotalTransportCost);
+
+                        $transportTaxa4BTS = ((($sumTotalTransportSale * $percIOF) / 100) + $sumTotalTransportSale) * ($transportEvent->taxa_4bts / 100);
+                        $sumTaxeTransportCost += (($sumTotalTransportCost * $percIOF) / 100);
+                        $sumTaxeTransportSale += (($sumTotalTransportSale * $percIOF) / 100);
+                        ?>
+                        <tfoot class="table-footer">
+                            <tr>
+                                <td colspan="12" style="padding: 0;">
+                                    <table style="width: 100%;">
+                                        <tr class="table-subheader" style="background-color: #ffe0b1">
+                                            <th class="align-middle custom-bg-success-text-white">Room Nights:</th>
+                                            <td class="align-middle">{{ $sumQtdDaylesTransport }}</td>
+                                            <th class="align-middle custom-bg-success-text-white">DIÁRIA MÉDIA</th>
+                                            <td class="align-middle">{{ formatCurrency($sumTotalTransportSale / $sumQtdDaylesTransport, $transportEvent->currency->symbol) }}</td>
+                                            <th class="align-middle custom-bg-success-text-white">EMITIR NOTA FISCAL?</th>
+                                            <td class="align-middle">{{ $transportEvent->invoice ? 'Sim' : 'Não' }}</td>
+                                            <th class="align-middle custom-bg-success-text-white">Total Venda</th>
+                                            <td class="align-middle">{{ formatCurrency($sumTotalTransportSale, $transportEvent->currency->symbol) }}</td>
+                                            <th class="align-middle custom-bg-success-text-white">Total Custo</th>
+                                            <td class="align-middle">{{ formatCurrency($sumTotalTransportCost, $transportEvent->currency->symbol) }}</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+
+                            @if($transportEvent->internal_observation != null && $transportEvent->internal_observation != "")
+                            <tr style="background-color: #ffe0b1">
+                                <td colspan="2"><b>Comentários:</b></td>
+                                <td colspan="10">{{ $transportEvent->internal_observation }}</td>
+                            </tr>
+                            @endif
+
+                            <tr>
+                                <td colspan="12" style="padding: 0;">
+
+                                    <table style="border-collapse: collapse; width: 100%; text-align: center;">
+                                        <tr>
+                                            <th colspan="2" style="background-color: #c1d9ff; border: 1px solid #ffffff;">IMPOSTOS CLIENTE</th>
+                                            <th colspan="2" style="background-color: #ffe5e5; border: 1px solid #ffffff;">IMPOSTOS A PAGAR</th>
+                                            <th></th>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">ISS ({{ $transportEvent->iss_percent }}%)</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">
+                                                {{ formatCurrency(($sumTransportSale * $transportEvent->iss_percent) / 100, $transportEvent->currency->symbol) }}
+                                            </td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">ISS ({{ $transportEvent->iss_percent }}%)</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">
+                                                {{ formatCurrency(($sumTransportCost * $transportEvent->iss_percent) / 100, $transportEvent->currency->symbol) }}
+                                            </td>
+                                            <td class="custom-bg-success-text-white" style="background-color: #c1d9ff; border: 1px solid #ffffff; color: #000">TOTAL COM TAXAS CLIENTE</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalTransportSaleTaxa, $transportEvent->currency->symbol) }}</td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA DE SERVIÇO ({{ $transportEvent->service_percent }}%)</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTransportSale * $transportEvent->service_percent) / 100, $transportEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA DE SERVIÇO ({{ $transportEvent->service_percent }}%)</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTransportCost * $transportEvent->service_percent) / 100, $transportEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff; background-color: #ffe5e5; color: #000">TOTAL COM TAXAS A PAGAR</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalTransportCostTaxa, $transportEvent->currency->symbol) }}</td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IVA ({{ $transportEvent->iva_percent }}%)</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTransportSale * $transportEvent->iva_percent) / 100, $transportEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IVA ({{ $transportEvent->iva_percent }}%)</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTransportCost * $transportEvent->iva_percent) / 100, $transportEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">LUCRO TOTAL</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($sumTotalTransportSaleTaxa - $sumTotalTransportCostTaxa, $transportEvent->currency->symbol) }}</td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($transportEvent->service_charge, $transportEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">TAXA TURISMO</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($transportEvent->service_charge, $transportEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Comissão</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($totalKickbackTransport, $transportEvent->currency->symbol) }}</td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $percIOF }}%)</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTransportSale * $percIOF) / 100, $transportEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">IOF ({{ $percIOF }}%)</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency(($sumTotalTransportCost * $percIOF) / 100, $transportEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;" colspan="2"></td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;">Serviço 4BTS ({{ number_format($transportEvent->taxa_4bts, 2) }}%)</td>
+                                            <td style="background-color: #ffe0b1; border: 1px solid #ffffff;">{{ formatCurrency($transportTaxa4BTS, $transportEvent->currency->symbol) }}</td>
+                                            <td class="custom-bg-success-text-white" style="border: 1px solid #ffffff;" colspan="4"></td>
+                                        </tr>
+                                    </table>
+
+                                </td>
+                            </tr>
+
+                        </tfoot>
+
+                    </table>
                 </div>
                 @endif
 

@@ -40,8 +40,18 @@ if (!function_exists('quebraTexto')) {
     }
 }
 
-function formatCurrencyBr($value) {
-    return 'R$ ' . number_format((float)$value, 2, ',', '.');
+if (!function_exists('formatCurrencyAirfare')) {
+    function formatCurrencyAirfare($value, $symbol = 'R$') {
+        $val = round((float)$value * 100) / 100;
+        $sym = !empty($symbol) ? trim($symbol) : 'R$';
+        return $sym . ' ' . number_format($val, 2, ',', '.');
+    }
+}
+
+if (!function_exists('formatCurrencyBr')) {
+    function formatCurrencyBr($value, $symbol = 'R$') {
+        return formatCurrencyAirfare($value, $symbol);
+    }
 }
 
 function formatDateBr($dateStr) {
@@ -123,6 +133,7 @@ function formatTimePdf($timeStr) {
 <!DOCTYPE html>
 <html>
 <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta charset="utf-8">
     <title>Proposta Fretamento</title>
     <style>
@@ -272,6 +283,7 @@ function formatTimePdf($timeStr) {
             font-size: 11pt;
             color: #2563EB;
             font-weight: bold;
+            font-family: 'DejaVu Sans', sans-serif;
         }
         .leg-time-main {
             font-weight: bold;
@@ -330,6 +342,7 @@ function formatTimePdf($timeStr) {
             font-size: 10.5pt;
             color: #111111;
             display: inline-block;
+            font-family: 'DejaVu Sans', Helvetica, Arial, sans-serif;
         }
 
         /* Observações da Proposta */
@@ -493,6 +506,9 @@ function formatTimePdf($timeStr) {
                 $mk = ($airfare->markup && (float)$airfare->markup > 0) ? (float)$airfare->markup : 0.75;
                 $vendaEstimada = $custoNet > 0 ? ($custoNet / $mk) : 0;
                 $valorFinal = $vendaEstimada + $totTaxaEmbarque;
+
+                $airfareCurr = $airfare->currency ?? (!empty($airfare->currency_id) ? \App\Models\Currency::find($airfare->currency_id) : null);
+                $currSymbol = $airfareCurr ? ($airfareCurr->symbol ?: ($airfareCurr->sigla ?: 'R$')) : 'R$';
             @endphp
 
             <div class="charter-block" style="{{ $index > 0 ? 'page-break-before: always; margin-top: 15px;' : '' }}">
@@ -547,7 +563,7 @@ function formatTimePdf($timeStr) {
                                 @endif
                             </td>
                             <td class="leg-arrow">
-                                &rarr;
+                                &#8594;
                             </td>
                             <td>
                                 @if($destCode)
@@ -579,7 +595,7 @@ function formatTimePdf($timeStr) {
                             <td>
                                 <div class="leg-date-title">Origem a confirmar</div>
                             </td>
-                            <td class="leg-arrow">&rarr;</td>
+                            <td class="leg-arrow">&#8594;</td>
                             <td>
                                 <div class="leg-date-title">Destino a confirmar</div>
                             </td>
@@ -665,7 +681,7 @@ function formatTimePdf($timeStr) {
                                     <td colspan="2" style="padding-top: 6px;">
                                         <div class="valor-box">
                                             <span class="valor-label">Valor:</span>
-                                            <span class="valor-val">{{ formatCurrencyBr($valorFinal) }}</span>
+                                            <span class="valor-val">{{ formatCurrencyBr($valorFinal, $currSymbol) }}</span>
                                         </div>
                                     </td>
                                 </tr>
