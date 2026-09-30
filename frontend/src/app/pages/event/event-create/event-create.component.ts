@@ -171,9 +171,9 @@ export class EventCreateComponent implements OnInit {
     invoice: false,
     iof: 0,
     change_hotel_times: false,
-    checkin_time: '',
+    checkin_time: '15:00',
     checkin_time_end: '',
-    checkout_time: '',
+    checkout_time: '11:00',
     checkout_time_end: '',
     deadline_date: '',
     markup: 0.75,
@@ -241,10 +241,10 @@ export class EventCreateComponent implements OnInit {
       this.providerLinkForm.payment_method = this.normalizePaymentMethod(found.payment_method);
       if (this.providerLinkType === 'hotel') {
         if (!this.providerLinkForm.change_hotel_times) {
-          this.providerLinkForm.checkin_time = found.checkin_time || '';
-          this.providerLinkForm.checkin_time_end = found.checkin_time_end || '';
-          this.providerLinkForm.checkout_time = found.checkout_time || '';
-          this.providerLinkForm.checkout_time_end = found.checkout_time_end || '';
+          this.providerLinkForm.checkin_time = found.checkin_time || '15:00';
+          this.providerLinkForm.checkin_time_end = '';
+          this.providerLinkForm.checkout_time = found.checkout_time || '11:00';
+          this.providerLinkForm.checkout_time_end = '';
         }
       }
     }
@@ -254,10 +254,10 @@ export class EventCreateComponent implements OnInit {
     if (!this.providerLinkForm.change_hotel_times) {
       const found = this.providers.find(p => p.id === this.providerLinkForm.provider_id);
       if (found) {
-        this.providerLinkForm.checkin_time = found.checkin_time || '';
-        this.providerLinkForm.checkin_time_end = found.checkin_time_end || '';
-        this.providerLinkForm.checkout_time = found.checkout_time || '';
-        this.providerLinkForm.checkout_time_end = found.checkout_time_end || '';
+        this.providerLinkForm.checkin_time = found.checkin_time || '15:00';
+        this.providerLinkForm.checkin_time_end = '';
+        this.providerLinkForm.checkout_time = found.checkout_time || '11:00';
+        this.providerLinkForm.checkout_time_end = '';
       }
     }
   }
@@ -772,9 +772,7 @@ export class EventCreateComponent implements OnInit {
       if (type === 'hotel' && found) {
         isDifferent =
           (editItem.checkin_time || '') !== (found.checkin_time || '') ||
-          (editItem.checkin_time_end || '') !== (found.checkin_time_end || '') ||
-          (editItem.checkout_time || '') !== (found.checkout_time || '') ||
-          (editItem.checkout_time_end || '') !== (found.checkout_time_end || '');
+          (editItem.checkout_time || '') !== (found.checkout_time || '');
       }
 
       this.providerLinkForm = {
@@ -792,10 +790,10 @@ export class EventCreateComponent implements OnInit {
         invoice: editItem.invoice !== undefined ? !!editItem.invoice : false,
         iof: editItem.iof || 0,
         change_hotel_times: isDifferent,
-        checkin_time: editItem.checkin_time || '',
-        checkin_time_end: editItem.checkin_time_end || '',
-        checkout_time: editItem.checkout_time || '',
-        checkout_time_end: editItem.checkout_time_end || '',
+        checkin_time: editItem.checkin_time || (found?.checkin_time || '15:00'),
+        checkin_time_end: '',
+        checkout_time: editItem.checkout_time || (found?.checkout_time || '11:00'),
+        checkout_time_end: '',
         deadline_date: editItem.deadline_date ? editItem.deadline_date.split('T')[0] : '',
         equipment: editItem.equipment || editItem.aircraft || '',
         pax_first: editItem.pax_first || 0,
@@ -841,9 +839,9 @@ export class EventCreateComponent implements OnInit {
         invoice: false,
         iof: 0,
         change_hotel_times: false,
-        checkin_time: '',
+        checkin_time: '15:00',
         checkin_time_end: '',
-        checkout_time: '',
+        checkout_time: '11:00',
         checkout_time_end: '',
         deadline_date: '',
         equipment: '',
@@ -1107,10 +1105,10 @@ export class EventCreateComponent implements OnInit {
     if (this.providerLinkType === 'hotel' && !this.providerLinkForm.change_hotel_times) {
       const found = this.providers.find(p => p.id === this.providerLinkForm.provider_id);
       if (found) {
-        this.providerLinkForm.checkin_time = found.checkin_time || '';
-        this.providerLinkForm.checkin_time_end = found.checkin_time_end || '';
-        this.providerLinkForm.checkout_time = found.checkout_time || '';
-        this.providerLinkForm.checkout_time_end = found.checkout_time_end || '';
+        this.providerLinkForm.checkin_time = found.checkin_time || '15:00';
+        this.providerLinkForm.checkin_time_end = '';
+        this.providerLinkForm.checkout_time = found.checkout_time || '11:00';
+        this.providerLinkForm.checkout_time_end = '';
       }
     }
 

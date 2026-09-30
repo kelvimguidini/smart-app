@@ -1899,8 +1899,8 @@
                 </label>
               </div>
 
-              <div class="col-md-2 form-group mb-0">
-                <label for="checkin_time" class="form-label font-weight-bold text-secondary mb-1" style="font-size: 0.85rem;">Check-in Início:</label>
+              <div class="col-md-3 form-group mb-0">
+                <label for="checkin_time" class="form-label font-weight-bold text-secondary mb-1" style="font-size: 0.85rem;">Check-in:</label>
                 <input
                   type="time"
                   id="checkin_time"
@@ -1910,36 +1910,14 @@
                   [disabled]="!providerLinkForm.change_hotel_times" />
               </div>
 
-              <div class="col-md-2 form-group mb-0">
-                <label for="checkin_time_end" class="form-label font-weight-bold text-secondary mb-1" style="font-size: 0.85rem;">Check-in Fim:</label>
-                <input
-                  type="time"
-                  id="checkin_time_end"
-                  class="form-control"
-                  [(ngModel)]="providerLinkForm.checkin_time_end"
-                  name="checkin_time_end"
-                  [disabled]="!providerLinkForm.change_hotel_times" />
-              </div>
-
-              <div class="col-md-2 form-group mb-0">
-                <label for="checkout_time" class="form-label font-weight-bold text-secondary mb-1" style="font-size: 0.85rem;">Check-out Início:</label>
+              <div class="col-md-3 form-group mb-0">
+                <label for="checkout_time" class="form-label font-weight-bold text-secondary mb-1" style="font-size: 0.85rem;">Check-out:</label>
                 <input
                   type="time"
                   id="checkout_time"
                   class="form-control"
                   [(ngModel)]="providerLinkForm.checkout_time"
                   name="checkout_time"
-                  [disabled]="!providerLinkForm.change_hotel_times" />
-              </div>
-
-              <div class="col-md-2 form-group mb-0">
-                <label for="checkout_time_end" class="form-label font-weight-bold text-secondary mb-1" style="font-size: 0.85rem;">Check-out Fim:</label>
-                <input
-                  type="time"
-                  id="checkout_time_end"
-                  class="form-control"
-                  [(ngModel)]="providerLinkForm.checkout_time_end"
-                  name="checkout_time_end"
                   [disabled]="!providerLinkForm.change_hotel_times" />
               </div>
             </div>

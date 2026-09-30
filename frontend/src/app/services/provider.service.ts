@@ -18,9 +18,9 @@ export interface Provider {
   iva_percent: number;
   payment_method: string;
   checkin_time: string;
-  checkin_time_end: string;
+  checkin_time_end?: string;
   checkout_time: string;
-  checkout_time_end: string;
+  checkout_time_end?: string;
   has_hotel: boolean;
   city?: City;
 }
@@ -38,9 +38,9 @@ export interface ProviderCreateUpdateRequest {
   iva_percent: number;
   payment_method: string;
   checkin_time: string;
-  checkin_time_end: string;
+  checkin_time_end?: string;
   checkout_time: string;
-  checkout_time_end: string;
+  checkout_time_end?: string;
   has_hotel: boolean;
   type?: string;
 }

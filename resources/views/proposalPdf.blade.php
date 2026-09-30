@@ -597,8 +597,8 @@ function quebraTexto($texto, $limite = 40)
                                 <td colspan="1"><b>Comentários:</b></td>
                                 <td colspan="5">{{ $hotelEvent->customer_observation }}</td>
                                 <td colspan="4">
-                                    <b>Check-in:</b> {{ $hotelEvent->checkin_time }} - {{ $hotelEvent->checkin_time_end }} &nbsp;&nbsp;|&nbsp;&nbsp;
-                                    <b>Check-out:</b> {{ $hotelEvent->checkout_time }} - {{ $hotelEvent->checkout_time_end }}
+                                    <b>Check-in:</b> {{ $hotelEvent->checkin_time }} &nbsp;&nbsp;|&nbsp;&nbsp;
+                                    <b>Check-out:</b> {{ $hotelEvent->checkout_time }}
                                 </td>
                             </tr>
                             <tr style="background-color: #ffe0b1">

@@ -192,6 +192,7 @@ export class EventListComponent implements OnInit, AfterViewInit {
 
   // Filter form
   filters = {
+    proposalId: '',
     startDate: '',
     endDate: '',
     city: '',
@@ -309,6 +310,8 @@ export class EventListComponent implements OnInit, AfterViewInit {
       per_page: this.pagination.per_page || 10,
       order_by: this.sortKey,
       order_dir: this.sortDir,
+      id: this.filters.proposalId,
+      proposalId: this.filters.proposalId,
       startDate: this.filters.startDate,
       endDate: this.filters.endDate,
       city: this.filters.city,

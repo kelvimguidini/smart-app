@@ -621,9 +621,9 @@ function quebraTexto($texto, $limite = 40)
                                         </tr>
                                         <tr class="table-subheader" style="background-color: #ffe0b1">
                                             <th class="align-middle custom-bg-success-text-white">Check-in:</th>
-                                            <td class="" colspan="2">{{ $hotelEvent->checkin_time }} - {{ $hotelEvent->checkin_time_end }}</td>
+                                            <td class="" colspan="2">{{ $hotelEvent->checkin_time }}</td>
                                             <th class="align-middle custom-bg-success-text-white">Check-out:</th>
-                                            <td class="" colspan="2">{{ $hotelEvent->checkout_time }} - {{ $hotelEvent->checkout_time_end }}</td>
+                                            <td class="" colspan="2">{{ $hotelEvent->checkout_time }}</td>
                                             <th class="align-middle custom-bg-success-text-white">Prazo:</th>
                                             <td class="align-middle" colspan="3">{{ empty($hotelEvent->deadline_date) || $hotelEvent->deadline_date === '0000-00-00' ? "--" : date("d/m/Y", strtotime($hotelEvent->deadline_date)) }}</td>
                                         </tr>

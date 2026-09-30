@@ -188,34 +188,16 @@
           <!-- Check-in -->
           <div class="col-lg-6 mb-3">
             <div class="form-group mb-0">
-              <label class="form-label fw-bold">Check-in</label>
-              <div class="row align-items-center g-2">
-                <div class="col-6">
-                  <small class="text-muted d-block">Início</small>
-                  <input type="time" class="form-control" [(ngModel)]="form.checkin_time" name="checkin_time" />
-                </div>
-                <div class="col-6">
-                  <small class="text-muted d-block">Fim</small>
-                  <input type="time" class="form-control" [(ngModel)]="form.checkin_time_end" name="checkin_time_end" />
-                </div>
-              </div>
+              <label for="checkin_time" class="form-label fw-bold">Check-in</label>
+              <input type="time" id="checkin_time" class="form-control" [(ngModel)]="form.checkin_time" name="checkin_time" />
             </div>
           </div>
 
           <!-- Check-out -->
           <div class="col-lg-6 mb-3">
             <div class="form-group mb-0">
-              <label class="form-label fw-bold">Check-out</label>
-              <div class="row align-items-center g-2">
-                <div class="col-6">
-                  <small class="text-muted d-block">Início</small>
-                  <input type="time" class="form-control" [(ngModel)]="form.checkout_time" name="checkout_time" />
-                </div>
-                <div class="col-6">
-                  <small class="text-muted d-block">Fim</small>
-                  <input type="time" class="form-control" [(ngModel)]="form.checkout_time_end" name="checkout_time_end" />
-                </div>
-              </div>
+              <label for="checkout_time" class="form-label fw-bold">Check-out</label>
+              <input type="time" id="checkout_time" class="form-control" [(ngModel)]="form.checkout_time" name="checkout_time" />
             </div>
           </div>
         </div>

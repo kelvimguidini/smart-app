@@ -38,6 +38,10 @@ class EloquentEventRepository implements EventRepositoryInterface
         }
 
         // Filtros simplificados para o repositório
+        $proposalId = $request->input('id') ?: $request->input('proposalId') ?: $request->input('proposal_id');
+        if (!empty($proposalId)) {
+            $query->where('event.id', $proposalId);
+        }
         if ($request->startDate && $request->endDate) {
             $query->where(function ($q) use ($request) {
                 $q->whereDate('date', '>=', $request->startDate)->whereDate('date', '<=', $request->endDate)
