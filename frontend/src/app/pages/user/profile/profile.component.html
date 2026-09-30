@@ -34,7 +34,7 @@
                             <div class="col-lg-4 mb-3">
                                 <div class="form-group mb-0">
                                     <label for="phone" class="form-label">Telefone: <span class="text-danger">*</span></label>
-                                    <input type="text" id="phone" class="form-control" formControlName="phone" placeholder="Ex: (11) 99999-9999" mask="(00) 0000-00009" [dropSpecialCharacters]="false" required>
+                                    <input type="text" id="phone" class="form-control" formControlName="phone" placeholder="Ex: (11) 99999-9999" mask="(00) 0000-0000||(00) 00000-0000" [dropSpecialCharacters]="false" required>
                                     <div *ngIf="profileForm.get('phone')?.invalid && profileForm.get('phone')?.touched" class="text-danger mt-1">
                                         <small>O telefone é obrigatório</small>
                                     </div>

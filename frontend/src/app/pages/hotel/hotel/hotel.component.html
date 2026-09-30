@@ -100,7 +100,7 @@
                 [(ngModel)]="form.phone"
                 name="phone"
                 placeholder="Ex: (11) 99999-9999"
-                mask="(00) 0000-00009"
+                mask="(00) 0000-0000||(00) 00000-0000"
                 [dropSpecialCharacters]="false" />
 
               <div *ngIf="errors['phone']" class="text-danger mt-1">
