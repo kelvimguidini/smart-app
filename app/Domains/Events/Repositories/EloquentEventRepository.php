@@ -127,7 +127,7 @@ class EloquentEventRepository implements EventRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getProposalData(int $eventId, int $providerId, string $table): array
+    public function getProposalData(int $eventId, int $providerId, string $table, ?string $targetStatus = null): array
     {
         $withRelations = ['customer'];
 
@@ -135,6 +135,7 @@ class EloquentEventRepository implements EventRepositoryInterface
             $withRelations = array_merge($withRelations, [
                 'event_hotels' => fn($q) => $q->where('hotel_id', $providerId),
                 'event_hotels.hotel',
+                'event_hotels.status_his',
                 'event_hotels.eventHotelsOpt' => fn($q) => $q->orderBy('order', 'asc')->orderby('in'),
                 'event_hotels.eventHotelsOpt.regime',
                 'event_hotels.eventHotelsOpt.apto_hotel',
@@ -143,6 +144,7 @@ class EloquentEventRepository implements EventRepositoryInterface
                 
                 'event_abs' => fn($q) => $q->where('ab_id', $providerId),
                 'event_abs.ab',
+                'event_abs.status_his',
                 'event_abs.eventAbOpts' => fn($q) => $q->orderBy('order', 'asc')->orderby('in'),
                 'event_abs.eventAbOpts.local',
                 'event_abs.eventAbOpts.service_type',
@@ -150,6 +152,7 @@ class EloquentEventRepository implements EventRepositoryInterface
                 
                 'event_halls' => fn($q) => $q->where('hall_id', $providerId),
                 'event_halls.hall',
+                'event_halls.status_his',
                 'event_halls.eventHallOpts' => fn($q) => $q->orderBy('order', 'asc')->orderby('in'),
                 'event_halls.eventHallOpts.purpose',
                 'event_halls.eventHallOpts.service',
@@ -162,6 +165,7 @@ class EloquentEventRepository implements EventRepositoryInterface
             $withRelations = array_merge($withRelations, [
                 'event_adds' => fn($q) => $q->where('add_id', $providerId),
                 'event_adds.add',
+                'event_adds.status_his',
                 'event_adds.eventAddOpts' => fn($q) => $q->orderBy('order', 'asc')->orderby('in'),
                 'event_adds.eventAddOpts.measure',
                 'event_adds.eventAddOpts.service',
@@ -173,6 +177,7 @@ class EloquentEventRepository implements EventRepositoryInterface
             $withRelations = array_merge($withRelations, [
                 'event_transports' => fn($q) => $q->where('transport_id', $providerId),
                 'event_transports.transport',
+                'event_transports.status_his',
                 'event_transports.eventTransportOpts' => fn($q) => $q->orderBy('order', 'asc')->orderby('in'),
                 'event_transports.eventTransportOpts.brand',
                 'event_transports.eventTransportOpts.vehicle',
@@ -188,6 +193,7 @@ class EloquentEventRepository implements EventRepositoryInterface
                 }) : $q,
                 'event_airfares.provider',
                 'event_airfares.airline',
+                'event_airfares.status_his',
                 'event_airfares.eventAirfareOpts' => fn($q) => $q->orderBy('id', 'asc'),
                 'event_airfares.eventAirfareOpts.outbound_airline',
                 'event_airfares.currency',
@@ -195,6 +201,58 @@ class EloquentEventRepository implements EventRepositoryInterface
         }
 
         $eventDataBase = Event::with($withRelations)->find($eventId);
+
+        if (!$targetStatus && $eventDataBase) {
+            $mainItem = null;
+            if ($table === 'event_hotels') {
+                $mainItem = $eventDataBase->event_hotels->firstWhere('hotel_id', $providerId);
+            } elseif ($table === 'event_abs') {
+                $mainItem = $eventDataBase->event_abs->firstWhere('ab_id', $providerId);
+            } elseif ($table === 'event_halls') {
+                $mainItem = $eventDataBase->event_halls->firstWhere('hall_id', $providerId);
+            } elseif ($table === 'event_adds') {
+                $mainItem = $eventDataBase->event_adds->firstWhere('add_id', $providerId);
+            } elseif ($table === 'event_transports') {
+                $mainItem = $eventDataBase->event_transports->firstWhere('transport_id', $providerId);
+            } elseif ($table === 'event_airfares' || $table === 'event_airfare') {
+                $mainItem = $eventDataBase->event_airfares->firstWhere('id', $providerId) 
+                    ?? $eventDataBase->event_airfares->firstWhere('airline_id', $providerId);
+            }
+            $targetStatus = $mainItem?->status_his?->first()?->status;
+        }
+
+        if ($targetStatus === 'dating_with_customer' && $eventDataBase) {
+            if ($eventDataBase->relationLoaded('event_hotels')) {
+                $eventDataBase->setRelation('event_hotels', $eventDataBase->event_hotels->filter(function ($item) {
+                    return $item->status_his?->first()?->status === 'dating_with_customer';
+                })->values());
+            }
+            if ($eventDataBase->relationLoaded('event_abs')) {
+                $eventDataBase->setRelation('event_abs', $eventDataBase->event_abs->filter(function ($item) {
+                    return $item->status_his?->first()?->status === 'dating_with_customer';
+                })->values());
+            }
+            if ($eventDataBase->relationLoaded('event_halls')) {
+                $eventDataBase->setRelation('event_halls', $eventDataBase->event_halls->filter(function ($item) {
+                    return $item->status_his?->first()?->status === 'dating_with_customer';
+                })->values());
+            }
+            if ($eventDataBase->relationLoaded('event_adds')) {
+                $eventDataBase->setRelation('event_adds', $eventDataBase->event_adds->filter(function ($item) {
+                    return $item->status_his?->first()?->status === 'dating_with_customer';
+                })->values());
+            }
+            if ($eventDataBase->relationLoaded('event_transports')) {
+                $eventDataBase->setRelation('event_transports', $eventDataBase->event_transports->filter(function ($item) {
+                    return $item->status_his?->first()?->status === 'dating_with_customer';
+                })->values());
+            }
+            if ($eventDataBase->relationLoaded('event_airfares')) {
+                $eventDataBase->setRelation('event_airfares', $eventDataBase->event_airfares->filter(function ($item) {
+                    return $item->status_his?->first()?->status === 'dating_with_customer';
+                })->values());
+            }
+        }
 
         $providers = collect();
         if ($table == 'event_hotels' || $table == 'event_abs' || $table == 'event_halls') {
@@ -215,7 +273,8 @@ class EloquentEventRepository implements EventRepositoryInterface
         return [
             "providerDataBase" => $providerDataBase,
             "eventDataBase" => $eventDataBase,
-            "table" => $table
+            "table" => $table,
+            "targetStatus" => $targetStatus
         ];
     }
 }

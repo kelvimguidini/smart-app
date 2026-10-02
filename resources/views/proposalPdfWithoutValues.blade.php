@@ -138,9 +138,14 @@ $hallEvent  = null;
 $addEvent  = null;
 $transportEvent = null;
 
+$event = $event ?? null;
+$provider = $provider ?? null;
+$table = $table ?? null;
+$targetStatus = $targetStatus ?? null;
+
 if ($provider != null && $event != null && $table != null) {
     if ($table == 'event_hotels' || $table == 'event_abs' || $table == 'event_halls') {
-        $hotelEvent = $event->event_hotels->firstWhere('hotel_id', $provider->id) ?? $event->event_hotels->first();
+        $hotelEvent = $event->event_hotels->firstWhere('hotel_id', $provider->id);
     }
 
     if ($table == 'event_hotels' || $table == 'event_abs' || $table == 'event_halls') {
@@ -157,6 +162,24 @@ if ($provider != null && $event != null && $table != null) {
 
     if ($table == 'event_transports') {
         $transportEvent = $event->event_transports->firstWhere('transport_id', $provider->id);
+    }
+
+    if ($targetStatus === 'dating_with_customer') {
+        if ($hotelEvent && ($hotelEvent->status_his?->first()?->status ?? null) !== 'dating_with_customer') {
+            $hotelEvent = null;
+        }
+        if ($abEvent && ($abEvent->status_his?->first()?->status ?? null) !== 'dating_with_customer') {
+            $abEvent = null;
+        }
+        if ($hallEvent && ($hallEvent->status_his?->first()?->status ?? null) !== 'dating_with_customer') {
+            $hallEvent = null;
+        }
+        if ($addEvent && ($addEvent->status_his?->first()?->status ?? null) !== 'dating_with_customer') {
+            $addEvent = null;
+        }
+        if ($transportEvent && ($transportEvent->status_his?->first()?->status ?? null) !== 'dating_with_customer') {
+            $transportEvent = null;
+        }
     }
 }
 

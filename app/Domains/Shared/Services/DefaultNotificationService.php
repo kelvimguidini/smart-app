@@ -37,6 +37,9 @@ class DefaultNotificationService implements NotificationServiceInterface
      */
     public function generatePdf(string $view, array $data, string $paper = 'A4', string $orientation = 'portrait'): string
     {
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
+
         $options = new Options();
         $options->set('isRemoteEnabled', true);
         $options->set('chroot', base_path('public'));

@@ -190,6 +190,9 @@ class ProviderController extends Controller
         }
 
         if ($request->download == "true") {
+            ini_set('memory_limit', '512M');
+            set_time_limit(300);
+
             $data = $this->eventRepository->getProposalData($request->event_id, $request->provider_id, $request->type);
             $options = new \Dompdf\Options();
             $options->set('isRemoteEnabled', true);
@@ -227,7 +230,11 @@ class ProviderController extends Controller
 
     protected function handleDownload($request, $type)
     {
-        $data = $this->eventRepository->getProposalData($request->event_id, $request->provider_id, $request->type);
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
+
+        $status = $request->status ?? null;
+        $data = $this->eventRepository->getProposalData($request->event_id, $request->provider_id, $request->type, $status);
         
         $view = 'proposalPdf';
         if ($type === 2) {
@@ -242,7 +249,12 @@ class ProviderController extends Controller
         $options->set('isRemoteEnabled', true);
         $options->set('chroot', base_path('public'));
         $pdf = new \Dompdf\Dompdf($options);
-        $html = view($view, ['event' => $data['eventDataBase'], 'provider' => $data['providerDataBase'], 'table' => $data['table']])->render();
+        $html = view($view, [
+            'event' => $data['eventDataBase'],
+            'provider' => $data['providerDataBase'],
+            'table' => $data['table'],
+            'targetStatus' => $data['targetStatus'] ?? $status
+        ])->render();
         $pdf->loadHtml($html);
         $pdf->setPaper('A4', 'portrait');
         $pdf->render();

@@ -66,7 +66,8 @@ interface EventRepositoryInterface
      * @param int $eventId
      * @param int $providerId
      * @param string $table
+     * @param string|null $targetStatus
      * @return array
      */
-    public function getProposalData(int $eventId, int $providerId, string $table): array;
+    public function getProposalData(int $eventId, int $providerId, string $table, ?string $targetStatus = null): array;
 }

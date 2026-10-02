@@ -346,7 +346,11 @@ export class ProviderActionsComponent {
   sendProposal() {
     if (!this.sendEmail) {
       // Direct Download (Async)
-      const downloadUrl = `${this.eventService.getApiUrl()}/proposal-hotel/true/${this.prov.id}/${this.event.id}/${this.prov.table}`;
+      const queryParams = new URLSearchParams({
+        status: this.prov.status || '',
+        table_id: String(this.prov.table_id || '')
+      }).toString();
+      const downloadUrl = `${this.eventService.getApiUrl()}/proposal-hotel/true/${this.prov.id}/${this.event.id}/${this.prov.table}?${queryParams}`;
       const prefix = this.prov.isAirfare ? 'Proposta_Aereo_' : 'Proposta_';
       const filename = `${prefix}ID${this.event.id}_${this.prov.name || 'Fornecedor'}.pdf`;
       this.showProposalModal = false;
@@ -360,7 +364,9 @@ export class ProviderActionsComponent {
         message: this.message,
         emails: this.emails,
         copyMe: this.copyMe,
-        type: this.prov.table
+        type: this.prov.table,
+        status: this.prov.status,
+        table_id: this.prov.table_id
       };
 
       this.eventService.sendProposalEmail(payload).subscribe({
@@ -391,7 +397,11 @@ export class ProviderActionsComponent {
   sendProposalWithoutValues() {
     if (!this.sendEmailWithoutValues) {
       // Direct Download (Async)
-      const downloadUrl = `${this.eventService.getApiUrl()}/proposal-hotel-without-values/true/${this.prov.id}/${this.event.id}/${this.prov.table}`;
+      const queryParams = new URLSearchParams({
+        status: this.prov.status || '',
+        table_id: String(this.prov.table_id || '')
+      }).toString();
+      const downloadUrl = `${this.eventService.getApiUrl()}/proposal-hotel-without-values/true/${this.prov.id}/${this.event.id}/${this.prov.table}?${queryParams}`;
       const prefix = this.prov.isAirfare ? 'Proposta_Sem_Valores_Aereo_' : 'Proposta_Sem_Valores_';
       const filename = `${prefix}ID${this.event.id}_${this.prov.name || 'Fornecedor'}.pdf`;
       this.showProposalWithoutValuesModal = false;
@@ -405,7 +415,9 @@ export class ProviderActionsComponent {
         message: this.messageWithoutValues,
         emails: this.emailsWithoutValues,
         copyMe: this.copyMeWithoutValues,
-        type: this.prov.table
+        type: this.prov.table,
+        status: this.prov.status,
+        table_id: this.prov.table_id
       };
 
       this.eventService.sendProposalWithoutValuesEmail(payload).subscribe({

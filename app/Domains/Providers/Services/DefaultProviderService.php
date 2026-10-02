@@ -90,7 +90,8 @@ class DefaultProviderService implements ProviderServiceInterface
      */
     public function sendDocument(array $requestData, int $authUserId, int $pdfType): bool
     {
-        $data = $this->eventRepository->getProposalData($requestData['event_id'], $requestData['provider_id'], $requestData['type']);
+        $status = $requestData['status'] ?? null;
+        $data = $this->eventRepository->getProposalData($requestData['event_id'], $requestData['provider_id'], $requestData['type'], $status);
         
         $view = 'proposalPdf';
         $subject = "Proposta para hotel";
@@ -113,7 +114,8 @@ class DefaultProviderService implements ProviderServiceInterface
         $pdfContent = $this->notificationService->generatePdf($view, [
             'event' => $data['eventDataBase'],
             'provider' => $data['providerDataBase'],
-            'table' => $data['table']
+            'table' => $data['table'],
+            'targetStatus' => $data['targetStatus'] ?? $status
         ]);
 
         $filename = "ID{$requestData['event_id']} - " . ($data['providerDataBase']->name ?? '') . " - {$filenamePrefix}.pdf";
