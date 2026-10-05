@@ -348,56 +348,67 @@ class DefaultEventApiService implements EventApiServiceInterface
 
     private function movimentoHotelariaXML($opt, $fornecedor, $evento, $movimentoXml)
     {
-        $movimento = $movimentoXml->addChild('hotelaria');
-        $movimento->addChild('pax', htmlspecialchars(mb_substr($evento->name ?? '', 0, 40)));
-        $movimento->addChild('tipo', 'ADT');
-        $movimento->addChild('motivoviagem', '');
-        $movimento->addChild('moeda', htmlspecialchars($fornecedor->currency?->sigla ?? ''));
-        $movimento->addChild('cambio', htmlspecialchars($evento->exchange_rate ?? '1'));
         $in = Carbon::parse($opt->in);
         $out = Carbon::parse($opt->out);
-        $movimento->addChild('checkin', htmlspecialchars($in->format('d/m/Y') ?? ''));
-        $movimento->addChild('checkout', htmlspecialchars($out->format('d/m/Y') ?? ''));
+        $days = $this->daysBetween($opt->in, $opt->out);
+        $roomCount = max(1, intval($opt->count ?? 1));
 
-        $qtdDayle = $opt->count * $this->daysBetween($opt->in, $opt->out);
-        $movimento->addChild('comisrecforvalor', htmlspecialchars(($opt->received_proposal * $qtdDayle * $opt->kickback) / 100 ?? ''));
-        // $movimento->addChild('descpagclivalor', htmlspecialchars($opt->received_proposal * $qtdDayle ?? ''));
-        $movimento->addChild('observacao', htmlspecialchars($fornecedor->internal_observation  ?? ''));
-        $movimento->addChild('observacao2', htmlspecialchars($fornecedor->customer_observation  ?? ''));
-        $movimento->addChild('categapto', htmlspecialchars($opt->category_hotel?->name ?? ''));
-
-        $movimento->addChild('regime', htmlspecialchars($opt->regime?->name ?? ''));
-
-        // Aptos
-        $aptos = $movimento->addChild('aptos');
-
-        $aptoXml = $aptos->addChild('apto');
-
-        $tipoApto = strtoupper($opt->apto_hotel?->name ?? '');
+        $tipoApto = strtoupper(trim($opt->apto_hotel?->name ?? ''));
         $tiposReconhecidos = ['SGL', 'DBL', 'TPL', 'QPL'];
 
         if ($tipoApto === 'TWIN') {
             $tipoApto = 'DBL';
+        } elseif ($tipoApto === 'TRP') {
+            $tipoApto = 'TPL';
+        } elseif ($tipoApto === 'QUA') {
+            $tipoApto = 'QPL';
         } elseif (!in_array($tipoApto, $tiposReconhecidos)) {
-            $tipoApto = 'DBL'; // ou escolha um padrão, se preferir
+            $tipoApto = !empty($tipoApto) ? $tipoApto : 'DBL';
         }
-
-        $aptoXml->addChild('tipoapto', htmlspecialchars($tipoApto));
 
         $totais = $this->computeTotals($evento, $fornecedor, $opt);
 
-        $movimento->addChild('taxaservico', htmlspecialchars($totais['diaria_taxas'] * $qtdDayle ?? ''));
+        // O layout da integração (STUR/intagi) aceita no máximo 5 aptos por movimento de hotelaria
+        $roomChunks = array_chunk(array_fill(0, $roomCount, true), 5);
 
-        $aptoXml->addChild('valordiaria', htmlspecialchars($totais['diaria'] ?? ''));
-        $aptoXml->addChild('valordiariabalcao', htmlspecialchars($totais['diaria'] ?? ''));
-        $aptoXml->addChild('valordiariafornecedor', htmlspecialchars($totais['diaria_fornecedor'] ?? ''));
-        $aptoXml->addChild('qtddiaria', htmlspecialchars($qtdDayle ?? ''));
+        foreach ($roomChunks as $chunk) {
+            $chunkRoomCount = count($chunk);
+            $chunkDiarias = $chunkRoomCount * $days;
 
-        if (isset($fornecedor->status_his)) {
+            $movimento = $movimentoXml->addChild('hotelaria');
+            $movimento->addChild('pax', htmlspecialchars(mb_substr($evento->name ?? '', 0, 40)));
+            $movimento->addChild('tipo', 'ADT');
+            $movimento->addChild('motivoviagem', '');
+            $movimento->addChild('moeda', htmlspecialchars($fornecedor->currency?->sigla ?? ''));
+            $movimento->addChild('cambio', htmlspecialchars((string) ($evento->exchange_rate ?? '1')));
+            $movimento->addChild('checkin', htmlspecialchars($in->format('d/m/Y') ?? ''));
+            $movimento->addChild('checkout', htmlspecialchars($out->format('d/m/Y') ?? ''));
 
-            $movimento->addChild('confirmadopor', '');
-            $movimento->addChild('dataconfirmacao', '');
-            $movimento->addChild('numconfirmacao', '');
+            $movimento->addChild('taxaservico', htmlspecialchars((string) ($totais['diaria_taxas'] * $chunkDiarias ?? '')));
+            $movimento->addChild('comisrecforvalor', htmlspecialchars((string) (($opt->received_proposal * $chunkDiarias * ($opt->kickback ?? 0)) / 100 ?? '')));
+            // $movimento->addChild('descpagclivalor', htmlspecialchars($opt->received_proposal * $chunkDiarias ?? ''));
+            $movimento->addChild('observacao', htmlspecialchars($fornecedor->internal_observation ?? ''));
+            $movimento->addChild('observacao2', htmlspecialchars($fornecedor->customer_observation ?? ''));
+            $movimento->addChild('categapto', htmlspecialchars($opt->category_hotel?->name ?? ''));
+            $movimento->addChild('regime', htmlspecialchars($opt->regime?->name ?? ''));
+
+            // Aptos discriminados por quarto
+            $aptos = $movimento->addChild('aptos');
+
+            for ($i = 0; $i < $chunkRoomCount; $i++) {
+                $aptoXml = $aptos->addChild('apto');
+                $aptoXml->addChild('tipoapto', htmlspecialchars($tipoApto));
+                $aptoXml->addChild('valordiaria', htmlspecialchars((string) ($totais['diaria'] ?? '')));
+                $aptoXml->addChild('valordiariabalcao', htmlspecialchars((string) ($totais['diaria'] ?? '')));
+                $aptoXml->addChild('valordiariafornecedor', htmlspecialchars((string) ($totais['diaria_fornecedor'] ?? '')));
+                $aptoXml->addChild('qtddiaria', htmlspecialchars((string) $days));
+            }
+
+            if (isset($fornecedor->status_his)) {
+                $movimento->addChild('confirmadopor', '');
+                $movimento->addChild('dataconfirmacao', '');
+                $movimento->addChild('numconfirmacao', '');
+            }
         }
     }
 
