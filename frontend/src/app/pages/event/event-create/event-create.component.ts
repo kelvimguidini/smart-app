@@ -1024,6 +1024,9 @@ export class EventCreateComponent implements OnInit {
     if (!file) return;
     this.photoFiles[pNum] = file;
     this.photoPreviews[pNum] = URL.createObjectURL(file);
+    if (this.errors.photos) {
+      delete this.errors.photos;
+    }
   }
 
   removePhoto(pNum: number, event?: Event) {
@@ -1092,6 +1095,20 @@ export class EventCreateComponent implements OnInit {
       const iofVal = Number(this.providerLinkForm.iof || 0);
       if (iofVal <= 0) {
         this.errors.iof = ['O IOF não pode ser zero ou menor para moedas estrangeiras.'];
+        hasErrors = true;
+      }
+    }
+
+    if (this.providerLinkType === 'airfare') {
+      let photoCount = 0;
+      for (let pNum = 1; pNum <= 4; pNum++) {
+        const val = (this.providerLinkForm as any)[`photo_${pNum}`];
+        if (this.photoFiles[pNum] || (val && typeof val === 'string' && val.trim() !== '')) {
+          photoCount++;
+        }
+      }
+      if (photoCount === 0) {
+        this.errors.photos = ['É obrigatório anexar no mínimo 1 foto da aeronave (máximo 4).'];
         hasErrors = true;
       }
     }

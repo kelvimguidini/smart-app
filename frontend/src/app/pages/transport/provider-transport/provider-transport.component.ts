@@ -72,6 +72,7 @@ export class ProviderTransportComponent implements OnInit {
     service_percent: null as number | null,
     iva_percent: null as number | null,
     payment_method: '',
+    codestur: '',
   };
 
   ngOnInit(): void {
@@ -160,6 +161,7 @@ export class ProviderTransportComponent implements OnInit {
       service_percent: provider.service_percent ?? null,
       iva_percent: provider.iva_percent ?? null,
       payment_method: provider.payment_method ?? '',
+      codestur: provider.codestur ?? '',
     };
 
     this.selectedCityName = provider.city
@@ -186,6 +188,7 @@ export class ProviderTransportComponent implements OnInit {
       service_percent: null,
       iva_percent: null,
       payment_method: '',
+      codestur: '',
     };
     this.selectedCityName = '';
     this.errors = {};
@@ -249,6 +252,7 @@ export class ProviderTransportComponent implements OnInit {
       service_percent: this.form.service_percent,
       iva_percent: this.form.iva_percent,
       payment_method: this.form.payment_method || null,
+      codestur: this.form.codestur || null,
     };
 
     this.providerTransportService.saveProvider(data).subscribe({

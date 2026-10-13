@@ -129,7 +129,7 @@ class DefaultEventApiService implements EventApiServiceInterface
                 // Adiciona cliente no XML
                 $clienteXml = $xml->addChild('cliente');
 
-                $clienteXml->addChild('idcliente', htmlspecialchars($cliente->codestur ?? $cliente->id));
+                $clienteXml->addChild('idcliente', htmlspecialchars(!empty($cliente->codestur) ? $cliente->codestur : $cliente->id));
                 $clienteXml->addChild('cnpjcpf', htmlspecialchars($cliente->document));
                 $clienteXml->addChild('razaonome', htmlspecialchars($cliente->name));
                 $clienteXml->addChild('nomefantasia', htmlspecialchars($cliente->name));
@@ -201,9 +201,9 @@ class DefaultEventApiService implements EventApiServiceInterface
 
 
         $venda->addChild('dtemissao', htmlspecialchars(Carbon::parse($evento->date)->format('d/m/Y')));
-        $venda->addChild('idcliente', htmlspecialchars($evento->customer?->codestur ?? $evento->customer?->id ?? ''));
+        $venda->addChild('idcliente', htmlspecialchars(!empty($evento->customer?->codestur) ? $evento->customer->codestur : ($evento->customer?->id ?? '')));
         $venda->addChild('idoperador', htmlspecialchars($fornecedor?->broker?->name ?? ''));
-        $venda->addChild('idfornecedor', htmlspecialchars($providerObj->codestur ?? $providerObj->id ?? ''));
+        $venda->addChild('idfornecedor', htmlspecialchars(!empty($providerObj->codestur) ? $providerObj->codestur : ($providerObj->id ?? '')));
         $venda->addChild('formrec', '2');
 
         $venda->addChild('vencrec', htmlspecialchars(!empty($fornecedor->deadline_date) ? Carbon::parse($fornecedor->deadline_date)->format('d/m/Y') : Carbon::parse($evento->date)->format('d/m/Y')));
@@ -254,11 +254,11 @@ class DefaultEventApiService implements EventApiServiceInterface
 
         $movimentosXml = $venda->addChild('movimentos');
 
-        $opts = $fornecedor->eventHotelsOpt 
-            ?? $fornecedor->eventAbOpts 
-            ?? $fornecedor->eventHallOpts 
-            ?? $fornecedor->eventAddOpts 
-            ?? $fornecedor->eventTransportOpts 
+        $opts = $fornecedor->eventHotelsOpt
+            ?? $fornecedor->eventAbOpts
+            ?? $fornecedor->eventHallOpts
+            ?? $fornecedor->eventAddOpts
+            ?? $fornecedor->eventTransportOpts
             ?? $fornecedor->eventAirfareOpts;
 
         if ($tipo['rel'] === 'event_airfares') {
@@ -420,9 +420,9 @@ class DefaultEventApiService implements EventApiServiceInterface
         $movimento->addChild('moeda', htmlspecialchars($fornecedor->currency?->sigla ?? 'BRL'));
         $movimento->addChild('cambio', htmlspecialchars((string)($evento->exchange_rate ?? '1')));
 
-        $ciaCode = $opt->outbound_airline?->code 
-            ?? $fornecedor->airline?->code 
-            ?? $fornecedor->airline?->name 
+        $ciaCode = $opt->outbound_airline?->code
+            ?? $fornecedor->airline?->code
+            ?? $fornecedor->airline?->name
             ?? '';
         $movimento->addChild('cia', htmlspecialchars(mb_substr($ciaCode, 0, 10)));
 
@@ -513,7 +513,7 @@ class DefaultEventApiService implements EventApiServiceInterface
 
             if ($fornecedor) {
                 $fornecedorXml = $xml->addChild('fornecedor');
-                $fornecedorXml->addChild('idfornecedor', htmlspecialchars($fornecedor->codestur ?? $fornecedor->id));
+                $fornecedorXml->addChild('idfornecedor', htmlspecialchars(!empty($fornecedor->codestur) ? $fornecedor->codestur : $fornecedor->id));
                 $fornecedorXml->addChild('razaonome', htmlspecialchars($fornecedor->name ?? ''));
                 $fornecedorXml->addChild('nomefantasia', htmlspecialchars($fornecedor->fantasy_name ?? $fornecedor->name ?? ''));
 
@@ -601,7 +601,7 @@ class DefaultEventApiService implements EventApiServiceInterface
         $days = ceil($interval->days);
         return $days == 0 ? 1 : $days;
     }
-    
+
     private function daysBetween1($date1, $date2)
     {
         // Convert both dates to DateTime objects

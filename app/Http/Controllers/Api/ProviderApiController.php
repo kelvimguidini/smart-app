@@ -64,7 +64,8 @@ class ProviderApiController extends Controller
             'checkin_time_end' => 'nullable',
             'checkout_time' => 'nullable',
             'checkout_time_end' => 'nullable',
-            'type' => 'nullable|string'
+            'type' => 'nullable|string',
+            'codestur' => 'nullable|string|max:50'
         ], [
             'iss_percent.min' => 'O campo ISS (%) não deve ser menor que 0.',
             'iss_percent.max' => 'O campo ISS (%) não deve ser maior que 100.',
@@ -82,7 +83,7 @@ class ProviderApiController extends Controller
                 'name', 'city_id', 'contact', 'phone', 'email', 'national',
                 'iss_percent', 'service_percent', 'iva_percent', 'payment_method',
                 'checkin_time', 'checkin_time_end', 'checkout_time', 'checkout_time_end',
-                'type'
+                'type', 'codestur'
             ]);
 
             // Implicitly set type to hotel if requested

@@ -21,6 +21,7 @@ export interface ProviderTransport {
   service_percent?: number | null;
   iva_percent?: number | null;
   payment_method?: string | null;
+  codestur?: string | null;
   active: boolean;
   created_at?: string;
   updated_at?: string;
@@ -49,6 +50,7 @@ export interface ProviderTransportCreateUpdateRequest {
   service_percent?: number | null;
   iva_percent?: number | null;
   payment_method?: string | null;
+  codestur?: string | null;
 }
 
 @Injectable({

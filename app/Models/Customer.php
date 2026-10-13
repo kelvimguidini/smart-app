@@ -22,7 +22,8 @@ class Customer extends Model
         'email',
         'color',
         'responsibleAuthorizing',
-        'active'
+        'active',
+        'codestur'
     ];
     protected $table = 'customer';
 
@@ -72,6 +73,7 @@ class Customer extends Model
      * @var string
      */
     protected $responsibleAuthorizing = 'responsibleAuthorizing';
+    protected $codestur = 'codestur';
 
 
     /**

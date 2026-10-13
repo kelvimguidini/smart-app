@@ -69,10 +69,11 @@ class CustomerApiController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
+            'codestur' => 'nullable|string|max:50',
         ]);
 
         try {
-            $data = $request->only('name', 'color', 'document', 'phone', 'email', 'responsibleAuthorizing');
+            $data = $request->only('name', 'color', 'document', 'phone', 'email', 'responsibleAuthorizing', 'codestur');
             
             // Handle logo upload if provided
             if ($request->hasFile('logo')) {

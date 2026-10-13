@@ -229,4 +229,60 @@ class DefaultEventApiServiceTest extends TestCase
             $this->assertEquals('4', (string) $apto->qtddiaria);
         }
     }
+
+    public function testGenerateXmlPayloadUsesCodesturForCustomerAndProvider()
+    {
+        $startDate = '2026-10-01';
+        $endDate = '2026-10-31';
+
+        $customer = new \App\Models\Customer();
+        $customer->id = 55;
+        $customer->codestur = 'STUR-CLI-999';
+
+        $event = new Event();
+        $event->id = 1;
+        $event->code = 'EVT-001';
+        $event->date = '2026-10-01';
+        $event->setRelation('customer', $customer);
+
+        $currency = new \App\Models\Currency();
+        $currency->sigla = 'BRL';
+
+        $hotelProvider = new \App\Models\Provider();
+        $hotelProvider->id = 77;
+        $hotelProvider->codestur = 'STUR-HOT-888';
+
+        $opt = new \App\Models\EventHotelOpt();
+        $opt->in = '2026-10-01';
+        $opt->out = '2026-10-02';
+        $opt->count = 1;
+        $opt->received_proposal = 100.00;
+        $opt->received_proposal_percent = 0;
+        $opt->kickback = 0;
+
+        $eventHotel = new \App\Models\EventHotel();
+        $eventHotel->id = 1;
+        $eventHotel->setRelation('hotel', $hotelProvider);
+        $eventHotel->setRelation('currency', $currency);
+        $eventHotel->setRelation('status_his', new \Illuminate\Database\Eloquent\Collection([]));
+        $eventHotel->setRelation('eventHotelsOpt', new \Illuminate\Database\Eloquent\Collection([$opt]));
+
+        $event->setRelation('event_hotels', new \Illuminate\Database\Eloquent\Collection([$eventHotel]));
+        $event->setRelation('event_abs', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_halls', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_transports', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_adds', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_airfares', new \Illuminate\Database\Eloquent\Collection([]));
+
+        $this->eventApiRepositoryMock
+            ->shouldReceive('getEventsForExport')
+            ->once()
+            ->andReturn(new \Illuminate\Database\Eloquent\Collection([$event]));
+
+        $xmlString = $this->service->generateXmlPayload($startDate, $endDate);
+        $xml = simplexml_load_string($xmlString);
+
+        $this->assertEquals('STUR-CLI-999', (string) $xml->vendas->venda->idcliente);
+        $this->assertEquals('STUR-HOT-888', (string) $xml->vendas->venda->idfornecedor);
+    }
 }

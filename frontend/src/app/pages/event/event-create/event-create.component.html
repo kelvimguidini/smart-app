@@ -1854,10 +1854,12 @@
 
                   <!-- Upload/Seleção de 4 Fotos -->
                   <div class="col-md-12">
-                    <label class="small font-weight-bold d-block mb-2">Fotos da Proposta (Até 4 Imagens):</label>
+                    <label class="small font-weight-bold d-block mb-2">
+                      Fotos da Proposta (Mínimo 1, Máximo 4 Imagens): <span class="text-danger">*</span>
+                    </label>
                     <div class="row">
                       <div class="col-md-3 mb-2" *ngFor="let pNum of [1, 2, 3, 4]">
-                        <div class="border p-2 text-center bg-light rounded h-100 d-flex flex-column justify-content-between">
+                        <div class="border p-2 text-center bg-light rounded h-100 d-flex flex-column justify-content-between" [class.border-danger]="errors.photos">
                           <span class="d-block font-weight-bold mb-1" style="font-size: 0.85rem;">Foto {{ pNum }}</span>
 
                           <div *ngIf="getPhotoValue(pNum)" class="mb-2 position-relative d-inline-block mx-auto">
@@ -1874,6 +1876,9 @@
                           <input [id]="'photo_input_' + pNum" type="file" accept="image/*" class="form-control form-control-sm" (change)="onPhotoFileChange($event, pNum)">
                         </div>
                       </div>
+                    </div>
+                    <div *ngIf="errors.photos" class="text-danger mt-1">
+                      <small *ngFor="let err of errors.photos" class="d-block font-weight-bold">{{ err }}</small>
                     </div>
                   </div>
                 </div>

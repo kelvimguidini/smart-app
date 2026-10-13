@@ -40,6 +40,7 @@ export class CustomersComponent implements OnInit {
     phone: string;
     email: string;
     responsibleAuthorizing: string;
+    codestur: string;
   } = {
     id: 0,
     name: '',
@@ -48,6 +49,7 @@ export class CustomersComponent implements OnInit {
     phone: '',
     email: '',
     responsibleAuthorizing: '',
+    codestur: '',
   };
   logoFile: File | null = null;
   currentLogoUrl: string | null = null;
@@ -127,6 +129,7 @@ export class CustomersComponent implements OnInit {
       phone: '',
       email: '',
       responsibleAuthorizing: '',
+      codestur: '',
     };
     this.logoFile = null;
     this.currentLogoUrl = null;
@@ -148,6 +151,7 @@ export class CustomersComponent implements OnInit {
       phone: customer.phone || '',
       email: customer.email || '',
       responsibleAuthorizing: customer.responsibleAuthorizing || '',
+      codestur: customer.codestur || '',
     };
     this.currentLogoUrl = customer.logo || null;
     this.logoFile = null;
@@ -200,6 +204,7 @@ export class CustomersComponent implements OnInit {
     if (this.form.phone) formData.append('phone', this.form.phone);
     if (this.form.email) formData.append('email', this.form.email);
     if (this.form.responsibleAuthorizing) formData.append('responsibleAuthorizing', this.form.responsibleAuthorizing);
+    formData.append('codestur', this.form.codestur || '');
 
     if (this.logoFile) {
       formData.append('logo', this.logoFile);

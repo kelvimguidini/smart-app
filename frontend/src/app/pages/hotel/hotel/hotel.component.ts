@@ -95,6 +95,7 @@ export class HotelComponent implements OnInit {
       checkout_time: '11:00',
       checkout_time_end: '',
       has_hotel: true,
+      codestur: '',
       type: 'hotel',
     };
   }
@@ -184,6 +185,7 @@ export class HotelComponent implements OnInit {
       checkout_time: provider.checkout_time || '11:00',
       checkout_time_end: '',
       has_hotel: true,
+      codestur: provider.codestur || '',
       type: 'hotel',
     };
 

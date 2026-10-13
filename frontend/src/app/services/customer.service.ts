@@ -11,6 +11,7 @@ export interface Customer {
   phone?: string;
   email?: string;
   responsibleAuthorizing?: string;
+  codestur?: string;
   logo?: string;
   active: boolean;
   created_at?: string;

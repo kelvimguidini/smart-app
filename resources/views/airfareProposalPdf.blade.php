@@ -56,6 +56,9 @@ if (!function_exists('formatCurrencyBr')) {
 
 function formatDateBr($dateStr) {
     if (empty($dateStr)) return '-';
+    if (preg_match('/^\d{2}\/\d{2}\/\d{4}/', (string)$dateStr)) {
+        return substr((string)$dateStr, 0, 10);
+    }
     try {
         $dt = new DateTime($dateStr);
         return $dt->format('d/m/Y');
@@ -96,21 +99,37 @@ function getImgSrc($path) {
     return null;
 }
 
+function getActualAirfarePhotos($airfare) {
+    $photos = [];
+    for ($i = 1; $i <= 4; $i++) {
+        $field = 'photo_' . $i;
+        $val = $airfare->$field ?? null;
+        if (!empty($val)) {
+            $resolved = getImgSrc($val);
+            if ($resolved) {
+                if (str_starts_with($resolved, 'http://') || str_starts_with($resolved, 'https://') || str_starts_with($resolved, 'data:image')) {
+                    $photos[] = $resolved;
+                } elseif (file_exists($resolved)) {
+                    $photos[] = $resolved;
+                }
+            }
+        }
+    }
+    return $photos;
+}
+
 function getAirfarePhotoSrc($airfare, $pNum) {
     $field = 'photo_' . $pNum;
     $val = $airfare->$field ?? null;
     if (!empty($val)) {
         $resolved = getImgSrc($val);
-        if ($resolved && file_exists($resolved)) return $resolved;
-    }
-    // Fallback default image
-    $defaultPath = public_path("images/airfares/default_{$pNum}.jpg");
-    if (file_exists($defaultPath)) {
-        return $defaultPath;
-    }
-    $altPath = public_path("storage/airfares/1xIaOwnuKjeo2MU8AQC94vS6J0iNH0haGK66oMDq.jpg");
-    if (file_exists($altPath)) {
-        return $altPath;
+        if ($resolved) {
+            if (str_starts_with($resolved, 'http://') || str_starts_with($resolved, 'https://') || str_starts_with($resolved, 'data:image')) {
+                return $resolved;
+            } elseif (file_exists($resolved)) {
+                return $resolved;
+            }
+        }
     }
     return null;
 }
@@ -358,32 +377,35 @@ function formatTimePdf($timeStr) {
             line-height: 1.4;
         }
 
-        /* Grid de 4 Fotos 2x2 */
+        /* Grid de Fotos Dinâmico */
         .tbl-photos-grid {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
             margin-bottom: 4px;
         }
         .tbl-photos-grid td {
-            width: 50%;
             padding: 3px;
             vertical-align: middle;
+            text-align: center;
         }
         .aircraft-photo {
             width: 100%;
-            height: 150px;
             object-fit: cover;
             display: block;
             border: 1px solid #CBD5E1;
         }
-        .photo-fallback {
-            width: 100%;
-            height: 150px;
-            background-color: #E2E8F0;
-            border: 1px dashed #94A3B8;
-            text-align: center;
-            box-sizing: border-box;
-            padding-top: 60px;
+        .photo-single {
+            height: 220px;
+        }
+        .photo-double {
+            height: 165px;
+        }
+        .photo-triple {
+            height: 140px;
+        }
+        .photo-quad {
+            height: 130px;
         }
         .disclaimer-txt {
             font-size: 6.8pt;
@@ -620,10 +642,26 @@ function formatTimePdf($timeStr) {
                                 <tr class="spec-row">
                                     <td class="spec-label" style="font-weight: normal;">Passageiros:</td>
                                     <td class="spec-val">
-                                        @if($airfare->total_pax > 0)
-                                            {{ $airfare->total_pax }} PAX @if($airfare->pax_executiva > 0) ({{ $airfare->pax_executiva }} em Executiva) @elseif($airfare->pax_economica > 0) ({{ $airfare->pax_economica }} em Econômica) @endif
-                                        @elseif($paxTotal > 0)
-                                            {{ $paxTotal }} PAX
+                                        @php
+                                            $classesList = [];
+                                            if (!empty($airfare->pax_first) && (int)$airfare->pax_first > 0) {
+                                                $classesList[] = $airfare->pax_first . ' First';
+                                            }
+                                            if (!empty($airfare->pax_executiva) && (int)$airfare->pax_executiva > 0) {
+                                                $classesList[] = $airfare->pax_executiva . ' Executiva';
+                                            }
+                                            if (!empty($airfare->pax_premium) && (int)$airfare->pax_premium > 0) {
+                                                $classesList[] = $airfare->pax_premium . ' Premium';
+                                            }
+                                            if (!empty($airfare->pax_economica) && (int)$airfare->pax_economica > 0) {
+                                                $classesList[] = $airfare->pax_economica . ' Econômica';
+                                            }
+
+                                            $sumPax = (int)($airfare->pax_first ?? 0) + (int)($airfare->pax_executiva ?? 0) + (int)($airfare->pax_premium ?? 0) + (int)($airfare->pax_economica ?? 0);
+                                            $totPaxDisplay = (int)($airfare->total_pax > 0 ? $airfare->total_pax : ($sumPax > 0 ? $sumPax : $paxTotal));
+                                        @endphp
+                                        @if($totPaxDisplay > 0)
+                                            {{ $totPaxDisplay }} PAX @if(!empty($classesList))({{ implode(', ', $classesList) }})@endif
                                         @else
                                             A confirmar
                                         @endif
@@ -677,6 +715,18 @@ function formatTimePdf($timeStr) {
                                         {{ $poraoTxt }}@if($bordoTxt && $bordoTxt !== '-' && $bordoTxt !== '0 kg') (Bordo: {{ $bordoTxt }})@endif
                                     </td>
                                 </tr>
+                                @if(!empty($airfare->deadline_date) && $airfare->deadline_date !== '0000-00-00')
+                                <tr class="spec-row">
+                                    <td class="spec-label" style="font-weight: normal;">Prazo:</td>
+                                    <td class="spec-val">{{ formatDateBr($airfare->deadline_date) }}</td>
+                                </tr>
+                                @endif
+                                @if(!empty($airfare->prazo_cia) && $airfare->prazo_cia !== '0000-00-00')
+                                <tr class="spec-row">
+                                    <td class="spec-label" style="font-weight: normal;">Prazo da Cia:</td>
+                                    <td class="spec-val">{{ formatDateBr($airfare->prazo_cia) }}</td>
+                                </tr>
+                                @endif
                                 <tr>
                                     <td colspan="2" style="padding-top: 6px;">
                                         <div class="valor-box">
@@ -715,54 +765,62 @@ function formatTimePdf($timeStr) {
                     </tr>
                 </table>
 
-                <!-- 3. Grid de 4 Fotos da Proposta (2x2) -->
-                <table class="tbl-photos-grid">
-                    <tr>
-                        <td>
-                            @php $p1 = getAirfarePhotoSrc($airfare, 1); @endphp
-                            @if(extension_loaded('gd') && $p1 && file_exists($p1))
-                                <img src="{{ $p1 }}" class="aircraft-photo">
-                            @else
-                                <div class="photo-fallback">
-                                    <span style="font-size: 8.5pt; font-weight: bold; color: #475569;">Aeronave - Foto 1</span>
-                                </div>
-                            @endif
-                        </td>
-                        <td>
-                            @php $p2 = getAirfarePhotoSrc($airfare, 2); @endphp
-                            @if(extension_loaded('gd') && $p2 && file_exists($p2))
-                                <img src="{{ $p2 }}" class="aircraft-photo">
-                            @else
-                                <div class="photo-fallback">
-                                    <span style="font-size: 8.5pt; font-weight: bold; color: #475569;">Aeronave - Foto 2</span>
-                                </div>
-                            @endif
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            @php $p3 = getAirfarePhotoSrc($airfare, 3); @endphp
-                            @if(extension_loaded('gd') && $p3 && file_exists($p3))
-                                <img src="{{ $p3 }}" class="aircraft-photo">
-                            @else
-                                <div class="photo-fallback">
-                                    <span style="font-size: 8.5pt; font-weight: bold; color: #475569;">Aeronave - Foto 3</span>
-                                </div>
-                            @endif
-                        </td>
-                        <td>
-                            @php $p4 = getAirfarePhotoSrc($airfare, 4); @endphp
-                            @if(extension_loaded('gd') && $p4 && file_exists($p4))
-                                <img src="{{ $p4 }}" class="aircraft-photo">
-                            @else
-                                <div class="photo-fallback">
-                                    <span style="font-size: 8.5pt; font-weight: bold; color: #475569;">Aeronave - Foto 4</span>
-                                </div>
-                            @endif
-                        </td>
-                    </tr>
-                </table>
-                <div class="disclaimer-txt">* Imagens meramente ilustrativas</div>
+                <!-- 3. Fotos da Proposta / Aeronave (Espaço Dinâmico) -->
+                @php 
+                    $actualPhotos = getActualAirfarePhotos($airfare); 
+                    $totalPhotos = count($actualPhotos);
+                @endphp
+
+                @if($totalPhotos > 0)
+                    <table class="tbl-photos-grid">
+                        @if($totalPhotos === 1)
+                            <tr>
+                                <td style="width: 100%;">
+                                    <img src="{{ $actualPhotos[0] }}" class="aircraft-photo photo-single">
+                                </td>
+                            </tr>
+                        @elseif($totalPhotos === 2)
+                            <tr>
+                                <td style="width: 50%;">
+                                    <img src="{{ $actualPhotos[0] }}" class="aircraft-photo photo-double">
+                                </td>
+                                <td style="width: 50%;">
+                                    <img src="{{ $actualPhotos[1] }}" class="aircraft-photo photo-double">
+                                </td>
+                            </tr>
+                        @elseif($totalPhotos === 3)
+                            <tr>
+                                <td style="width: 33.33%;">
+                                    <img src="{{ $actualPhotos[0] }}" class="aircraft-photo photo-triple">
+                                </td>
+                                <td style="width: 33.33%;">
+                                    <img src="{{ $actualPhotos[1] }}" class="aircraft-photo photo-triple">
+                                </td>
+                                <td style="width: 33.34%;">
+                                    <img src="{{ $actualPhotos[2] }}" class="aircraft-photo photo-triple">
+                                </td>
+                            </tr>
+                        @else
+                            <tr>
+                                <td style="width: 50%;">
+                                    <img src="{{ $actualPhotos[0] }}" class="aircraft-photo photo-quad">
+                                </td>
+                                <td style="width: 50%;">
+                                    <img src="{{ $actualPhotos[1] }}" class="aircraft-photo photo-quad">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 50%;">
+                                    <img src="{{ $actualPhotos[2] }}" class="aircraft-photo photo-quad">
+                                </td>
+                                <td style="width: 50%;">
+                                    <img src="{{ $actualPhotos[3] }}" class="aircraft-photo photo-quad">
+                                </td>
+                            </tr>
+                        @endif
+                    </table>
+                    <div class="disclaimer-txt">* Imagens meramente ilustrativas</div>
+                @endif
 
             </div>
         @endforeach

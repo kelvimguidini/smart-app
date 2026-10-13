@@ -45,6 +45,7 @@ class ProviderTransportApiController extends Controller
             'service_percent' => 'nullable|numeric|min:0|max:100',
             'iva_percent'     => 'nullable|numeric|min:0|max:100',
             'payment_method'  => 'nullable|string|max:255',
+            'codestur'        => 'nullable|string|max:50',
         ]);
 
         $data = [
@@ -58,6 +59,7 @@ class ProviderTransportApiController extends Controller
             'service_percent' => $request->service_percent,
             'iva_percent'     => $request->iva_percent,
             'payment_method'  => $request->payment_method,
+            'codestur'        => $request->codestur,
         ];
 
         try {

@@ -94,8 +94,20 @@
             </div>
           </div>
 
-          <!-- Logo -->
+          <!-- Código STUR -->
           <div class="col-lg-6 mb-3">
+            <div class="form-group mb-0">
+              <label for="codestur" class="form-label">Código STUR</label>
+              <input type="text" class="form-control" id="codestur" [(ngModel)]="form.codestur" name="codestur" placeholder="Cód. STUR" [class.is-invalid]="errors['codestur']" />
+              
+              <div *ngIf="errors['codestur']" class="text-danger mt-1">
+                <small *ngFor="let err of errors['codestur']" class="d-block">{{ err }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Logo -->
+          <div class="col-lg-12 mb-3">
             <div class="form-group mb-0">
               <label for="logoFile" class="form-label">Logo</label>
               <input class="form-control" type="file" id="logoFile" (change)="onFileChange($event)" accept="image/*">
@@ -178,6 +190,7 @@
                           }"></i>
                       </div>
                     </th>
+                    <th scope="col">Cód. STUR</th>
 
                     <th scope="col" class="text-end">Ações</th>
                   </tr>
@@ -194,6 +207,9 @@
                     </td>
                     <td>
                       <span [class.text-muted]="!customer.active">{{ customer.phone || '-' }}</span>
+                    </td>
+                    <td>
+                      <span class="badge bg-light text-dark border">{{ customer.codestur || '-' }}</span>
                     </td>
 
                     <td class="text-end">

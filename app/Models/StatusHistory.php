@@ -48,8 +48,12 @@ class StatusHistory extends Model
             return true;
         }
 
-        if ($status === null) {
+        if ($status === null || $status === 'add_information') {
             return true;
+        }
+
+        if (self::isBlockedStatus($status)) {
+            return false;
         }
 
         $statusConfig = \App\Http\Middleware\Constants::STATUS[$status] ?? null;

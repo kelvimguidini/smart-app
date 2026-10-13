@@ -124,6 +124,27 @@ class EventAirfareApiController extends Controller
                 }
             }
 
+            // Validação de fotos: Mínimo 1 foto, máximo 4 fotos
+            $existingRecord = $request->id > 0 ? $this->eventAirfareRepository->find($request->id) : null;
+            $photoCount = 0;
+            foreach (['photo_1', 'photo_2', 'photo_3', 'photo_4'] as $photoKey) {
+                $val = array_key_exists($photoKey, $providerData)
+                    ? $providerData[$photoKey]
+                    : ($existingRecord ? $existingRecord->$photoKey : null);
+                if (!empty($val)) {
+                    $photoCount++;
+                }
+            }
+
+            if ($photoCount < 1) {
+                return response()->json([
+                    'message' => 'É obrigatório anexar no mínimo 1 foto da aeronave (máximo 4).',
+                    'errors' => [
+                        'photos' => ['É obrigatório anexar no mínimo 1 foto da aeronave (máximo 4).']
+                    ]
+                ], 422);
+            }
+
             $provider = $request->id > 0 
                 ? $this->eventAirfareRepository->saveEventAirfare($providerData, $request->id) 
                 : $this->eventAirfareRepository->saveEventAirfare($providerData);
