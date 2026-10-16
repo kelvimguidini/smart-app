@@ -23,6 +23,7 @@ class EloquentEventApiRepository implements EventApiRepositoryInterface
             'crd',
             'hotelOperator',
             'landOperator',
+            'airOperator',
             // Hotéis
             'event_hotels.hotel',
             'event_hotels.eventHotelsOpt' => fn($q) => $q->orderBy('order', 'asc')->orderby('in'),

@@ -4,6 +4,7 @@ namespace App\Domains\Events\Services;
 
 use App\Domains\Events\Repositories\EventApiRepositoryInterface;
 use App\Http\Middleware\Constants;
+use App\Models\AirfareAirport;
 use App\Models\Customer;
 use Carbon\Carbon;
 use DateTime;
@@ -163,6 +164,10 @@ class DefaultEventApiService implements EventApiServiceInterface
         $venda->addChild('tipoproduto', $tipoProduto);
         $providerObj = $tipo['fornecedor']($fornecedor);
         $national = $providerObj->national ?? true;
+        $providerObj = $tipo['fornecedor']($fornecedor);
+        $national = $tipo['rel'] === 'event_airfares'
+            ? $this->isAirfareNational($fornecedor, $fornecedor->eventAirfareOpts)
+            : ($providerObj->national ?? true);
 
         switch ($tipo['rel']) {
             case 'event_hotels':
@@ -175,7 +180,7 @@ class DefaultEventApiService implements EventApiServiceInterface
                 $idProduto = $national ? 'SL' : 'LOC';
                 break;
             case 'event_airfares':
-                $idProduto = $national ? 'AERN' : 'AERI';
+                $idProduto = $national ? 'ETICKET NACIONAL' : 'ETICKET INTERNACIONAL';
                 break;
             default:
                 $idProduto = $national ? 'DIVN' : 'DIVI';
@@ -203,7 +208,10 @@ class DefaultEventApiService implements EventApiServiceInterface
         $venda->addChild('dtemissao', htmlspecialchars(Carbon::parse($evento->date)->format('d/m/Y')));
         $venda->addChild('idcliente', htmlspecialchars(!empty($evento->customer?->codestur) ? $evento->customer->codestur : ($evento->customer?->id ?? '')));
         $venda->addChild('idoperador', htmlspecialchars($fornecedor?->broker?->name ?? ''));
-        $venda->addChild('idfornecedor', htmlspecialchars(!empty($providerObj->codestur) ? $providerObj->codestur : ($providerObj->id ?? '')));
+        $fornecedorCode = !empty($providerObj->codestur)
+            ? $providerObj->codestur
+            : ($tipo['rel'] === 'event_airfares' ? ($this->getAirlineIataCode($providerObj?->name) ?: ($providerObj?->id ?? '')) : ($providerObj?->id ?? ''));
+        $venda->addChild('idfornecedor', htmlspecialchars((string)$fornecedorCode));
         $venda->addChild('formrec', '2');
 
         $venda->addChild('vencrec', htmlspecialchars(!empty($fornecedor->deadline_date) ? Carbon::parse($fornecedor->deadline_date)->format('d/m/Y') : Carbon::parse($evento->date)->format('d/m/Y')));
@@ -254,32 +262,25 @@ class DefaultEventApiService implements EventApiServiceInterface
 
         $movimentosXml = $venda->addChild('movimentos');
 
-        $opts = $fornecedor->eventHotelsOpt
-            ?? $fornecedor->eventAbOpts
-            ?? $fornecedor->eventHallOpts
-            ?? $fornecedor->eventAddOpts
-            ?? $fornecedor->eventTransportOpts
-            ?? $fornecedor->eventAirfareOpts;
-
         if ($tipo['rel'] === 'event_airfares') {
-            if (!$opts || (is_countable($opts) && count($opts) === 0)) {
-                $opts = [$fornecedor];
-            }
+            $this->movimentoAereoXML($fornecedor->eventAirfareOpts, $fornecedor, $evento, $movimentosXml);
         } else {
-            $opts = $opts ?? [];
-        }
+            $opts = $fornecedor->eventHotelsOpt
+                ?? $fornecedor->eventAbOpts
+                ?? $fornecedor->eventHallOpts
+                ?? $fornecedor->eventAddOpts
+                ?? $fornecedor->eventTransportOpts
+                ?? [];
 
-        foreach ($opts as $opt) {
-            switch ($tipo['rel']) {
-                case 'event_hotels':
-                    $this->movimentoHotelariaXML($opt, $fornecedor, $evento, $movimentosXml);
-                    break;
-                case 'event_airfares':
-                    $this->movimentoAereoXML($opt, $fornecedor, $evento, $movimentosXml);
-                    break;
-                default:
-                    $this->movimentoDiversosXML($opt, $fornecedor, $evento, $movimentosXml, $tipo['rel']);
-                    break;
+            foreach ($opts as $opt) {
+                switch ($tipo['rel']) {
+                    case 'event_hotels':
+                        $this->movimentoHotelariaXML($opt, $fornecedor, $evento, $movimentosXml);
+                        break;
+                    default:
+                        $this->movimentoDiversosXML($opt, $fornecedor, $evento, $movimentosXml, $tipo['rel']);
+                        break;
+                }
             }
         }
     }
@@ -412,42 +413,49 @@ class DefaultEventApiService implements EventApiServiceInterface
         }
     }
 
-    private function movimentoAereoXML($opt, $fornecedor, $evento, $movimentoXml)
+    private function movimentoAereoXML($opts, $fornecedor, $evento, $movimentoXml)
     {
-        $movimento = $movimentoXml->addChild('passagem');
+        $movimento = $movimentoXml->addChild('aereo');
         $movimento->addChild('pax', htmlspecialchars(mb_substr($evento->name ?? '', 0, 40)));
         $movimento->addChild('tipo', 'ADT');
+
+        $firstOpt = is_iterable($opts) ? (is_array($opts) ? ($opts[0] ?? null) : $opts->first()) : $opts;
+
+        $totais = $this->computeTotalsAirfare($evento, $fornecedor, $firstOpt);
+
+        $movimento->addChild('tarifa', htmlspecialchars(number_format($totais['tarifa'], 2, '.', '')));
+        $movimento->addChild('tarifafornecedor', htmlspecialchars(number_format($totais['tarifa_fornecedor'], 2, '.', '')));
         $movimento->addChild('moeda', htmlspecialchars($fornecedor->currency?->sigla ?? 'BRL'));
         $movimento->addChild('cambio', htmlspecialchars((string)($evento->exchange_rate ?? '1')));
+        $movimento->addChild('datacambio', htmlspecialchars(Carbon::parse($evento->date)->format('d/m/Y')));
+        $movimento->addChild('taxaembarque', htmlspecialchars(number_format($totais['taxa_embarque'], 2, '.', '')));
 
-        $ciaCode = $opt->outbound_airline?->code
-            ?? $fornecedor->airline?->code
-            ?? $fornecedor->airline?->name
-            ?? '';
-        $movimento->addChild('cia', htmlspecialchars(mb_substr($ciaCode, 0, 10)));
+        if (!empty($fornecedor->internal_observation)) {
+            $movimento->addChild('observacao', htmlspecialchars($fornecedor->internal_observation));
+        }
+        if (!empty($fornecedor->customer_observation)) {
+            $movimento->addChild('observacao2', htmlspecialchars($fornecedor->customer_observation));
+        }
 
-        $flightNo = $opt->outbound_flight_number ?? '';
-        $movimento->addChild('voo', htmlspecialchars(mb_substr($flightNo, 0, 10)));
+        $localizador = !empty($firstOpt?->outbound_flight_number)
+            ? mb_substr(trim($firstOpt->outbound_flight_number), 0, 10)
+            : mb_substr($evento->code ?? '', 0, 10);
+        $movimento->addChild('localizador', htmlspecialchars($localizador));
 
-        $origem = $opt->outbound_origin ?? '';
-        $movimento->addChild('origem', htmlspecialchars(mb_substr($origem, 0, 5)));
+        $trechos = $movimento->addChild('trechos');
 
-        $destino = $opt->outbound_destination ?? '';
-        $movimento->addChild('destino', htmlspecialchars(mb_substr($destino, 0, 5)));
+        $segmentCount = 0;
+        if (is_iterable($opts)) {
+            foreach ($opts as $opt) {
+                if (empty($opt) || !is_object($opt)) continue;
+                $this->addSegmentoTrechoXML($trechos, $opt, $fornecedor, $evento);
+                $segmentCount++;
+            }
+        }
 
-        $dtSaida = !empty($opt->outbound_date)
-            ? Carbon::parse($opt->outbound_date)->format('d/m/Y')
-            : (!empty($evento->date) ? Carbon::parse($evento->date)->format('d/m/Y') : '');
-        $movimento->addChild('dtsaida', htmlspecialchars($dtSaida));
-
-        $totais = $this->computeTotalsAirfare($evento, $fornecedor, $opt);
-
-        $movimento->addChild('tarifa', htmlspecialchars((string)$totais['tarifa']));
-        $movimento->addChild('tarifabalcao', htmlspecialchars((string)$totais['tarifa']));
-        $movimento->addChild('tarifafornecedor', htmlspecialchars((string)$totais['tarifa_fornecedor']));
-        $movimento->addChild('taxaembarque', htmlspecialchars((string)$totais['taxa_embarque']));
-        $movimento->addChild('observacao', htmlspecialchars($fornecedor->internal_observation ?? ''));
-        $movimento->addChild('observacao2', htmlspecialchars($fornecedor->customer_observation ?? ''));
+        if ($segmentCount === 0) {
+            $this->addSegmentoTrechoXML($trechos, null, $fornecedor, $evento);
+        }
 
         if (isset($fornecedor->status_his)) {
             $movimento->addChild('confirmadopor', '');
@@ -456,15 +464,72 @@ class DefaultEventApiService implements EventApiServiceInterface
         }
     }
 
-    private function computeTotalsAirfare($evento, $fornecedor, $opt): array
+    private function addSegmentoTrechoXML($trechosXml, $opt, $fornecedor, $evento)
     {
-        $cost = floatval($opt->received_proposal ?? $fornecedor->total_net_sem_4bts ?? 0);
+        $segmento = $trechosXml->addChild('segmento');
+
+        $origem = mb_substr(strtoupper(trim($opt?->outbound_origin ?? '')), 0, 3);
+        if (strlen($origem) < 3) {
+            $origem = str_pad($origem, 3, 'X');
+        }
+        $segmento->addChild('de', htmlspecialchars($origem));
+
+        $destino = mb_substr(strtoupper(trim($opt?->outbound_destination ?? '')), 0, 3);
+        if (strlen($destino) < 3) {
+            $destino = str_pad($destino, 3, 'X');
+        }
+        $segmento->addChild('para', htmlspecialchars($destino));
+
+        $dtSaida = !empty($opt?->outbound_date)
+            ? Carbon::parse($opt->outbound_date)->format('d/m/Y')
+            : (!empty($evento->date) ? Carbon::parse($evento->date)->format('d/m/Y') : Carbon::now()->format('d/m/Y'));
+        $segmento->addChild('datasaida', htmlspecialchars($dtSaida));
+        $segmento->addChild('datachegada', htmlspecialchars($dtSaida));
+
+        $horaSaida = !empty($opt?->outbound_departure_time)
+            ? Carbon::parse($opt->outbound_departure_time)->format('H:i')
+            : '00:00';
+        $segmento->addChild('horasaida', htmlspecialchars($horaSaida));
+
+        $horaChegada = !empty($opt?->outbound_arrival_time)
+            ? Carbon::parse($opt->outbound_arrival_time)->format('H:i')
+            : '00:00';
+        $segmento->addChild('horachegada', htmlspecialchars($horaChegada));
+
+        $voo = !empty($opt?->outbound_flight_number)
+            ? mb_substr(trim($opt->outbound_flight_number), 0, 7)
+            : '0000';
+        $segmento->addChild('voo', htmlspecialchars($voo));
+
+        $segmento->addChild('classe', 'Y');
+
+        $localizador = !empty($opt?->outbound_flight_number)
+            ? mb_substr(trim($opt->outbound_flight_number), 0, 9)
+            : mb_substr($evento->code ?? '', 0, 9);
+        $segmento->addChild('localizador', htmlspecialchars($localizador));
+
+        $segmento->addChild('status', 'OK');
+        $segmento->addChild('conexao', 'N');
+
+        $ciaName = $opt?->outbound_airline?->name ?? $fornecedor->airline?->name ?? '';
+        $ciaCode = $this->getAirlineIataCode($ciaName);
+        $segmento->addChild('ciaaerea', htmlspecialchars($ciaCode));
+    }
+
+    private function computeTotalsAirfare($evento, $fornecedor, $opt = null): array
+    {
+        $cost = floatval($opt?->received_proposal ?? $fornecedor->total_net_sem_4bts ?? 0);
         $taxaEmbarque = floatval($fornecedor->taxa_embarque_unit ?? 0);
 
-        $taxes = $this->sumTaxesProvider($fornecedor, $opt);
-        $taxesCost = $this->sumTaxesProviderCost($fornecedor, $opt);
-
         $saleBase = $this->unitSaleAirfare($fornecedor, $opt);
+
+        $iss = floatval($fornecedor->iss_percent ?? 0) / 100;
+        $service = floatval($fornecedor->service_percent ?? 0) / 100;
+        $iva = floatval($fornecedor->iva_percent ?? 0) / 100;
+        $charge = floatval($fornecedor->service_charge ?? 0) / 100;
+
+        $taxes = ($saleBase * $iss) + ($saleBase * $service) + ($saleBase * $iva) + ($saleBase * $charge);
+        $taxesCost = ($cost * $iss) + ($cost * $service) + ($cost * $iva) + ($cost * $charge);
 
         $totalCost = $cost + $taxesCost;
         $totalSale = $saleBase + $taxes;
@@ -484,13 +549,13 @@ class DefaultEventApiService implements EventApiServiceInterface
         ];
     }
 
-    private function unitSaleAirfare($fornecedor, $opt)
+    private function unitSaleAirfare($fornecedor, $opt = null)
     {
-        $cost = floatval($opt->received_proposal ?? $fornecedor->total_net_sem_4bts ?? 0);
+        $cost = floatval($opt?->received_proposal ?? $fornecedor->total_net_sem_4bts ?? 0);
         if (isset($fornecedor->markup) && floatval($fornecedor->markup) > 0) {
             return $cost * (1 + (floatval($fornecedor->markup) / 100));
         }
-        $percent = floatval($opt->received_proposal_percent ?? 0);
+        $percent = floatval($opt?->received_proposal_percent ?? 0);
         if ($percent > 0) {
             $factor = $percent > 2 ? $percent / 100 : $percent;
             return ceil($cost / $factor);
@@ -499,6 +564,243 @@ class DefaultEventApiService implements EventApiServiceInterface
             return $cost * (1 + (floatval($fornecedor->taxa_4bts) / 100));
         }
         return $cost;
+    }
+
+    private function isAirfareNational($fornecedor, $opts): bool
+    {
+        // 1. Se a moeda não for BRL/R$, é internacional
+        $moeda = strtoupper(trim($fornecedor->currency?->sigla ?? ''));
+        if (!empty($moeda) && !in_array($moeda, ['BRL', 'R$', 'REAL', 'REAIS'])) {
+            return false;
+        }
+
+        // 2. Verificar os trechos/aeroportos em cada opção
+        $checkedAnyAirport = false;
+        if (!empty($opts) && is_iterable($opts)) {
+            foreach ($opts as $opt) {
+                if (empty($opt) || !is_object($opt)) continue;
+
+                $origin = trim($opt->outbound_origin ?? '');
+                $destination = trim($opt->outbound_destination ?? '');
+
+                if (!empty($origin)) {
+                    $originNational = $this->isAirportNational($origin);
+                    if ($originNational === false) {
+                        return false;
+                    }
+                    if ($originNational === true) {
+                        $checkedAnyAirport = true;
+                    }
+                }
+
+                if (!empty($destination)) {
+                    $destNational = $this->isAirportNational($destination);
+                    if ($destNational === false) {
+                        return false;
+                    }
+                    if ($destNational === true) {
+                        $checkedAnyAirport = true;
+                    }
+                }
+            }
+        }
+
+        // 3. Se verificou aeroportos e nenhum foi internacional, é nacional
+        if ($checkedAnyAirport) {
+            return true;
+        }
+
+        // 4. Se o fornecedor (airline ou provider) tiver campo national explícito
+        if (isset($fornecedor->airline?->national)) {
+            return (bool) $fornecedor->airline->national;
+        }
+        if (isset($fornecedor->provider?->national)) {
+            return (bool) $fornecedor->provider->national;
+        }
+
+        // Default: Nacional
+        return true;
+    }
+
+    private function isAirportNational(string $term): ?bool
+    {
+        $term = trim($term);
+        if (empty($term)) {
+            return null;
+        }
+
+        $cleanTerm = strtoupper($term);
+        $iataCandidate = strlen($cleanTerm) === 3 ? $cleanTerm : (preg_match('/^([A-Z]{3})\b/i', $term, $m) ? strtoupper($m[1]) : null);
+
+        if ($iataCandidate) {
+            try {
+                $airport = AirfareAirport::where('iata_code', $iataCandidate)->first();
+                if ($airport) {
+                    $country = mb_strtoupper(trim($airport->country ?? ''));
+                    return in_array($country, ['BRASIL', 'BRAZIL', 'BR', 'BRA', '']);
+                }
+            } catch (\Throwable $e) {
+                // Fallback se DB inacessível no contexto
+            }
+        }
+
+        try {
+            $airport = AirfareAirport::where('name', 'like', "%{$term}%")
+                ->orWhere('city', 'like', "%{$term}%")
+                ->first();
+            if ($airport) {
+                $country = mb_strtoupper(trim($airport->country ?? ''));
+                return in_array($country, ['BRASIL', 'BRAZIL', 'BR', 'BRA', '']);
+            }
+        } catch (\Throwable $e) {
+            // Fallback se DB inacessível no contexto
+        }
+
+        $brazilianIatas = [
+            'GRU',
+            'CGH',
+            'BSB',
+            'GIG',
+            'SDU',
+            'CNF',
+            'VCP',
+            'SSA',
+            'REC',
+            'FOR',
+            'CWB',
+            'POA',
+            'FLN',
+            'VIX',
+            'BEL',
+            'MAO',
+            'CGB',
+            'CGR',
+            'GYN',
+            'MCZ',
+            'NAT',
+            'JPA',
+            'THE',
+            'SLZ',
+            'PVH',
+            'BPS',
+            'IGU',
+            'NVT',
+            'AJU',
+            'UDI',
+            'LDB',
+            'RAO',
+            'PMW',
+            'JDO',
+            'MGF',
+            'CXJ',
+            'IOS',
+            'CPV',
+            'PET',
+            'XAP',
+            'STM',
+            'IMP',
+            'BVB',
+            'RBR',
+            'MAB',
+            'CZS',
+            'JTC',
+            'VAG',
+            'PPB',
+            'JOI',
+            'IPN',
+            'FEC',
+            'OPS',
+            'ARU',
+            'MEA',
+            'QWJ',
+            'BAU',
+            'SOD',
+            'SJP',
+            'CFB'
+        ];
+
+        if ($iataCandidate && in_array($iataCandidate, $brazilianIatas)) {
+            return true;
+        }
+
+        $intlIatas = [
+            'MIA',
+            'MCO',
+            'JFK',
+            'EWR',
+            'LAX',
+            'LIS',
+            'OPO',
+            'MAD',
+            'BCN',
+            'CDG',
+            'ORY',
+            'LHR',
+            'LGW',
+            'FRA',
+            'MUC',
+            'AMS',
+            'FCO',
+            'EZE',
+            'AEP',
+            'SCL',
+            'BOG',
+            'LIM',
+            'MVD',
+            'ASU',
+            'PTY',
+            'CUN',
+            'MEX',
+            'DXB',
+            'DOH',
+            'YYZ'
+        ];
+
+        if ($iataCandidate && in_array($iataCandidate, $intlIatas)) {
+            return false;
+        }
+
+        return null;
+    }
+
+    private function getAirlineIataCode(?string $name): string
+    {
+        if (empty($name)) {
+            return '';
+        }
+        $clean = strtoupper(trim($name));
+        $map = [
+            'AZUL' => 'AD',
+            'GOL' => 'G3',
+            'LATAM' => 'LA',
+            'TAM' => 'JJ',
+            'VOEPASS' => '2Z',
+            'PASSAREDO' => '2Z',
+            'AVIANCA' => 'AV',
+            'TAP' => 'TP',
+            'COPA' => 'CM',
+            'AMERICAN' => 'AA',
+            'UNITED' => 'UA',
+            'DELTA' => 'DL',
+            'AIR FRANCE' => 'AF',
+            'KLM' => 'KL',
+            'LUFTHANSA' => 'LH',
+            'EMIRATES' => 'EK',
+            'QATAR' => 'QR',
+            'IBERIA' => 'IB',
+            'AEROLINEAS' => 'AR',
+            'AEROMEXICO' => 'AM',
+            'BRITISH' => 'BA',
+        ];
+        foreach ($map as $key => $code) {
+            if (str_contains($clean, $key)) {
+                return $code;
+            }
+        }
+        if (strlen($clean) <= 2) {
+            return $clean;
+        }
+        return mb_substr($clean, 0, 2);
     }
 
     private function fornecedoresXML($fornecedorId, $xml, $modelClass = \App\Models\Provider::class)
@@ -522,6 +824,8 @@ class DefaultEventApiService implements EventApiServiceInterface
                     $tipoFornec = 'TRANSP';
                 } elseif ($modelClass === \App\Models\ProviderServices::class) {
                     $tipoFornec = 'DIV';
+                } elseif ($modelClass === \App\Models\AirfareAirline::class) {
+                    $tipoFornec = 'CIA';
                 } else {
                     $tipoFornec = 'HOT';
                 }

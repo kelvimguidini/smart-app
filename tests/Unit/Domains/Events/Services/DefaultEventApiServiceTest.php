@@ -285,4 +285,140 @@ class DefaultEventApiServiceTest extends TestCase
         $this->assertEquals('STUR-CLI-999', (string) $xml->vendas->venda->idcliente);
         $this->assertEquals('STUR-HOT-888', (string) $xml->vendas->venda->idfornecedor);
     }
+
+    public function testGenerateXmlPayloadAirfareNationalRouteSetsEticketNacional()
+    {
+        $startDate = '2026-10-01';
+        $endDate = '2026-10-31';
+
+        $event = new Event();
+        $event->id = 502;
+        $event->name = 'TESTE AÉREO THAMIRES';
+        $event->code = '12345';
+        $event->date = '2026-10-13';
+        $event->exchange_rate = 1.0;
+
+        $currency = new \App\Models\Currency();
+        $currency->sigla = 'BRL';
+
+        $airline = new \App\Models\AirfareAirline();
+        $airline->id = 1;
+        $airline->name = 'GOL';
+
+        $optIda = new \App\Models\EventAirfareOpt();
+        $optIda->id = 1;
+        $optIda->outbound_origin = 'GRU';
+        $optIda->outbound_destination = 'SDU';
+        $optIda->outbound_flight_number = 'G3-1234';
+        $optIda->outbound_date = '2026-10-13';
+        $optIda->outbound_departure_time = '08:00';
+        $optIda->outbound_arrival_time = '09:00';
+        $optIda->setRelation('outbound_airline', $airline);
+
+        $eventAirfare = new \App\Models\EventAirfare();
+        $eventAirfare->id = 10;
+        $eventAirfare->total_net_sem_4bts = 1500.00;
+        $eventAirfare->markup = 10;
+        $eventAirfare->taxa_embarque_unit = 50.00;
+        $eventAirfare->setRelation('airline', $airline);
+        $eventAirfare->setRelation('currency', $currency);
+        $eventAirfare->setRelation('status_his', new \Illuminate\Database\Eloquent\Collection([]));
+        $eventAirfare->setRelation('eventAirfareOpts', new \Illuminate\Database\Eloquent\Collection([$optIda]));
+
+        $event->setRelation('event_hotels', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_abs', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_halls', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_transports', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_adds', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_airfares', new \Illuminate\Database\Eloquent\Collection([$eventAirfare]));
+
+        $this->eventApiRepositoryMock
+            ->shouldReceive('getEventsForExport')
+            ->once()
+            ->andReturn(new \Illuminate\Database\Eloquent\Collection([$event]));
+
+        $xmlString = $this->service->generateXmlPayload($startDate, $endDate);
+        $xml = simplexml_load_string($xmlString);
+
+        $venda = $xml->vendas->venda;
+        $this->assertEquals('AEREO', (string) $venda->tipoproduto);
+        $this->assertEquals('ETICKET NACIONAL', (string) $venda->idproduto);
+        $this->assertEquals('NACIONAL', (string) $venda->clasproduto);
+
+        // Movimento deve ser <aereo> e não <passagem>
+        $this->assertNotEmpty($venda->movimentos->aereo);
+        $this->assertEmpty($venda->movimentos->passagem);
+
+        $aereo = $venda->movimentos->aereo;
+        $this->assertEquals('TESTE AÉREO THAMIRES', (string) $aereo->pax);
+        $this->assertEquals('BRL', (string) $aereo->moeda);
+        $this->assertEquals('50.00', (string) $aereo->taxaembarque);
+        $this->assertCount(1, $aereo->trechos->segmento);
+        $this->assertEquals('GRU', (string) $aereo->trechos->segmento[0]->de);
+        $this->assertEquals('SDU', (string) $aereo->trechos->segmento[0]->para);
+        $this->assertEquals('G3', (string) $aereo->trechos->segmento[0]->ciaaerea);
+    }
+
+    public function testGenerateXmlPayloadAirfareInternationalRouteSetsEticketInternacional()
+    {
+        $startDate = '2026-10-01';
+        $endDate = '2026-10-31';
+
+        $event = new Event();
+        $event->id = 503;
+        $event->name = 'TESTE AÉREO INTERNACIONAL';
+        $event->code = '54321';
+        $event->date = '2026-10-15';
+        $event->exchange_rate = 5.5;
+
+        $currency = new \App\Models\Currency();
+        $currency->sigla = 'USD';
+
+        $airline = new \App\Models\AirfareAirline();
+        $airline->id = 2;
+        $airline->name = 'AMERICAN AIRLINES';
+
+        $opt = new \App\Models\EventAirfareOpt();
+        $opt->id = 2;
+        $opt->outbound_origin = 'GRU';
+        $opt->outbound_destination = 'MIA';
+        $opt->outbound_flight_number = 'AA-906';
+        $opt->outbound_date = '2026-10-15';
+        $opt->setRelation('outbound_airline', $airline);
+
+        $eventAirfare = new \App\Models\EventAirfare();
+        $eventAirfare->id = 11;
+        $eventAirfare->total_net_sem_4bts = 800.00;
+        $eventAirfare->markup = 0;
+        $eventAirfare->taxa_embarque_unit = 80.00;
+        $eventAirfare->setRelation('airline', $airline);
+        $eventAirfare->setRelation('currency', $currency);
+        $eventAirfare->setRelation('status_his', new \Illuminate\Database\Eloquent\Collection([]));
+        $eventAirfare->setRelation('eventAirfareOpts', new \Illuminate\Database\Eloquent\Collection([$opt]));
+
+        $event->setRelation('event_hotels', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_abs', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_halls', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_transports', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_adds', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_airfares', new \Illuminate\Database\Eloquent\Collection([$eventAirfare]));
+
+        $this->eventApiRepositoryMock
+            ->shouldReceive('getEventsForExport')
+            ->once()
+            ->andReturn(new \Illuminate\Database\Eloquent\Collection([$event]));
+
+        $xmlString = $this->service->generateXmlPayload($startDate, $endDate);
+        $xml = simplexml_load_string($xmlString);
+
+        $venda = $xml->vendas->venda;
+        $this->assertEquals('AEREO', (string) $venda->tipoproduto);
+        $this->assertEquals('ETICKET INTERNACIONAL', (string) $venda->idproduto);
+        $this->assertEquals('INTERNACIONAL', (string) $venda->clasproduto);
+
+        $aereo = $venda->movimentos->aereo;
+        $this->assertEquals('GRU', (string) $aereo->trechos->segmento[0]->de);
+        $this->assertEquals('MIA', (string) $aereo->trechos->segmento[0]->para);
+        $this->assertEquals('AA', (string) $aereo->trechos->segmento[0]->ciaaerea);
+    }
 }
