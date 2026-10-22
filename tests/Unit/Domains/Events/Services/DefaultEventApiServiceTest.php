@@ -307,8 +307,8 @@ class DefaultEventApiServiceTest extends TestCase
 
         $optIda = new \App\Models\EventAirfareOpt();
         $optIda->id = 1;
-        $optIda->outbound_origin = 'GRU';
-        $optIda->outbound_destination = 'SDU';
+        $optIda->outbound_origin = 'Aeroporto Santos Dumont (SDU)';
+        $optIda->outbound_destination = 'Aeroporto de Congonhas (CGH)';
         $optIda->outbound_flight_number = 'G3-1234';
         $optIda->outbound_date = '2026-10-13';
         $optIda->outbound_departure_time = '08:00';
@@ -354,11 +354,15 @@ class DefaultEventApiServiceTest extends TestCase
 
         $aereo = $venda->movimentos->aereo;
         $this->assertEquals('TESTE AÉREO THAMIRES', (string) $aereo->pax);
-        $this->assertEquals('BRL', (string) $aereo->moeda);
+        $this->assertEquals('R$', (string) $aereo->moeda);
+        $this->assertEquals('1650.00', (string) $aereo->tarifa);
+        $this->assertEquals('1650.00', (string) $aereo->tarifaCheia);
+        $this->assertEquals('1500.00', (string) $aereo->tarifafornecedor);
+        $this->assertEquals('1500.00', (string) $aereo->tarifaCheiaFornec);
         $this->assertEquals('50.00', (string) $aereo->taxaembarque);
         $this->assertCount(1, $aereo->trechos->segmento);
-        $this->assertEquals('GRU', (string) $aereo->trechos->segmento[0]->de);
-        $this->assertEquals('SDU', (string) $aereo->trechos->segmento[0]->para);
+        $this->assertEquals('SDU', (string) $aereo->trechos->segmento[0]->de);
+        $this->assertEquals('CGH', (string) $aereo->trechos->segmento[0]->para);
         $this->assertEquals('G3', (string) $aereo->trechos->segmento[0]->ciaaerea);
     }
 
@@ -383,8 +387,8 @@ class DefaultEventApiServiceTest extends TestCase
 
         $opt = new \App\Models\EventAirfareOpt();
         $opt->id = 2;
-        $opt->outbound_origin = 'GRU';
-        $opt->outbound_destination = 'MIA';
+        $opt->outbound_origin = 'Aeroporto Internacional de Guarulhos (GRU)';
+        $opt->outbound_destination = 'Miami International Airport (MIA)';
         $opt->outbound_flight_number = 'AA-906';
         $opt->outbound_date = '2026-10-15';
         $opt->setRelation('outbound_airline', $airline);
@@ -423,6 +427,7 @@ class DefaultEventApiServiceTest extends TestCase
         $this->assertEquals('4BTS', (string) $venda->idpromotor);
 
         $aereo = $venda->movimentos->aereo;
+        $this->assertEquals('USD', (string) $aereo->moeda);
         $this->assertEquals('GRU', (string) $aereo->trechos->segmento[0]->de);
         $this->assertEquals('MIA', (string) $aereo->trechos->segmento[0]->para);
         $this->assertEquals('AA', (string) $aereo->trechos->segmento[0]->ciaaerea);
