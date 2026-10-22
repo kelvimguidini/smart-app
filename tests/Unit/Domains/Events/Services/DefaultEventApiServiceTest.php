@@ -342,8 +342,11 @@ class DefaultEventApiServiceTest extends TestCase
 
         $venda = $xml->vendas->venda;
         $this->assertEquals('AEREO', (string) $venda->tipoproduto);
-        $this->assertEquals('ETICKET NACIONAL', (string) $venda->idproduto);
+        $this->assertEquals('180', (string) $venda->idproduto);
         $this->assertEquals('NACIONAL', (string) $venda->clasproduto);
+        $this->assertEquals('01/0018', (string) $venda->tipoctarec);
+        $this->assertEquals('01/0001', (string) $venda->tipoctapag);
+        $this->assertEquals('4BTS', (string) $venda->idpromotor);
 
         // Movimento deve ser <aereo> e não <passagem>
         $this->assertNotEmpty($venda->movimentos->aereo);
@@ -413,8 +416,11 @@ class DefaultEventApiServiceTest extends TestCase
 
         $venda = $xml->vendas->venda;
         $this->assertEquals('AEREO', (string) $venda->tipoproduto);
-        $this->assertEquals('ETICKET INTERNACIONAL', (string) $venda->idproduto);
+        $this->assertEquals('190', (string) $venda->idproduto);
         $this->assertEquals('INTERNACIONAL', (string) $venda->clasproduto);
+        $this->assertEquals('01/0018', (string) $venda->tipoctarec);
+        $this->assertEquals('01/0001', (string) $venda->tipoctapag);
+        $this->assertEquals('4BTS', (string) $venda->idpromotor);
 
         $aereo = $venda->movimentos->aereo;
         $this->assertEquals('GRU', (string) $aereo->trechos->segmento[0]->de);

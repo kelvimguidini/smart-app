@@ -96,8 +96,8 @@ class DefaultEventApiService implements EventApiServiceInterface
                     'tipoProvider' => 'airline',
                     'fornecedor' => fn($item) => $item->airline ?: $item->provider,
                     'model' => \App\Models\AirfareAirline::class,
-                    'tipoctarec' => '02/0016',
-                    'tipoctapag' => '02/0013',
+                    'tipoctarec' => '01/0018',
+                    'tipoctapag' => '01/0001',
                 ],
             ];
 
@@ -160,10 +160,8 @@ class DefaultEventApiService implements EventApiServiceInterface
         $venda->addChild('origem', 'SMART4BTS');
         $venda->addChild('idvenda', htmlspecialchars($evento->id . '-' . $fornecedor->id . '-' . $tipo['id']));
         $venda->addChild('idvendapai', htmlspecialchars($evento->code));
-        $tipoProduto = $tipo['rel'] == 'event_hotels' ? 'HOTEL' : ($tipo['rel'] == 'event_airfares' ? 'PASSAGEM' : 'DIVERSOS');
+        $tipoProduto = $tipo['rel'] == 'event_hotels' ? 'HOTEL' : ($tipo['rel'] == 'event_airfares' ? 'AEREO' : 'DIVERSOS');
         $venda->addChild('tipoproduto', $tipoProduto);
-        $providerObj = $tipo['fornecedor']($fornecedor);
-        $national = $providerObj->national ?? true;
         $providerObj = $tipo['fornecedor']($fornecedor);
         $national = $tipo['rel'] === 'event_airfares'
             ? $this->isAirfareNational($fornecedor, $fornecedor->eventAirfareOpts)
@@ -180,7 +178,7 @@ class DefaultEventApiService implements EventApiServiceInterface
                 $idProduto = $national ? 'SL' : 'LOC';
                 break;
             case 'event_airfares':
-                $idProduto = $national ? 'ETICKET NACIONAL' : 'ETICKET INTERNACIONAL';
+                $idProduto = $national ? '180' : '190';
                 break;
             default:
                 $idProduto = $national ? 'DIVN' : 'DIVI';
@@ -191,7 +189,7 @@ class DefaultEventApiService implements EventApiServiceInterface
         $venda->addChild('clasproduto', htmlspecialchars($national ? 'NACIONAL' : 'INTERNACIONAL'));
 
         if ($tipo['rel'] === 'event_airfares') {
-            $idPromotor = $evento->air_operator ?? '';
+            $idPromotor = '4BTS';
             $idEmissor = $evento->airOperator?->codigo_stur ?? '';
         } elseif ($tipo['rel'] === 'event_transports') {
             $idPromotor = $evento->land_operator ?? '';
