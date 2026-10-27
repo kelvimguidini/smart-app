@@ -96,8 +96,8 @@ class DefaultEventApiService implements EventApiServiceInterface
                     'tipoProvider' => 'airline',
                     'fornecedor' => fn($item) => $item->airline ?: $item->provider,
                     'model' => \App\Models\AirfareAirline::class,
-                    'tipoctarec' => '01/0018',
-                    'tipoctapag' => '01/0001',
+                    'tipoctarec' => '02/0012',
+                    'tipoctapag' => '02/0012',
                 ],
             ];
 
@@ -160,7 +160,7 @@ class DefaultEventApiService implements EventApiServiceInterface
         $venda->addChild('origem', 'SMART4BTS');
         $venda->addChild('idvenda', htmlspecialchars($evento->id . '-' . $fornecedor->id . '-' . $tipo['id']));
         $venda->addChild('idvendapai', htmlspecialchars($evento->code));
-        $tipoProduto = $tipo['rel'] == 'event_hotels' ? 'HOTEL' : ($tipo['rel'] == 'event_airfares' ? 'AEREO' : 'DIVERSOS');
+        $tipoProduto = $tipo['rel'] == 'event_hotels' ? 'HOTEL' : ($tipo['rel'] == 'event_airfares' ? 'Aereo' : 'DIVERSOS');
         $venda->addChild('tipoproduto', $tipoProduto);
         $providerObj = $tipo['fornecedor']($fornecedor);
         $national = $tipo['rel'] === 'event_airfares'
@@ -186,7 +186,10 @@ class DefaultEventApiService implements EventApiServiceInterface
         }
         $venda->addChild('idproduto', htmlspecialchars($idProduto));
 
-        $venda->addChild('clasproduto', htmlspecialchars($national ? 'NACIONAL' : 'INTERNACIONAL'));
+        $clasProduto = $tipo['rel'] === 'event_airfares'
+            ? ($national ? 'Nacional' : 'Internacional')
+            : ($national ? 'NACIONAL' : 'INTERNACIONAL');
+        $venda->addChild('clasproduto', htmlspecialchars($clasProduto));
 
         if ($tipo['rel'] === 'event_airfares') {
             $idPromotor = '4BTS';
@@ -256,7 +259,8 @@ class DefaultEventApiService implements EventApiServiceInterface
         $venda->addChild('tipoctarec', htmlspecialchars((string) ($tipoCtarec ?? '')));
         $venda->addChild('tipoctapag', htmlspecialchars((string) ($tipoCtapag ?? '')));
 
-        $venda->addChild('formpagto', 2); //FATURADO
+        $formPagto = $tipo['rel'] === 'event_airfares' ? 7 : 2;
+        $venda->addChild('formpagto', $formPagto); // 7 para Aereo, 2 FATURADO para demais
 
         $movimentosXml = $venda->addChild('movimentos');
 
@@ -430,18 +434,14 @@ class DefaultEventApiService implements EventApiServiceInterface
         $movimento->addChild('tarifaCheiaFornec', htmlspecialchars(number_format($totais['tarifa_fornecedor'], 2, '.', '')));
 
         $sigla = strtoupper(trim($fornecedor->currency?->sigla ?? ''));
-        $moeda = (empty($sigla) || in_array($sigla, ['BRL', 'R$', 'REAL', 'REAIS'])) ? 'R$' : $sigla;
+        $moeda = (empty($sigla) || in_array($sigla, ['BRL', 'R$', 'REAL', 'REAIS'])) ? 'BRL' : $sigla;
         $movimento->addChild('moeda', htmlspecialchars($moeda));
 
         $cambio = number_format(floatval($evento->exchange_rate ?? 1), 2, '.', '');
         $movimento->addChild('cambio', htmlspecialchars($cambio));
-        $movimento->addChild('cambiofornecedor', htmlspecialchars($cambio));
         $movimento->addChild('datacambio', htmlspecialchars(Carbon::parse($evento->date)->format('d/m/Y')));
         $movimento->addChild('taxaembarque', htmlspecialchars(number_format($totais['taxa_embarque'], 2, '.', '')));
-        $movimento->addChild('taxaextra', '0.00');
-        $movimento->addChild('taxaservico', '0.00');
-        $movimento->addChild('comisrecforvalor', '0.00');
-        $movimento->addChild('descpagclivalor', '0.00');
+        $movimento->addChild('taxaservico', htmlspecialchars(number_format($totais['taxa_servico'], 2, '.', '')));
 
         if (!empty($fornecedor->internal_observation)) {
             $movimento->addChild('observacao', htmlspecialchars($fornecedor->internal_observation));
@@ -454,6 +454,9 @@ class DefaultEventApiService implements EventApiServiceInterface
             ? mb_substr(trim($firstOpt->outbound_flight_number), 0, 10)
             : mb_substr($evento->code ?? '', 0, 10);
         $movimento->addChild('localizador', htmlspecialchars($localizador));
+
+        $uniqueId = 'AIR-' . strtoupper(\Illuminate\Support\Str::uuid());
+        $movimento->addChild('uniqueId', $uniqueId);
 
         $trechos = $movimento->addChild('trechos');
 
@@ -537,7 +540,7 @@ class DefaultEventApiService implements EventApiServiceInterface
             : mb_substr($evento->code ?? '', 0, 9);
         $segmento->addChild('localizador', htmlspecialchars($localizador));
 
-        $segmento->addChild('status', 'OK');
+        $segmento->addChild('status', 'Ativa');
         $segmento->addChild('conexao', 'N');
 
         $ciaName = $airlineObj?->name ?? $fornecedor->airline?->name ?? '';
@@ -630,10 +633,21 @@ class DefaultEventApiService implements EventApiServiceInterface
         $totalSaleIOF = ((($totalSale * $percIOF) / 100) + $totalSale);
         $totalCostIOF = ((($totalCost * $percIOF) / 100) + $totalCost);
 
+        $taxa4bts = floatval($fornecedor->taxa_4bts ?? 0);
+        $taxaServico = 0.0;
+        if ($taxa4bts > 0) {
+            $taxaServico = $totalSaleIOF * ($taxa4bts / 100);
+        } elseif ($charge > 0) {
+            $taxaServico = $saleBase * $charge;
+        } elseif ($service > 0) {
+            $taxaServico = $saleBase * $service;
+        }
+
         return [
             'tarifa_fornecedor' => round($totalCostIOF, 2),
             'tarifa' => round($totalSaleIOF, 2),
             'taxa_embarque' => round($taxaEmbarque, 2),
+            'taxa_servico' => round($taxaServico, 2),
         ];
     }
 
@@ -655,10 +669,6 @@ class DefaultEventApiService implements EventApiServiceInterface
         if ($percent > 0) {
             $factor = $percent > 2 ? $percent / 100 : $percent;
             return ceil($cost / $factor);
-        }
-
-        if (isset($fornecedor->taxa_4bts) && floatval($fornecedor->taxa_4bts) > 0) {
-            return $cost * (1 + (floatval($fornecedor->taxa_4bts) / 100));
         }
 
         return $cost;

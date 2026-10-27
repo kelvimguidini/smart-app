@@ -341,11 +341,12 @@ class DefaultEventApiServiceTest extends TestCase
         $xml = simplexml_load_string($xmlString);
 
         $venda = $xml->vendas->venda;
-        $this->assertEquals('AEREO', (string) $venda->tipoproduto);
+        $this->assertEquals('Aereo', (string) $venda->tipoproduto);
         $this->assertEquals('180', (string) $venda->idproduto);
-        $this->assertEquals('NACIONAL', (string) $venda->clasproduto);
-        $this->assertEquals('01/0018', (string) $venda->tipoctarec);
-        $this->assertEquals('01/0001', (string) $venda->tipoctapag);
+        $this->assertEquals('Nacional', (string) $venda->clasproduto);
+        $this->assertEquals('02/0012', (string) $venda->tipoctarec);
+        $this->assertEquals('02/0012', (string) $venda->tipoctapag);
+        $this->assertEquals('7', (string) $venda->formpagto);
         $this->assertEquals('4BTS', (string) $venda->idpromotor);
 
         // Movimento deve ser <aereo> e não <passagem>
@@ -354,15 +355,18 @@ class DefaultEventApiServiceTest extends TestCase
 
         $aereo = $venda->movimentos->aereo;
         $this->assertEquals('TESTE AÉREO THAMIRES', (string) $aereo->pax);
-        $this->assertEquals('R$', (string) $aereo->moeda);
+        $this->assertEquals('BRL', (string) $aereo->moeda);
         $this->assertEquals('1650.00', (string) $aereo->tarifa);
         $this->assertEquals('1650.00', (string) $aereo->tarifaCheia);
         $this->assertEquals('1500.00', (string) $aereo->tarifafornecedor);
         $this->assertEquals('1500.00', (string) $aereo->tarifaCheiaFornec);
         $this->assertEquals('50.00', (string) $aereo->taxaembarque);
+        $this->assertEquals('0.00', (string) $aereo->taxaservico);
+        $this->assertNotEmpty((string) $aereo->uniqueId);
         $this->assertCount(1, $aereo->trechos->segmento);
         $this->assertEquals('SDU', (string) $aereo->trechos->segmento[0]->de);
         $this->assertEquals('CGH', (string) $aereo->trechos->segmento[0]->para);
+        $this->assertEquals('Ativa', (string) $aereo->trechos->segmento[0]->status);
         $this->assertEquals('G3', (string) $aereo->trechos->segmento[0]->ciaaerea);
     }
 
@@ -419,17 +423,83 @@ class DefaultEventApiServiceTest extends TestCase
         $xml = simplexml_load_string($xmlString);
 
         $venda = $xml->vendas->venda;
-        $this->assertEquals('AEREO', (string) $venda->tipoproduto);
+        $this->assertEquals('Aereo', (string) $venda->tipoproduto);
         $this->assertEquals('190', (string) $venda->idproduto);
-        $this->assertEquals('INTERNACIONAL', (string) $venda->clasproduto);
-        $this->assertEquals('01/0018', (string) $venda->tipoctarec);
-        $this->assertEquals('01/0001', (string) $venda->tipoctapag);
+        $this->assertEquals('Internacional', (string) $venda->clasproduto);
+        $this->assertEquals('02/0012', (string) $venda->tipoctarec);
+        $this->assertEquals('02/0012', (string) $venda->tipoctapag);
+        $this->assertEquals('7', (string) $venda->formpagto);
         $this->assertEquals('4BTS', (string) $venda->idpromotor);
 
         $aereo = $venda->movimentos->aereo;
         $this->assertEquals('USD', (string) $aereo->moeda);
+        $this->assertNotEmpty((string) $aereo->uniqueId);
         $this->assertEquals('GRU', (string) $aereo->trechos->segmento[0]->de);
         $this->assertEquals('MIA', (string) $aereo->trechos->segmento[0]->para);
+        $this->assertEquals('Ativa', (string) $aereo->trechos->segmento[0]->status);
         $this->assertEquals('AA', (string) $aereo->trechos->segmento[0]->ciaaerea);
+    }
+
+    public function testGenerateXmlPayloadAirfareWithTaxa4btsSetsTaxaServico()
+    {
+        $startDate = '2026-10-01';
+        $endDate = '2026-10-31';
+
+        $event = new Event();
+        $event->id = 504;
+        $event->name = 'TESTE TAXA SERVICO';
+        $event->code = '99999';
+        $event->date = '2026-10-20';
+        $event->exchange_rate = 1.0;
+
+        $currency = new \App\Models\Currency();
+        $currency->sigla = 'BRL';
+
+        $airline = new \App\Models\AirfareAirline();
+        $airline->id = 3;
+        $airline->name = 'AZUL';
+
+        $opt = new \App\Models\EventAirfareOpt();
+        $opt->id = 3;
+        $opt->outbound_origin = 'MAO';
+        $opt->outbound_destination = 'MGF';
+        $opt->outbound_flight_number = 'AD-1413';
+        $opt->outbound_date = '2027-01-13';
+        $opt->setRelation('outbound_airline', $airline);
+
+        $eventAirfare = new \App\Models\EventAirfare();
+        $eventAirfare->id = 12;
+        $eventAirfare->total_net_sem_4bts = 1554.70;
+        $eventAirfare->markup = 25.0; // 1554.70 * 1.25 = 1943.38
+        $eventAirfare->taxa_embarque_unit = 107.19;
+        $eventAirfare->taxa_4bts = 5.5157; // gera taxa de servico proporcional
+        $eventAirfare->setRelation('airline', $airline);
+        $eventAirfare->setRelation('currency', $currency);
+        $eventAirfare->setRelation('status_his', new \Illuminate\Database\Eloquent\Collection([]));
+        $eventAirfare->setRelation('eventAirfareOpts', new \Illuminate\Database\Eloquent\Collection([$opt]));
+
+        $event->setRelation('event_hotels', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_abs', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_halls', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_transports', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_adds', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_airfares', new \Illuminate\Database\Eloquent\Collection([$eventAirfare]));
+
+        $this->eventApiRepositoryMock
+            ->shouldReceive('getEventsForExport')
+            ->once()
+            ->andReturn(new \Illuminate\Database\Eloquent\Collection([$event]));
+
+        $xmlString = $this->service->generateXmlPayload($startDate, $endDate);
+        $xml = simplexml_load_string($xmlString);
+
+        $aereo = $xml->vendas->venda->movimentos->aereo;
+        $this->assertEquals('BRL', (string) $aereo->moeda);
+        $this->assertEquals('107.19', (string) $aereo->taxaembarque);
+        $this->assertEquals('107.19', (string) $aereo->taxaservico);
+        $this->assertEquals('1554.70', (string) $aereo->tarifafornecedor);
+        $this->assertEquals('1943.38', (string) $aereo->tarifa);
+        $this->assertEquals('Ativa', (string) $aereo->trechos->segmento[0]->status);
+        $this->assertEquals('AD', (string) $aereo->trechos->segmento[0]->ciaaerea);
     }
 }
