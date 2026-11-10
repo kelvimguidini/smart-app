@@ -96,8 +96,8 @@ class DefaultEventApiService implements EventApiServiceInterface
                     'tipoProvider' => 'airline',
                     'fornecedor' => fn($item) => $item->airline ?: $item->provider,
                     'model' => \App\Models\AirfareAirline::class,
-                    'tipoctarec' => '02/0012',
-                    'tipoctapag' => '02/0012',
+                    'tipoctarec' => 'TD-0000431',
+                    'tipoctapag' => 'TD-0000430',
                 ],
             ];
 
@@ -178,7 +178,7 @@ class DefaultEventApiService implements EventApiServiceInterface
                 $idProduto = $national ? 'SL' : 'LOC';
                 break;
             case 'event_airfares':
-                $idProduto = $national ? '180' : '190';
+                $idProduto = '404';
                 break;
             default:
                 $idProduto = $national ? 'DIVN' : 'DIVI';
@@ -610,7 +610,8 @@ class DefaultEventApiService implements EventApiServiceInterface
             $cost = floatval($fornecedor->total_net_sem_4bts);
         }
 
-        $taxaEmbarque = floatval($fornecedor->taxa_embarque_unit ?? 0);
+        $paxTotal = intval($fornecedor->total_pax ?: ((intval($fornecedor->pax_first ?? 0) + intval($fornecedor->pax_executiva ?? 0) + intval($fornecedor->pax_premium ?? 0) + intval($fornecedor->pax_economica ?? 0)) ?: 1));
+        $taxaEmbarque = floatval($fornecedor->taxa_embarque_unit ?? 0) * $paxTotal;
 
         $saleBase = $this->unitSaleAirfare($fornecedor, $cost, $opt);
 

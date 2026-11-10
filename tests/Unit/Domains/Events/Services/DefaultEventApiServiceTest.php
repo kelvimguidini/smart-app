@@ -342,10 +342,10 @@ class DefaultEventApiServiceTest extends TestCase
 
         $venda = $xml->vendas->venda;
         $this->assertEquals('Aereo', (string) $venda->tipoproduto);
-        $this->assertEquals('180', (string) $venda->idproduto);
+        $this->assertEquals('404', (string) $venda->idproduto);
         $this->assertEquals('Nacional', (string) $venda->clasproduto);
-        $this->assertEquals('02/0012', (string) $venda->tipoctarec);
-        $this->assertEquals('02/0012', (string) $venda->tipoctapag);
+        $this->assertEquals('TD-0000431', (string) $venda->tipoctarec);
+        $this->assertEquals('TD-0000430', (string) $venda->tipoctapag);
         $this->assertEquals('7', (string) $venda->formpagto);
         $this->assertEquals('4BTS', (string) $venda->idpromotor);
 
@@ -424,10 +424,10 @@ class DefaultEventApiServiceTest extends TestCase
 
         $venda = $xml->vendas->venda;
         $this->assertEquals('Aereo', (string) $venda->tipoproduto);
-        $this->assertEquals('190', (string) $venda->idproduto);
+        $this->assertEquals('404', (string) $venda->idproduto);
         $this->assertEquals('Internacional', (string) $venda->clasproduto);
-        $this->assertEquals('02/0012', (string) $venda->tipoctarec);
-        $this->assertEquals('02/0012', (string) $venda->tipoctapag);
+        $this->assertEquals('TD-0000431', (string) $venda->tipoctarec);
+        $this->assertEquals('TD-0000430', (string) $venda->tipoctapag);
         $this->assertEquals('7', (string) $venda->formpagto);
         $this->assertEquals('4BTS', (string) $venda->idpromotor);
 
@@ -501,5 +501,68 @@ class DefaultEventApiServiceTest extends TestCase
         $this->assertEquals('1943.38', (string) $aereo->tarifa);
         $this->assertEquals('Ativa', (string) $aereo->trechos->segmento[0]->status);
         $this->assertEquals('AD', (string) $aereo->trechos->segmento[0]->ciaaerea);
+    }
+
+    public function testGenerateXmlPayloadAirfareMultipliesTaxaEmbarqueByTotalPax()
+    {
+        $startDate = '2026-10-01';
+        $endDate = '2026-10-31';
+
+        $event = new Event();
+        $event->id = 505;
+        $event->name = 'TESTE FRETAMENTO 30 PAX';
+        $event->code = '12345';
+        $event->date = '2026-10-13';
+        $event->exchange_rate = 1.0;
+
+        $currency = new \App\Models\Currency();
+        $currency->sigla = 'BRL';
+
+        $airline = new \App\Models\AirfareAirline();
+        $airline->id = 3;
+        $airline->name = 'AZUL';
+
+        $opt = new \App\Models\EventAirfareOpt();
+        $opt->id = 4;
+        $opt->outbound_origin = 'GRU';
+        $opt->outbound_destination = 'GIG';
+        $opt->outbound_flight_number = 'AD-9000';
+        $opt->outbound_date = '2026-10-13';
+        $opt->setRelation('outbound_airline', $airline);
+
+        $eventAirfare = new \App\Models\EventAirfare();
+        $eventAirfare->id = 13;
+        $eventAirfare->total_net_sem_4bts = 35000.00;
+        $eventAirfare->markup = 1.0; // 35000 * 1.01 = 35350.00
+        $eventAirfare->taxa_embarque_unit = 45.00;
+        $eventAirfare->total_pax = 30;
+        $eventAirfare->setRelation('airline', $airline);
+        $eventAirfare->setRelation('currency', $currency);
+        $eventAirfare->setRelation('status_his', new \Illuminate\Database\Eloquent\Collection([]));
+        $eventAirfare->setRelation('eventAirfareOpts', new \Illuminate\Database\Eloquent\Collection([$opt]));
+
+        $event->setRelation('event_hotels', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_abs', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_halls', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_transports', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_adds', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_airfares', new \Illuminate\Database\Eloquent\Collection([$eventAirfare]));
+
+        $this->eventApiRepositoryMock
+            ->shouldReceive('getEventsForExport')
+            ->once()
+            ->andReturn(new \Illuminate\Database\Eloquent\Collection([$event]));
+
+        $xmlString = $this->service->generateXmlPayload($startDate, $endDate);
+        $xml = simplexml_load_string($xmlString);
+
+        $venda = $xml->vendas->venda;
+        $this->assertEquals('Aereo', (string) $venda->tipoproduto);
+        $this->assertEquals('404', (string) $venda->idproduto);
+        $this->assertEquals('TD-0000431', (string) $venda->tipoctarec);
+        $this->assertEquals('TD-0000430', (string) $venda->tipoctapag);
+
+        $aereo = $venda->movimentos->aereo;
+        $this->assertEquals('1350.00', (string) $aereo->taxaembarque);
     }
 }
