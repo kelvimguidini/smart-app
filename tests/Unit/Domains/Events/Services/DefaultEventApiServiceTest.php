@@ -341,7 +341,7 @@ class DefaultEventApiServiceTest extends TestCase
         $xml = simplexml_load_string($xmlString);
 
         $venda = $xml->vendas->venda;
-        $this->assertEquals('Aereo', (string) $venda->tipoproduto);
+        $this->assertEquals('Pacote', (string) $venda->tipoproduto);
         $this->assertEquals('404', (string) $venda->idproduto);
         $this->assertEquals('Nacional', (string) $venda->clasproduto);
         $this->assertEquals('TD-0000431', (string) $venda->tipoctarec);
@@ -423,7 +423,7 @@ class DefaultEventApiServiceTest extends TestCase
         $xml = simplexml_load_string($xmlString);
 
         $venda = $xml->vendas->venda;
-        $this->assertEquals('Aereo', (string) $venda->tipoproduto);
+        $this->assertEquals('Pacote', (string) $venda->tipoproduto);
         $this->assertEquals('404', (string) $venda->idproduto);
         $this->assertEquals('Internacional', (string) $venda->clasproduto);
         $this->assertEquals('TD-0000431', (string) $venda->tipoctarec);
@@ -557,7 +557,7 @@ class DefaultEventApiServiceTest extends TestCase
         $xml = simplexml_load_string($xmlString);
 
         $venda = $xml->vendas->venda;
-        $this->assertEquals('Aereo', (string) $venda->tipoproduto);
+        $this->assertEquals('Pacote', (string) $venda->tipoproduto);
         $this->assertEquals('404', (string) $venda->idproduto);
         $this->assertEquals('TD-0000431', (string) $venda->tipoctarec);
         $this->assertEquals('TD-0000430', (string) $venda->tipoctapag);

@@ -160,7 +160,7 @@ class DefaultEventApiService implements EventApiServiceInterface
         $venda->addChild('origem', 'SMART4BTS');
         $venda->addChild('idvenda', htmlspecialchars($evento->id . '-' . $fornecedor->id . '-' . $tipo['id']));
         $venda->addChild('idvendapai', htmlspecialchars($evento->code));
-        $tipoProduto = $tipo['rel'] == 'event_hotels' ? 'HOTEL' : ($tipo['rel'] == 'event_airfares' ? 'Aereo' : 'DIVERSOS');
+        $tipoProduto = $tipo['rel'] == 'event_hotels' ? 'HOTEL' : ($tipo['rel'] == 'event_airfares' ? 'Pacote' : 'DIVERSOS');
         $venda->addChild('tipoproduto', $tipoProduto);
         $providerObj = $tipo['fornecedor']($fornecedor);
         $national = $tipo['rel'] === 'event_airfares'
