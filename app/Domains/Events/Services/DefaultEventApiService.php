@@ -160,7 +160,7 @@ class DefaultEventApiService implements EventApiServiceInterface
         $venda->addChild('origem', 'SMART4BTS');
         $venda->addChild('idvenda', htmlspecialchars($evento->id . '-' . $fornecedor->id . '-' . $tipo['id']));
         $venda->addChild('idvendapai', htmlspecialchars($evento->code));
-        $tipoProduto = $tipo['rel'] == 'event_hotels' ? 'HOTEL' : ($tipo['rel'] == 'event_airfares' ? 'Pacote' : 'DIVERSOS');
+        $tipoProduto = $tipo['rel'] == 'event_hotels' ? 'HOTEL' : 'DIVERSOS';
         $venda->addChild('tipoproduto', $tipoProduto);
         $providerObj = $tipo['fornecedor']($fornecedor);
         $national = $tipo['rel'] === 'event_airfares'
@@ -178,7 +178,7 @@ class DefaultEventApiService implements EventApiServiceInterface
                 $idProduto = $national ? 'SL' : 'LOC';
                 break;
             case 'event_airfares':
-                $idProduto = '404';
+                $idProduto = '523';
                 break;
             default:
                 $idProduto = $national ? 'DIVN' : 'DIVI';
@@ -259,13 +259,13 @@ class DefaultEventApiService implements EventApiServiceInterface
         $venda->addChild('tipoctarec', htmlspecialchars((string) ($tipoCtarec ?? '')));
         $venda->addChild('tipoctapag', htmlspecialchars((string) ($tipoCtapag ?? '')));
 
-        $formPagto = $tipo['rel'] === 'event_airfares' ? 7 : 2;
-        $venda->addChild('formpagto', $formPagto); // 7 para Aereo, 2 FATURADO para demais
+        $formPagto = 2;
+        $venda->addChild('formpagto', $formPagto); // 2 FATURADO
 
         $movimentosXml = $venda->addChild('movimentos');
 
         if ($tipo['rel'] === 'event_airfares') {
-            $this->movimentoAereoXML($fornecedor->eventAirfareOpts, $fornecedor, $evento, $movimentosXml);
+            $this->movimentoAereoDiversosXML($fornecedor->eventAirfareOpts, $fornecedor, $evento, $movimentosXml);
         } else {
             $opts = $fornecedor->eventHotelsOpt
                 ?? $fornecedor->eventAbOpts
@@ -412,6 +412,67 @@ class DefaultEventApiService implements EventApiServiceInterface
                 $movimento->addChild('dataconfirmacao', '');
                 $movimento->addChild('numconfirmacao', '');
             }
+        }
+    }
+
+    private function movimentoAereoDiversosXML($opts, $fornecedor, $evento, $movimentoXml)
+    {
+        $movimento = $movimentoXml->addChild('diversos');
+        $movimento->addChild('pax', htmlspecialchars(mb_substr($evento->name ?? '', 0, 40)));
+        $movimento->addChild('tipo', 'ADT');
+        $movimento->addChild('descricao', 'FRETAMENTO AEREO');
+
+        $sigla = strtoupper(trim($fornecedor->currency?->sigla ?? ''));
+        $moeda = (empty($sigla) || in_array($sigla, ['BRL', 'R$', 'REAL', 'REAIS'])) ? 'BRL' : $sigla;
+        $movimento->addChild('moeda', htmlspecialchars($moeda));
+        $movimento->addChild('moedafornecedor', htmlspecialchars($moeda));
+
+        $cambio = number_format(floatval($evento->exchange_rate ?? 1), 2, '.', '');
+        $movimento->addChild('cambio', htmlspecialchars($cambio));
+        $movimento->addChild('cambiofornecedor', htmlspecialchars($cambio));
+        $movimento->addChild('datacambio', htmlspecialchars(Carbon::parse($evento->date)->format('d/m/Y')));
+
+        $firstOpt = is_iterable($opts) ? (is_array($opts) ? ($opts[0] ?? null) : $opts->first()) : $opts;
+        $lastOpt = is_iterable($opts) ? (is_array($opts) ? (end($opts) ?: null) : $opts->last()) : $opts;
+
+        $checkinDate = !empty($firstOpt?->outbound_date)
+            ? Carbon::parse($firstOpt->outbound_date)
+            : Carbon::parse($evento->date ?? now());
+
+        $checkoutDate = !empty($lastOpt?->inbound_date)
+            ? Carbon::parse($lastOpt->inbound_date)
+            : (!empty($lastOpt?->outbound_date) ? Carbon::parse($lastOpt->outbound_date) : $checkinDate);
+
+        $movimento->addChild('checkin', htmlspecialchars($checkinDate->format('d/m/Y')));
+        $movimento->addChild('checkout', htmlspecialchars($checkoutDate->format('d/m/Y')));
+
+        $totais = $this->computeTotalsAirfare($evento, $fornecedor, $firstOpt);
+
+        $taxaTotal = round($totais['taxa_embarque'] + $totais['taxa_servico'], 2);
+        $movimento->addChild('taxaservico', htmlspecialchars(number_format($taxaTotal, 2, '.', '')));
+        $movimento->addChild('taxaservicofor', htmlspecialchars(number_format($taxaTotal, 2, '.', '')));
+
+        if (!empty($totais['taxa_embarque']) && $totais['taxa_embarque'] > 0) {
+            $movimento->addChild('taxaextra', htmlspecialchars(number_format($totais['taxa_embarque'], 2, '.', '')));
+            $movimento->addChild('taxaextrafor', htmlspecialchars(number_format($totais['taxa_embarque'], 2, '.', '')));
+        }
+
+        $movimento->addChild('valordiaria', htmlspecialchars(number_format($totais['tarifa'], 2, '.', '')));
+        $movimento->addChild('valordiariabalcao', htmlspecialchars(number_format($totais['tarifa'], 2, '.', '')));
+        $movimento->addChild('valordiariafornecedor', htmlspecialchars(number_format($totais['tarifa_fornecedor'], 2, '.', '')));
+        $movimento->addChild('qtdservico', '1');
+
+        if (!empty($fornecedor->internal_observation)) {
+            $movimento->addChild('observacao', htmlspecialchars($fornecedor->internal_observation));
+        }
+        if (!empty($fornecedor->customer_observation)) {
+            $movimento->addChild('observacao2', htmlspecialchars($fornecedor->customer_observation));
+        }
+
+        if (isset($fornecedor->status_his)) {
+            $movimento->addChild('confirmadopor', '');
+            $movimento->addChild('dataconfirmacao', '');
+            $movimento->addChild('numconfirmacao', '');
         }
     }
 
