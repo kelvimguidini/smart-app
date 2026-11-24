@@ -202,9 +202,8 @@ class DefaultEventApiService implements EventApiServiceInterface
             $idEmissor = $evento->hotelOperator?->codigo_stur ?? '';
         }
 
-        $venda->addChild('idpromotor', htmlspecialchars((string)$idPromotor));
         $venda->addChild('idemissor', htmlspecialchars((string)$idEmissor));
-
+        $venda->addChild('idpromotor', htmlspecialchars((string)$idPromotor));
 
         $venda->addChild('dtemissao', htmlspecialchars(Carbon::parse($evento->date)->format('d/m/Y')));
         $venda->addChild('idcliente', htmlspecialchars(!empty($evento->customer?->codestur) ? $evento->customer->codestur : ($evento->customer?->id ?? '')));
@@ -214,12 +213,28 @@ class DefaultEventApiService implements EventApiServiceInterface
             : ($tipo['rel'] === 'event_airfares' ? ($this->getAirlineIataCode($providerObj?->name) ?: ($providerObj?->id ?? '')) : ($providerObj?->id ?? ''));
         $venda->addChild('idfornecedor', htmlspecialchars((string)$fornecedorCode));
         $venda->addChild('formrec', '2');
-
         $venda->addChild('vencrec', htmlspecialchars(!empty($fornecedor->deadline_date) ? Carbon::parse($fornecedor->deadline_date)->format('d/m/Y') : Carbon::parse($evento->date)->format('d/m/Y')));
+        $venda->addChild('formpagto', '2'); // 2 FATURADO
+
         $venda->addChild('centrocustocli', htmlspecialchars($evento->cost_center ?? ''));
         $venda->addChild('setorcli', htmlspecialchars($evento->sector ?? ''));
         $venda->addChild('filialagencia', htmlspecialchars($evento->crd?->number ?? ''));
         $venda->addChild('centrocusto', htmlspecialchars($evento->crd?->number ?? ''));
+
+        $tipoCtarec = $tipo['tipoctarec'];
+        $tipoCtapag = $tipo['tipoctapag'];
+
+        // Se for uma função, executa. Se já for string, usa direto.
+        if (is_callable($tipoCtarec)) {
+            $tipoCtarec = $tipoCtarec($fornecedor);
+        }
+        if (is_callable($tipoCtapag)) {
+            $tipoCtapag = $tipoCtapag($fornecedor);
+        }
+
+        // Garante que são strings antes de adicionar ao XML
+        $venda->addChild('tipoctarec', htmlspecialchars((string) ($tipoCtarec ?? '')));
+        $venda->addChild('tipoctapag', htmlspecialchars((string) ($tipoCtapag ?? '')));
 
         $venda->addChild('solicitante', htmlspecialchars($evento->requester ?? ''));
 
@@ -243,24 +258,6 @@ class DefaultEventApiService implements EventApiServiceInterface
 
         $venda->addChild('projetocodigo', htmlspecialchars($evento->code ?? ''));
         $venda->addChild('projetonome', htmlspecialchars(mb_substr($evento->name ?? '', 0, 30)));
-
-        $tipoCtarec = $tipo['tipoctarec'];
-        $tipoCtapag = $tipo['tipoctapag'];
-
-        // Se for uma função, executa. Se já for string, usa direto.
-        if (is_callable($tipoCtarec)) {
-            $tipoCtarec = $tipoCtarec($fornecedor);
-        }
-        if (is_callable($tipoCtapag)) {
-            $tipoCtapag = $tipoCtapag($fornecedor);
-        }
-
-        // Garante que são strings antes de adicionar ao XML
-        $venda->addChild('tipoctarec', htmlspecialchars((string) ($tipoCtarec ?? '')));
-        $venda->addChild('tipoctapag', htmlspecialchars((string) ($tipoCtapag ?? '')));
-
-        $formPagto = 2;
-        $venda->addChild('formpagto', $formPagto); // 2 FATURADO
 
         $movimentosXml = $venda->addChild('movimentos');
 
@@ -448,19 +445,29 @@ class DefaultEventApiService implements EventApiServiceInterface
 
         $totais = $this->computeTotalsAirfare($evento, $fornecedor, $firstOpt);
 
-        $taxaTotal = round($totais['taxa_embarque'] + $totais['taxa_servico'], 2);
-        $movimento->addChild('taxaservico', htmlspecialchars(number_format($taxaTotal, 2, '.', '')));
-        $movimento->addChild('taxaservicofor', htmlspecialchars(number_format($taxaTotal, 2, '.', '')));
+        $paxTotal = intval($fornecedor->total_pax ?: ((intval($fornecedor->pax_first ?? 0) + intval($fornecedor->pax_executiva ?? 0) + intval($fornecedor->pax_premium ?? 0) + intval($fornecedor->pax_economica ?? 0)) ?: 1));
+        if ($paxTotal <= 0) {
+            $paxTotal = 1;
+        }
 
+        // Taxa de serviço (APENAS taxa de serviço/4BTS, sem duplicar a taxa de embarque)
+        $movimento->addChild('taxaservico', htmlspecialchars(number_format($totais['taxa_servico'], 2, '.', '')));
+        $movimento->addChild('taxaservicofor', '0.00');
+
+        // Taxa de embarque total vai em taxaextra / taxaextrafor
         if (!empty($totais['taxa_embarque']) && $totais['taxa_embarque'] > 0) {
             $movimento->addChild('taxaextra', htmlspecialchars(number_format($totais['taxa_embarque'], 2, '.', '')));
             $movimento->addChild('taxaextrafor', htmlspecialchars(number_format($totais['taxa_embarque'], 2, '.', '')));
         }
 
-        $movimento->addChild('valordiaria', htmlspecialchars(number_format($totais['tarifa'], 2, '.', '')));
-        $movimento->addChild('valordiariabalcao', htmlspecialchars(number_format($totais['tarifa'], 2, '.', '')));
-        $movimento->addChild('valordiariafornecedor', htmlspecialchars(number_format($totais['tarifa_fornecedor'], 2, '.', '')));
-        $movimento->addChild('qtdservico', '1');
+        // Diárias unitárias por passageiro (STUR calcula: Pax Qtde * Valor da diária = Total das diárias do fretamento)
+        $diariaUnitCliente = round($totais['tarifa'] / $paxTotal, 2);
+        $diariaUnitFornec = round($totais['tarifa_fornecedor'] / $paxTotal, 2);
+
+        $movimento->addChild('valordiaria', htmlspecialchars(number_format($diariaUnitCliente, 2, '.', '')));
+        $movimento->addChild('valordiariabalcao', htmlspecialchars(number_format($diariaUnitCliente, 2, '.', '')));
+        $movimento->addChild('valordiariafornecedor', htmlspecialchars(number_format($diariaUnitFornec, 2, '.', '')));
+        $movimento->addChild('qtdservico', htmlspecialchars((string) $paxTotal));
 
         if (!empty($fornecedor->internal_observation)) {
             $movimento->addChild('observacao', htmlspecialchars($fornecedor->internal_observation));

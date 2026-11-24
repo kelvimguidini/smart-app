@@ -18,7 +18,7 @@ class DefaultEventApiServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->eventApiRepositoryMock = Mockery::mock(EventApiRepositoryInterface::class);
         $this->service = new DefaultEventApiService($this->eventApiRepositoryMock);
     }
@@ -48,7 +48,7 @@ class DefaultEventApiServiceTest extends TestCase
             ->andReturn(new \Illuminate\Database\Eloquent\Collection([]));
 
         $xml = $this->service->generateXmlPayload($startDate, $endDate);
-        
+
         $this->assertStringContainsString('<intagi>', $xml);
         $this->assertStringContainsString('<versaolayout>V4.4</versaolayout>', $xml);
         $this->assertStringContainsString('<clientes/>', $xml);
@@ -359,7 +359,7 @@ class DefaultEventApiServiceTest extends TestCase
         $this->assertEquals('1650.00', (string) $mov->valordiaria);
         $this->assertEquals('1650.00', (string) $mov->valordiariabalcao);
         $this->assertEquals('1500.00', (string) $mov->valordiariafornecedor);
-        $this->assertEquals('50.00', (string) $mov->taxaservico);
+        $this->assertEquals('0.00', (string) $mov->taxaservico);
         $this->assertEquals('50.00', (string) $mov->taxaextra);
         $this->assertEquals('1', (string) $mov->qtdservico);
     }
@@ -429,7 +429,8 @@ class DefaultEventApiServiceTest extends TestCase
         $this->assertEquals('USD', (string) $mov->moeda);
         $this->assertEquals('FRETAMENTO AEREO', (string) $mov->descricao);
         $this->assertEquals('800.00', (string) $mov->valordiaria);
-        $this->assertEquals('80.00', (string) $mov->taxaservico);
+        $this->assertEquals('0.00', (string) $mov->taxaservico);
+        $this->assertEquals('80.00', (string) $mov->taxaextra);
     }
 
     public function testGenerateXmlPayloadAirfareWithTaxa4btsSetsTaxaServico()
@@ -490,8 +491,8 @@ class DefaultEventApiServiceTest extends TestCase
         $this->assertEquals('FRETAMENTO AEREO', (string) $mov->descricao);
         $this->assertEquals('1554.70', (string) $mov->valordiariafornecedor);
         $this->assertEquals('1943.38', (string) $mov->valordiaria);
-        $this->assertEquals('214.38', (string) $mov->taxaservico); // 107.19 embarque + 107.19 servico
-        $this->assertEquals('107.19', (string) $mov->taxaextra);
+        $this->assertEquals('107.19', (string) $mov->taxaservico); // APENAS servico
+        $this->assertEquals('107.19', (string) $mov->taxaextra); // embarque
     }
 
     public function testGenerateXmlPayloadAirfareMultipliesTaxaEmbarqueByTotalPax()
@@ -556,7 +557,10 @@ class DefaultEventApiServiceTest extends TestCase
 
         $mov = $venda->movimentos->diversos;
         $this->assertEquals('FRETAMENTO AEREO', (string) $mov->descricao);
-        $this->assertEquals('1350.00', (string) $mov->taxaservico);
+        $this->assertEquals('30', (string) $mov->qtdservico);
+        $this->assertEquals('1178.33', (string) $mov->valordiaria);
+        $this->assertEquals('1166.67', (string) $mov->valordiariafornecedor);
+        $this->assertEquals('0.00', (string) $mov->taxaservico);
         $this->assertEquals('1350.00', (string) $mov->taxaextra);
     }
 }
