@@ -178,7 +178,7 @@ class DefaultEventApiService implements EventApiServiceInterface
                 $idProduto = $national ? 'SL' : 'LOC';
                 break;
             case 'event_airfares':
-                $idProduto = '523';
+                $idProduto = 'FRET';
                 break;
             default:
                 $idProduto = $national ? 'DIVN' : 'DIVI';
@@ -728,10 +728,7 @@ class DefaultEventApiService implements EventApiServiceInterface
 
         if (isset($fornecedor->markup) && floatval($fornecedor->markup) > 0) {
             $mk = floatval($fornecedor->markup);
-            if ($mk < 1.0) {
-                return $cost / $mk;
-            }
-            return $cost * (1 + ($mk / 100));
+            return ($mk < 2) ? ($cost / $mk) : ($cost * (1 + ($mk / 100)));
         }
 
         $percent = floatval($opt?->received_proposal_percent ?? 0);

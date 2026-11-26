@@ -342,7 +342,7 @@ class DefaultEventApiServiceTest extends TestCase
 
         $venda = $xml->vendas->venda;
         $this->assertEquals('DIVERSOS', (string) $venda->tipoproduto);
-        $this->assertEquals('523', (string) $venda->idproduto);
+        $this->assertEquals('FRET', (string) $venda->idproduto);
         $this->assertEquals('NACIONAL', (string) $venda->clasproduto);
         $this->assertEquals('TD-0000431', (string) $venda->tipoctarec);
         $this->assertEquals('TD-0000430', (string) $venda->tipoctapag);
@@ -525,7 +525,7 @@ class DefaultEventApiServiceTest extends TestCase
         $eventAirfare = new \App\Models\EventAirfare();
         $eventAirfare->id = 13;
         $eventAirfare->total_net_sem_4bts = 35000.00;
-        $eventAirfare->markup = 1.0; // 35000 * 1.01 = 35350.00
+        $eventAirfare->markup = 1.0; // Fator 1.0 = sem markup sobre custo (35000 / 1.0 = 35000.00)
         $eventAirfare->taxa_embarque_unit = 45.00;
         $eventAirfare->total_pax = 30;
         $eventAirfare->setRelation('airline', $airline);
@@ -558,9 +558,73 @@ class DefaultEventApiServiceTest extends TestCase
         $mov = $venda->movimentos->diversos;
         $this->assertEquals('FRETAMENTO AEREO', (string) $mov->descricao);
         $this->assertEquals('30', (string) $mov->qtdservico);
-        $this->assertEquals('1178.33', (string) $mov->valordiaria);
+        $this->assertEquals('1166.67', (string) $mov->valordiaria);
         $this->assertEquals('1166.67', (string) $mov->valordiariafornecedor);
         $this->assertEquals('0.00', (string) $mov->taxaservico);
         $this->assertEquals('1350.00', (string) $mov->taxaextra);
+    }
+
+    public function testGenerateXmlPayloadForFretamentoAereoComTaxa4bts()
+    {
+        $startDate = '2026-11-01';
+        $endDate = '2026-11-30';
+
+        $event = new Event();
+        $event->id = 515;
+        $event->name = 'TESTE AEREO THAMIRES 2';
+        $event->code = '123';
+        $event->date = '2026-11-23';
+        $event->exchange_rate = 1.0;
+
+        $currency = new \App\Models\Currency();
+        $currency->sigla = 'BRL';
+
+        $airline = new \App\Models\AirfareAirline();
+        $airline->id = 3;
+        $airline->name = 'AZUL';
+
+        $opt = new \App\Models\EventAirfareOpt();
+        $opt->id = 10;
+        $opt->outbound_origin = 'GRU';
+        $opt->outbound_destination = 'GIG';
+        $opt->outbound_flight_number = 'AD-1234';
+        $opt->outbound_date = '2026-11-23';
+        $opt->setRelation('outbound_airline', $airline);
+
+        $eventAirfare = new \App\Models\EventAirfare();
+        $eventAirfare->id = 11;
+        $eventAirfare->total_net_sem_4bts = 10000.00;
+        $eventAirfare->markup = 1.0; // Divisor factor 1.0 = custo 10.000 / 1.0 = 10.000 (sem markup adicional sobre a tarifa)
+        $eventAirfare->taxa_embarque_unit = 50.00;
+        $eventAirfare->taxa_4bts = 10.0; // 10% sobre 10.000 = 1.000,00
+        $eventAirfare->total_pax = 10;
+        $eventAirfare->setRelation('airline', $airline);
+        $eventAirfare->setRelation('currency', $currency);
+        $eventAirfare->setRelation('status_his', new \Illuminate\Database\Eloquent\Collection([]));
+        $eventAirfare->setRelation('eventAirfareOpts', new \Illuminate\Database\Eloquent\Collection([$opt]));
+
+        $event->setRelation('event_hotels', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_abs', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_halls', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_transports', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_adds', new \Illuminate\Database\Eloquent\Collection([]));
+        $event->setRelation('event_airfares', new \Illuminate\Database\Eloquent\Collection([$eventAirfare]));
+
+        $this->eventApiRepositoryMock
+            ->shouldReceive('getEventsForExport')
+            ->once()
+            ->andReturn(new \Illuminate\Database\Eloquent\Collection([$event]));
+
+        $xmlString = $this->service->generateXmlPayload($startDate, $endDate);
+        $xml = simplexml_load_string($xmlString);
+
+        $mov = $xml->vendas->venda->movimentos->diversos;
+        $this->assertEquals('10', (string) $mov->qtdservico);
+        $this->assertEquals('1000.00', (string) $mov->valordiaria);
+        $this->assertEquals('1000.00', (string) $mov->valordiariabalcao);
+        $this->assertEquals('1000.00', (string) $mov->valordiariafornecedor);
+        $this->assertEquals('1000.00', (string) $mov->taxaservico);
+        $this->assertEquals('500.00', (string) $mov->taxaextra);
+        $this->assertEquals('500.00', (string) $mov->taxaextrafor);
     }
 }
